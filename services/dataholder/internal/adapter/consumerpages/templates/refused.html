@@ -1,0 +1,3 @@
+{{template "head" (.Page (printf "%s cannot continue" .Bank) 0)}}<h1>{{.Bank}} cannot continue</h1>
+<p>{{.Bank}} cannot continue with this request to share your data. Go back to the application that sent you here and start again.</p>
+{{template "card-end"}}{{template "foot" .}}

@@ -1,0 +1,14 @@
+{{template "head" (.Page (printf "Share your data - %s" .Bank) 2)}}<h1>Enter your one-time password</h1>
+{{template "notice" .}}<p>If {{.Bank}} knows this email address or customer number, we sent a one-time password to the email address that we have for you. It is valid for {{.ValidMinutes}} minutes.</p>
+<form method="post" action="{{.Action}}">
+<input type="hidden" name="csrf_token" value="{{.Token}}">
+<p class="cp-field"><label for="otp">One-time password</label>
+<input type="text" id="otp" name="otp" class="cp-otp" inputmode="numeric" autocomplete="one-time-code" required></p>
+<button class="cp-button cp-primary" type="submit" name="action" value="continue">Continue</button>
+</form>
+{{if .CanResend}}<form method="post" action="{{.Action}}">
+<input type="hidden" name="csrf_token" value="{{.Token}}">
+<button class="cp-button cp-secondary" type="submit" name="action" value="resend">Send a new one-time password</button>
+</form>
+{{else}}<p>{{.Bank}} cannot send you a different one-time password for this request.</p>
+{{end}}{{template "cancel" .}}{{template "card-end"}}{{template "password" (printf "The one-time password is only to share your data with %s. %s does not need your password, and %s does not ask for it." .Recipient .Recipient .Bank)}}{{template "foot" .}}

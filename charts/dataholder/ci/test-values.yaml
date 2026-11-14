@@ -1,0 +1,28 @@
+# Values that render the chart in the tests and in mise run lint:chart. They are not for a deployment.
+image:
+  tag: 0123abc
+brand:
+  preset: wattle-bank
+  id: 00000000-0000-4000-8000-000000000001
+publicBaseURL: https://bank.test:8081
+secureBaseURL: https://bank.test:8083
+register:
+  publicBaseURL: https://register.test:8081
+  statusInterval: 1m
+mail:
+  smtpAddress: mail.test:25
+  from: no-reply@bank.test
+operator:
+  allowedHosts: [bank.test:8082]
+  tokenSecret: bank-operator-token
+telemetry:
+  otlpEndpoint: http://otel.test:4318
+database:
+  host: postgres.test
+  name: bank
+  ownerSecret: bank-owner
+  serviceSecret: bank-service
+pki:
+  publicTLSSecret: bank-public-tls
+  secureTLSSecret: bank-secure-tls
+  caBundleSecret: cdr-ca-bundle

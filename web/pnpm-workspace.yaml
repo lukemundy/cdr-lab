@@ -1,0 +1,27 @@
+# Each supply-chain control is set explicitly, also when the pnpm default is
+# the same, so that a change of a default cannot weaken it.
+
+packages:
+  - apps/*
+  - packages/*
+
+# 3 days, as Renovate security:minimumReleaseAgeNpm. Renovate gives lock file
+# maintenance no age, so this setting is the only control there.
+minimumReleaseAge: 4320
+# Fail when no version meets the age. Do not install a newer version instead.
+minimumReleaseAgeStrict: true
+# Also check the age and the trust policy of each entry in the lock file.
+trustLockfile: false
+
+trustPolicy: no-downgrade
+blockExoticSubdeps: true
+strictDepBuilds: true
+
+# The dependencies that can run build scripts. Each entry needs a comment with its reason.
+allowBuilds: {}
+
+# openapi-typescript needs the TypeScript compiler API, which TypeScript 7 does not have yet. Its package uses the
+# TypeScript 6 alias, which works but is outside the declared peer range.
+peerDependencyRules:
+  allowedVersions:
+    openapi-typescript>typescript: "6"

@@ -1,0 +1,45 @@
+# Build output
+/bin/
+
+# Test output
+*.out
+coverage.*
+
+# Local config and secrets
+.env
+.env.*
+*.key
+*.p12
+*.pfx
+
+# Local agent instructions (a CLAUDE.local.md stops AGENTS.md from loading)
+CLAUDE.local.md
+
+# Agent worktrees
+/.worktrees/
+
+# Lab CA keys and certificates (mise run pki), in any directory where a command or test makes them
+.lab/
+
+# JavaScript dependencies, Vitest failure screenshots and attachments, and Playwright results (web/)
+node_modules/
+__screenshots__/
+.vitest/
+test-results/
+
+# Build output of the web workspace
+web/**/dist/
+
+# The image of each service with a console copies the console build into its embed directory.
+services/register/internal/adapter/console/dist/*
+!services/register/internal/adapter/console/dist/.gitkeep
+services/dataholder/internal/adapter/console/dist/*
+!services/dataholder/internal/adapter/console/dist/.gitkeep
+services/dataholder/internal/adapter/banksite/dist/*
+!services/dataholder/internal/adapter/banksite/dist/.gitkeep
+# The data holder image copies the consumer pages build of web/packages/ui into its embed directory.
+services/dataholder/internal/adapter/consumerpages/static/*
+!services/dataholder/internal/adapter/consumerpages/static/.gitkeep
+
+# The chart dependencies, which mise run chart:deps gets from Chart.lock
+charts/*/charts/

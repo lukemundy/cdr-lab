@@ -1,0 +1,92 @@
+/* Import after "tailwindcss" and tokens.css. The resets remove the default values, so bg-red-500 gives no CSS. */
+@theme inline {
+  --color-*: initial;
+  --color-page: var(--ds-color-page);
+  --color-surface: var(--ds-color-surface);
+  --color-raised: var(--ds-color-raised);
+  --color-backdrop: var(--ds-color-backdrop);
+  --color-fg: var(--ds-color-fg);
+  --color-fg-muted: var(--ds-color-fg-muted);
+  --color-fg-on-primary: var(--ds-color-fg-on-primary);
+  --color-heading: var(--ds-color-heading);
+  --color-link: var(--ds-color-link);
+  --color-brand: var(--ds-color-brand);
+  --color-fg-on-brand: var(--ds-color-fg-on-brand);
+  --color-hero: var(--ds-color-hero);
+  --color-fg-on-hero: var(--ds-color-fg-on-hero);
+  --color-accent: var(--ds-color-accent);
+  --color-border: var(--ds-color-border);
+  --color-border-strong: var(--ds-color-border-strong);
+  --color-focus: var(--ds-color-focus);
+  --color-primary: var(--ds-color-primary);
+  --color-primary-hover: var(--ds-color-primary-hover);
+  --color-primary-pressed: var(--ds-color-primary-pressed);
+  --color-secondary: var(--ds-color-secondary);
+  --color-success-bg: var(--ds-color-success-bg);
+  --color-success-border: var(--ds-color-success-border);
+  --color-success-fg: var(--ds-color-success-fg);
+  --color-warning-bg: var(--ds-color-warning-bg);
+  --color-warning-border: var(--ds-color-warning-border);
+  --color-warning-fg: var(--ds-color-warning-fg);
+  --color-danger-bg: var(--ds-color-danger-bg);
+  --color-danger-border: var(--ds-color-danger-border);
+  --color-danger-fg: var(--ds-color-danger-fg);
+  --color-info-bg: var(--ds-color-info-bg);
+  --color-info-border: var(--ds-color-info-border);
+  --color-info-fg: var(--ds-color-info-fg);
+  /* The console shell (src/shell.ts). */
+  --color-shell-nav-hover: color-mix(in oklab, var(--ds-color-fg-on-hero) 8%, var(--ds-color-hero));
+  --color-shell-nav-current: color-mix(
+    in oklab,
+    var(--ds-color-fg-on-hero) 14%,
+    var(--ds-color-hero)
+  );
+  --color-shell-band: color-mix(in oklab, var(--ds-color-accent) 10%, var(--ds-color-surface));
+  --color-shell-page: color-mix(in oklab, var(--ds-color-hero) 3%, var(--ds-color-page));
+
+  --font-*: initial;
+  --font-sans: var(--ds-font-body);
+  --font-mono: var(--ds-font-code);
+  --font-heading: var(--ds-font-heading);
+
+  --text-*: initial;
+  --text-xs: var(--ds-font-size-xs);
+  --text-sm: var(--ds-font-size-sm);
+  --text-base: var(--ds-font-size-base);
+  --text-lg: var(--ds-font-size-lg);
+  --text-xl: var(--ds-font-size-xl);
+  --text-2xl: var(--ds-font-size-2xl);
+  --text-3xl: var(--ds-font-size-3xl);
+
+  --leading-*: initial;
+  --leading-tight: var(--ds-line-height-tight);
+  --leading-normal: var(--ds-line-height-normal);
+  --leading-relaxed: var(--ds-line-height-relaxed);
+
+  --font-weight-*: initial;
+  --font-weight-regular: var(--ds-font-weight-regular);
+  --font-weight-medium: var(--ds-font-weight-medium);
+  --font-weight-semibold: var(--ds-font-weight-semibold);
+  --font-weight-bold: var(--ds-font-weight-bold);
+
+  --radius-*: initial;
+  --radius-sm: var(--ds-radius-sm);
+  --radius-md: var(--ds-radius-md);
+  --radius-lg: var(--ds-radius-lg);
+  --radius-full: var(--ds-radius-full);
+
+  --shadow-*: initial;
+  --shadow-1: var(--ds-elevation-1);
+  --shadow-2: var(--ds-elevation-2);
+  --shadow-3: var(--ds-elevation-3);
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-shadow-*: initial;
+
+  --spacing: var(--ds-space-1);
+  --spacing-control: var(--ds-size-control);
+  --spacing-table-row: var(--ds-size-table-row);
+  --spacing-control-x: var(--ds-space-control-x);
+  --spacing-cell-x: var(--ds-space-cell-x);
+  --spacing-cell-y: var(--ds-space-cell-y);
+}

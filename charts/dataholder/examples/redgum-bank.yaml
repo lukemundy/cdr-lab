@@ -1,0 +1,9 @@
+# The values of the preset brand Redgum Bank that agree with its record in services/register/seed/preset-banks.json.
+# A deployment adds the other values, and changes the base URLs here and in the seed to the hosts of the deployment.
+brand:
+  preset: redgum-bank
+  id: 4967dd80-2cd2-43c3-8b13-f6faafb684ad
+publicBaseURL: https://redgumbank.test:8081
+secureBaseURL: https://redgumbank.test:8083
+mail:
+  from: no-reply@redgumbank.test

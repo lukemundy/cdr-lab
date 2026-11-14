@@ -1,0 +1,566 @@
+{
+  "products": [
+    {
+      "productId": "kestrel-perch",
+      "lastUpdated": "2026-09-08T00:00:00Z",
+      "productCategory": "TRANS_AND_SAVINGS_ACCOUNTS",
+      "name": "Kestrel Perch",
+      "description": "An everyday account with no monthly fee, with sub-accounts for bills and spending.",
+      "brand": "Kestrel Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "DIGITAL_BANKING"
+        },
+        {
+          "featureType": "NPP_ENABLED"
+        },
+        {
+          "featureType": "NPP_PAYID"
+        },
+        {
+          "featureType": "DIGITAL_WALLET",
+          "additionalValue": "Apple Pay"
+        },
+        {
+          "featureType": "DIGITAL_WALLET",
+          "additionalValue": "Google Pay"
+        },
+        {
+          "featureType": "CARD_ACCESS",
+          "additionalValue": "Mastercard Debit"
+        },
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "Up to 5 sub-accounts, each with its own BSB and account number"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Monthly account fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalValue": "P1M"
+        },
+        {
+          "name": "International transaction fee",
+          "feeType": "TRANSACTION",
+          "feeMethodUType": "rateBased",
+          "rateBased": {
+            "rateType": "TRANSACTION",
+            "rate": "0.03"
+          }
+        }
+      ]
+    },
+    {
+      "productId": "updraft-saver",
+      "lastUpdated": "2026-10-01T00:00:00Z",
+      "productCategory": "TRANS_AND_SAVINGS_ACCOUNTS",
+      "name": "Updraft Saver",
+      "description": "A savings account that pays bonus interest when you deposit $50 or more and make no more than one withdrawal in a month.",
+      "brand": "Kestrel Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "DIGITAL_BANKING"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Monthly account fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalValue": "P1M"
+        }
+      ],
+      "depositRates": [
+        {
+          "depositRateType": "VARIABLE",
+          "rate": "0.0080",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M"
+        },
+        {
+          "depositRateType": "BONUS",
+          "rate": "0.0395",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "additionalValue": "Deposit $50 or more and make one withdrawal or fewer in the month",
+          "additionalInfo": "On balances up to $200,000"
+        }
+      ]
+    },
+    {
+      "productId": "fledgling-account",
+      "lastUpdated": "2026-10-01T00:00:00Z",
+      "productCategory": "TRANS_AND_SAVINGS_ACCOUNTS",
+      "name": "Fledgling Account",
+      "description": "A transaction account and debit card for customers from 12 to 17 years old, with spend controls for a parent.",
+      "brand": "Kestrel Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "DIGITAL_BANKING"
+        },
+        {
+          "featureType": "NPP_ENABLED"
+        },
+        {
+          "featureType": "NPP_PAYID"
+        },
+        {
+          "featureType": "CARD_ACCESS",
+          "additionalValue": "Mastercard Debit"
+        },
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "A parent can see the account and set spend limits in the app"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Monthly account fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalValue": "P1M"
+        }
+      ]
+    },
+    {
+      "productId": "kestrel-term-deposit",
+      "lastUpdated": "2026-10-12T00:00:00Z",
+      "productCategory": "TERM_DEPOSITS",
+      "name": "Hover Term Deposit",
+      "description": "A term deposit from $1,000 for 1 to 36 months.",
+      "brand": "Kestrel Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "FUNDS_AVAILABLE_AFTER",
+          "additionalValue": "P31D"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Early withdrawal adjustment",
+          "feeType": "WITHDRAWAL",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalInfo": "The bank reduces the interest when you withdraw early"
+        }
+      ],
+      "depositRates": [
+        {
+          "depositRateType": "FIXED",
+          "rate": "0.0390",
+          "applicationType": "MATURITY",
+          "additionalValue": "P5M"
+        },
+        {
+          "depositRateType": "FIXED",
+          "rate": "0.0405",
+          "applicationType": "MATURITY",
+          "additionalValue": "P11M"
+        },
+        {
+          "depositRateType": "FIXED",
+          "rate": "0.0380",
+          "applicationType": "MATURITY",
+          "additionalValue": "P36M"
+        }
+      ]
+    },
+    {
+      "productId": "kestrel-low-fee-card",
+      "lastUpdated": "2026-08-18T00:00:00Z",
+      "productCategory": "CRED_AND_CHRG_CARDS",
+      "name": "Glide Card",
+      "description": "A low rate credit card with a monthly fee, and no fee in a month with a zero closing balance.",
+      "brand": "Kestrel Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "INTEREST_FREE",
+          "additionalValue": "P45D"
+        },
+        {
+          "featureType": "DIGITAL_WALLET",
+          "additionalValue": "Apple Pay"
+        },
+        {
+          "featureType": "DIGITAL_WALLET",
+          "additionalValue": "Google Pay"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Monthly fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "6.00"
+          },
+          "additionalValue": "P1M",
+          "additionalInfo": "No fee in a month with a zero closing balance"
+        },
+        {
+          "name": "Late payment fee",
+          "feeType": "LATE_PAYMENT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "15.00"
+          }
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "PURCHASE",
+          "rate": "0.1349",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED"
+        },
+        {
+          "lendingRateType": "CASH_ADVANCE",
+          "rate": "0.2149",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED"
+        }
+      ]
+    },
+    {
+      "productId": "kestrel-green-loan",
+      "lastUpdated": "2026-07-25T00:00:00Z",
+      "productCategory": "PERS_LOANS",
+      "name": "Thermal Energy Loan",
+      "description": "A secured personal loan for solar panels, batteries and other energy upgrades to a home.",
+      "brand": "Kestrel Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "EXTRA_REPAYMENTS"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Establishment fee",
+          "feeType": "UPFRONT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "195.00"
+          }
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "FIXED",
+          "rate": "0.0649",
+          "comparisonRate": "0.0699",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "UNCONSTRAINED",
+          "additionalValue": "P7Y",
+          "additionalInfo": "The comparison rate is for $20,000 over 7 years"
+        }
+      ]
+    },
+    {
+      "productId": "nest-home-loan",
+      "lastUpdated": "2026-09-29T00:00:00Z",
+      "productCategory": "RESIDENTIAL_MORTGAGES",
+      "name": "Nest First Home Loan",
+      "description": "A home loan for first home buyers with a deposit from 5%, with a rate discount for the first 2 years.",
+      "brand": "Kestrel Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "OFFSET"
+        },
+        {
+          "featureType": "EXTRA_REPAYMENTS"
+        },
+        {
+          "featureType": "REDRAW"
+        },
+        {
+          "featureType": "GUARANTOR",
+          "additionalInfo": "A family member can give a guarantee in place of a larger deposit"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Establishment fee",
+          "feeType": "UPFRONT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          }
+        },
+        {
+          "name": "Monthly service fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "8.00"
+          },
+          "additionalValue": "P1M"
+        },
+        {
+          "name": "Discharge fee",
+          "feeType": "EXIT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "350.00"
+          }
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "INTRODUCTORY",
+          "rate": "0.0569",
+          "comparisonRate": "0.0601",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "OWNER_OCCUPIED",
+          "additionalValue": "P2Y",
+          "additionalInfo": "For the first 2 years, then the variable rate"
+        },
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.0614",
+          "comparisonRate": "0.0601",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "OWNER_OCCUPIED"
+        }
+      ]
+    },
+    {
+      "productId": "kestrel-investor-home-loan",
+      "lastUpdated": "2026-09-29T00:00:00Z",
+      "productCategory": "RESIDENTIAL_MORTGAGES",
+      "name": "Eyrie Investor Home Loan",
+      "description": "A variable rate home loan for investment property, with interest only repayments for up to 10 years.",
+      "brand": "Kestrel Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "OFFSET"
+        },
+        {
+          "featureType": "REDRAW"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Annual fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "395.00"
+          },
+          "additionalValue": "P1Y"
+        },
+        {
+          "name": "Discharge fee",
+          "feeType": "EXIT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "350.00"
+          }
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.0639",
+          "comparisonRate": "0.0661",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "INVESTMENT"
+        },
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.0679",
+          "comparisonRate": "0.0701",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "INTEREST_ONLY",
+          "loanPurpose": "INVESTMENT"
+        }
+      ]
+    },
+    {
+      "productId": "kestrel-margin-loan",
+      "lastUpdated": "2026-08-30T00:00:00Z",
+      "productCategory": "MARGIN_LOANS",
+      "name": "Soaring Share Loan",
+      "description": "A loan to invest in approved Australian shares and managed funds, secured by the investments.",
+      "brand": "Kestrel Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "Lend up to 70% of the value of approved investments"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Establishment fee",
+          "feeType": "UPFRONT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          }
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.0920",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED"
+        },
+        {
+          "lendingRateType": "FIXED",
+          "rate": "0.0880",
+          "applicationType": "UPFRONT",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED",
+          "additionalValue": "P1Y",
+          "additionalInfo": "Interest is paid in advance for the year"
+        }
+      ]
+    },
+    {
+      "productId": "kestrel-overdraft",
+      "lastUpdated": "2026-06-20T00:00:00Z",
+      "productCategory": "OVERDRAFTS",
+      "name": "Perch Overdraft",
+      "description": "An overdraft up to $5,000 on a Kestrel Perch account.",
+      "brand": "Kestrel Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "OVERDRAFT",
+          "additionalValue": "5000"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Monthly fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "5.00"
+          },
+          "additionalValue": "P1M"
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.1499",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED"
+        }
+      ]
+    },
+    {
+      "productId": "kestrel-family-saver",
+      "lastUpdated": "2026-10-25T00:00:00Z",
+      "productCategory": "TRANS_AND_SAVINGS_ACCOUNTS",
+      "name": "Nestling Family Saver",
+      "description": "A joint savings account for a family, with one savings goal for each child. It will be available from 1 March 2027.",
+      "brand": "Kestrel Bank",
+      "isTailored": false,
+      "effectiveFrom": "2027-03-01T00:00:00Z",
+      "features": [
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "Up to 6 goals in one account"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Monthly account fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalValue": "P1M"
+        }
+      ],
+      "depositRates": [
+        {
+          "depositRateType": "VARIABLE",
+          "rate": "0.0410",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M"
+        }
+      ]
+    },
+    {
+      "productId": "kestrel-classic-home-loan",
+      "lastUpdated": "2023-11-01T00:00:00Z",
+      "productCategory": "RESIDENTIAL_MORTGAGES",
+      "name": "Wingspan Package Home Loan",
+      "description": "A package home loan that is closed to new customers.",
+      "brand": "Kestrel Bank",
+      "isTailored": false,
+      "effectiveFrom": "2015-04-01T00:00:00Z",
+      "effectiveTo": "2026-09-30T14:00:00Z",
+      "features": [
+        {
+          "featureType": "OFFSET"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Annual package fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "395.00"
+          },
+          "additionalValue": "P1Y"
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.0689",
+          "comparisonRate": "0.0712",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "OWNER_OCCUPIED"
+        }
+      ]
+    }
+  ]
+}

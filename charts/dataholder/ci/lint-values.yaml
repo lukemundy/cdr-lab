@@ -1,0 +1,12 @@
+# An overlay of test-values.yaml that turns on each optional part, for mise run lint:chart. It is not for a deployment.
+brand:
+  preset: ""
+  configMap: bank-brand
+console:
+  enabled: true
+  allowedHosts: [localhost:8084]
+bankSite:
+  enabled: true
+  allowedHosts: [localhost:8085]
+pki:
+  publicRootSecret: public-root

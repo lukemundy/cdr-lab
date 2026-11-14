@@ -1,0 +1,9 @@
+{{template "head" (.Page (printf "Share your data - %s" .Bank) 1)}}<h1>Share your data with {{.Recipient}}</h1>
+<p>First, tell us who you are.</p>
+<form method="post" action="{{.Action}}">
+<input type="hidden" name="csrf_token" value="{{.Token}}">
+<p class="cp-field"><label for="identifier">Email address or customer number</label>
+<input type="text" id="identifier" name="identifier" autocomplete="off" spellcheck="false" autocapitalize="none" required></p>
+<button class="cp-button cp-primary" type="submit" name="action" value="continue">Continue</button>
+</form>
+{{template "cancel" .}}{{template "card-end"}}{{template "password" (printf "%s does not need your password to get your data. %s does not ask for your password on this page. Do not give your password to %s or to a different person." .Recipient .Bank .Recipient)}}{{template "foot" .}}

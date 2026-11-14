@@ -1,0 +1,1302 @@
+{
+  "dataHolders": [
+    {
+      "legalEntityId": "dd4d6bc6-22f4-4f61-aae9-9580382718c8",
+      "legalEntityName": "Wattle Bank Limited",
+      "logoUri": "https://wattle-bank:8081/brand/logo.svg",
+      "status": "ACTIVE",
+      "dataHolderBrands": [
+        {
+          "dataHolderBrandId": "d7385786-d8b1-4d4b-bb80-b21616df1a4d",
+          "brandName": "Wattle Bank",
+          "industries": [
+            "banking"
+          ],
+          "logoUri": "https://wattle-bank:8081/brand/logo.svg",
+          "status": "ACTIVE",
+          "endpointDetail": {
+            "version": "v1",
+            "publicBaseUri": "https://wattle-bank:8081",
+            "productBaseUri": "https://wattle-bank:8081",
+            "resourceBaseUri": "https://wattle-bank:8083",
+            "infosecBaseUri": "https://wattle-bank:8081",
+            "websiteUri": "https://wattlebank.test"
+          },
+          "jwksEndpoint": "https://wattle-bank:8081/jwks"
+        }
+      ]
+    },
+    {
+      "legalEntityId": "830186b8-6060-4773-8b59-e8567a13df01",
+      "legalEntityName": "Redgum Bank Limited",
+      "logoUri": "https://redgum-bank:8081/brand/logo.svg",
+      "status": "ACTIVE",
+      "dataHolderBrands": [
+        {
+          "dataHolderBrandId": "4967dd80-2cd2-43c3-8b13-f6faafb684ad",
+          "brandName": "Redgum Bank",
+          "industries": [
+            "banking"
+          ],
+          "logoUri": "https://redgum-bank:8081/brand/logo.svg",
+          "status": "ACTIVE",
+          "endpointDetail": {
+            "version": "v1",
+            "publicBaseUri": "https://redgum-bank:8081",
+            "productBaseUri": "https://redgum-bank:8081",
+            "resourceBaseUri": "https://redgum-bank:8083",
+            "infosecBaseUri": "https://redgum-bank:8081",
+            "websiteUri": "https://redgumbank.test"
+          },
+          "jwksEndpoint": "https://redgum-bank:8081/jwks"
+        }
+      ]
+    },
+    {
+      "legalEntityId": "00b12e81-207f-4fb7-b01f-d0c50cb1a06c",
+      "legalEntityName": "Harbour Bank Limited",
+      "logoUri": "https://harbour-bank:8081/brand/logo.svg",
+      "status": "ACTIVE",
+      "dataHolderBrands": [
+        {
+          "dataHolderBrandId": "366f7b1c-93c7-4b84-9c92-ab2456614095",
+          "brandName": "Harbour Bank",
+          "industries": [
+            "banking"
+          ],
+          "logoUri": "https://harbour-bank:8081/brand/logo.svg",
+          "status": "ACTIVE",
+          "endpointDetail": {
+            "version": "v1",
+            "publicBaseUri": "https://harbour-bank:8081",
+            "productBaseUri": "https://harbour-bank:8081",
+            "resourceBaseUri": "https://harbour-bank:8083",
+            "infosecBaseUri": "https://harbour-bank:8081",
+            "websiteUri": "https://harbourbank.test"
+          },
+          "jwksEndpoint": "https://harbour-bank:8081/jwks"
+        }
+      ]
+    },
+    {
+      "legalEntityId": "0ed9945f-022e-4dca-9d05-ce327566e3de",
+      "legalEntityName": "Kestrel Bank Limited",
+      "logoUri": "https://kestrel-bank:8081/brand/logo.svg",
+      "status": "ACTIVE",
+      "dataHolderBrands": [
+        {
+          "dataHolderBrandId": "1ee54312-624b-4679-bf33-cf4af113f934",
+          "brandName": "Kestrel Bank",
+          "industries": [
+            "banking"
+          ],
+          "logoUri": "https://kestrel-bank:8081/brand/logo.svg",
+          "status": "ACTIVE",
+          "endpointDetail": {
+            "version": "v1",
+            "publicBaseUri": "https://kestrel-bank:8081",
+            "productBaseUri": "https://kestrel-bank:8081",
+            "resourceBaseUri": "https://kestrel-bank:8083",
+            "infosecBaseUri": "https://kestrel-bank:8081",
+            "websiteUri": "https://kestrelbank.test"
+          },
+          "jwksEndpoint": "https://kestrel-bank:8081/jwks"
+        }
+      ]
+    },
+    {
+      "legalEntityId": "a81975c6-1ac9-4fe4-88fc-68f50efd27cb",
+      "legalEntityName": "Mock Holdings Ltd",
+      "logoUri": "https://mock-holdings.example/logo.png",
+      "status": "ACTIVE",
+      "dataHolderBrands": [
+        {
+          "dataHolderBrandId": "293b45de-2a40-4e1b-ac77-324dacccb2c8",
+          "brandName": "Mock Energy",
+          "brandGroup": "Mock Group",
+          "industries": [
+            "energy",
+            "telco"
+          ],
+          "logoUri": "https://mock-energy.example/logo.png",
+          "status": "ACTIVE",
+          "endpointDetail": {
+            "version": "v1",
+            "publicBaseUri": "https://api.mock-energy.example",
+            "resourceBaseUri": "https://mtls.mock-energy.example",
+            "infosecBaseUri": "https://id.mock-energy.example",
+            "websiteUri": "https://mock-energy.example"
+          },
+          "jwksEndpoint": "https://mtls.mock-energy.example/cdr-register/v1/jwks"
+        },
+        {
+          "dataHolderBrandId": "1d344684-ca92-463d-af1e-4239ed438c18",
+          "brandName": "Mock Lending",
+          "industries": [
+            "non-bank-lending"
+          ],
+          "logoUri": "https://mock-lending.example/logo.png",
+          "status": "INACTIVE",
+          "endpointDetail": {
+            "version": "v1",
+            "publicBaseUri": "https://api.mock-lending.example",
+            "resourceBaseUri": "https://mtls.mock-lending.example",
+            "infosecBaseUri": "https://id.mock-lending.example",
+            "websiteUri": "https://mock-lending.example"
+          },
+          "jwksEndpoint": "https://mtls.mock-lending.example/cdr-register/v1/jwks"
+        },
+        {
+          "interimId": "d9530e60-cdc4-408c-a6f4-aba39e4158b6",
+          "brandName": "Mock Mutual",
+          "industries": [
+            "banking"
+          ],
+          "logoUri": "https://mock-mutual.example/logo.png",
+          "status": "ACTIVE",
+          "endpointDetail": {
+            "publicBaseUri": "https://prd.mock-mutual.example",
+            "productBaseUri": "https://prd.mock-mutual.example"
+          }
+        }
+      ]
+    },
+    {
+      "legalEntityId": "91bbf006-ca02-47b6-99c3-ddc63541e1c6",
+      "legalEntityName": "Former Bank Ltd",
+      "logoUri": "https://former-bank.example/logo.png",
+      "status": "REMOVED",
+      "dataHolderBrands": [
+        {
+          "dataHolderBrandId": "4ce2ed25-ed3f-429c-8cbd-24d5041a7c93",
+          "brandName": "Former Bank",
+          "industries": [
+            "banking"
+          ],
+          "logoUri": "https://former-bank.example/logo.png",
+          "status": "REMOVED",
+          "endpointDetail": {
+            "version": "v1",
+            "publicBaseUri": "https://api.former-bank.example",
+            "resourceBaseUri": "https://mtls.former-bank.example",
+            "infosecBaseUri": "https://id.former-bank.example",
+            "websiteUri": "https://former-bank.example"
+          },
+          "jwksEndpoint": "https://mtls.former-bank.example/cdr-register/v1/jwks"
+        },
+        {
+          "dataHolderBrandId": "83c66a47-6bfa-4d12-9353-12a117969a5e",
+          "brandName": "Former Lending",
+          "industries": [
+            "non-bank-lending"
+          ],
+          "logoUri": "https://former-lending.example/logo.png",
+          "status": "REMOVED",
+          "endpointDetail": {
+            "version": "v1",
+            "publicBaseUri": "https://api.former-lending.example",
+            "resourceBaseUri": "https://mtls.former-lending.example",
+            "infosecBaseUri": "https://id.former-lending.example",
+            "websiteUri": "https://former-lending.example"
+          },
+          "jwksEndpoint": "https://mtls.former-lending.example/cdr-register/v1/jwks"
+        }
+      ]
+    },
+    {
+      "legalEntityId": "48cc4432-47f8-43b4-98ca-1a5ec4698d28",
+      "legalEntityName": "Bright Energy Pty Ltd",
+      "logoUri": "https://bright-energy.example/logo.png",
+      "status": "ACTIVE",
+      "dataHolderBrands": [
+        {
+          "dataHolderBrandId": "fa92bb4f-0914-4631-91af-98a6d34e23d4",
+          "interimId": "7e1b355e-af51-4c7e-8525-645c2a9da175",
+          "brandName": "Bright Energy",
+          "industries": [
+            "energy"
+          ],
+          "logoUri": "https://bright-energy.example/logo.png",
+          "status": "ACTIVE",
+          "endpointDetail": {
+            "version": "v1",
+            "publicBaseUri": "https://api.bright-energy.example",
+            "resourceBaseUri": "https://mtls.bright-energy.example",
+            "infosecBaseUri": "https://id.bright-energy.example",
+            "websiteUri": "https://bright-energy.example"
+          },
+          "jwksEndpoint": "https://mtls.bright-energy.example/cdr-register/v1/jwks"
+        },
+        {
+          "interimId": "71badab5-29d3-435c-a336-66c4b969e423",
+          "brandName": "Bright Energy Business",
+          "industries": [
+            "energy"
+          ],
+          "logoUri": "https://business.bright-energy.example/logo.png",
+          "status": "ACTIVE",
+          "endpointDetail": {
+            "publicBaseUri": "https://prd.business.bright-energy.example",
+            "productBaseUri": "https://prd.business.bright-energy.example"
+          }
+        }
+      ]
+    },
+    {
+      "legalEntityId": "51a7978a-53e3-4a1a-97d8-74d7ee2d0014",
+      "legalEntityName": "Former Utilities Ltd",
+      "logoUri": "https://former-utilities.example/logo.png",
+      "status": "REMOVED",
+      "dataHolderBrands": [
+        {
+          "dataHolderBrandId": "50f5fb5d-6534-4eae-bce2-9ed051a7c2e1",
+          "brandName": "Former Power",
+          "industries": [
+            "energy"
+          ],
+          "logoUri": "https://former-power.example/logo.png",
+          "status": "REMOVED",
+          "endpointDetail": {
+            "version": "v1",
+            "publicBaseUri": "https://api.former-power.example",
+            "resourceBaseUri": "https://mtls.former-power.example",
+            "infosecBaseUri": "https://id.former-power.example",
+            "websiteUri": "https://former-power.example"
+          },
+          "jwksEndpoint": "https://mtls.former-power.example/cdr-register/v1/jwks"
+        },
+        {
+          "dataHolderBrandId": "6fdcc931-0930-43a7-ade6-60c1b9a9dc61",
+          "brandName": "Former Mobile",
+          "industries": [
+            "telco"
+          ],
+          "logoUri": "https://former-mobile.example/logo.png",
+          "status": "REMOVED",
+          "endpointDetail": {
+            "version": "v1",
+            "publicBaseUri": "https://api.former-mobile.example",
+            "resourceBaseUri": "https://mtls.former-mobile.example",
+            "infosecBaseUri": "https://id.former-mobile.example",
+            "websiteUri": "https://former-mobile.example"
+          },
+          "jwksEndpoint": "https://mtls.former-mobile.example/cdr-register/v1/jwks"
+        }
+      ]
+    },
+    {
+      "legalEntityId": "476cd829-6efb-4c0b-b450-d8ef8eb467c3",
+      "legalEntityName": "Quiet Telecommunications Pty Ltd",
+      "logoUri": "https://quiet-mobile.example/logo.png",
+      "status": "ACTIVE",
+      "dataHolderBrands": [
+        {
+          "dataHolderBrandId": "51afeac6-c330-4d7e-891f-198e81524257",
+          "brandName": "Quiet Mobile",
+          "industries": [
+            "telco"
+          ],
+          "logoUri": "https://quiet-mobile.example/logo.png",
+          "status": "INACTIVE",
+          "endpointDetail": {
+            "version": "v1",
+            "publicBaseUri": "https://api.quiet-mobile.example",
+            "resourceBaseUri": "https://mtls.quiet-mobile.example",
+            "infosecBaseUri": "https://id.quiet-mobile.example",
+            "websiteUri": "https://quiet-mobile.example"
+          },
+          "jwksEndpoint": "https://mtls.quiet-mobile.example/cdr-register/v1/jwks"
+        }
+      ]
+    }
+  ],
+  "dataRecipients": [
+    {
+      "legalEntityId": "c7b88455-4a14-479e-b53e-fbc4000716b3",
+      "legalEntityName": "Mock Budgeting Pty Ltd",
+      "accreditationNumber": "ADR-MOCK-0001",
+      "accreditationLevel": "UNRESTRICTED",
+      "logoUri": "https://mock-budgeting.example/logo.png",
+      "status": "ACTIVE",
+      "dataRecipientBrands": [
+        {
+          "dataRecipientBrandId": "e25806f4-9384-41f6-a65d-2b12e2529e3b",
+          "brandName": "Mock Budget",
+          "logoUri": "https://mock-budget.example/logo.png",
+          "status": "ACTIVE",
+          "softwareProducts": [
+            {
+              "softwareProductId": "66b83c54-e4f4-434d-aa9b-789f64358022",
+              "softwareProductName": "Mock Budget Web",
+              "softwareProductDescription": "Mock Budget Web, a mock software product",
+              "logoUri": "https://web.mock-budget.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://web.mock-budget.example",
+              "redirectUris": [
+                "https://web.mock-budget.example/callback"
+              ],
+              "tosUri": "https://web.mock-budget.example/terms",
+              "policyUri": "https://web.mock-budget.example/privacy",
+              "jwksUri": "https://web.mock-budget.example/jwks",
+              "revocationUri": "https://web.mock-budget.example/revoke",
+              "recipientBaseUri": "https://cdr.web.mock-budget.example",
+              "scopes": [
+                "openid",
+                "profile",
+                "bank:accounts.basic:read",
+                "bank:transactions:read",
+                "common:customer.basic:read",
+                "cdr:registration"
+              ]
+            },
+            {
+              "softwareProductId": "c9c2cde8-e247-4565-b341-376b029738d9",
+              "softwareProductName": "Mock Budget Mobile",
+              "softwareProductDescription": "Mock Budget Mobile, a mock software product",
+              "logoUri": "https://mobile.mock-budget.example/logo.png",
+              "status": "INACTIVE",
+              "clientUri": "https://mobile.mock-budget.example",
+              "redirectUris": [
+                "https://mobile.mock-budget.example/callback"
+              ],
+              "tosUri": "https://mobile.mock-budget.example/terms",
+              "policyUri": "https://mobile.mock-budget.example/privacy",
+              "jwksUri": "https://mobile.mock-budget.example/jwks",
+              "revocationUri": "https://mobile.mock-budget.example/revoke",
+              "recipientBaseUri": "https://cdr.mobile.mock-budget.example",
+              "scopes": [
+                "openid",
+                "profile",
+                "bank:accounts.basic:read",
+                "bank:transactions:read",
+                "common:customer.basic:read",
+                "cdr:registration"
+              ]
+            },
+            {
+              "softwareProductId": "6d0b646f-475d-4c7b-af85-0eb558f50d47",
+              "softwareProductName": "Mock Budget Beta",
+              "softwareProductDescription": "Mock Budget Beta, a mock software product",
+              "logoUri": "https://beta.mock-budget.example/logo.png",
+              "status": "REMOVED",
+              "clientUri": "https://beta.mock-budget.example",
+              "redirectUris": [
+                "https://beta.mock-budget.example/callback"
+              ],
+              "tosUri": "https://beta.mock-budget.example/terms",
+              "policyUri": "https://beta.mock-budget.example/privacy",
+              "jwksUri": "https://beta.mock-budget.example/jwks",
+              "revocationUri": "https://beta.mock-budget.example/revoke",
+              "recipientBaseUri": "https://cdr.beta.mock-budget.example",
+              "scopes": [
+                "openid",
+                "profile",
+                "bank:accounts.basic:read",
+                "bank:transactions:read",
+                "common:customer.basic:read",
+                "cdr:registration"
+              ]
+            }
+          ]
+        },
+        {
+          "dataRecipientBrandId": "ffea3f81-674a-4ba8-bfd2-9bd576c2fe9d",
+          "brandName": "Mock Legacy",
+          "logoUri": "https://mock-legacy.example/logo.png",
+          "status": "INACTIVE",
+          "softwareProducts": [
+            {
+              "softwareProductId": "92901e46-7739-400f-bda5-108c15a56177",
+              "softwareProductName": "Mock Legacy Web",
+              "softwareProductDescription": "Mock Legacy Web, a mock software product",
+              "logoUri": "https://web.mock-legacy.example/logo.png",
+              "status": "INACTIVE",
+              "clientUri": "https://web.mock-legacy.example",
+              "redirectUris": [
+                "https://web.mock-legacy.example/callback"
+              ],
+              "tosUri": "https://web.mock-legacy.example/terms",
+              "policyUri": "https://web.mock-legacy.example/privacy",
+              "jwksUri": "https://web.mock-legacy.example/jwks",
+              "revocationUri": "https://web.mock-legacy.example/revoke",
+              "recipientBaseUri": "https://cdr.web.mock-legacy.example",
+              "scopes": [
+                "openid",
+                "profile",
+                "bank:accounts.basic:read",
+                "bank:transactions:read",
+                "common:customer.basic:read",
+                "cdr:registration"
+              ]
+            }
+          ]
+        },
+        {
+          "dataRecipientBrandId": "d5729a91-55a4-4292-90df-90dd4e2661c0",
+          "brandName": "Mock Retired",
+          "logoUri": "https://mock-retired.example/logo.png",
+          "status": "REMOVED",
+          "softwareProducts": [
+            {
+              "softwareProductId": "dba38b05-6f17-44ad-8483-13430245266d",
+              "softwareProductName": "Mock Retired Web",
+              "softwareProductDescription": "Mock Retired Web, a mock software product",
+              "logoUri": "https://web.mock-retired.example/logo.png",
+              "status": "REMOVED",
+              "clientUri": "https://web.mock-retired.example",
+              "redirectUris": [
+                "https://web.mock-retired.example/callback"
+              ],
+              "tosUri": "https://web.mock-retired.example/terms",
+              "policyUri": "https://web.mock-retired.example/privacy",
+              "jwksUri": "https://web.mock-retired.example/jwks",
+              "revocationUri": "https://web.mock-retired.example/revoke",
+              "recipientBaseUri": "https://cdr.web.mock-retired.example",
+              "scopes": [
+                "openid",
+                "profile",
+                "bank:accounts.basic:read",
+                "bank:transactions:read",
+                "common:customer.basic:read",
+                "cdr:registration"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "legalEntityId": "1619c1f2-f900-4f80-89b2-a509b13077de",
+      "legalEntityName": "Mock Suspended Pty Ltd",
+      "accreditationNumber": "ADR-MOCK-0002",
+      "accreditationLevel": "SPONSORED",
+      "logoUri": "https://mock-suspended.example/logo.png",
+      "status": "SUSPENDED",
+      "dataRecipientBrands": [
+        {
+          "dataRecipientBrandId": "2be122e9-be19-41ca-827f-b874b2b4c26c",
+          "brandName": "Mock Paused",
+          "logoUri": "https://mock-paused.example/logo.png",
+          "status": "ACTIVE",
+          "softwareProducts": [
+            {
+              "softwareProductId": "f39df41c-a747-4d76-b3f1-2dfe077bd2f4",
+              "softwareProductName": "Mock Paused Web",
+              "softwareProductDescription": "Mock Paused Web, a mock software product",
+              "logoUri": "https://web.mock-paused.example/logo.png",
+              "status": "INACTIVE",
+              "clientUri": "https://web.mock-paused.example",
+              "redirectUris": [
+                "https://web.mock-paused.example/callback"
+              ],
+              "tosUri": "https://web.mock-paused.example/terms",
+              "policyUri": "https://web.mock-paused.example/privacy",
+              "jwksUri": "https://web.mock-paused.example/jwks",
+              "revocationUri": "https://web.mock-paused.example/revoke",
+              "recipientBaseUri": "https://cdr.web.mock-paused.example",
+              "scopes": [
+                "openid",
+                "profile",
+                "bank:accounts.basic:read",
+                "bank:transactions:read",
+                "common:customer.basic:read",
+                "cdr:registration"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "legalEntityId": "bac15e22-f60b-4a9d-adba-c211e512f8b5",
+      "legalEntityName": "Mock Revoked Pty Ltd",
+      "accreditationNumber": "ADR-MOCK-0003",
+      "accreditationLevel": "UNRESTRICTED",
+      "logoUri": "https://mock-revoked.example/logo.png",
+      "status": "REVOKED",
+      "dataRecipientBrands": [
+        {
+          "dataRecipientBrandId": "8c5d45f2-097e-46e5-9c06-7ffef1c12668",
+          "brandName": "Mock Stopped",
+          "logoUri": "https://mock-stopped.example/logo.png",
+          "status": "ACTIVE",
+          "softwareProducts": [
+            {
+              "softwareProductId": "fd413366-bded-4651-b255-484082817dfe",
+              "softwareProductName": "Mock Stopped Web",
+              "softwareProductDescription": "Mock Stopped Web, a mock software product",
+              "logoUri": "https://web.mock-stopped.example/logo.png",
+              "status": "REMOVED",
+              "clientUri": "https://web.mock-stopped.example",
+              "redirectUris": [
+                "https://web.mock-stopped.example/callback"
+              ],
+              "tosUri": "https://web.mock-stopped.example/terms",
+              "policyUri": "https://web.mock-stopped.example/privacy",
+              "jwksUri": "https://web.mock-stopped.example/jwks",
+              "revocationUri": "https://web.mock-stopped.example/revoke",
+              "recipientBaseUri": "https://cdr.web.mock-stopped.example",
+              "scopes": [
+                "openid",
+                "profile",
+                "bank:accounts.basic:read",
+                "bank:transactions:read",
+                "common:customer.basic:read",
+                "cdr:registration"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "legalEntityId": "46b84bf7-9f2d-42a7-8a67-c18a96a0a25d",
+      "legalEntityName": "Mock Surrendered Pty Ltd",
+      "accreditationNumber": "ADR-MOCK-0004",
+      "accreditationLevel": "UNRESTRICTED",
+      "logoUri": "https://mock-surrendered.example/logo.png",
+      "status": "SURRENDERED",
+      "dataRecipientBrands": [
+        {
+          "dataRecipientBrandId": "0e974fe3-222c-4392-86e6-7ce24d085f6d",
+          "brandName": "Mock Closed",
+          "logoUri": "https://mock-closed.example/logo.png",
+          "status": "REMOVED",
+          "softwareProducts": [
+            {
+              "softwareProductId": "3ed50bd0-c711-4877-9512-743df16ae29a",
+              "softwareProductName": "Mock Closed Web",
+              "softwareProductDescription": "Mock Closed Web, a mock software product",
+              "logoUri": "https://web.mock-closed.example/logo.png",
+              "status": "REMOVED",
+              "clientUri": "https://web.mock-closed.example",
+              "redirectUris": [
+                "https://web.mock-closed.example/callback"
+              ],
+              "tosUri": "https://web.mock-closed.example/terms",
+              "policyUri": "https://web.mock-closed.example/privacy",
+              "jwksUri": "https://web.mock-closed.example/jwks",
+              "revocationUri": "https://web.mock-closed.example/revoke",
+              "recipientBaseUri": "https://cdr.web.mock-closed.example",
+              "scopes": [
+                "openid",
+                "profile",
+                "bank:accounts.basic:read",
+                "bank:transactions:read",
+                "common:customer.basic:read",
+                "cdr:registration"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "legalEntityId": "9a99b5d7-fd53-49e7-8a1c-152fcd8f380b",
+      "legalEntityName": "Mock Status Change Pty Ltd",
+      "accreditationNumber": "ADR-MOCK-0005",
+      "accreditationLevel": "UNRESTRICTED",
+      "logoUri": "https://status-change.example/logo.png",
+      "status": "ACTIVE",
+      "dataRecipientBrands": [
+        {
+          "dataRecipientBrandId": "72afef7f-716a-463f-b007-10a4313d5e96",
+          "brandName": "Status Change",
+          "logoUri": "https://status-change.example/brand.png",
+          "status": "ACTIVE",
+          "softwareProducts": [
+            {
+              "softwareProductId": "89fcb232-f453-4f9a-9ea9-5655d9203c3c",
+              "softwareProductName": "Status Change Web",
+              "softwareProductDescription": "Status Change Web, a mock software product",
+              "logoUri": "https://web.status-change.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://web.status-change.example",
+              "redirectUris": [
+                "https://web.status-change.example/callback"
+              ],
+              "jwksUri": "https://web.status-change.example/jwks",
+              "revocationUri": "https://web.status-change.example/revoke",
+              "recipientBaseUri": "https://cdr.web.status-change.example",
+              "scopes": [
+                "openid",
+                "bank:accounts.basic:read"
+              ]
+            },
+            {
+              "softwareProductId": "b442771c-9c80-4b07-8249-f4aedfe8a2e0",
+              "softwareProductName": "Status Change Mobile",
+              "softwareProductDescription": "Status Change Mobile, a mock software product",
+              "logoUri": "https://mobile.status-change.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://mobile.status-change.example",
+              "redirectUris": [
+                "https://mobile.status-change.example/callback"
+              ],
+              "jwksUri": "https://mobile.status-change.example/jwks",
+              "revocationUri": "https://mobile.status-change.example/revoke",
+              "recipientBaseUri": "https://cdr.mobile.status-change.example",
+              "scopes": [
+                "openid",
+                "bank:accounts.basic:read"
+              ]
+            },
+            {
+              "softwareProductId": "385e5475-0448-46b9-a740-cec9213b95d9",
+              "softwareProductName": "Status Change Beta",
+              "softwareProductDescription": "Status Change Beta, a mock software product",
+              "logoUri": "https://beta.status-change.example/logo.png",
+              "status": "INACTIVE",
+              "clientUri": "https://beta.status-change.example",
+              "redirectUris": [
+                "https://beta.status-change.example/callback"
+              ],
+              "jwksUri": "https://beta.status-change.example/jwks",
+              "revocationUri": "https://beta.status-change.example/revoke",
+              "recipientBaseUri": "https://cdr.beta.status-change.example",
+              "scopes": [
+                "openid",
+                "bank:accounts.basic:read"
+              ]
+            }
+          ]
+        },
+        {
+          "dataRecipientBrandId": "16d4cda0-2ab3-44f4-81df-8584bb07c30f",
+          "brandName": "Status Change Legacy",
+          "logoUri": "https://legacy.status-change.example/brand.png",
+          "status": "INACTIVE",
+          "softwareProducts": [
+            {
+              "softwareProductId": "a0dfca7e-4688-473d-b2a9-a3c2657879f0",
+              "softwareProductName": "Status Change Legacy",
+              "softwareProductDescription": "Status Change Legacy, a mock software product",
+              "logoUri": "https://legacy.status-change.example/logo.png",
+              "status": "INACTIVE",
+              "clientUri": "https://legacy.status-change.example",
+              "redirectUris": [
+                "https://legacy.status-change.example/callback"
+              ],
+              "jwksUri": "https://legacy.status-change.example/jwks",
+              "revocationUri": "https://legacy.status-change.example/revoke",
+              "recipientBaseUri": "https://cdr.legacy.status-change.example",
+              "scopes": [
+                "openid",
+                "bank:accounts.basic:read"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "legalEntityId": "416448ea-d963-4391-89a7-6de950b6bc91",
+      "legalEntityName": "Mock Surrender Pty Ltd",
+      "accreditationNumber": "ADR-MOCK-0006",
+      "accreditationLevel": "SPONSORED",
+      "logoUri": "https://surrender.example/logo.png",
+      "status": "ACTIVE",
+      "dataRecipientBrands": [
+        {
+          "dataRecipientBrandId": "99fa87f9-117e-460a-b89d-b69b5fe84340",
+          "brandName": "Surrender",
+          "logoUri": "https://surrender.example/brand.png",
+          "status": "ACTIVE",
+          "softwareProducts": [
+            {
+              "softwareProductId": "7bae25e7-ec64-445e-9e10-e9717bd2363d",
+              "softwareProductName": "Surrender Web",
+              "softwareProductDescription": "Surrender Web, a mock software product",
+              "logoUri": "https://web.surrender.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://web.surrender.example",
+              "redirectUris": [
+                "https://web.surrender.example/callback"
+              ],
+              "jwksUri": "https://web.surrender.example/jwks",
+              "revocationUri": "https://web.surrender.example/revoke",
+              "recipientBaseUri": "https://cdr.web.surrender.example",
+              "scopes": [
+                "openid",
+                "bank:accounts.basic:read"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "legalEntityId": "bd653a0f-cf64-40ae-b914-aa479f5fb725",
+      "legalEntityName": "Token Test Pty Ltd",
+      "accreditationNumber": "ADR-MOCK-0007",
+      "accreditationLevel": "UNRESTRICTED",
+      "logoUri": "https://conformance.example/logo.png",
+      "status": "ACTIVE",
+      "dataRecipientBrands": [
+        {
+          "dataRecipientBrandId": "40c7892c-82c7-4452-a97d-319000cfa828",
+          "brandName": "Token Test",
+          "logoUri": "https://conformance.example/logo.png",
+          "status": "ACTIVE",
+          "softwareProducts": [
+            {
+              "softwareProductId": "33bfd771-cac1-44c2-8940-a82f529b6170",
+              "softwareProductName": "Token Test Active",
+              "softwareProductDescription": "Token Test Active, a software product of the conformance tests",
+              "logoUri": "https://conformance.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://conformance.example",
+              "redirectUris": [
+                "https://conformance.example/callback"
+              ],
+              "jwksUri": "https://conformance:8443/jwks",
+              "revocationUri": "https://conformance.example/revoke",
+              "recipientBaseUri": "https://cdr.conformance.example",
+              "scopes": [
+                "openid",
+                "bank:accounts.basic:read",
+                "cdr:registration"
+              ]
+            },
+            {
+              "softwareProductId": "839ffa5f-09dd-4e00-9bbc-38dff23a9b2f",
+              "softwareProductName": "Token Test Inactive",
+              "softwareProductDescription": "Token Test Inactive, a software product of the conformance tests",
+              "logoUri": "https://conformance.example/logo.png",
+              "status": "INACTIVE",
+              "clientUri": "https://conformance.example",
+              "redirectUris": [
+                "https://conformance.example/callback"
+              ],
+              "jwksUri": "https://conformance:8443/jwks",
+              "revocationUri": "https://conformance.example/revoke",
+              "recipientBaseUri": "https://cdr.conformance.example",
+              "scopes": [
+                "openid",
+                "bank:accounts.basic:read",
+                "cdr:registration"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "legalEntityId": "41090368-a571-41df-a2c2-a9ad32dfa512",
+      "legalEntityName": "Status Test Pty Ltd",
+      "accreditationNumber": "ADR-MOCK-0008",
+      "accreditationLevel": "UNRESTRICTED",
+      "logoUri": "https://conformance.example/logo.png",
+      "status": "ACTIVE",
+      "dataRecipientBrands": [
+        {
+          "dataRecipientBrandId": "c6081b2a-4335-4b6b-92bd-0e6b11f9a1e6",
+          "brandName": "Status Test",
+          "logoUri": "https://conformance.example/logo.png",
+          "status": "ACTIVE",
+          "softwareProducts": [
+            {
+              "softwareProductId": "8bbe8ce3-3d90-44b2-b97d-383d7fa7e579",
+              "softwareProductName": "Status Test Web",
+              "softwareProductDescription": "Status Test Web, a software product of the conformance tests",
+              "logoUri": "https://conformance.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://conformance.example",
+              "redirectUris": [
+                "https://conformance.example/callback"
+              ],
+              "jwksUri": "https://conformance:8443/jwks",
+              "revocationUri": "https://conformance.example/revoke",
+              "recipientBaseUri": "https://cdr.conformance.example",
+              "scopes": [
+                "openid",
+                "bank:accounts.basic:read",
+                "cdr:registration"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "legalEntityId": "6f1d2a57-0c5e-4b0e-9d0a-3f6c1b7e8a41",
+      "legalEntityName": "Registration Test Pty Ltd",
+      "accreditationNumber": "ADR-MOCK-0009",
+      "accreditationLevel": "UNRESTRICTED",
+      "logoUri": "https://conformance.example/logo.png",
+      "status": "ACTIVE",
+      "dataRecipientBrands": [
+        {
+          "dataRecipientBrandId": "b2c4e6a8-1d3f-4a5b-8c7d-9e0f1a2b3c4d",
+          "brandName": "Registration Test",
+          "logoUri": "https://conformance.example/logo.png",
+          "status": "ACTIVE",
+          "softwareProducts": [
+            {
+              "softwareProductId": "d4f6a8c0-2e4b-4c6d-9e8f-0a1b2c3d4e5f",
+              "softwareProductName": "Registration Test Web",
+              "softwareProductDescription": "Registration Test Web, a software product of the data holder conformance tests",
+              "logoUri": "https://conformance.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://conformance.example",
+              "redirectUris": [
+                "https://conformance.example/callback"
+              ],
+              "jwksUri": "https://conformance:8444/jwks",
+              "revocationUri": "https://conformance.example/revoke",
+              "recipientBaseUri": "https://cdr.conformance.example",
+              "scopes": [
+                "openid",
+                "bank:accounts.basic:read",
+                "cdr:registration"
+              ]
+            },
+            {
+              "softwareProductId": "e5a7b9c1-3f5d-4d7e-8f9a-1b2c3d4e5f60",
+              "softwareProductName": "Registration Test Minimal",
+              "softwareProductDescription": "Registration Test Minimal, a software product of the data holder conformance tests with a scope that the data holder does not support",
+              "logoUri": "https://conformance.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://conformance.example",
+              "redirectUris": [
+                "https://conformance.example/callback"
+              ],
+              "jwksUri": "https://conformance:8444/jwks",
+              "revocationUri": "https://conformance.example/revoke",
+              "recipientBaseUri": "https://cdr.conformance.example",
+              "scopes": [
+                "openid",
+                "profile",
+                "bank:payees:read",
+                "bank:accounts.basic:read",
+                "cdr:registration"
+              ]
+            },
+            {
+              "softwareProductId": "a7c9d1e3-5b7f-4f9a-8b1c-3d4e5f6a7b82",
+              "softwareProductName": "Registration Test Data Only",
+              "softwareProductDescription": "Registration Test Data Only, a software product of the data holder conformance tests with no scope for registration management",
+              "logoUri": "https://conformance.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://conformance.example",
+              "redirectUris": [
+                "https://conformance.example/callback"
+              ],
+              "jwksUri": "https://conformance:8444/jwks",
+              "revocationUri": "https://conformance.example/revoke",
+              "recipientBaseUri": "https://cdr.conformance.example",
+              "scopes": [
+                "openid",
+                "bank:accounts.basic:read"
+              ]
+            },
+            {
+              "softwareProductId": "b8d0e2f4-6c8a-4a0b-9c2d-4e5f6a7b8c93",
+              "softwareProductName": "Registration Test Lifecycle",
+              "softwareProductDescription": "Registration Test Lifecycle, the software product that the data holder conformance tests register, update and delete",
+              "logoUri": "https://conformance.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://conformance.example",
+              "redirectUris": [
+                "https://conformance.example/callback"
+              ],
+              "jwksUri": "https://conformance:8444/jwks",
+              "revocationUri": "https://conformance.example/revoke",
+              "recipientBaseUri": "https://cdr.conformance.example",
+              "scopes": [
+                "openid",
+                "bank:accounts.basic:read",
+                "cdr:registration"
+              ]
+            },
+            {
+              "softwareProductId": "c9e1f3a5-7d9b-4b1c-8d3e-5f6a7b8c9da4",
+              "softwareProductName": "Registration Test No Consent",
+              "softwareProductDescription": "Registration Test No Consent, the software product that the data holder conformance tests register with no grant type for consent",
+              "logoUri": "https://conformance.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://conformance.example",
+              "redirectUris": [
+                "https://conformance.example/callback"
+              ],
+              "jwksUri": "https://conformance:8444/jwks",
+              "revocationUri": "https://conformance.example/revoke",
+              "recipientBaseUri": "https://cdr.conformance.example",
+              "scopes": [
+                "openid",
+                "bank:accounts.basic:read",
+                "cdr:registration"
+              ]
+            },
+            {
+              "softwareProductId": "0b3d5f71-8e2a-4c4d-a6f8-6a7b8c9d0eb5",
+              "softwareProductName": "Registration Test All Scopes",
+              "softwareProductDescription": "Registration Test All Scopes, the software product of the data holder conformance tests with each data scope that the data holder supports",
+              "logoUri": "https://conformance.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://conformance.example",
+              "redirectUris": [
+                "https://conformance.example/callback"
+              ],
+              "jwksUri": "https://conformance:8444/jwks",
+              "revocationUri": "https://conformance.example/revoke",
+              "recipientBaseUri": "https://cdr.conformance.example",
+              "scopes": [
+                "openid",
+                "profile",
+                "common:customer.basic:read",
+                "bank:accounts.basic:read",
+                "bank:accounts.detail:read",
+                "bank:transactions:read",
+                "cdr:registration"
+              ]
+            },
+            {
+              "softwareProductId": "f6b8c0d2-4a6e-4e8f-9a0b-2c3d4e5f6a71",
+              "softwareProductName": "Registration Test Key Change",
+              "softwareProductDescription": "Registration Test Key Change, the software product that registers with the data holder after a key change of the Register",
+              "logoUri": "https://conformance.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://conformance.example",
+              "redirectUris": [
+                "https://conformance.example/callback"
+              ],
+              "jwksUri": "https://conformance:8443/jwks",
+              "revocationUri": "https://conformance.example/revoke",
+              "recipientBaseUri": "https://cdr.conformance.example",
+              "scopes": [
+                "openid",
+                "bank:accounts.basic:read",
+                "cdr:registration"
+              ]
+            },
+            {
+              "softwareProductId": "1c4e6a82-9f3b-4d5e-b7a9-7b8c9d0e1fc6",
+              "softwareProductName": "Registration Test Sector",
+              "softwareProductDescription": "Registration Test Sector, the software product of the data holder conformance tests with a sector identifier of its own",
+              "logoUri": "https://conformance.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://conformance.example",
+              "redirectUris": [
+                "https://conformance.example/callback"
+              ],
+              "jwksUri": "https://conformance:8444/jwks",
+              "revocationUri": "https://conformance.example/revoke",
+              "recipientBaseUri": "https://cdr.conformance.example",
+              "scopes": [
+                "openid",
+                "profile",
+                "common:customer.basic:read",
+                "bank:accounts.basic:read",
+                "bank:accounts.detail:read",
+                "bank:transactions:read",
+                "cdr:registration"
+              ],
+              "sectorIdentifierUri": "https://sector.conformance.example/redirect-uris.json"
+            },
+            {
+              "softwareProductId": "3e5a7c94-1b2d-4f6e-8a9b-0c1d2e3f4a87",
+              "softwareProductName": "Registration Test Accounts",
+              "softwareProductDescription": "Registration Test Accounts, the software product of the data holder conformance tests that registers again to keep its account identifiers",
+              "logoUri": "https://conformance.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://conformance.example",
+              "redirectUris": [
+                "https://conformance.example/callback"
+              ],
+              "jwksUri": "https://conformance:8444/jwks",
+              "revocationUri": "https://conformance.example/revoke",
+              "recipientBaseUri": "https://cdr.conformance.example",
+              "scopes": [
+                "openid",
+                "profile",
+                "common:customer.basic:read",
+                "bank:accounts.basic:read",
+                "bank:accounts.detail:read",
+                "bank:transactions:read",
+                "cdr:registration"
+              ]
+            },
+            {
+              "softwareProductId": "5c7e9a1b-3d5f-4b7d-9e1f-2a3b4c5d6e7f",
+              "softwareProductName": "Registration Test Notice",
+              "softwareProductDescription": "Registration Test Notice, the software product of the data holder conformance tests whose CDR arrangement revocation endpoint the tests serve",
+              "logoUri": "https://conformance.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://conformance.example",
+              "redirectUris": [
+                "https://conformance.example/callback"
+              ],
+              "jwksUri": "https://conformance:8444/jwks",
+              "revocationUri": "https://conformance.example/revoke",
+              "recipientBaseUri": "https://conformance:8444",
+              "scopes": [
+                "openid",
+                "profile",
+                "bank:accounts.basic:read",
+                "cdr:registration"
+              ]
+            },
+            {
+              "softwareProductId": "7a9c1e3b-5d7f-4a9b-8c1d-3e5f7a9b1c2d",
+              "softwareProductName": "Registration Test Second Notice",
+              "softwareProductDescription": "Registration Test Second Notice, a second software product of the data holder conformance tests whose CDR arrangement revocation endpoint the tests serve",
+              "logoUri": "https://conformance.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://conformance.example",
+              "redirectUris": [
+                "https://conformance.example/callback"
+              ],
+              "jwksUri": "https://conformance:8444/jwks",
+              "revocationUri": "https://conformance.example/revoke",
+              "recipientBaseUri": "https://conformance:8444",
+              "scopes": [
+                "openid",
+                "profile",
+                "bank:accounts.basic:read",
+                "cdr:registration"
+              ]
+            },
+            {
+              "softwareProductId": "2d4f6b8a-0c1e-4a3b-9d5f-7b9c1d3e5f70",
+              "softwareProductName": "Registration Test Inactive",
+              "softwareProductDescription": "Registration Test Inactive, the software product of the data holder conformance tests that becomes INACTIVE and then ACTIVE again",
+              "logoUri": "https://conformance.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://conformance.example",
+              "redirectUris": [
+                "https://conformance.example/callback"
+              ],
+              "jwksUri": "https://conformance:8444/jwks",
+              "revocationUri": "https://conformance.example/revoke",
+              "recipientBaseUri": "https://conformance.example",
+              "scopes": [
+                "openid",
+                "profile",
+                "common:customer.basic:read",
+                "cdr:registration"
+              ]
+            },
+            {
+              "softwareProductId": "4f6a8c0e-2b4d-4c6e-8f0a-9b1c3d5e7f81",
+              "softwareProductName": "Registration Test Removed",
+              "softwareProductDescription": "Registration Test Removed, the software product of the data holder conformance tests that becomes REMOVED, whose CDR arrangement revocation endpoint the tests serve",
+              "logoUri": "https://conformance.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://conformance.example",
+              "redirectUris": [
+                "https://conformance.example/callback"
+              ],
+              "jwksUri": "https://conformance:8444/jwks",
+              "revocationUri": "https://conformance.example/revoke",
+              "recipientBaseUri": "https://conformance:8444",
+              "scopes": [
+                "openid",
+                "profile",
+                "bank:accounts.basic:read",
+                "cdr:registration"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "legalEntityId": "1c664017-a83c-4086-96f8-d61026d2df41",
+      "legalEntityName": "OpenID Test Pty Ltd",
+      "accreditationNumber": "ADR-MOCK-0010",
+      "accreditationLevel": "UNRESTRICTED",
+      "logoUri": "https://openid.example/logo.png",
+      "status": "ACTIVE",
+      "dataRecipientBrands": [
+        {
+          "dataRecipientBrandId": "37b32ae1-eb99-4774-ab0a-6fccf3a85725",
+          "brandName": "OpenID Test",
+          "logoUri": "https://openid.example/logo.png",
+          "status": "ACTIVE",
+          "softwareProducts": [
+            {
+              "softwareProductId": "aa29d742-9413-4d10-850c-70b310427da2",
+              "softwareProductName": "OpenID Test Client 1",
+              "softwareProductDescription": "OpenID Test Client 1, one of the two clients of the OpenID conformance suite",
+              "logoUri": "https://openid.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://openid.example",
+              "redirectUris": [
+                "https://openid:8443/test/a/cdr-lab/callback"
+              ],
+              "jwksUri": "https://openid-runner:8443/client-1/jwks",
+              "revocationUri": "https://openid.example/revoke",
+              "recipientBaseUri": "https://cdr.openid.example",
+              "scopes": [
+                "openid",
+                "profile",
+                "common:customer.basic:read",
+                "bank:accounts.basic:read",
+                "bank:transactions:read",
+                "cdr:registration"
+              ]
+            },
+            {
+              "softwareProductId": "d07c4109-dc08-4319-9856-274afa9fa7e2",
+              "softwareProductName": "OpenID Test Client 2",
+              "softwareProductDescription": "OpenID Test Client 2, one of the two clients of the OpenID conformance suite",
+              "logoUri": "https://openid.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://openid.example",
+              "redirectUris": [
+                "https://openid:8443/test/a/cdr-lab/callback?dummy1=lorem&dummy2=ipsum"
+              ],
+              "jwksUri": "https://openid-runner:8443/client-2/jwks",
+              "revocationUri": "https://openid.example/revoke",
+              "recipientBaseUri": "https://cdr.openid.example",
+              "scopes": [
+                "openid",
+                "profile",
+                "common:customer.basic:read",
+                "bank:accounts.basic:read",
+                "bank:transactions:read",
+                "cdr:registration"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "legalEntityId": "7c89d9d4-4f19-4bb3-90c3-b2d5b95520c4",
+      "legalEntityName": "Console Test Pty Ltd",
+      "accreditationNumber": "ADR-MOCK-0011",
+      "accreditationLevel": "UNRESTRICTED",
+      "logoUri": "https://console-test.example/logo.png",
+      "status": "ACTIVE",
+      "dataRecipientBrands": [
+        {
+          "dataRecipientBrandId": "448f8187-12fc-405c-997f-6f372623f590",
+          "brandName": "Console Test",
+          "logoUri": "https://console-test.example/logo.png",
+          "status": "ACTIVE",
+          "softwareProducts": [
+            {
+              "softwareProductId": "f408f354-ef53-4342-93df-5266601ff735",
+              "softwareProductName": "Console Test Web",
+              "softwareProductDescription": "Console Test Web, a software product of the lab browser tests",
+              "logoUri": "https://console-test.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://console-test.example",
+              "redirectUris": [
+                "https://console-test.example/callback"
+              ],
+              "jwksUri": "https://console-test.example/jwks",
+              "revocationUri": "https://console-test.example/revoke",
+              "recipientBaseUri": "https://cdr.console-test.example",
+              "scopes": [
+                "openid",
+                "bank:accounts.basic:read"
+              ]
+            },
+            {
+              "softwareProductId": "3b9f04e2-c47b-4573-bbc5-797616237370",
+              "softwareProductName": "Console Test Mobile",
+              "softwareProductDescription": "Console Test Mobile, a software product of the lab browser tests",
+              "logoUri": "https://console-test.example/logo.png",
+              "status": "INACTIVE",
+              "clientUri": "https://console-test.example",
+              "redirectUris": [
+                "https://console-test.example/callback"
+              ],
+              "jwksUri": "https://console-test.example/jwks",
+              "revocationUri": "https://console-test.example/revoke",
+              "recipientBaseUri": "https://cdr.console-test.example",
+              "scopes": [
+                "openid",
+                "bank:accounts.basic:read"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "legalEntityId": "816bfdc3-72b2-4a5c-8cf1-6bc4541a9777",
+      "legalEntityName": "Console Certificate Test Pty Ltd",
+      "accreditationNumber": "ADR-MOCK-0012",
+      "accreditationLevel": "UNRESTRICTED",
+      "logoUri": "https://console-certificate-test.example/logo.png",
+      "status": "ACTIVE",
+      "dataRecipientBrands": [
+        {
+          "dataRecipientBrandId": "074f33f9-3ba3-4d70-8cf1-449b952d8320",
+          "brandName": "Console Certificate Test",
+          "logoUri": "https://console-certificate-test.example/logo.png",
+          "status": "ACTIVE",
+          "softwareProducts": [
+            {
+              "softwareProductId": "2b12751e-9c39-4b5e-acb2-673f24e12e95",
+              "softwareProductName": "Console Certificate Test Web",
+              "softwareProductDescription": "Console Certificate Test Web, a software product of the lab browser tests",
+              "logoUri": "https://console-certificate-test.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://console-certificate-test.example",
+              "redirectUris": [
+                "https://console-certificate-test.example/callback"
+              ],
+              "jwksUri": "https://console-certificate-test.example/jwks",
+              "revocationUri": "https://console-certificate-test.example/revoke",
+              "recipientBaseUri": "https://cdr.console-certificate-test.example",
+              "scopes": [
+                "openid",
+                "bank:accounts.basic:read"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "legalEntityId": "1e3767b2-7bd8-435a-b0a4-e18a1be73b9a",
+      "legalEntityName": "Console Change Test Pty Ltd",
+      "accreditationNumber": "ADR-MOCK-0013",
+      "accreditationLevel": "UNRESTRICTED",
+      "logoUri": "https://console-change-test.example/logo.png",
+      "status": "ACTIVE",
+      "dataRecipientBrands": []
+    },
+    {
+      "legalEntityId": "38ec0d0d-dde5-45c2-a3e1-7db8994a50d5",
+      "legalEntityName": "Console Product Change Test Pty Ltd",
+      "accreditationNumber": "ADR-MOCK-0014",
+      "accreditationLevel": "UNRESTRICTED",
+      "logoUri": "https://console-product-change-test.example/logo.png",
+      "status": "ACTIVE",
+      "dataRecipientBrands": [
+        {
+          "dataRecipientBrandId": "cc8d12e9-f551-4e0a-8a40-ad0e4ae49430",
+          "brandName": "Console Product Change Test",
+          "logoUri": "https://console-product-change-test.example/logo.png",
+          "status": "ACTIVE",
+          "softwareProducts": [
+            {
+              "softwareProductId": "79c0f724-3405-4c96-beba-79730c824c76",
+              "softwareProductName": "Console Product Change Test Web",
+              "softwareProductDescription": "Console Product Change Test Web, a software product of the lab browser tests",
+              "logoUri": "https://console-product-change-test.example/logo.png",
+              "status": "ACTIVE",
+              "clientUri": "https://console-product-change-test.example",
+              "redirectUris": [
+                "https://console-product-change-test.example/callback"
+              ],
+              "jwksUri": "https://console-product-change-test.example/jwks",
+              "revocationUri": "https://console-product-change-test.example/revoke",
+              "recipientBaseUri": "https://cdr.console-product-change-test.example",
+              "scopes": [
+                "openid",
+                "bank:accounts.basic:read"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+# The values of the preset brand Harbour Bank that agree with its record in services/register/seed/preset-banks.json.
+# A deployment adds the other values, and changes the base URLs here and in the seed to the hosts of the deployment.
+brand:
+  preset: harbour-bank
+  id: 366f7b1c-93c7-4b84-9c92-ab2456614095
+publicBaseURL: https://harbourbank.test:8081
+secureBaseURL: https://harbourbank.test:8083
+mail:
+  from: no-reply@harbourbank.test

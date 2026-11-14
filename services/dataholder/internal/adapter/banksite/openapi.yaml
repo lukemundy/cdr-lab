@@ -1,0 +1,1064 @@
+# The data holder does not read this document at runtime: its tests validate the responses against it, and the UI
+# generates its types from it. A test fails when an object schema does not set additionalProperties: false.
+openapi: 3.0.3
+info:
+  title: Online bank site API
+  version: "1"
+  description: >-
+    The same-origin API of the online bank site of the mock data holder. It has no version in its path, because the
+    UI and the API ship together (services/dataholder/DESIGN.md, Site API). The fields of a product, an account, a
+    balance and a transaction have the names and the values of the CDS schemas.
+paths:
+  /api/brand:
+    get:
+      operationId: getBrand
+      summary: The brand of the data holder instance
+      responses:
+        "200":
+          description: The brand.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Brand"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/products:
+    get:
+      operationId: listProducts
+      summary: Each current product of the brand
+      description: >-
+        The products and the values of Get Products with effective=CURRENT, in one response with no pages.
+      responses:
+        "200":
+          description: The current products.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductList"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/products/{productId}:
+    get:
+      operationId: getProduct
+      summary: One current product
+      description: The values of Get Product Detail. A product that is not current gives 404.
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The product.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductDetail"
+        "404":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/customers:
+    post:
+      operationId: signUp
+      summary: Sign up as a new customer, and start a session
+      description: >-
+        The data holder creates the customer with the rules of a create of a customer in the operator interface, and
+        creates the customer number. An email address that a different customer has, with no difference for upper and
+        lower case, gives 409. The response sets the session cookie. A full session store gives 503 and creates no
+        customer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignUpRequest"
+      responses:
+        "201":
+          description: The new customer. The response sets the session cookie, and has no Location header.
+          headers:
+            Set-Cookie:
+              $ref: "#/components/headers/SessionCookie"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionCustomer"
+        "400":
+          $ref: "#/components/responses/RefusedValues"
+        "409":
+          description: A different customer has the email address. The field error has a text for the consumer.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/FieldErrorsProblem"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/session:
+    post:
+      operationId: signIn
+      summary: Sign in with an email address or a customer number, and start a session
+      description: >-
+        The body has the user identifier only: the email address, with no difference for upper and lower case, or the
+        customer number. A value that no customer has gives 400 with a field error at /identifier. A body with a
+        password field gives 400: the UI does not send the password. The session of the request, if any, ends. A full
+        session store gives 503.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignInRequest"
+      responses:
+        "204":
+          description: The session started. The response sets the session cookie.
+          headers:
+            Set-Cookie:
+              $ref: "#/components/headers/SessionCookie"
+        "400":
+          $ref: "#/components/responses/RefusedValues"
+        default:
+          $ref: "#/components/responses/Error"
+    get:
+      operationId: getSession
+      summary: The customer of the session
+      responses:
+        "200":
+          description: The customer of the session.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionCustomer"
+        "403":
+          $ref: "#/components/responses/NoSession"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: signOut
+      summary: Sign out
+      description: The session of the request, if any, ends, and the response expires the cookie.
+      responses:
+        "204":
+          description: The consumer is signed out.
+        default:
+          $ref: "#/components/responses/Error"
+  /api/accounts:
+    get:
+      operationId: listAccounts
+      summary: Each account of the customer of the session
+      description: >-
+        The accounts in the order of Get Accounts, each with the fields of BankingAccountV3 that the site shows and
+        the balance of Get Account Balance. accountId is the account identifier of the data holder.
+      responses:
+        "200":
+          description: The accounts.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountList"
+        "403":
+          $ref: "#/components/responses/NoSession"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: openAccount
+      summary: Open an account of a current product for the customer of the session
+      description: >-
+        The data holder opens the account with the rules of a create of an account in the operator interface, with
+        no credit assessment. The account gets the category and the name of the product, the BSB of the brand and a
+        random account number. A product in a RevolvingProductCategory needs a creditLimit, which the account gets. A
+        product in a LoanProductCategory needs a loanAmount: the account gets a posted drawdown transaction of minus
+        the loan amount, and a creditLimit of 0.00. Each amount is more than 0.00. A product that is not current or
+        that does not exist gives 400 with a field error at /productId. An amount that is not valid, or that the
+        product does not have, gives 400 with a field error at its field.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OpenAccountRequest"
+      responses:
+        "201":
+          description: The new account, with no Location header.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        "400":
+          $ref: "#/components/responses/RefusedValues"
+        "403":
+          $ref: "#/components/responses/NoSession"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/accounts/{accountId}/balance:
+    get:
+      operationId: getBalance
+      summary: The balance of one account of the customer of the session
+      description: The values of Get Account Balance. An account of a different customer gives 404.
+      parameters:
+        - $ref: "#/components/parameters/AccountId"
+      responses:
+        "200":
+          description: The balance.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Balance"
+        "403":
+          $ref: "#/components/responses/NoSession"
+        "404":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/accounts/{accountId}/transactions:
+    get:
+      operationId: listTransactions
+      summary: One page of the transactions of one account of the customer of the session
+      description: >-
+        The transactions of Get Transactions For Account with no filter: from 90 days before the time of the request
+        to the time of the request, in the same order. transactionId is the transaction identifier of the data
+        holder. An account of a different customer gives 404. A page after the last page gives an empty list.
+      parameters:
+        - $ref: "#/components/parameters/AccountId"
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page-size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 25
+      responses:
+        "200":
+          description: The page of transactions.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionList"
+        "400":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/NoSession"
+        "404":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/accounts/{accountId}/close:
+    post:
+      operationId: closeAccount
+      summary: Close one open account of the customer of the session
+      description: >-
+        ends has the arrangementId of each arrangement that the close action named at the confirmation, and an empty
+        list when it named none. When the close now ends different arrangements, or the account is closed, the
+        response is 409 and the data holder changes nothing. An account of a different customer gives 404.
+      parameters:
+        - $ref: "#/components/parameters/AccountId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CloseRequest"
+      responses:
+        "204":
+          description: The account is closed.
+        "400":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/NoSession"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/consents:
+    get:
+      operationId: listConsents
+      summary: Each CDR arrangement of the customer of the session
+      description: >-
+        The arrangements of the customer, newest confirmation first, on one page. The data holder gives the language
+        of the data clusters, so that the UI has no copy of the rules.
+      responses:
+        "200":
+          description: The consents.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConsentList"
+        "403":
+          $ref: "#/components/responses/NoSession"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/consents/{arrangementId}/withdraw:
+    post:
+      operationId: withdrawConsent
+      summary: Withdraw one current consent of the customer of the session
+      description: >-
+        The consumer withdraws the consent on the consumer dashboard (rule 4.25(1)(a) of the CDR Rules), and the
+        withdrawal has the method CONSUMER_DASHBOARD. The request has no body, because the withdrawal ends only the
+        arrangement of the path. The withdrawal cannot be reversed, and the data holder sends a notice to the data
+        recipient. A consent that ended gives 409, and the data holder changes nothing. A consent of a different
+        customer gives 404.
+      parameters:
+        - $ref: "#/components/parameters/ArrangementId"
+      responses:
+        "204":
+          description: The consent ended.
+        "403":
+          $ref: "#/components/responses/NoSession"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        default:
+          $ref: "#/components/responses/Error"
+components:
+  headers:
+    SessionCookie:
+      description: >-
+        The session cookie __Host-bank-session-<dataHolderBrandId>, with only the session ID, and Secure, HttpOnly,
+        SameSite=Strict and Path=/.
+      schema:
+        type: string
+  parameters:
+    ArrangementId:
+      name: arrangementId
+      in: path
+      required: true
+      description: The cdr_arrangement_id of the consent.
+      schema:
+        type: string
+    AccountId:
+      name: accountId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    Error:
+      description: An error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    RefusedValues:
+      description: >-
+        The request body is not valid, or the data holder refuses a value. Each value that the data holder refuses has
+        a field error with a text for the consumer.
+      content:
+        application/problem+json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/Problem"
+              - $ref: "#/components/schemas/FieldErrorsProblem"
+    NoSession:
+      description: >-
+        The request has no valid session. With a session cookie, the problem is a SessionEndedProblem and the response
+        expires the cookie.
+      content:
+        application/problem+json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/Problem"
+              - $ref: "#/components/schemas/SessionEndedProblem"
+  schemas:
+    Brand:
+      type: object
+      additionalProperties: false
+      required: [brandName, demonstrationNotice, layout, photos]
+      properties:
+        brandName:
+          type: string
+          description: The brandName of the brand on the Register.
+        demonstrationNotice:
+          type: string
+          description: The text of the footer, which says that the bank is not real. A brand cannot change it.
+        layout:
+          type: string
+          enum: [meadow, ledger, horizon, updraft]
+          description: The layout of the site, from the brand directory.
+        photos:
+          type: array
+          description: >-
+            The file name of each photo of the brand, which the site gets at /brand/<file name>. The site asks for no
+            other photo.
+          items:
+            type: string
+            pattern: "^(hero|category-[a-z-]+)\\.webp$"
+    ProductList:
+      type: object
+      additionalProperties: false
+      required: [products]
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+    Product:
+      type: object
+      additionalProperties: false
+      description: The fields of BankingProductV6 that the data holder holds.
+      required: [productId, lastUpdated, productCategory, name, description, brand, isTailored]
+      properties:
+        productId:
+          type: string
+        effectiveFrom:
+          type: string
+          format: date-time
+        effectiveTo:
+          type: string
+          format: date-time
+        lastUpdated:
+          type: string
+          format: date-time
+        productCategory:
+          $ref: "#/components/schemas/ProductCategory"
+        name:
+          type: string
+        description:
+          type: string
+        brand:
+          type: string
+        isTailored:
+          type: boolean
+    ProductDetail:
+      type: object
+      additionalProperties: false
+      description: The fields of BankingProductDetailV7 that the data holder holds.
+      required: [productId, lastUpdated, productCategory, name, description, brand, isTailored]
+      properties:
+        productId:
+          type: string
+        effectiveFrom:
+          type: string
+          format: date-time
+        effectiveTo:
+          type: string
+          format: date-time
+        lastUpdated:
+          type: string
+          format: date-time
+        productCategory:
+          $ref: "#/components/schemas/ProductCategory"
+        name:
+          type: string
+        description:
+          type: string
+        brand:
+          type: string
+        isTailored:
+          type: boolean
+        features:
+          type: array
+          items:
+            $ref: "#/components/schemas/Feature"
+        fees:
+          type: array
+          items:
+            $ref: "#/components/schemas/Fee"
+        depositRates:
+          type: array
+          items:
+            $ref: "#/components/schemas/DepositRate"
+        lendingRates:
+          type: array
+          items:
+            $ref: "#/components/schemas/LendingRate"
+    Feature:
+      type: object
+      additionalProperties: false
+      required: [featureType]
+      properties:
+        featureType:
+          $ref: "#/components/schemas/FeatureType"
+        additionalValue:
+          type: string
+        additionalInfo:
+          type: string
+    Fee:
+      type: object
+      additionalProperties: false
+      required: [name, feeType, feeMethodUType]
+      properties:
+        name:
+          type: string
+        feeType:
+          $ref: "#/components/schemas/FeeType"
+        feeMethodUType:
+          $ref: "#/components/schemas/FeeMethodUType"
+        fixedAmount:
+          type: object
+          additionalProperties: false
+          required: [amount]
+          properties:
+            amount:
+              type: string
+              description: An AmountString.
+        rateBased:
+          type: object
+          additionalProperties: false
+          required: [rateType, rate]
+          properties:
+            rateType:
+              $ref: "#/components/schemas/FeeRateType"
+            rate:
+              type: string
+              description: A RateString.
+        variable:
+          type: object
+          additionalProperties: false
+          properties:
+            feeMinimum:
+              type: string
+              description: An AmountString.
+            feeMaximum:
+              type: string
+              description: An AmountString.
+        additionalValue:
+          type: string
+        additionalInfo:
+          type: string
+    DepositRate:
+      type: object
+      additionalProperties: false
+      required: [depositRateType, rate, applicationType]
+      properties:
+        depositRateType:
+          $ref: "#/components/schemas/DepositRateType"
+        rate:
+          type: string
+          description: A RateString.
+        applicationType:
+          $ref: "#/components/schemas/ApplicationType"
+        applicationFrequency:
+          type: string
+          description: An ISO 8601 duration.
+        additionalValue:
+          type: string
+        additionalInfo:
+          type: string
+    LendingRate:
+      type: object
+      additionalProperties: false
+      required: [lendingRateType, rate, applicationType, repaymentType, loanPurpose]
+      properties:
+        lendingRateType:
+          $ref: "#/components/schemas/LendingRateType"
+        rate:
+          type: string
+          description: A RateString.
+        comparisonRate:
+          type: string
+          description: A RateString.
+        applicationType:
+          $ref: "#/components/schemas/ApplicationType"
+        applicationFrequency:
+          type: string
+          description: An ISO 8601 duration.
+        repaymentType:
+          $ref: "#/components/schemas/RepaymentType"
+        loanPurpose:
+          $ref: "#/components/schemas/LoanPurpose"
+        additionalValue:
+          type: string
+        additionalInfo:
+          type: string
+    AccountList:
+      type: object
+      additionalProperties: false
+      required: [accounts]
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Account"
+    Account:
+      type: object
+      additionalProperties: false
+      description: >-
+        The fields of BankingAccountV3 that the site shows, the balance of the account, and the actions that the
+        rules permit now.
+      required:
+        [accountId, creationDate, displayName, maskedNumber, openStatus, productCategory, productName, balance, actions]
+      properties:
+        accountId:
+          type: string
+        creationDate:
+          type: string
+          format: date
+        displayName:
+          type: string
+        maskedNumber:
+          type: string
+        openStatus:
+          $ref: "#/components/schemas/OpenStatus"
+        productCategory:
+          $ref: "#/components/schemas/ProductCategory"
+        productName:
+          type: string
+        balance:
+          $ref: "#/components/schemas/Balance"
+        actions:
+          description: An open account has the action close. A closed account has no action.
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountAction"
+    AccountAction:
+      type: object
+      additionalProperties: false
+      required: [action, ends]
+      properties:
+        action:
+          type: string
+          enum: [close]
+        ends:
+          description: >-
+            Each arrangement that the close ends, in the sequence of their confirmation. The list is empty when the
+            account is not the last open account of the customer.
+          type: array
+          items:
+            $ref: "#/components/schemas/ArrangementEnd"
+    ArrangementEnd:
+      type: object
+      additionalProperties: false
+      required: [arrangementId, clientName]
+      properties:
+        arrangementId:
+          type: string
+        clientName:
+          type: string
+    CloseRequest:
+      type: object
+      additionalProperties: false
+      required: [ends]
+      properties:
+        ends:
+          type: array
+          items:
+            type: string
+    ConsentList:
+      type: object
+      additionalProperties: false
+      required: [consents]
+      properties:
+        consents:
+          type: array
+          items:
+            $ref: "#/components/schemas/Consent"
+    Consent:
+      type: object
+      additionalProperties: false
+      description: >-
+        A CDR arrangement with the names of the data recipient that the consent page showed. An arrangement is ENDED
+        after an event ended it, and at and after the end of its sharing.
+      required:
+        [arrangementId, clientName, brandName, status, confirmedAt, sharingDurationSeconds, sharingEndsAt, accounts,
+        dataClusters]
+      properties:
+        arrangementId:
+          type: string
+        clientName:
+          description: The name of the software product.
+          type: string
+        brandName:
+          description: The org_name of the registration at the confirmation.
+          type: string
+        legalEntityName:
+          description: The legal_entity_name of the registration at the confirmation, when it had one.
+          type: string
+        status:
+          type: string
+          enum: [CURRENT, ENDED]
+        confirmedAt:
+          type: string
+          format: date-time
+        sharingDurationSeconds:
+          type: integer
+          format: int64
+          minimum: 0
+        sharingEndsAt:
+          type: string
+          format: date-time
+        endedAt:
+          description: >-
+            For an ENDED arrangement only: the time of the event that ended it, or else the end of its sharing.
+          type: string
+          format: date-time
+        accounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConsentAccount"
+        dataClusters:
+          type: array
+          items:
+            $ref: "#/components/schemas/DataCluster"
+    ConsentAccount:
+      type: object
+      additionalProperties: false
+      description: An account of an arrangement, with the fields of an account in the list of the accounts.
+      required: [accountId, creationDate, displayName, maskedNumber, openStatus, productCategory, productName]
+      properties:
+        accountId:
+          type: string
+        creationDate:
+          type: string
+          format: date
+        displayName:
+          type: string
+        maskedNumber:
+          type: string
+        openStatus:
+          $ref: "#/components/schemas/OpenStatus"
+        productCategory:
+          $ref: "#/components/schemas/ProductCategory"
+        productName:
+          type: string
+    DataCluster:
+      type: object
+      additionalProperties: false
+      description: >-
+        A data cluster of the scopes of the arrangement, in the language of the CDS. The disclosure times are absent
+        when the data holder disclosed no data of the cluster.
+      required: [name, permissions]
+      properties:
+        name:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        firstDisclosedAt:
+          type: string
+          format: date-time
+        lastDisclosedAt:
+          type: string
+          format: date-time
+    Balance:
+      type: object
+      additionalProperties: false
+      description: The fields of BankingBalance that the data holder gives, with no accountId.
+      required: [currentBalance, availableBalance, creditLimit]
+      properties:
+        currentBalance:
+          $ref: "#/components/schemas/AmountString"
+        availableBalance:
+          $ref: "#/components/schemas/AmountString"
+        creditLimit:
+          $ref: "#/components/schemas/AmountString"
+    TransactionList:
+      type: object
+      additionalProperties: false
+      required: [transactions, totalRecords, totalPages]
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+        totalRecords:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+    Transaction:
+      type: object
+      additionalProperties: false
+      description: A BankingTransactionV2.
+      required: [accountId, transactionId, isDetailAvailable, type, status, description, amount, reference]
+      properties:
+        accountId:
+          type: string
+        transactionId:
+          type: string
+        isDetailAvailable:
+          type: boolean
+        type:
+          $ref: "#/components/schemas/TransactionType"
+        status:
+          $ref: "#/components/schemas/TransactionStatus"
+        description:
+          type: string
+        postingDateTime:
+          type: string
+          format: date-time
+        valueDateTime:
+          type: string
+          format: date-time
+        executionDateTime:
+          type: string
+          format: date-time
+        amount:
+          $ref: "#/components/schemas/AmountString"
+        reference:
+          type: string
+        merchantName:
+          type: string
+        merchantCategoryCode:
+          type: string
+        billerCode:
+          type: string
+        billerName:
+          type: string
+        crn:
+          type: string
+        apcaNumber:
+          type: string
+    AmountString:
+      type: string
+      description: A CDS AmountString, for example "-4.50".
+      pattern: "^-?[0-9]+\\.[0-9]{2}$"
+    # Each enumeration has each value that the data holder accepts; a test compares each list with the domain and
+    # with the CDS. The site shows the categories in the order of this list: the order of the tables of the CDS
+    # section "Product Categories", deposit products and then lending products.
+    ProductCategory:
+      type: string
+      enum:
+        - REGULATED_TRUST_ACCOUNTS
+        - TERM_DEPOSITS
+        - TRANS_AND_SAVINGS_ACCOUNTS
+        - TRAVEL_CARDS
+        - BUSINESS_LOANS
+        - BUY_NOW_PAY_LATER
+        - CRED_AND_CHRG_CARDS
+        - LEASES
+        - MARGIN_LOANS
+        - OVERDRAFTS
+        - PERS_LOANS
+        - RESIDENTIAL_MORTGAGES
+        - TRADE_FINANCE
+    # The lending categories of revolving credit. The open of a product of these categories needs a creditLimit; a
+    # test compares the list with the rule of the data holder.
+    RevolvingProductCategory:
+      type: string
+      enum:
+        - BUY_NOW_PAY_LATER
+        - CRED_AND_CHRG_CARDS
+        - MARGIN_LOANS
+        - OVERDRAFTS
+    # The lending categories of a loan. The open of a product of these categories needs a loanAmount; a test compares
+    # the list with the rule of the data holder.
+    LoanProductCategory:
+      type: string
+      enum:
+        - BUSINESS_LOANS
+        - LEASES
+        - PERS_LOANS
+        - RESIDENTIAL_MORTGAGES
+        - TRADE_FINANCE
+    FeatureType:
+      type: string
+      enum:
+        - ADDITIONAL_CARDS
+        - BALANCE_TRANSFERS
+        - BILL_PAYMENT
+        - BONUS_REWARDS
+        - CARD_ACCESS
+        - CASHBACK_OFFER
+        - COMPLEMENTARY_PRODUCT_DISCOUNTS
+        - EXTRA_DOWN_PAYMENT
+        - DIGITAL_BANKING
+        - DIGITAL_WALLET
+        - DONATE_INTEREST
+        - EXTRA_REPAYMENTS
+        - FRAUD_PROTECTION
+        - FREE_TXNS
+        - FREE_TXNS_ALLOWANCE
+        - FUNDS_AVAILABLE_AFTER
+        - GUARANTOR
+        - INSTALMENT_PLAN
+        - INSURANCE
+        - INTEREST_FREE
+        - INTEREST_FREE_TRANSFERS
+        - LOYALTY_PROGRAM
+        - NOTIFICATIONS
+        - NPP_ENABLED
+        - NPP_PAYID
+        - OFFSET
+        - OTHER
+        - OVERDRAFT
+        - REDRAW
+        - RELATIONSHIP_MANAGEMENT
+        - UNLIMITED_TXNS
+    FeeType:
+      type: string
+      enum:
+        - CASH_ADVANCE
+        - DEPOSIT
+        - DISHONOUR
+        - ENQUIRY
+        - EVENT
+        - EXIT
+        - LATE_PAYMENT
+        - OTHER
+        - PAYMENT
+        - PERIODIC
+        - PURCHASE
+        - REPLACEMENT
+        - TRANSACTION
+        - UPFRONT
+        - UPFRONT_PER_PLAN
+        - VARIATION
+        - WITHDRAWAL
+    FeeMethodUType:
+      type: string
+      enum: [fixedAmount, rateBased, variable]
+    FeeRateType:
+      type: string
+      enum: [BALANCE, INTEREST_ACCRUED, TRANSACTION]
+    DepositRateType:
+      type: string
+      enum: [BONUS, BUNDLE_BONUS, FIXED, FLOATING, INTRODUCTORY, MARKET_LINKED, VARIABLE]
+    LendingRateType:
+      type: string
+      enum:
+        - BALANCE_TRANSFER
+        - BUNDLE_DISCOUNT_FIXED
+        - BUNDLE_DISCOUNT_VARIABLE
+        - CASH_ADVANCE
+        - DISCOUNT
+        - FIXED
+        - FLOATING
+        - INTRODUCTORY
+        - MARKET_LINKED
+        - PENALTY
+        - PURCHASE
+        - VARIABLE
+    ApplicationType:
+      type: string
+      enum: [MATURITY, PERIODIC, UPFRONT]
+    RepaymentType:
+      type: string
+      enum: [INTEREST_ONLY, OTHER, PRINCIPAL_AND_INTEREST, UNCONSTRAINED]
+    LoanPurpose:
+      type: string
+      enum: [INVESTMENT, OTHER, OWNER_OCCUPIED, UNCONSTRAINED]
+    OpenStatus:
+      type: string
+      enum: [CLOSED, OPEN]
+    TransactionType:
+      type: string
+      enum:
+        - DIRECT_DEBIT
+        - FEE
+        - INTEREST_CHARGED
+        - INTEREST_PAID
+        - OTHER
+        - PAYMENT
+        - TRANSFER_INCOMING
+        - TRANSFER_OUTGOING
+    TransactionStatus:
+      type: string
+      enum: [PENDING, POSTED]
+    Problem:
+      type: object
+      additionalProperties: false
+      description: RFC 9457 problem details with the type about:blank.
+      required: [type, title, status, detail]
+      properties:
+        type:
+          type: string
+          enum: [about:blank]
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+    SessionEndedProblem:
+      type: object
+      additionalProperties: false
+      description: RFC 9457 problem details for a session cookie with no valid session.
+      required: [type, title, status, detail]
+      properties:
+        type:
+          type: string
+          enum: ["https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#session"]
+        title:
+          type: string
+          enum: [The session ended]
+        status:
+          type: integer
+        detail:
+          type: string
+    FieldErrorsProblem:
+      type: object
+      additionalProperties: false
+      description: RFC 9457 problem details for values that the data holder refuses.
+      required: [type, title, status, detail, errors]
+      properties:
+        type:
+          type: string
+          enum: ["https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#site-api"]
+        title:
+          type: string
+          enum: [Values in the request are not valid]
+        status:
+          type: integer
+        detail:
+          type: string
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/FieldError"
+    FieldError:
+      type: object
+      additionalProperties: false
+      required: [pointer, detail]
+      properties:
+        pointer:
+          type: string
+          description: The JSON Pointer of the value in the request body, as a URI fragment, for example "#/lastName".
+        detail:
+          type: string
+          description: A text in plain language for the consumer, which names the field with its label on the page.
+    SignUpRequest:
+      type: object
+      additionalProperties: false
+      required: [lastName, emailAddress]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        emailAddress:
+          type: string
+    OpenAccountRequest:
+      type: object
+      additionalProperties: false
+      description: >-
+        A creditLimit only for a product in a RevolvingProductCategory, and a loanAmount only for a product in a
+        LoanProductCategory.
+      required: [productId]
+      properties:
+        productId:
+          type: string
+        creditLimit:
+          $ref: "#/components/schemas/AmountString"
+        loanAmount:
+          $ref: "#/components/schemas/AmountString"
+    SignInRequest:
+      type: object
+      additionalProperties: false
+      required: [identifier]
+      properties:
+        identifier:
+          description: The email address or the customer number.
+          type: string
+    SessionCustomer:
+      type: object
+      additionalProperties: false
+      required: [customerNumber, lastName]
+      properties:
+        customerNumber:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string

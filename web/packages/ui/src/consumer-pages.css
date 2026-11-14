@@ -1,0 +1,400 @@
+/*
+ * The styles of the consumer pages of the data holder, which are Go pages with no script
+ * (services/dataholder/internal/adapter/consumerpages/templates). The build puts tokens.css and fonts.css before this
+ * file, and the data holder serves /brand/styles.css after it with the values of the brand. DESIGN.md (Consumer pages)
+ * gives the rules.
+ *
+ * The class names and the element structure of the templates are the contract with this file. The conformance suite
+ * reads the forms, the data clusters and the accounts with patterns, so those elements have no class.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100svh;
+  margin: 0;
+  background: var(--ds-color-page);
+  color: var(--ds-color-fg);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-font-size-base);
+  line-height: var(--ds-line-height-normal);
+  overflow-wrap: anywhere;
+}
+
+.cp-icon {
+  flex: none;
+  inline-size: 1.25em;
+  block-size: 1.25em;
+}
+
+/* Header: the logo of the bank on the brand colour. */
+.cp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-3) max(var(--ds-space-5), env(safe-area-inset-right)) var(--ds-space-3)
+    max(var(--ds-space-5), env(safe-area-inset-left));
+  background: var(--ds-color-brand);
+  color: var(--ds-color-fg-on-brand);
+  border-block-start: var(--ds-space-1) solid var(--ds-color-accent);
+  border-block-end: 1px solid var(--ds-color-border);
+}
+
+.cp-logo {
+  display: block;
+  block-size: var(--ds-space-8);
+  inline-size: auto;
+  max-inline-size: 70%;
+}
+
+.cp-secure {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-semibold);
+}
+
+/* Hero: the data recipient and the bank. The card overlaps its lower edge. */
+.cp-hero {
+  padding: var(--ds-space-5) var(--ds-space-5) var(--ds-space-10);
+  background: var(--ds-color-hero);
+  color: var(--ds-color-fg-on-hero);
+}
+
+.cp-hero > * {
+  max-inline-size: 27.5rem;
+  margin-inline: auto;
+}
+
+.cp-hero p {
+  margin-block: var(--ds-space-3) 0;
+  text-align: center;
+}
+
+.cp-connection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-2);
+}
+
+.cp-initial {
+  display: grid;
+  place-items: center;
+  inline-size: var(--ds-space-8);
+  block-size: var(--ds-space-8);
+  border: 2px solid currentcolor;
+  border-radius: var(--ds-radius-md);
+  font-weight: var(--ds-font-weight-bold);
+}
+
+.cp-arrow {
+  inline-size: var(--ds-space-5);
+  block-size: var(--ds-space-5);
+}
+
+.cp-mark {
+  display: block;
+  inline-size: var(--ds-space-8);
+  block-size: var(--ds-space-8);
+}
+
+.cp-main {
+  flex: 1;
+  padding: 0 var(--ds-space-4) var(--ds-space-6);
+}
+
+.cp-header + .cp-main {
+  padding-block-start: var(--ds-space-6);
+}
+
+.cp-hero + .cp-main {
+  margin-block-start: calc(-1 * var(--ds-space-6));
+}
+
+.cp-card {
+  max-inline-size: 27.5rem;
+  margin-inline: auto;
+  padding: var(--ds-space-6) var(--ds-space-5);
+  background: var(--ds-color-raised);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-elevation-1), var(--ds-elevation-3);
+}
+
+.cp-card > :last-child {
+  margin-block-end: 0;
+}
+
+/* Step: the text gives the step, and the bar is decoration. */
+.cp-step {
+  margin: 0;
+  color: var(--ds-color-fg-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cp-progress {
+  position: relative;
+  block-size: var(--ds-space-1);
+  margin-block: var(--ds-space-2) var(--ds-space-5);
+  background: var(--ds-color-border);
+  border-radius: var(--ds-radius-full);
+  overflow: hidden;
+}
+
+.cp-progress::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--ds-color-heading);
+  border-radius: var(--ds-radius-full);
+}
+
+.cp-progress-1::after {
+  inline-size: calc(100% / 3);
+}
+
+.cp-progress-2::after {
+  inline-size: calc(200% / 3);
+}
+
+.cp-progress-3::after {
+  inline-size: 100%;
+}
+
+h1 {
+  margin: 0 0 var(--ds-space-2);
+  color: var(--ds-color-heading);
+  font-size: var(--ds-font-size-2xl);
+  font-weight: var(--ds-font-weight-bold);
+  line-height: var(--ds-line-height-tight);
+  letter-spacing: -0.015em;
+}
+
+h2 {
+  margin: var(--ds-space-6) 0 var(--ds-space-2);
+  color: var(--ds-color-heading);
+  font-size: var(--ds-font-size-base);
+  font-weight: var(--ds-font-weight-bold);
+}
+
+h3 {
+  margin: 0;
+  font-size: var(--ds-font-size-base);
+  font-weight: var(--ds-font-weight-semibold);
+}
+
+p {
+  margin: 0 0 var(--ds-space-4);
+}
+
+ul {
+  margin: var(--ds-space-2) 0 0;
+  padding-inline-start: var(--ds-space-5);
+}
+
+/* Data clusters: each cluster and its permissions, always visible. */
+.cp-clusters > h3 {
+  padding-block-start: var(--ds-space-3);
+  border-block-start: 1px solid var(--ds-color-border);
+}
+
+.cp-clusters > ul {
+  margin-block-end: var(--ds-space-3);
+}
+
+.cp-clusters {
+  margin-block-end: var(--ds-space-4);
+  border-block-end: 1px solid var(--ds-color-border);
+}
+
+.cp-alert {
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background: var(--ds-color-danger-bg);
+  color: var(--ds-color-danger-fg);
+  border: 1px solid var(--ds-color-danger-border);
+  border-radius: var(--ds-radius-md);
+}
+
+/* The statement about passwords, below the card. */
+.cp-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-3);
+  max-inline-size: 27.5rem;
+  margin: var(--ds-space-4) auto 0;
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background: var(--ds-color-info-bg);
+  color: var(--ds-color-info-fg);
+  border: 1px solid var(--ds-color-info-border);
+  border-radius: var(--ds-radius-md);
+}
+
+.cp-note p {
+  margin: 0;
+}
+
+form {
+  margin: 0;
+}
+
+.cp-field {
+  margin-block-end: var(--ds-space-4);
+}
+
+.cp-field label,
+legend {
+  display: block;
+  margin-block-end: var(--ds-space-1);
+  padding: 0;
+  font-weight: var(--ds-font-weight-semibold);
+}
+
+input[type="text"] {
+  display: block;
+  inline-size: 100%;
+  min-block-size: var(--ds-size-control);
+  padding: 0 var(--ds-space-control-x);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-fg);
+  border: 1px solid var(--ds-color-border-strong);
+  border-radius: var(--ds-radius-sm);
+  font: inherit;
+  /* iOS Safari zooms into a field with text smaller than 16 px. */
+  font-size: var(--ds-font-size-lg);
+}
+
+.cp-otp {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--ds-font-weight-semibold);
+  letter-spacing: 0.35em;
+}
+
+fieldset {
+  margin: 0 0 var(--ds-space-4);
+  padding: 0;
+  border: 0;
+}
+
+/* Account selection: a native checkbox in a card that shows its state. */
+.cp-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  min-block-size: var(--ds-size-control);
+  margin: 0 0 var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-control-x);
+  border: 1px solid var(--ds-color-border-strong);
+  border-radius: var(--ds-radius-md);
+}
+
+.cp-choice:has(:checked) {
+  border-color: var(--ds-color-heading);
+  box-shadow: inset 0 0 0 1px var(--ds-color-heading);
+}
+
+.cp-choice input {
+  flex: none;
+  inline-size: var(--ds-space-5);
+  block-size: var(--ds-space-5);
+  margin: 0;
+  accent-color: var(--ds-color-heading);
+}
+
+.cp-choice label {
+  flex: 1;
+  padding-block: var(--ds-space-2);
+  font-weight: var(--ds-font-weight-semibold);
+  cursor: pointer;
+}
+
+.cp-button {
+  display: block;
+  inline-size: 100%;
+  min-block-size: var(--ds-size-control);
+  margin-block-start: var(--ds-space-3);
+  padding: var(--ds-space-2) var(--ds-space-control-x);
+  border: 0;
+  border-radius: var(--ds-radius-md);
+  font: inherit;
+  font-weight: var(--ds-font-weight-semibold);
+  cursor: pointer;
+  transition:
+    background-color var(--ds-duration-fast) cubic-bezier(0.2, 0, 0, 1),
+    translate var(--ds-duration-fast) cubic-bezier(0.2, 0, 0, 1);
+}
+
+.cp-button:active {
+  translate: 0 1px;
+}
+
+.cp-primary {
+  background: var(--ds-color-primary);
+  color: var(--ds-color-fg-on-primary);
+}
+
+.cp-primary:hover {
+  background: var(--ds-color-primary-hover);
+}
+
+.cp-primary:active {
+  background: var(--ds-color-primary-pressed);
+}
+
+.cp-secondary {
+  background: transparent;
+  color: var(--ds-color-heading);
+  box-shadow: inset 0 0 0 1.5px var(--ds-color-border-strong);
+}
+
+.cp-secondary:hover {
+  background: var(--ds-color-secondary);
+}
+
+.cp-quiet {
+  background: transparent;
+  color: var(--ds-color-link);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.cp-quiet:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
+
+.cp-footer {
+  padding: var(--ds-space-5) var(--ds-space-5) max(var(--ds-space-6), env(safe-area-inset-bottom));
+  color: var(--ds-color-fg-muted);
+  font-size: var(--ds-font-size-sm);
+  text-align: center;
+}
+
+.cp-footer p {
+  max-inline-size: 40ch;
+  margin: 0 auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-button {
+    transition: none;
+  }
+
+  .cp-button:active {
+    translate: none;
+  }
+}

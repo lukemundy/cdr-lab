@@ -1,0 +1,2444 @@
+# The Register does not read this document at runtime: its tests validate the responses against it, and the UI
+# generates its types from it. A test fails when an object schema does not set additionalProperties: false.
+openapi: 3.0.3
+info:
+  title: Register console API
+  version: "1"
+  description: >-
+    The same-origin API of the operator console of the mock CDR Register. It has no version in its path,
+    because the UI and the API ship together (services/register/DESIGN.md, Console API).
+paths:
+  /api/data-recipients:
+    get:
+      operationId: listDataRecipients
+      summary: One page of the data recipient legal entities
+      parameters:
+        - name: status
+          in: query
+          description: Only the data recipients with this status.
+          schema:
+            $ref: "#/components/schemas/DataRecipientStatus"
+        - name: q
+          in: query
+          description: >-
+            Only the data recipients whose legal entity name contains this text, with no difference for
+            upper and lower case. An empty value matches each name.
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: The sort key. The legal entity ID then sorts the records with the same key.
+          schema:
+            type: string
+            enum: [legalEntityName, accreditationNumber, status, brandCount, softwareProductCount]
+            default: legalEntityName
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+        - name: page
+          in: query
+          description: The page number. A page after the last page has no records.
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+      responses:
+        "200":
+          description: The page of data recipients, and the number of data recipients in all pages.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataRecipientList"
+        "400":
+          description: A query parameter is not valid.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        default:
+          description: An error.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+    post:
+      operationId: createDataRecipient
+      summary: Create a data recipient legal entity, with no brands
+      description: >-
+        The body gives each field of one data recipient legal entity in the format of the load file, with no brands.
+        The operator adds the brands after the create.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DataRecipientCreateRequest"
+      responses:
+        "201":
+          $ref: "#/components/responses/Created"
+        "400":
+          $ref: "#/components/responses/RefusedValues"
+        "409":
+          $ref: "#/components/responses/RefusedCreate"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}:
+    get:
+      operationId: getDataRecipient
+      summary: The detail of a data recipient legal entity, with each brand and software product
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+      responses:
+        "200":
+          description: The data recipient.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataRecipientDetail"
+        "404":
+          description: No data recipient has the legal entity ID.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        default:
+          description: An error.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api/data-recipients/{legalEntityId}/suspend:
+    post:
+      operationId: suspendDataRecipient
+      summary: Suspend a data recipient. Its ACTIVE software products become INACTIVE.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+      requestBody:
+        $ref: "#/components/requestBodies/StatusAction"
+      responses:
+        "204":
+          description: The Register made the change and its cascade.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/revoke:
+    post:
+      operationId: revokeDataRecipient
+      summary: Revoke a data recipient. Its software products become REMOVED.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+      requestBody:
+        $ref: "#/components/requestBodies/StatusAction"
+      responses:
+        "204":
+          description: The Register made the change and its cascade.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/surrender:
+    post:
+      operationId: surrenderDataRecipient
+      summary: Surrender a data recipient. Its software products become REMOVED.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+      requestBody:
+        $ref: "#/components/requestBodies/StatusAction"
+      responses:
+        "204":
+          description: The Register made the change and its cascade.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/reinstate:
+    post:
+      operationId: reinstateDataRecipient
+      summary: Reinstate a data recipient. Its software products do not change.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+      requestBody:
+        $ref: "#/components/requestBodies/StatusAction"
+      responses:
+        "204":
+          description: The Register made the change and its cascade.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/software-products/{softwareProductId}/activate:
+    post:
+      operationId: activateSoftwareProduct
+      summary: Activate a software product
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/SoftwareProductId"
+      requestBody:
+        $ref: "#/components/requestBodies/StatusAction"
+      responses:
+        "204":
+          description: The Register made the change.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/software-products/{softwareProductId}/deactivate:
+    post:
+      operationId: deactivateSoftwareProduct
+      summary: Deactivate a software product
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/SoftwareProductId"
+      requestBody:
+        $ref: "#/components/requestBodies/StatusAction"
+      responses:
+        "204":
+          description: The Register made the change.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/software-products/{softwareProductId}/remove:
+    post:
+      operationId: removeSoftwareProduct
+      summary: Remove a software product. This cannot be reversed.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/SoftwareProductId"
+      requestBody:
+        $ref: "#/components/requestBodies/StatusAction"
+      responses:
+        "204":
+          description: The Register made the change.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/software-products/{softwareProductId}/certificates:
+    post:
+      operationId: registerClientCertificate
+      summary: Register a client certificate for a software product
+      description: >-
+        The Register keeps the SHA-256 thumbprint of the certificate, not the certificate. A certificate that is
+        already registered changes nothing.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/SoftwareProductId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CertificateRegistrationRequest"
+      responses:
+        "204":
+          description: The Register trusts the certificate for the software product.
+        "400":
+          description: The request body is not valid, or the certificate is not one PEM certificate.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/software-products/{softwareProductId}/certificates/{thumbprint}/remove:
+    post:
+      operationId: removeClientCertificate
+      summary: Remove a client certificate of a software product
+      description: >-
+        A removal is permitted in each status of the software product. A thumbprint that is not registered
+        changes nothing. An access token that exists stays valid until it expires.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/SoftwareProductId"
+        - name: thumbprint
+          in: path
+          required: true
+          description: The SHA-256 thumbprint (RFC 8705 x5t#S256) of the certificate.
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/StatusAction"
+      responses:
+        "204":
+          description: The Register does not trust the certificate for the software product.
+        "400":
+          description: The request body is not valid, or the thumbprint is not a base64url SHA-256 value.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/software-products/{softwareProductId}/certificates/issue:
+    post:
+      operationId: issueClientCertificate
+      summary: Issue a client certificate for a software product from a CSR, and register it
+      description: >-
+        The mock CDR intermediate issues the certificate, and the Register registers it for the software product.
+        The CSR follows the CSR profile of a client certificate. The CN is the software product name, and the O is
+        the brand name.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/SoftwareProductId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CertificateIssueRequest"
+      responses:
+        "200":
+          description: The certificate and its thumbprint. The Register does not keep the certificate.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CertificateIssueResponse"
+        "400":
+          description: >-
+            The request body is not valid, the CSR is not one PEM CSR, or the CSR breaks a rule. The detail names
+            each rule that the CSR breaks.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: >-
+            The software product cannot get a certificate, or the participant changed after the version in the request.
+            The Register changed nothing.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/change:
+    post:
+      operationId: changeDataRecipientDetails
+      summary: Change the details of a data recipient legal entity
+      description: >-
+        The body gives each field of the change. A field that is not in the body has no value after the change.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DataRecipientDetailsChangeRequest"
+      responses:
+        "204":
+          description: The Register made the change.
+        "400":
+          $ref: "#/components/responses/RefusedValues"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/RefusedChange"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/brands/{brandId}/change:
+    post:
+      operationId: changeDataRecipientBrandDetails
+      summary: Change the details of a data recipient brand
+      description: >-
+        The body gives each field of the change. The status and the software products of the brand do not change.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/BrandId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DataRecipientBrandChangeRequest"
+      responses:
+        "204":
+          description: The Register made the change.
+        "400":
+          $ref: "#/components/responses/RefusedValues"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/RefusedChange"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/brands/{brandId}/activate:
+    post:
+      operationId: activateDataRecipientBrand
+      summary: Activate a data recipient brand. Its software products do not change.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/BrandId"
+      requestBody:
+        $ref: "#/components/requestBodies/StatusAction"
+      responses:
+        "204":
+          description: The Register made the change.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/brands/{brandId}/deactivate:
+    post:
+      operationId: deactivateDataRecipientBrand
+      summary: Deactivate a data recipient brand. Its ACTIVE software products become INACTIVE.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/BrandId"
+      requestBody:
+        $ref: "#/components/requestBodies/StatusAction"
+      responses:
+        "204":
+          description: The Register made the change and its cascade.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/brands/{brandId}/remove:
+    post:
+      operationId: removeDataRecipientBrand
+      summary: Remove a data recipient brand. Its software products become REMOVED. This cannot be reversed.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/BrandId"
+      requestBody:
+        $ref: "#/components/requestBodies/StatusAction"
+      responses:
+        "204":
+          description: The Register made the change and its cascade.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/brands:
+    post:
+      operationId: addDataRecipientBrand
+      summary: Add a brand to a data recipient, with no software products
+      description: >-
+        The body gives the version of the data recipient and each field of one brand in the format of the load file,
+        with no software products. The operator adds the software products after the add.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DataRecipientBrandAddRequest"
+      responses:
+        "201":
+          $ref: "#/components/responses/Created"
+        "400":
+          $ref: "#/components/responses/RefusedValues"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/RefusedAdd"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/brands/{brandId}/software-products:
+    post:
+      operationId: addSoftwareProduct
+      summary: Add a software product to a data recipient brand, with no client certificates
+      description: >-
+        The body gives the version of the data recipient and each field of one software product in the format of the
+        load file, with no client certificates. The Location header gives the path of the software product, which is
+        not under the path of its brand.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/BrandId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SoftwareProductAddRequest"
+      responses:
+        "201":
+          $ref: "#/components/responses/Created"
+        "400":
+          $ref: "#/components/responses/RefusedValues"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/RefusedAdd"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/software-products/{softwareProductId}/change:
+    post:
+      operationId: changeSoftwareProductDetails
+      summary: Change the details of a software product
+      description: >-
+        The body gives each field of the change. An optional field that is not in the body has no value after the
+        change. The status and the client certificates of the software product do not change.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/SoftwareProductId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SoftwareProductChangeRequest"
+      responses:
+        "204":
+          description: The Register made the change.
+        "400":
+          $ref: "#/components/responses/RefusedValues"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/RefusedChange"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-holders:
+    get:
+      operationId: listDataHolders
+      summary: One page of the data holder legal entities
+      parameters:
+        - name: status
+          in: query
+          description: Only the data holders with this status.
+          schema:
+            $ref: "#/components/schemas/DataHolderStatus"
+        - name: q
+          in: query
+          description: >-
+            Only the data holders whose legal entity name or brand name contains this text, with no difference
+            for upper and lower case. The search includes the brands in each status. An empty value matches each
+            name.
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: The sort key. The legal entity ID then sorts the records with the same key.
+          schema:
+            type: string
+            enum: [legalEntityName, status, brandCount]
+            default: legalEntityName
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+        - name: page
+          in: query
+          description: The page number. A page after the last page has no records.
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+      responses:
+        "200":
+          description: The page of data holders, and the number of data holders in all pages.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataHolderList"
+        "400":
+          description: A query parameter is not valid.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        default:
+          description: An error.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+    post:
+      operationId: createDataHolder
+      summary: Create a data holder legal entity, with no brands
+      description: >-
+        The body gives each field of one data holder legal entity in the format of the load file, with no brands.
+        The operator adds the brands after the create.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DataHolderCreateRequest"
+      responses:
+        "201":
+          $ref: "#/components/responses/Created"
+        "400":
+          $ref: "#/components/responses/RefusedValues"
+        "409":
+          $ref: "#/components/responses/RefusedCreate"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-holders/{legalEntityId}/change:
+    post:
+      operationId: changeDataHolderDetails
+      summary: Change the details of a data holder legal entity
+      description: >-
+        The body gives each field of the change. A field that is not in the body has no value after the change.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DataHolderDetailsChangeRequest"
+      responses:
+        "204":
+          description: The Register made the change.
+        "400":
+          $ref: "#/components/responses/RefusedValues"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/RefusedChange"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-holders/{legalEntityId}/remove:
+    post:
+      operationId: removeDataHolder
+      summary: Remove a data holder legal entity. Each of its brands becomes REMOVED. This cannot be reversed.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+      requestBody:
+        $ref: "#/components/requestBodies/StatusAction"
+      responses:
+        "204":
+          description: The Register made the change and its cascade.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-holders/{legalEntityId}/brands/{brandId}/activate:
+    post:
+      operationId: activateDataHolderBrand
+      summary: Activate a data holder brand.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/BrandId"
+      requestBody:
+        $ref: "#/components/requestBodies/StatusAction"
+      responses:
+        "204":
+          description: The Register made the change.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-holders/{legalEntityId}/brands/{brandId}/deactivate:
+    post:
+      operationId: deactivateDataHolderBrand
+      summary: Deactivate a data holder brand.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/BrandId"
+      requestBody:
+        $ref: "#/components/requestBodies/StatusAction"
+      responses:
+        "204":
+          description: The Register made the change.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-holders/{legalEntityId}/brands/{brandId}/remove:
+    post:
+      operationId: removeDataHolderBrand
+      summary: Remove a data holder brand. This cannot be reversed.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/BrandId"
+      requestBody:
+        $ref: "#/components/requestBodies/StatusAction"
+      responses:
+        "204":
+          description: The Register made the change.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-holders/{legalEntityId}/brands/{brandId}/certificates/issue:
+    post:
+      operationId: issueServerCertificate
+      summary: Issue a server certificate for a data holder brand from a CSR
+      description: >-
+        The mock CDR intermediate issues the certificate. The Register records the issue, and does not register the
+        certificate. The CSR follows the CSR profile of a server certificate. The O is the brand name or the legal
+        entity name.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/BrandId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CertificateIssueRequest"
+      responses:
+        "200":
+          description: The certificate and its thumbprint. The Register does not keep the certificate.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CertificateIssueResponse"
+        "400":
+          description: >-
+            The request body is not valid, the CSR is not one PEM CSR, or the CSR breaks a rule. The detail names
+            each rule that the CSR breaks.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: >-
+            The brand cannot get a certificate, or the participant changed after the version in the request.
+            The Register changed nothing.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-holders/{legalEntityId}/brands:
+    post:
+      operationId: addDataHolderBrand
+      summary: Add a brand to a data holder
+      description: >-
+        The body gives the version of the data holder and each field of one brand in the format of the load file. The
+        Location header gives the path of the brand with its dataHolderBrandId, or with its interimId when it has no
+        dataHolderBrandId.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DataHolderBrandAddRequest"
+      responses:
+        "201":
+          $ref: "#/components/responses/Created"
+        "400":
+          $ref: "#/components/responses/RefusedValues"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/RefusedAdd"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-holders/{legalEntityId}/brands/{brandId}/change:
+    post:
+      operationId: changeDataHolderBrandDetails
+      summary: Change the details of a data holder brand
+      description: >-
+        The brandId is the dataHolderBrandId of the brand, or its interimId when it has no dataHolderBrandId. The body
+        gives each field of the change. An optional field that is not in the body has no value after the change. The
+        identifiers and the status of the brand do not change.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/BrandId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DataHolderBrandChangeRequest"
+      responses:
+        "204":
+          description: The Register made the change.
+        "400":
+          $ref: "#/components/responses/RefusedValues"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/RefusedChange"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/key-sets:
+    get:
+      operationId: listKeySets
+      summary: The access token key set and the SSA key set, with no key material
+      description: >-
+        The key ID, the state and the creation time of each key. The response has no private key and no
+        public key: the JWKS endpoints give the public keys (services/register/DESIGN.md, Console API).
+      responses:
+        "200":
+          description: The access token key set, and then the SSA key set.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeySetList"
+        default:
+          description: An error.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api/key-sets/{keySet}/publish-next:
+    post:
+      operationId: publishNextKey
+      summary: Publish a new next key in the JWKS of the key set. The key that signs does not change.
+      description: The previous key of the last key change leaves the JWKS, and the Register deletes it.
+      parameters:
+        - $ref: "#/components/parameters/KeySet"
+      requestBody:
+        $ref: "#/components/requestBodies/KeyAction"
+      responses:
+        "204":
+          description: The Register published the next key.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/KeySetNotFound"
+        "409":
+          $ref: "#/components/responses/KeySetConflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/key-sets/{keySet}/activate-next:
+    post:
+      operationId: activateNextKey
+      summary: Sign with the next key. The key that signed becomes the previous key, which the JWKS still publishes.
+      parameters:
+        - $ref: "#/components/parameters/KeySet"
+      requestBody:
+        $ref: "#/components/requestBodies/KeyAction"
+      responses:
+        "204":
+          description: The Register signs with the next key.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/KeySetNotFound"
+        "409":
+          $ref: "#/components/responses/KeySetConflict"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-holders/{legalEntityId}:
+    get:
+      operationId: getDataHolder
+      summary: The detail of a data holder legal entity, with each brand
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+      responses:
+        "200":
+          description: The data holder.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataHolderDetail"
+        "404":
+          description: No data holder has the legal entity ID.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        default:
+          description: An error.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api/cdr-ca-bundle:
+    get:
+      operationId: getCDRCABundle
+      summary: The CDR CA bundle
+      description: >-
+        The intermediate and then the root certificate of the mock CDR CA, in PEM. It is the bundle that the mTLS
+        listeners of the Register trust.
+      responses:
+        "200":
+          description: The CDR CA bundle.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CDRCABundle"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/cdr-certificates/revocations:
+    get:
+      operationId: listRevocations
+      summary: One page of the revocations of the mock CDR intermediate, newest first, then by serial number
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: The page of revocations, and the number of revocations in all pages.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RevocationList"
+        "400":
+          description: A query parameter is not valid.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/cdr-certificates/check-revocation:
+    post:
+      operationId: checkRevocation
+      summary: Check a revocation with no change
+      description: >-
+        The Register does the checks of a revocation, and names the first certificate. It revokes nothing.
+      requestBody:
+        $ref: "#/components/requestBodies/Revocation"
+      responses:
+        "200":
+          description: The certificate that a revocation with this request revokes.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RevocableCertificate"
+        "400":
+          $ref: "#/components/responses/RefusedRevocation"
+        "409":
+          $ref: "#/components/responses/AlreadyRevoked"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/cdr-certificates/revoke:
+    post:
+      operationId: revokeCertificate
+      summary: Revoke a certificate of the mock CDR intermediate
+      description: >-
+        The Register revokes the first certificate, and signs a new CRL that lists it with the reason. A revocation
+        cannot be reversed.
+      requestBody:
+        $ref: "#/components/requestBodies/Revocation"
+      responses:
+        "204":
+          description: The CRL lists the certificate.
+        "400":
+          $ref: "#/components/responses/RefusedRevocation"
+        "409":
+          $ref: "#/components/responses/AlreadyRevoked"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/data-recipients/{legalEntityId}/history:
+    get:
+      operationId: getDataRecipientHistory
+      summary: One page of the events of a data recipient legal entity, newest first by stream version
+      description: >-
+        Each entry gives only the fields of the table of event types in services/register/DESIGN.md
+        (Operator console, Functions). No entry gives the payload or the metadata of an event.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: The page of events, and the number of events in all pages.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataRecipientHistory"
+        "400":
+          description: A query parameter is not valid.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          description: No data recipient has the legal entity ID.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        default:
+          description: An error.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api/data-holders/{legalEntityId}/history:
+    get:
+      operationId: getDataHolderHistory
+      summary: One page of the events of a data holder legal entity, newest first by stream version
+      description: >-
+        Each entry gives only the fields of the table of event types in services/register/DESIGN.md
+        (Operator console, Functions). No entry gives the payload or the metadata of an event.
+      parameters:
+        - $ref: "#/components/parameters/LegalEntityId"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: The page of events, and the number of events in all pages.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataHolderHistory"
+        "400":
+          description: A query parameter is not valid.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          description: No data holder has the legal entity ID.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        default:
+          description: An error.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+components:
+  parameters:
+    LegalEntityId:
+      name: legalEntityId
+      in: path
+      required: true
+      schema:
+        type: string
+    KeySet:
+      name: keySet
+      in: path
+      required: true
+      description: access-token or ssa. Another value gives 404.
+      schema:
+        type: string
+    SoftwareProductId:
+      name: softwareProductId
+      in: path
+      required: true
+      schema:
+        type: string
+    BrandId:
+      name: brandId
+      in: path
+      required: true
+      schema:
+        type: string
+    Page:
+      name: page
+      in: query
+      description: The page number. A page after the last page has no records.
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 25
+  requestBodies:
+    Revocation:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/RevocationRequest"
+    KeyAction:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/KeyActionRequest"
+    StatusAction:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/StatusActionRequest"
+  responses:
+    RefusedRevocation:
+      description: >-
+        The request body is not valid, or the Register refuses a value. A value that the Register refuses has a
+        field error at #/certificate or #/reason, for example a certificate that the mock CDR intermediate did not
+        sign. The Register changed nothing.
+      content:
+        application/problem+json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/Problem"
+              - $ref: "#/components/schemas/FieldErrorsProblem"
+    AlreadyRevoked:
+      description: >-
+        The certificate is already revoked. The detail gives the reason of the revocation that exists. The Register
+        changed nothing.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    RefusedValues:
+      description: >-
+        The request body is not valid, or the participant model refuses a value. A value of a field of the record
+        has a field error.
+      content:
+        application/problem+json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/Problem"
+              - $ref: "#/components/schemas/FieldErrorsProblem"
+    Created:
+      description: The Register made the record. The body is empty.
+      headers:
+        Location:
+          description: >-
+            The path of the new record in the console API, which is the start of the paths of its actions.
+          required: true
+          schema:
+            type: string
+    RefusedCreate:
+      description: >-
+        A different record has the identifier of the new record, or a status in the body breaks a status rule. The
+        field of the identifier or of the status has a field error. The Register changed nothing.
+      content:
+        application/problem+json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/Problem"
+              - $ref: "#/components/schemas/FieldErrorsProblem"
+    RefusedAdd:
+      description: >-
+        The participant is not at the version of the request, a different record has the identifier of the new
+        record, or a status in the body breaks a status rule. The field of the identifier or of the status has a field
+        error. The Register changed nothing.
+      content:
+        application/problem+json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/Problem"
+              - $ref: "#/components/schemas/FieldErrorsProblem"
+    RefusedChange:
+      description: >-
+        The participant is not at the version of the request, or the change breaks a status rule. A status that
+        breaks a rule has a field error. The Register changed nothing.
+      content:
+        application/problem+json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/Problem"
+              - $ref: "#/components/schemas/FieldErrorsProblem"
+    BadRequest:
+      description: The request body is not valid.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    NotFound:
+      description: The participant, its brand or its software product does not exist.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Conflict:
+      description: >-
+        The data recipient is not at the version of the request, or the status rules do not permit the change.
+        The Register changed nothing.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    KeySetNotFound:
+      description: The key set does not exist.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    KeySetConflict:
+      description: >-
+        The key set is not at the version of the request, or the state of the key set does not permit the step.
+        The Register changed nothing.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Error:
+      description: An error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+  schemas:
+    CDRCABundle:
+      type: object
+      additionalProperties: false
+      required: [caBundle]
+      properties:
+        caBundle:
+          type: string
+          description: The intermediate and then the root certificate of the mock CDR CA, in PEM.
+    RevocationReason:
+      type: string
+      enum: [unspecified, keyCompromise, affiliationChanged, superseded, cessationOfOperation, privilegeWithdrawn]
+    SerialNumber:
+      type: string
+      pattern: "^([0-9A-F]{2})+$"
+      description: >-
+        The serial number in uppercase hexadecimal, with two digits for each byte and no separators, as
+        openssl x509 -serial gives it.
+    RevocationRequest:
+      type: object
+      additionalProperties: false
+      required: [certificate, reason]
+      properties:
+        certificate:
+          type: string
+          description: One PEM certificate, or a PEM chain with the certificate first. The Register revokes the first.
+        reason:
+          $ref: "#/components/schemas/RevocationReason"
+    RevocableCertificate:
+      type: object
+      additionalProperties: false
+      required: [serialNumber, subject, thumbprint, notAfter]
+      properties:
+        serialNumber:
+          $ref: "#/components/schemas/SerialNumber"
+        subject:
+          type: string
+          description: The subject in the RFC 4514 format.
+        thumbprint:
+          type: string
+          description: The SHA-256 thumbprint of the certificate, in the base64url format of RFC 8705 x5t#S256.
+        notAfter:
+          type: string
+          format: date-time
+          description: The end of the validity of the certificate.
+    RevocationList:
+      type: object
+      additionalProperties: false
+      required: [data, totalRecords]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Revocation"
+        totalRecords:
+          type: integer
+          minimum: 0
+    Revocation:
+      type: object
+      additionalProperties: false
+      required: [serialNumber, subject, thumbprint, revokedAt, reason]
+      properties:
+        serialNumber:
+          $ref: "#/components/schemas/SerialNumber"
+        subject:
+          type: string
+          description: The subject in the RFC 4514 format.
+        thumbprint:
+          type: string
+          description: The SHA-256 thumbprint of the certificate, in the base64url format of RFC 8705 x5t#S256.
+        revokedAt:
+          type: string
+          format: date-time
+        reason:
+          $ref: "#/components/schemas/RevocationReason"
+    DataRecipientCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [legalEntityId, legalEntityName, accreditationNumber, accreditationLevel, logoUri, status]
+      properties:
+        legalEntityId:
+          type: string
+          description: The identifier of the new data recipient. No different record can have it.
+        legalEntityName:
+          type: string
+        accreditationNumber:
+          type: string
+        accreditationLevel:
+          $ref: "#/components/schemas/AccreditationLevel"
+        logoUri:
+          type: string
+        status:
+          $ref: "#/components/schemas/DataRecipientStatus"
+    DataRecipientDetailsChangeRequest:
+      type: object
+      additionalProperties: false
+      required: [version, legalEntityName, accreditationNumber, accreditationLevel, logoUri]
+      properties:
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: The version of the data recipient that the form loaded.
+        legalEntityName:
+          type: string
+        accreditationNumber:
+          type: string
+        accreditationLevel:
+          $ref: "#/components/schemas/AccreditationLevel"
+        logoUri:
+          type: string
+    DataHolderCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [legalEntityId, legalEntityName, logoUri, status]
+      properties:
+        legalEntityId:
+          type: string
+          description: The identifier of the new data holder. No different record can have it.
+        legalEntityName:
+          type: string
+        logoUri:
+          type: string
+        status:
+          $ref: "#/components/schemas/DataHolderStatus"
+    DataHolderDetailsChangeRequest:
+      type: object
+      additionalProperties: false
+      required: [version, legalEntityName, logoUri]
+      properties:
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: The version of the data holder that the form loaded.
+        legalEntityName:
+          type: string
+        logoUri:
+          type: string
+    DataHolderBrandAddRequest:
+      type: object
+      additionalProperties: false
+      description: >-
+        A brand has a dataHolderBrandId, an interimId or both. A brand with no dataHolderBrandId needs only its public
+        details.
+      required: [version, brandName, industries, logoUri, status, endpointDetail]
+      properties:
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: The version of the data holder that the form loaded.
+        dataHolderBrandId:
+          type: string
+          description: An identifier of the new brand. No different record can have it.
+        interimId:
+          type: string
+          description: An identifier of the new brand. No different record can have it.
+        brandName:
+          type: string
+        brandGroup:
+          type: string
+        industries:
+          type: array
+          items:
+            $ref: "#/components/schemas/Industry"
+        logoUri:
+          type: string
+        status:
+          $ref: "#/components/schemas/Status"
+        endpointDetail:
+          $ref: "#/components/schemas/EndpointDetail"
+        jwksEndpoint:
+          type: string
+    DataHolderBrandChangeRequest:
+      type: object
+      additionalProperties: false
+      required: [version, brandName, industries, logoUri, endpointDetail]
+      properties:
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: The version of the data holder that the form loaded.
+        brandName:
+          type: string
+        brandGroup:
+          type: string
+        industries:
+          type: array
+          items:
+            $ref: "#/components/schemas/Industry"
+        logoUri:
+          type: string
+        endpointDetail:
+          $ref: "#/components/schemas/EndpointDetail"
+        jwksEndpoint:
+          type: string
+    DataRecipientBrandChangeRequest:
+      type: object
+      additionalProperties: false
+      required: [version, brandName, logoUri]
+      properties:
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: The version of the data recipient that the form loaded.
+        brandName:
+          type: string
+        logoUri:
+          type: string
+    SoftwareProductChangeRequest:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          version,
+          softwareProductName,
+          softwareProductDescription,
+          logoUri,
+          clientUri,
+          redirectUris,
+          jwksUri,
+          revocationUri,
+          recipientBaseUri,
+          scopes,
+        ]
+      properties:
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: The version of the data recipient that the form loaded.
+        softwareProductName:
+          type: string
+        softwareProductDescription:
+          type: string
+        logoUri:
+          type: string
+        clientUri:
+          type: string
+        sectorIdentifierUri:
+          type: string
+        redirectUris:
+          type: array
+          items:
+            type: string
+        tosUri:
+          type: string
+        policyUri:
+          type: string
+        jwksUri:
+          type: string
+        revocationUri:
+          type: string
+        recipientBaseUri:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+    DataRecipientBrandAddRequest:
+      type: object
+      additionalProperties: false
+      required: [version, dataRecipientBrandId, brandName, logoUri, status]
+      properties:
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: The version of the data recipient that the form loaded.
+        dataRecipientBrandId:
+          type: string
+          description: The identifier of the new brand. No different record can have it.
+        brandName:
+          type: string
+        logoUri:
+          type: string
+        status:
+          $ref: "#/components/schemas/Status"
+    SoftwareProductAddRequest:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          version,
+          softwareProductId,
+          softwareProductName,
+          softwareProductDescription,
+          logoUri,
+          clientUri,
+          redirectUris,
+          jwksUri,
+          revocationUri,
+          recipientBaseUri,
+          scopes,
+          status,
+        ]
+      properties:
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: The version of the data recipient that the form loaded.
+        softwareProductId:
+          type: string
+          description: The identifier of the new software product. No different record can have it.
+        softwareProductName:
+          type: string
+        softwareProductDescription:
+          type: string
+        logoUri:
+          type: string
+        clientUri:
+          type: string
+        sectorIdentifierUri:
+          type: string
+        redirectUris:
+          type: array
+          items:
+            type: string
+        tosUri:
+          type: string
+        policyUri:
+          type: string
+        jwksUri:
+          type: string
+        revocationUri:
+          type: string
+        recipientBaseUri:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        status:
+          $ref: "#/components/schemas/Status"
+    FieldErrorsProblem:
+      type: object
+      additionalProperties: false
+      description: >-
+        RFC 9457 problem details for values that the Register refuses. The errors member gives each value of a
+        field of the record. The detail gives each problem that names no field of the record.
+      required: [type, title, status, detail, errors]
+      properties:
+        type:
+          type: string
+          enum: ["https://github.com/lukemundy/cdr-lab/blob/main/services/register/DESIGN.md#console-api"]
+        title:
+          type: string
+          enum: [Values in the request are not valid]
+        status:
+          type: integer
+        detail:
+          type: string
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/FieldError"
+    FieldError:
+      type: object
+      additionalProperties: false
+      required: [pointer, detail]
+      properties:
+        pointer:
+          type: string
+          description: >-
+            A JSON Pointer to the field in the request body, in the URI fragment form (RFC 6901, section 6), for
+            example "#/logoUri". The error of an item of a list points to the list.
+        detail:
+          type: string
+          description: What is wrong with the value, in one sentence.
+    KeyActionRequest:
+      type: object
+      additionalProperties: false
+      required: [version]
+      properties:
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: The version of the key set that the operator saw.
+    CertificateRegistrationRequest:
+      type: object
+      additionalProperties: false
+      required: [version, certificate]
+      properties:
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: The version of the data recipient that the operator saw.
+        certificate:
+          type: string
+          description: One PEM certificate, with no other text.
+    ClientCertificateAction:
+      type: string
+      enum: [register, issue, remove]
+    ServerCertificateAction:
+      type: string
+      enum: [issue]
+    CertificateIssueRequest:
+      type: object
+      additionalProperties: false
+      required: [version, csr]
+      properties:
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: The version of the participant that the operator saw.
+        csr:
+          type: string
+          description: One PEM CSR, with no other text. The Register never gets the private key.
+    CertificateIssueResponse:
+      type: object
+      additionalProperties: false
+      required: [certificateChain, thumbprint]
+      properties:
+        certificateChain:
+          type: string
+          description: The certificate and then the intermediate certificate, in PEM.
+        thumbprint:
+          type: string
+          description: The SHA-256 thumbprint of the certificate, in the base64url format of RFC 8705 x5t#S256.
+    StatusActionRequest:
+      type: object
+      additionalProperties: false
+      required: [version]
+      properties:
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: The version of the participant that the operator saw.
+    DataRecipientStatusAction:
+      type: object
+      additionalProperties: false
+      description: A status change of the legal entity that the rules permit now.
+      required: [action, status, irreversible, changes]
+      properties:
+        action:
+          type: string
+          enum: [suspend, revoke, surrender, reinstate]
+        status:
+          $ref: "#/components/schemas/DataRecipientStatus"
+        irreversible:
+          type: boolean
+          description: True when the change or its cascade gives a status that cannot change again.
+        changes:
+          type: array
+          description: Each software product that the action also changes.
+          items:
+            $ref: "#/components/schemas/SoftwareProductStatusChange"
+    DataRecipientBrandStatusAction:
+      type: object
+      additionalProperties: false
+      description: A status change of the data recipient brand that the rules permit now.
+      required: [action, status, irreversible, changes]
+      properties:
+        action:
+          type: string
+          enum: [activate, deactivate, remove]
+        status:
+          $ref: "#/components/schemas/Status"
+        irreversible:
+          type: boolean
+          description: True when the change or its cascade gives a status that cannot change again.
+        changes:
+          type: array
+          description: Each software product of the brand that the action also changes.
+          items:
+            $ref: "#/components/schemas/SoftwareProductStatusChange"
+    SoftwareProductStatusAction:
+      type: object
+      additionalProperties: false
+      description: A status change of the software product that the rules permit now.
+      required: [action, status, irreversible, changes]
+      properties:
+        action:
+          type: string
+          enum: [activate, deactivate, remove]
+        status:
+          $ref: "#/components/schemas/Status"
+        irreversible:
+          type: boolean
+          description: True when the change or its cascade gives a status that cannot change again.
+        changes:
+          type: array
+          description: Each other software product that the action also changes.
+          items:
+            $ref: "#/components/schemas/SoftwareProductStatusChange"
+    SoftwareProductStatusChange:
+      type: object
+      additionalProperties: false
+      required: [softwareProductId, softwareProductName, from, to]
+      properties:
+        softwareProductId:
+          type: string
+        softwareProductName:
+          type: string
+        from:
+          $ref: "#/components/schemas/Status"
+        to:
+          $ref: "#/components/schemas/Status"
+    DataHolderStatusAction:
+      type: object
+      additionalProperties: false
+      description: A status change of the data holder legal entity that the rules permit now.
+      required: [action, status, irreversible, changes]
+      properties:
+        action:
+          type: string
+          enum: [remove]
+        status:
+          $ref: "#/components/schemas/DataHolderStatus"
+        irreversible:
+          type: boolean
+          description: True when the change or its cascade gives a status that cannot change again.
+        changes:
+          type: array
+          description: Each brand that the action also changes.
+          items:
+            $ref: "#/components/schemas/DataHolderBrandStatusChange"
+    DataHolderBrandStatusAction:
+      type: object
+      additionalProperties: false
+      description: A status change of the data holder brand that the rules permit now.
+      required: [action, status, irreversible, changes]
+      properties:
+        action:
+          type: string
+          enum: [activate, deactivate, remove]
+        status:
+          $ref: "#/components/schemas/Status"
+        irreversible:
+          type: boolean
+          description: True when the change or its cascade gives a status that cannot change again.
+        changes:
+          type: array
+          description: Each other brand that the action also changes.
+          items:
+            $ref: "#/components/schemas/DataHolderBrandStatusChange"
+    DataHolderBrandStatusChange:
+      type: object
+      additionalProperties: false
+      description: A brand has a dataHolderBrandId, an interimId or both, as in DataHolderBrand.
+      required: [brandName, from, to]
+      properties:
+        dataHolderBrandId:
+          type: string
+        interimId:
+          type: string
+        brandName:
+          type: string
+        from:
+          $ref: "#/components/schemas/Status"
+        to:
+          $ref: "#/components/schemas/Status"
+    DataRecipientStatus:
+      type: string
+      enum: [ACTIVE, SUSPENDED, REVOKED, SURRENDERED]
+    DataRecipientList:
+      type: object
+      additionalProperties: false
+      required: [data, totalRecords]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/DataRecipientSummary"
+        totalRecords:
+          type: integer
+          minimum: 0
+    DataRecipientSummary:
+      type: object
+      additionalProperties: false
+      required:
+        [legalEntityId, legalEntityName, accreditationNumber, status, brandCount, softwareProductCount]
+      properties:
+        legalEntityId:
+          type: string
+        legalEntityName:
+          type: string
+        accreditationNumber:
+          type: string
+        status:
+          $ref: "#/components/schemas/DataRecipientStatus"
+        brandCount:
+          type: integer
+          minimum: 0
+          description: The number of brands in each status.
+        softwareProductCount:
+          type: integer
+          minimum: 0
+          description: The number of software products in each status.
+    DataHolderStatus:
+      type: string
+      enum: [ACTIVE, REMOVED]
+    Industry:
+      type: string
+      enum: [banking, energy, non-bank-lending, telco]
+    DataHolderList:
+      type: object
+      additionalProperties: false
+      required: [data, totalRecords]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/DataHolderSummary"
+        totalRecords:
+          type: integer
+          minimum: 0
+    DataHolderSummary:
+      type: object
+      additionalProperties: false
+      required: [legalEntityId, legalEntityName, status, brandCount, industries]
+      properties:
+        legalEntityId:
+          type: string
+        legalEntityName:
+          type: string
+        status:
+          $ref: "#/components/schemas/DataHolderStatus"
+        brandCount:
+          type: integer
+          minimum: 0
+          description: The number of brands in each status.
+        industries:
+          type: array
+          uniqueItems: true
+          description: The industries of the brands in each status, in the order of this enumeration.
+          items:
+            $ref: "#/components/schemas/Industry"
+    KeySetList:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/KeySet"
+    KeySet:
+      type: object
+      additionalProperties: false
+      required: [keySet, version, keys, actions]
+      properties:
+        keySet:
+          type: string
+          enum: [access-token, ssa]
+          description: The key set, with the same value as in the path of the operator interface.
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Changes at each step of a key change. An action gives it in its request body.
+        keys:
+          type: array
+          description: The key that signs first, then the next key, then the previous key.
+          items:
+            $ref: "#/components/schemas/Key"
+        actions:
+          type: array
+          description: The one step of a key change that the state of the key set permits now.
+          items:
+            $ref: "#/components/schemas/KeyAction"
+    KeyAction:
+      type: object
+      additionalProperties: false
+      required: [action, irreversible, changes]
+      properties:
+        action:
+          type: string
+          enum: [publish-next, activate-next]
+          description: >-
+            publish-next also adds a new next key, which is not in changes because it has no key ID before the
+            step.
+        irreversible:
+          type: boolean
+          description: >-
+            Always true: an activation changes the key that participants must trust, and a publish deletes the
+            previous key.
+        changes:
+          type: array
+          description: Each key that the step changes, in the sequence of the change.
+          items:
+            $ref: "#/components/schemas/KeyChange"
+    KeyChange:
+      type: object
+      additionalProperties: false
+      description: >-
+        A change of a key that exists. A change with no to is a key that leaves the JWKS and that the Register
+        deletes.
+      required: [keyId, from]
+      properties:
+        keyId:
+          type: string
+        from:
+          $ref: "#/components/schemas/KeyState"
+        to:
+          $ref: "#/components/schemas/KeyState"
+    Key:
+      type: object
+      additionalProperties: false
+      required: [keyId, state, createdAt]
+      properties:
+        keyId:
+          type: string
+          description: The kid of the key in the JWKS of its key set.
+        state:
+          $ref: "#/components/schemas/KeyState"
+        createdAt:
+          type: string
+          format: date-time
+          description: The time at which the Register created the key, in UTC.
+    KeyState:
+      type: string
+      enum: [signing, next, previous]
+      description: >-
+        signing is the key that signs. next is the key that the JWKS publishes before it signs. previous is
+        the key that signed before the last activation, which the JWKS still publishes.
+    AccreditationLevel:
+      type: string
+      enum: [UNRESTRICTED, SPONSORED]
+    Status:
+      type: string
+      description: The status of a brand or of a software product.
+      enum: [ACTIVE, INACTIVE, REMOVED]
+    DataRecipientDetail:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          legalEntityId,
+          legalEntityName,
+          accreditationNumber,
+          accreditationLevel,
+          logoUri,
+          status,
+          lastUpdated,
+          version,
+          actions,
+          dataRecipientBrands,
+        ]
+      properties:
+        legalEntityId:
+          type: string
+        legalEntityName:
+          type: string
+        accreditationNumber:
+          type: string
+        accreditationLevel:
+          $ref: "#/components/schemas/AccreditationLevel"
+        logoUri:
+          type: string
+        status:
+          $ref: "#/components/schemas/DataRecipientStatus"
+        lastUpdated:
+          type: string
+          format: date-time
+          description: The time in UTC of the last change to the legal entity, its brands or its software products.
+        version:
+          type: integer
+          format: int64
+          description: The version of the data recipient. It changes at each change of the record.
+        actions:
+          type: array
+          description: The status changes of the legal entity that the rules permit now.
+          items:
+            $ref: "#/components/schemas/DataRecipientStatusAction"
+        dataRecipientBrands:
+          type: array
+          description: Each brand in each status, in the order of the record.
+          items:
+            $ref: "#/components/schemas/DataRecipientBrand"
+    DataRecipientBrand:
+      type: object
+      additionalProperties: false
+      required: [dataRecipientBrandId, brandName, logoUri, status, actions, softwareProducts]
+      properties:
+        dataRecipientBrandId:
+          type: string
+        brandName:
+          type: string
+        logoUri:
+          type: string
+        status:
+          $ref: "#/components/schemas/Status"
+        actions:
+          type: array
+          description: The status changes of the brand that the rules permit now.
+          items:
+            $ref: "#/components/schemas/DataRecipientBrandStatusAction"
+        softwareProducts:
+          type: array
+          description: Each software product in each status, in the order of the record.
+          items:
+            $ref: "#/components/schemas/SoftwareProduct"
+    SoftwareProduct:
+      type: object
+      additionalProperties: false
+      description: A software product with the metadata of its SSA. An optional URI with no value is not present.
+      required:
+        [
+          softwareProductId,
+          softwareProductName,
+          softwareProductDescription,
+          logoUri,
+          status,
+          clientUri,
+          redirectUris,
+          jwksUri,
+          revocationUri,
+          recipientBaseUri,
+          scopes,
+          clientCertificateThumbprints,
+          actions,
+          clientCertificateActions,
+        ]
+      properties:
+        softwareProductId:
+          type: string
+        softwareProductName:
+          type: string
+        softwareProductDescription:
+          type: string
+        logoUri:
+          type: string
+        status:
+          $ref: "#/components/schemas/Status"
+        clientUri:
+          type: string
+        sectorIdentifierUri:
+          type: string
+        redirectUris:
+          type: array
+          items:
+            type: string
+        tosUri:
+          type: string
+        policyUri:
+          type: string
+        jwksUri:
+          type: string
+        revocationUri:
+          type: string
+        recipientBaseUri:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        clientCertificateThumbprints:
+          type: array
+          description: The SHA-256 thumbprint (RFC 8705 x5t#S256) of each client certificate that the Register trusts.
+          items:
+            type: string
+        actions:
+          type: array
+          description: The status changes of the software product that the rules permit now.
+          items:
+            $ref: "#/components/schemas/SoftwareProductStatusAction"
+        clientCertificateActions:
+          type: array
+          description: >-
+            The client certificate actions that the rules permit now. A removal is permitted in each status, for
+            each thumbprint.
+          items:
+            $ref: "#/components/schemas/ClientCertificateAction"
+    DataHolderDetail:
+      type: object
+      additionalProperties: false
+      required: [legalEntityId, legalEntityName, logoUri, status, lastUpdated, version, actions, dataHolderBrands]
+      properties:
+        legalEntityId:
+          type: string
+        legalEntityName:
+          type: string
+        logoUri:
+          type: string
+        status:
+          $ref: "#/components/schemas/DataHolderStatus"
+        lastUpdated:
+          type: string
+          format: date-time
+          description: The time in UTC of the last change to the legal entity or its brands.
+        version:
+          type: integer
+          format: int64
+          description: The version of the data holder. It changes at each change of the record.
+        actions:
+          type: array
+          description: The status changes of the legal entity that the rules permit now.
+          items:
+            $ref: "#/components/schemas/DataHolderStatusAction"
+        dataHolderBrands:
+          type: array
+          description: Each brand in each status, in the order of the record.
+          items:
+            $ref: "#/components/schemas/DataHolderBrand"
+    DataHolderBrand:
+      type: object
+      additionalProperties: false
+      description: >-
+        A brand has a dataHolderBrandId, an interimId or both. A brand with no dataHolderBrandId shares only
+        product data, and has no secure endpoints and no JWKS endpoint. An optional field with no value is not
+        present.
+      required: [brandName, industries, logoUri, status, actions, serverCertificateActions, endpointDetail]
+      properties:
+        dataHolderBrandId:
+          type: string
+        interimId:
+          type: string
+        brandName:
+          type: string
+        brandGroup:
+          type: string
+        industries:
+          type: array
+          items:
+            $ref: "#/components/schemas/Industry"
+        logoUri:
+          type: string
+        status:
+          $ref: "#/components/schemas/Status"
+        actions:
+          type: array
+          description: The status changes of the brand that the rules permit now.
+          items:
+            $ref: "#/components/schemas/DataHolderBrandStatusAction"
+        serverCertificateActions:
+          type: array
+          description: >-
+            The server certificate actions that the rules permit now. Only a brand with a dataHolderBrandId that
+            is not REMOVED can get a server certificate.
+          items:
+            $ref: "#/components/schemas/ServerCertificateAction"
+        endpointDetail:
+          $ref: "#/components/schemas/EndpointDetail"
+        jwksEndpoint:
+          type: string
+    EndpointDetail:
+      type: object
+      additionalProperties: false
+      required: [publicBaseUri]
+      properties:
+        version:
+          type: string
+        publicBaseUri:
+          type: string
+        productBaseUri:
+          type: string
+        resourceBaseUri:
+          type: string
+        infosecBaseUri:
+          type: string
+        extensionBaseUri:
+          type: string
+        websiteUri:
+          type: string
+    DataRecipientHistory:
+      type: object
+      additionalProperties: false
+      required: [data, totalRecords]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/DataRecipientHistoryEntry"
+        totalRecords:
+          type: integer
+          minimum: 0
+    DataRecipientHistoryEntry:
+      oneOf:
+        - $ref: "#/components/schemas/LegalEntityHistoryEntry"
+        - $ref: "#/components/schemas/SoftwareProductHistoryEntry"
+        - $ref: "#/components/schemas/ClientCertificateHistoryEntry"
+        - $ref: "#/components/schemas/DataRecipientBrandHistoryEntry"
+      discriminator:
+        propertyName: eventType
+        mapping:
+          DataRecipientImported: "#/components/schemas/LegalEntityHistoryEntry"
+          AccreditationSuspended: "#/components/schemas/LegalEntityHistoryEntry"
+          AccreditationRevoked: "#/components/schemas/LegalEntityHistoryEntry"
+          AccreditationSurrendered: "#/components/schemas/LegalEntityHistoryEntry"
+          AccreditationReinstated: "#/components/schemas/LegalEntityHistoryEntry"
+          SoftwareProductActivated: "#/components/schemas/SoftwareProductHistoryEntry"
+          SoftwareProductDeactivated: "#/components/schemas/SoftwareProductHistoryEntry"
+          SoftwareProductRemoved: "#/components/schemas/SoftwareProductHistoryEntry"
+          ClientCertificateRegistered: "#/components/schemas/ClientCertificateHistoryEntry"
+          ClientCertificateRemoved: "#/components/schemas/ClientCertificateHistoryEntry"
+          ClientCertificateIssued: "#/components/schemas/ClientCertificateHistoryEntry"
+          DataRecipientCreated: "#/components/schemas/LegalEntityHistoryEntry"
+          DataRecipientDetailsChanged: "#/components/schemas/LegalEntityHistoryEntry"
+          SoftwareProductAdded: "#/components/schemas/SoftwareProductHistoryEntry"
+          SoftwareProductDetailsChanged: "#/components/schemas/SoftwareProductHistoryEntry"
+          DataRecipientBrandAdded: "#/components/schemas/DataRecipientBrandHistoryEntry"
+          DataRecipientBrandDetailsChanged: "#/components/schemas/DataRecipientBrandHistoryEntry"
+          DataRecipientBrandActivated: "#/components/schemas/DataRecipientBrandHistoryEntry"
+          DataRecipientBrandDeactivated: "#/components/schemas/DataRecipientBrandHistoryEntry"
+          DataRecipientBrandRemoved: "#/components/schemas/DataRecipientBrandHistoryEntry"
+    LegalEntityHistoryEntry:
+      type: object
+      additionalProperties: false
+      description: An event of a data recipient legal entity. It has no other fields.
+      required: [streamVersion, eventType, recordedAt]
+      properties:
+        streamVersion:
+          type: integer
+          minimum: 1
+        eventType:
+          type: string
+          enum: [DataRecipientImported, DataRecipientCreated, DataRecipientDetailsChanged, AccreditationSuspended, AccreditationRevoked, AccreditationSurrendered, AccreditationReinstated]
+        recordedAt:
+          type: string
+          format: date-time
+          description: The time at which the Register recorded the event, in UTC.
+    SoftwareProductHistoryEntry:
+      type: object
+      additionalProperties: false
+      description: An event that adds a software product, or changes its details or its status.
+      required: [streamVersion, eventType, recordedAt, softwareProductId, softwareProductName]
+      properties:
+        streamVersion:
+          type: integer
+          minimum: 1
+        eventType:
+          type: string
+          enum: [SoftwareProductAdded, SoftwareProductDetailsChanged, SoftwareProductActivated, SoftwareProductDeactivated, SoftwareProductRemoved]
+        recordedAt:
+          type: string
+          format: date-time
+          description: The time at which the Register recorded the event, in UTC.
+        softwareProductId:
+          type: string
+        softwareProductName:
+          type: string
+          description: The name of the software product at the time of the event.
+    ClientCertificateHistoryEntry:
+      type: object
+      additionalProperties: false
+      description: An event that issues, registers or removes a client certificate of a software product.
+      required: [streamVersion, eventType, recordedAt, softwareProductId, softwareProductName, thumbprint]
+      properties:
+        streamVersion:
+          type: integer
+          minimum: 1
+        eventType:
+          type: string
+          enum: [ClientCertificateRegistered, ClientCertificateIssued, ClientCertificateRemoved]
+        recordedAt:
+          type: string
+          format: date-time
+          description: The time at which the Register recorded the event, in UTC.
+        softwareProductId:
+          type: string
+        softwareProductName:
+          type: string
+          description: The name of the software product at the time of the event.
+        thumbprint:
+          type: string
+          description: The SHA-256 thumbprint (RFC 8705 x5t#S256) of the client certificate.
+    DataRecipientBrandHistoryEntry:
+      type: object
+      additionalProperties: false
+      description: An event that adds or changes a data recipient brand.
+      required: [streamVersion, eventType, recordedAt, brandId, brandName]
+      properties:
+        streamVersion:
+          type: integer
+          minimum: 1
+        eventType:
+          type: string
+          enum: [DataRecipientBrandAdded, DataRecipientBrandDetailsChanged, DataRecipientBrandActivated, DataRecipientBrandDeactivated, DataRecipientBrandRemoved]
+        recordedAt:
+          type: string
+          format: date-time
+          description: The time at which the Register recorded the event, in UTC.
+        brandId:
+          type: string
+          description: The dataRecipientBrandId of the brand.
+        brandName:
+          type: string
+          description: The name of the brand at the time of the event.
+    DataHolderHistory:
+      type: object
+      additionalProperties: false
+      required: [data, totalRecords]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/DataHolderHistoryEntry"
+        totalRecords:
+          type: integer
+          minimum: 0
+    DataHolderHistoryEntry:
+      oneOf:
+        - $ref: "#/components/schemas/DataHolderLegalEntityHistoryEntry"
+        - $ref: "#/components/schemas/DataHolderBrandHistoryEntry"
+        - $ref: "#/components/schemas/ServerCertificateHistoryEntry"
+      discriminator:
+        propertyName: eventType
+        mapping:
+          DataHolderImported: "#/components/schemas/DataHolderLegalEntityHistoryEntry"
+          DataHolderCreated: "#/components/schemas/DataHolderLegalEntityHistoryEntry"
+          DataHolderDetailsChanged: "#/components/schemas/DataHolderLegalEntityHistoryEntry"
+          DataHolderLegalEntityRemoved: "#/components/schemas/DataHolderLegalEntityHistoryEntry"
+          DataHolderBrandAdded: "#/components/schemas/DataHolderBrandHistoryEntry"
+          DataHolderBrandDetailsChanged: "#/components/schemas/DataHolderBrandHistoryEntry"
+          DataHolderBrandActivated: "#/components/schemas/DataHolderBrandHistoryEntry"
+          DataHolderBrandDeactivated: "#/components/schemas/DataHolderBrandHistoryEntry"
+          DataHolderBrandRemoved: "#/components/schemas/DataHolderBrandHistoryEntry"
+          ServerCertificateIssued: "#/components/schemas/ServerCertificateHistoryEntry"
+    DataHolderLegalEntityHistoryEntry:
+      type: object
+      additionalProperties: false
+      description: An event of a data holder legal entity. It has no other fields.
+      required: [streamVersion, eventType, recordedAt]
+      properties:
+        streamVersion:
+          type: integer
+          minimum: 1
+        eventType:
+          type: string
+          enum: [DataHolderImported, DataHolderCreated, DataHolderDetailsChanged, DataHolderLegalEntityRemoved]
+        recordedAt:
+          type: string
+          format: date-time
+          description: The time at which the Register recorded the event, in UTC.
+    DataHolderBrandHistoryEntry:
+      type: object
+      additionalProperties: false
+      description: An event that adds or changes a data holder brand.
+      required: [streamVersion, eventType, recordedAt, brandId, brandName]
+      properties:
+        streamVersion:
+          type: integer
+          minimum: 1
+        eventType:
+          type: string
+          enum: [DataHolderBrandAdded, DataHolderBrandDetailsChanged, DataHolderBrandActivated, DataHolderBrandDeactivated, DataHolderBrandRemoved]
+        recordedAt:
+          type: string
+          format: date-time
+          description: The time at which the Register recorded the event, in UTC.
+        brandId:
+          type: string
+          description: The dataHolderBrandId of the brand, or its interimId when it has no dataHolderBrandId.
+        brandName:
+          type: string
+          description: The name of the brand at the time of the event.
+    ServerCertificateHistoryEntry:
+      type: object
+      additionalProperties: false
+      description: An event that issues a server certificate for a data holder brand.
+      required: [streamVersion, eventType, recordedAt, brandId, brandName, thumbprint]
+      properties:
+        streamVersion:
+          type: integer
+          minimum: 1
+        eventType:
+          type: string
+          enum: [ServerCertificateIssued]
+        recordedAt:
+          type: string
+          format: date-time
+          description: The time at which the Register recorded the event, in UTC.
+        brandId:
+          type: string
+          description: The dataHolderBrandId of the brand.
+        brandName:
+          type: string
+          description: The name of the brand at the time of the event.
+        thumbprint:
+          type: string
+          description: The SHA-256 thumbprint (RFC 8705 x5t#S256) of the server certificate.
+    Problem:
+      type: object
+      additionalProperties: false
+      description: RFC 9457 problem details with the type about:blank.
+      required: [type, title, status, detail]
+      properties:
+        type:
+          type: string
+          enum: [about:blank]
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string

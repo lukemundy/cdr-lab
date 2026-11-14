@@ -1,0 +1,6 @@
+# Each ignore gives its reason and an end date, so that the scan reports the advisory again if no fix comes.
+
+[[IgnoredVulns]]
+id = "GHSA-g3hv-75wg-m249"
+ignoreUntil = 2026-12-30
+reason = "minimatch 5.1.9 does not have the affected code (firstPhasePreProcess, optimizationLevel). Only openapi-typescript uses it, through @redocly/openapi-core 1.x, which needs the minimatch 5 API. The repository gives all its glob patterns."

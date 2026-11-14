@@ -1,0 +1,14 @@
+{
+	admin off
+	auto_https off
+}
+
+:8443 {
+	tls /tls/suite.crt /tls/suite.key
+	reverse_proxy openid-server:8080 {
+		# The suite holds some requests open until a callback arrives, for up to 60 seconds.
+		transport http {
+			read_timeout 120s
+		}
+	}
+}

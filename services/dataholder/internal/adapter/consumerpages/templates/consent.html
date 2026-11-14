@@ -1,0 +1,26 @@
+{{template "head" (.Page (printf "Share your data - %s" .Bank) 3)}}<h1>Share your data with {{.Recipient}}</h1>
+{{template "notice" .}}{{with .Consent}}<p>{{.LegalEntity}} asks {{$.Bank}} to share your data. {{.LegalEntity}} uses the brand name {{$.Recipient}} and the application {{.Software}}.</p>
+<h2>Data that {{$.Bank}} will share</h2>
+<div class="cp-clusters">
+{{range .Clusters}}<h3>{{.Name}}</h3>
+<ul>
+{{range .Permissions}}<li>{{.}}</li>
+{{end}}</ul>
+{{else}}<p>This request asks for no data.</p>
+{{end}}</div>
+<h2>How long {{$.Bank}} will share your data</h2>
+{{if .OneOccasion}}<p>{{$.Bank}} will share your data one time.</p>
+{{else}}<p>{{$.Bank}} will share your data for {{.Duration}}, until {{.EndDate}} (UTC).</p>
+{{end}}{{if .NeedsAccounts}}<p>The data includes data from before today that {{$.Bank}} has for the accounts that you select.</p>
+{{else}}<p>The data includes data from before today that {{$.Bank}} has.</p>
+{{end}}<p>You can stop the sharing at any time. Sign in to {{$.Bank}} online banking and go to Data sharing, or ask {{$.Bank}}.</p>
+{{if not .Eligible}}<p>You have no open account at {{$.Bank}}, so you cannot share your data with {{$.Recipient}}.</p>
+{{else}}<form method="post" action="{{$.Action}}">
+<input type="hidden" name="csrf_token" value="{{$.Token}}">
+{{if .NeedsAccounts}}<fieldset class="cp-accounts">
+<legend>Select the accounts to share</legend>
+{{range .Accounts}}<p class="cp-choice"><input type="checkbox" id="account-{{.ID}}" name="account" value="{{.ID}}"> <label for="account-{{.ID}}">{{.DisplayName}} ({{.MaskedNumber}})</label></p>
+{{end}}</fieldset>
+{{end}}<button class="cp-button cp-primary" type="submit" name="action" value="confirm">Share my data</button>
+</form>
+{{end}}{{end}}{{template "cancel" .}}{{template "card-end"}}{{template "foot" .}}

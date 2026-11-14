@@ -1,0 +1,14 @@
+[
+  { "package": "@fontsource-variable/inter", "family": "Inter Variable" },
+  { "package": "@fontsource-variable/jetbrains-mono", "family": "JetBrains Mono Variable" },
+  { "package": "@fontsource-variable/figtree", "family": "Figtree Variable" },
+  { "package": "@fontsource-variable/public-sans", "family": "Public Sans Variable" },
+  { "package": "@fontsource-variable/geist", "family": "Geist Variable" },
+  { "package": "@fontsource-variable/dm-sans", "family": "DM Sans Variable" },
+  {
+    "package": "@fontsource-variable/bricolage-grotesque",
+    "family": "Bricolage Grotesque Variable"
+  },
+  { "package": "@fontsource-variable/source-serif-4", "family": "Source Serif 4 Variable" },
+  { "package": "@fontsource-variable/unbounded", "family": "Unbounded Variable" }
+]

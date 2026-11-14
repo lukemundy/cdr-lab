@@ -1,0 +1,9 @@
+# The values of the preset brand Kestrel Bank that agree with its record in services/register/seed/preset-banks.json.
+# A deployment adds the other values, and changes the base URLs here and in the seed to the hosts of the deployment.
+brand:
+  preset: kestrel-bank
+  id: 1ee54312-624b-4679-bf33-cf4af113f934
+publicBaseURL: https://kestrelbank.test:8081
+secureBaseURL: https://kestrelbank.test:8083
+mail:
+  from: no-reply@kestrelbank.test

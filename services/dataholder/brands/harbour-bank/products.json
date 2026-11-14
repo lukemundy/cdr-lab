@@ -1,0 +1,533 @@
+{
+  "products": [
+    {
+      "productId": "harbour-mooring",
+      "lastUpdated": "2026-09-18T00:00:00Z",
+      "productCategory": "TRANS_AND_SAVINGS_ACCOUNTS",
+      "name": "Harbour Mooring",
+      "description": "An everyday account with no monthly fee and no international transaction fee on card purchases.",
+      "brand": "Harbour Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "DIGITAL_BANKING"
+        },
+        {
+          "featureType": "NPP_ENABLED"
+        },
+        {
+          "featureType": "NPP_PAYID"
+        },
+        {
+          "featureType": "DIGITAL_WALLET",
+          "additionalValue": "Apple Pay"
+        },
+        {
+          "featureType": "DIGITAL_WALLET",
+          "additionalValue": "Google Pay"
+        },
+        {
+          "featureType": "CARD_ACCESS",
+          "additionalValue": "Visa Debit"
+        },
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "No international transaction fee and no fee at overseas ATMs that Harbour Bank does not own"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Monthly account fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalValue": "P1M"
+        },
+        {
+          "name": "International transaction fee",
+          "feeType": "TRANSACTION",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          }
+        }
+      ]
+    },
+    {
+      "productId": "tidewater-saver",
+      "lastUpdated": "2026-10-09T00:00:00Z",
+      "productCategory": "TRANS_AND_SAVINGS_ACCOUNTS",
+      "name": "Tidewater Saver",
+      "description": "A savings account with an introductory rate for the first 4 months, then a variable rate.",
+      "brand": "Harbour Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "DIGITAL_BANKING"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Monthly account fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalValue": "P1M"
+        }
+      ],
+      "depositRates": [
+        {
+          "depositRateType": "INTRODUCTORY",
+          "rate": "0.0475",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "additionalValue": "P4M",
+          "additionalInfo": "For the first 4 months after you open the account, on balances up to $250,000"
+        },
+        {
+          "depositRateType": "VARIABLE",
+          "rate": "0.0230",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M"
+        }
+      ]
+    },
+    {
+      "productId": "harbour-foreign-currency-account",
+      "lastUpdated": "2026-09-18T00:00:00Z",
+      "productCategory": "TRANS_AND_SAVINGS_ACCOUNTS",
+      "name": "Harbour Many Currencies Account",
+      "description": "An account that holds one of 10 foreign currencies, for customers who are paid or pay in a foreign currency.",
+      "brand": "Harbour Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "Available in USD, EUR, GBP, NZD, JPY, SGD, HKD, CAD, CHF and CNY"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Monthly account fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "10.00"
+          },
+          "additionalValue": "P1M",
+          "additionalInfo": "No fee when the balance is more than the equal of AUD 5,000"
+        },
+        {
+          "name": "Outward telegraphic transfer fee",
+          "feeType": "TRANSACTION",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "20.00"
+          }
+        }
+      ]
+    },
+    {
+      "productId": "spinnaker-travel-card",
+      "lastUpdated": "2026-08-20T00:00:00Z",
+      "productCategory": "TRAVEL_CARDS",
+      "name": "Spinnaker Travel Card",
+      "description": "A reloadable prepaid card that holds up to 9 currencies at a locked exchange rate.",
+      "brand": "Harbour Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "Lock the exchange rate when you load a currency"
+        },
+        {
+          "featureType": "DIGITAL_WALLET",
+          "additionalValue": "Apple Pay"
+        },
+        {
+          "featureType": "FRAUD_PROTECTION"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Card issue fee",
+          "feeType": "UPFRONT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          }
+        },
+        {
+          "name": "Reload fee",
+          "feeType": "DEPOSIT",
+          "feeMethodUType": "rateBased",
+          "rateBased": {
+            "rateType": "TRANSACTION",
+            "rate": "0.005"
+          },
+          "additionalInfo": "0.5% of each reload, with a minimum of $5"
+        },
+        {
+          "name": "Overseas ATM withdrawal fee",
+          "feeType": "WITHDRAWAL",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "2.50"
+          }
+        }
+      ]
+    },
+    {
+      "productId": "harbour-term-deposit",
+      "lastUpdated": "2026-10-16T00:00:00Z",
+      "productCategory": "TERM_DEPOSITS",
+      "name": "Anchor Term Deposit",
+      "description": "A term deposit from $5,000 for 1 month to 5 years.",
+      "brand": "Harbour Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "FUNDS_AVAILABLE_AFTER",
+          "additionalValue": "P31D"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Early withdrawal adjustment",
+          "feeType": "WITHDRAWAL",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalInfo": "The bank reduces the interest when you withdraw early"
+        }
+      ],
+      "depositRates": [
+        {
+          "depositRateType": "FIXED",
+          "rate": "0.0360",
+          "applicationType": "MATURITY",
+          "additionalValue": "P1M"
+        },
+        {
+          "depositRateType": "FIXED",
+          "rate": "0.0410",
+          "applicationType": "MATURITY",
+          "additionalValue": "P8M"
+        },
+        {
+          "depositRateType": "FIXED",
+          "rate": "0.0395",
+          "applicationType": "MATURITY",
+          "additionalValue": "P12M"
+        }
+      ]
+    },
+    {
+      "productId": "breakwater-points-card",
+      "lastUpdated": "2026-08-03T00:00:00Z",
+      "productCategory": "CRED_AND_CHRG_CARDS",
+      "name": "Breakwater Points Card",
+      "description": "A credit card that earns travel points, with airport lounge passes and no international transaction fee.",
+      "brand": "Harbour Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "LOYALTY_PROGRAM",
+          "additionalValue": "Harbour Bank Breakwater Points",
+          "additionalInfo": "1.5 points for each $1, up to $7,500 each statement period"
+        },
+        {
+          "featureType": "BONUS_REWARDS",
+          "additionalValue": "60000",
+          "additionalInfo": "When you spend $3,000 in the first 3 months"
+        },
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "Two airport lounge passes each year"
+        },
+        {
+          "featureType": "INSURANCE",
+          "additionalValue": "International travel insurance"
+        },
+        {
+          "featureType": "INTEREST_FREE",
+          "additionalValue": "P44D"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Annual fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "295.00"
+          },
+          "additionalValue": "P1Y"
+        },
+        {
+          "name": "International transaction fee",
+          "feeType": "TRANSACTION",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          }
+        },
+        {
+          "name": "Late payment fee",
+          "feeType": "LATE_PAYMENT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "20.00"
+          }
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "PURCHASE",
+          "rate": "0.2124",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED"
+        },
+        {
+          "lendingRateType": "CASH_ADVANCE",
+          "rate": "0.2199",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED"
+        }
+      ]
+    },
+    {
+      "productId": "harbour-low-rate-card",
+      "lastUpdated": "2026-08-03T00:00:00Z",
+      "productCategory": "CRED_AND_CHRG_CARDS",
+      "name": "Slipway Card",
+      "description": "A low rate credit card with a balance transfer offer and a small annual fee.",
+      "brand": "Harbour Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "INTEREST_FREE",
+          "additionalValue": "P55D"
+        },
+        {
+          "featureType": "BALANCE_TRANSFERS"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Annual fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "58.00"
+          },
+          "additionalValue": "P1Y"
+        },
+        {
+          "name": "Balance transfer fee",
+          "feeType": "UPFRONT",
+          "feeMethodUType": "rateBased",
+          "rateBased": {
+            "rateType": "TRANSACTION",
+            "rate": "0.02"
+          }
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "PURCHASE",
+          "rate": "0.1349",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED"
+        },
+        {
+          "lendingRateType": "BALANCE_TRANSFER",
+          "rate": "0.0000",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED",
+          "additionalInfo": "0% p.a. for 26 months, then the cash advance rate"
+        }
+      ]
+    },
+    {
+      "productId": "harbour-car-loan",
+      "lastUpdated": "2026-07-15T00:00:00Z",
+      "productCategory": "PERS_LOANS",
+      "name": "Wharf Car Loan",
+      "description": "A fixed rate loan for a new or used car, with the car as security.",
+      "brand": "Harbour Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "EXTRA_REPAYMENTS",
+          "additionalInfo": "Extra repayments are possible, but an early repayment cost can apply"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Establishment fee",
+          "feeType": "UPFRONT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "250.00"
+          }
+        },
+        {
+          "name": "Monthly loan fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "12.00"
+          },
+          "additionalValue": "P1M"
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "FIXED",
+          "rate": "0.0749",
+          "comparisonRate": "0.0858",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "UNCONSTRAINED",
+          "additionalValue": "P5Y",
+          "additionalInfo": "For a car up to 2 years old. The comparison rate is for $30,000 over 5 years."
+        }
+      ]
+    },
+    {
+      "productId": "harbour-home-loan",
+      "lastUpdated": "2026-09-25T00:00:00Z",
+      "productCategory": "RESIDENTIAL_MORTGAGES",
+      "name": "Clear Water Home Loan",
+      "description": "A basic variable rate home loan with no offset account and no ongoing fees.",
+      "brand": "Harbour Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "EXTRA_REPAYMENTS"
+        },
+        {
+          "featureType": "REDRAW"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Establishment fee",
+          "feeType": "UPFRONT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          }
+        },
+        {
+          "name": "Discharge fee",
+          "feeType": "EXIT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "350.00"
+          }
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.0589",
+          "comparisonRate": "0.0591",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "OWNER_OCCUPIED"
+        },
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.0624",
+          "comparisonRate": "0.0626",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "INVESTMENT"
+        }
+      ]
+    },
+    {
+      "productId": "harbour-expat-home-loan",
+      "lastUpdated": "2026-10-28T00:00:00Z",
+      "productCategory": "RESIDENTIAL_MORTGAGES",
+      "name": "Far Shore Home Loan",
+      "description": "A home loan for Australian citizens who live overseas and buy a home in Australia. It will be available from 1 March 2027.",
+      "brand": "Harbour Bank",
+      "isTailored": false,
+      "effectiveFrom": "2027-03-01T00:00:00Z",
+      "features": [
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "For Australian citizens and permanent residents who live and earn income overseas"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Establishment fee",
+          "feeType": "UPFRONT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "600.00"
+          }
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.0679",
+          "comparisonRate": "0.0692",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "OWNER_OCCUPIED",
+          "additionalInfo": "Loan to value ratio up to 70%"
+        }
+      ]
+    },
+    {
+      "productId": "harbour-travel-card-classic",
+      "lastUpdated": "2024-03-01T00:00:00Z",
+      "productCategory": "TRAVEL_CARDS",
+      "name": "Lighthouse Travel Card",
+      "description": "A prepaid travel card that is replaced by the Spinnaker Travel Card.",
+      "brand": "Harbour Bank",
+      "isTailored": false,
+      "effectiveFrom": "2017-05-01T00:00:00Z",
+      "effectiveTo": "2026-03-31T13:00:00Z",
+      "features": [
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "Closed to new customers. Load amounts are refunded on request."
+        }
+      ],
+      "fees": [
+        {
+          "name": "Reload fee",
+          "feeType": "DEPOSIT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "5.00"
+          }
+        }
+      ]
+    }
+  ]
+}

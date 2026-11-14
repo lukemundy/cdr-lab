@@ -1,0 +1,66 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "docker:pinDigests",
+    "helpers:pinGitHubActionDigests",
+    ":configMigration",
+    ":pinDevDependencies",
+    "abandonments:recommended",
+    "security:minimumReleaseAgeNpm",
+    ":maintainLockFilesWeekly"
+  ],
+  "postUpdateOptions": [
+    "gomodTidy",
+    "gomodUpdateImportPaths"
+  ],
+  "packageRules": [
+    {
+      "description": "Update all OpenTelemetry Go modules in one pull request, because they depend on each other.",
+      "matchManagers": ["gomod"],
+      "matchPackageNames": ["go.opentelemetry.io/**"],
+      "groupName": "opentelemetry-go",
+      "separateMajorMinor": false
+    },
+    {
+      "description": "Group Docker digest-only updates into one weekly pull request.",
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["digest"],
+      "groupName": "docker digests",
+      "schedule": ["* * * * 1"]
+    },
+    {
+      "description": "A person reviews each major update. The auto-merge workflow refuses a pull request with this label.",
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["no-automerge"]
+    },
+    {
+      "description": "Node and pnpm install and build the web workspace, and pnpm applies its supply-chain controls. Wait 3 days, as for npm. The Node image also waits, so that the node group updates mise.toml and the image together.",
+      "matchDepNames": ["node", "pnpm", "docker.io/library/node"],
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "Update the Go of mise.toml and the Go images in one pull request, so that the versions agree (mise run lint:versions).",
+      "matchDepNames": ["go", "docker.io/library/golang"],
+      "matchUpdateTypes": ["major", "minor", "patch"],
+      "groupName": "go"
+    },
+    {
+      "description": "Update the Node of mise.toml and the Node image in one pull request, so that the versions agree (mise run lint:versions).",
+      "matchDepNames": ["node", "docker.io/library/node"],
+      "matchUpdateTypes": ["major", "minor", "patch"],
+      "groupName": "node"
+    },
+    {
+      "description": "Update the bjw-s common library chart of each chart in one pull request, so that the charts have the same library behaviour.",
+      "matchManagers": ["helmv3"],
+      "matchDepNames": ["common"],
+      "groupName": "bjw-s common"
+    },
+    {
+      "description": "The auto-merge workflow cannot merge a pull request that changes workflow files when main also changed workflow files after its base. Rebase these pull requests when main moves, so that the workflow can merge them.",
+      "matchFileNames": [".github/workflows/**"],
+      "rebaseWhen": "behind-base-branch"
+    }
+  ]
+}

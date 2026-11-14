@@ -1,0 +1,29 @@
+{
+  "size": {
+    "$type": "dimension",
+    "control": {
+      "$value": {
+        "value": 32,
+        "unit": "px"
+      }
+    },
+    "table-row": {
+      "$value": {
+        "value": 36,
+        "unit": "px"
+      }
+    }
+  },
+  "space": {
+    "$type": "dimension",
+    "control-x": {
+      "$value": "{space.3}"
+    },
+    "cell-x": {
+      "$value": "{space.3}"
+    },
+    "cell-y": {
+      "$value": "{space.2}"
+    }
+  }
+}

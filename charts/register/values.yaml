@@ -1,0 +1,58 @@
+# The values of the Register. An empty value with no default is required: the chart does not render without it.
+# The chart also accepts the values of the bjw-s common library chart, for example resources and nodeSelector.
+
+image:
+  repository: ghcr.io/lukemundy/cdr-lab/register
+  # The full or the short commit ID of the image.
+  tag: ""
+  # Optional. With a digest, the image cannot change under the tag.
+  digest: ""
+
+# The base URLs that clients use for the public and the secure APIs.
+publicBaseURL: ""
+secureBaseURL: ""
+# The CRL URL of the mock CDR intermediate CA, which each certificate that the Register issues gives.
+crlURL: ""
+
+operator:
+  # The Host header values (host:port) of the operator interface.
+  allowedHosts: []
+  # An existing Secret with the operator token in the key token.
+  tokenSecret: ""
+
+# Lab-only. The name of an existing ConfigMap with a participant seed file in the key participants.json, for example
+# from kubectl create configmap <name> --from-file=participants.json=<file>.
+seed:
+  configMap: ""
+
+console:
+  enabled: false
+  # The Host header values (host:port) of the console. Required when the console is on.
+  allowedHosts: []
+
+telemetry:
+  # The OTLP HTTP endpoint for traces, metrics and logs.
+  otlpEndpoint: ""
+
+database:
+  host: ""
+  port: 5432
+  name: ""
+  sslMode: require
+  # Secrets with the keys username and password, for example the basic-auth Secrets of CloudNativePG.
+  # The owner user runs the migrations. The Register connects as the service user.
+  ownerSecret: ""
+  serviceSecret: ""
+
+# The names of existing Secrets. The chart makes no keys or certificates.
+pki:
+  # kubernetes.io/tls Secrets (tls.crt and tls.key) of the public and the secure API listeners.
+  publicTLSSecret: ""
+  secureTLSSecret: ""
+  # A kubernetes.io/tls Secret with the certificate and the key of the mock CDR intermediate CA.
+  intermediateSecret: ""
+  # A Secret with the CDR CA bundle in the key ca.crt.
+  caBundleSecret: ""
+  # Optional. A Secret with the key ca.crt that the Register trusts when it gets the JWKS of a software product,
+  # instead of the system roots.
+  publicRootSecret: ""

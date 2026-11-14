@@ -1,0 +1,790 @@
+/* The layouts of the online bank site, selected by data-layout on the shell (services/dataholder/DESIGN.md, Presentation). */
+@layer components {
+  .bank {
+    display: flex;
+    flex-direction: column;
+    min-block-size: 100svh;
+    background: var(--ds-color-page);
+    color: var(--ds-color-fg);
+  }
+
+  .bank :is(h1, h2, h3) {
+    font-family: var(--ds-font-heading);
+  }
+
+  .bank-skip {
+    position: absolute;
+    inset-block-start: var(--ds-space-2);
+    inset-inline-start: var(--ds-space-2);
+    z-index: 10;
+    padding: var(--ds-space-2) var(--ds-space-control-x);
+    border-radius: var(--ds-radius-md);
+    background: var(--ds-color-surface);
+    color: var(--ds-color-fg);
+    font-weight: var(--ds-font-weight-medium);
+    translate: 0 -200%;
+  }
+
+  .bank-skip:focus {
+    translate: 0;
+  }
+
+  .bank-header {
+    background: var(--ds-color-brand);
+    color: var(--ds-color-fg-on-brand);
+  }
+
+  .bank-header-in,
+  .bank-main {
+    inline-size: 100%;
+    max-inline-size: 75rem;
+    margin-inline: auto;
+  }
+
+  .bank-header-in {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-2) var(--ds-space-4);
+    padding: var(--ds-space-3) var(--ds-space-4);
+  }
+
+  .bank-home {
+    display: flex;
+    align-items: center;
+    min-block-size: var(--ds-size-control);
+    border-radius: var(--ds-radius-sm);
+  }
+
+  .bank-logo {
+    display: block;
+    block-size: var(--ds-space-8);
+    inline-size: auto;
+    max-inline-size: 100%;
+  }
+
+  .bank-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--ds-space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .bank-main {
+    flex: 1;
+    padding: var(--ds-space-6) var(--ds-space-4) var(--ds-space-10);
+    outline: none;
+  }
+
+  .bank :is(a, button, summary):focus-visible,
+  .bank-main:focus-visible {
+    outline: 3px solid var(--ds-color-focus);
+    outline-offset: 2px;
+  }
+
+  /* The padding puts the statements at the left edge of the content of the main area. */
+  .bank .cp-footer {
+    padding-inline: max(var(--ds-space-4), calc((100% - 75rem) / 2 + var(--ds-space-4)));
+    background: var(--ds-color-hero);
+    color: var(--ds-color-fg-on-hero);
+    text-align: start;
+  }
+
+  .bank .cp-footer > * {
+    max-inline-size: 75ch;
+    margin: 0;
+  }
+
+  .bank .cp-footer > .cp-note {
+    max-inline-size: none;
+  }
+
+  .bank .cp-footer .cp-note p {
+    max-inline-size: 75ch;
+    margin: 0;
+  }
+
+  .bank .cp-card {
+    max-inline-size: 60rem;
+  }
+
+  .photo {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+
+  .photo-placeholder {
+    display: grid;
+    place-items: center;
+    background: var(--ds-color-brand);
+  }
+
+  .photo-placeholder img {
+    inline-size: 25%;
+    max-inline-size: var(--ds-space-16);
+    min-inline-size: var(--ds-space-6);
+  }
+
+  /* The home page */
+  .home {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-10);
+  }
+
+  .hero {
+    display: grid;
+  }
+
+  .hero-text {
+    padding: var(--ds-space-6) var(--ds-space-5);
+  }
+
+  .hero-text h1 {
+    font-size: var(--ds-font-size-3xl);
+  }
+
+  .hero-text p {
+    max-inline-size: 40ch;
+    font-size: var(--ds-font-size-lg);
+  }
+
+  .hero-text .cp-button {
+    inline-size: fit-content;
+    margin-block-start: var(--ds-space-5);
+  }
+
+  .home h2 {
+    font-size: var(--ds-font-size-2xl);
+  }
+
+  .hero-photo {
+    aspect-ratio: 4 / 3;
+  }
+
+  .type-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+    gap: var(--ds-space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .type-card {
+    display: flex;
+    flex-direction: column;
+    block-size: 100%;
+    overflow: hidden;
+    background: var(--ds-color-surface);
+    color: var(--ds-color-fg);
+    text-decoration: none;
+  }
+
+  .type-photo {
+    aspect-ratio: 4 / 3;
+    block-size: auto;
+  }
+
+  .type-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ds-space-2);
+    padding: var(--ds-space-3) var(--ds-space-4) var(--ds-space-4);
+  }
+
+  .type-name {
+    color: var(--ds-color-link);
+    font-weight: var(--ds-font-weight-semibold);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .type-card:hover .type-name {
+    text-decoration-thickness: 2px;
+  }
+
+  .type-count {
+    color: var(--ds-color-fg-muted);
+    font-size: var(--ds-font-size-sm);
+  }
+
+  .sharing {
+    padding: var(--ds-space-5);
+    background: var(--ds-color-surface);
+  }
+
+  .sharing p {
+    margin: 0;
+  }
+
+  /* The product list, the product detail and the sign-in */
+  .group-head {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-4);
+    margin-block: var(--ds-space-6) var(--ds-space-3);
+  }
+
+  .group-head h2 {
+    margin: 0;
+  }
+
+  .group-photo {
+    flex: none;
+    inline-size: var(--ds-space-16);
+    block-size: var(--ds-space-16);
+  }
+
+  .product-head {
+    display: grid;
+    gap: var(--ds-space-4);
+    margin-block-end: var(--ds-space-4);
+  }
+
+  .product-photo {
+    aspect-ratio: 16 / 7;
+    block-size: auto;
+    border-radius: var(--ds-radius-lg);
+  }
+
+  .with-photo {
+    display: grid;
+    gap: var(--ds-space-6);
+    align-items: start;
+  }
+
+  .with-photo-image .photo {
+    aspect-ratio: 16 / 9;
+    block-size: auto;
+    border-radius: var(--ds-radius-lg);
+  }
+
+  .with-photo .cp-card {
+    margin: 0;
+  }
+
+  /* The account cards */
+  .account-list {
+    display: grid;
+    gap: var(--ds-space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .account-card {
+    position: relative;
+    padding: var(--ds-space-5);
+    padding-inline-end: var(--ds-space-16);
+    border-radius: var(--ds-radius-lg);
+    background: var(--ds-color-brand);
+    color: var(--ds-color-fg-on-brand);
+  }
+
+  .account-card h3 {
+    margin-block-start: 0;
+  }
+
+  .account-card[data-status="CLOSED"] {
+    background: var(--ds-color-secondary);
+    color: var(--ds-color-fg);
+  }
+
+  .account-mark {
+    position: absolute;
+    inset-block-start: var(--ds-space-4);
+    inset-inline-end: var(--ds-space-4);
+    inline-size: var(--ds-space-8);
+    block-size: var(--ds-space-8);
+  }
+
+  .account-summary {
+    margin-block: var(--ds-space-4);
+  }
+
+  @media (min-width: 40rem) {
+    .account-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .hero-text h1 {
+      font-size: calc(var(--ds-font-size-3xl) * 1.6);
+    }
+
+    .product-head {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      align-items: center;
+    }
+
+    .product-photo {
+      aspect-ratio: 4 / 3;
+    }
+
+    .with-photo {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .with-photo-image .photo {
+      aspect-ratio: 4 / 5;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .account-list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  /* ---------- meadow: a rounded photo with a panel in the brand colour that overlaps it ---------- */
+  [data-layout="meadow"] {
+    --layout-radius: calc(var(--ds-radius-lg) * 2);
+  }
+
+  [data-layout="meadow"] .hero-text {
+    position: relative;
+    z-index: 1;
+    border-radius: var(--layout-radius) var(--layout-radius) 0 0;
+    background: var(--ds-color-brand);
+    color: var(--ds-color-fg-on-brand);
+  }
+
+  [data-layout="meadow"] .hero-text h1 {
+    color: var(--ds-color-fg-on-brand);
+  }
+
+  /* The panel has the brand colour, which can be the colour of the primary action. */
+  [data-layout="meadow"] .hero-text .cp-button {
+    background: var(--ds-color-hero);
+    color: var(--ds-color-fg-on-hero);
+    border-radius: var(--ds-radius-full);
+  }
+
+  [data-layout="meadow"] .hero-photo {
+    border-radius: 0 0 var(--layout-radius) var(--layout-radius);
+  }
+
+  [data-layout="meadow"]
+    :is(.type-card, .sharing, .cp-card, .account-card, .group-photo, .product-photo) {
+    border-radius: var(--layout-radius);
+  }
+
+  [data-layout="meadow"] .type-card {
+    border: 1px solid var(--ds-color-border);
+  }
+
+  [data-layout="meadow"] .type-count {
+    padding: 0 var(--ds-space-2);
+    border-radius: var(--ds-radius-full);
+    background: var(--ds-color-brand);
+    color: var(--ds-color-fg-on-brand);
+    font-weight: var(--ds-font-weight-semibold);
+  }
+
+  [data-layout="meadow"] .group-photo {
+    border-radius: var(--ds-radius-full);
+  }
+
+  [data-layout="meadow"] .account-card {
+    overflow: hidden;
+  }
+
+  [data-layout="meadow"] .account-card::after {
+    content: "";
+    position: absolute;
+    inset-block-end: calc(-1 * var(--ds-space-8));
+    inset-inline-end: calc(-1 * var(--ds-space-8));
+    inline-size: calc(var(--ds-space-16) * 2);
+    block-size: calc(var(--ds-space-16) * 2);
+    border-radius: var(--ds-radius-full);
+    background: var(--ds-color-surface);
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  [data-layout="meadow"] .account-card[data-status="CLOSED"]::after {
+    display: none;
+  }
+
+  @media (min-width: 48rem) {
+    [data-layout="meadow"] .hero {
+      grid-template-columns: 5fr 7fr;
+      align-items: center;
+    }
+
+    [data-layout="meadow"] .hero-text {
+      margin-inline-end: calc(-1 * var(--ds-space-16));
+      padding: var(--ds-space-10) var(--ds-space-8);
+      border-radius: var(--layout-radius);
+    }
+
+    [data-layout="meadow"] .hero-photo {
+      border-radius: var(--layout-radius);
+    }
+  }
+
+  /* ---------- ledger: a wide photo with a white panel on a rule, square corners, ruled lists ---------- */
+  [data-layout="ledger"] .bank-header {
+    border-block-start: var(--ds-space-1) solid var(--ds-color-primary);
+    border-block-end: 1px solid var(--ds-color-border);
+  }
+
+  [data-layout="ledger"] .hero-photo {
+    aspect-ratio: 4 / 3;
+  }
+
+  [data-layout="ledger"] .hero-text {
+    position: relative;
+    margin: calc(-1 * var(--ds-space-10)) var(--ds-space-3) 0;
+    border-block-start: var(--ds-space-1) solid var(--ds-color-primary);
+    background: var(--ds-color-surface);
+  }
+
+  [data-layout="ledger"] .hero-text,
+  [data-layout="ledger"] .hero-photo {
+    grid-column: 1;
+  }
+
+  [data-layout="ledger"] .hero-photo {
+    grid-row: 1;
+  }
+
+  [data-layout="ledger"] .type-list {
+    grid-template-columns: 1fr;
+    gap: 0;
+    border-block-start: 2px solid var(--ds-color-hero);
+  }
+
+  [data-layout="ledger"] .type-card {
+    display: grid;
+    grid-template-columns: var(--ds-space-16) 1fr;
+    align-items: center;
+    gap: var(--ds-space-4);
+    padding: var(--ds-space-3) 0;
+    border-block-end: 1px solid var(--ds-color-border);
+    background: transparent;
+  }
+
+  [data-layout="ledger"] .type-photo {
+    aspect-ratio: 1;
+  }
+
+  [data-layout="ledger"] .type-body {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 0;
+  }
+
+  [data-layout="ledger"] .type-name {
+    color: var(--ds-color-heading);
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-font-size-lg);
+    text-decoration-color: var(--ds-color-primary);
+    text-decoration-thickness: 2px;
+  }
+
+  [data-layout="ledger"] .sharing {
+    border-inline-start: var(--ds-space-1) solid var(--ds-color-primary);
+    background: var(--ds-color-hero);
+    color: var(--ds-color-fg-on-hero);
+  }
+
+  [data-layout="ledger"] .sharing h2 {
+    color: var(--ds-color-fg-on-hero);
+  }
+
+  [data-layout="ledger"] .group-head {
+    padding-block-end: var(--ds-space-3);
+    border-block-end: 2px solid var(--ds-color-hero);
+  }
+
+  [data-layout="ledger"] .account-card {
+    border-inline-start: var(--ds-space-2) solid var(--ds-color-primary);
+    background: var(--ds-color-hero);
+    color: var(--ds-color-fg-on-hero);
+  }
+
+  [data-layout="ledger"] .account-card[data-status="CLOSED"] {
+    border-inline-start-color: var(--ds-color-border-strong);
+    background: var(--ds-color-secondary);
+    color: var(--ds-color-fg);
+  }
+
+  [data-layout="ledger"] .account-mark {
+    padding: 2px;
+    border-radius: var(--ds-radius-sm);
+    background: var(--ds-color-surface);
+  }
+
+  @media (min-width: 48rem) {
+    [data-layout="ledger"] .hero {
+      position: relative;
+      margin-block-start: calc(-1 * var(--ds-space-6));
+    }
+
+    [data-layout="ledger"] .hero-photo {
+      aspect-ratio: 21 / 9;
+    }
+
+    [data-layout="ledger"] .hero-text {
+      position: absolute;
+      inset-block-end: calc(-1 * var(--ds-space-8));
+      inset-inline-start: 0;
+      inline-size: min(100%, 32rem);
+      margin: 0;
+      padding: var(--ds-space-8);
+      box-shadow: var(--ds-elevation-1);
+    }
+
+    [data-layout="ledger"] .types {
+      display: grid;
+      grid-template-columns: 18rem 1fr;
+      gap: var(--ds-space-10);
+      margin-block-start: var(--ds-space-10);
+    }
+
+    [data-layout="ledger"] .account-list {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    [data-layout="ledger"] .account-card {
+      border-radius: 0;
+      border-block-end: 1px solid var(--ds-color-border);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    [data-layout="ledger"] .type-list {
+      grid-template-columns: 1fr 1fr;
+      column-gap: var(--ds-space-8);
+    }
+  }
+
+  /* ---------- horizon: a wide panorama above a band in the hero colour, postcards, tickets ---------- */
+  [data-layout="horizon"] .hero {
+    margin-block-start: calc(-1 * var(--ds-space-6));
+  }
+
+  [data-layout="horizon"] .hero-photo {
+    grid-row: 1;
+    aspect-ratio: 3 / 2;
+  }
+
+  [data-layout="horizon"] .hero-text {
+    border-block-start: var(--ds-space-1) solid var(--ds-color-accent);
+    background: var(--ds-color-hero);
+    color: var(--ds-color-fg-on-hero);
+  }
+
+  [data-layout="horizon"] .hero-text h1 {
+    color: var(--ds-color-fg-on-hero);
+    letter-spacing: -0.03em;
+  }
+
+  [data-layout="horizon"] .type-list {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  }
+
+  [data-layout="horizon"] .type-card {
+    padding: var(--ds-space-2) var(--ds-space-2) 0;
+    border: 1px solid var(--ds-color-border);
+    border-block-end: var(--ds-space-1) solid var(--ds-color-hero);
+    border-radius: var(--ds-radius-sm);
+  }
+
+  [data-layout="horizon"] .type-photo {
+    aspect-ratio: 3 / 2;
+  }
+
+  [data-layout="horizon"] .type-body {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding-inline: var(--ds-space-1);
+  }
+
+  [data-layout="horizon"] .sharing {
+    border-radius: var(--ds-radius-lg);
+    border-inline-start: var(--ds-space-1) solid var(--ds-color-accent);
+  }
+
+  [data-layout="horizon"] .group-photo {
+    inline-size: var(--ds-space-16);
+    border-radius: var(--ds-radius-md);
+  }
+
+  [data-layout="horizon"] .account-card {
+    overflow: hidden;
+    background: var(--ds-color-hero);
+    color: var(--ds-color-fg-on-hero);
+  }
+
+  [data-layout="horizon"] .account-card[data-status="CLOSED"] {
+    background: var(--ds-color-secondary);
+    color: var(--ds-color-fg);
+  }
+
+  /* The dashed line makes the card look like a ticket. */
+  [data-layout="horizon"] .account-card h3 {
+    margin-inline: calc(-1 * var(--ds-space-5)) calc(-1 * var(--ds-space-16));
+    padding: 0 var(--ds-space-16) var(--ds-space-3) var(--ds-space-5);
+    border-block-end: 2px dashed var(--ds-color-accent);
+  }
+
+  [data-layout="horizon"] .account-mark {
+    padding: 2px;
+    border-radius: var(--ds-radius-sm);
+    background: var(--ds-color-surface);
+  }
+
+  @media (min-width: 48rem) {
+    [data-layout="horizon"] .hero-photo {
+      aspect-ratio: 3 / 1;
+    }
+
+    [data-layout="horizon"] .hero-text {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      align-items: end;
+      column-gap: var(--ds-space-10);
+      padding: var(--ds-space-10) var(--ds-space-8);
+    }
+
+    [data-layout="horizon"] .hero-text h1 {
+      grid-row: span 2;
+      margin: 0;
+    }
+  }
+
+  /* ---------- updraft: a panel in the hero colour with a photo cut like a wing, and a grid of tiles ---------- */
+  [data-layout="updraft"] .hero {
+    overflow: hidden;
+    border-radius: calc(var(--ds-radius-lg) * 1.5);
+    background: var(--ds-color-hero);
+    color: var(--ds-color-fg-on-hero);
+  }
+
+  [data-layout="updraft"] .hero-text h1 {
+    color: var(--ds-color-fg-on-hero);
+  }
+
+  [data-layout="updraft"] .hero-photo {
+    clip-path: polygon(0 15%, 100% 0, 100% 100%, 0 100%);
+  }
+
+  [data-layout="updraft"] .bank-nav [aria-current="page"],
+  [data-layout="updraft"] .hero .cp-button {
+    border-radius: var(--ds-radius-full);
+  }
+
+  [data-layout="updraft"] .type-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ds-space-3);
+  }
+
+  [data-layout="updraft"] .type-list li:first-child {
+    grid-column: 1 / -1;
+  }
+
+  [data-layout="updraft"] .type-card {
+    position: relative;
+    min-block-size: 11rem;
+    border-radius: var(--ds-radius-lg);
+    background: var(--ds-color-hero);
+  }
+
+  [data-layout="updraft"] .type-photo {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
+    block-size: 100%;
+  }
+
+  [data-layout="updraft"] .type-body {
+    position: relative;
+    margin: auto var(--ds-space-2) var(--ds-space-2);
+    padding: var(--ds-space-2) var(--ds-space-3);
+    gap: 0;
+    border-inline-start: var(--ds-space-1) solid var(--ds-color-accent);
+    border-radius: var(--ds-radius-md);
+    background: var(--ds-color-hero);
+  }
+
+  [data-layout="updraft"] :is(.type-name, .type-count) {
+    color: var(--ds-color-fg-on-hero);
+  }
+
+  [data-layout="updraft"] .sharing {
+    border-inline-start: var(--ds-space-1) solid var(--ds-color-accent);
+    border-radius: var(--ds-radius-lg);
+  }
+
+  [data-layout="updraft"] :is(.group-photo, .product-photo, .cp-card) {
+    border-radius: var(--ds-radius-lg);
+  }
+
+  [data-layout="updraft"] .account-card {
+    background: var(--ds-color-hero);
+    color: var(--ds-color-fg-on-hero);
+    box-shadow: inset 0 calc(-1 * var(--ds-space-2)) 0 var(--ds-color-accent);
+  }
+
+  [data-layout="updraft"] .account-card[data-status="CLOSED"] {
+    background: var(--ds-color-secondary);
+    color: var(--ds-color-fg);
+    box-shadow: inset 0 calc(-1 * var(--ds-space-2)) 0 var(--ds-color-border-strong);
+  }
+
+  [data-layout="updraft"] .account-mark {
+    padding: 2px;
+    border-radius: var(--ds-radius-md);
+    background: var(--ds-color-surface);
+  }
+
+  @media (min-width: 48rem) {
+    [data-layout="updraft"] .hero {
+      grid-template-columns: 1.15fr 1fr;
+      min-block-size: 28rem;
+    }
+
+    [data-layout="updraft"] .hero-text {
+      align-self: center;
+      padding: var(--ds-space-12) var(--ds-space-10);
+    }
+
+    [data-layout="updraft"] .hero-photo {
+      clip-path: polygon(22% 0, 100% 0, 100% 100%, 0 100%);
+    }
+
+    [data-layout="updraft"] .type-list {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-auto-rows: minmax(12rem, auto);
+    }
+
+    [data-layout="updraft"] .type-list li:first-child {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+
+    [data-layout="updraft"] .account-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+}
+
+/* The text of an account card has the colour of its card. A utility class of a shared part, for example the muted text
+   of a term, must not change it, so this rule is outside the layers. */
+.account-card :is(h3, a, dt, dd) {
+  color: inherit;
+}

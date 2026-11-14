@@ -1,0 +1,13 @@
+{
+  "products": [
+    {
+      "productId": "everyday",
+      "lastUpdated": "2026-08-03T01:00:00Z",
+      "productCategory": "TRANS_AND_SAVINGS_ACCOUNTS",
+      "name": "Everyday Account",
+      "description": "An account for each day.",
+      "brand": "Coastal Bank",
+      "isTailored": false
+    }
+  ]
+}

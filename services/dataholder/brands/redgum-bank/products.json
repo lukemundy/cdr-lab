@@ -1,0 +1,600 @@
+{
+  "products": [
+    {
+      "productId": "redgum-daybook",
+      "lastUpdated": "2026-09-10T00:00:00Z",
+      "productCategory": "TRANS_AND_SAVINGS_ACCOUNTS",
+      "name": "Redgum Daybook",
+      "description": "A personal transaction account with no monthly fee, a debit card and no overseas ATM fee from Redgum Bank.",
+      "brand": "Redgum Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "DIGITAL_BANKING"
+        },
+        {
+          "featureType": "NPP_ENABLED"
+        },
+        {
+          "featureType": "NPP_PAYID"
+        },
+        {
+          "featureType": "DIGITAL_WALLET",
+          "additionalValue": "Apple Pay"
+        },
+        {
+          "featureType": "DIGITAL_WALLET",
+          "additionalValue": "Google Pay"
+        },
+        {
+          "featureType": "CARD_ACCESS",
+          "additionalValue": "Visa Debit"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Monthly account fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalValue": "P1M"
+        },
+        {
+          "name": "International transaction fee",
+          "feeType": "TRANSACTION",
+          "feeMethodUType": "rateBased",
+          "rateBased": {
+            "rateType": "TRANSACTION",
+            "rate": "0.0299"
+          }
+        }
+      ]
+    },
+    {
+      "productId": "heartwood-saver",
+      "lastUpdated": "2026-10-06T00:00:00Z",
+      "productCategory": "TRANS_AND_SAVINGS_ACCOUNTS",
+      "name": "Heartwood Saver",
+      "description": "A savings account that pays bonus interest in each month with no withdrawals.",
+      "brand": "Redgum Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "DIGITAL_BANKING"
+        },
+        {
+          "featureType": "NPP_ENABLED"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Monthly account fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalValue": "P1M"
+        }
+      ],
+      "depositRates": [
+        {
+          "depositRateType": "VARIABLE",
+          "rate": "0.0110",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M"
+        },
+        {
+          "depositRateType": "BONUS",
+          "rate": "0.0360",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "additionalValue": "Bonus interest for a month with no withdrawals",
+          "additionalInfo": "On balances up to $500,000"
+        }
+      ]
+    },
+    {
+      "productId": "ledger-business-account",
+      "lastUpdated": "2026-09-10T00:00:00Z",
+      "productCategory": "TRANS_AND_SAVINGS_ACCOUNTS",
+      "name": "Ledger Business Account",
+      "description": "A business transaction account with a monthly fee, unlimited electronic transactions and a link to accounting software.",
+      "brand": "Redgum Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "DIGITAL_BANKING"
+        },
+        {
+          "featureType": "NPP_ENABLED"
+        },
+        {
+          "featureType": "NPP_PAYID"
+        },
+        {
+          "featureType": "UNLIMITED_TXNS",
+          "additionalInfo": "Electronic transactions only"
+        },
+        {
+          "featureType": "BILL_PAYMENT",
+          "additionalValue": "BPAY"
+        },
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "Daily transaction feeds to most accounting software"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Monthly account fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "10.00"
+          },
+          "additionalValue": "P1M",
+          "additionalInfo": "No fee for the first 6 months"
+        },
+        {
+          "name": "Branch transaction fee",
+          "feeType": "TRANSACTION",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "3.00"
+          },
+          "additionalInfo": "For each cash or cheque deposit or withdrawal at a branch"
+        },
+        {
+          "name": "Cheque dishonour fee",
+          "feeType": "DISHONOUR",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "15.00"
+          }
+        }
+      ]
+    },
+    {
+      "productId": "redgum-business-cash-reserve",
+      "lastUpdated": "2026-10-06T00:00:00Z",
+      "productCategory": "TRANS_AND_SAVINGS_ACCOUNTS",
+      "name": "Sapwood Business Saver",
+      "description": "A business savings account with tiered interest that is higher on larger balances.",
+      "brand": "Redgum Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "DIGITAL_BANKING"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Monthly account fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalValue": "P1M"
+        }
+      ],
+      "depositRates": [
+        {
+          "depositRateType": "VARIABLE",
+          "rate": "0.0150",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "additionalInfo": "On balances up to $250,000"
+        },
+        {
+          "depositRateType": "VARIABLE",
+          "rate": "0.0310",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "additionalInfo": "On the part of the balance above $250,000"
+        }
+      ]
+    },
+    {
+      "productId": "redgum-term-deposit",
+      "lastUpdated": "2026-10-14T00:00:00Z",
+      "productCategory": "TERM_DEPOSITS",
+      "name": "Burl Term Deposit",
+      "description": "A term deposit from $5,000 for 1 to 60 months, for personal and business customers.",
+      "brand": "Redgum Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "FUNDS_AVAILABLE_AFTER",
+          "additionalValue": "P31D",
+          "additionalInfo": "Give 31 days notice to withdraw the funds before the maturity date"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Early withdrawal adjustment",
+          "feeType": "WITHDRAWAL",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalInfo": "If you withdraw early, the bank can reduce the interest by up to 50%."
+        }
+      ],
+      "depositRates": [
+        {
+          "depositRateType": "FIXED",
+          "rate": "0.0405",
+          "applicationType": "MATURITY",
+          "additionalValue": "P4M"
+        },
+        {
+          "depositRateType": "FIXED",
+          "rate": "0.0410",
+          "applicationType": "MATURITY",
+          "additionalValue": "P9M"
+        },
+        {
+          "depositRateType": "FIXED",
+          "rate": "0.0400",
+          "applicationType": "MATURITY",
+          "additionalValue": "P12M"
+        },
+        {
+          "depositRateType": "FIXED",
+          "rate": "0.0385",
+          "applicationType": "MATURITY",
+          "additionalValue": "P60M",
+          "additionalInfo": "Interest is paid each year for terms longer than 12 months"
+        }
+      ]
+    },
+    {
+      "productId": "redgum-business-card",
+      "lastUpdated": "2026-08-25T00:00:00Z",
+      "productCategory": "CRED_AND_CHRG_CARDS",
+      "name": "Tally Business Card",
+      "description": "A business credit card with a low rate, cards for employees and spend controls for each card.",
+      "brand": "Redgum Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "ADDITIONAL_CARDS",
+          "additionalValue": "99"
+        },
+        {
+          "featureType": "INTEREST_FREE",
+          "additionalValue": "P55D"
+        },
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "Set a spend limit and a merchant category block for each employee card"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Annual fee for each card",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "50.00"
+          },
+          "additionalValue": "P1Y"
+        },
+        {
+          "name": "Late payment fee",
+          "feeType": "LATE_PAYMENT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "25.00"
+          }
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "PURCHASE",
+          "rate": "0.1399",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED"
+        },
+        {
+          "lendingRateType": "CASH_ADVANCE",
+          "rate": "0.2124",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED"
+        }
+      ]
+    },
+    {
+      "productId": "paddock-equipment-loan",
+      "lastUpdated": "2026-07-21T00:00:00Z",
+      "productCategory": "BUSINESS_LOANS",
+      "name": "Paddock Equipment Loan",
+      "description": "A secured loan for farm and business equipment, with repayments that can follow the seasonal income of a farm.",
+      "brand": "Redgum Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "Make repayments monthly, each quarter, each six months or each year"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Establishment fee",
+          "feeType": "UPFRONT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "350.00"
+          }
+        },
+        {
+          "name": "Monthly service fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "9.00"
+          },
+          "additionalValue": "P1M"
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "FIXED",
+          "rate": "0.0795",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "UNCONSTRAINED",
+          "additionalValue": "P5Y",
+          "additionalInfo": "Rate for new equipment and a term of 5 years. Rates are set by the equipment and the term."
+        }
+      ]
+    },
+    {
+      "productId": "redgum-business-loan",
+      "lastUpdated": "2026-07-21T00:00:00Z",
+      "productCategory": "BUSINESS_LOANS",
+      "name": "Boundary Business Loan",
+      "description": "A business loan from $20,000, secured by residential or commercial property, with a variable or fixed rate.",
+      "brand": "Redgum Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "EXTRA_REPAYMENTS",
+          "additionalInfo": "Variable rate loans only"
+        },
+        {
+          "featureType": "RELATIONSHIP_MANAGEMENT"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Establishment fee",
+          "feeType": "UPFRONT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalInfo": "Set by the loan amount and the security"
+        },
+        {
+          "name": "Monthly service fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "15.00"
+          },
+          "additionalValue": "P1M"
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.0870",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "UNCONSTRAINED",
+          "additionalInfo": "Secured by residential property"
+        },
+        {
+          "lendingRateType": "FIXED",
+          "rate": "0.0745",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "UNCONSTRAINED",
+          "additionalValue": "P3Y"
+        }
+      ]
+    },
+    {
+      "productId": "redgum-business-overdraft",
+      "lastUpdated": "2026-07-21T00:00:00Z",
+      "productCategory": "OVERDRAFTS",
+      "name": "Ledger Working Capital Line",
+      "description": "A secured overdraft for working capital, linked to a Ledger Business Account.",
+      "brand": "Redgum Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "OVERDRAFT"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Facility fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "rateBased",
+          "additionalValue": "P3M",
+          "additionalInfo": "1.00% p.a. of the limit, charged each quarter",
+          "rateBased": {
+            "rateType": "BALANCE",
+            "rate": "0.01"
+          }
+        },
+        {
+          "name": "Excess fee",
+          "feeType": "OTHER",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalInfo": "The penalty rate applies to the amount above the limit"
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.0925",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED"
+        },
+        {
+          "lendingRateType": "PENALTY",
+          "rate": "0.0600",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED",
+          "additionalInfo": "In addition to the overdraft rate, on the amount above the limit"
+        }
+      ]
+    },
+    {
+      "productId": "redgum-home-loan",
+      "lastUpdated": "2026-09-30T00:00:00Z",
+      "productCategory": "RESIDENTIAL_MORTGAGES",
+      "name": "Grain Package Home Loan",
+      "description": "A variable rate home loan in a package with an offset account and a rate discount, for an annual fee.",
+      "brand": "Redgum Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "OFFSET",
+          "additionalInfo": "Up to 10 offset accounts"
+        },
+        {
+          "featureType": "EXTRA_REPAYMENTS"
+        },
+        {
+          "featureType": "REDRAW"
+        },
+        {
+          "featureType": "COMPLEMENTARY_PRODUCT_DISCOUNTS",
+          "additionalInfo": "No annual fee on one Business Low Rate Card"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Annual package fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "395.00"
+          },
+          "additionalValue": "P1Y"
+        },
+        {
+          "name": "Discharge fee",
+          "feeType": "EXIT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "350.00"
+          }
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.0609",
+          "comparisonRate": "0.0634",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "OWNER_OCCUPIED"
+        },
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.0644",
+          "comparisonRate": "0.0669",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "INVESTMENT"
+        }
+      ]
+    },
+    {
+      "productId": "redgum-invoice-finance",
+      "lastUpdated": "2026-10-20T00:00:00Z",
+      "productCategory": "BUSINESS_LOANS",
+      "name": "Ledger Invoice Advance",
+      "description": "A facility that lends up to 80% of the value of unpaid invoices. It will be available from 1 March 2027.",
+      "brand": "Redgum Bank",
+      "isTailored": false,
+      "effectiveFrom": "2027-03-01T00:00:00Z",
+      "features": [
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "Funds are available within one business day after you upload an invoice"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Establishment fee",
+          "feeType": "UPFRONT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "500.00"
+          }
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.0950",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED"
+        }
+      ]
+    },
+    {
+      "productId": "redgum-farm-management-deposit",
+      "lastUpdated": "2025-06-01T00:00:00Z",
+      "productCategory": "TERM_DEPOSITS",
+      "name": "Stockyard Reserve Deposit",
+      "description": "A term deposit for primary producers. It is closed to new deposits.",
+      "brand": "Redgum Bank",
+      "isTailored": false,
+      "effectiveFrom": "2018-07-01T00:00:00Z",
+      "effectiveTo": "2026-06-30T14:00:00Z",
+      "features": [
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "For primary producers only"
+        }
+      ],
+      "depositRates": [
+        {
+          "depositRateType": "FIXED",
+          "rate": "0.0350",
+          "applicationType": "MATURITY",
+          "additionalValue": "P12M"
+        }
+      ]
+    }
+  ]
+}

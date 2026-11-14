@@ -1,0 +1,628 @@
+name: cdr-lab
+
+# An empty LAB_OTLP_ENDPOINT turns telemetry export off, for a lab that does not start the telemetry profile.
+x-telemetry-environment: &telemetry-environment
+  OTEL_EXPORTER_OTLP_ENDPOINT: ${LAB_OTLP_ENDPOINT-http://lgtm:4318}
+
+# A search domain of the host can resolve a bare service name before the compose DNS does, for example to a tailnet host.
+x-lab-dns: &lab-dns
+  dns_search: ["."]
+
+x-build-args: &build-args
+  BUILD_COMMIT: ${BUILD_COMMIT:-unknown}
+  BUILD_COMMIT_SHORT: ${BUILD_COMMIT_SHORT:-unknown}
+  BUILD_TIME: ${BUILD_TIME:-unknown}
+  BUILD_ID: ${BUILD_ID:-local}
+
+# The data holder image and the settings that are the same for each preset bank.
+x-dataholder-build: &dataholder-build
+  context: .
+  dockerfile: services/dataholder/Dockerfile
+  args:
+    <<: *build-args
+    # mise.toml sets it.
+    PNPM_VERSION: ${PNPM_VERSION:-}
+
+# The migrate and seed containers use only the database and the telemetry settings.
+x-dataholder-database-environment: &dataholder-database-environment
+  <<: *telemetry-environment
+  PGHOST: postgres
+  PGSSLMODE: disable
+
+x-dataholder-environment: &dataholder-environment
+  <<: *dataholder-database-environment
+  PUBLIC_TLS_CERT_FILE: /tls/public.crt
+  PUBLIC_TLS_KEY_FILE: /tls/public.key
+  SECURE_TLS_CERT_FILE: /tls/secure.crt
+  SECURE_TLS_KEY_FILE: /tls/secure.key
+  CDR_CA_BUNDLE_FILE: /pki/cdr-ca-bundle.pem
+  # The data holder loads the CRL at each check, so that a conformance test sees a revocation with no wait.
+  CRL_MAX_AGE: 0s
+  REGISTER_JWKS_URL: https://register:8081/cdr-register/v1/jwks
+  REGISTER_PUBLIC_BASE_URL: https://register:8081
+  # Short, so that the conformance tests see a status change quickly.
+  REGISTER_STATUS_INTERVAL: 5s
+  OPERATOR_TOKEN: lab-operator-token
+  # The mail sink keeps each email, and delivers none.
+  SMTP_ADDRESS: mail:1025
+  # The data holder gets the Register JWKS and the JWKS of each software product from a lab host, which has a
+  # certificate from the mock public CA.
+  SSL_CERT_FILE: /pki/public-root.crt
+  CONSOLE_ENABLED: "true"
+  # The online bank site of each bank (lab-only).
+  BANK_SITE_ENABLED: "true"
+
+services:
+  register:
+    <<: *lab-dns
+    build: &register-build
+      context: .
+      dockerfile: services/register/Dockerfile
+      args:
+        <<: *build-args
+        # mise.toml sets it.
+        PNPM_VERSION: ${PNPM_VERSION:-}
+    environment: &register-environment
+      <<: *telemetry-environment
+      PGHOST: postgres
+      PGUSER: register
+      PGPASSWORD: register
+      PGDATABASE: register
+      PGSSLMODE: disable
+      PUBLIC_BASE_URL: https://register:8081
+      PUBLIC_TLS_CERT_FILE: /tls/public.crt
+      PUBLIC_TLS_KEY_FILE: /tls/public.key
+      SECURE_BASE_URL: https://register:8083
+      SECURE_TLS_CERT_FILE: /tls/secure.crt
+      SECURE_TLS_KEY_FILE: /tls/secure.key
+      CDR_CA_BUNDLE_FILE: /pki/cdr-ca-bundle.pem
+      # The Register issues CDR certificates as the mock CDR intermediate.
+      CDR_INTERMEDIATE_CERT_FILE: /pki/cdr-intermediate.crt
+      CDR_INTERMEDIATE_KEY_FILE: /pki/cdr-intermediate.key
+      CDR_INTERMEDIATE_CRL_URL: http://register:8085/crl/cdr-intermediate.crl
+      # The Register gets the JWKS of each software product from a lab host, which has a certificate from the mock public CA.
+      SSL_CERT_FILE: /pki/public-root.crt
+      OPERATOR_TOKEN: lab-operator-token
+      OPERATOR_ALLOWED_HOSTS: register:8082,127.0.0.1:8082,localhost:8082
+      CONSOLE_ENABLED: "true"
+      # The Host header values of the console. The console refuses other values, so that DNS rebinding cannot reach it.
+      CONSOLE_ALLOWED_HOSTS: 127.0.0.1:8084,localhost:8084
+    ports:
+      - 127.0.0.1:8080:8080
+      - 127.0.0.1:8081:8081
+      - 127.0.0.1:8082:8082
+      - 127.0.0.1:8083:8083
+      - 127.0.0.1:8084:8084
+      - 127.0.0.1:8085:8085
+    volumes:
+      - ./.lab/pki/register:/tls:ro,z
+      - ./.lab/pki/cdr/ca-bundle.pem:/pki/cdr-ca-bundle.pem:ro,z
+      - ./.lab/pki/cdr/intermediate.crt:/pki/cdr-intermediate.crt:ro,z
+      - ./.lab/pki/cdr/intermediate.key:/pki/cdr-intermediate.key:ro,z
+      - ./.lab/pki/public/root.crt:/pki/public-root.crt:ro,z
+    depends_on:
+      postgres:
+        condition: service_healthy
+      register-seed:
+        condition: service_completed_successfully
+
+  register-migrate:
+    <<: *lab-dns
+    build: *register-build
+    environment:
+      <<: *register-environment
+      # The owner user of the database runs the migrations (lab/postgres/init.sql).
+      PGUSER: register_owner
+      PGPASSWORD: register_owner
+    command: [migrate]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  register-seed:
+    <<: *lab-dns
+    build: *register-build
+    environment: *register-environment
+    command: [seed, -if-empty, /seed/example.json]
+    volumes:
+      - ./services/register/seed/example.json:/seed/example.json:ro,z
+    depends_on:
+      postgres-grants:
+        condition: service_completed_successfully
+
+  # The default preset bank. The Register gives the service name of each bank as the host of the base URIs of its brand.
+  wattle-bank:
+    <<: *lab-dns
+    build: *dataholder-build
+    environment:
+      <<: *dataholder-environment
+      PGUSER: wattle_bank
+      PGPASSWORD: wattle_bank
+      PGDATABASE: wattle_bank
+      # The Wattle Bank brand of services/register/seed/example.json.
+      DATA_HOLDER_BRAND_ID: d7385786-d8b1-4d4b-bb80-b21616df1a4d
+      # A preset brand (services/dataholder/brands). Its brand name is the brandName on the Register.
+      DATA_HOLDER_BRAND: wattle-bank
+      PUBLIC_BASE_URL: https://wattle-bank:8081
+      SECURE_BASE_URL: https://wattle-bank:8083
+      # Clients on the compose network use port 8082, and the host uses port 8182.
+      OPERATOR_ALLOWED_HOSTS: wattle-bank:8082,127.0.0.1:8182,localhost:8182
+      MAIL_FROM: no-reply@wattlebank.test
+      # The browser of the OpenID conformance suite cannot read the mail sink.
+      FIXED_OTPS: openid@mail.test:111111,fixed-otp@mail.test:024680
+      # The Host header values of the console. The console refuses other values, so that DNS rebinding cannot reach it.
+      CONSOLE_ALLOWED_HOSTS: 127.0.0.1:8184,localhost:8184
+      BANK_SITE_ALLOWED_HOSTS: 127.0.0.1:8185,localhost:8185
+    ports:
+      - 127.0.0.1:8180:8080
+      - 127.0.0.1:8181:8081
+      - 127.0.0.1:8182:8082
+      - 127.0.0.1:8183:8083
+      - 127.0.0.1:8184:8084
+      - 127.0.0.1:8185:8085
+    volumes:
+      - ./.lab/pki/wattle-bank:/tls:ro,z
+      - ./.lab/pki/cdr/ca-bundle.pem:/pki/cdr-ca-bundle.pem:ro,z
+      - ./.lab/pki/public/root.crt:/pki/public-root.crt:ro,z
+    depends_on:
+      wattle-bank-seed:
+        condition: service_completed_successfully
+      # The data holder is ready only after it gets the statuses of the software products from the Register.
+      register:
+        condition: service_started
+
+  wattle-bank-migrate:
+    <<: *lab-dns
+    build: *dataholder-build
+    environment:
+      <<: *dataholder-database-environment
+      # The owner user of the database runs the migrations (lab/postgres/init.sql).
+      PGUSER: wattle_bank_owner
+      PGPASSWORD: wattle_bank_owner
+      PGDATABASE: wattle_bank
+    command: [migrate]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Loads the product catalogue of the brand.
+  wattle-bank-seed:
+    <<: *lab-dns
+    build: *dataholder-build
+    environment:
+      <<: *dataholder-database-environment
+      PGUSER: wattle_bank
+      PGPASSWORD: wattle_bank
+      PGDATABASE: wattle_bank
+      DATA_HOLDER_BRAND: wattle-bank
+    command: [seed, -if-empty]
+    depends_on:
+      postgres-grants:
+        condition: service_completed_successfully
+
+  # The three other preset banks have the same settings as wattle-bank, with their own names and ports.
+  redgum-bank:
+    <<: *lab-dns
+    profiles: [all-banks]
+    build: *dataholder-build
+    environment:
+      <<: *dataholder-environment
+      PGUSER: redgum_bank
+      PGPASSWORD: redgum_bank
+      PGDATABASE: redgum_bank
+      # The Redgum Bank brand of services/register/seed/example.json.
+      DATA_HOLDER_BRAND_ID: 4967dd80-2cd2-43c3-8b13-f6faafb684ad
+      DATA_HOLDER_BRAND: redgum-bank
+      PUBLIC_BASE_URL: https://redgum-bank:8081
+      SECURE_BASE_URL: https://redgum-bank:8083
+      OPERATOR_ALLOWED_HOSTS: redgum-bank:8082,127.0.0.1:8282,localhost:8282
+      MAIL_FROM: no-reply@redgumbank.test
+      CONSOLE_ALLOWED_HOSTS: 127.0.0.1:8284,localhost:8284
+      BANK_SITE_ALLOWED_HOSTS: 127.0.0.1:8285,localhost:8285
+    ports:
+      - 127.0.0.1:8280:8080
+      - 127.0.0.1:8281:8081
+      - 127.0.0.1:8282:8082
+      - 127.0.0.1:8283:8083
+      - 127.0.0.1:8284:8084
+      - 127.0.0.1:8285:8085
+    volumes:
+      - ./.lab/pki/redgum-bank:/tls:ro,z
+      - ./.lab/pki/cdr/ca-bundle.pem:/pki/cdr-ca-bundle.pem:ro,z
+      - ./.lab/pki/public/root.crt:/pki/public-root.crt:ro,z
+    depends_on:
+      redgum-bank-seed:
+        condition: service_completed_successfully
+      register:
+        condition: service_started
+
+  redgum-bank-migrate:
+    <<: *lab-dns
+    profiles: [all-banks]
+    build: *dataholder-build
+    environment:
+      <<: *dataholder-database-environment
+      PGUSER: redgum_bank_owner
+      PGPASSWORD: redgum_bank_owner
+      PGDATABASE: redgum_bank
+    command: [migrate]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  redgum-bank-seed:
+    <<: *lab-dns
+    profiles: [all-banks]
+    build: *dataholder-build
+    environment:
+      <<: *dataholder-database-environment
+      PGUSER: redgum_bank
+      PGPASSWORD: redgum_bank
+      PGDATABASE: redgum_bank
+      DATA_HOLDER_BRAND: redgum-bank
+    command: [seed, -if-empty]
+    depends_on:
+      redgum-bank-migrate:
+        condition: service_completed_successfully
+      postgres-grants:
+        condition: service_completed_successfully
+
+  harbour-bank:
+    <<: *lab-dns
+    profiles: [all-banks]
+    build: *dataholder-build
+    environment:
+      <<: *dataholder-environment
+      PGUSER: harbour_bank
+      PGPASSWORD: harbour_bank
+      PGDATABASE: harbour_bank
+      # The Harbour Bank brand of services/register/seed/example.json.
+      DATA_HOLDER_BRAND_ID: 366f7b1c-93c7-4b84-9c92-ab2456614095
+      DATA_HOLDER_BRAND: harbour-bank
+      PUBLIC_BASE_URL: https://harbour-bank:8081
+      SECURE_BASE_URL: https://harbour-bank:8083
+      OPERATOR_ALLOWED_HOSTS: harbour-bank:8082,127.0.0.1:8382,localhost:8382
+      MAIL_FROM: no-reply@harbourbank.test
+      CONSOLE_ALLOWED_HOSTS: 127.0.0.1:8384,localhost:8384
+      BANK_SITE_ALLOWED_HOSTS: 127.0.0.1:8385,localhost:8385
+    ports:
+      - 127.0.0.1:8380:8080
+      - 127.0.0.1:8381:8081
+      - 127.0.0.1:8382:8082
+      - 127.0.0.1:8383:8083
+      - 127.0.0.1:8384:8084
+      - 127.0.0.1:8385:8085
+    volumes:
+      - ./.lab/pki/harbour-bank:/tls:ro,z
+      - ./.lab/pki/cdr/ca-bundle.pem:/pki/cdr-ca-bundle.pem:ro,z
+      - ./.lab/pki/public/root.crt:/pki/public-root.crt:ro,z
+    depends_on:
+      harbour-bank-seed:
+        condition: service_completed_successfully
+      register:
+        condition: service_started
+
+  harbour-bank-migrate:
+    <<: *lab-dns
+    profiles: [all-banks]
+    build: *dataholder-build
+    environment:
+      <<: *dataholder-database-environment
+      PGUSER: harbour_bank_owner
+      PGPASSWORD: harbour_bank_owner
+      PGDATABASE: harbour_bank
+    command: [migrate]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  harbour-bank-seed:
+    <<: *lab-dns
+    profiles: [all-banks]
+    build: *dataholder-build
+    environment:
+      <<: *dataholder-database-environment
+      PGUSER: harbour_bank
+      PGPASSWORD: harbour_bank
+      PGDATABASE: harbour_bank
+      DATA_HOLDER_BRAND: harbour-bank
+    command: [seed, -if-empty]
+    depends_on:
+      harbour-bank-migrate:
+        condition: service_completed_successfully
+      postgres-grants:
+        condition: service_completed_successfully
+
+  kestrel-bank:
+    <<: *lab-dns
+    profiles: [all-banks]
+    build: *dataholder-build
+    environment:
+      <<: *dataholder-environment
+      PGUSER: kestrel_bank
+      PGPASSWORD: kestrel_bank
+      PGDATABASE: kestrel_bank
+      # The Kestrel Bank brand of services/register/seed/example.json.
+      DATA_HOLDER_BRAND_ID: 1ee54312-624b-4679-bf33-cf4af113f934
+      DATA_HOLDER_BRAND: kestrel-bank
+      PUBLIC_BASE_URL: https://kestrel-bank:8081
+      SECURE_BASE_URL: https://kestrel-bank:8083
+      OPERATOR_ALLOWED_HOSTS: kestrel-bank:8082,127.0.0.1:8482,localhost:8482
+      MAIL_FROM: no-reply@kestrelbank.test
+      CONSOLE_ALLOWED_HOSTS: 127.0.0.1:8484,localhost:8484
+      BANK_SITE_ALLOWED_HOSTS: 127.0.0.1:8485,localhost:8485
+    ports:
+      - 127.0.0.1:8480:8080
+      - 127.0.0.1:8481:8081
+      - 127.0.0.1:8482:8082
+      - 127.0.0.1:8483:8083
+      - 127.0.0.1:8484:8084
+      - 127.0.0.1:8485:8085
+    volumes:
+      - ./.lab/pki/kestrel-bank:/tls:ro,z
+      - ./.lab/pki/cdr/ca-bundle.pem:/pki/cdr-ca-bundle.pem:ro,z
+      - ./.lab/pki/public/root.crt:/pki/public-root.crt:ro,z
+    depends_on:
+      kestrel-bank-seed:
+        condition: service_completed_successfully
+      register:
+        condition: service_started
+
+  kestrel-bank-migrate:
+    <<: *lab-dns
+    profiles: [all-banks]
+    build: *dataholder-build
+    environment:
+      <<: *dataholder-database-environment
+      PGUSER: kestrel_bank_owner
+      PGPASSWORD: kestrel_bank_owner
+      PGDATABASE: kestrel_bank
+    command: [migrate]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  kestrel-bank-seed:
+    <<: *lab-dns
+    profiles: [all-banks]
+    build: *dataholder-build
+    environment:
+      <<: *dataholder-database-environment
+      PGUSER: kestrel_bank
+      PGPASSWORD: kestrel_bank
+      PGDATABASE: kestrel_bank
+      DATA_HOLDER_BRAND: kestrel-bank
+    command: [seed, -if-empty]
+    depends_on:
+      kestrel-bank-migrate:
+        condition: service_completed_successfully
+      postgres-grants:
+        condition: service_completed_successfully
+
+  conformance:
+    <<: *lab-dns
+    profiles: [test]
+    # Keep the Go version the same as in mise.toml.
+    image: docker.io/library/golang:1.27.4-trixie@sha256:b54b2639de8c1bfe538ec5ffc45f29b1932235ac5f6d63c059853646677112d9
+    working_dir: /src
+    command: [go, test, -tags, conformance, -count=1, github.com/lukemundy/cdr-lab/conformance/...]
+    environment:
+      GOCACHE: /cache/build
+      GOMODCACHE: /cache/mod
+      GOTOOLCHAIN: local
+      REGISTER_PUBLIC_URL: https://register:8081
+      REGISTER_OPERATOR_URL: http://register:8082
+      REGISTER_SECURE_URL: https://register:8083
+      REGISTER_OPERATOR_TOKEN: lab-operator-token
+      DATAHOLDER_PROBE_URL: http://wattle-bank:8080
+      DATAHOLDER_OPERATOR_URL: http://wattle-bank:8082
+      DATAHOLDER_OPERATOR_TOKEN: lab-operator-token
+      MAIL_SINK_URL: http://mail:8025
+      # The Wattle Bank brand of services/register/seed/example.json.
+      DATAHOLDER_BRAND_ID: d7385786-d8b1-4d4b-bb80-b21616df1a4d
+      PKI_CA_BUNDLE: /src/.lab/pki/cdr/ca-bundle.pem
+      PKI_PUBLIC_ROOT: /src/.lab/pki/public/root.crt
+      PKI_CLIENT_CERT: /src/.lab/pki/conformance/client.crt
+      PKI_CLIENT_KEY: /src/.lab/pki/conformance/client.key
+      PKI_REVOKED_CLIENT_CERT: /src/.lab/pki/conformance/revoked.crt
+      PKI_REVOKED_CLIENT_KEY: /src/.lab/pki/conformance/revoked.key
+      PKI_REVOCATION_CLIENT_CERT: /src/.lab/pki/conformance/revocation.crt
+      PKI_REVOCATION_CLIENT_KEY: /src/.lab/pki/conformance/revocation.key
+      PKI_UNREGISTERED_CLIENT_CERT: /src/.lab/pki/conformance/unregistered.crt
+      PKI_UNREGISTERED_CLIENT_KEY: /src/.lab/pki/conformance/unregistered.key
+      PKI_INACTIVE_CLIENT_CERT: /src/.lab/pki/conformance/inactive.crt
+      PKI_INACTIVE_CLIENT_KEY: /src/.lab/pki/conformance/inactive.key
+      PKI_STATUS_CLIENT_CERT: /src/.lab/pki/conformance/status.crt
+      PKI_STATUS_CLIENT_KEY: /src/.lab/pki/conformance/status.key
+      PKI_REGISTRATION_CLIENT_CERT: /src/.lab/pki/conformance/registration.crt
+      PKI_REGISTRATION_CLIENT_KEY: /src/.lab/pki/conformance/registration.key
+      # The seed file gives https://conformance:8443 as the JWKS host of the token test software products.
+      JWKS_LISTEN_ADDRESS: :8443
+      # The seed file gives https://conformance:8444 as the JWKS host of the software products of the data holder tests,
+      # and as the recipient base URI of one of them.
+      DATAHOLDER_JWKS_LISTEN_ADDRESS: :8444
+      JWKS_TLS_CERT: /src/.lab/pki/conformance/jwks.crt
+      JWKS_TLS_KEY: /src/.lab/pki/conformance/jwks.key
+    volumes:
+      - .:/src:ro,z
+      - ${CONFORMANCE_GO_CACHE:-go-cache}:/cache
+    depends_on:
+      mail:
+        condition: service_healthy
+      wattle-bank:
+        condition: service_started
+
+  # The OpenID conformance suite (FAPI 1.0 Advanced), from the OpenID Foundation. openid-runner configures it and runs
+  # its test plan against the data holder.
+  openid-runner:
+    <<: *lab-dns
+    profiles: [openid]
+    # Keep the Go version the same as in mise.toml.
+    image: docker.io/library/golang:1.27.4-trixie@sha256:b54b2639de8c1bfe538ec5ffc45f29b1932235ac5f6d63c059853646677112d9
+    working_dir: /src
+    command: [go, test, -tags, openid, -count=1, -v, -timeout, 90m, github.com/lukemundy/cdr-lab/conformance/openid/...]
+    environment:
+      GOCACHE: /cache/build
+      GOMODCACHE: /cache/mod
+      GOTOOLCHAIN: local
+      # The suite refuses a request that is not HTTPS.
+      OPENID_SUITE_URL: https://openid:8443
+      # The host browser opens the suite on this port of compose.yaml.
+      OPENID_SUITE_PUBLIC_URL: https://localhost:8443
+      REGISTER_PUBLIC_URL: https://register:8081
+      REGISTER_OPERATOR_URL: http://register:8082
+      REGISTER_SECURE_URL: https://register:8083
+      REGISTER_OPERATOR_TOKEN: lab-operator-token
+      DATAHOLDER_PROBE_URL: http://wattle-bank:8080
+      DATAHOLDER_OPERATOR_URL: http://wattle-bank:8082
+      DATAHOLDER_OPERATOR_TOKEN: lab-operator-token
+      # The Wattle Bank brand of services/register/seed/example.json.
+      DATAHOLDER_BRAND_ID: d7385786-d8b1-4d4b-bb80-b21616df1a4d
+      PKI_CA_BUNDLE: /src/.lab/pki/cdr/ca-bundle.pem
+      PKI_PUBLIC_ROOT: /src/.lab/pki/public/root.crt
+      PKI_CLIENT_1_CERT: /src/.lab/pki/openid/client-1.crt
+      PKI_CLIENT_1_KEY: /src/.lab/pki/openid/client-1.key
+      PKI_CLIENT_2_CERT: /src/.lab/pki/openid/client-2.crt
+      PKI_CLIENT_2_KEY: /src/.lab/pki/openid/client-2.key
+      # The seed file gives https://openid-runner:8443 as the JWKS host of the two clients.
+      JWKS_LISTEN_ADDRESS: :8443
+      JWKS_TLS_CERT: /src/.lab/pki/openid/jwks.crt
+      JWKS_TLS_KEY: /src/.lab/pki/openid/jwks.key
+    volumes:
+      - .:/src:ro,z
+      - ${CONFORMANCE_GO_CACHE:-go-cache}:/cache
+    depends_on:
+      openid:
+        condition: service_healthy
+      wattle-bank:
+        condition: service_started
+      register:
+        condition: service_started
+
+  # The TLS front of the suite. The seed file gives https://openid:8443 as the host of the redirect URI of the clients.
+  openid:
+    <<: *lab-dns
+    profiles: [openid]
+    image: docker.io/library/caddy:2.11.9-alpine@sha256:0bbb055bda6793c999bde78b1b5ce3e89f829fb031af2cf50056ea1246559fee
+    healthcheck:
+      test: [CMD, wget, --quiet, --spider, --no-check-certificate, https://127.0.0.1:8443/]
+      interval: 2s
+      timeout: 2s
+      start_period: 120s
+    ports:
+      - 127.0.0.1:8443:8443
+    volumes:
+      - ./conformance/openid/Caddyfile:/etc/caddy/Caddyfile:ro,z
+      - ./.lab/pki/openid/suite.crt:/tls/suite.crt:ro,z
+      - ./.lab/pki/openid/suite.key:/tls/suite.key:ro,z
+    depends_on:
+      openid-server:
+        condition: service_started
+
+  openid-server:
+    <<: *lab-dns
+    profiles: [openid]
+    image: registry.gitlab.com/openid/conformance-suite:release-v5.3.3@sha256:377ab51f011d821c4b6f7729053e85adf062d691e51a3615f40507fd900a2436
+    environment:
+      BASE_URL: https://openid:8443
+      MONGODB_HOST: openid-mongodb
+      # The dev profile permits the API with no login.
+      SPRING_PROFILES_ACTIVE: dev
+      # The suite does not start without the clients of its login providers. The dev profile does not use them.
+      OIDC_GOOGLE_CLIENTID: unused
+      OIDC_GOOGLE_SECRET: unused
+      OIDC_GITLAB_CLIENTID: unused
+      OIDC_GITLAB_SECRET: unused
+      # The browser of the suite verifies the TLS certificates of the data holder and of the TLS front.
+      JAVA_EXTRA_ARGS: >-
+        -Djavax.net.ssl.trustStore=/pki/truststore.p12
+        -Djavax.net.ssl.trustStoreType=PKCS12
+        -Djavax.net.ssl.trustStorePassword=lab-truststore
+    volumes:
+      - ./.lab/pki/openid/truststore.p12:/pki/truststore.p12:ro,z
+    depends_on:
+      openid-mongodb:
+        condition: service_started
+
+  # Keep the version that the suite uses (docker-compose-prebuilt.yml of the suite).
+  openid-mongodb:
+    <<: *lab-dns
+    profiles: [openid]
+    image: docker.io/library/mongo:9.0.4@sha256:452bdaf2127b8ff851e31410a267809b9829eded219979f2210e7c7efb85a058
+
+  # The mail sink of the lab: it accepts each email of a service over SMTP, keeps it in memory and delivers none.
+  mail:
+    <<: *lab-dns
+    image: docker.io/axllent/mailpit:v1.33.1@sha256:aef2aacc11f075ec0fb6874275ee4a421e688e11a96ebb296134d1735c7761ce
+    ports:
+      - 127.0.0.1:8025:8025
+    healthcheck:
+      test: [CMD, /mailpit, readyz]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  postgres:
+    <<: *lab-dns
+    image: &postgres-image docker.io/library/postgres:18.6-trixie@sha256:3a4264520e121176619f54ff867d12774bc81e95e7b84db58d63bccdb6144b81
+    # Lab-only credentials. The tests connect as this superuser (mise.toml).
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      # TCP, because the temporary server that initialises the database listens on the socket only.
+      test: [CMD, pg_isready, --host=127.0.0.1, --username=postgres, --dbname=postgres]
+      interval: 2s
+      timeout: 2s
+      start_period: 30s
+    ports:
+      - 127.0.0.1:5432:5432
+    volumes:
+      # PostgreSQL 18 images keep the data in a version directory below this path.
+      - postgres-data:/var/lib/postgresql
+      # The image runs this file one time, when the volume is empty.
+      - ./lab/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro,z
+
+  # Makes each service user a member of the roles that the migrations of its service create.
+  postgres-grants:
+    <<: *lab-dns
+    image: *postgres-image
+    command: [psql, --no-psqlrc, --set=ON_ERROR_STOP=1, --file=/grants.sql]
+    environment:
+      PGHOST: postgres
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+    volumes:
+      - ./lab/postgres/grants.sql:/grants.sql:ro,z
+    depends_on:
+      register-migrate:
+        condition: service_completed_successfully
+      wattle-bank-migrate:
+        condition: service_completed_successfully
+
+  lgtm:
+    <<: *lab-dns
+    profiles: [telemetry]
+    image: docker.io/grafana/otel-lgtm:0.39.0@sha256:4c8056c9c05fcb3c8fd93800e85334bfd79b4d0271b47a54a121a64af41fe1fe
+    environment:
+      TEMPO_EXTRA_ARGS: --query-frontend.mcp-server.enabled=true
+    healthcheck:
+      test: [CMD, test, -f, /tmp/ready]
+      interval: 5s
+      timeout: 2s
+      start_period: 60s
+    ports:
+      - 127.0.0.1:3000:3000
+      - 127.0.0.1:3100:3100
+      - 127.0.0.1:3200:3200
+      - 127.0.0.1:4317:4317
+      - 127.0.0.1:4318:4318
+      - 127.0.0.1:9090:9090
+    volumes:
+      - lgtm-data:/data
+
+volumes:
+  go-cache:
+  lgtm-data:
+  postgres-data:

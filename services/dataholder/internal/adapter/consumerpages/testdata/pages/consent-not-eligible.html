@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en-AU" data-density="comfortable">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Share your data - Coastal Bank</title>
+<link rel="stylesheet" href="/static/consumer.css">
+<link rel="stylesheet" href="/brand/styles.css">
+</head>
+<body>
+<header class="cp-header"><img class="cp-logo" src="/brand/logo.svg" alt="Coastal Bank"><span class="cp-secure"><svg class="cp-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Secure</span></header>
+<div class="cp-hero">
+<div class="cp-connection" aria-hidden="true"><span class="cp-initial">B</span><svg class="cp-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><img class="cp-mark" src="/brand/mark.svg" alt=""></div>
+<p><strong>Budget &lt;App&gt; &amp; Co</strong> asks for your data from Coastal Bank.</p>
+</div>
+<main class="cp-main">
+<div class="cp-card">
+<p class="cp-step">Step 3 of 3</p>
+<div class="cp-progress cp-progress-3" aria-hidden="true"></div>
+<h1>Share your data with Budget &lt;App&gt; &amp; Co</h1>
+<p>Budget Holdings Pty Ltd asks Coastal Bank to share your data. Budget Holdings Pty Ltd uses the brand name Budget &lt;App&gt; &amp; Co and the application Budget Tracker.</p>
+<h2>Data that Coastal Bank will share</h2>
+<div class="cp-clusters">
+<h3>Account name, type and balance</h3>
+<ul>
+<li>Name of account</li>
+<li>Type of account</li>
+<li>Account balance</li>
+</ul>
+</div>
+<h2>How long Coastal Bank will share your data</h2>
+<p>Coastal Bank will share your data one time.</p>
+<p>The data includes data from before today that Coastal Bank has for the accounts that you select.</p>
+<p>You can stop the sharing at any time. Sign in to Coastal Bank online banking and go to Data sharing, or ask Coastal Bank.</p>
+<p>You have no open account at Coastal Bank, so you cannot share your data with Budget &lt;App&gt; &amp; Co.</p>
+<form method="post" action="/authorize/flow-1">
+<input type="hidden" name="csrf_token" value="form-token">
+<button class="cp-button cp-quiet" type="submit" name="action" value="cancel">Cancel and go back to Budget &lt;App&gt; &amp; Co</button>
+</form>
+</div>
+</main>
+<footer class="cp-footer"><p>Coastal Bank is not a real bank and this is just a demonstration. CDR Lab has no affiliation with any real bank nor the ACCC, DSB, or any real CDR participant.</p></footer>
+</body>
+</html>
+

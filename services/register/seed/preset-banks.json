@@ -1,0 +1,109 @@
+{
+  "dataHolders": [
+    {
+      "legalEntityId": "dd4d6bc6-22f4-4f61-aae9-9580382718c8",
+      "legalEntityName": "Wattle Bank Limited",
+      "logoUri": "https://wattlebank.test:8081/brand/logo.svg",
+      "status": "ACTIVE",
+      "dataHolderBrands": [
+        {
+          "dataHolderBrandId": "d7385786-d8b1-4d4b-bb80-b21616df1a4d",
+          "brandName": "Wattle Bank",
+          "industries": [
+            "banking"
+          ],
+          "logoUri": "https://wattlebank.test:8081/brand/logo.svg",
+          "status": "ACTIVE",
+          "endpointDetail": {
+            "version": "v1",
+            "publicBaseUri": "https://wattlebank.test:8081",
+            "productBaseUri": "https://wattlebank.test:8081",
+            "resourceBaseUri": "https://wattlebank.test:8083",
+            "infosecBaseUri": "https://wattlebank.test:8081",
+            "websiteUri": "https://wattlebank.test"
+          },
+          "jwksEndpoint": "https://wattlebank.test:8081/jwks"
+        }
+      ]
+    },
+    {
+      "legalEntityId": "830186b8-6060-4773-8b59-e8567a13df01",
+      "legalEntityName": "Redgum Bank Limited",
+      "logoUri": "https://redgumbank.test:8081/brand/logo.svg",
+      "status": "ACTIVE",
+      "dataHolderBrands": [
+        {
+          "dataHolderBrandId": "4967dd80-2cd2-43c3-8b13-f6faafb684ad",
+          "brandName": "Redgum Bank",
+          "industries": [
+            "banking"
+          ],
+          "logoUri": "https://redgumbank.test:8081/brand/logo.svg",
+          "status": "ACTIVE",
+          "endpointDetail": {
+            "version": "v1",
+            "publicBaseUri": "https://redgumbank.test:8081",
+            "productBaseUri": "https://redgumbank.test:8081",
+            "resourceBaseUri": "https://redgumbank.test:8083",
+            "infosecBaseUri": "https://redgumbank.test:8081",
+            "websiteUri": "https://redgumbank.test"
+          },
+          "jwksEndpoint": "https://redgumbank.test:8081/jwks"
+        }
+      ]
+    },
+    {
+      "legalEntityId": "00b12e81-207f-4fb7-b01f-d0c50cb1a06c",
+      "legalEntityName": "Harbour Bank Limited",
+      "logoUri": "https://harbourbank.test:8081/brand/logo.svg",
+      "status": "ACTIVE",
+      "dataHolderBrands": [
+        {
+          "dataHolderBrandId": "366f7b1c-93c7-4b84-9c92-ab2456614095",
+          "brandName": "Harbour Bank",
+          "industries": [
+            "banking"
+          ],
+          "logoUri": "https://harbourbank.test:8081/brand/logo.svg",
+          "status": "ACTIVE",
+          "endpointDetail": {
+            "version": "v1",
+            "publicBaseUri": "https://harbourbank.test:8081",
+            "productBaseUri": "https://harbourbank.test:8081",
+            "resourceBaseUri": "https://harbourbank.test:8083",
+            "infosecBaseUri": "https://harbourbank.test:8081",
+            "websiteUri": "https://harbourbank.test"
+          },
+          "jwksEndpoint": "https://harbourbank.test:8081/jwks"
+        }
+      ]
+    },
+    {
+      "legalEntityId": "0ed9945f-022e-4dca-9d05-ce327566e3de",
+      "legalEntityName": "Kestrel Bank Limited",
+      "logoUri": "https://kestrelbank.test:8081/brand/logo.svg",
+      "status": "ACTIVE",
+      "dataHolderBrands": [
+        {
+          "dataHolderBrandId": "1ee54312-624b-4679-bf33-cf4af113f934",
+          "brandName": "Kestrel Bank",
+          "industries": [
+            "banking"
+          ],
+          "logoUri": "https://kestrelbank.test:8081/brand/logo.svg",
+          "status": "ACTIVE",
+          "endpointDetail": {
+            "version": "v1",
+            "publicBaseUri": "https://kestrelbank.test:8081",
+            "productBaseUri": "https://kestrelbank.test:8081",
+            "resourceBaseUri": "https://kestrelbank.test:8083",
+            "infosecBaseUri": "https://kestrelbank.test:8081",
+            "websiteUri": "https://kestrelbank.test"
+          },
+          "jwksEndpoint": "https://kestrelbank.test:8081/jwks"
+        }
+      ]
+    }
+  ],
+  "dataRecipients": []
+}

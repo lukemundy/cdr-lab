@@ -1,0 +1,16 @@
+/*
+ * The stylesheet of the design system. A UI imports this file once, and imports no other Tailwind CSS.
+ */
+@import "tailwindcss";
+@import "@cdr-lab/tokens/tokens.css";
+@import "@cdr-lab/tokens/fonts.css";
+@import "@cdr-lab/tokens/theme.css";
+
+/* Tailwind does not scan a workspace package that an app imports, so the package gives its own source. */
+@source "./";
+
+@layer base {
+  body {
+    @apply bg-page font-sans text-fg;
+  }
+}

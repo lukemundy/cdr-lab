@@ -1,0 +1,152 @@
+version: "2"
+
+run:
+  # Also lint the conformance tests and the OpenID conformance run, which have these build tags.
+  build-tags:
+    - conformance
+    - openid
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - contextcheck
+    - depguard
+    - errorlint
+    - exhaustive
+    - forbidigo
+    - gochecknoinits
+    - gomoddirectives
+    - gosec
+    - lll
+    - modernize
+    - musttag
+    - nilerr
+    - noctx
+    - nolintlint
+    - rowserrcheck
+    - sloglint
+    - sqlclosecheck
+    - testifylint
+    - usetesting
+    - wsl_v5
+  settings:
+    depguard:
+      rules:
+        domain-is-pure:
+          list-mode: strict
+          files:
+            - "**/internal/domain/**"
+            - "!$test"
+          allow:
+            - $gostd
+            # Only a parser, with no I/O. The longer match wins over the deny of net.
+            - net/url
+          deny:
+            - pkg: context
+              desc: domain operations do no I/O
+            - pkg: os
+              desc: domain operations do no I/O
+            - pkg: net
+              desc: domain operations do no I/O
+            - pkg: database/sql
+              desc: domain operations do no I/O
+            - pkg: log
+              desc: domain operations do no I/O
+        # Generic event sourcing code has no dependencies, so that the app layer of each service can use it.
+        eventsourcing-is-pure:
+          list-mode: strict
+          files:
+            - "**/pkg/eventsourcing/*.go"
+            - "!$test"
+          allow:
+            - $gostd
+        # The pki command and the Register share the CA code, so it has no dependencies.
+        ca-is-standard-library-only:
+          list-mode: strict
+          files:
+            - "**/pkg/ca/*.go"
+            - "!$test"
+          allow:
+            - $gostd
+        # Add these two rules for each service.
+        dataholder-adapters-only-in-root:
+          files:
+            - "**/services/dataholder/**"
+            - "!**/services/dataholder/internal/root/**"
+            - "!**/services/dataholder/internal/adapter/**/*_test.go"
+          deny:
+            - pkg: github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter
+              desc: only the composition root connects adapters; the app layer defines ports, and adapters implement them
+        dataholder-root-only-in-main:
+          files:
+            - "**/services/dataholder/**"
+            - "!**/services/dataholder/cmd/**"
+          deny:
+            - pkg: github.com/lukemundy/cdr-lab/services/dataholder/internal/root
+              desc: only main calls the composition root
+        register-adapters-only-in-root:
+          files:
+            - "**/services/register/**"
+            - "!**/services/register/internal/root/**"
+            - "!**/services/register/internal/adapter/**/*_test.go"
+          deny:
+            - pkg: github.com/lukemundy/cdr-lab/services/register/internal/adapter
+              desc: only the composition root connects adapters; the app layer defines ports, and adapters implement them
+        register-root-only-in-main:
+          files:
+            - "**/services/register/**"
+            - "!**/services/register/cmd/**"
+          deny:
+            - pkg: github.com/lukemundy/cdr-lab/services/register/internal/root
+              desc: only main calls the composition root
+    forbidigo:
+      forbid:
+        - pattern: ^time\.Now$
+          msg: the app layer gives the time to the domain
+        - pattern: ^rand\.
+          msg: the app layer gives random values and IDs to the domain
+      analyze-types: true
+    gomoddirectives:
+      toolchain-forbidden: true
+    gosec:
+      excludes:
+        - G115 # integer overflow conversion: too many false positives
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment
+        - shadow
+    lll:
+      line-length: 120
+      tab-width: 4
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+    rowserrcheck:
+      packages:
+        - github.com/jackc/pgx/v5
+    sloglint:
+      no-mixed-args: true
+      context: scope
+    staticcheck:
+      checks:
+        - all
+  exclusions:
+    rules:
+      - path-except: /internal/domain/
+        linters:
+          - forbidigo
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+    - golines
+  settings:
+    golines:
+      max-len: 120
+      shorten-comments: true
+    goimports:
+      local-prefixes:
+        - github.com/lukemundy/cdr-lab

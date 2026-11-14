@@ -1,0 +1,21 @@
+# Values that render the chart in the tests and in mise run lint:chart. They are not for a deployment.
+image:
+  tag: 0123abc
+publicBaseURL: https://register.test:8081
+secureBaseURL: https://register.test:8083
+crlURL: http://register.test:8085/crl/cdr-intermediate.crl
+operator:
+  allowedHosts: [register.test:8082]
+  tokenSecret: register-operator-token
+telemetry:
+  otlpEndpoint: http://otel.test:4318
+database:
+  host: postgres.test
+  name: register
+  ownerSecret: register-owner
+  serviceSecret: register-service
+pki:
+  publicTLSSecret: register-public-tls
+  secureTLSSecret: register-secure-tls
+  intermediateSecret: cdr-intermediate
+  caBundleSecret: cdr-ca-bundle

@@ -1,0 +1,7 @@
+/*
+ * The stylesheet of a React consumer UI: the design system, and the styles of the consumer pages of the data holder in
+ * the components layer, so that a utility class can change them. A consumer UI imports this file in place of
+ * styles.css. DESIGN.md (Consumer pages) gives the rules.
+ */
+@import "./styles.css";
+@import "./consumer-pages.css" layer(components);

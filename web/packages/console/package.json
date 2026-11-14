@@ -1,0 +1,32 @@
+{
+  "name": "@cdr-lab/console",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./app": "./src/app.tsx",
+    "./form-values": "./src/form-values.ts",
+    "./list-search": "./src/list-search.ts",
+    "./problem": "./src/problem.ts",
+    "./query": "./src/query.ts",
+    "./record-actions": "./src/record-actions.tsx",
+    "./router-search": "./src/router-search.ts",
+    "./test/app": "./src/test/app.tsx",
+    "./e2e/checks": "./src/e2e/checks.ts",
+    "./e2e/dataholder-lab": "./src/e2e/dataholder-lab.ts"
+  },
+  "dependencies": {
+    "@cdr-lab/ui": "workspace:*",
+    "@tanstack/react-query": "5.107.1",
+    "@tanstack/react-router": "1.170.46"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "peerDependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  }
+}

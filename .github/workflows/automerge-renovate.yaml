@@ -1,0 +1,76 @@
+name: Automerge Renovate PRs
+
+# This workflow merges the Renovate PRs on an interval when they reach a certain age (from PR open). This helps apply a
+# uniform wait time before merging new updates to help mitigate risks of bad versions or supply chain attacks.
+#
+# A person reviews each PR that has the label no-automerge, which Renovate adds to each major update.
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: automerge-renovate
+  cancel-in-progress: false
+
+env:
+  MIN_AGE_HOURS: "48"
+
+jobs:
+  automerge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # merge the PR
+      pull-requests: write # merge the PR
+      checks: read # read the check runs of the PR
+      statuses: read # read the commit statuses of the PR
+      actions: write # start the checks of main after the merge
+    steps:
+    - name: Merge oldest eligible Renovate PR
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+      run: |
+        set -euo pipefail
+
+        # A fork PR can have a renovate/ branch and no checks yet, so the PR must come from this repository and have the commits check.
+        # mergeStateStatus is the view of GITHUB_TOKEN, which has no workflows permission, so it can be BLOCKED here only.
+        candidates=$(gh pr list --state open --author app/renovate \
+          --json number,createdAt,author,isCrossRepository,headRefName,headRefOid,mergeStateStatus,statusCheckRollup,labels \
+          --jq '
+            ('"$MIN_AGE_HOURS"' | tonumber) as $age
+            | (now - ($age * 3600)) as $cutoff
+            | map(select(
+                .author.login == "app/renovate" and
+                (.isCrossRepository | not) and
+                (.headRefName | startswith("renovate/")) and
+                (any(.labels[]; .name == "no-automerge") | not) and
+                ((.createdAt | fromdateiso8601) < $cutoff) and
+                any((.statusCheckRollup // [])[]; .name == "commits") and
+                all((.statusCheckRollup // [])[];
+                  (((.conclusion // .state) // "") | ascii_upcase) as $s
+                  | ($s == "SUCCESS" or $s == "NEUTRAL" or $s == "SKIPPED"))
+              ))
+            | sort_by(.createdAt)
+          ')
+
+        jq -r '.[] | select(.mergeStateStatus != "CLEAN")
+          | "::warning::Renovate PR #\(.number) passes its checks but is \(.mergeStateStatus) for this job. Merge it by hand, or tick its rebase checkbox."' \
+          <<<"$candidates"
+
+        read -r pr sha < <(jq -r 'map(select(.mergeStateStatus == "CLEAN")) | .[0] // empty | "\(.number) \(.headRefOid)"' <<<"$candidates") || true
+
+        if [ -z "${pr:-}" ]; then
+          echo "No eligible Renovate PR to merge."
+          exit 0
+        fi
+
+        echo "Merging PR #$pr at $sha"
+        gh pr merge "$pr" --squash --match-head-commit "$sha"
+
+        # GitHub starts no workflow for a push that the GITHUB_TOKEN makes, so this job starts the checks of main.
+        gh workflow run ci.yml --ref main
+        gh workflow run commits.yml --ref main

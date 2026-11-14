@@ -1,0 +1,631 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: &paths-ignore
+      - docs/**
+      - "**/*.md"
+      - renovate.json
+  pull_request:
+    paths-ignore: *paths-ignore
+  # A weekly scan of the lock files for new advisories. The schedule runs only the audit job.
+  schedule:
+    - cron: "0 20 * * 0"
+  # The auto-merge workflow starts this run after it merges, because GitHub starts no push run for its merge.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to a pull request cancels the run that it replaces, and other runs never share a group.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+# CI does not start the telemetry backend of the lab deployment.
+env:
+  COMPOSE_PROFILES: ""
+  LAB_OTLP_ENDPOINT: ""
+  REGISTER_IMAGE: ghcr.io/${{ github.repository }}/register
+  DATAHOLDER_IMAGE: ghcr.io/${{ github.repository }}/dataholder
+
+jobs:
+  # Each job runs only when one of its inputs changes. A run with no base commit runs all jobs.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      go: ${{ steps.diff.outputs.go }}
+      conformance: ${{ steps.diff.outputs.conformance }}
+      web: ${{ steps.diff.outputs.web }}
+      register-image: ${{ steps.diff.outputs.register-image }}
+      dataholder-image: ${{ steps.diff.outputs.dataholder-image }}
+      audit: ${{ steps.diff.outputs.audit }}
+      chart: ${{ steps.diff.outputs.chart }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # The base is the first parent of the merge commit of a pull request, or of the squash commit of a push to main.
+          fetch-depth: 2
+
+      - name: Find the changed inputs
+        id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          base=""
+          case "$EVENT" in
+            pull_request) base=HEAD^1 ;;
+            push) git cat-file -e "$BEFORE^{commit}" 2>/dev/null && base="$BEFORE" || true ;;
+          esac
+
+          # Prints true when a path changed, when there is no base, or when git diff fails.
+          changed() {
+            if [ -n "$base" ] && git diff --quiet "$base" HEAD -- "$@"; then echo false; else echo true; fi
+          }
+
+          shared=(mise.toml .github/workflows/ci.yml)
+          backend=(go.mod go.sum lab pkg pki services conformance compose.yaml)
+          if [ "$EVENT" = schedule ]; then
+            printf '%s\n' go=false conformance=false web=false register-image=false dataholder-image=false audit=true chart=false >> "$GITHUB_OUTPUT"
+          else
+            {
+              # Go tests check the brand directory contract against the token names and the fonts of the design system.
+              echo "go=$(changed "${shared[@]}" "${backend[@]}" .golangci.yml web/packages/tokens/tokens \
+                web/packages/tokens/fonts.json)"
+              echo "conformance=$(changed "${shared[@]}" "${backend[@]}" .dockerignore)"
+              echo "web=$(changed "${shared[@]}" web services/register/internal/adapter/console/openapi.yaml \
+                services/dataholder/internal/adapter/console/openapi.yaml \
+                services/dataholder/internal/adapter/banksite/openapi.yaml services/dataholder/brands \
+                services/dataholder/internal/adapter/consumerpages/testdata)"
+              # All inputs of each image, so that each change to an image publishes it, and the lab that the job starts.
+              echo "register-image=$(changed "${shared[@]}" go.mod go.sum pkg services/register web .dockerignore \
+                compose.yaml lab)"
+              echo "dataholder-image=$(changed "${shared[@]}" go.mod go.sum pkg services/dataholder web .dockerignore \
+                compose.yaml lab)"
+              echo "audit=$(changed "${shared[@]}" osv-scanner.toml go.mod go.sum web/pnpm-lock.yaml)"
+              echo "chart=$(changed "${shared[@]}" charts go.mod go.sum)"
+            } >> "$GITHUB_OUTPUT"
+          fi
+          cat "$GITHUB_OUTPUT"
+
+  lint:
+    needs: changes
+    if: needs.changes.outputs.go == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Only main saves a cache, so that a pull request cannot change the cache that other runs use.
+      - &install-mise
+        name: Install Mise
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          version: 2026.11.8
+          cache_save: ${{ github.event_name == 'push' }}
+
+      - name: Restore the Go and golangci-lint caches
+        id: cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/.cache/golangci-lint
+            ~/go/pkg/mod
+          key: go-lint-${{ hashFiles('go.sum', 'mise.toml') }}-${{ github.sha }}
+          restore-keys: go-lint-${{ hashFiles('go.sum', 'mise.toml') }}-
+
+      - name: Tidy
+        run: mise run tidy && git diff --exit-code
+
+      - name: Lint
+        run: mise run lint:go
+
+      - name: Check the Go and Node image versions
+        run: mise run lint:versions
+
+      # Only main saves a cache, so that a pull request cannot change the cache that other runs use.
+      - name: Save the Go and golangci-lint caches
+        if: github.event_name == 'push' && steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/.cache/golangci-lint
+            ~/go/pkg/mod
+          key: ${{ steps.cache.outputs.cache-primary-key }}
+
+  test:
+    needs: changes
+    if: needs.changes.outputs.go == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - *install-mise
+
+      - name: Restore the Go caches
+        id: cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: go-test-${{ hashFiles('go.sum', 'mise.toml') }}-${{ github.sha }}
+          restore-keys: go-test-${{ hashFiles('go.sum', 'mise.toml') }}-
+
+      - name: Start PostgreSQL
+        run: docker-compose up --detach --wait postgres
+
+      - name: Test
+        env:
+          # Without this flag, Go uses the test results in the restored cache.
+          GOFLAGS: -count=1
+        run: mise run test:go
+
+      - name: Build
+        env:
+          BUILD_ID: ${{ github.run_id }}
+        run: mise run build:go
+
+      - name: Save the Go caches
+        if: github.event_name == 'push' && steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ steps.cache.outputs.cache-primary-key }}
+
+  # The lab jobs load these images, so that parallel jobs do not each build the same images.
+  images:
+    needs: changes
+    if: >-
+      needs.changes.outputs.conformance == 'true' || needs.changes.outputs.register-image == 'true' ||
+      needs.changes.outputs.dataholder-image == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - *install-mise
+
+      - name: Build the images
+        env:
+          BUILD_ID: ${{ github.run_id }}
+        run: mise run build:images
+
+      # The images that have no registry in their name are the images that compose builds.
+      - name: Save the images
+        run: |
+          set -euo pipefail
+          docker save $(docker-compose config --images | grep -v /) --output "$RUNNER_TEMP/images.tar"
+
+      - name: Upload the images
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: images
+          path: ${{ runner.temp }}/images.tar
+          retention-days: 1
+          if-no-files-found: error
+
+      # The kernel messages can give the cause of a "Bus error" in the web build, which occurs only on hosted runners.
+      - name: Show the kernel messages
+        if: failure() && runner.environment == 'github-hosted'
+        run: sudo dmesg | tail -n 50
+
+  conformance:
+    needs: [changes, images]
+    if: needs.changes.outputs.conformance == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - *install-mise
+
+      # The pki task of the lab deployment compiles on the runner.
+      - name: Restore the Go caches
+        id: cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/conformance-go
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: go-conformance-${{ hashFiles('go.sum', 'mise.toml') }}-${{ github.sha }}
+          restore-keys: go-conformance-${{ hashFiles('go.sum', 'mise.toml') }}-
+
+      # No job starts the other preset banks, so this check finds a fault in their services before a lab starts them.
+      - name: Check the compose file with the all-banks profile
+        run: docker-compose --profile all-banks config --quiet
+
+      - &download-images
+        name: Download the images
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: images
+          path: ${{ runner.temp }}
+
+      - name: Start the lab deployment
+        run: docker load --input "$RUNNER_TEMP/images.tar" && mise run up --no-build
+
+      - name: Run the conformance tests
+        run: CONFORMANCE_GO_CACHE="$HOME/.cache/conformance-go" mise run conformance
+
+      - name: Save the Go caches
+        if: github.event_name == 'push' && steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/conformance-go
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ steps.cache.outputs.cache-primary-key }}
+
+      - name: Show the service logs
+        if: failure()
+        run: docker-compose logs
+
+      - name: Stop the lab deployment
+        if: always()
+        run: mise run reset
+
+  web:
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - *install-mise
+
+      - name: Find the pnpm store
+        id: store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the pnpm store and the browsers
+        id: cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ${{ steps.store.outputs.path }}
+            ~/.cache/ms-playwright
+          key: web-${{ hashFiles('web/pnpm-lock.yaml', 'mise.toml') }}-${{ github.sha }}
+          restore-keys: web-${{ hashFiles('web/pnpm-lock.yaml', 'mise.toml') }}-
+
+      # Fails when the lock file is not current, when a dependency has a build script that allowBuilds does not name,
+      # or when a version is newer than the minimum release age (web/pnpm-workspace.yaml).
+      - name: Install from the lock file
+        run: mise run web:install
+
+      - name: Check the registry signatures
+        run: pnpm audit signatures
+
+      # Also fails for a new generated file that is not committed.
+      - name: Check the generated files
+        run: |
+          mise run generate
+          git status --porcelain
+          test -z "$(git status --porcelain)"
+
+      - name: Lint
+        run: mise run lint:web
+
+      - name: Test
+        run: mise run test:web
+
+      - name: Save the pnpm store and the browsers
+        if: github.event_name == 'push' && steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ${{ steps.store.outputs.path }}
+            ~/.cache/ms-playwright
+          key: ${{ steps.cache.outputs.cache-primary-key }}
+
+  register-image:
+    needs: [changes, images]
+    if: needs.changes.outputs.register-image == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - *install-mise
+
+      # The pki task compiles on the runner. This job does not save the caches of the conformance and web jobs.
+      - name: Restore the Go caches
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: go-conformance-${{ hashFiles('go.sum', 'mise.toml') }}-${{ github.sha }}
+          restore-keys: go-conformance-${{ hashFiles('go.sum', 'mise.toml') }}-
+
+      - name: Find the pnpm store
+        id: store
+        working-directory: web
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the pnpm store and the browsers
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ${{ steps.store.outputs.path }}
+            ~/.cache/ms-playwright
+          key: web-${{ hashFiles('web/pnpm-lock.yaml', 'mise.toml') }}-${{ github.sha }}
+          restore-keys: web-${{ hashFiles('web/pnpm-lock.yaml', 'mise.toml') }}-
+
+      - *download-images
+
+      - name: Start the Register
+        run: docker load --input "$RUNNER_TEMP/images.tar" && mise run up --no-build register
+
+      - name: Check that the Register image has no Node
+        run: |
+          set -euo pipefail
+          files=$(docker export "$(docker-compose ps --quiet register)" | tar -t)
+          if grep -E '(^|/)(node|node_modules|npm|pnpm)(/|$)' <<< "$files"; then
+            echo "The Register image contains Node or npm packages." >&2
+            exit 1
+          fi
+
+      - name: Run the browser tests
+        run: mise run test:lab-web --project register-console
+
+      # Only the publish job can write packages, so it pushes this tested image.
+      - name: Save the Register image
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          image=$(docker inspect --format '{{.Image}}' "$(docker-compose ps --quiet register)")
+          # The same commands as BUILD_COMMIT and BUILD_COMMIT_SHORT in mise.toml, so that the tags are the commit
+          # that the service reports in its telemetry.
+          for tag in "$(git describe --always --abbrev=40 --exclude='*')" "$(git describe --always --exclude='*')"; do
+            docker tag "$image" "$REGISTER_IMAGE:$tag"
+          done
+          docker save "$REGISTER_IMAGE" --output "$RUNNER_TEMP/register-image.tar"
+
+      - name: Upload the Register image
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: register-image
+          path: ${{ runner.temp }}/register-image.tar
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Show the service logs
+        if: failure()
+        run: docker-compose logs
+
+      - name: Stop the lab deployment
+        if: always()
+        run: mise run reset
+
+  # A test job that fails or is cancelled stops the publish, but a test job that its path filter skipped does not.
+  register-image-publish:
+    needs: [lint, test, conformance, web, register-image]
+    if: >-
+      github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !cancelled() && !failure() &&
+      needs.register-image.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Download the Register image
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: register-image
+          path: ${{ runner.temp }}
+
+      - name: Push the Register image
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          docker load --input "$RUNNER_TEMP/register-image.tar"
+          docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin <<< "$GH_TOKEN"
+          docker push --all-tags "$REGISTER_IMAGE"
+          docker logout ghcr.io
+
+  chart:
+    needs: changes
+    if: needs.changes.outputs.chart == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - *install-mise
+
+      - name: Lint
+        run: mise run lint:chart
+
+      - name: Test
+        run: mise exec -- go test ./charts/...
+
+  chart-publish:
+    needs: chart
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - *install-mise
+
+      # A SemVer prerelease cannot start with a zero digit, so the version has a g before the short commit ID.
+      # Each chart gets the version of the commit, so a push never changes the version of a different commit.
+      - name: Push the charts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHART_REPOSITORY: oci://ghcr.io/${{ github.repository }}/charts
+        run: |
+          set -euo pipefail
+          commit=$(git describe --always --exclude='*')
+          mise run chart:deps
+          helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin <<< "$GH_TOKEN"
+          for chart in charts/*/Chart.yaml; do
+            dir=${chart%/Chart.yaml}
+            helm package "$dir" --version "0.0.0-g$commit" --app-version "$commit" --destination "$RUNNER_TEMP"
+            helm push "$RUNNER_TEMP/${dir#charts/}-0.0.0-g$commit.tgz" "$CHART_REPOSITORY"
+          done
+          helm registry logout ghcr.io
+
+  dataholder-image:
+    needs: [changes, images]
+    if: needs.changes.outputs.dataholder-image == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - *install-mise
+
+      # The pki task compiles on the runner. This job does not save the caches of the conformance and web jobs.
+      - name: Restore the Go caches
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: go-conformance-${{ hashFiles('go.sum', 'mise.toml') }}-${{ github.sha }}
+          restore-keys: go-conformance-${{ hashFiles('go.sum', 'mise.toml') }}-
+
+      - name: Find the pnpm store
+        id: store
+        working-directory: web
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the pnpm store and the browsers
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ${{ steps.store.outputs.path }}
+            ~/.cache/ms-playwright
+          key: web-${{ hashFiles('web/pnpm-lock.yaml', 'mise.toml') }}-${{ github.sha }}
+          restore-keys: web-${{ hashFiles('web/pnpm-lock.yaml', 'mise.toml') }}-
+
+      # The data holder is ready only after it gets the statuses from the Register, so compose also starts the Register.
+      - *download-images
+
+      - name: Start the data holder
+        run: docker load --input "$RUNNER_TEMP/images.tar" && mise run up --no-build wattle-bank
+
+      - name: Check that the data holder image has no Node
+        run: |
+          set -euo pipefail
+          files=$(docker export "$(docker-compose ps --quiet wattle-bank)" | tar -t)
+          if grep -E '(^|/)(node|node_modules|npm|pnpm)(/|$)' <<< "$files"; then
+            echo "The data holder image contains Node or npm packages." >&2
+            exit 1
+          fi
+
+      - name: Run the browser tests
+        run: mise run test:lab-web --project dataholder-console --project dataholder-bank
+
+      # Only the publish job can write packages, so it pushes this tested image.
+      - name: Save the data holder image
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          image=$(docker inspect --format '{{.Image}}' "$(docker-compose ps --quiet wattle-bank)")
+          # The same commands as BUILD_COMMIT and BUILD_COMMIT_SHORT in mise.toml, so that the tags are the commit
+          # that the service reports in its telemetry.
+          for tag in "$(git describe --always --abbrev=40 --exclude='*')" "$(git describe --always --exclude='*')"; do
+            docker tag "$image" "$DATAHOLDER_IMAGE:$tag"
+          done
+          docker save "$DATAHOLDER_IMAGE" --output "$RUNNER_TEMP/dataholder-image.tar"
+
+      - name: Upload the data holder image
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dataholder-image
+          path: ${{ runner.temp }}/dataholder-image.tar
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Show the service logs
+        if: failure()
+        run: docker-compose logs
+
+      - name: Stop the lab deployment
+        if: always()
+        run: mise run reset
+
+  dataholder-image-publish:
+    needs: [lint, test, conformance, web, dataholder-image]
+    if: >-
+      github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !cancelled() && !failure() &&
+      needs.dataholder-image.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Download the data holder image
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dataholder-image
+          path: ${{ runner.temp }}
+
+      - name: Push the data holder image
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          docker load --input "$RUNNER_TEMP/dataholder-image.tar"
+          docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin <<< "$GH_TOKEN"
+          docker push --all-tags "$DATAHOLDER_IMAGE"
+          docker logout ghcr.io
+
+  # Known vulnerabilities and known malicious packages (MAL- advisories) in the Go and npm dependencies.
+  audit:
+    needs: changes
+    if: needs.changes.outputs.audit == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - *install-mise
+
+      - name: Scan the lock files
+        run: mise run audit

@@ -1,0 +1,9 @@
+# The values of the preset brand Wattle Bank that agree with its record in services/register/seed/preset-banks.json.
+# A deployment adds the other values, and changes the base URLs here and in the seed to the hosts of the deployment.
+brand:
+  preset: wattle-bank
+  id: d7385786-d8b1-4d4b-bb80-b21616df1a4d
+publicBaseURL: https://wattlebank.test:8081
+secureBaseURL: https://wattlebank.test:8083
+mail:
+  from: no-reply@wattlebank.test

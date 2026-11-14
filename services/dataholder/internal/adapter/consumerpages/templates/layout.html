@@ -1,0 +1,37 @@
+{{define "head"}}<!doctype html>
+<html lang="en-AU" data-density="comfortable">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}}</title>
+<link rel="stylesheet" href="/static/consumer.css">
+<link rel="stylesheet" href="/brand/styles.css">
+</head>
+<body>
+<header class="cp-header"><img class="cp-logo" src="/brand/logo.svg" alt="{{.Bank}}"><span class="cp-secure">{{template "lock"}}Secure</span></header>
+{{if .Recipient}}<div class="cp-hero">
+<div class="cp-connection" aria-hidden="true"><span class="cp-initial">{{initial .Recipient}}</span><svg class="cp-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><img class="cp-mark" src="/brand/mark.svg" alt=""></div>
+<p><strong>{{.Recipient}}</strong> asks for your data from {{.Bank}}.</p>
+</div>
+{{end}}<main class="cp-main">
+<div class="cp-card">
+{{if .Step}}<p class="cp-step">Step {{.Step}} of 3</p>
+<div class="cp-progress cp-progress-{{.Step}}" aria-hidden="true"></div>
+{{end}}{{end}}
+{{define "card-end"}}</div>
+{{end}}
+{{define "foot"}}</main>
+<footer class="cp-footer"><p>{{demonstration .Bank}}</p></footer>
+</body>
+</html>
+{{end}}
+{{define "lock"}}<svg class="cp-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>{{end}}
+{{define "cancel"}}<form method="post" action="{{.Action}}">
+<input type="hidden" name="csrf_token" value="{{.Token}}">
+<button class="cp-button cp-quiet" type="submit" name="action" value="cancel">Cancel and go back to {{.Recipient}}</button>
+</form>
+{{end}}
+{{define "notice"}}{{if .Notice}}<p class="cp-alert" role="alert">{{.Notice}}</p>
+{{end}}{{end}}
+{{define "password"}}<div class="cp-note">{{template "lock"}}<p>{{.}}</p></div>
+{{end}}

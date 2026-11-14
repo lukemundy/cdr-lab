@@ -1,0 +1,317 @@
+[tools]
+# mise run lint:versions checks that the Go and Node images have these versions.
+go = "1.27.4"
+golangci-lint = "2.15.0"
+cocogitto = "7.0.0"
+docker-compose = "5.7.1"
+# Pin Node and pnpm only here, not also in web/.
+node = "26.13.0"
+pnpm = "12.16.1"
+osv-scanner = "2.7.1"
+helm = "4.3.2"
+kubeconform = "0.8.0"
+
+[env]
+# The image builds install this pnpm version, so that mise.toml is its only pin.
+PNPM_VERSION = '''{{ exec(command=`awk -F'"' '/^pnpm = /{print $2}' "` ~ config_root ~ `/mise.toml"`) }}'''
+# The lab starts the telemetry backend unless the environment gives a different value.
+COMPOSE_PROFILES = "{{ get_env(name='COMPOSE_PROFILES', default='telemetry') }}"
+
+[vars]
+# The -X flags in services/*/Dockerfile must match these variables.
+build_env = """
+export BUILD_COMMIT="$(git describe --always --dirty --abbrev=40 --exclude='*')"
+export BUILD_COMMIT_SHORT="$(git describe --always --dirty --exclude='*')"
+export BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+export BUILD_ID="${BUILD_ID:-local}"
+"""
+
+# Connection to the lab PostgreSQL (compose.yaml) for the tests.
+pg_env = """
+export PGHOST="${PGHOST:-localhost}"
+export PGUSER="${PGUSER:-postgres}"
+export PGPASSWORD="${PGPASSWORD:-postgres}"
+export PGDATABASE="${PGDATABASE:-postgres}"
+export PGSSLMODE="${PGSSLMODE:-disable}"
+"""
+
+[tasks.hooks]
+description = "Install the git hooks from cog.toml"
+run = "cog install-hook --all --overwrite"
+
+[tasks.tidy]
+description = "Run go mod tidy"
+run = "go mod tidy"
+
+[tasks.fmt]
+description = "Format all code"
+depends = ["fmt:go", "fmt:web"]
+
+[tasks."fmt:go"]
+description = "Format the Go code"
+run = "golangci-lint fmt ./..."
+
+[tasks."fmt:web"]
+description = "Format the web workspace"
+depends = ["web:install"]
+dir = "web"
+run = "pnpm run fmt"
+
+[tasks.lint]
+description = "Lint all code"
+depends = ["lint:go", "lint:web", "lint:versions", "lint:chart"]
+
+[tasks."chart:deps"]
+description = "Get the chart dependencies of each Chart.lock"
+run = """
+for chart in charts/*/Chart.yaml; do
+  helm dependency build --skip-refresh "${chart%/Chart.yaml}"
+done
+"""
+
+# ci/lint-values.yaml of each chart turns on each optional part.
+[tasks."lint:chart"]
+description = "Lint each chart, and check its manifests against the Kubernetes schemas"
+depends = ["chart:deps"]
+run = """
+for chart in charts/*/Chart.yaml; do
+  dir=${chart%/Chart.yaml}
+  helm lint --strict "$dir" --values "$dir/ci/test-values.yaml" --values "$dir/ci/lint-values.yaml"
+  helm template test "$dir" --kube-version 1.36.0 --values "$dir/ci/test-values.yaml" --values "$dir/ci/lint-values.yaml" |
+    kubeconform -strict -summary -kubernetes-version 1.36.0
+done
+"""
+
+[tasks."lint:go"]
+description = "Run golangci-lint"
+run = "golangci-lint run ./..."
+
+[tasks."lint:versions"]
+description = "Check that the Go and Node images have the versions of mise.toml"
+run = '''
+status=0
+for pair in go:golang node:node; do
+  tool=${pair%%:*} image=${pair#*:}
+  want=$(awk -F'"' "/^$tool = /{print \$2}" mise.toml)
+  for ref in $(grep -oh "docker.io/library/$image:[^@ ]*" services/*/Dockerfile compose.yaml); do
+    tag=${ref#*:}
+    case "$tag" in
+      "$want" | "$want"-*) ;;
+      *) echo "$ref: the $tool version of mise.toml is $want" >&2; status=1 ;;
+    esac
+  done
+done
+exit $status
+'''
+
+[tasks."lint:web"]
+description = "Type-check, lint and check the format of the web workspace"
+depends = ["web:install"]
+dir = "web"
+run = "pnpm run lint"
+
+[tasks.test]
+description = "Run all tests"
+depends = ["test:go", "test:web"]
+
+[tasks."test:go"]
+description = "Run the Go tests with the race detector. Database tests need the lab PostgreSQL."
+depends = ["chart:deps"]
+run = """
+{{ vars.pg_env }}
+go test -race github.com/lukemundy/cdr-lab/...
+"""
+
+[tasks."test:web"]
+description = "Run the web tests in a real browser"
+depends = ["build:web"]
+dir = "web"
+run = [
+  # The locked Playwright version selects the browser version.
+  "pnpm exec playwright install --only-shell chromium firefox",
+  "pnpm run test",
+]
+
+[tasks."build:web"]
+description = "Build the web workspace, for example the design tokens"
+depends = ["web:install"]
+dir = "web"
+run = "pnpm run build"
+
+[tasks.generate]
+description = "Generate the committed files from their sources, for example the console API types (CI fails if this changes files)"
+depends = ["web:install"]
+dir = "web"
+run = "pnpm --recursive run generate"
+
+[tasks."test:lab-web"]
+description = "Run the browser tests of the web UIs against the running lab deployment"
+depends = ["web:install"]
+dir = "web"
+# Node trusts the lab public CA, so that the tests can call the CDR APIs of the Register with TLS verification.
+# The data holder tests create their customers with the operator interface.
+env = { REGISTER_CONSOLE_URL = "http://localhost:8084", REGISTER_PUBLIC_URL = "https://localhost:8081", DATAHOLDER_CONSOLE_URL = "http://localhost:8184", DATAHOLDER_OPERATOR_URL = "http://localhost:8182", DATAHOLDER_OPERATOR_TOKEN = "lab-operator-token", DATAHOLDER_PUBLIC_URL = "https://localhost:8181", BANK_SITE_URL = "https://localhost:8185", NODE_EXTRA_CA_CERTS = "{{config_root}}/.lab/pki/public/root.crt" }
+run = [
+  "pnpm exec playwright install --only-shell chromium",
+  "pnpm exec playwright test",
+]
+
+[tasks."web:install"]
+description = "Install the web workspace dependencies from the lock file"
+hide = true
+dir = "web"
+run = "pnpm install --frozen-lockfile"
+
+[tasks.audit]
+description = "Scan the Go and pnpm lock files for known vulnerabilities and malicious packages"
+run = "osv-scanner scan --config osv-scanner.toml --lockfile go.mod --lockfile web/pnpm-lock.yaml"
+
+[tasks.conformance]
+description = "Run the conformance tests in the running lab deployment"
+# With --use-aliases, the Register finds the tests at the host name conformance.
+run = "docker-compose run --rm --use-aliases conformance"
+
+[tasks.build]
+description = "Build all service binaries and the web workspace"
+depends = ["build:go", "build:web"]
+
+[tasks."build:images"]
+description = "Build the images of the lab deployment"
+run = """
+{{ vars.build_env }}
+docker-compose build
+"""
+
+[tasks."build:go"]
+description = "Build all service binaries into bin/"
+run = """
+{{ vars.build_env }}
+p=github.com/lukemundy/cdr-lab/pkg/platform/buildinfo
+go build -o bin/ -ldflags "-X $p.commit=$BUILD_COMMIT -X $p.commitShort=$BUILD_COMMIT_SHORT -X $p.buildTime=$BUILD_TIME -X $p.id=$BUILD_ID" github.com/lukemundy/cdr-lab/services/.../cmd/...
+"""
+
+[tasks.pki]
+description = "Create the lab CAs and the lab certificates in .lab/pki if they do not exist"
+run = [
+  "go run github.com/lukemundy/cdr-lab/pki/cmd/pki init -dir .lab/pki",
+  """
+  pki="go run github.com/lukemundy/cdr-lab/pki/cmd/pki"
+  # The CRL listener of the Register (compose.yaml).
+  crl_url=http://register:8085/crl/cdr-intermediate.crl
+  mkdir -p .lab/pki/register .lab/pki/conformance .lab/pki/openid
+
+  # Any user can read these lab keys, because the containers read them as another user.
+  # O is the brand name in a client certificate and the legal entity name in a server certificate (pki/DESIGN.md, CSR profile).
+  cdr_certificate() {
+    openssl req -new -newkey rsa:2048 -nodes -keyout "$2.key" -out "$2.csr" \
+      -subj "/C=AU/O=$3/OU=Consumer Data Right/CN=$4" ${5:+-addext "subjectAltName=$5"} 2>/dev/null &&
+      chmod 644 "$2.key" &&
+      $pki issue -dir .lab/pki -type "$1" -crl-url "$crl_url" -out "$2.crt" "$2.csr" &&
+      rm "$2.csr"
+  }
+
+  if [ ! -f .lab/pki/register/public.crt ]; then
+    $pki issue-public -dir .lab/pki \
+      -cert .lab/pki/register/public.crt -key .lab/pki/register/public.key register localhost || exit 1
+  fi
+  if [ ! -f .lab/pki/register/secure.crt ]; then
+    cdr_certificate server .lab/pki/register/secure "Mock CDR Register" register DNS:register,DNS:localhost || exit 1
+  fi
+  # The four preset banks (compose.yaml), also when the all-banks profile is off, so that a lab can turn it on later.
+  for bank in "wattle-bank:Wattle Bank Limited" "redgum-bank:Redgum Bank Limited" \
+    "harbour-bank:Harbour Bank Limited" "kestrel-bank:Kestrel Bank Limited"; do
+    host=${bank%%:*}
+    legal_entity=${bank#*:}
+    mkdir -p ".lab/pki/$host"
+    if [ ! -f ".lab/pki/$host/public.crt" ]; then
+      $pki issue-public -dir .lab/pki \
+        -cert ".lab/pki/$host/public.crt" -key ".lab/pki/$host/public.key" "$host" localhost || exit 1
+    fi
+    if [ ! -f ".lab/pki/$host/secure.crt" ]; then
+      cdr_certificate server ".lab/pki/$host/secure" "$legal_entity" "$host" "DNS:$host,DNS:localhost" || exit 1
+    fi
+  done
+  if [ ! -f .lab/pki/conformance/client.crt ]; then
+    cdr_certificate client .lab/pki/conformance/client "Token Test" "Token Test Active" || exit 1
+  fi
+  if [ ! -f .lab/pki/conformance/unregistered.crt ]; then
+    cdr_certificate client .lab/pki/conformance/unregistered "Token Test" "Token Test Active" || exit 1
+  fi
+  if [ ! -f .lab/pki/conformance/inactive.crt ]; then
+    cdr_certificate client .lab/pki/conformance/inactive "Token Test" "Token Test Inactive" || exit 1
+  fi
+  if [ ! -f .lab/pki/conformance/jwks.crt ]; then
+    $pki issue-public -dir .lab/pki \
+      -cert .lab/pki/conformance/jwks.crt -key .lab/pki/conformance/jwks.key conformance || exit 1
+  fi
+  if [ ! -f .lab/pki/conformance/status.crt ]; then
+    cdr_certificate client .lab/pki/conformance/status "Status Test" "Status Test Web" || exit 1
+  fi
+  if [ ! -f .lab/pki/conformance/registration.crt ]; then
+    cdr_certificate client .lab/pki/conformance/registration "Registration Test" "Registration Test Web" || exit 1
+  fi
+  if [ ! -f .lab/pki/openid/client-1.crt ]; then
+    cdr_certificate client .lab/pki/openid/client-1 "OpenID Test" "OpenID Test Client 1" || exit 1
+  fi
+  if [ ! -f .lab/pki/openid/client-2.crt ]; then
+    cdr_certificate client .lab/pki/openid/client-2 "OpenID Test" "OpenID Test Client 2" || exit 1
+  fi
+  # The TLS front of the OpenID conformance suite, and the JWKS host of its two clients.
+  if [ ! -f .lab/pki/openid/suite.crt ]; then
+    $pki issue-public -dir .lab/pki -cert .lab/pki/openid/suite.crt -key .lab/pki/openid/suite.key openid localhost || exit 1
+  fi
+  if [ ! -f .lab/pki/openid/jwks.crt ]; then
+    $pki issue-public -dir .lab/pki -cert .lab/pki/openid/jwks.crt -key .lab/pki/openid/jwks.key openid-runner || exit 1
+  fi
+  # The conformance tests revoke this fixture through the Register before they use it.
+  if [ ! -f .lab/pki/conformance/revoked.crt ]; then
+    cdr_certificate client .lab/pki/conformance/revoked "Token Test" "Token Test Active" || exit 1
+  fi
+  # A conformance test revokes this fixture.
+  if [ ! -f .lab/pki/conformance/revocation.crt ]; then
+    cdr_certificate client .lab/pki/conformance/revocation "Token Test" "Token Test Active" || exit 1
+  fi
+  """,
+]
+
+[tasks.up]
+description = "Build and start the lab deployment, and wait until it is healthy. With --no-build, start the images that are there"
+depends = ["pki"]
+usage = """
+arg "[service]..." help="Start only these services and their dependencies"
+flag "--all-banks" help="Also start the three other preset banks (compose profile all-banks)"
+flag "--no-build" help="Do not build the images. Use the images that are there, for example the images that CI loads"
+"""
+run = """
+{{ vars.build_env }}
+if [ "${usage_all_banks:-}" = true ]; then
+  export COMPOSE_PROFILES="${COMPOSE_PROFILES:+$COMPOSE_PROFILES,}all-banks"
+fi
+build=--build
+if [ "${usage_no_build:-}" = true ]; then
+  build=--no-build
+fi
+docker-compose up --detach "$build" --wait --wait-timeout 60 ${usage_service:-}
+"""
+
+[tasks.openid-conformance]
+description = "Run the OpenID FAPI 1.0 Advanced conformance suite against the data holder in the running lab"
+depends = ["pki"]
+# The suite is Java. Its browser trusts only the CAs of this truststore.
+# With --use-aliases, the data holder finds the JWKS of the clients at the host name openid-runner.
+run = """
+if [ ! -f .lab/pki/openid/truststore.p12 ]; then
+  openssl pkcs12 -export -nokeys -in .lab/pki/public/root.crt -jdktrust anyExtendedKeyUsage \
+    -passout pass:lab-truststore -out .lab/pki/openid/truststore.p12 && chmod 644 .lab/pki/openid/truststore.p12 || exit 1
+fi
+docker-compose --profile openid run --rm --use-aliases openid-runner
+"""
+
+[tasks.down]
+description = "Stop the lab deployment and keep its data"
+# All profiles, so that the containers of the OpenID conformance suite also stop.
+run = "docker-compose --profile '*' down --remove-orphans"
+
+[tasks.reset]
+description = "Stop the lab deployment and delete its data and its CAs"
+run = ["docker-compose --profile '*' down --volumes --remove-orphans", "rm -rf .lab/pki"]

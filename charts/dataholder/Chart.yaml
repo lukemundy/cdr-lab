@@ -1,0 +1,10 @@
+apiVersion: v2
+name: dataholder
+description: One brand of the mock data holder of cdr-lab
+type: application
+# CI publishes each chart as 0.0.0-g<short commit>, with the short commit as the appVersion.
+version: 0.0.0
+dependencies:
+  - name: common
+    version: 5.3.0
+    repository: oci://ghcr.io/bjw-s-labs/helm

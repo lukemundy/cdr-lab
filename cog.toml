@@ -1,0 +1,11 @@
+# Conventional Commits configuration. See README.md.
+
+ignore_merge_commits = true
+
+scopes = ["authserver", "ca", "cds", "conformance", "dataholder", "eventsourcing", "pki", "openapi", "platform", "register", "deps", "web", "ui", "tokens", "console", "register-console", "dataholder-console", "dataholder-bank"]
+
+[git_hooks.commit-msg]
+script = """#!/bin/sh
+set -e
+mise exec -- cog verify --file "$1"
+"""

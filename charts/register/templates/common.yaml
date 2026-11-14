@@ -1,0 +1,174 @@
+{{- /* Helm's required accepts an empty list, so this check uses empty. */ -}}
+{{- define "register.required" -}}
+  {{- if empty (index . 1) -}}
+    {{- fail (printf "set %s: %s" (index . 0) (index . 2)) -}}
+  {{- end -}}
+  {{- index . 1 -}}
+{{- end -}}
+
+{{- define "register.secretKey" -}}
+valueFrom:
+  secretKeyRef:
+    name: {{ index . 0 }}
+    key: {{ index . 1 }}
+{{- end -}}
+
+{{- define "register.containerSecurityContext" -}}
+allowPrivilegeEscalation: false
+readOnlyRootFilesystem: true
+capabilities:
+  drop: [ALL]
+{{- end -}}
+
+{{- define "register.secretMount" -}}
+type: secret
+name: {{ index . 0 }}
+advancedMounts:
+  main:
+    main:
+      - path: {{ index . 1 }}
+        readOnly: true
+{{- end -}}
+
+{{- define "register.values" -}}
+{{- $v := .Values -}}
+{{- $_ := include "register.required" (list "operator.allowedHosts" $v.operator.allowedHosts "the Host header values of the operator interface") -}}
+{{- if $v.console.enabled -}}
+  {{- $_ = include "register.required" (list "console.allowedHosts" $v.console.allowedHosts "the Host header values of the console") -}}
+{{- end -}}
+{{- $image := dict
+  "repository" $v.image.repository
+  "tag" (include "register.required" (list "image.tag" $v.image.tag "the commit ID of the Register image"))
+  "digest" $v.image.digest
+-}}
+{{- $database := dict
+  "PGHOST" (include "register.required" (list "database.host" $v.database.host "the PostgreSQL host"))
+  "PGPORT" ($v.database.port | toString)
+  "PGDATABASE" (include "register.required" (list "database.name" $v.database.name "the database of the Register"))
+  "PGSSLMODE" $v.database.sslMode
+  "OTEL_EXPORTER_OTLP_ENDPOINT" (include "register.required" (list "telemetry.otlpEndpoint" $v.telemetry.otlpEndpoint "the OTLP HTTP endpoint"))
+-}}
+{{- $owner := include "register.required" (list "database.ownerSecret" $v.database.ownerSecret "the Secret of the owner user") -}}
+{{- $service := include "register.required" (list "database.serviceSecret" $v.database.serviceSecret "the Secret of the service user") -}}
+defaultPodOptions:
+  automountServiceAccountToken: false
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    seccompProfile:
+      type: RuntimeDefault
+
+controllers:
+  main:
+    replicas: 1
+    # One pod at a time, because the migrations take no lock and the Register is the issuing CA.
+    strategy: Recreate
+    initContainers:
+      migrate:
+        order: 1
+        image: {{ toYaml $image | nindent 10 }}
+        args: [migrate]
+        env:
+          {{- toYaml $database | nindent 10 }}
+          PGUSER: {{ include "register.secretKey" (list $owner "username") | nindent 12 }}
+          PGPASSWORD: {{ include "register.secretKey" (list $owner "password") | nindent 12 }}
+        securityContext: {{ include "register.containerSecurityContext" . | nindent 10 }}
+      {{- if $v.seed.configMap }}
+      seed:
+        order: 2
+        image: {{ toYaml $image | nindent 10 }}
+        args: [seed, -if-empty, /seed/participants.json]
+        env:
+          {{- toYaml $database | nindent 10 }}
+          PGUSER: {{ include "register.secretKey" (list $service "username") | nindent 12 }}
+          PGPASSWORD: {{ include "register.secretKey" (list $service "password") | nindent 12 }}
+        securityContext: {{ include "register.containerSecurityContext" . | nindent 10 }}
+      {{- end }}
+    containers:
+      main:
+        image: {{ toYaml $image | nindent 10 }}
+        args: [serve]
+        env:
+          {{- toYaml $database | nindent 10 }}
+          PGUSER: {{ include "register.secretKey" (list $service "username") | nindent 12 }}
+          PGPASSWORD: {{ include "register.secretKey" (list $service "password") | nindent 12 }}
+          PUBLIC_BASE_URL: {{ include "register.required" (list "publicBaseURL" $v.publicBaseURL "the base URL of the public APIs") }}
+          PUBLIC_TLS_CERT_FILE: /tls/public/tls.crt
+          PUBLIC_TLS_KEY_FILE: /tls/public/tls.key
+          SECURE_BASE_URL: {{ include "register.required" (list "secureBaseURL" $v.secureBaseURL "the base URL of the secure APIs") }}
+          SECURE_TLS_CERT_FILE: /tls/secure/tls.crt
+          SECURE_TLS_KEY_FILE: /tls/secure/tls.key
+          CDR_CA_BUNDLE_FILE: /pki/ca-bundle/ca.crt
+          CDR_INTERMEDIATE_CERT_FILE: /pki/intermediate/tls.crt
+          CDR_INTERMEDIATE_KEY_FILE: /pki/intermediate/tls.key
+          CDR_INTERMEDIATE_CRL_URL: {{ include "register.required" (list "crlURL" $v.crlURL "the CRL URL of the mock CDR intermediate CA") }}
+          {{- if $v.pki.publicRootSecret }}
+          SSL_CERT_FILE: /pki/public-root/ca.crt
+          {{- end }}
+          OPERATOR_TOKEN: {{ include "register.secretKey" (list (include "register.required" (list "operator.tokenSecret" $v.operator.tokenSecret "the Secret of the operator token")) "token") | nindent 12 }}
+          OPERATOR_ALLOWED_HOSTS: {{ $v.operator.allowedHosts | join "," | quote }}
+          CONSOLE_ENABLED: {{ $v.console.enabled | toString | quote }}
+          {{- if $v.console.enabled }}
+          CONSOLE_ALLOWED_HOSTS: {{ $v.console.allowedHosts | join "," | quote }}
+          {{- end }}
+        ports:
+          - {name: health, containerPort: 8080}
+          - {name: public, containerPort: 8081}
+          - {name: operator, containerPort: 8082}
+          - {name: secure, containerPort: 8083}
+          {{- if $v.console.enabled }}
+          - {name: console, containerPort: 8084}
+          {{- end }}
+          - {name: crl, containerPort: 8085}
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet: {path: /livez, port: 8080}
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet: {path: /readyz, port: 8080}
+          startup:
+            enabled: false
+        securityContext: {{ include "register.containerSecurityContext" . | nindent 10 }}
+
+service:
+  main:
+    controller: main
+    # A literal template, because the library can render the name only after it loads its defaults.
+    forceRename: {{ `{{ include "bjw-s.common.lib.chart.names.fullname" . }}` | quote }}
+    ports:
+      public: {port: 8081}
+      operator: {port: 8082}
+      secure: {port: 8083}
+      {{- if $v.console.enabled }}
+      console: {port: 8084}
+      {{- end }}
+      crl: {port: 8085}
+
+persistence:
+  public-tls: {{ include "register.secretMount" (list (include "register.required" (list "pki.publicTLSSecret" $v.pki.publicTLSSecret "the TLS Secret of the public APIs")) "/tls/public") | nindent 4 }}
+  secure-tls: {{ include "register.secretMount" (list (include "register.required" (list "pki.secureTLSSecret" $v.pki.secureTLSSecret "the TLS Secret of the secure APIs")) "/tls/secure") | nindent 4 }}
+  intermediate: {{ include "register.secretMount" (list (include "register.required" (list "pki.intermediateSecret" $v.pki.intermediateSecret "the Secret of the mock CDR intermediate CA")) "/pki/intermediate") | nindent 4 }}
+  ca-bundle: {{ include "register.secretMount" (list (include "register.required" (list "pki.caBundleSecret" $v.pki.caBundleSecret "the Secret of the CDR CA bundle")) "/pki/ca-bundle") | nindent 4 }}
+  {{- if $v.pki.publicRootSecret }}
+  public-root: {{ include "register.secretMount" (list $v.pki.publicRootSecret "/pki/public-root") | nindent 4 }}
+  {{- end }}
+  {{- if $v.seed.configMap }}
+  seed:
+    type: configMap
+    name: {{ $v.seed.configMap }}
+    advancedMounts:
+      main:
+        seed:
+          - path: /seed
+            readOnly: true
+  {{- end }}
+{{- end -}}
+
+{{- $_ := mustMergeOverwrite .Values (include "register.values" . | fromYaml) -}}
+{{- include "bjw-s.common.loader.all" . -}}

@@ -1,0 +1,32 @@
+{
+  "name": "@cdr-lab/dataholder-bank",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "generate": "openapi-typescript ../../../services/dataholder/internal/adapter/banksite/openapi.yaml --enum-values --output src/api/schema.gen.ts"
+  },
+  "dependencies": {
+    "@cdr-lab/console": "workspace:*",
+    "@cdr-lab/ui": "workspace:*",
+    "@tanstack/react-query": "5.107.1",
+    "@tanstack/react-router": "1.170.46",
+    "openapi-fetch": "0.17.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@babel/core": "8.1.0",
+    "@rolldown/plugin-babel": "0.3.1",
+    "@tailwindcss/vite": "4.3.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.2.1",
+    "babel-plugin-react-compiler": "1.0.0",
+    "msw": "3.0.5",
+    "openapi-msw": "2.1.1",
+    "openapi-typescript": "7.13.0",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "vite": "8.3.8"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "name": "cdr-lab design tokens",
+  "version": "2025.10",
+  "description": "The design tokens of the lab web UIs. See web/packages/ui/DESIGN.md (Tokens).",
+  "sets": {
+    "base": {
+      "sources": [
+        {
+          "$ref": "primitive.json"
+        },
+        {
+          "$ref": "base.json"
+        }
+      ]
+    }
+  },
+  "modifiers": {
+    "brand": {
+      "description": "The colour roles, the font families and the radius of a brand.",
+      "contexts": {
+        "lab": [
+          {
+            "$ref": "brand/lab.json"
+          }
+        ]
+      },
+      "default": "lab"
+    },
+    "density": {
+      "description": "Spacing, control heights and table row heights.",
+      "contexts": {
+        "compact": [
+          {
+            "$ref": "density/compact.json"
+          }
+        ],
+        "comfortable": [
+          {
+            "$ref": "density/comfortable.json"
+          }
+        ]
+      },
+      "default": "compact"
+    }
+  },
+  "resolutionOrder": [
+    {
+      "$ref": "#/sets/base"
+    },
+    {
+      "$ref": "#/modifiers/brand"
+    },
+    {
+      "$ref": "#/modifiers/density"
+    }
+  ]
+}

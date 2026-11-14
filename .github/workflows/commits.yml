@@ -1,0 +1,49 @@
+name: commits
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  # The auto-merge workflow starts this run after it merges, because GitHub starts no push run for its merge.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to a pull request cancels the run that it replaces, and other runs never share a group.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  commits:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Install Mise
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          version: 2026.11.8
+          cache_save: ${{ github.event_name == 'push' }}
+
+      # cog stops with an error when git has no user identity.
+      - name: Set git identity
+        run: |
+          git config --global user.name ci
+          git config --global user.email ci@localhost
+
+      - name: Check commit messages
+        run: cog check --ignore-merge-commits
+
+      # The title goes through env, not into the script, to prevent script injection.
+      - name: Check PR title is a Conventional Commit
+        if: github.event_name == 'pull_request'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: cog verify "$PR_TITLE"

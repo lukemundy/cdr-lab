@@ -1,0 +1,701 @@
+{
+  "products": [
+    {
+      "productId": "wattle-pocket",
+      "lastUpdated": "2026-09-14T01:00:00Z",
+      "productCategory": "TRANS_AND_SAVINGS_ACCOUNTS",
+      "name": "Wattle Pocket",
+      "description": "An everyday transaction account with a debit card, no monthly fee and no fee for transactions in Australia.",
+      "brand": "Wattle Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "DIGITAL_BANKING"
+        },
+        {
+          "featureType": "NPP_ENABLED"
+        },
+        {
+          "featureType": "NPP_PAYID"
+        },
+        {
+          "featureType": "DIGITAL_WALLET",
+          "additionalValue": "Apple Pay"
+        },
+        {
+          "featureType": "DIGITAL_WALLET",
+          "additionalValue": "Google Pay"
+        },
+        {
+          "featureType": "CARD_ACCESS",
+          "additionalValue": "Visa Debit"
+        },
+        {
+          "featureType": "UNLIMITED_TXNS"
+        },
+        {
+          "featureType": "NOTIFICATIONS",
+          "additionalValue": "Spend alerts",
+          "additionalInfo": "An alert in the app for each card purchase"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Monthly account fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalValue": "P1M"
+        },
+        {
+          "name": "International transaction fee",
+          "feeType": "TRANSACTION",
+          "feeMethodUType": "rateBased",
+          "rateBased": {
+            "rateType": "TRANSACTION",
+            "rate": "0.03"
+          },
+          "additionalInfo": "3% of the Australian dollar value of each card transaction in a foreign currency"
+        }
+      ],
+      "depositRates": [
+        {
+          "depositRateType": "VARIABLE",
+          "rate": "0.0001",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "additionalInfo": "Paid on the full balance"
+        }
+      ]
+    },
+    {
+      "productId": "seedling-saver",
+      "lastUpdated": "2026-10-02T01:00:00Z",
+      "productCategory": "TRANS_AND_SAVINGS_ACCOUNTS",
+      "name": "Seedling Saver",
+      "description": "A savings account that pays bonus interest in each month that the balance at the end of the month is higher than at the start, with no deposit amount necessary.",
+      "brand": "Wattle Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "DIGITAL_BANKING"
+        },
+        {
+          "featureType": "NPP_ENABLED"
+        },
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "Make up to ten savings goals in the app and follow your progress"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Monthly account fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalValue": "P1M"
+        }
+      ],
+      "depositRates": [
+        {
+          "depositRateType": "VARIABLE",
+          "rate": "0.0090",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "additionalInfo": "Base rate, paid on the full balance"
+        },
+        {
+          "depositRateType": "BONUS",
+          "rate": "0.0365",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "additionalValue": "Bonus interest for a month in which the closing balance is higher than the opening balance, not counting interest",
+          "additionalInfo": "Paid in addition to the base rate, on balances up to $100,000"
+        }
+      ]
+    },
+    {
+      "productId": "wattle-junior-saver",
+      "lastUpdated": "2026-10-02T01:00:00Z",
+      "productCategory": "TRANS_AND_SAVINGS_ACCOUNTS",
+      "name": "Wattle Junior Saver",
+      "description": "A savings account for customers under 18 years old, with a parent or guardian as a joint signatory and a fixed rate of interest each month.",
+      "brand": "Wattle Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "DIGITAL_BANKING"
+        },
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "For customers from 0 to 17 years old. At 18 years old, the account changes to a Seedling Saver."
+        }
+      ],
+      "fees": [
+        {
+          "name": "Monthly account fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalValue": "P1M"
+        }
+      ],
+      "depositRates": [
+        {
+          "depositRateType": "VARIABLE",
+          "rate": "0.0425",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "additionalInfo": "On balances up to $20,000. Balances above $20,000 earn 0.10% p.a."
+        }
+      ]
+    },
+    {
+      "productId": "wattle-fixed-term",
+      "lastUpdated": "2026-10-20T00:00:00Z",
+      "productCategory": "TERM_DEPOSITS",
+      "name": "Grove Term Deposit",
+      "description": "A term deposit from $5,000 for a term of 3 to 24 months, with interest paid at maturity.",
+      "brand": "Wattle Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "FUNDS_AVAILABLE_AFTER",
+          "additionalValue": "P31D",
+          "additionalInfo": "Give 31 days notice to withdraw the funds before the maturity date"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Early withdrawal adjustment",
+          "feeType": "WITHDRAWAL",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalInfo": "If you withdraw early, the bank reduces the interest that it pays. The reduction is set by the part of the term that is complete."
+        }
+      ],
+      "depositRates": [
+        {
+          "depositRateType": "FIXED",
+          "rate": "0.0400",
+          "applicationType": "MATURITY",
+          "additionalValue": "P3M"
+        },
+        {
+          "depositRateType": "FIXED",
+          "rate": "0.0415",
+          "applicationType": "MATURITY",
+          "additionalValue": "P6M"
+        },
+        {
+          "depositRateType": "FIXED",
+          "rate": "0.0420",
+          "applicationType": "MATURITY",
+          "additionalValue": "P12M",
+          "additionalInfo": "For terms of 12 months, interest can also be paid each year"
+        },
+        {
+          "depositRateType": "FIXED",
+          "rate": "0.0395",
+          "applicationType": "MATURITY",
+          "additionalValue": "P24M"
+        }
+      ]
+    },
+    {
+      "productId": "canopy-rewards-card",
+      "lastUpdated": "2026-08-11T03:00:00Z",
+      "productCategory": "CRED_AND_CHRG_CARDS",
+      "name": "Canopy Rewards Card",
+      "description": "A rewards credit card that earns 1 point for each dollar of eligible purchases, with up to 55 days interest free on purchases.",
+      "brand": "Wattle Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "LOYALTY_PROGRAM",
+          "additionalValue": "Wattle Bank Canopy Points",
+          "additionalInfo": "1 point for each $1 of eligible purchases, up to 3,000 points each statement period"
+        },
+        {
+          "featureType": "INTEREST_FREE",
+          "additionalValue": "P55D",
+          "additionalInfo": "On purchases, when you pay the closing balance in full by the due date"
+        },
+        {
+          "featureType": "ADDITIONAL_CARDS",
+          "additionalValue": "1"
+        },
+        {
+          "featureType": "DIGITAL_WALLET",
+          "additionalValue": "Apple Pay"
+        },
+        {
+          "featureType": "DIGITAL_WALLET",
+          "additionalValue": "Google Pay"
+        },
+        {
+          "featureType": "FRAUD_PROTECTION"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Annual fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "120.00"
+          },
+          "additionalValue": "P1Y"
+        },
+        {
+          "name": "Late payment fee",
+          "feeType": "LATE_PAYMENT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "15.00"
+          }
+        },
+        {
+          "name": "Cash advance fee",
+          "feeType": "CASH_ADVANCE",
+          "feeMethodUType": "rateBased",
+          "rateBased": {
+            "rateType": "TRANSACTION",
+            "rate": "0.02"
+          },
+          "additionalInfo": "2% of each cash advance, with a minimum of $2.50"
+        },
+        {
+          "name": "International transaction fee",
+          "feeType": "TRANSACTION",
+          "feeMethodUType": "rateBased",
+          "rateBased": {
+            "rateType": "TRANSACTION",
+            "rate": "0.03"
+          }
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "PURCHASE",
+          "rate": "0.2049",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED"
+        },
+        {
+          "lendingRateType": "CASH_ADVANCE",
+          "rate": "0.2149",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED"
+        }
+      ]
+    },
+    {
+      "productId": "plain-card",
+      "lastUpdated": "2026-08-11T03:00:00Z",
+      "productCategory": "CRED_AND_CHRG_CARDS",
+      "name": "Bare Branch Card",
+      "description": "A low rate credit card with a small annual fee and no reward points.",
+      "brand": "Wattle Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "INTEREST_FREE",
+          "additionalValue": "P50D",
+          "additionalInfo": "On purchases, when you pay the closing balance in full by the due date"
+        },
+        {
+          "featureType": "DIGITAL_WALLET",
+          "additionalValue": "Apple Pay"
+        },
+        {
+          "featureType": "DIGITAL_WALLET",
+          "additionalValue": "Google Pay"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Annual fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "55.00"
+          },
+          "additionalValue": "P1Y"
+        },
+        {
+          "name": "Late payment fee",
+          "feeType": "LATE_PAYMENT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "15.00"
+          }
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "PURCHASE",
+          "rate": "0.1299",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED"
+        },
+        {
+          "lendingRateType": "CASH_ADVANCE",
+          "rate": "0.2149",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED"
+        },
+        {
+          "lendingRateType": "BALANCE_TRANSFER",
+          "rate": "0.0000",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED",
+          "additionalInfo": "0% p.a. for 15 months on balances transferred at application, then the cash advance rate applies"
+        }
+      ]
+    },
+    {
+      "productId": "wattle-personal-loan",
+      "lastUpdated": "2026-07-30T02:00:00Z",
+      "productCategory": "PERS_LOANS",
+      "name": "Bloom Personal Loan",
+      "description": "A variable rate personal loan from $4,000 to $50,000 over 1 to 7 years, with free extra repayments and redraw.",
+      "brand": "Wattle Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "EXTRA_REPAYMENTS"
+        },
+        {
+          "featureType": "REDRAW",
+          "additionalInfo": "Redraw extra repayments in the app"
+        },
+        {
+          "featureType": "DIGITAL_BANKING"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Establishment fee",
+          "feeType": "UPFRONT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "275.00"
+          }
+        },
+        {
+          "name": "Monthly loan service fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "12.00"
+          },
+          "additionalValue": "P1M"
+        },
+        {
+          "name": "Late payment fee",
+          "feeType": "LATE_PAYMENT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "20.00"
+          }
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.1149",
+          "comparisonRate": "0.1269",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "UNCONSTRAINED",
+          "additionalInfo": "Comparison rate for a $30,000 unsecured loan over 5 years"
+        }
+      ]
+    },
+    {
+      "productId": "everyday-home-loan",
+      "lastUpdated": "2026-09-22T00:00:00Z",
+      "productCategory": "RESIDENTIAL_MORTGAGES",
+      "name": "Hearth Variable Home Loan",
+      "description": "A variable rate home loan with no monthly fee and an optional linked offset account for an annual package fee.",
+      "brand": "Wattle Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "EXTRA_REPAYMENTS"
+        },
+        {
+          "featureType": "REDRAW"
+        },
+        {
+          "featureType": "OFFSET",
+          "additionalInfo": "100% offset against one linked Wattle Pocket account, with the annual package fee"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Establishment fee",
+          "feeType": "UPFRONT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          }
+        },
+        {
+          "name": "Annual package fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "350.00"
+          },
+          "additionalValue": "P1Y",
+          "additionalInfo": "Only when you select the offset account"
+        },
+        {
+          "name": "Discharge fee",
+          "feeType": "EXIT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "350.00"
+          }
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.0599",
+          "comparisonRate": "0.0612",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "OWNER_OCCUPIED",
+          "additionalInfo": "Owner occupied, loan to value ratio up to 80%"
+        },
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.0629",
+          "comparisonRate": "0.0642",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "INVESTMENT"
+        },
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.0669",
+          "comparisonRate": "0.0681",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "INTEREST_ONLY",
+          "loanPurpose": "INVESTMENT",
+          "additionalInfo": "Interest only for up to 5 years"
+        }
+      ]
+    },
+    {
+      "productId": "fixed-home-loan",
+      "lastUpdated": "2026-09-22T00:00:00Z",
+      "productCategory": "RESIDENTIAL_MORTGAGES",
+      "name": "Hearth Fixed Home Loan",
+      "description": "A home loan with a rate that stays the same for 1 to 3 years. After the fixed term, the loan changes to the variable rate.",
+      "brand": "Wattle Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "EXTRA_REPAYMENTS",
+          "additionalInfo": "Up to $10,000 each year of the fixed term with no fee"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Establishment fee",
+          "feeType": "UPFRONT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          }
+        },
+        {
+          "name": "Break cost",
+          "feeType": "EXIT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalInfo": "When you repay the loan early in the fixed term, a break cost can apply. It is calculated from the change in market rates."
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "FIXED",
+          "rate": "0.0589",
+          "comparisonRate": "0.0634",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "OWNER_OCCUPIED",
+          "additionalValue": "P1Y"
+        },
+        {
+          "lendingRateType": "FIXED",
+          "rate": "0.0569",
+          "comparisonRate": "0.0627",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "OWNER_OCCUPIED",
+          "additionalValue": "P2Y"
+        },
+        {
+          "lendingRateType": "FIXED",
+          "rate": "0.0579",
+          "comparisonRate": "0.0625",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "PRINCIPAL_AND_INTEREST",
+          "loanPurpose": "OWNER_OCCUPIED",
+          "additionalValue": "P3Y"
+        }
+      ]
+    },
+    {
+      "productId": "wattle-overdraft",
+      "lastUpdated": "2026-06-15T00:00:00Z",
+      "productCategory": "OVERDRAFTS",
+      "name": "Pocket Buffer Overdraft",
+      "description": "An overdraft from $1,000 to $10,000 that is linked to a Wattle Pocket account.",
+      "brand": "Wattle Bank",
+      "isTailored": false,
+      "features": [
+        {
+          "featureType": "OVERDRAFT",
+          "additionalValue": "10000"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Overdraft service fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "8.00"
+          },
+          "additionalValue": "P1M"
+        },
+        {
+          "name": "Dishonour fee",
+          "feeType": "DISHONOUR",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          }
+        }
+      ],
+      "lendingRates": [
+        {
+          "lendingRateType": "VARIABLE",
+          "rate": "0.1435",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M",
+          "repaymentType": "UNCONSTRAINED",
+          "loanPurpose": "UNCONSTRAINED"
+        }
+      ]
+    },
+    {
+      "productId": "roam-travel-card",
+      "lastUpdated": "2026-09-01T00:00:00Z",
+      "productCategory": "TRAVEL_CARDS",
+      "name": "Roam Travel Card",
+      "description": "A prepaid travel card that holds up to 12 currencies. It will be available from 1 March 2027.",
+      "brand": "Wattle Bank",
+      "isTailored": false,
+      "effectiveFrom": "2027-03-01T00:00:00Z",
+      "features": [
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "Load and hold up to 12 foreign currencies"
+        },
+        {
+          "featureType": "DIGITAL_WALLET",
+          "additionalValue": "Apple Pay"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Card issue fee",
+          "feeType": "UPFRONT",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          }
+        },
+        {
+          "name": "ATM withdrawal fee overseas",
+          "feeType": "WITHDRAWAL",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "3.00"
+          }
+        }
+      ]
+    },
+    {
+      "productId": "blossom-bonus-saver",
+      "lastUpdated": "2024-02-01T00:00:00Z",
+      "productCategory": "TRANS_AND_SAVINGS_ACCOUNTS",
+      "name": "Blossom Christmas Saver",
+      "description": "A savings account for the Christmas season. It is closed to new customers.",
+      "brand": "Wattle Bank",
+      "isTailored": false,
+      "effectiveFrom": "2019-11-01T00:00:00Z",
+      "effectiveTo": "2026-06-30T14:00:00Z",
+      "features": [
+        {
+          "featureType": "OTHER",
+          "additionalInfo": "Withdrawals are only possible in November and December"
+        }
+      ],
+      "fees": [
+        {
+          "name": "Monthly account fee",
+          "feeType": "PERIODIC",
+          "feeMethodUType": "fixedAmount",
+          "fixedAmount": {
+            "amount": "0.00"
+          },
+          "additionalValue": "P1M"
+        }
+      ],
+      "depositRates": [
+        {
+          "depositRateType": "VARIABLE",
+          "rate": "0.0250",
+          "applicationType": "PERIODIC",
+          "applicationFrequency": "P1M"
+        }
+      ]
+    }
+  ]
+}
