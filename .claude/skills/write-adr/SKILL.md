@@ -74,6 +74,7 @@ If the facts are not sufficient to write the context or the reasons, ask the use
 - Never reference or link `README.md`. It is not a primary source.
 - An ADR can reference only ADRs with a lower number. A past decision cannot depend on a future one. The `Amended by` and `Superseded by` lines are the only exceptions.
 - An ADR is not a living document and not a design document. Do not add API descriptions or implementation notes to an ADR after it is on `main`.
+- A change that moves the target of a link in an ADR updates the link. A link update does not change the decision, so it needs no amendment.
 - Do not use a new convention (a new section, a status field, an ID scheme, a link format) before the user approves it.
 - Write in ASD-STE100 Simplified Technical English, with inclusive language.
 - The repo `README.md` _may_ link to an ADR in this form: `See [ADR-0004](docs/adr/0004-module-layout.md).`
