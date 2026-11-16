@@ -30,6 +30,7 @@ func register(t *testing.T, handler func(w http.ResponseWriter, r *http.Request)
 	return registerstatus.NewClient(server.URL+"/", server.Client().Transport), &got
 }
 
+// Verifies: DH-0679
 func TestTheStatusesComeFromGetSoftwareProductsStatusesWithTheIndustryAll(t *testing.T) {
 	client, got := register(t, func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("ETag", `"v1"`)
@@ -48,6 +49,7 @@ func TestTheStatusesComeFromGetSoftwareProductsStatusesWithTheIndustryAll(t *tes
 	assert.Equal(t, []request{{statusPath, "3", ""}}, *got, "a first request has no If-None-Match")
 }
 
+// Verifies: DH-0685
 func TestARequestWithTheETagOfTheLastResponseCanGetNotModified(t *testing.T) {
 	client, got := register(t, func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusNotModified) })
 

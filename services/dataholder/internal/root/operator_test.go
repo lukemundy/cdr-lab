@@ -335,6 +335,7 @@ func TestAnAccountThatIsNotValidIsRefusedWithEachRuleAndIsNotCreated(t *testing.
 	assert.Contains(t, string(l.customer(t, customer.CustomerNumber).body), `"accounts":[]`)
 }
 
+// Verifies: DH-0740
 func TestASecondAccountWithTheSameBSBAndAccountNumberGivesConflict(t *testing.T) {
 	l := newOperatorLab(t)
 	first, second := l.newCustomer(t), l.newCustomer(t)
@@ -345,6 +346,7 @@ func TestASecondAccountWithTheSameBSBAndAccountNumberGivesConflict(t *testing.T)
 	l.operate(t, http.MethodPost, accountsPath(second.CustomerNumber), account).problemDetail(t, http.StatusConflict)
 }
 
+// Verifies: DH-0736
 func TestACustomerWithTheEmailAddressOfADifferentCustomerInADifferentCaseGivesConflict(t *testing.T) {
 	l := newOperatorLab(t)
 	first := l.newCustomer(t)
@@ -358,6 +360,7 @@ func TestACustomerWithTheEmailAddressOfADifferentCustomerInADifferentCaseGivesCo
 	assert.NotContains(t, string(reply.body), strings.ToUpper(first.EmailAddress))
 }
 
+// Verifies: DH-0732
 func TestACustomerNumberThatDoesNotExistGivesNotFound(t *testing.T) {
 	l := newOperatorLab(t)
 
@@ -367,6 +370,7 @@ func TestACustomerNumberThatDoesNotExistGivesNotFound(t *testing.T) {
 	l.operate(t, http.MethodGet, arrangementsPath(unknownCustomerNumber), nil).problemDetail(t, http.StatusNotFound)
 }
 
+// Verifies: DH-0741
 func TestTheOperatorCreatesAnAccountWithACreditLimit(t *testing.T) {
 	l := newOperatorLab(t)
 	card := everydayAccount("10000011")
@@ -395,6 +399,7 @@ func TestACreditLimitThatIsNotAnAmountWithTwoDecimalDigitsIsRefusedAndNoAccountI
 	assert.Contains(t, string(l.customer(t, customer.CustomerNumber).body), `"accounts":[]`)
 }
 
+// Verifies: DH-0723, DH-0747
 func TestTheOperatorClosesAnOpenAccountOneTime(t *testing.T) {
 	l := newOperatorLab(t)
 	customer := l.newCustomer(t)
@@ -417,6 +422,7 @@ func TestTheOperatorClosesAnOpenAccountOneTime(t *testing.T) {
 		problemDetail(t, http.StatusConflict)
 }
 
+// Verifies: DH-0746
 func TestTheOperatorCannotCloseAnAccountThatTheCustomerDoesNotHave(t *testing.T) {
 	l := newOperatorLab(t)
 	owner, other := l.newCustomer(t), l.newCustomer(t)
@@ -536,6 +542,7 @@ func (l operatorLab) arrangementsOf(t *testing.T, customerNumber string) []opera
 	return arrangements
 }
 
+// Verifies: DH-0727, DH-0764
 func TestTheOperatorReadsAnArrangementAndWithdrawsItOneTime(t *testing.T) {
 	const ninetyDays = 90 * 24 * 60 * 60
 
@@ -572,6 +579,7 @@ func TestTheOperatorReadsAnArrangementAndWithdrawsItOneTime(t *testing.T) {
 			problemDetail(t, http.StatusConflict))
 }
 
+// Verifies: DH-0763
 func TestAWithdrawalOfAnArrangementThatTheCustomerDoesNotHaveGivesNotFoundAndEndsNothing(t *testing.T) {
 	l := newOperatorLab(t)
 	number, other := l.newCustomer(t).CustomerNumber, l.newCustomer(t).CustomerNumber

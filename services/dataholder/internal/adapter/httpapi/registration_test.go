@@ -65,6 +65,7 @@ func postRegistration(t *testing.T, r *registrar, contentType, body string) *htt
 	return rec
 }
 
+// Verifies: DH-0643, DH-0644
 func TestARegistrationGives201WithTheRegistration(t *testing.T) {
 	r := &registrar{registration: domain.Registration{
 		ClientID:          "client-1",
@@ -112,12 +113,14 @@ func TestARegistrationGives201WithTheRegistration(t *testing.T) {
 	}`, rec.Body.String(), "the response has no optional value that is absent, and no registration access token")
 }
 
+// Verifies: DH-0600
 func TestAContentTypeWithAParameterIsAccepted(t *testing.T) {
 	rec := postRegistration(t, &registrar{}, "application/jwt; charset=utf-8", "header.request.signature")
 
 	assert.Equal(t, http.StatusCreated, rec.Code)
 }
 
+// Verifies: DH-0601
 func TestARegistrationWithADifferentContentTypeGives415WithNoBody(t *testing.T) {
 	for _, contentType := range []string{"", "application/json", "text/plain"} {
 		t.Run(contentType, func(t *testing.T) {
@@ -132,6 +135,7 @@ func TestARegistrationWithADifferentContentTypeGives415WithNoBody(t *testing.T) 
 	}
 }
 
+// Verifies: DH-0648
 func TestARegistrationThatIsRefusedGives400WithTheErrorCode(t *testing.T) {
 	r := &registrar{err: domain.RegistrationError{
 		Code:        domain.InvalidRedirectURI,
@@ -157,6 +161,7 @@ func TestARegistrationThatFailsGives500WithNoCause(t *testing.T) {
 	assert.JSONEq(t, `{"error": "server_error"}`, rec.Body.String())
 }
 
+// Verifies: DH-0609
 func TestARegistrationRequestThatIsTooLargeIsRefused(t *testing.T) {
 	r := &registrar{}
 
@@ -280,6 +285,7 @@ func manageRegistration(
 	return rec
 }
 
+// Verifies: DH-0667
 func TestAClientReadsItsRegistrationWithItsToken(t *testing.T) {
 	rec := getRegistration(t, "client-1", "Bearer token-1")
 
@@ -298,6 +304,7 @@ func TestTheBearerSchemeIsNotCaseSensitive(t *testing.T) {
 	assert.Equal(t, http.StatusOK, getRegistration(t, "client-1", "bearer token-1").Code)
 }
 
+// Verifies: DH-0661, DH-0662, DH-0663, DH-0664, DH-0665, DH-0666
 func TestAReadOfARegistrationThatIsRefusedHasNoBody(t *testing.T) {
 	tests := map[string]struct {
 		clientID, authorization string
@@ -350,6 +357,7 @@ func TestAReadOfARegistrationThatFailsGives500WithNoCause(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0672
 func TestAClientUpdatesItsRegistrationWithItsToken(t *testing.T) {
 	r := &registrar{registration: domain.Registration{ClientID: "client-1", SoftwareID: "software-1"}}
 
@@ -364,6 +372,7 @@ func TestAClientUpdatesItsRegistrationWithItsToken(t *testing.T) {
 	assert.Contains(t, rec.Body.String(), `"client_id":"client-1"`)
 }
 
+// Verifies: DH-0669
 func TestAnUpdateThatIsRefusedGivesTheResponseOfARegistrationThatIsRefused(t *testing.T) {
 	t.Run("a request that is not valid", func(t *testing.T) {
 		r := &registrar{err: domain.RegistrationError{
@@ -390,6 +399,7 @@ func TestAnUpdateThatIsRefusedGivesTheResponseOfARegistrationThatIsRefused(t *te
 	})
 }
 
+// Verifies: DH-0673
 func TestAClientDeletesItsRegistrationWithItsToken(t *testing.T) {
 	r := &registrar{}
 
@@ -429,6 +439,7 @@ func TestAnUpdateOrADeletionWithNoTokenOfTheClientChangesNothing(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0663
 func TestAnUpdateOrADeletionOfARegistrationThatIsDeletedAfterTheTokenCheckGives401(t *testing.T) {
 	for _, method := range []string{http.MethodPut, http.MethodDelete} {
 		t.Run(method, func(t *testing.T) {
