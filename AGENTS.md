@@ -24,6 +24,7 @@ More than one agent can work on this repository at the same time. Do the steps b
 1. **Start in a worktree.** Always work in a git worktree, never in the main checkout. Put the worktree in `.worktrees/` at the root of the local repository
 2. **Make the change.**
     - Before you open a pull request, run the `tidy`, `fmt`, `lint` and `test` tasks, and make sure they pass. Do not run the lab tasks (`up`, `conformance`, `test:lab-web`) before a pull request. CI runs all checks when you open the pull request, at each push to it, and again after the merge to `main`.
+    - When the change adds or changes a specification, follow [`docs/spec/conventions.md`](docs/spec/conventions.md).
     - When the change makes `README.md` or this file incorrect, update the file in the same change. Follow "Keep the README a summary" below.
     - When the change takes a shortcut that is acceptable only in the lab, or closes one, update `docs/production-gaps.md` in the same change. That file gives the test for an entry.
 3. **Open a pull request.** When the change is ready, commit it, push the branch and open a pull request for review.

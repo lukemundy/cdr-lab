@@ -38,6 +38,7 @@ cdr-lab/
 ├── docs/
 │   ├── adr/             # architecture decision records
 │   ├── production-gaps.md # shortcuts that are acceptable in the lab only
+│   ├── spec/            # the conventions and the glossary of the specifications
 │   └── research/        # dated research notes with sources (background only)
 ├── lab/                 # lab-only set-up files, for example the databases and users of the lab PostgreSQL
 ├── pkg/                 # shared libraries, one directory each
@@ -54,7 +55,7 @@ To add a service, copy `services/register`, except its `DESIGN.md`: write a new 
 
 ### Specifications
 
-- Each service, `pkg/` library and other component has a specification: a `DESIGN.md`, or a `design/` directory when it has more than 5,000 words. It gives requirements only, also non-functional requirements, and does not describe the implementation ([ADR 0024](docs/adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md)).
+- Each service, `pkg/` library and other component has a specification: a `DESIGN.md`, or a `design/` directory when it has more than 5,000 words. It gives requirements only, also non-functional requirements, and does not describe the implementation ([ADR 0024](docs/adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md)). [`docs/spec/conventions.md`](docs/spec/conventions.md) gives the templates and the formats.
 - Each requirement is one rule, with an identifier and a link to its primary source or to a judgement in the same file. Refer to a rule with a descriptive link, never with an identifier alone.
 - A rule that a `pkg/` library implements is in the specification of that library. A service gives only its differences.
 - The research notes in `docs/research/` are background. Do not cite them as a source, and do not cite through them.
