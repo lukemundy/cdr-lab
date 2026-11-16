@@ -36,6 +36,7 @@ function CertificateForm() {
   );
 }
 
+// Verifies: UI-0318
 test("a file input is a file control with a visible label and help text", async () => {
   const container = render(<CertificateForm />);
   const input = page.getByLabelText("Certificate file");
@@ -49,6 +50,7 @@ test("a file input is a file control with a visible label and help text", async 
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0320
 test("the text of the selected file goes into the text area, where the user can change it", async () => {
   const container = render(<CertificateForm />);
   const input = page.getByLabelText("Certificate file");
@@ -82,6 +84,7 @@ test("a file that the browser cannot read shows an error at the field", async ()
   expect(texts).toEqual([]);
 });
 
+// Verifies: UI-0302
 test("an error that the app gives shows at the field", async () => {
   const container = render(
     <FileInput label="Certificate file" error="Choose a file." onFileText={() => {}} />,
@@ -93,6 +96,7 @@ test("an error that the app gives shows at the field", async () => {
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0201, UI-0202
 test("the keyboard reaches the file input with a visible focus", async () => {
   render(<FileInput label="Certificate file" onFileText={() => {}} />);
 
@@ -102,6 +106,7 @@ test("the keyboard reaches the file input with a visible focus", async () => {
 });
 
 // A file chooser opens outside the page, so the test checks the activation that opens it, and stops the chooser.
+// Verifies: UI-0319
 test("Space and Enter activate the file input, which opens the file chooser", async () => {
   render(<FileInput label="Certificate file" onFileText={() => {}} />);
   const input = page.getByLabelText("Certificate file").element();
@@ -125,6 +130,7 @@ test("a disabled file input passes the accessibility checks", async () => {
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0094
 test("the file input is 24 by 24 CSS px or more", () => {
   render(<FileInput label="Certificate file" onFileText={() => {}} />);
 

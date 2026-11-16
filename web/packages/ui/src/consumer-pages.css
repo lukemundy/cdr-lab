@@ -1,7 +1,7 @@
 /*
  * The styles of the consumer pages of the data holder, which are Go pages with no script
  * (services/dataholder/internal/adapter/consumerpages/templates). The build puts tokens.css and fonts.css before this
- * file, and the data holder serves /brand/styles.css after it with the values of the brand. DESIGN.md (Consumer pages)
+ * file, and the data holder serves /brand/styles.css after it with the values of the brand. design/consumer-pages.md
  * gives the rules.
  *
  * The class names and the element structure of the templates are the contract with this file. The conformance suite

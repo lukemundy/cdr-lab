@@ -18,6 +18,7 @@ function renderCopyButton() {
   return { container, button: page.getByRole("button", { name: "Copy legal entity ID" }) };
 }
 
+// Verifies: UI-0256
 test("a click copies the value and announces the result", async () => {
   const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue();
   const { container, button } = renderCopyButton();
@@ -29,6 +30,7 @@ test("a click copies the value and announces the result", async () => {
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0201, UI-0202
 test("the keyboard focuses the button with a visible focus, and Enter copies", async () => {
   const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue();
   const { button } = renderCopyButton();
@@ -81,6 +83,7 @@ test("the result goes after 3 seconds", async () => {
   await expect.element(page.getByRole("status")).toHaveTextContent("");
 });
 
+// Verifies: UI-0094
 test("the button is 24 by 24 CSS px or more, and passes the accessibility checks before a copy", async () => {
   const { container, button } = renderCopyButton();
 

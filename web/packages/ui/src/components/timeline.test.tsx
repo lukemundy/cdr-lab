@@ -38,6 +38,7 @@ function renderTimeline(props: Partial<TimelineProps> = {}) {
   return { container, pages };
 }
 
+// Verifies: UI-0252
 test("the timeline is an ordered list of the events, in the order that it gets", async () => {
   const { container } = renderTimeline();
 
@@ -53,6 +54,7 @@ test("the timeline is an ordered list of the events, in the order that it gets",
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0253
 test("each event has its time in a time element with the ISO 8601 UTC value, and the time has seconds and the offset from UTC", () => {
   const { container } = renderTimeline();
 
@@ -70,12 +72,14 @@ test("each event has its time in a time element with the ISO 8601 UTC value, and
   ]);
 });
 
+// Verifies: UI-0254
 test("an event shows its details", async () => {
   renderTimeline();
 
   await expect.element(page.getByText("Mock Product")).toBeVisible();
 });
 
+// Verifies: UI-0255
 test("the pagination is below the list, and works with the keyboard", async () => {
   const { container, pages } = renderTimeline();
 
@@ -97,6 +101,7 @@ test("the pagination is below the list, and works with the keyboard", async () =
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0255
 test("the empty state shows when there are no events", async () => {
   const { container } = renderTimeline({
     events: [],
@@ -111,6 +116,7 @@ test("the empty state shows when there are no events", async () => {
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0255
 test("the loading state is a status message", async () => {
   const { container } = renderTimeline({ events: [], status: { state: "loading" } });
 
@@ -119,6 +125,7 @@ test("the loading state is a status message", async () => {
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0255
 test("the error state is an alert with the problem", async () => {
   const { container } = renderTimeline({
     events: [],

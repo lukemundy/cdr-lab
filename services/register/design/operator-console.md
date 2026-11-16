@@ -24,9 +24,9 @@ This area gives the lab-only operator console of the Register: its views, the hi
 - <a id="reg-1011"></a>**REG-1011** The detail of a data holder gives each brand, with its brand ID, its interim ID or both, its name, brand group, logo URI, status, industries, endpoints and JWKS endpoint. ([the endpoints of a data holder brand](participants.md#reg-0207); [the identifiers of a data holder brand](participants.md#reg-0208))
 - <a id="reg-1012"></a>**REG-1012** The detail of a data holder brand does not show its server certificates. The history shows each issue of a server certificate with its thumbprint. ([the event of a server certificate issue](certificate-management.md#reg-0630); [Judgement: no server certificates in the detail of a data holder brand](#reg-1080))
 - <a id="reg-1013"></a>**REG-1013** The detail of a participant links to its history. ([Judgement: the detail and the history on two pages](#reg-1091))
-- <a id="reg-1412"></a>**REG-1412** The status actions and "Register certificate" are buttons after the details of their record and before its child records. For example, the buttons of a brand are before its software products. ([design system DESIGN.md: Components][ui-components])
-- <a id="reg-1413"></a>**REG-1413** Each brand and each software product is a card that starts collapsed. The title bar of the card shows the status of its record. ([design system DESIGN.md: Components][ui-components])
-- <a id="reg-1414"></a>**REG-1414** The heading "Brands" and each heading "Software products" have "Show all" and "Hide all". ([design system DESIGN.md: Components][ui-components])
+- <a id="reg-1412"></a>**REG-1412** The status actions and "Register certificate" are buttons after the details of their record and before its child records. For example, the buttons of a brand are before its software products. ([the action row of a record](../../../web/packages/ui/design/components.md#ui-0246))
+- <a id="reg-1413"></a>**REG-1413** Each brand and each software product is a card that starts collapsed. The title bar of the card shows the status of its record. ([the cards that start collapsed](../../../web/packages/ui/design/components.md#ui-0241); [the title bar of a collapsible card](../../../web/packages/ui/design/components.md#ui-0239))
+- <a id="reg-1414"></a>**REG-1414** The heading "Brands" and each heading "Software products" have "Show all" and "Hide all". ([Show all and Hide all](../../../web/packages/ui/design/components.md#ui-0244))
 
 ## History
 
@@ -86,7 +86,7 @@ The table gives the text and the fields of each event type in the history.
 - <a id="reg-1050"></a>**REG-1050** The side navigation marks the section of each page as current, also when the URL of the page is not under the URL of the section. For example, each form of a data recipient, a brand or a software product marks "Data recipients". ([Judgement: the current section in the side navigation](#reg-1087))
 - <a id="reg-1051"></a>**REG-1051** The header and the title of the browser tab give the name "CDR Register". ([Judgement: the name "CDR Register"](#reg-1088))
 - <a id="reg-1052"></a>**REG-1052** The filter, the sort and the page of a list are in the URL. For example, a reload of a list shows the same filter, sort and page. ([Judgement: the view in the URL](#reg-1089))
-- <a id="reg-1053"></a>**REG-1053** The search of a list applies while the lab operator types. ([design system DESIGN.md: Components][ui-components])
+- <a id="reg-1053"></a>**REG-1053** The search of a list applies while the lab operator types, as the design system gives it. ([when the search of the filter bar applies](../../../web/packages/ui/design/components.md#ui-0271))
 - <a id="reg-1054"></a>**REG-1054** A search replaces the history entry of the list. A filter, a sort and a page add a history entry. ([Judgement: the browser history of a list](#reg-1090))
 - <a id="reg-1055"></a>**REG-1055** The detail and the history of a participant each have their own URL. The page of the history is in the URL. ([Judgement: the detail and the history on two pages](#reg-1091))
 - <a id="reg-1056"></a>**REG-1056** The CDR certificates page has its own URL. The page of the list of the revocations is in the URL. ([Judgement: the view in the URL](#reg-1089))
@@ -177,7 +177,7 @@ The console is a web UI. The [web UI library](../../../pkg/platform/consolehttp/
 ### <a id="reg-1090"></a>REG-1090 The browser history of a list
 
 - Kind: choice
-- Basis: Step 3.3. The search applies while the lab operator types ([design system DESIGN.md: Components][ui-components]).
+- Basis: Step 3.3. The search applies while the lab operator types ([when the search of the filter bar applies](../../../web/packages/ui/design/components.md#ui-0271)).
 - Reason: With a replaced entry, Back does not go through each pause in the typing. A filter, a sort and a page are each one decision of the lab operator.
 
 ### <a id="reg-1091"></a>REG-1091 The detail and the history on two pages
@@ -220,4 +220,3 @@ The console is a web UI. The [web UI library](../../../pkg/platform/consolehttp/
 [cds-nfrs]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#non-functional-requirements
 [fetch-metadata]: https://w3c.github.io/webappsec-fetch-metadata/
 [asvs-v3]: https://github.com/OWASP/ASVS/blob/v5.0.0_release/5.0/en/0x12-V3-Web-Frontend-Security.md
-[ui-components]: ../../../web/packages/ui/DESIGN.md#components

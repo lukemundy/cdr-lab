@@ -43,6 +43,7 @@ function shell() {
   );
 }
 
+// Verifies: UI-0360
 test("the shell gives the logo with the brand name as its text alternative, the navigation, the main content and the footer", async () => {
   const container = shell();
 
@@ -71,6 +72,7 @@ test("the logo links to the home page", async () => {
     .toHaveAttribute("href", "/");
 });
 
+// Verifies: UI-0361
 test("the shell has no Secure label, because the site must not look like the CDR authentication", async () => {
   shell();
 

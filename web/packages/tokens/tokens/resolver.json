@@ -1,7 +1,7 @@
 {
   "name": "cdr-lab design tokens",
   "version": "2025.10",
-  "description": "The design tokens of the lab web UIs. See web/packages/ui/DESIGN.md (Tokens).",
+  "description": "The design tokens of the lab web UIs. See web/packages/ui/design/tokens-and-brands.md.",
   "sets": {
     "base": {
       "sources": [

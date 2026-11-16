@@ -5,6 +5,7 @@ import { expectNoAxeViolations } from "../test/checks";
 import { render } from "../test/render";
 import { EmptyState, ErrorState, LoadingState } from "./states";
 
+// Verifies: UI-0275
 test("the empty state gives its title and description", async () => {
   const container = render(
     <EmptyState title="No data recipients" description="Change the filters to see more." />,
@@ -15,6 +16,7 @@ test("the empty state gives its title and description", async () => {
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0275
 test("the loading state is a status message", async () => {
   const container = render(<LoadingState />);
 
@@ -22,6 +24,7 @@ test("the loading state is a status message", async () => {
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0276
 test("the error state is an alert with the title and the detail of the problem", async () => {
   const container = render(
     <ErrorState

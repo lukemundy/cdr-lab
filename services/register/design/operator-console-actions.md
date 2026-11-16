@@ -40,11 +40,11 @@ This area gives the actions of the operator console, the rules for each action, 
 
 ## Certificate issue
 
-- <a id="reg-1227"></a>**REG-1227** The software product card has the button "Issue certificate" after "Register certificate", in its action row. ([design system DESIGN.md: Components][ui-components]; [Judgement: the place of the certificate actions](#reg-1286))
-- <a id="reg-1228"></a>**REG-1228** The data holder brand card has the button "Issue certificate" after its status actions, in its action row. ([design system DESIGN.md: Components][ui-components]; [Judgement: the place of the certificate actions](#reg-1286))
+- <a id="reg-1227"></a>**REG-1227** The software product card has the button "Issue certificate" after "Register certificate", in its action row. ([the action row of a record](../../../web/packages/ui/design/components.md#ui-0246); [Judgement: the place of the certificate actions](#reg-1286))
+- <a id="reg-1228"></a>**REG-1228** The data holder brand card has the button "Issue certificate" after its status actions, in its action row. ([the action row of a record](../../../web/packages/ui/design/components.md#ui-0246); [Judgement: the place of the certificate actions](#reg-1286))
 - <a id="reg-1229"></a>**REG-1229** The console shows each "Issue certificate" button only when the console API permits the action. For example, a REMOVED software product has no button. ([the permitted certificate actions](operator-console-api.md#reg-1136); [the server certificate actions of a brand](operator-console-api.md#reg-1137))
 - <a id="reg-1230"></a>**REG-1230** The side navigation has the section "CDR certificates" after "Signing keys", with its own page. ([the structure of a console](../../../web/packages/ui/design/layout.md#ui-0071); [Judgement: the place of the certificate actions](#reg-1286))
-- <a id="reg-1231"></a>**REG-1231** The CDR certificates page shows the CDR CA bundle with a "Save as file" button, then a "Revoke certificate" button in an action row, then the list of the revocations. ([design system DESIGN.md: Components][ui-components]; [Judgement: the place of the certificate actions](#reg-1286))
+- <a id="reg-1231"></a>**REG-1231** The CDR certificates page shows the CDR CA bundle with a "Save as file" button, then a "Revoke certificate" button in an action row, then the list of the revocations. ([the action row of a record](../../../web/packages/ui/design/components.md#ui-0246); [Judgement: the place of the certificate actions](#reg-1286))
 - <a id="reg-1232"></a>**REG-1232** An issue is a dialog with one PEM CSR field and a CSR file input. The field and the input have the rules of the registration of a client certificate. ([the request body of an issue](certificate-management.md#reg-0602))
 - <a id="reg-1233"></a>**REG-1233** The help text of the CSR field says that the Register needs only the CSR, and never the private key. ([ACCC CPS, section 3.2.1][accc-cps]; [the Register never gets the private key](certificate-management.md#reg-0603))
 - <a id="reg-1234"></a>**REG-1234** For a client certificate, the help text of the CSR field gives the subject that the Register requires, with the names of the record. The CN is the name of the software product, and the O is the name of its brand. ([CDS: Certificate Signing Request Profile][cds-csr-profile]; [WCAG 2.2, SC 3.3.2][wcag-3-3-2]; [Judgement: the help text of a CSR field](#reg-1287))
@@ -129,7 +129,7 @@ This area gives the actions of the operator console, the rules for each action, 
 ### <a id="reg-1286"></a>REG-1286 The place of the certificate actions
 
 - Kind: choice
-- Basis: Step 3.3. The design system puts an action on one record in the action row of that record ([design system DESIGN.md: Components][ui-components]).
+- Basis: Step 3.3. The design system puts an action on one record in the action row of that record ([the action row of a record](../../../web/packages/ui/design/components.md#ui-0246)).
 - Reason: An issue is an action on one record. The CA bundle and a revocation are not of a participant, because [a revocation can be of a certificate of the lab set-up](certificate-revocation.md#reg-0701), so they get their own page, as the key sets do. A revocation needs the certificate, which the Register does not keep, so a revocation from a registered thumbprint is not possible ([Judgement: the certificate identifies the certificate to revoke](certificate-revocation.md#reg-0740)).
 
 ### <a id="reg-1287"></a>REG-1287 The help text of a CSR field
@@ -141,7 +141,7 @@ This area gives the actions of the operator console, the rules for each action, 
 ### <a id="reg-1288"></a>REG-1288 The result of an issue in its dialog
 
 - Kind: choice
-- Basis: Step 3.3. The response is the only copy of the certificate ([Judgement: the response of an issue](certificate-management.md#reg-0644)). A toast closes by itself ([WCAG 2.2, SC 2.2.1][wcag-2-2-1]; [design system DESIGN.md: Decisions][ui-decisions], row "Errors and toasts").
+- Basis: Step 3.3. The response is the only copy of the certificate ([Judgement: the response of an issue](certificate-management.md#reg-0644)). A toast closes by itself ([WCAG 2.2, SC 2.2.1][wcag-2-2-1]; [only a success shows in a toast](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0336)).
 - Reason: The text area lets the lab operator see and copy the chain. The console does not read the certificate, so the Register gives the thumbprint, which the lab operator finds again in the software product card and in the history.
 
 ### <a id="reg-1289"></a>REG-1289 The close of the result of an issue
@@ -186,5 +186,3 @@ This area gives the actions of the operator console, the rules for each action, 
 [apg-dialog]: https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
 [html-download]: https://html.spec.whatwg.org/multipage/links.html#downloading-resources
 [rfc9110-idempotent]: https://www.rfc-editor.org/rfc/rfc9110#name-idempotent-methods
-[ui-components]: ../../../web/packages/ui/DESIGN.md#components
-[ui-decisions]: ../../../web/packages/ui/DESIGN.md#decisions

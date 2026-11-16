@@ -29,6 +29,7 @@ function renderShell(brand: { logo?: string; label?: string } = {}) {
   );
 }
 
+// Verifies: UI-0212
 test("the shell has a banner with the name, a navigation and a main area", async () => {
   const container = renderShell();
 
@@ -38,6 +39,7 @@ test("the shell has a banner with the name, a navigation and a main area", async
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0215
 test("with no logo, the header has the name as text and not the brand colour", async () => {
   renderShell();
 
@@ -47,7 +49,7 @@ test("with no logo, the header has the name as text and not the brand colour", a
   expect(banner.element().className).not.toContain("bg-brand");
 });
 
-// Verifies: UI-0075
+// Verifies: UI-0075, UI-0215, UI-0216
 test("with a logo, the header shows the logo with the name as its alternative and the label on the brand colour", async () => {
   const container = renderShell({ logo: "/brand/logo.svg", label: "Operator console" });
 
@@ -101,6 +103,7 @@ test("the current item has its own background and a bar that does not use the ac
   expect(current.borderLeftColor).toBe(current.color);
 });
 
+// Verifies: UI-0213
 test("the navigation marks the current page", async () => {
   renderShell();
 
@@ -112,6 +115,7 @@ test("the navigation marks the current page", async () => {
     .not.toHaveAttribute("aria-current");
 });
 
+// Verifies: UI-0214, UI-0230
 test("each navigation item shows its icon, which assistive technology does not announce", async () => {
   renderShell();
   await expect
@@ -142,6 +146,7 @@ test("a navigation item with no icon shows only its text", async () => {
   expect(link.element().querySelector("svg")).toBeNull();
 });
 
+// Verifies: UI-0217
 test("the first Tab shows the skip link, and the skip link moves the focus to the main area", async () => {
   renderShell();
 
@@ -156,6 +161,7 @@ test("the first Tab shows the skip link, and the skip link moves the focus to th
   expect(document.activeElement).toBe(page.getByRole("button", { name: "In the page" }).element());
 });
 
+// Verifies: UI-0201, UI-0202
 test("the keyboard reaches each navigation item with a visible focus", async () => {
   renderShell();
 

@@ -18,6 +18,7 @@ function renderPagination(current: number, pageCount: number) {
   return { container, pages };
 }
 
+// Verifies: UI-0267
 test("the pagination tells the user the current page, the number of pages and the number of records", async () => {
   const { container } = renderPagination(2, 4);
 
@@ -27,6 +28,7 @@ test("the pagination tells the user the current page, the number of pages and th
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0267
 test("the page text is a status message, so that a change of page is announced", async () => {
   renderPagination(2, 4);
 
@@ -35,6 +37,7 @@ test("the page text is a status message, so that a change of page is announced",
     .toHaveTextContent("Page 2 of 4");
 });
 
+// Verifies: UI-0267
 test("the number of records is a status message, so that the result of a new search is announced", async () => {
   renderPagination(2, 4);
 
@@ -43,6 +46,7 @@ test("the number of records is a status message, so that the result of a new sea
     .toHaveTextContent("95 records");
 });
 
+// Verifies: UI-0266
 test("Previous and Next ask for the page before and after", async () => {
   const { pages } = renderPagination(2, 4);
 
@@ -80,6 +84,7 @@ test("no records gives page 1 of 1", async () => {
     .toHaveTextContent("Page 1 of 1");
 });
 
+// Verifies: UI-0201, UI-0202
 test("the keyboard reaches and uses each button with a visible focus", async () => {
   const { pages } = renderPagination(2, 4);
 
@@ -92,6 +97,7 @@ test("the keyboard reaches and uses each button with a visible focus", async () 
   expect(pages).toEqual([3]);
 });
 
+// Verifies: UI-0094
 test("each button is 24 by 24 CSS px or more", () => {
   renderPagination(2, 4);
 

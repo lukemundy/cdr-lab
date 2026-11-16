@@ -43,7 +43,7 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 |---|---|---|---|---|
 | <a id="dh-0322"></a>**DH-0322** | `brand.json` | Yes | The fields of [the brand file](#dh-0331) | [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 | <a id="dh-0323"></a>**DH-0323** | `tokens.json` | Yes | The values of the brand for the semantic colour roles, the body font, the heading font and the radius of the design system. They are in the token format of the design system, with literal values only. | [what a brand can change](../../../web/packages/ui/design/tokens-and-brands.md#ui-0031); [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
-| <a id="dh-0324"></a>**DH-0324** | `logo.svg` | Yes | The logo, legible on the brand colour of the header of the pages and on white | [design system DESIGN.md: Consumer pages][ui-consumer-pages] |
+| <a id="dh-0324"></a>**DH-0324** | `logo.svg` | Yes | The logo, legible on the brand colour of the header of the pages and on white | [the logo on the brand colour and on white](../../../web/packages/ui/design/consumer-pages.md#ui-0363) |
 | <a id="dh-0325"></a>**DH-0325** | `logo.png` | Yes | The logo of `logo.svg` as a PNG image for the email, legible on the brand colour of the header of the email | [the logo in the OTP email](consumer-authentication.md#dh-1251); [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 | <a id="dh-0326"></a>**DH-0326** | `mark.svg` | Yes | A square symbol of the brand, for small sizes | [a brand can change the logo](../../../web/packages/ui/design/tokens-and-brands.md#ui-0031) |
 | <a id="dh-0327"></a>**DH-0327** | `products.json` | Yes | The product catalogue of the brand, in the format of [a load file](product-reference-data.md#dh-0234) | [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
@@ -145,7 +145,7 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 ### <a id="dh-0376"></a>DH-0376 The SVG namespace and a square mark
 
 - Kind: choice
-- Basis: Step 3.3. [ADR 0023][adr-0023] gives the SVG structure, and the design system requires a square mark ([design system DESIGN.md: Consumer pages][ui-consumer-pages]).
+- Basis: Step 3.3. [ADR 0023][adr-0023] gives the SVG structure, and the design system shows the mark in a row of the hero ([the row of the hero](../../../web/packages/ui/design/consumer-pages.md#ui-0365)).
 - Reason: A browser does not show an SVG file with no SVG namespace as an image. A `viewBox` that is not square cannot give a square mark.
 
 ### <a id="dh-0377"></a>DH-0377 The size of `logo.png`
@@ -186,7 +186,6 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 [cds-product-categories]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#product-categories
 [adr-0018]: ../../../docs/adr/0018-container-images-with-a-web-ui-build-stage.md
 [adr-0023]: ../../../docs/adr/0023-give-the-brand-of-a-data-holder-as-a-strict-brand-directory.md
-[ui-consumer-pages]: ../../../web/packages/ui/DESIGN.md#consumer-pages
 [wcag-1-4-3]: https://www.w3.org/TR/WCAG22/#contrast-minimum
 [wcag-1-4-11]: https://www.w3.org/TR/WCAG22/#non-text-contrast
 [k8s-configmap]: https://kubernetes.io/docs/concepts/configuration/configmap/

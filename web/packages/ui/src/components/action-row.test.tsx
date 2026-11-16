@@ -6,6 +6,7 @@ import { render } from "../test/render";
 import { ActionRow } from "./action-row";
 import { Button } from "./button";
 
+// Verifies: UI-0246
 test("an action row shows its buttons on one line, in their order", async () => {
   const container = render(
     <ActionRow>

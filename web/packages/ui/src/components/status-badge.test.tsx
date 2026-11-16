@@ -8,6 +8,7 @@ import { StatusBadge } from "./status-badge";
 describe.each(["neutral", "success", "warning", "danger", "info"] as const)(
   "the %s status badge",
   (tone) => {
+    // Verifies: UI-0268
     test("shows its status text and passes the accessibility checks", async () => {
       const container = render(<StatusBadge tone={tone}>SUSPENDED</StatusBadge>);
 

@@ -11,7 +11,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// Verifies: UI-0162
+// Verifies: UI-0162, UI-0257
 test("the identifier shows the full value in the monospace font, with a copy button", async () => {
   const container = render(<Identifier value={id} label="legal entity ID" />);
 
@@ -24,6 +24,7 @@ test("the identifier shows the full value in the monospace font, with a copy but
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0259
 test("a long identifier with no break points wraps in a narrow container", () => {
   const value = "x".repeat(200);
   const container = render(
@@ -37,6 +38,7 @@ test("a long identifier with no break points wraps in a narrow container", () =>
   expect(box.scrollWidth).toBeLessThanOrEqual(box.clientWidth);
 });
 
+// Verifies: UI-0259
 test("with whitespace-nowrap, the identifier stays on one line", () => {
   const container = render(
     <div style={{ width: "100px" }}>
@@ -51,6 +53,7 @@ test("with whitespace-nowrap, the identifier stays on one line", () => {
   );
 });
 
+// Verifies: UI-0258
 test("with a display value, the identifier shows that value and the copy button copies the value", async () => {
   const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue();
   const container = render(<Identifier value="062000" display="062-000" label="BSB" />);

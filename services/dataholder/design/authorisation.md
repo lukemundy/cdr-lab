@@ -27,6 +27,7 @@ After the authentication, one page asks the consumer for the authorisation to di
 - <a id="dh-0814"></a>**DH-0814** The authorisation page shows the date on which the sharing ends in UTC, with the label "UTC". ([Judgement: the time zone and the duration on the authorisation page](#dh-0851))
 - <a id="dh-0815"></a>**DH-0815** The authorisation page says that the data includes the data from before the authorisation that the data holder holds for the selected accounts. ([CDR Rules][cdr-rules], rule 4.23(1)(b); [Judgement: the period of the data on the authorisation page](#dh-0852))
 - <a id="dh-0816"></a>**DH-0816** The authorisation page says that the consumer can withdraw the authorisation at any time, and how. The text is "You can stop the sharing at any time. Sign in to <brand name> online banking and go to Data sharing, or ask <brand name>". ([CDR Rules][cdr-rules], rule 4.23(1)(f) and (g), rule 4.25(1); [Judgement: the instructions to withdraw](#dh-0853))
+- <a id="dh-2603"></a>**DH-2603** The authorisation page shows each data cluster as a heading and a list of its permissions. The permissions are always visible: the consumer does not open a control to read them. ([the list of groups](../../../web/packages/ui/design/consumer-pages.md#ui-0383); [Judgement: data clusters that are always visible](#dh-2611))
 - <a id="dh-0817"></a>**DH-0817** The instructions to withdraw on the authorisation page have no link. ([CDR Rules][cdr-rules], rule 4.24(d); [Judgement: the instructions to withdraw](#dh-0853))
 - <a id="dh-0818"></a>**DH-0818** The authorisation page asks for no information other than the account selection. It offers no other products or services, and it has no reference to other documents. ([CDR Rules][cdr-rules], rule 4.24)
 
@@ -75,11 +76,14 @@ These rules apply to each page of the authentication and of the authorisation. T
 
 - <a id="dh-0835"></a>**DH-0835** Each consumer page shows the logo and the name of the brand, and uses the colours of the brand. The text alternative of the logo is the brand name. ([WCAG 2.2, SC 1.1.1][wcag-1-1-1]; [Judgement: the brand on the consumer pages](#dh-0859))
 - <a id="dh-0836"></a>**DH-0836** Each consumer page names the data holder with its brand name. For example, a page that refuses a request says "<brand name> cannot continue" or "<brand name> cannot use this form". ([Judgement: the brand on the consumer pages](#dh-0859))
+- <a id="dh-2600"></a>**DH-2600** Each page of the flow has a [step indicator](../../../web/packages/ui/design/consumer-pages.md#ui-0370) with 3 steps. The first authentication page is "Step 1 of 3", the OTP page is "Step 2 of 3" and the authorisation page is "Step 3 of 3". ([Judgement: three steps in the flow](#dh-2610))
+- <a id="dh-2601"></a>**DH-2601** A page that refuses a request or a form has no step indicator. ([Judgement: three steps in the flow](#dh-2610))
+- <a id="dh-2602"></a>**DH-2602** The [hero sentence](../../../web/packages/ui/design/consumer-pages.md#ui-0366) of each page of the flow names the data recipient with its brand name, and names the brand of the data holder. For example, the hero sentence "Acme Budget asks for your data from Wattle Bank" names both. ([the brand name of the data recipient](consumer-authentication.md#dh-1215); [Judgement: the brand on the consumer pages](#dh-0859))
 - <a id="dh-0837"></a>**DH-0837** Each consumer page has a footer with the text "<brand name> is not a real bank and this is just a demonstration. CDR Lab has no affiliation with any real bank nor the ACCC, DSB, or any real CDR participant." The footer has no link. ([CDS: Common Authentication Standards][cds-cx-authentication]; [Judgement: a footer that says the pages are a demonstration](#dh-0860))
 - <a id="dh-0838"></a>**DH-0838** The data holder gives the text of the footer. A brand directory cannot change or remove it. ([Judgement: a footer that says the pages are a demonstration](#dh-0860))
 - <a id="dh-0839"></a>**DH-0839** Accessibility: each consumer page meets WCAG 2.2 Level AA, and the automated accessibility checks pass. ([CDS: Accessibility Standards][cds-accessibility]; [Judgement: one design system for all UIs (ADR 0016)][adr-0016])
 - <a id="dh-0840"></a>**DH-0840** Accessibility: each consumer page is usable at a viewport width of 320 CSS px, with no horizontal scroll. ([WCAG 2.2, SC 1.4.10][wcag-1-4-10])
-- <a id="dh-0841"></a>**DH-0841** The consumer pages use the design guide of the [design system](../../../web/packages/ui/DESIGN.md). Their styles are a stylesheet of the design system that the data holder contains, and the styles of the brand. ([Judgement: one design system for all UIs (ADR 0016)][adr-0016])
+- <a id="dh-0841"></a>**DH-0841** The consumer pages use the [design guide of the consumer pages](../../../web/packages/ui/design/consumer-pages.md) of the design system. Their styles are a stylesheet of the design system that the data holder contains, and the styles of the brand. ([Judgement: one design system for all UIs (ADR 0016)][adr-0016])
 - <a id="dh-0842"></a>**DH-0842** Each consumer page works with no JavaScript, and runs no script. ([Judgement: consumer pages with no script and no content from other hosts](#dh-0861))
 - <a id="dh-0843"></a>**DH-0843** Each consumer page loads styles, fonts and images only from the same origin. It loads no content from other hosts. ([Judgement: consumer pages with no script and no content from other hosts](#dh-0861))
 - <a id="dh-0844"></a>**DH-0844** Each consumer page has the Content Security Policy `default-src 'none'; style-src 'self'; font-src 'self'; img-src 'self'; frame-ancestors 'none'; base-uri 'none'`, with no `form-action`. ([MDN: CSP][mdn-csp]; [Judgement: the Content Security Policy of the consumer pages](#dh-0862))
@@ -181,6 +185,18 @@ These rules apply to each page of the authentication and of the authorisation. T
 - Kind: choice
 - Basis: Step 3.3. The `logoUri` of the brand on the Register needs a fixed URL on the public base URI ([the logo on the public base URI](brand.md#dh-0313)), and the CDS gives no path for the other brand files.
 - Reason: The files of the brand have one prefix, and the online bank site uses the same paths. The selector has a higher specificity than the `:root` of the tokens of the design system.
+
+### <a id="dh-2610"></a>DH-2610 Three steps in the flow
+
+- Kind: choice
+- Basis: Step 3.3. The CDS gives no rule for a step indicator in the authorisation flow ([CDS: Common Authentication Standards][cds-cx-authentication]).
+- Reason: The flow always has three pages: the user identifier, the OTP and the authorisation. The consumer sees how much of the flow is left. A refusal ends the flow, so it is not a step.
+
+### <a id="dh-2611"></a>DH-2611 Data clusters that are always visible
+
+- Kind: choice
+- Basis: Step 3.3. The CDS requires the data cluster language and the permission language word for word, but it gives no rule for their display ([CDS: Data Language Standards][cds-data-language]).
+- Reason: A permission that the consumer must open to read is easy to miss.
 
 [adr-0012]: ../../../docs/adr/0012-utc-for-all-times.md
 [adr-0014]: ../../../docs/adr/0014-web-uis-as-embedded-react-single-page-applications.md

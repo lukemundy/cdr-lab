@@ -61,7 +61,7 @@ This area gives the accounts of a consumer on the online bank site: the balances
 - <a id="dh-2231"></a>**DH-2231** The account has no link to its product. A later change to the product, or its end, does not change the account. ([CDS: BankingAccountV3][cds-schema-account]; [Judgement: no link from an account to its product](#dh-2306))
 - <a id="dh-2232"></a>**DH-2232** An account that the consumer opens is not in an arrangement that exists. The next authorisation of the customer can include it. ([the authorisation page lists each open account](authorisation.md#dh-0819); [the amendment of an authorisation is a non-goal](README.md))
 - <a id="dh-2233"></a>**DH-2233** After an open, the site shows the page of the new account, with a status message that names the product. The focus is on the heading of the page. ([WCAG 2.2, SC 4.1.3][wcag-4-1-3])
-- <a id="dh-2234"></a>**DH-2234** While an open is in progress, the busy state of the button stops a second open. The site never sends an open again by itself. ([design system DESIGN.md][ui-design]; [Judgement: no idempotency key for an open](#dh-2307))
+- <a id="dh-2234"></a>**DH-2234** While an open is in progress, the busy state of the button stops a second open. The site never sends an open again by itself. ([no automatic second request](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0301); [Judgement: no idempotency key for an open](#dh-2307))
 - <a id="dh-2235"></a>**DH-2235** The data holder has no idempotency key for an open. For example, two requests open two accounts. ([Judgement: no idempotency key for an open](#dh-2307))
 
 ## Close of an account
@@ -75,7 +75,7 @@ This area gives the accounts of a consumer on the online bank site: the balances
 - <a id="dh-2246"></a>**DH-2246** A close has no rule for the balance or for pending transactions. The closed account keeps its balance and its transactions. ([Judgement: no balance rule at a close](#dh-2308))
 - <a id="dh-2247"></a>**DH-2247** The data holder records no channel of a close. For example, a close on the site and a close by the operator give the same record. ([CDR Rules][cdr-rules], rule 9.3; [Judgement: no record of the channel of a close](#dh-2309))
 - <a id="dh-2248"></a>**DH-2248** After a close, the dialog closes and a status message names the closed account. The site shows the accounts page with the focus on its heading, and the account is in the group of the closed accounts. ([WCAG 2.2, SC 4.1.3][wcag-4-1-3])
-- <a id="dh-2249"></a>**DH-2249** When a close fails for a reason that is not a changed set of arrangements, the dialog stays open and shows the error. The site never sends a close again by itself. ([design system DESIGN.md][ui-design])
+- <a id="dh-2249"></a>**DH-2249** When a close fails for a reason that is not a changed set of arrangements, the dialog stays open and shows the error. The site never sends a close again by itself. ([no automatic second request](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0301))
 
 ## Judgements
 
@@ -124,7 +124,7 @@ This area gives the accounts of a consumer on the online bank site: the balances
 ### <a id="dh-2307"></a>DH-2307 No idempotency key for an open
 
 - Kind: choice
-- Basis: Step 3.3. The UI never sends an action again by itself ([design system DESIGN.md][ui-design]).
+- Basis: Step 3.3. The UI never sends an action again by itself ([no automatic second request](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0301)).
 - Reason: A second account after two requests is what the consumer asked for, and it has no effect on a different person in the lab. A key adds a store for a case that the busy state already stops.
 
 ### <a id="dh-2308"></a>DH-2308 No balance rule at a close
@@ -142,7 +142,6 @@ This area gives the accounts of a consumer on the online bank site: the balances
 [adr-0021]: ../../../docs/adr/0021-record-one-business-fact-in-each-event-type.md
 [adr-0023]: ../../../docs/adr/0023-give-the-brand-of-a-data-holder-as-a-strict-brand-directory.md
 [production-gaps]: ../../../docs/production-gaps.md
-[ui-design]: ../../../web/packages/ui/DESIGN.md
 [aml-ctf-act]: https://www.legislation.gov.au/C2006A00169/latest/text
 [auspaynet-bsb]: https://bsb.auspaynet.com.au/
 [cdr-rules]: https://www.legislation.gov.au/F2020L00094/latest/text

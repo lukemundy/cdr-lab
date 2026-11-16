@@ -14,6 +14,7 @@ function definitionOf(container: HTMLElement, term: string): HTMLElement {
   return dd;
 }
 
+// Verifies: UI-0247
 test("each value is in the description list with its term", async () => {
   const container = render(
     <DescriptionList>
@@ -32,6 +33,7 @@ test("each value is in the description list with its term", async () => {
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0249
 test("an empty value shows the text Not set", async () => {
   const container = render(
     <DescriptionList>
@@ -48,6 +50,7 @@ test("an empty value shows the text Not set", async () => {
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0250
 test("an empty list of values can give its own text", async () => {
   const container = render(
     <DescriptionList>
@@ -61,6 +64,7 @@ test("an empty list of values can give its own text", async () => {
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0248
 test("a value can be a list of values", async () => {
   const container = render(
     <DescriptionList>
@@ -73,6 +77,7 @@ test("a value can be a list of values", async () => {
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0251
 test("a long thumbprint and a long URI wrap, and the page has no horizontal scroll at 1280 CSS px", async () => {
   await page.viewport(1280, 800);
   const thumbprint = "kZ2lQnTXy1vbQ8mcJ0aA7oPqRsTuVwXyZ01234567-_";

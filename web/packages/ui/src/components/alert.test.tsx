@@ -7,6 +7,7 @@ import { render } from "../test/render";
 import { Alert } from "./alert";
 import { Button } from "./button";
 
+// Verifies: UI-0333
 test("an alert gives its title and its text, and passes the accessibility checks", async () => {
   const container = render(
     <Alert title="Conflict">The data recipient changed. See the current status.</Alert>,
@@ -35,6 +36,7 @@ function FailingForm() {
 }
 
 // A screen reader announces an element with the alert role when it is added to the page.
+// Verifies: UI-0333
 test("an alert that appears is an alert when it is added", async () => {
   render(<FailingForm />);
   expect(page.getByRole("alert").query()).toBeNull();
@@ -44,6 +46,7 @@ test("an alert that appears is an alert when it is added", async () => {
   await expect.element(page.getByRole("alert")).toMatchTextContent("Bad Request");
 });
 
+// Verifies: UI-0334
 test("an alert has no close button, so it stays until its cause changes", () => {
   render(<Alert title="Conflict">Detail.</Alert>);
 

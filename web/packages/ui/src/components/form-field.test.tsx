@@ -6,6 +6,7 @@ import { expectNoAxeViolations, expectTargetSize, expectVisibleFocus } from "../
 import { render } from "../test/render";
 import { Select, TextArea, TextField } from "./form-field";
 
+// Verifies: UI-0302
 test("a text field has a visible label, and the screen reader reads the label and the help text", async () => {
   const container = render(
     <TextField label="Software product name" description="The name in the SSA." />,
@@ -36,6 +37,7 @@ test("a text field with no help text has no description", async () => {
   await expect.element(page.getByRole("textbox", { name: "Name" })).toHaveAccessibleDescription("");
 });
 
+// Verifies: UI-0302
 test("an error shows at the field, and the field is invalid and described by the error", async () => {
   const container = render(
     <TextField label="Name" description="The name in the SSA." error="Enter a name." />,
@@ -48,6 +50,7 @@ test("an error shows at the field, and the field is invalid and described by the
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0303
 test("the error shows above the control, after the label and the help text", () => {
   render(<TextField label="Name" description="Help" error="Enter a name." />);
   const elements = [
@@ -80,6 +83,7 @@ function ServerErrorForm() {
   );
 }
 
+// Verifies: UI-0305
 test("an error from the server shows at the field, and goes when the user changes the value", async () => {
   const container = render(<ServerErrorForm />);
   const field = page.getByRole("textbox", { name: "Certificate" });
@@ -100,6 +104,7 @@ test("an error from the server shows at the field, and goes when the user change
     .not.toBeInTheDocument();
 });
 
+// Verifies: UI-0307
 test("a text area is a multi-line text box with its label, help text and error", async () => {
   const container = render(
     <TextArea
@@ -143,6 +148,7 @@ test("a disabled field is not in the tab sequence, and passes the accessibility 
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0201, UI-0202
 test("the keyboard reaches each field with a visible focus", async () => {
   render(
     <>
@@ -159,6 +165,7 @@ test("the keyboard reaches each field with a visible focus", async () => {
   expectVisibleFocus(page.getByRole("textbox", { name: "Certificate" }).element());
 });
 
+// Verifies: UI-0094
 test("each field is 24 by 24 CSS px or more", () => {
   render(
     <>
@@ -176,6 +183,7 @@ const levels = [
   { value: "SPONSORED", label: "Sponsored" },
 ];
 
+// Verifies: UI-0308
 test("a select is a native select with its label, help text, options and error", async () => {
   const container = render(
     <Select
@@ -210,6 +218,7 @@ test("the keyboard changes the value of a select, with a visible focus", async (
   await expect.element(select).toHaveValue("SPONSORED");
 });
 
+// Verifies: UI-0309
 test("a select with a placeholder has no selected value until the user chooses one", async () => {
   const container = render(
     <form aria-label="Create">
