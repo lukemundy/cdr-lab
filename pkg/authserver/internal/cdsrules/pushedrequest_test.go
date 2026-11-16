@@ -32,6 +32,7 @@ func TestTheRefreshTokenExpiresAtTheEndOfTheSharingDuration(t *testing.T) {
 	assert.WithinDuration(t, time.Now().Add(time.Hour), refreshTokenExpiry(t, server, tokens), 10*time.Second)
 }
 
+// Verifies: AUTH-0090
 func TestASharingDurationOfMoreThanOneYearIsOneYear(t *testing.T) {
 	server, recipient := newAuthServer(t)
 
@@ -58,6 +59,7 @@ func TestNoSharingDurationGivesNoRefreshToken(t *testing.T) {
 	}
 }
 
+// Verifies: AUTH-0089
 func TestASharingDurationThatIsNotValidFailsThePushedAuthorisationRequest(t *testing.T) {
 	for name, value := range map[string]any{"negative": -1, "not a number": "one year", "fraction": 1.5} {
 		t.Run(name, func(t *testing.T) {
@@ -70,6 +72,7 @@ func TestASharingDurationThatIsNotValidFailsThePushedAuthorisationRequest(t *tes
 	}
 }
 
+// Verifies: AUTH-0093
 func TestASharingDurationOutsideTheClaimsMemberHasNoEffect(t *testing.T) {
 	_, recipient := newAuthServer(t)
 
@@ -78,6 +81,7 @@ func TestASharingDurationOutsideTheClaimsMemberHasNoEffect(t *testing.T) {
 	assert.NotContains(t, tokens, "refresh_token")
 }
 
+// Verifies: AUTH-0079
 func TestARequestObjectThatIsValidFor60MinutesIsAccepted(t *testing.T) {
 	_, recipient := newAuthServer(t)
 	now := time.Now()
@@ -90,6 +94,7 @@ func TestARequestObjectThatIsValidFor60MinutesIsAccepted(t *testing.T) {
 	require.Equal(t, http.StatusCreated, a.par.status, a.par.body)
 }
 
+// Verifies: AUTH-0079
 func TestARequestObjectThatIsValidForMoreThan60MinutesIsRefused(t *testing.T) {
 	now := time.Now()
 
@@ -108,6 +113,7 @@ func TestARequestObjectThatIsValidForMoreThan60MinutesIsRefused(t *testing.T) {
 	}
 }
 
+// Verifies: AUTH-0091
 func TestARequestObjectWithAnArrangementIDIsRefused(t *testing.T) {
 	_, recipient := newAuthServer(t)
 
@@ -116,6 +122,7 @@ func TestARequestObjectWithAnArrangementIDIsRefused(t *testing.T) {
 	requireRefused(t, a.par, "invalid_request_object")
 }
 
+// Verifies: AUTH-0086
 func TestARequestForTheRegistrationScopeIsRefused(t *testing.T) {
 	_, recipient := newAuthServer(t)
 
@@ -130,6 +137,7 @@ func acrClaim(acr map[string]any) map[string]any {
 	return cdsClaims(map[string]any{"id_token": map[string]any{"acr": acr}})
 }
 
+// Verifies: AUTH-0092
 func TestAnEssentialACRThatTheDataHolderCannotReachIsRefused(t *testing.T) {
 	tests := map[string]map[string]any{
 		"essential value 3":  {"essential": true, "value": loa3},
@@ -146,6 +154,7 @@ func TestAnEssentialACRThatTheDataHolderCannotReachIsRefused(t *testing.T) {
 	}
 }
 
+// Verifies: AUTH-0092
 func TestAnACRThatTheDataHolderReachesOrThatIsVoluntaryIsAccepted(t *testing.T) {
 	tests := map[string]map[string]any{
 		"essential value 2":        {"essential": true, "value": loa2},

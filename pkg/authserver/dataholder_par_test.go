@@ -103,6 +103,7 @@ func requirePushRefused(t *testing.T, r reply, status int, code string) string {
 	return description
 }
 
+// Verifies: AUTH-0061, AUTH-0065, AUTH-0066, AUTH-0067
 func TestARegisteredClientPushesARequestObjectAndGetsARequestURIFor60Seconds(t *testing.T) {
 	b := newBank(t)
 
@@ -118,6 +119,7 @@ func TestARegisteredClientPushesARequestObjectAndGetsARequestURIFor60Seconds(t *
 	assert.Greater(t, len(strings.TrimPrefix(requestURI, requestURIPrefix)), 20, "the reference is not short")
 }
 
+// Verifies: AUTH-0067
 func TestTwoPushedRequestsGetDifferentRequestURIs(t *testing.T) {
 	b := newBank(t)
 
@@ -127,6 +129,7 @@ func TestTwoPushedRequestsGetDifferentRequestURIs(t *testing.T) {
 	assert.NotEqual(t, first.body["request_uri"], second.body["request_uri"])
 }
 
+// Verifies: AUTH-0073
 func TestARequestObjectSignedWithES256IsAcceptedWhenTheClientRegisteredES256(t *testing.T) {
 	b := newBank(t)
 	client := b.clients[registeredClientID]
@@ -140,6 +143,7 @@ func TestARequestObjectSignedWithES256IsAcceptedWhenTheClientRegisteredES256(t *
 	require.Equal(t, http.StatusCreated, r.status, r.body)
 }
 
+// Verifies: AUTH-0072
 func TestARequestObjectSignedWithAnAlgorithmThatTheClientDidNotRegisterIsRefused(t *testing.T) {
 	b := newBank(t)
 	object := assertion{alg: jose.ES256, key: b.ecKey, kid: "ec", claims: b.requestObject()}
@@ -149,6 +153,7 @@ func TestARequestObjectSignedWithAnAlgorithmThatTheClientDidNotRegisterIsRefused
 	requirePushRefused(t, r, http.StatusBadRequest, "invalid_request_object")
 }
 
+// Verifies: AUTH-0062
 func TestAnAuthorisationParameterOutsideTheRequestObjectHasNoEffect(t *testing.T) {
 	b := newBank(t)
 	form := b.parForm(b.signedObject(b.requestObject()))
@@ -161,6 +166,7 @@ func TestAnAuthorisationParameterOutsideTheRequestObjectHasNoEffect(t *testing.T
 	require.Equal(t, http.StatusCreated, r.status, r.body)
 }
 
+// Verifies: AUTH-0061
 func TestAPushedRequestWithNoRequestObjectIsRefused(t *testing.T) {
 	b := newBank(t)
 	form := b.parForm(b.signedObject(b.requestObject()))
@@ -175,6 +181,7 @@ func TestAPushedRequestWithNoRequestObjectIsRefused(t *testing.T) {
 	requirePushRefused(t, b.par(form), http.StatusBadRequest, "invalid_request")
 }
 
+// Verifies: AUTH-0063
 func TestAPushedRequestWithARequestURIParameterIsRefused(t *testing.T) {
 	b := newBank(t)
 	form := b.parForm(b.signedObject(b.requestObject()))
@@ -183,6 +190,7 @@ func TestAPushedRequestWithARequestURIParameterIsRefused(t *testing.T) {
 	requirePushRefused(t, b.par(form), http.StatusBadRequest, "invalid_request")
 }
 
+// Verifies: AUTH-0068
 func TestAPushedRequestWithAClientAssertionThatIsNotValidIsRefused(t *testing.T) {
 	b := newBank(t)
 
@@ -199,6 +207,7 @@ func TestAPushedRequestWithAClientAssertionThatIsNotValidIsRefused(t *testing.T)
 	assert.Equal(t, "invalid client", description, "the response does not give the cause of a failed authentication")
 }
 
+// Verifies: AUTH-0064
 func TestAClientWithNoAuthorisationCodeGrantCannotPushARequest(t *testing.T) {
 	b := newBank(t)
 	client := b.clients[registeredClientID]
@@ -208,6 +217,7 @@ func TestAClientWithNoAuthorisationCodeGrantCannotPushARequest(t *testing.T) {
 	requirePushRefused(t, b.push(b.requestObject()), http.StatusBadRequest, "invalid_grant")
 }
 
+// Verifies: AUTH-0069, AUTH-0070
 func TestARequestObjectThatBreaksARuleIsRefusedWithACauseThatNamesTheRule(t *testing.T) {
 	otherKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	require.NoError(t, err)
@@ -220,78 +230,96 @@ func TestARequestObjectThatBreaksARuleIsRefusedWithACauseThatNamesTheRule(t *tes
 		// cause is a part of the error_description.
 		cause string
 	}{
+		// Verifies: AUTH-0076, AUTH-0094
 		"wrong aud": {
 			change: func(_ *bank, c map[string]any) { c["aud"] = "https://recipient.example" },
 			code:   "invalid_request_object", cause: "aud",
 		},
+		// Verifies: AUTH-0075, AUTH-0094
 		"wrong iss": {
 			change: func(_ *bank, c map[string]any) { c["iss"] = "client-2" },
 			code:   "invalid_request_object", cause: "iss",
 		},
+		// Verifies: AUTH-0075, AUTH-0094
 		"client_id of a different client": {
 			change: func(_ *bank, c map[string]any) { c["client_id"] = "client-2" },
 			code:   "invalid_request_object", cause: "client_id",
 		},
+		// Verifies: AUTH-0077, AUTH-0094
 		"no nbf": {
 			change: func(_ *bank, c map[string]any) { delete(c, "nbf") },
 			code:   "invalid_request_object", cause: "nbf",
 		},
+		// Verifies: AUTH-0077, AUTH-0094
 		"no exp": {
 			change: func(_ *bank, c map[string]any) { delete(c, "exp") },
 			code:   "invalid_request_object", cause: "exp",
 		},
+		// Verifies: AUTH-0078
 		"nbf of more than 60 minutes before the request": {
 			change: func(_ *bank, c map[string]any) { c["nbf"] = now.Add(-61 * time.Minute).Unix() },
 			code:   "invalid_request_object", cause: "nbf",
 		},
+		// Verifies: AUTH-0079
 		"exp of more than 60 minutes after the nbf": {
 			change: func(_ *bank, c map[string]any) {
 				c["nbf"], c["exp"] = now.Add(-30*time.Minute).Unix(), now.Add(31*time.Minute).Unix()
 			},
 			code: "invalid_request_object", cause: "60 minutes after nbf",
 		},
+		// Verifies: AUTH-0080
 		"expired": {
 			change: func(_ *bank, c map[string]any) {
 				c["nbf"], c["exp"] = now.Add(-10*time.Minute).Unix(), now.Add(-5*time.Minute).Unix()
 			},
 			code: "invalid_request_object", cause: "exp",
 		},
+		// Verifies: AUTH-0081, AUTH-0095
 		"response_type that is not code": {
 			change: func(_ *bank, c map[string]any) { c["response_type"] = "code id_token" },
 			code:   "invalid_request",
 		},
+		// Verifies: AUTH-0082, AUTH-0095
 		"response_mode that is not jwt": {
 			change: func(_ *bank, c map[string]any) { c["response_mode"] = "query" },
 			code:   "invalid_request",
 		},
+		// Verifies: AUTH-0082, AUTH-0095
 		"no response_mode": {
 			change: func(_ *bank, c map[string]any) { delete(c, "response_mode") },
 			code:   "invalid_request", cause: "response_mode",
 		},
+		// Verifies: AUTH-0083, AUTH-0095
 		"redirect_uri that is not registered": {
 			change: func(_ *bank, c map[string]any) { c["redirect_uri"] = "https://attacker.example/callback" },
 			code:   "invalid_request", cause: "redirect_uri",
 		},
+		// Verifies: AUTH-0083, AUTH-0095
 		"no redirect_uri": {
 			change: func(_ *bank, c map[string]any) { delete(c, "redirect_uri") },
 			code:   "invalid_request", cause: "redirect_uri",
 		},
+		// Verifies: AUTH-0087, AUTH-0095
 		"no nonce": {
 			change: func(_ *bank, c map[string]any) { delete(c, "nonce") },
 			code:   "invalid_request", cause: "nonce",
 		},
+		// Verifies: AUTH-0088, AUTH-0095
 		"no code_challenge": {
 			change: func(_ *bank, c map[string]any) { delete(c, "code_challenge") },
 			code:   "invalid_request", cause: "code_challenge",
 		},
+		// Verifies: AUTH-0088, AUTH-0095
 		"code_challenge_method that is not S256": {
 			change: func(_ *bank, c map[string]any) { c["code_challenge_method"] = "plain" },
 			code:   "invalid_request", cause: "code_challenge_method",
 		},
+		// Verifies: AUTH-0084, AUTH-0095
 		"no openid scope": {
 			change: func(_ *bank, c map[string]any) { c["scope"] = "bank:accounts.basic:read" },
 			code:   "invalid_request", cause: "openid",
 		},
+		// Verifies: AUTH-0085
 		"scope that the registration does not have": {
 			change: func(_ *bank, c map[string]any) { c["scope"] = "openid profile" },
 			code:   "invalid_scope", cause: "profile",
@@ -300,20 +328,24 @@ func TestARequestObjectThatBreaksARuleIsRefusedWithACauseThatNamesTheRule(t *tes
 			change: func(_ *bank, c map[string]any) { c["scope"] = "openid bank:payees:read" },
 			code:   "invalid_scope", cause: "bank:payees:read",
 		},
+		// Verifies: AUTH-0086
 		"registration scope": {
 			change: func(_ *bank, c map[string]any) { c["scope"] = "openid cdr:registration" },
 			code:   "invalid_scope", cause: "cdr:registration",
 		},
+		// Verifies: AUTH-0089, AUTH-0094
 		"negative sharing_duration": {
 			change: func(_ *bank, c map[string]any) { c["claims"] = map[string]any{"sharing_duration": -1} },
 			code:   "invalid_request_object", cause: "sharing_duration",
 		},
+		// Verifies: AUTH-0091
 		"cdr_arrangement_id": {
 			change: func(_ *bank, c map[string]any) {
 				c["claims"] = map[string]any{"cdr_arrangement_id": "5a1bf696-ee03-408b-b315-97955415d1f0"}
 			},
 			code: "invalid_request_object", cause: "cdr_arrangement_id",
 		},
+		// Verifies: AUTH-0092
 		"essential acr that the data holder cannot reach": {
 			change: func(_ *bank, c map[string]any) {
 				c["claims"] = map[string]any{"id_token": map[string]any{
@@ -335,6 +367,7 @@ func TestARequestObjectThatBreaksARuleIsRefusedWithACauseThatNamesTheRule(t *tes
 		})
 	}
 
+	// Verifies: AUTH-0074, AUTH-0094
 	t.Run("signature of a key that the client does not have", func(t *testing.T) {
 		b := newBank(t)
 		object := b.signedObject(b.requestObject())
@@ -344,6 +377,7 @@ func TestARequestObjectThatBreaksARuleIsRefusedWithACauseThatNamesTheRule(t *tes
 	})
 }
 
+// Verifies: AUTH-0089, AUTH-0092, AUTH-0093
 func TestARequestObjectWithASharingDurationAndAnACRThatTheDataHolderReachesIsAccepted(t *testing.T) {
 	b := newBank(t)
 	claims := b.requestObject()
@@ -361,6 +395,7 @@ func TestARequestObjectWithASharingDurationAndAnACRThatTheDataHolderReachesIsAcc
 	require.Equal(t, http.StatusCreated, r.status, r.body)
 }
 
+// Verifies: AUTH-0070
 func TestTheCauseOfARefusalDoesNotRepeatTheRequestObject(t *testing.T) {
 	b := newBank(t)
 	claims := b.requestObject()

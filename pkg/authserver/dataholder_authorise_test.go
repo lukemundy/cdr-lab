@@ -82,6 +82,7 @@ func authorisePath(clientID, requestURI string) string {
 	return "/authorize?" + url.Values{"client_id": {clientID}, "request_uri": {requestURI}}.Encode()
 }
 
+// Verifies: AUTH-0096
 func TestTheAuthorisationEndpointStartsTheConsumerPagesForAPushedRequest(t *testing.T) {
 	b := newBank(t)
 
@@ -125,6 +126,7 @@ func TestTwoFlowsHaveDifferentPathsAndStates(t *testing.T) {
 	assert.Nil(t, second.State)
 }
 
+// Verifies: AUTH-0098, AUTH-0100
 func TestARequestURIIsAcceptedOneTimeOnly(t *testing.T) {
 	b := newBank(t)
 	target := authorisePath(registeredClientID, b.requestURI())
@@ -139,6 +141,7 @@ func TestARequestURIIsAcceptedOneTimeOnly(t *testing.T) {
 	assert.Len(t, b.pages.interactions, 1, "the second use does not start the pages")
 }
 
+// Verifies: AUTH-0100, AUTH-0101
 func TestTheAuthorisationEndpointRefusesARequestThatItCannotTrustWithNoRedirect(t *testing.T) {
 	const otherClientID = "client-2"
 
@@ -146,14 +149,17 @@ func TestTheAuthorisationEndpointRefusesARequestThatItCannotTrustWithNoRedirect(
 		target func(b *bank) string
 		status int
 	}{
+		// Verifies: AUTH-0098
 		"request_uri that the data holder does not know": {
 			target: func(*bank) string { return authorisePath(registeredClientID, requestURIPrefix+"unknown") },
 			status: http.StatusBadRequest,
 		},
+		// Verifies: AUTH-0097
 		"no request_uri": {
 			target: func(*bank) string { return "/authorize?client_id=" + registeredClientID },
 			status: http.StatusBadRequest,
 		},
+		// Verifies: AUTH-0097
 		"request parameter": {
 			target: func(b *bank) string {
 				object := b.form(b.signedObject(b.requestObject())).Get("client_assertion")
@@ -161,6 +167,7 @@ func TestTheAuthorisationEndpointRefusesARequestThatItCannotTrustWithNoRedirect(
 			},
 			status: http.StatusBadRequest,
 		},
+		// Verifies: AUTH-0099
 		"request_uri of a different client": {
 			target: func(b *bank) string { return authorisePath(otherClientID, b.requestURI()) },
 			status: http.StatusUnauthorized,
@@ -173,6 +180,7 @@ func TestTheAuthorisationEndpointRefusesARequestThatItCannotTrustWithNoRedirect(
 			target: func(b *bank) string { return "/authorize?request_uri=" + url.QueryEscape(b.requestURI()) },
 			status: http.StatusUnauthorized,
 		},
+		// Verifies: AUTH-0102
 		"flow that does not exist": {
 			target: func(*bank) string { return "/authorize/5a1bf696-ee03-408b-b315-97955415d1f0" },
 			status: http.StatusBadRequest,
@@ -226,6 +234,7 @@ func queryNames(query url.Values) []string {
 	return names
 }
 
+// Verifies: AUTH-0104, AUTH-0105, AUTH-0106, AUTH-0107
 func TestADenialRedirectsTheBrowserWithASignedErrorForTheSoftwareProduct(t *testing.T) {
 	for _, denial := range []authserver.Denial{authserver.AccessDenied, authserver.TemporarilyUnavailable} {
 		t.Run(string(denial), func(t *testing.T) {
@@ -248,6 +257,7 @@ func TestADenialRedirectsTheBrowserWithASignedErrorForTheSoftwareProduct(t *test
 	}
 }
 
+// Verifies: AUTH-0102
 func TestAFlowThatEndedWithADenialDoesNotContinue(t *testing.T) {
 	b := newBank(t)
 	b.browse(http.MethodGet, authorisePath(registeredClientID, b.requestURI()))
@@ -263,6 +273,7 @@ func TestAFlowThatEndedWithADenialDoesNotContinue(t *testing.T) {
 	assert.Len(t, b.pages.interactions, 2, "the pages are not called for a flow that ended")
 }
 
+// Verifies: AUTH-0090
 func TestAnInteractionHasTheSharingDurationOfTheRequest(t *testing.T) {
 	tests := map[string]struct {
 		claims map[string]any
@@ -292,6 +303,7 @@ func TestAnInteractionHasTheSharingDurationOfTheRequest(t *testing.T) {
 	}
 }
 
+// Verifies: AUTH-0104, AUTH-0105, AUTH-0106, AUTH-0107
 func TestAnApprovalRedirectsTheBrowserWithASignedCodeForTheSoftwareProduct(t *testing.T) {
 	b := newBank(t)
 	b.browse(http.MethodGet, authorisePath(registeredClientID, b.requestURI()))
@@ -331,6 +343,7 @@ func TestTwoApprovalsGiveDifferentCodes(t *testing.T) {
 	assert.NotEqual(t, codes[0], codes[1])
 }
 
+// Verifies: AUTH-0102
 func TestAFlowThatEndedWithAnApprovalDoesNotContinue(t *testing.T) {
 	b := newBank(t)
 	b.browse(http.MethodGet, authorisePath(registeredClientID, b.requestURI()))
