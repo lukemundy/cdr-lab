@@ -375,9 +375,9 @@ The descriptive text tells the reader what the rule says. It is not the identifi
 
 For example:
 
-- Use: "The consumer selects the accounts on the authorisation page ([only open accounts are offered](#dh-0120))."
-- Not: "The consumer selects the accounts on the authorisation page ([DH-0120](#dh-0120))."
-- Not: "The consumer selects the accounts on the authorisation page (see DH-0120)."
+- Use: `The consumer selects the accounts on the authorisation page ([only open accounts are offered](#dh-0120)).`
+- Not: `The consumer selects the accounts on the authorisation page ([DH-0120](#dh-0120)).`
+- Not: `The consumer selects the accounts on the authorisation page (see DH-0120).`
 
 A link to a heading of a specification is permitted only for a link from outside the specifications, for example from a README. A heading anchor changes when the heading text changes.
 

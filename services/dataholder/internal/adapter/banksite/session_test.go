@@ -606,7 +606,6 @@ func TestTheSiteRefusesAChangeFromADifferentOrigin(t *testing.T) {
 	}
 }
 
-// DESIGN.md, Session: the rule of the account routes, also at a read of the session.
 // Verifies: DH-1744, DH-2045
 func TestAReadOfTheSessionOfACustomerThatTheDataHolderNoLongerHasEndsTheSession(t *testing.T) {
 	store := newCustomers(quoll)
