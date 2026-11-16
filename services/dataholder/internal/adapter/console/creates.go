@@ -25,7 +25,6 @@ type Creator interface {
 }
 
 const (
-	fieldErrorsType = "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#console-api"
 	// A customer, an account or a transaction is a few kilobytes at most.
 	maxCreateBodyBytes = 64 << 10
 	badCustomerBody    = "The request body must be a JSON object with only the fields of the customer."
@@ -105,7 +104,7 @@ func writeCreateError(w http.ResponseWriter, r *http.Request, err error) {
 	}
 
 	if conflict.Pointer != "" {
-		problem.WriteFieldErrors(w, fieldErrorsType, http.StatusConflict, "", []problem.FieldError{conflict})
+		problem.WriteFieldErrors(w, http.StatusConflict, "", []problem.FieldError{conflict})
 		return
 	}
 
@@ -120,5 +119,5 @@ func writeCreateError(w http.ResponseWriter, r *http.Request, err error) {
 		errs = append(errs, problem.FieldError{Pointer: problem.FieldPointer(f.Field), Detail: f.Detail})
 	}
 
-	problem.WriteFieldErrors(w, fieldErrorsType, http.StatusBadRequest, "", errs)
+	problem.WriteFieldErrors(w, http.StatusBadRequest, "", errs)
 }

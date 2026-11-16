@@ -37,7 +37,7 @@ const revoked: Revocation = {
 };
 
 const fieldErrorsType =
-  "https://github.com/lukemundy/cdr-lab/blob/main/services/register/DESIGN.md#console-api" as const;
+  "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002" as const;
 
 type Requests = { checks: unknown[]; revocations: unknown[]; pages: (string | null)[] };
 

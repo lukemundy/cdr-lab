@@ -205,6 +205,10 @@ This table is the registry of the codes. A new specification adds its code to th
 | `pkg/platform/telemetry` | `TELE` |
 | `pkg/platform/httpserver` | `SRV` |
 | `pkg/platform/database` | `DBASE` |
+| `pkg/platform/operatorhttp` | `OPI` |
+| `pkg/platform/hostallowlist` | `HOST` |
+| `pkg/platform/problem` | `PROB` |
+| `pkg/platform/jsonhttp` | `BODY` |
 
 A code has 2 to 5 capital letters. A code is not the name of a standard, and it is not an existing code with one letter changed. For example, `CDS` is the name of a standard, and `CON` is too near to `CONF`.
 

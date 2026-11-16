@@ -10,6 +10,8 @@ import (
 )
 
 const (
+	// The anchor is the identifier of the rule, so the URI stays when a specification moves.
+	fieldErrorsType   = "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002"
 	fieldErrorsTitle  = "Values in the request are not valid"
 	fieldErrorsDetail = "One or more values in the request are not valid."
 )
@@ -46,7 +48,7 @@ func FieldPointer(field string) string {
 }
 
 // WriteFieldErrors writes the problem of Write when errs is empty. An empty detail gives a general detail.
-func WriteFieldErrors(w http.ResponseWriter, typeURI string, status int, detail string, errs []FieldError) {
+func WriteFieldErrors(w http.ResponseWriter, status int, detail string, errs []FieldError) {
 	if len(errs) == 0 {
 		Write(w, status, detail)
 		return
@@ -62,7 +64,7 @@ func WriteFieldErrors(w http.ResponseWriter, typeURI string, status int, detail 
 		Status int          `json:"status"`
 		Detail string       `json:"detail"`
 		Errors []FieldError `json:"errors"`
-	}{Type: typeURI, Title: fieldErrorsTitle, Status: status, Detail: detail, Errors: errs})
+	}{Type: fieldErrorsType, Title: fieldErrorsTitle, Status: status, Detail: detail, Errors: errs})
 }
 
 func write(w http.ResponseWriter, status int, body any) {

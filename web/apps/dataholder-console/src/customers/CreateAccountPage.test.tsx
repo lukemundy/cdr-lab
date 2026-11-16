@@ -39,7 +39,7 @@ function serveCreate(before: CustomerDetail, ...results: Result[]) {
 }
 
 const fieldErrorsType =
-  "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#console-api";
+  "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002";
 const displayNameError = "displayName must have 1 to 100 characters";
 const categoryError = "productCategory must be a value of BankingProductCategoryV2";
 const pairError = "An account has this bsb and accountNumber.";

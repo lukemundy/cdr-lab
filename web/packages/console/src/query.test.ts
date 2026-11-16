@@ -11,7 +11,7 @@ function retries(failures: number, error: Error): boolean {
 }
 
 test("a server or network failure is tried again two times", () => {
-  const serverError = new ProblemError({ title: "Internal Server Error" }, 500, "");
+  const serverError = new ProblemError({ title: "Internal Server Error" }, 500);
 
   expect(retries(0, serverError)).toBe(true);
   expect(retries(1, new TypeError("Failed to fetch"))).toBe(true);
@@ -19,5 +19,5 @@ test("a server or network failure is tried again two times", () => {
 });
 
 test("a request that the API refused is not tried again", () => {
-  expect(retries(0, new ProblemError({ title: "Not Found" }, 404, ""))).toBe(false);
+  expect(retries(0, new ProblemError({ title: "Not Found" }, 404))).toBe(false);
 });

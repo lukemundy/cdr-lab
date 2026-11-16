@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	fieldErrorsType = "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#console-api"
+	fieldErrorsType = "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002"
 	newAccountID    = "5d1f7a52-6a3b-4c1e-9f0d-2b8e4c7a9e13"
 	createAccounts  = "/api/customers/00000001/accounts"
 	newAccountBody  = `{"displayName": "Everyday", "productCategory": "TRANS_AND_SAVINGS_ACCOUNTS",
@@ -87,6 +87,7 @@ func TestACustomerWithTheEmailAddressOfADifferentCustomerGivesAConflictAtTheEmai
 	assert.Contains(t, get(t, r.ports, "/api/customers").body, `"totalRecords":1`)
 }
 
+// Verifies: PROB-0002, PROB-0003
 func TestACustomerThatTheRulesRefuseGivesAnErrorAtEachFieldAndIsNotCreated(t *testing.T) {
 	r := newRecords(t).withCreates()
 

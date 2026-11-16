@@ -26,6 +26,7 @@ func serve(t *testing.T, allowed []string, requestHost, method string) *httptest
 	return rec
 }
 
+// Verifies: HOST-0001
 func TestARequestWithAHostThatIsNotAllowedIsRefused(t *testing.T) {
 	allowed := []string{"server.test:8082", "127.0.0.1:8082", "proxy.test"}
 	hosts := map[string]string{
@@ -57,6 +58,7 @@ func TestARequestWithAHostThatIsNotAllowedIsRefused(t *testing.T) {
 	}
 }
 
+// Verifies: HOST-0001, HOST-0002
 func TestARequestWithAnAllowedHostIsNotRefused(t *testing.T) {
 	allowed := []string{"server.test:8082", "127.0.0.1:8082", "proxy.test"}
 
@@ -73,6 +75,7 @@ func TestAnEmptyAllowlistRefusesEachRequest(t *testing.T) {
 	assert.Equal(t, http.StatusForbidden, serve(t, nil, "server.test:8082", http.MethodGet).Code)
 }
 
+// Verifies: HOST-0001, HOST-0002
 func TestParseGivesTheHostsInLowerCase(t *testing.T) {
 	got, err := hostallowlist.Parse(" 127.0.0.1:8084, Localhost:8084 ,[::1]:8084, Proxy.Test, [::1]")
 
@@ -80,6 +83,7 @@ func TestParseGivesTheHostsInLowerCase(t *testing.T) {
 	assert.Equal(t, []string{"127.0.0.1:8084", "localhost:8084", "[::1]:8084", "proxy.test", "[::1]"}, got)
 }
 
+// Verifies: HOST-0001
 func TestParseRefusesAValueThatIsNotAListOfHosts(t *testing.T) {
 	for _, value := range []string{
 		"", " ", "127.0.0.1:8084,", "localhost:", ":8084", "localhost:99999",

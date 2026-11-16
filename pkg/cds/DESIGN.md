@@ -27,7 +27,7 @@ flowchart LR
 | Library | Specification |
 |---|---|
 | `pkg/platform/httproute` | None. |
-| `pkg/platform/jsonhttp` | None. |
+| `pkg/platform/jsonhttp` | [JSON body library](../platform/jsonhttp/DESIGN.md) |
 
 ## Goals
 

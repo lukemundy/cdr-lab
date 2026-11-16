@@ -14,6 +14,7 @@ import (
 	"github.com/lukemundy/cdr-lab/pkg/platform/problem"
 )
 
+// Verifies: PROB-0001
 func TestAProblemHasTheStatusPhraseAsItsTitle(t *testing.T) {
 	rec := httptest.NewRecorder()
 
@@ -51,16 +52,17 @@ func TestAnUnexpectedErrorLogsOnlyTheTypeOfTheError(t *testing.T) {
 	assert.NotContains(t, logs.String(), "10.0.0.1")
 }
 
-func TestFieldErrorsHaveTheTypeOfTheService(t *testing.T) {
+// Verifies: PROB-0002, PROB-0003, PROB-0004, PROB-0006
+func TestFieldErrorsHaveTheFieldErrorsType(t *testing.T) {
 	rec := httptest.NewRecorder()
 
-	problem.WriteFieldErrors(rec, "https://service.example/problems#field-errors", http.StatusBadRequest, "",
+	problem.WriteFieldErrors(rec, http.StatusBadRequest, "",
 		[]problem.FieldError{{Pointer: problem.FieldPointer("endpoints.website"), Detail: "must be an https URI"}})
 
 	require.Equal(t, http.StatusBadRequest, rec.Code)
 	assert.Equal(t, "application/problem+json", rec.Header().Get("Content-Type"))
 	assert.JSONEq(t, `{
-		"type": "https://service.example/problems#field-errors",
+		"type": "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002",
 		"title": "Values in the request are not valid",
 		"status": 400,
 		"detail": "One or more values in the request are not valid.",
@@ -71,17 +73,18 @@ func TestFieldErrorsHaveTheTypeOfTheService(t *testing.T) {
 func TestFieldErrorsKeepTheDetailThatIsGiven(t *testing.T) {
 	rec := httptest.NewRecorder()
 
-	problem.WriteFieldErrors(rec, "https://service.example/problems#field-errors", http.StatusConflict,
+	problem.WriteFieldErrors(rec, http.StatusConflict,
 		"The brand is INACTIVE.", []problem.FieldError{{Pointer: "#/status", Detail: "must be INACTIVE"}})
 
 	require.Equal(t, http.StatusConflict, rec.Code)
 	assert.Contains(t, rec.Body.String(), `"detail":"The brand is INACTIVE."`)
 }
 
+// Verifies: PROB-0007
 func TestNoFieldErrorsIsAProblemWithNoType(t *testing.T) {
 	rec := httptest.NewRecorder()
 
-	problem.WriteFieldErrors(rec, "https://service.example/problems#field-errors", http.StatusConflict,
+	problem.WriteFieldErrors(rec, http.StatusConflict,
 		"The brand is INACTIVE.", nil)
 
 	assert.JSONEq(

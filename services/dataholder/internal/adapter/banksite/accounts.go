@@ -418,7 +418,7 @@ func writeOpenError(w http.ResponseWriter, r *http.Request, s sessions, err erro
 		return
 	}
 
-	problem.WriteFieldErrors(w, fieldErrorsType, http.StatusBadRequest, "", errs)
+	problem.WriteFieldErrors(w, http.StatusBadRequest, "", errs)
 }
 
 // onlyConsumerValues is false for an error of a value that the data holder takes from the product.

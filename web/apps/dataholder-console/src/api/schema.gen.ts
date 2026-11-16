@@ -645,7 +645,7 @@ export interface components {
         /** @description RFC 9457 problem details for values that the data holder refuses. The errors member gives each value that the rules refuse. The detail says that values of the request are not valid. */
         FieldErrorsProblem: {
             /** @enum {string} */
-            type: "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#console-api";
+            type: "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002";
             /** @enum {string} */
             title: "Values in the request are not valid";
             status: number;
@@ -1250,6 +1250,6 @@ export const transactionTypeValues: ReadonlyArray<FlattenedDeepRequired<componen
 export const transactionStatusValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["TransactionStatus"]> = ["PENDING", "POSTED"];
 export const extensionUTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["ExtensionUType"]> = ["nppPayload"];
 export const nPPServiceValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["NPPService"]> = ["X2P1", "IFTI", "BSCT", "CATSCT"];
-export const fieldErrorsProblemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FieldErrorsProblem"]["type"]> = ["https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#console-api"];
+export const fieldErrorsProblemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FieldErrorsProblem"]["type"]> = ["https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002"];
 export const fieldErrorsProblemTitleValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FieldErrorsProblem"]["title"]> = ["Values in the request are not valid"];
 export const problemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["Problem"]["type"]> = ["about:blank"];

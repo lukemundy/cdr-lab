@@ -224,7 +224,7 @@ func writeCreation(w http.ResponseWriter, r *http.Request, c creation, notFound 
 		problem.Write(w, http.StatusNotFound, notFound)
 	case errors.Is(err, domain.ErrExists), errors.As(err, &notUnique):
 		field := c.fieldOf(notUnique)
-		problem.WriteFieldErrors(w, fieldErrorsType, http.StatusConflict, "", []problem.FieldError{{
+		problem.WriteFieldErrors(w, http.StatusConflict, "", []problem.FieldError{{
 			Pointer: problem.FieldPointer(field), Detail: field + " is not unique: a different record has it",
 		}})
 	case errors.Is(err, domain.ErrNotValid):

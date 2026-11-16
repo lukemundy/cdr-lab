@@ -78,7 +78,7 @@ test("a refusal of the open shows the error of the bank", async () => {
   worker.use(
     http.post("/api/accounts", ({ response }) =>
       response(400).json({
-        type: "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#site-api",
+        type: "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002",
         title: "Values in the request are not valid",
         status: 400,
         detail: "One or more values in the request are not valid.",
@@ -223,7 +223,7 @@ test("a refusal of the amount shows the error of the bank at the field", async (
   worker.use(
     http.post("/api/accounts", ({ response }) =>
       response(400).json({
-        type: "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#site-api",
+        type: "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002",
         title: "Values in the request are not valid",
         status: 400,
         detail: "One or more values in the request are not valid.",

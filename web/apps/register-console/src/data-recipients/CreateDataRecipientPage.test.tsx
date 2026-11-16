@@ -48,7 +48,7 @@ function serveCreate(...results: Result[]) {
 }
 
 const refusal = (pointer: string, detail: string, status: 400 | 409) => ({
-  type: "https://github.com/lukemundy/cdr-lab/blob/main/services/register/DESIGN.md#console-api",
+  type: "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002",
   title: "Values in the request are not valid",
   status,
   detail: "One or more values in the request are not valid.",
