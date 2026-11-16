@@ -265,4 +265,4 @@ The first table gives the CDR APIs of the data holder. The second table gives th
 [support-fapi-headers]: https://cdr-support.zendesk.com/hc/en-us/articles/4410664891919
 [cds-pagination]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#pagination
 [cds-error-codes]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-codes
-[conformance-design]: ../../conformance/DESIGN.md
+[conformance-design]: ../../../conformance/DESIGN.md

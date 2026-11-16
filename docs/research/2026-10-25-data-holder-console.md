@@ -55,7 +55,7 @@ The (ca), (cb), (da) and (db) records are for energy, product data agreements an
 - Each 6 months, the data holder reports the complaint data, the number of each type of request, and the number of refusals with the rule relied on. [R 9.4(1)] The report goes through the CDR Participant Portal by 30 January and 30 July. [F]
 - The form asks for complaints (Q1 to Q7), request counts (Q8 to Q10), and refusals by type: 403 for a potential threat, 404 or 422 for a blocked or suspended account, and 429 for traffic thresholds or a denial-of-service attack (Q11 to Q13). [F]
 - "The return of a 403, 404, 422 and 429 HTTP error code in response to circumstances other than those set out in the above table does not constitute a refusal to disclose data". [S-4523876174863]
-- The scope of the mock has no blocked accounts, no refusal for harm and no traffic thresholds ([data holder DESIGN.md](../../services/dataholder/DESIGN.md#scope)). A 403 `AdrStatusNotActive` is not in the table of S-4523876174863. Thus the refusal counts of the mock are always zero.
+- The scope of the mock has no blocked accounts, no refusal for harm and no traffic thresholds ([data holder: non-goals](../../services/dataholder/design/README.md#non-goals)). A 403 `AdrStatusNotActive` is not in the table of S-4523876174863. Thus the refusal counts of the mock are always zero.
 - Get Metrics is out of scope for the mock, but its schema shows the counts that a production data holder keeps, for example `AuthorisationMetricsV2` with `activeAuthorisationCount`, `revokedAuthorisationCount` and `abandonmentsByStage`. [A]
 
 ## 2. Staff and the consumer dashboard
@@ -94,7 +94,7 @@ JUDGEMENT, with the evidence where it exists:
 
 | Item | Evidence | Value |
 |---|---|---|
-| The notices to the data recipient, with each attempt, its time and its result | Rule 4.26A. The data holder records each attempt ([data holder DESIGN.md](../../services/dataholder/DESIGN.md#notice-to-the-data-recipient)), but the operator interface gives only `noticeStatus`. | High. A data recipient developer sees why a notice failed. |
+| The notices to the data recipient, with each attempt, its time and its result | Rule 4.26A. The data holder records each attempt ([data holder: the record of each attempt](../../services/dataholder/design/end-of-an-arrangement.md#dh-0940)), but the operator interface gives only `noticeStatus`. | High. A data recipient developer sees why a notice failed. |
 | The client registrations of software products | mock-data-recipient has a registrations page on the other side. No rule requires it. | High. Registration is the first point of failure for a new data recipient. |
 | The Register status of each software product that the data holder holds, and the time of the last poll | The 5-minute limit of [CDS: Metadata Cache Management](https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#metadata-cache-management) | High. It explains a 403 `AdrStatusNotActive`, and the time after a status change on the Register. |
 | The channel of a withdrawal | S-4411292647823, X 5CM2.00.10 | Medium. It models rule 4.25(1)(b). |
