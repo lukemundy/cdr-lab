@@ -59,6 +59,7 @@ const (
 	thumbprint2 = "K1mHUV9VotBbECiNHlOgxTqXzkRHAR0KmgmBU-ggd_E"
 )
 
+// Verifies: REG-1127, REG-1128
 func TestADataRecipientDetailGivesEachBrandAndSoftwareProductInTheOrderOfTheRecord(t *testing.T) {
 	full := product("sp-2", domain.Inactive)
 	full.SectorIdentifierURI = "https://recipient.example/sector"
@@ -108,6 +109,7 @@ func TestADataRecipientDetailGivesEachBrandAndSoftwareProductInTheOrderOfTheReco
 	}`, withoutActions(t, withoutLastUpdated(t, resp.body)))
 }
 
+// Verifies: REG-1130
 func TestADataRecipientDetailWithNoBrandsHasAnEmptyList(t *testing.T) {
 	queries := seed(t, recipient("dr-1", "Alpha Pty Ltd", domain.DataRecipientActive))
 
@@ -117,6 +119,7 @@ func TestADataRecipientDetailWithNoBrandsHasAnEmptyList(t *testing.T) {
 	assert.Contains(t, resp.body, `"dataRecipientBrands":[]`)
 }
 
+// Verifies: REG-1127, REG-1128
 func TestADataHolderDetailGivesEachBrandInTheOrderOfTheRecord(t *testing.T) {
 	registered := brand("dh-1-b1", "Alpha Bank", domain.Active, domain.Telco, domain.Banking)
 	registered.InterimID = "dh-1-i1"
@@ -159,6 +162,7 @@ func TestADataHolderDetailGivesEachBrandInTheOrderOfTheRecord(t *testing.T) {
 	}`, withoutHolderActions(t, withoutLastUpdated(t, resp.body)))
 }
 
+// Verifies: REG-1130
 func TestADataHolderDetailWithNoBrandsHasAnEmptyList(t *testing.T) {
 	queries := seedParticipants(t, domain.Participants{DataHolders: []domain.DataHolder{
 		dataHolder("dh-1", "Alpha Ltd", domain.DataHolderActive),
@@ -170,6 +174,7 @@ func TestADataHolderDetailWithNoBrandsHasAnEmptyList(t *testing.T) {
 	assert.Contains(t, resp.body, `"dataHolderBrands":[]`)
 }
 
+// Verifies: REG-1111
 func TestADetailOfAnUnknownLegalEntityGivesNotFoundWithNoIdentifier(t *testing.T) {
 	queries := seedParticipants(t, domain.Participants{
 		DataRecipients: []domain.DataRecipient{recipient("dr-1", "Alpha Pty Ltd", domain.DataRecipientActive)},

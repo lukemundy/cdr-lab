@@ -19,6 +19,7 @@ function serve(body: { data: ReturnType<typeof recipient>[]; totalRecords: numbe
 const table = () => page.getByRole("table", { name: "Data recipients" });
 
 describe("the data recipients page", () => {
+  // Verifies: REG-1002
   test("shows each data recipient of the page, with its counts and the total", async () => {
     serve({
       data: [recipient("Mock Budgeting Pty Ltd"), recipient("Other Pty Ltd", "SUSPENDED")],
@@ -51,6 +52,7 @@ describe("the data recipients page", () => {
     await expect.element(page.getByText("No data recipients match")).toBeVisible();
   });
 
+  // Verifies: REG-1052
   test("a URL gives the API the same filter, search, sort and page", async () => {
     const requests = serve({ data: [recipient("Mock Budgeting Pty Ltd")], totalRecords: 60 });
 
@@ -109,6 +111,7 @@ describe("the data recipients page", () => {
       .toBe("?status=REVOKED&q=budget&sort=accreditationNumber&order=asc&page=2&pageSize=25");
   });
 
+  // Verifies: REG-1053, REG-1054
   test("a typed search applies with no click and adds no history entry for each pause", async () => {
     const requests = serve({ data: [recipient("Mock Budgeting Pty Ltd")], totalRecords: 1 });
     const router = renderApp("/data-recipients");
@@ -211,6 +214,7 @@ describe("the data recipients page", () => {
       .toBeVisible();
   });
 
+  // Verifies: REG-1060
   test("passes the automated accessibility checks", async () => {
     serve({
       data: [recipient("Mock Budgeting Pty Ltd"), recipient("Other Pty Ltd", "REVOKED")],

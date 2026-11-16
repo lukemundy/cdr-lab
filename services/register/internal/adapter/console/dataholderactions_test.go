@@ -56,6 +56,7 @@ func holderActionsOf(t *testing.T, ports console.Ports, legalEntityID string) ho
 	return body
 }
 
+// Verifies: REG-1133, REG-1134
 func TestADataHolderDetailGivesThePermittedActionsWithTheirCascade(t *testing.T) {
 	detail := holderActionsOf(t, seedForHolderBrands(t), "dh-1")
 
@@ -78,6 +79,7 @@ func TestARemovedDataHolderDetailGivesNoAction(t *testing.T) {
 	assert.JSONEq(t, `[]`, string(holderActionsOf(t, seedForHolderBrands(t), "dh-2").Actions))
 }
 
+// Verifies: REG-1102
 func TestEachDataHolderBrandActionChangesTheBrand(t *testing.T) {
 	ports := seedForHolderBrands(t)
 	queries := ports.Readers.(*readmodel.Queries)
@@ -119,6 +121,7 @@ func TestEachDataHolderBrandActionChangesTheBrand(t *testing.T) {
 	}
 }
 
+// Verifies: REG-1101
 func TestTheRemovalOfADataHolderRemovesItAndEachOfItsBrands(t *testing.T) {
 	ports := seedForHolderBrands(t)
 	queries := ports.Readers.(*readmodel.Queries)
@@ -146,6 +149,7 @@ func TestTheRemovalOfADataHolderRemovesItAndEachOfItsBrands(t *testing.T) {
 	assert.Empty(t, brands)
 }
 
+// Verifies: REG-1140
 func TestADataHolderActionWithAVersionThatIsNotCurrentChangesNothing(t *testing.T) {
 	ports := seedForHolderBrands(t)
 	require.Equal(t, http.StatusNoContent,
@@ -230,6 +234,7 @@ func TestADataHolderActionGivesAProblemWithNoErrorMessageWhenTheChangeFails(t *t
 	assert.NotContains(t, resp.body, "Mock Budgeting")
 }
 
+// Verifies: REG-1137
 func TestADataHolderDetailGivesThePermittedServerCertificateActionsOfEachBrand(t *testing.T) {
 	resp := get(t, seedForHolderBrands(t).Readers, "/api/data-holders/dh-1")
 	require.Equal(t, http.StatusOK, resp.status, resp.body)

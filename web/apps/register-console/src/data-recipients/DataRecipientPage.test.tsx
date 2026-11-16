@@ -92,6 +92,7 @@ const valueOf = (regionName: string, term: string) =>
   definitionOf(region(regionName).element(), term).textContent;
 
 describe("the data recipient page", () => {
+  // Verifies: REG-1007, REG-1008, REG-1009
   test("shows the legal entity, each brand and each software product", async () => {
     const requests = serve(detail);
 
@@ -207,6 +208,7 @@ describe("the data recipient page", () => {
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth);
   });
 
+  // Verifies: REG-1058
   test("shows the logos as URIs and loads no image", async () => {
     serve(detail);
 
@@ -259,6 +261,7 @@ describe("the data recipient page", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1006
   test("a row of the list links to the detail, and the navigation item stays current", async () => {
     serve(detail);
     worker.use(

@@ -306,6 +306,7 @@ func TestAChangeOfADataHolderBrandAtTheCurrentVersionReplacesEachField(t *testin
 	assert.Contains(t, history.body, `"eventType":"DataHolderBrandDetailsChanged"`)
 }
 
+// Verifies: REG-1104
 func TestAChangeOfABrandWithOnlyAnInterimIDUsesTheInterimIDInThePath(t *testing.T) {
 	ports := seedForHolderBrands(t)
 

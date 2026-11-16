@@ -128,7 +128,7 @@ This area gives the console API of the operator console. The console API is JSON
 ### <a id="dh-1683"></a>DH-1683 The sorts of the console lists
 
 - Kind: choice
-- Basis: Step 3.3. The Register console gives the rules: text in the byte order, a name with no difference for case, and the identifier of the record last ([Register DESIGN.md: Decisions][register-decisions]).
+- Basis: Step 3.3. The Register console gives the rules: text in the byte order, a name with no difference for case, and the identifier of the record last ([Judgement: the sorts of a participant list](../../register/design/operator-console-api.md#reg-1174)).
 - Reason: The same rules in both consoles. The sorts by a count let the operator find the records with the most use. The data holder calculates a count of the arrangements that did not end at the request, because it depends on the time of the request.
 
 ### <a id="dh-1684"></a>DH-1684 The client name as the default order of the registrations
@@ -197,7 +197,6 @@ This area gives the console API of the operator console. The console API is JSON
 [adr-0014]: ../../../docs/adr/0014-web-uis-as-embedded-react-single-page-applications.md
 [adr-0017]: ../../../docs/adr/0017-console-api-contracts-in-openapi.md
 [adr-0019]: ../../../docs/adr/0019-limit-the-conformance-suite-to-cdr-conformance.md
-[register-decisions]: ../../register/DESIGN.md#decisions
 [cds-common-field-types]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#common-field-types
 [cds-dcr-endpoints]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#dynamic-client-registration-endpoints
 [cds-metadata-cache]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#metadata-cache-management
