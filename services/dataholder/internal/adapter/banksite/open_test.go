@@ -210,6 +210,7 @@ func TestAnOpenForACustomerThatTheDataHolderNoLongerHasEndsTheSession(t *testing
 }
 
 // The UI gives the field of an open from these categories, so the document must give the rule of the data holder.
+// Verifies: DH-2213, DH-2214
 func TestTheDocumentGivesTheCategoriesOfACreditLimitAndOfALoanAmount(t *testing.T) {
 	document, err := openapi3.NewLoader().LoadFromFile("openapi.yaml")
 	require.NoError(t, err)

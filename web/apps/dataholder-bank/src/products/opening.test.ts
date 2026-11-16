@@ -4,6 +4,7 @@ import { productCategoryValues } from "../api/client";
 import { amountStringOf, openValueOf } from "./opening";
 
 describe("the value of an open", () => {
+  // Verifies: DH-2213, DH-2214, DH-2218
   test.each([
     ["CRED_AND_CHRG_CARDS", "creditLimit", "Credit limit"],
     ["OVERDRAFTS", "creditLimit", "Credit limit"],
@@ -34,6 +35,7 @@ describe("the value of an open", () => {
 });
 
 describe("an amount that a person types", () => {
+  // Verifies: DH-2220
   test.each([
     ["5000", "5000.00"],
     ["5,000", "5000.00"],

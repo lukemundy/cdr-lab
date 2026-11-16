@@ -2,6 +2,7 @@ import { expect, test } from "vitest";
 
 import { effectiveTime, formatDay, formatSignedAmount } from "./format";
 
+// Verifies: DH-2206
 test("an amount of a transaction shows its sign", () => {
   expect(formatSignedAmount("-4.50")).toBe("-$4.50");
   expect(formatSignedAmount("1200.00")).toBe("+$1,200.00");

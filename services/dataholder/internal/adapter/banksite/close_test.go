@@ -30,6 +30,7 @@ func customerOfSession() *customers {
 	return newCustomers(domain.Customer{CustomerNumber: signedIn, LastName: "Quoll"})
 }
 
+// Verifies: DH-2244
 func TestACloseClosesTheAccountOfTheCustomerOfTheSessionWithTheArrangementsOfTheConfirmation(t *testing.T) {
 	store := customerOfSession()
 
@@ -102,6 +103,7 @@ func TestARefusedCloseGivesTheStatusOfTheRefusalAndNoIdentifier(t *testing.T) {
 	}
 }
 
+// Verifies: DH-2245
 func TestACloseThatEndsDifferentArrangementsSaysThatTheAccountsChanged(t *testing.T) {
 	store := customerOfSession()
 	store.closeErr = app.ErrEndsChanged

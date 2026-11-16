@@ -34,6 +34,7 @@ function serveOpen(bodies: unknown[]) {
   );
 }
 
+// Verifies: DH-2217
 test("the open page names the product and its category, and needs a confirmation", async () => {
   serveSession();
   serveProducts([saver]);
@@ -54,6 +55,7 @@ test("the open page names the product and its category, and needs a confirmation
     .toHaveAttribute("href", "/products/saver");
 });
 
+// Verifies: DH-2233
 test("an open of a deposit product sends the product ID only, then shows the new account with a status message and the focus on its heading", async () => {
   const bodies: unknown[] = [];
   serveProducts([saver]);
@@ -124,6 +126,7 @@ test("an open after the end of the session goes to the sign-in page", async () =
     .toBeVisible();
 });
 
+// Verifies: DH-2216
 test("the open page needs a session", async () => {
   serveProducts([saver]);
 
@@ -137,6 +140,7 @@ test("the open page needs a session", async () => {
 const card = product("card", { name: "Glide Card", productCategory: "CRED_AND_CHRG_CARDS" });
 const loan = product("loan", { name: "Bloom Personal Loan", productCategory: "PERS_LOANS" });
 
+// Verifies: DH-2219
 test("the open page of a lending product says that the bank approves the account immediately", async () => {
   serveSession();
   serveProducts([card]);
@@ -196,6 +200,7 @@ test.each([
   },
 );
 
+// Verifies: DH-2221
 test("text that is not an amount gives a field error and sends no open", async () => {
   const bodies: unknown[] = [];
   serveSession();
@@ -217,6 +222,7 @@ test("text that is not an amount gives a field error and sends no open", async (
   expect(bodies).toEqual([]);
 });
 
+// Verifies: DH-2222
 test("a refusal of the amount shows the error of the bank at the field", async () => {
   serveSession();
   serveProducts([loan]);

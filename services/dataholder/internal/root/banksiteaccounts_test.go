@@ -238,6 +238,7 @@ func (d accountData) siteRequest(t *testing.T, path string) *httptest.ResponseRe
 }
 
 // A reader that ignores the customer of the session fails this test.
+// Verifies: DH-2209
 func TestTheBankSiteGivesNoAccountOfADifferentCustomer(t *testing.T) {
 	const otherAccount = "account-00000002"
 
@@ -272,7 +273,7 @@ func TestTheBankSiteGivesNoAccountOfADifferentCustomer(t *testing.T) {
 
 type record = map[string]any
 
-// withoutIDs removes the identifiers that are different by design (DESIGN.md: Accounts, balances and transactions).
+// withoutIDs removes the identifiers that the site and the banking APIs give differently by design.
 func withoutIDs(r record) record {
 	clone := record{}
 
@@ -285,7 +286,7 @@ func withoutIDs(r record) record {
 	return clone
 }
 
-// The site and the APIs of a consent read the same functions at the same time (DESIGN.md: Tests of the account data).
+// Verifies: DH-2208
 func TestTheBankSiteGivesTheAccountsBalancesAndTransactionsOfTheAPIsOfAConsent(t *testing.T) {
 	now := time.Now().UTC().Truncate(time.Second)
 	data := newAccountData(t, now)

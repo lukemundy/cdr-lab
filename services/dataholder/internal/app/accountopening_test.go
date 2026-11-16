@@ -85,6 +85,7 @@ func opening(store app.CustomerStore, products app.ProductReader, values ...uint
 	}
 }
 
+// Verifies: DH-2225
 func TestAnOpenGivesAnAccountOfTheProductWithTheBSBOfTheBrandAndARandomAccountNumber(t *testing.T) {
 	store := newFakeCustomerStore()
 	store.customers["00000001"] = customer()
@@ -106,6 +107,7 @@ func TestAnOpenGivesAnAccountOfTheProductWithTheBSBOfTheBrandAndARandomAccountNu
 	assert.Equal(t, []domain.Account{want}, store.accounts["00000001"])
 }
 
+// Verifies: DH-2210, DH-2223
 func TestEachDepositCategoryOpens(t *testing.T) {
 	for _, category := range domain.DepositCategories() {
 		t.Run(string(category), func(t *testing.T) {
@@ -125,6 +127,7 @@ func TestEachDepositCategoryOpens(t *testing.T) {
 	}
 }
 
+// Verifies: DH-2224
 func TestAnOpenUsesTheCurrentProductQueryOfTheSite(t *testing.T) {
 	products := productsOf(saver())
 
@@ -145,6 +148,7 @@ func TestTheCurrentProductQueryGivesEachCurrentProductOnOnePage(t *testing.T) {
 	assert.Equal(t, app.ProductQuery{Effective: app.EffectiveCurrent, At: now(), Page: 1}, app.CurrentProducts(now()))
 }
 
+// Verifies: DH-2224
 func TestAnOpenOfAProductThatIsNotCurrentOpensNoAccount(t *testing.T) {
 	store := newFakeCustomerStore()
 
@@ -162,6 +166,7 @@ func loan() domain.Product {
 	return domain.Product{ProductID: "loan", ProductCategory: domain.CategoryPersLoans, Name: "Bloom Personal Loan"}
 }
 
+// Verifies: DH-2225
 func TestAnOpenOfRevolvingCreditGivesTheAccountTheCreditLimitAndNoTransaction(t *testing.T) {
 	for _, category := range domain.RevolvingCategories() {
 		t.Run(string(category), func(t *testing.T) {
@@ -182,6 +187,7 @@ func TestAnOpenOfRevolvingCreditGivesTheAccountTheCreditLimitAndNoTransaction(t 
 	}
 }
 
+// Verifies: DH-2227, DH-2228
 func TestAnOpenOfALoanAddsTheAccountWithADrawdownOfTheLoanAmountAndNoCreditLimit(t *testing.T) {
 	for _, category := range domain.LoanCategories() {
 		t.Run(string(category), func(t *testing.T) {
@@ -204,6 +210,7 @@ func TestAnOpenOfALoanAddsTheAccountWithADrawdownOfTheLoanAmountAndNoCreditLimit
 	}
 }
 
+// Verifies: DH-2222
 func TestAnOpenWithAValueThatIsNotValidOpensNoAccount(t *testing.T) {
 	tests := map[string]struct {
 		productID string
@@ -234,6 +241,7 @@ func TestAnOpenWithAValueThatIsNotValidOpensNoAccount(t *testing.T) {
 	}
 }
 
+// Verifies: DH-2226
 func TestAnAccountNumberThatIsInUseIsReplacedAlsoForALoan(t *testing.T) {
 	store := numbersInUse{fakeCustomerStore: newFakeCustomerStore(), used: map[string]bool{"00000001": true}}
 
@@ -246,6 +254,7 @@ func TestAnAccountNumberThatIsInUseIsReplacedAlsoForALoan(t *testing.T) {
 	assert.Len(t, store.transactions[opened.AccountID], 1)
 }
 
+// Verifies: DH-2226
 func TestAnAccountNumberThatIsInUseIsReplaced(t *testing.T) {
 	store := numbersInUse{fakeCustomerStore: newFakeCustomerStore(), used: map[string]bool{"00000001": true}}
 
@@ -260,6 +269,7 @@ func TestAnAccountNumberThatIsInUseIsReplaced(t *testing.T) {
 	assert.Equal(t, "00000002", opened.AccountNumber)
 }
 
+// Verifies: DH-2226
 func TestAnOpenFailsWhenEachOf3AccountNumbersIsInUse(t *testing.T) {
 	store := numbersInUse{
 		fakeCustomerStore: newFakeCustomerStore(),

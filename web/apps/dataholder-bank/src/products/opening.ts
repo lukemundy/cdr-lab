@@ -2,7 +2,7 @@ import type { ProductCategory } from "../api/client";
 import { loanProductCategoryValues, revolvingProductCategoryValues } from "../api/schema.gen";
 
 // The value that the consumer gives at the open of a lending product, with the name of its field in the site API
-// (services/dataholder/DESIGN.md, Opening of an account). A deposit product has none.
+// (services/dataholder/design/online-bank-site-accounts.md). A deposit product has none.
 export type OpenValue = { name: "creditLimit" | "loanAmount"; label: string; description: string };
 
 const creditLimit: OpenValue = {

@@ -11,6 +11,7 @@ import (
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/domain"
 )
 
+// Verifies: DH-2213, DH-2214
 func TestEachCategoryIsOneKindOfProduct(t *testing.T) {
 	all := slices.Concat(domain.DepositCategories(), domain.RevolvingCategories(), domain.LoanCategories())
 
@@ -60,6 +61,7 @@ func TestAnOpeningGivesTheValueOfTheKindOfTheProductInCents(t *testing.T) {
 	}
 }
 
+// Verifies: DH-2222
 func TestAnOpeningValueThatIsAbsentNotAnAmountOrNotMoreThanZeroIsAnErrorOfItsField(t *testing.T) {
 	tests := map[string]struct {
 		category domain.ProductCategory
@@ -101,6 +103,7 @@ func TestAnOpeningValueThatIsAbsentNotAnAmountOrNotMoreThanZeroIsAnErrorOfItsFie
 	}
 }
 
+// Verifies: DH-2223
 func TestAnOpeningValueThatTheKindOfTheProductHasNotIsAnErrorOfItsField(t *testing.T) {
 	tests := map[string]struct {
 		category domain.ProductCategory
@@ -135,6 +138,7 @@ func TestAnOpeningValueThatTheKindOfTheProductHasNotIsAnErrorOfItsField(t *testi
 	}
 }
 
+// Verifies: DH-2228
 func TestADrawdownIsAPostedDebitOfTheLoanAmountAtTheTimeOfTheOpen(t *testing.T) {
 	at := time.Date(2026, 11, 3, 1, 0, 0, 0, time.UTC)
 

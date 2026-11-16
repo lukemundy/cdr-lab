@@ -73,6 +73,7 @@ const isIn = (categories: readonly string[]) => (product: CDSProduct) =>
   categories.includes(product.productCategory);
 
 // The journey makes its own customer, because the lab has no seed customers, and gives no consent.
+// Verifies: DH-2215, DH-2240
 test("a new customer opens an account of a deposit product, and the customer closes their last open account after the confirmation", async ({
   page,
 }) => {
@@ -132,6 +133,7 @@ test("a new customer opens an account of a deposit product, and the customer clo
   await expect(page.getByRole("button", { name: "Close account" })).toHaveCount(0);
 });
 
+// Verifies: DH-2225, DH-2229
 test("a new customer opens revolving credit with a credit limit and a loan that owes the loan amount", async ({
   page,
 }) => {
