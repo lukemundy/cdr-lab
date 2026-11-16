@@ -4,12 +4,12 @@ This area gives the non-functional requirements that apply to all of the data ho
 
 ## Performance
 
-- <a id="dh-0001"></a>**DH-0001** Performance: on a development workstation at 50 requests each second, 95 % of API calls complete within 200 ms. ([CDS: Performance Requirements][cds-performance]; [Judgement: a response time target for the lab](#dh-0020))
+- <a id="dh-0001"></a>**DH-0001** Performance: on a development workstation at 50 requests each second, 95 % of API calls complete within 200 ms. ([CDS: Performance Requirements][cds-performance]; [Judgement: a target of 200 ms, below the lowest CDS threshold](#dh-0020))
 - <a id="dh-0002"></a>**DH-0002** Performance: when the traffic is above a CDS traffic threshold, the data holder does not throttle or refuse a request. For example, the data holder gives no 429 response. ([CDS: Traffic Thresholds][cds-traffic-thresholds]; [Judgement: no throttle at the traffic thresholds](#dh-0021))
 
 ## Restart
 
-- <a id="dh-0003"></a>**DH-0003** Restart: after a restart, the data holder has the same values of these data. ([Judgement: the state that a restart keeps](#dh-0022))
+- <a id="dh-0003"></a>**DH-0003** Restart: after a restart, the data holder has the same values of these data. ([Judgement: a restart keeps the data, and not the flows or the sessions](#dh-0022))
   - the products
   - the registrations
   - the signing keys
@@ -20,8 +20,8 @@ This area gives the non-functional requirements that apply to all of the data ho
   - the subject identifiers and the resource identifiers
   - the refresh tokens
   - the revoked access tokens
-- <a id="dh-0004"></a>**DH-0004** Restart: when the data holder restarts during an authorisation flow, the flow can fail. The consumer then starts a new authorisation flow. ([Judgement: the state that a restart keeps](#dh-0022))
-- <a id="dh-0005"></a>**DH-0005** Restart: a restart ends each session of the online bank site. The consumer then signs in again. ([Judgement: the state that a restart keeps](#dh-0022); [the session of the online bank site](online-bank-site-sign-in.md#dh-2033))
+- <a id="dh-0004"></a>**DH-0004** Restart: when the data holder restarts during an authorisation flow, the flow can fail. The consumer then starts a new authorisation flow. ([Judgement: a restart keeps the data, and not the flows or the sessions](#dh-0022))
+- <a id="dh-0005"></a>**DH-0005** Restart: a restart ends each session of the online bank site. The consumer then signs in again. ([Judgement: a restart keeps the data, and not the flows or the sessions](#dh-0022); [the session of the online bank site](online-bank-site-sign-in.md#dh-2033))
 - <a id="dh-0006"></a>**DH-0006** Restart: after a restart, the data holder gets the statuses of the software products from the Register again. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [the get of the participant statuses](registration.md#dh-0679))
 
 ## Telemetry
@@ -85,10 +85,10 @@ The data holder also obeys the [Telemetry library](../../../pkg/platform/telemet
 
 ## Judgements
 
-### <a id="dh-0020"></a>DH-0020 A response time target for the lab
+### <a id="dh-0020"></a>DH-0020 A target of 200 ms, below the lowest CDS threshold
 
 - Kind: choice
-- Basis: Step 3.3. For 95 % of calls each hour, the CDS thresholds are 1,000 ms or more ([CDS: Performance Requirements][cds-performance]). The CDS gives them for production, not for a lab ([CDS: Non-functional Requirements][cds-nfrs]).
+- Basis: Step 3.3. The lowest CDS threshold is 1,000 ms, which 95 % of calls each hour must meet ([CDS: Performance Requirements][cds-performance]). The CDS gives the thresholds for production, not for a lab ([CDS: Non-functional Requirements][cds-nfrs]).
 - Reason: A target below the CDS thresholds shows a slow change before it can go above them. A development workstation can send 50 requests each second.
 
 ### <a id="dh-0021"></a>DH-0021 No throttle at the traffic thresholds
@@ -97,7 +97,7 @@ The data holder also obeys the [Telemetry library](../../../pkg/platform/telemet
 - Basis: Step 3.3. The CDS permits a data holder to throttle or refuse calls above the traffic thresholds, and does not require it ([CDS: Traffic Thresholds][cds-traffic-thresholds]).
 - Reason: The lab has no such load. A 429 response would make the conformance tests slow and not reliable.
 
-### <a id="dh-0022"></a>DH-0022 The state that a restart keeps
+### <a id="dh-0022"></a>DH-0022 A restart keeps the data, and not the flows or the sessions
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no rule for the restart of a data holder.

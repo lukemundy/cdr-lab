@@ -5,17 +5,17 @@ This area gives the products of the brand, their load, and the public APIs Get P
 ## Product fields
 
 - <a id="dh-0200"></a>**DH-0200** A product has the required fields of the `BankingProductDetailV7` schema. ([CDS: BankingProductDetailV7][cds-schema-product-detail])
-- <a id="dh-0201"></a>**DH-0201** A product can have these optional fields of the schema, and no other optional field. For example, a product has no `brandGroup`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [Judgement: the optional fields of a product](#dh-0260))
+- <a id="dh-0201"></a>**DH-0201** A product can have these optional fields of the schema, and no other optional field. For example, a product has no `brandGroup`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [Judgement: only the effective dates, features, fees and rates as optional fields](#dh-0260))
   - `effectiveFrom`
   - `effectiveTo`
   - `features`
   - `fees`
   - `depositRates`
   - `lendingRates`
-- <a id="dh-0202"></a>**DH-0202** A feature has the fields `featureType`, `additionalValue` and `additionalInfo`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [Judgement: the optional fields of a product](#dh-0260))
-- <a id="dh-0203"></a>**DH-0203** A fee has the fields `name`, `feeType`, `feeMethodUType`, `fixedAmount`, `rateBased`, `variable`, `additionalValue` and `additionalInfo`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [Judgement: the optional fields of a product](#dh-0260))
-- <a id="dh-0204"></a>**DH-0204** A deposit rate has the fields `depositRateType`, `rate`, `applicationType`, `applicationFrequency`, `additionalValue` and `additionalInfo`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [Judgement: the optional fields of a product](#dh-0260))
-- <a id="dh-0205"></a>**DH-0205** A lending rate has the fields of a deposit rate, with `lendingRateType` in place of `depositRateType`. It also has `comparisonRate`, `repaymentType` and `loanPurpose`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [Judgement: the optional fields of a product](#dh-0260))
+- <a id="dh-0202"></a>**DH-0202** A feature has the fields `featureType`, `additionalValue` and `additionalInfo`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [Judgement: only the effective dates, features, fees and rates as optional fields](#dh-0260))
+- <a id="dh-0203"></a>**DH-0203** A fee has the fields `name`, `feeType`, `feeMethodUType`, `fixedAmount`, `rateBased`, `variable`, `additionalValue` and `additionalInfo`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [Judgement: only the effective dates, features, fees and rates as optional fields](#dh-0260))
+- <a id="dh-0204"></a>**DH-0204** A deposit rate has the fields `depositRateType`, `rate`, `applicationType`, `applicationFrequency`, `additionalValue` and `additionalInfo`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [Judgement: only the effective dates, features, fees and rates as optional fields](#dh-0260))
+- <a id="dh-0205"></a>**DH-0205** A lending rate has the fields of a deposit rate, with `lendingRateType` in place of `depositRateType`. It also has `comparisonRate`, `repaymentType` and `loanPurpose`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [Judgement: only the effective dates, features, fees and rates as optional fields](#dh-0260))
 - <a id="dh-0206"></a>**DH-0206** When a field has a CDS enumeration, the data holder accepts each value of that enumeration. For example, a feature accepts each `featureType` of the CDS. ([CDS: BankingProductDetailV7][cds-schema-product-detail])
 - <a id="dh-0207"></a>**DH-0207** A rate is a CDS RateString. For example, `0.0125`. ([CDS: Common Field Types][cds-common-field-types])
 - <a id="dh-0208"></a>**DH-0208** An amount is a CDS AmountString. For example, `10.00`. ([CDS: Common Field Types][cds-common-field-types])
@@ -34,15 +34,15 @@ This area gives the products of the brand, their load, and the public APIs Get P
   - When a feature or a fee has the type `OTHER`, it has an `additionalInfo`.
   - When a deposit rate or a lending rate has the application type `PERIODIC`, it has an `applicationFrequency`.
 - <a id="dh-0217"></a>**DH-0217** The `brand` of a product is the brand name. ([CDR Support: Brands in the CDR ecosystem][support-brands]; [the brand name](brand.md#dh-0304))
-- <a id="dh-0218"></a>**DH-0218** A product `name` has 100 characters or fewer. For example, the load refuses a name of 101 characters. ([CDS: BankingProductV6][cds-schema-product]; [Judgement: the maximum length of a product name](#dh-0263))
-- <a id="dh-0219"></a>**DH-0219** A product is current when the time of the request is at or after its `effectiveFrom` and before its `effectiveTo`. A date that is absent has no limit. ([CDS: Get Products][cds-get-products]; [Judgement: the effective period of a product](#dh-0264))
-- <a id="dh-0220"></a>**DH-0220** A product is future when its `effectiveFrom` is after the time of the request. ([CDS: Get Products][cds-get-products]; [Judgement: the effective period of a product](#dh-0264))
+- <a id="dh-0218"></a>**DH-0218** A product `name` has 100 characters or fewer. For example, the load refuses a name of 101 characters. ([CDS: BankingProductV6][cds-schema-product]; [Judgement: a product name of 100 characters at most](#dh-0263))
+- <a id="dh-0219"></a>**DH-0219** A product is current when the time of the request is at or after its `effectiveFrom` and before its `effectiveTo`. A date that is absent has no limit. ([CDS: Get Products][cds-get-products]; [Judgement: an effective period that includes its start and not its end](#dh-0264))
+- <a id="dh-0220"></a>**DH-0220** A product is future when its `effectiveFrom` is after the time of the request. ([CDS: Get Products][cds-get-products]; [Judgement: an effective period that includes its start and not its end](#dh-0264))
 
 ## Preset catalogues
 
 - <a id="dh-0221"></a>**DH-0221** The product data of each preset brand is invented. It copies no product of a real data holder. ([Judgement: invented product data](#dh-0265))
-- <a id="dh-0222"></a>**DH-0222** The catalogue of each preset brand is the catalogue of an Australian retail bank. It has products in five or more product categories. ([CDS: Product Categories][cds-product-categories]; [Judgement: the products of the preset catalogues](#dh-0266))
-- <a id="dh-0223"></a>**DH-0223** The catalogue of each preset brand has one future product and one product whose `effectiveTo` is in the past. ([CDS: Get Products][cds-get-products]; [Judgement: the products of the preset catalogues](#dh-0266))
+- <a id="dh-0222"></a>**DH-0222** The catalogue of each preset brand is the catalogue of an Australian retail bank. It has products in five or more product categories. ([CDS: Product Categories][cds-product-categories]; [Judgement: preset catalogues with five categories, a future and an ended product](#dh-0266))
+- <a id="dh-0223"></a>**DH-0223** The catalogue of each preset brand has one future product and one product whose `effectiveTo` is in the past. ([CDS: Get Products][cds-get-products]; [Judgement: preset catalogues with five categories, a future and an ended product](#dh-0266))
 - <a id="dh-0224"></a>**DH-0224** Each `additionalValue` of a preset catalogue obeys the rule that the CDS gives for its type. For example, a fee of the type `PERIODIC` has a duration. ([CDS: Product & Account Components][cds-product-components])
 - <a id="dh-0225"></a>**DH-0225** The Get Products response and the Get Product Detail response of each product of each preset brand are valid against the CDS 1.36.0 OpenAPI specification. This includes a preset brand that the lab does not run. ([CDS OpenAPI: banking][cds-openapi-banking]; [Judgement: a schema check of each preset catalogue](#dh-0267))
 
@@ -55,7 +55,7 @@ This area gives the products of the brand, their load, and the public APIs Get P
 - <a id="dh-0228"></a>**DH-0228** The load is separate from the start of the data holder. The start of the data holder needs no load file. ([README: Component types][readme-component-types])
 - <a id="dh-0229"></a>**DH-0229** The load validates the full set against the product fields and the product validity rules of this area. When one product is not valid, the load changes nothing. ([the product fields](#dh-0200); [the product validity rules](#dh-0212))
 - <a id="dh-0230"></a>**DH-0230** When a product is not valid, the error of the load names each product and each rule that fails. For example, the error names the second product and its empty `name`. ([the product validity rules](#dh-0212))
-- <a id="dh-0231"></a>**DH-0231** The load refuses a product with a field that the data holder does not hold. For example, the load refuses a product with `brandGroup`. ([the optional fields that a product can have](#dh-0201); [Judgement: the optional fields of a product](#dh-0260))
+- <a id="dh-0231"></a>**DH-0231** The load refuses a product with a field that the data holder does not hold. For example, the load refuses a product with `brandGroup`. ([the optional fields that a product can have](#dh-0201); [Judgement: only the effective dates, features, fees and rates as optional fields](#dh-0260))
 - <a id="dh-0232"></a>**DH-0232** The load refuses a product whose `brand` is not the brand name. ([the brand of a product](#dh-0217))
 - <a id="dh-0233"></a>**DH-0233** The load does not compare an `additionalValue` with the rule of its type. ([CDS: Product & Account Components][cds-product-components]; [Judgement: no check of an `additionalValue` in the load](#dh-0269))
 - <a id="dh-0234"></a>**DH-0234** A load file uses the field names of the CDS product schemas. For example, a product in the file has `productCategory`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [Judgement: the CDS field names in a load file](#dh-0270))
@@ -76,13 +76,13 @@ This area gives the products of the brand, their load, and the public APIs Get P
 - <a id="dh-0239"></a>**DH-0239** The `updated-since` filter gives the products with a `lastUpdated` after that time. ([CDS: Get Products][cds-get-products])
 - <a id="dh-0240"></a>**DH-0240** The `brand` filter gives the products whose `brand` is equal to the value. The comparison is exact and case sensitive. For example, `wattle bank` does not match `Wattle Bank`. ([CDS: Get Products][cds-get-products]; [Judgement: an exact comparison for the `brand` filter](#dh-0272))
 - <a id="dh-0241"></a>**DH-0241** Get Products returns the products in descending order of `lastUpdated`. ([CDS: Get Products][cds-get-products])
-- <a id="dh-0242"></a>**DH-0242** When two products have the same `lastUpdated`, Get Products returns them in the order of their `productId`. ([Judgement: a stable order of the products](#dh-0273))
+- <a id="dh-0242"></a>**DH-0242** When two products have the same `lastUpdated`, Get Products returns them in the order of their `productId`. ([Judgement: `productId` as the second order of the products](#dh-0273))
 - <a id="dh-0243"></a>**DH-0243** Get Products supports `page` and `page-size`, with [the CDS pagination rules](../../../pkg/cds/DESIGN.md#cdsl-0017). Each link of a page keeps the filters of the request. ([the filters in each link of a page](../../../pkg/cds/DESIGN.md#cdsl-0029))
 
 ## Get Product Detail
 
 - <a id="dh-0244"></a>**DH-0244** Get Product Detail returns one product as a `BankingProductDetailV7` record, in the response envelope. ([CDS: Get Product Detail][cds-get-product-detail]; [the response envelope](../../../pkg/cds/DESIGN.md#cdsl-0034))
-- <a id="dh-0245"></a>**DH-0245** Get Product Detail returns a product that is not current. For example, it returns a future product. ([Judgement: the detail of each product that Get Products can list](#dh-0274))
+- <a id="dh-0245"></a>**DH-0245** Get Product Detail returns a product that is not current. For example, it returns a future product. ([Judgement: Get Product Detail for each product that Get Products can list](#dh-0274))
 
 ## Get Status and Get Outages
 
@@ -93,7 +93,7 @@ This area gives the products of the brand, their load, and the public APIs Get P
 
 ## Judgements
 
-### <a id="dh-0260"></a>DH-0260 The optional fields of a product
+### <a id="dh-0260"></a>DH-0260 Only the effective dates, features, fees and rates as optional fields
 
 - Kind: choice
 - Basis: Step 3.3. The schema marks the other fields as optional, and the CDS gives a data holder more discretion for payloads with no customer ([CDS: Payload Conventions][cds-payload-conventions]).
@@ -111,13 +111,13 @@ This area gives the products of the brand, their load, and the public APIs Get P
 - Basis: Step 3.3. The schema requires `productId`, and gives no minimum length ([CDS: BankingProductV6][cds-schema-product]).
 - Reason: An empty value cannot identify a product.
 
-### <a id="dh-0263"></a>DH-0263 The maximum length of a product name
+### <a id="dh-0263"></a>DH-0263 A product name of 100 characters at most
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no maximum for the `name` of a product ([CDS: BankingProductV6][cds-schema-product]).
 - Reason: An account that a consumer opens on the online bank site gets the name of its product ([the values of an account that the consumer opens](online-bank-site-accounts.md#dh-2225)), and the `productName` of an account has 1 to 100 characters ([the length of a product name of an account](operator-interface.md#dh-0737)). With the rule in the load, each product can open, and an open cannot fail because of its name.
 
-### <a id="dh-0264"></a>DH-0264 The effective period of a product
+### <a id="dh-0264"></a>DH-0264 An effective period that includes its start and not its end
 
 - Kind: choice
 - Basis: Step 3.3. The CDS says only that the `effective` filter uses whether the current time is in the effective period ([CDS: Get Products][cds-get-products]).
@@ -129,7 +129,7 @@ This area gives the products of the brand, their load, and the public APIs Get P
 - Basis: Step 3.1. The lab is not affiliated with a CDR participant ([README][readme]).
 - Reason: A copy of the products of a real data holder can make a reader think that the lab is affiliated with it.
 
-### <a id="dh-0266"></a>DH-0266 The products of the preset catalogues
+### <a id="dh-0266"></a>DH-0266 Preset catalogues with five categories, a future and an ended product
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives the product categories and the `effective` filter ([CDS: Product Categories][cds-product-categories], [CDS: Get Products][cds-get-products]), and gives no rule for the products of a mock data holder.
@@ -171,13 +171,13 @@ This area gives the products of the brand, their load, and the public APIs Get P
 - Basis: Step 3.3. The CDS says only that the filter gives the results of a specific brand ([CDS: Get Products][cds-get-products]).
 - Reason: A client gets the value from the `brand` field of a product. An exact comparison is then sufficient, and it is the simplest.
 
-### <a id="dh-0273"></a>DH-0273 A stable order of the products
+### <a id="dh-0273"></a>DH-0273 `productId` as the second order of the products
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives the order by `lastUpdated` only ([CDS: Get Products][cds-get-products]).
 - Reason: Pagination needs a stable order. Without a second key, a product with the same `lastUpdated` as a different product can be on two pages, or on none.
 
-### <a id="dh-0274"></a>DH-0274 The detail of each product that Get Products can list
+### <a id="dh-0274"></a>DH-0274 Get Product Detail for each product that Get Products can list
 
 - Kind: choice
 - Basis: Step 3.3. The CDS does not say whether Get Product Detail returns a product that is not current ([CDS: Get Product Detail][cds-get-product-detail]).

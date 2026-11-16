@@ -31,13 +31,13 @@ This area gives the authentication of a consumer with a one-time password, the O
 - <a id="dh-2604"></a>**DH-2604** The OTP page has one field for the OTP, with `autocomplete="one-time-code"`. It does not have one field for each digit. ([WCAG 2.2, SC 3.3.8][wcag-3-3-8]; [Judgement: one field for the OTP](#dh-2612))
 - <a id="dh-1222"></a>**DH-1222** When the consumer enters the correct OTP, the data holder authenticates the customer of that OTP. The authorisation is then for that customer. ([CDS: One-Time Password Credential Requirements][cds-otp])
 - <a id="dh-1223"></a>**DH-1223** When no customer has the user identifier, the data holder sends no email and shows the same OTP page. No OTP is then correct. ([CDS: One-Time Password Credential Requirements][cds-otp]; [Judgement: no enumeration of user identifiers](#dh-1274))
-- <a id="dh-1224"></a>**DH-1224** An OTP has 6 decimal digits from a cryptographic random source. When a [fixed OTP](#dh-1264) applies, the OTP has the fixed value. ([CDS: One-Time Password Credential Requirements][cds-otp]; [Judgement: the limits of an OTP](#dh-1277))
-- <a id="dh-1225"></a>**DH-1225** An OTP is valid for 5 minutes. ([CDS: One-Time Password Credential Requirements][cds-otp]; [Judgement: the limits of an OTP](#dh-1277))
+- <a id="dh-1224"></a>**DH-1224** An OTP has 6 decimal digits from a cryptographic random source. When a [fixed OTP](#dh-1264) applies, the OTP has the fixed value. ([CDS: One-Time Password Credential Requirements][cds-otp]; [Judgement: an OTP of 6 digits for 5 minutes, with 3 entries at most](#dh-1277))
+- <a id="dh-1225"></a>**DH-1225** An OTP is valid for 5 minutes. ([CDS: One-Time Password Credential Requirements][cds-otp]; [Judgement: an OTP of 6 digits for 5 minutes, with 3 entries at most](#dh-1277))
 - <a id="dh-1226"></a>**DH-1226** An OTP is valid for one use, and only in the authorisation flow that made it. ([CDS: One-Time Password Credential Requirements][cds-otp])
 - <a id="dh-1227"></a>**DH-1227** The OTP page shows the time for which the OTP is valid. For example, the page says that the OTP is valid for 5 minutes. ([CDS: Redirect to Web with One Time Password][cds-cx-otp])
 - <a id="dh-1228"></a>**DH-1228** The consumer can ask for a new OTP on the OTP page. A new OTP makes the previous OTP not valid. ([CX Guidelines: Redirect to Web with One Time Password][cx-otp])
-- <a id="dh-1229"></a>**DH-1229** The data holder sends a maximum of 3 OTPs in one authorisation flow. ([CX Guidelines: Redirect to Web with One Time Password][cx-otp]; [Judgement: the limits of an OTP](#dh-1277))
-- <a id="dh-1230"></a>**DH-1230** After 3 incorrect OTP entries in one authorisation flow, the flow ends with the error `access_denied`. ([CDR Support: One Time Password (OTP)][support-otp]; [CDR Support: Error scenarios and responses][support-error-scenarios]; [Judgement: the limits of an OTP](#dh-1277); [Judgement: `access_denied` at the end of an authentication](#dh-1275))
+- <a id="dh-1229"></a>**DH-1229** The data holder sends a maximum of 3 OTPs in one authorisation flow. ([CX Guidelines: Redirect to Web with One Time Password][cx-otp]; [Judgement: an OTP of 6 digits for 5 minutes, with 3 entries at most](#dh-1277))
+- <a id="dh-1230"></a>**DH-1230** After 3 incorrect OTP entries in one authorisation flow, the flow ends with the error `access_denied`. ([CDR Support: One Time Password (OTP)][support-otp]; [CDR Support: Error scenarios and responses][support-error-scenarios]; [Judgement: an OTP of 6 digits for 5 minutes, with 3 entries at most](#dh-1277); [Judgement: `access_denied` at the end of an authentication](#dh-1275))
 - <a id="dh-1231"></a>**DH-1231** When the data holder cannot send the OTP email, the authorisation flow ends with the error `temporarily_unavailable`. ([RFC 6749, section 4.1.2.1][rfc6749-authorisation-errors])
 - <a id="dh-1232"></a>**DH-1232** When the consumer does not complete the authorisation flow, the flow [ends 10 minutes after the authorisation request](../../../pkg/authserver/design/authorisation-request.md#auth-0103). The data holder then shows an error page. ([the end of an authorisation flow](../../../pkg/authserver/design/authorisation-request.md#auth-0103))
 - <a id="dh-1233"></a>**DH-1233** A correct OTP entry gives the level of assurance `urn:cds.au:cdr:2`. The time of that entry is the authentication time. ([CDS: Levels of Assurance][cds-loa]; [Judgement: one level of assurance](../../../pkg/authserver/design/authorisation-request.md#auth-0121))
@@ -51,19 +51,19 @@ This area gives the authentication of a consumer with a one-time password, the O
 - <a id="dh-1244"></a>**DH-1244** The `From` header has the brand name as its display name and the sender address of the configuration as its address. ([RFC 5322, section 3.4][rfc5322-3-4]; [one source of the brand name](brand.md#dh-0305); [Judgement: the brand name as the sender name](#dh-1281))
 - <a id="dh-1245"></a>**DH-1245** The `From` header is one valid header line for each brand name that the brand directory permits. This includes a name with special characters or with characters that are not ASCII. ([RFC 5322, section 3.4][rfc5322-3-4]; [RFC 2047, section 5][rfc2047-5]; [no control character in the brand name](brand.md#dh-0333))
 - <a id="dh-1246"></a>**DH-1246** When the sender address setting has a display name, the data holder does not start. The error names the setting. For example, the value `Wattle Bank <no-reply@wattlebank.test>` stops the start. ([Judgement: the brand name as the sender name](#dh-1281))
-- <a id="dh-1247"></a>**DH-1247** The OTP email has a plain text part and an HTML part, which give the same information. They are in a `multipart/alternative` body, with the plain text part first. ([RFC 2046, section 5.1.4][rfc2046-5-1-4]; [Judgement: an email format for email clients](#dh-1282))
+- <a id="dh-1247"></a>**DH-1247** The OTP email has a plain text part and an HTML part, which give the same information. They are in a `multipart/alternative` body, with the plain text part first. ([RFC 2046, section 5.1.4][rfc2046-5-1-4]; [Judgement: a multipart email with quoted-printable parts and inline styles](#dh-1282))
 - <a id="dh-1248"></a>**DH-1248** The HTML part and the logo are in a `multipart/related` body. The HTML part refers to the logo with a `cid:` URL. ([RFC 2387][rfc2387]; [RFC 2392][rfc2392]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 - <a id="dh-1249"></a>**DH-1249** No line of the message is longer than 998 characters. ([RFC 5322, section 2.1.1][rfc5322-2-1-1])
-- <a id="dh-1250"></a>**DH-1250** The plain text part and the HTML part have the transfer encoding `quoted-printable`. ([RFC 5322, section 2.1.1][rfc5322-2-1-1]; [Judgement: an email format for email clients](#dh-1282))
+- <a id="dh-1250"></a>**DH-1250** The plain text part and the HTML part have the transfer encoding `quoted-printable`. ([RFC 5322, section 2.1.1][rfc5322-2-1-1]; [Judgement: a multipart email with quoted-printable parts and inline styles](#dh-1282))
 - <a id="dh-1251"></a>**DH-1251** The only image of the OTP email is `logo.png` of the brand directory, in the email. The email loads no content from a different location. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 - <a id="dh-1252"></a>**DH-1252** The header of the HTML part shows the logo on the brand colour. The text alternative of the logo is the brand name. ([WCAG 2.2, SC 1.1.1][wcag-1-1-1])
-- <a id="dh-1253"></a>**DH-1253** The HTML part uses only inline styles, with literal sRGB colours in hex notation from the tokens of the brand, and a system font stack. For example, `color: #1a3d2b`. ([caniemail: style element][caniemail-style]; [caniemail: CSS variables][caniemail-css-variables]; [caniemail: modern colour functions][caniemail-modern-colour]; [Judgement: an email format for email clients](#dh-1282))
+- <a id="dh-1253"></a>**DH-1253** The HTML part uses only inline styles, with literal sRGB colours in hex notation from the tokens of the brand, and a system font stack. For example, `color: #1a3d2b`. ([caniemail: style element][caniemail-style]; [caniemail: CSS variables][caniemail-css-variables]; [caniemail: modern colour functions][caniemail-modern-colour]; [Judgement: a multipart email with quoted-printable parts and inline styles](#dh-1282))
 - <a id="dh-1254"></a>**DH-1254** Each pair of text and background colours in the HTML part is a [pair of text and background roles of the brand](brand.md#dh-0343). For example, the text colour on the brand colour. ([WCAG 2.2, SC 1.4.3][wcag-1-4-3])
 - <a id="dh-1255"></a>**DH-1255** The OTP is text in the HTML part, not an image, so that the consumer can copy it. ([WCAG 2.2, SC 3.3.8][wcag-3-3-8]; [Judgement: an OTP that the consumer can copy](#dh-1284))
 - <a id="dh-1256"></a>**DH-1256** The OTP email has no link and no button. It offers no other products or services, and it has no reference to other documents. ([CDS: Common Authentication Standards][cds-cx-authentication]; [CX Guidelines: Redirect to Web with One Time Password][cx-otp])
-- <a id="dh-1257"></a>**DH-1257** Both parts of the OTP email have the [footer text of the consumer pages](authorisation.md#dh-0837), with no link. ([Judgement: the footer text in the email](#dh-1285))
-- <a id="dh-1258"></a>**DH-1258** The HTML part has the language `en-AU` on its `html` element, and it has a title. ([WCAG 2.2, SC 3.1.1][wcag-3-1-1]; [Judgement: the HTML part as a document for a screen reader](#dh-1286))
-- <a id="dh-1259"></a>**DH-1259** Each table for layout in the HTML part has the role `presentation`. ([WCAG 2.2, SC 1.3.1][wcag-1-3-1]; [Judgement: the HTML part as a document for a screen reader](#dh-1286))
+- <a id="dh-1257"></a>**DH-1257** Both parts of the OTP email have the [footer text of the consumer pages](authorisation.md#dh-0837), with no link. ([Judgement: the footer text of the consumer pages in the email](#dh-1285))
+- <a id="dh-1258"></a>**DH-1258** The HTML part has the language `en-AU` on its `html` element, and it has a title. ([WCAG 2.2, SC 3.1.1][wcag-3-1-1]; [Judgement: web page accessibility rules for the HTML part of the email](#dh-1286))
+- <a id="dh-1259"></a>**DH-1259** Each table for layout in the HTML part has the role `presentation`. ([WCAG 2.2, SC 1.3.1][wcag-1-3-1]; [Judgement: web page accessibility rules for the HTML part of the email](#dh-1286))
 - <a id="dh-1260"></a>**DH-1260** The data holder sends no email other than the OTP email. For example, it sends no email to the consumer at the end of an arrangement. ([CDR Rules][cdr-rules], rules 4.26A to 4.28; [Judgement: no email other than the OTP email](#dh-1287))
 
 ## Mail delivery and fixed OTPs
@@ -116,7 +116,7 @@ These rules are lab-only. A production data holder has its own channel for the O
 - Basis: Step 3.3. The CDS requires "an existing channel or mechanism", at the discretion of the data holder ([CDS: One-Time Password Credential Requirements][cds-otp]). An OTP does not have to go by SMS ([CDR Support: One Time Password (OTP)][support-otp]).
 - Reason: Email is a channel that a mock can have with the behaviour of a production data holder. A mail sink makes sure that the lab sends no email to a real address.
 
-### <a id="dh-1277"></a>DH-1277 The limits of an OTP
+### <a id="dh-1277"></a>DH-1277 An OTP of 6 digits for 5 minutes, with 3 entries at most
 
 - Kind: choice
 - Basis: Step 3.3. The CDS requires 4 to 6 digits and an expiry, and leaves the period to the data holder ([CDS: One-Time Password Credential Requirements][cds-otp]). The ACCC says that a limit on failed entries is good practice ([CDR Support: One Time Password (OTP)][support-otp]).
@@ -134,7 +134,7 @@ These rules are lab-only. A production data holder has its own channel for the O
 - Basis: Step 3.3. No source gives the sender of an OTP email.
 - Reason: The consumer sees which brand sent the OTP. The brand directory stays the one source of the name, and a display name in the setting can disagree with it. An error at start-up is better than an error at the first OTP.
 
-### <a id="dh-1282"></a>DH-1282 An email format for email clients
+### <a id="dh-1282"></a>DH-1282 A multipart email with quoted-printable parts and inline styles
 
 - Kind: choice
 - Basis: Step 3.2. The best part of a `multipart/alternative` body is last ([RFC 2046, section 5.1.4][rfc2046-5-1-4]). Many clients do not support a `<style>` element, CSS variables or modern colour functions ([caniemail: style element][caniemail-style], [caniemail: CSS variables][caniemail-css-variables], [caniemail: modern colour functions][caniemail-modern-colour]).
@@ -146,13 +146,13 @@ These rules are lab-only. A production data holder has its own channel for the O
 - Basis: Step 3.2. An authentication must not require a cognitive function test, for example a transcription, unless a mechanism helps ([WCAG 2.2, SC 3.3.8][wcag-3-3-8]).
 - Reason: A consumer who can copy the OTP does not have to transcribe it.
 
-### <a id="dh-1285"></a>DH-1285 The footer text in the email
+### <a id="dh-1285"></a>DH-1285 The footer text of the consumer pages in the email
 
 - Kind: choice
 - Basis: Step 3.3. No source requires a footer in an OTP email. The [footer of the consumer pages](authorisation.md#dh-0860) has the same reason.
 - Reason: The email copies the brand of a bank, and it must not deceive a person, as for the pages.
 
-### <a id="dh-1286"></a>DH-1286 The HTML part as a document for a screen reader
+### <a id="dh-1286"></a>DH-1286 Web page accessibility rules for the HTML part of the email
 
 - Kind: choice
 - Basis: Step 3.2. WCAG requires the language of a page and the structure of its content ([WCAG 2.2, SC 3.1.1][wcag-3-1-1], [SC 1.3.1][wcag-1-3-1]). WCAG is for web content, and an email is not a web page.
