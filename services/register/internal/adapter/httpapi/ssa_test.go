@@ -40,6 +40,7 @@ func authorisedV4() http.Header {
 	return http.Header{"Authorization": {"Bearer valid"}, "X-V": {"4"}}
 }
 
+// Verifies: REG-0414
 func TestGetSSAGivesTheSSAOfTheCallerAsACompactJWT(t *testing.T) {
 	l := newSecureLab()
 
@@ -54,6 +55,7 @@ func TestGetSSAGivesTheSSAOfTheCallerAsACompactJWT(t *testing.T) {
 	assert.Equal(t, "drb-1", l.ssa.brand)
 }
 
+// Verifies: REG-0403, REG-0404
 func TestGetSSARefusesAPathThatIsNotOfTheCaller(t *testing.T) {
 	tests := map[string]struct {
 		path                string
@@ -124,6 +126,7 @@ func TestGetSSAIssueErrors(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0402, REG-0323
 func TestGetSSARefusesACallerThatIsNotActive(t *testing.T) {
 	l := newSecureLab()
 	l.reader.caller.Status = domain.Inactive
@@ -189,6 +192,7 @@ func jwksRequest(t *testing.T, keys httpapi.KeySource, header http.Header) *http
 	return rec
 }
 
+// Verifies: REG-0401, REG-0326
 func TestGetJWKSGivesThePublicSSAKeysWithAnETag(t *testing.T) {
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	require.NoError(t, err)

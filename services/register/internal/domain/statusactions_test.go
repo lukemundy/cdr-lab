@@ -82,6 +82,7 @@ func TestARevocationWithNoSoftwareProductToRemoveIsReversible(t *testing.T) {
 	})
 }
 
+// Verifies: REG-0222
 func TestASurrenderedDataRecipientHasNoAction(t *testing.T) {
 	actions := domain.PermittedStatusActions(statusFixture(domain.DataRecipientSurrendered))
 
@@ -92,6 +93,7 @@ func TestASurrenderedDataRecipientHasNoAction(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0223
 func TestTheActionsOfEachSoftwareProductFollowTheStatusRules(t *testing.T) {
 	tests := map[string]struct {
 		recipient domain.DataRecipientStatus
@@ -158,6 +160,7 @@ func TestTheActionsOfEachSoftwareProductFollowTheStatusRules(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0232, REG-0233, REG-0234
 func TestTheActionsOfEachBrandGiveTheCascadeToItsSoftwareProducts(t *testing.T) {
 	actions := domain.PermittedStatusActions(statusFixture(domain.DataRecipientActive))
 
@@ -193,6 +196,7 @@ func TestTheActionsOfEachBrandGiveTheCascadeToItsSoftwareProducts(t *testing.T) 
 	}, actions.Brands)
 }
 
+// Verifies: REG-0225
 func TestARemovedBrandHasNoAction(t *testing.T) {
 	_, state := execute(t, statusFixture(domain.DataRecipientActive), domain.RemoveDataRecipientBrand{BrandID: "drb-1"})
 

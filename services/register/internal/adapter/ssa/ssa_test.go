@@ -30,6 +30,7 @@ func signerWith(keys []authserver.SigningKey, err error) ssa.Signer {
 	return ssa.Signer{Keys: func(context.Context) ([]authserver.SigningKey, error) { return keys, err }}
 }
 
+// Verifies: REG-0413
 func TestTheSSAIsAPS256JWTSignedWithTheFirstKey(t *testing.T) {
 	newest, older := key(t, "ssa-2"), key(t, "ssa-1")
 

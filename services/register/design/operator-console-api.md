@@ -6,9 +6,9 @@ This area gives the console API of the operator console for the reads, the histo
 
 | ID | Action | Method and path | Success | Source |
 |---|---|---|---|---|
-| <a id="reg-1100"></a>**REG-1100** | Activate, deactivate or remove a data recipient brand | `POST /api/data-recipients/{legalEntityId}/brands/{brandId}/{activate,deactivate,remove}` | 204 | [the status rules](../DESIGN.md#status-rules) |
-| <a id="reg-1101"></a>**REG-1101** | Remove a data holder | `POST /api/data-holders/{legalEntityId}/remove` | 204 | [the status rules](../DESIGN.md#status-rules) |
-| <a id="reg-1102"></a>**REG-1102** | Activate, deactivate or remove a data holder brand | `POST /api/data-holders/{legalEntityId}/brands/{brandId}/{activate,deactivate,remove}` | 204 | [the status rules](../DESIGN.md#status-rules) |
+| <a id="reg-1100"></a>**REG-1100** | Activate, deactivate or remove a data recipient brand | `POST /api/data-recipients/{legalEntityId}/brands/{brandId}/{activate,deactivate,remove}` | 204 | [the transitions of a brand](participants.md#reg-0225) |
+| <a id="reg-1101"></a>**REG-1101** | Remove a data holder | `POST /api/data-holders/{legalEntityId}/remove` | 204 | [the transitions of a data holder legal entity](participants.md#reg-0224) |
+| <a id="reg-1102"></a>**REG-1102** | Activate, deactivate or remove a data holder brand | `POST /api/data-holders/{legalEntityId}/brands/{brandId}/{activate,deactivate,remove}` | 204 | [the transitions of a brand](participants.md#reg-0225) |
 
 - <a id="reg-1103"></a>**REG-1103** The OpenAPI document gives the path of each other read and status action. For example, the list of the data recipients is `GET /api/data-recipients`. ([Judgement: console API contracts in OpenAPI (ADR 0017)][adr-0017])
 - <a id="reg-1104"></a>**REG-1104** The `{brandId}` of a data holder brand in a path is its `dataHolderBrandId`. A brand with no `dataHolderBrandId` has its `interimId` in the path. ([the operator interface](../DESIGN.md#operator-interface))
@@ -31,7 +31,7 @@ This area gives the console API of the operator console for the reads, the histo
 - <a id="reg-1115"></a>**REG-1115** The lists of the participants and the history of a participant are in pages. ([the page parameters](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0014))
 - <a id="reg-1116"></a>**REG-1116** A response in pages gives the total number of records in all pages. ([Judgement: the total of a list](#reg-1171))
 - <a id="reg-1117"></a>**REG-1117** A page after the last page gives 200 with no records and the total. For example, `page=9` of a list of 30 records gives no records and the total 30. ([Judgement: a page after the last page](#reg-1172))
-- <a id="reg-1118"></a>**REG-1118** The list of the data recipients is filtered by status. ([the participant model](../DESIGN.md#participant-model))
+- <a id="reg-1118"></a>**REG-1118** The list of the data recipients is filtered by status. ([the statuses of a data recipient legal entity](participants.md#reg-0202))
 - <a id="reg-1119"></a>**REG-1119** A search of the list of the data recipients finds a part of the legal entity name, with no difference for upper and lower case. The characters `%` and `_` are text. For example, `budget` finds "Mock Budgeting Pty Ltd". ([Judgement: the search of a participant list](#reg-1173))
 - <a id="reg-1120"></a>**REG-1120** The list of the data recipients is sorted by one of these values, and then by the legal entity ID. The default is the name. ([Judgement: the sorts of a participant list](#reg-1174))
   - the name
@@ -41,7 +41,7 @@ This area gives the console API of the operator console for the reads, the histo
   - the number of software products
 - <a id="reg-1121"></a>**REG-1121** A sort by a text value is in the byte order of the text. A sort by the name has no difference for upper and lower case. ([Judgement: the sorts of a participant list](#reg-1174))
 - <a id="reg-1122"></a>**REG-1122** The numbers of brands and software products of a data recipient include each status. For example, a REMOVED brand is in the number of brands. ([Judgement: the counts in the data recipient list](#reg-1175))
-- <a id="reg-1123"></a>**REG-1123** The list of the data holders is filtered by status. ([the participant model](../DESIGN.md#participant-model))
+- <a id="reg-1123"></a>**REG-1123** The list of the data holders is filtered by status. ([the statuses of a data holder legal entity](participants.md#reg-0200))
 - <a id="reg-1124"></a>**REG-1124** A search of the list of the data holders finds a part of the legal entity name or of a brand name, with the rules of the data recipient search. For example, `wattle` finds the data holder "Wattle Bank Limited" by its brand "Wattle Bank". ([Judgement: the search of the data holder list](#reg-1176))
 - <a id="reg-1125"></a>**REG-1125** The list of the data holders is sorted by the name, the status or the number of brands, and then by the legal entity ID. The default is the name. ([Judgement: the sorts of a participant list](#reg-1174))
 - <a id="reg-1126"></a>**REG-1126** The list of the data holders gives, for each legal entity, the number of its brands and the industries of its brands, not each brand. The number of brands includes each status. ([Judgement: the brands in the data holder list](#reg-1177))
@@ -56,8 +56,8 @@ This area gives the console API of the operator console for the reads, the histo
 
 ## Status actions
 
-- <a id="reg-1132"></a>**REG-1132** The detail of a data recipient gives, for the legal entity, each brand and each software product, the status actions that the status rules permit for the current state of the record. ([the status rules](../DESIGN.md#status-rules); [Judgement: the permitted actions from the domain](#reg-1181))
-- <a id="reg-1133"></a>**REG-1133** The detail of a data holder gives, for the legal entity and each brand, the status actions that the status rules permit for the current state of the record. ([the status rules](../DESIGN.md#status-rules); [Judgement: the permitted actions from the domain](#reg-1181))
+- <a id="reg-1132"></a>**REG-1132** The detail of a data recipient gives, for the legal entity, each brand and each software product, the status actions that the status rules permit for the current state of the record. ([the transitions of a data recipient legal entity](participants.md#reg-0222); [the cascades of a suspension](participants.md#reg-0227); [Judgement: the permitted actions from the domain](#reg-1181))
+- <a id="reg-1133"></a>**REG-1133** The detail of a data holder gives, for the legal entity and each brand, the status actions that the status rules permit for the current state of the record. ([the transitions of a data holder legal entity](participants.md#reg-0224); [the cascade of a data holder removal](participants.md#reg-0231); [Judgement: the permitted actions from the domain](#reg-1181))
 - <a id="reg-1134"></a>**REG-1134** Each permitted status action gives each other record that it changes, with the status before and after. For example, the suspension of a data recipient gives each ACTIVE software product, with ACTIVE before and INACTIVE after. ([Judgement: the permitted actions from the domain](#reg-1181))
 - <a id="reg-1135"></a>**REG-1135** The Register finds the permitted actions and their changes with the same domain rules as the action itself. It changes no record to find them. ([Judgement: the permitted actions from the domain](#reg-1181))
 - <a id="reg-1136"></a>**REG-1136** The detail of a data recipient gives, for each software product, `clientCertificateActions`. It has `register` and `issue` when the rules permit them, and `remove` in each status. ([Judgement: the permitted certificate actions](#reg-1182))
@@ -80,7 +80,7 @@ This area gives the console API of the operator console for the reads, the histo
 - <a id="reg-1147"></a>**REG-1147** The key sets are one response. ([Judgement: one response for a detail and for the key sets](#reg-1178))
 - <a id="reg-1148"></a>**REG-1148** The key sets give no private key and no public key. For example, a key gives only its key ID, its state and its creation time. ([Judgement: no key material in the console](#reg-1187))
 - <a id="reg-1149"></a>**REG-1149** The key sets are `access-token` and `ssa`. The states of a key are `signing`, `next` and `previous`. ([Judgement: the names of the key sets and the states](#reg-1188))
-- <a id="reg-1150"></a>**REG-1150** Each key set gives the actions that the rules permit for its current state, with the state of each key before and after. ([the signing keys](../DESIGN.md#signing-keys); [Judgement: the permitted actions from the domain](#reg-1181))
+- <a id="reg-1150"></a>**REG-1150** Each key set gives the actions that the rules permit for its current state, with the state of each key before and after. ([the two steps of a key change](authorisation-server.md#reg-0468); [Judgement: the permitted actions from the domain](#reg-1181))
 - <a id="reg-1151"></a>**REG-1151** Each key set gives its version. The version is 1 when the Register creates the key set. ([Judgement: the version of a key set](#reg-1189))
 - <a id="reg-1152"></a>**REG-1152** Each publish and each activation adds 1 to the version of the key set, also through the operator interface. A step that the rules refuse does not change the version. ([Judgement: the version of a key set](#reg-1189))
 
@@ -185,7 +185,7 @@ This area gives the console API of the operator console for the reads, the histo
 ### <a id="reg-1186"></a>REG-1186 The brand in the history
 
 - Kind: choice
-- Basis: Step 3.3. A data holder brand can have an interim ID and no brand ID ([the participant model](../DESIGN.md#participant-model)).
+- Basis: Step 3.3. A data holder brand can have an interim ID and no brand ID ([the identifiers of a data holder brand](participants.md#reg-0208)).
 - Reason: One pair of fields for each kind of brand is the least complex. The identifier is the same as in the path of the brand in the operator interface.
 
 ### <a id="reg-1187"></a>REG-1187 No key material in the console

@@ -102,6 +102,7 @@ func TestDataRecipientsHaveEachDataRecipientAndSoftwareProductOfTheStatusLists(t
 	assert.Equal(t, statuses(t, softwareProductsStatusPath, "softwareProductId"), products)
 }
 
+// Verifies: REG-0306
 func TestDataRecipientsHaveOnlyTheFieldsOfTheSchema(t *testing.T) {
 	requireOnly := func(t *testing.T, o object, fields []string) {
 		t.Helper()
@@ -140,6 +141,7 @@ func TestDataRecipientsHaveALastUpdatedDateTime(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0313
 func TestDataRecipientsDoNotServeVersion3(t *testing.T) {
 	resp := call(t, dataRecipientsPath, v3())
 

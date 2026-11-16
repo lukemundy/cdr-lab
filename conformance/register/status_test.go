@@ -128,6 +128,7 @@ func requireCDSError(t *testing.T, resp response, status int, code, title string
 	assert.Equal(t, title, body.Errors[0].Title)
 }
 
+// Verifies: REG-0338
 func TestStatusListsHaveEntitiesInEachStatus(t *testing.T) {
 	for name, e := range statusEndpoints {
 		t.Run(name, func(t *testing.T) {
@@ -155,6 +156,7 @@ func TestStatusListsHaveEntitiesInEachStatus(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0316
 func TestListsRejectAnIndustryThatIsNotValid(t *testing.T) {
 	for name, e := range listEndpoints {
 		invalid := []string{"foo", "Banking"}
@@ -253,6 +255,7 @@ func TestListsGiveVersionErrors(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0326
 func TestListsHaveAnETagThatIfNoneMatchUses(t *testing.T) {
 	for name, e := range listEndpoints {
 		t.Run(name, func(t *testing.T) {
@@ -276,6 +279,7 @@ func TestListsHaveAnETagThatIfNoneMatchUses(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0344
 func TestAPreflightRequestPermitsAnyOriginToSendTheCDSHeaders(t *testing.T) {
 	for name, e := range listEndpoints {
 		t.Run(name, func(t *testing.T) {
@@ -328,12 +332,14 @@ func TestPublicResponsesPermitAnyOrigin(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0318
 func TestAnUnknownPathIsNotFound(t *testing.T) {
 	resp := call(t, "/unknown", v3())
 
 	requireCDSError(t, resp, http.StatusNotFound, "urn:au-cds:error:cds-all:Resource/NotFound", "Resource Not Found")
 }
 
+// Verifies: REG-0314
 func TestPublicResponsesGiveTheInteractionID(t *testing.T) {
 	for name, header := range map[string]http.Header{"success": v3(), "error": {}} {
 		t.Run(name, func(t *testing.T) {

@@ -44,7 +44,7 @@ This area gives the issue of CDR client certificates and CDR server certificates
 - <a id="reg-0628"></a>**REG-0628** When the brand has no `dataHolderBrandId`, a server certificate issue gives 409. ([Judgement: no server certificate for a brand with no `dataHolderBrandId`](#reg-0648))
 - <a id="reg-0629"></a>**REG-0629** The Register does not register a server certificate. ([Judgement: the record of a server certificate issue](#reg-0651))
 - <a id="reg-0630"></a>**REG-0630** The Register records a server certificate issue as one event of the data holder, with the brand and the thumbprint of the certificate. ([Judgement: the record of a server certificate issue](#reg-0651))
-- <a id="reg-0631"></a>**REG-0631** A server certificate issue sets the `lastUpdated` of each brand of the data holder, as each other event of the data holder does ([`lastUpdated`](../DESIGN.md#caching-pagination-lists-and-cors)). ([Judgement: the record of a server certificate issue](#reg-0651))
+- <a id="reg-0631"></a>**REG-0631** A server certificate issue sets the `lastUpdated` of each brand of the data holder, as each other event of the data holder does ([the `lastUpdated` of a brand](register-apis.md#reg-0336)). ([Judgement: the record of a server certificate issue](#reg-0651))
 
 ## Operator interface paths
 

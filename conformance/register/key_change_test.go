@@ -107,6 +107,7 @@ func keyChange(t *testing.T, keySet, jwksURL string, issue func() string) (befor
 	return before, after
 }
 
+// Verifies: REG-0468, REG-0470
 func TestAChangeOfTheSSAKeyDoesNotBreakVerification(t *testing.T) {
 	cert := activeTokenClient(t)
 	token := accessToken(t, idpTestActiveProduct, cert)
@@ -205,6 +206,7 @@ func brandsStatus(t *testing.T, cert tls.Certificate, token string) int {
 	return secureCall(t, cert, dataHolderBrandsPath, bearerV3(token)).status
 }
 
+// Verifies: REG-0471
 func TestAKeyChangeOfOneKeySetDoesNotChangeTheOtherKeySet(t *testing.T) {
 	cfg, _ := openIDConfiguration(t)
 	jwksURL := labtest.Env(t, "REGISTER_PUBLIC_URL") + registerJWKSPath

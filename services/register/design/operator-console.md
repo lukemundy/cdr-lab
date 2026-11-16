@@ -17,11 +17,11 @@ This area gives the lab-only operator console of the Register: its views, the hi
 
 ## Details
 
-- <a id="reg-1007"></a>**REG-1007** The detail of a data recipient gives the legal entity: its ID, name, accreditation number, accreditation level, logo URI, status and the time of the last change. ([the participant model](../DESIGN.md#participant-model))
-- <a id="reg-1008"></a>**REG-1008** The detail of a data recipient gives each brand, with its ID, name, logo URI and status. ([the participant model](../DESIGN.md#participant-model))
-- <a id="reg-1009"></a>**REG-1009** The detail of a data recipient gives each software product, with its ID, its status, its metadata and the thumbprints of its registered client certificates. ([the participant model](../DESIGN.md#participant-model))
-- <a id="reg-1010"></a>**REG-1010** The detail of a data holder gives the legal entity: its ID, name, logo URI, status and the time of the last change. ([the participant model](../DESIGN.md#participant-model))
-- <a id="reg-1011"></a>**REG-1011** The detail of a data holder gives each brand, with its brand ID, its interim ID or both, its name, brand group, logo URI, status, industries, endpoints and JWKS endpoint. ([the participant model](../DESIGN.md#participant-model))
+- <a id="reg-1007"></a>**REG-1007** The detail of a data recipient gives the legal entity: its ID, name, accreditation number, accreditation level, logo URI, status and the time of the last change. ([the accreditation of a data recipient legal entity](participants.md#reg-0211))
+- <a id="reg-1008"></a>**REG-1008** The detail of a data recipient gives each brand, with its ID, name, logo URI and status. ([the data recipient brand](participants.md#reg-0203))
+- <a id="reg-1009"></a>**REG-1009** The detail of a data recipient gives each software product, with its ID, its status, its metadata and the thumbprints of its registered client certificates. ([the metadata of a software product](participants.md#reg-0212); [the client certificates of a software product](participants.md#reg-0213))
+- <a id="reg-1010"></a>**REG-1010** The detail of a data holder gives the legal entity: its ID, name, logo URI, status and the time of the last change. ([the data holder legal entity](participants.md#reg-0200))
+- <a id="reg-1011"></a>**REG-1011** The detail of a data holder gives each brand, with its brand ID, its interim ID or both, its name, brand group, logo URI, status, industries, endpoints and JWKS endpoint. ([the endpoints of a data holder brand](participants.md#reg-0207); [the identifiers of a data holder brand](participants.md#reg-0208))
 - <a id="reg-1012"></a>**REG-1012** The detail of a data holder brand does not show its server certificates. The history shows each issue of a server certificate with its thumbprint. ([the event of a server certificate issue](certificate-management.md#reg-0630); [Judgement: no server certificates in the detail of a data holder brand](#reg-1080))
 - <a id="reg-1013"></a>**REG-1013** The detail of a participant links to its history. ([Judgement: the detail and the history on two pages](#reg-1091))
 
@@ -62,9 +62,9 @@ The table gives the text and the fields of each event type in the history.
 
 ## Key sets
 
-- <a id="reg-1041"></a>**REG-1041** The console shows the two key sets: the access token keys and the SSA keys. ([the signing keys](../DESIGN.md#signing-keys))
+- <a id="reg-1041"></a>**REG-1041** The console shows the two key sets: the access token keys and the SSA keys. ([the two key sets](authorisation-server.md#reg-0465))
 - <a id="reg-1042"></a>**REG-1042** Each key gives its key ID, its state and the time at which the Register created it. ([Judgement: the creation time of a key](#reg-1084))
-- <a id="reg-1043"></a>**REG-1043** The state of a key is one of these. ([the signing keys](../DESIGN.md#signing-keys))
+- <a id="reg-1043"></a>**REG-1043** The state of a key is one of these. ([the two steps of a key change](authorisation-server.md#reg-0468))
   - the key that signs
   - the next key
   - the previous key, which the JWKS still publishes
@@ -138,13 +138,13 @@ The console is a web UI. The [web UI library](../../../pkg/platform/consolehttp/
 ### <a id="reg-1084"></a>REG-1084 The creation time of a key
 
 - Kind: choice
-- Basis: Step 3.3. The CDS gives no time for a signing key in the JWKS ([the signing keys](../DESIGN.md#signing-keys)).
+- Basis: Step 3.3. The CDS gives no time for a signing key in the JWKS ([the two key sets](authorisation-server.md#reg-0465)).
 - Reason: The Register keeps no other time for a key. The creation time shows the sequence of a key change.
 
 ### <a id="reg-1085"></a>REG-1085 The order of the keys
 
 - Kind: choice
-- Basis: Step 3.3. The CDS gives no order of the keys ([the signing keys](../DESIGN.md#signing-keys)).
+- Basis: Step 3.3. The CDS gives no order of the keys ([the two key sets](authorisation-server.md#reg-0465)).
 - Reason: The order is the same as in the JWKS. The lab operator looks first for the key that signs.
 
 ### <a id="reg-1086"></a>REG-1086 The revocations in the console

@@ -13,6 +13,7 @@ import (
 
 var ssaIssuedAt = time.Date(2026, 10, 3, 1, 2, 3, 0, time.UTC)
 
+// Verifies: REG-0407, REG-0408, REG-0409, REG-0411
 func TestTheSSAHasTheClaimsOfTheSoftwareProductItsBrandAndItsLegalEntity(t *testing.T) {
 	dr := validDataRecipient()
 	sp := &dr.Brands[0].SoftwareProducts[0]
@@ -42,6 +43,7 @@ func TestTheSSAHasTheClaimsOfTheSoftwareProductItsBrandAndItsLegalEntity(t *test
 	}`, string(data))
 }
 
+// Verifies: REG-0412
 func TestTheSSAExpiresAfter10Minutes(t *testing.T) {
 	claims, err := validDataRecipient().SSA("sp-1", "jti-1", ssaIssuedAt)
 
@@ -49,6 +51,7 @@ func TestTheSSAExpiresAfter10Minutes(t *testing.T) {
 	assert.Equal(t, int64(600), claims.ExpiresAt-claims.IssuedAt)
 }
 
+// Verifies: REG-0409
 func TestTheSSAOmitsTheOptionalClaimsThatTheSoftwareProductDoesNotHave(t *testing.T) {
 	claims, err := validDataRecipient().SSA("sp-1", "jti-1", ssaIssuedAt)
 
@@ -60,6 +63,7 @@ func TestTheSSAOmitsTheOptionalClaimsThatTheSoftwareProductDoesNotHave(t *testin
 	assert.NotContains(t, string(data), "policy_uri")
 }
 
+// Verifies: REG-0402
 func TestTheSSAIsOnlyForAnActiveSoftwareProductOfAnActiveDataRecipient(t *testing.T) {
 	tests := map[string]struct {
 		state   domain.DataRecipientState

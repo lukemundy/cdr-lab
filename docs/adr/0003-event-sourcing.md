@@ -5,7 +5,7 @@
 
 ## Context
 
-The Register keeps participants whose statuses change over time. The status rules are state machines with cascades: for example, a data recipient suspension makes its ACTIVE software products INACTIVE at the same time ([Register DESIGN.md: Status rules](../../services/register/DESIGN.md#status-rules)). The Register must also never issue a REMOVED software product identifier again.
+The Register keeps participants whose statuses change over time. The status rules are state machines with cascades: for example, a data recipient suspension makes its ACTIVE software products INACTIVE at the same time ([the cascade of a data recipient suspension](../../services/register/design/participants.md#reg-0227)). The Register must also never issue a REMOVED software product identifier again.
 
 Later services have stronger needs. Data holders and accredited data recipients must keep records of each consumer authorisation or consent, and of each amendment and withdrawal, including how the consumer asked for the withdrawal. They must keep these records for 6 years ([CDR Rules, rule 9.3](https://www.legislation.gov.au/F2020L00094/latest/text)). A history of changes is a primary requirement there, not a secondary one.
 

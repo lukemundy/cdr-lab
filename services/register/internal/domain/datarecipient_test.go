@@ -41,6 +41,7 @@ func TestImportDataRecipientFailsWhenTheDataRecipientExists(t *testing.T) {
 	assert.EqualError(t, err, `data recipient "dr-1" already exists`)
 }
 
+// Verifies: REG-0229, REG-0235
 func TestImportDataRecipientAppliesTheStatusRules(t *testing.T) {
 	tests := map[string]struct {
 		legalEntity domain.DataRecipientStatus
@@ -230,6 +231,7 @@ func TestImportDataRecipientRejectsInvalidFields(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0214
 func TestImportDataRecipientAcceptsTextAtTheMaximumLength(t *testing.T) {
 	dr := validDataRecipient()
 	dr.LegalEntityName = strings.Repeat("é", domain.MaxNameLength)

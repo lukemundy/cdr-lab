@@ -80,6 +80,7 @@ func productStatuses(dr domain.DataRecipient) map[string]domain.Status {
 	return got
 }
 
+// Verifies: REG-0227
 func TestSuspendMakesActiveSoftwareProductsInactive(t *testing.T) {
 	events, state := execute(t, statusFixture(domain.DataRecipientActive), domain.SuspendAccreditation{})
 
@@ -94,6 +95,7 @@ func TestSuspendMakesActiveSoftwareProductsInactive(t *testing.T) {
 	}, productStatuses(state.DataRecipient))
 }
 
+// Verifies: REG-0228
 func TestRevokeAndSurrenderRemoveAllSoftwareProducts(t *testing.T) {
 	tests := map[string]struct {
 		from    domain.DataRecipientStatus
@@ -160,6 +162,7 @@ func TestReinstateDoesNotChangeSoftwareProducts(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0222
 func TestDataRecipientTransitionsThatTheStatusRulesDoNotAllowAreRefused(t *testing.T) {
 	tests := map[string]struct {
 		from    domain.DataRecipientStatus
@@ -214,6 +217,7 @@ func TestDataRecipientTransitionsThatTheStatusRulesDoNotAllowAreRefused(t *testi
 	}
 }
 
+// Verifies: REG-0223, REG-0230
 func TestSoftwareProductStatusChanges(t *testing.T) {
 	tests := map[string]struct {
 		command domain.DataRecipientCommand
@@ -269,6 +273,7 @@ func TestSoftwareProductStatusChanges(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0223
 func TestSoftwareProductChangesThatTheStatusRulesDoNotAllowAreRefused(t *testing.T) {
 	tests := map[string]struct {
 		from    domain.DataRecipientStatus
