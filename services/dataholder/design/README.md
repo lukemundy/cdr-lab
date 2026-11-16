@@ -46,6 +46,7 @@ flowchart LR
 | Banking APIs | [banking-apis.md](banking-apis.md) | The customers and accounts, the APIs that give the CDR data of an arrangement, and the record of disclosures. |
 | Operator interface | [operator-interface.md](operator-interface.md) | The lab-only HTTP API that creates customer data, closes accounts and withdraws authorisations. |
 | Operator console | [operator-console.md](operator-console.md) | The lab-only browser UI for the lab operator. |
+| Operator console actions and create forms | [operator-console-create.md](operator-console-create.md) | The actions and the create forms of the operator console. |
 | Operator console API | [operator-console-api.md](operator-console-api.md) | The console API of the operator console. |
 | Online bank site | [online-bank-site.md](online-bank-site.md) | The pages of the lab-only online bank site and their presentation. |
 | Online bank site sign-in | [online-bank-site-sign-in.md](online-bank-site-sign-in.md) | The sign-up, sign-in, sign-out and session of the online bank site. |

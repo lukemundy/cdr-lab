@@ -56,6 +56,7 @@ afterEach(() => {
 });
 
 describe("the transactions page", () => {
+  // Verifies: DH-1422
   test("shows each transaction of the page with its fields, and the total", async () => {
     const requests = serve({
       data: [

@@ -6,6 +6,7 @@ import { expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
 // the conformance suite and the other tests do not change it.
 const removedProduct = "6d0b646f-475d-4c7b-af85-0eb558f50d47";
 
+// Verifies: DH-1436, DH-1438
 test("the operator sees the Register status of each software product, and the time of the last response", async ({
   page,
 }) => {
@@ -27,6 +28,7 @@ test("the operator sees the Register status of each software product, and the ti
   await expectNoAxeViolations(page);
 });
 
+// Verifies: DH-1440
 test("the operator filters the statuses by the registration", async ({ page }) => {
   await page.goto("/register-statuses");
   const table = page.getByRole("table", { name: "Register statuses" });

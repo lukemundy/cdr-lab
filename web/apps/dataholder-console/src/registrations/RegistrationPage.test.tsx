@@ -47,6 +47,7 @@ const valueOf = (regionName: string, term: string) =>
   definitionOf(region(regionName).element(), term).textContent;
 
 describe("the client registration page", () => {
+  // Verifies: DH-1431, DH-1432
   test("shows the metadata of the registration, with each URI as text with a copy button", async () => {
     const requests = serve(
       registration(
@@ -118,6 +119,7 @@ describe("the client registration page", () => {
     expect(valueOf("Registration", "Register status")).toBe("Not known");
   });
 
+  // Verifies: DH-1433, DH-1434
   test("shows the arrangements of the client in a table, with the customer, the status and the times", async () => {
     const id = "9b3e6f10-4c2a-4d8e-b1f7-0a5c3e9d2b64";
     serve(registration(id));

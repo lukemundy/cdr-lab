@@ -96,6 +96,7 @@ describe("the create of a transaction", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: DH-1461
   test("the type and the status are the values of the CDS", async () => {
     serve();
     renderApp(createUrl);
@@ -120,6 +121,7 @@ describe("the create of a transaction", () => {
     expect(options("NPP service")).toEqual(["", "X2P1", "IFTI", "BSCT", "CATSCT"]);
   });
 
+  // Verifies: DH-1459
   test("the transactions of a closed account have no create", async () => {
     serve([], "CLOSED");
     renderApp(transactionsUrl);
@@ -143,6 +145,7 @@ describe("the create of a transaction", () => {
     await expect.element(actions.getByRole("button")).toHaveLength(1);
   });
 
+  // Verifies: DH-1453, DH-1460, DH-1464
   test("sends each value with no white space and each time in UTC, then shows the list with a toast", async () => {
     const bodies = serve([{ status: 201 }]);
     const router = renderApp(createUrl);
@@ -188,6 +191,7 @@ describe("the create of a transaction", () => {
     expect(bodies).toEqual([{ description: "", amount: "" }]);
   });
 
+  // Verifies: DH-1463
   test("sends the extended data when one of its fields has a value", async () => {
     const bodies = serve([{ status: 201 }]);
     renderApp(createUrl);
@@ -214,6 +218,7 @@ describe("the create of a transaction", () => {
     ]);
   });
 
+  // Verifies: DH-1453
   test("shows a refused value of the extended data at its field and in the summary, and keeps the values", async () => {
     const bodies = serve([{ status: 400, body: refusal }]);
     renderApp(createUrl);
@@ -249,6 +254,7 @@ describe("the create of a transaction", () => {
     await expect.element(page.getByRole("alert").getByText(detail)).toBeVisible();
   });
 
+  // Verifies: DH-1453
   test("Cancel goes back to the transactions and sends nothing", async () => {
     const bodies = serve();
     const router = renderApp(createUrl);

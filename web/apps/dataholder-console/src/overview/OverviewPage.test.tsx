@@ -56,6 +56,7 @@ function serve(body: Overview) {
 const changes = () => page.getByRole("table", { name: "Newest changes" });
 const rowOf = (time: string) => changes().getByRole("row").filter({ hasText: time });
 
+// Verifies: DH-1403
 test("the first page of the console is the overview, and its navigation item is current", async () => {
   serve(overview);
 
@@ -69,6 +70,7 @@ test("the first page of the console is the overview, and its navigation item is 
   expect(navigation.getByRole("link").first().element().textContent).toBe("Overview");
 });
 
+// Verifies: DH-1404, DH-1405
 test("the overview gives each count, with the counts that give it context and the links to the lists", async () => {
   serve(overview);
 
@@ -91,6 +93,7 @@ test("the overview gives each count, with the counts that give it context and th
   await expectNoAxeViolations(document.body);
 });
 
+// Verifies: DH-1408, DH-1409, DH-1410, DH-1411
 test("the newest changes give the time, the change, the customer number, the software product and the detail", async () => {
   serve(overview);
 
