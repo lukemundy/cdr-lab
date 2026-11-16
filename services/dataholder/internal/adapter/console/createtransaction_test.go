@@ -35,6 +35,7 @@ func anOpenAccount(t *testing.T) records {
 	return r
 }
 
+// Verifies: DH-1654
 func TestACreateOfATransactionGivesTheLocationOfTheNewTransactionAndNoBody(t *testing.T) {
 	r := anOpenAccount(t)
 
@@ -107,6 +108,7 @@ func TestARefusedValueInTheExtendedDataGivesAnErrorAtItsFieldAndCreatesNothing(t
 	assert.JSONEq(t, noTransactions, get(t, r.ports, everydayTransactions).body)
 }
 
+// Verifies: DH-1657
 func TestAValueWithNoValidFormatGivesAnErrorAtItsFieldAndCreatesNothing(t *testing.T) {
 	r := anOpenAccount(t)
 
@@ -142,6 +144,7 @@ func TestATransactionForAClosedAccountIsAConflictAndCreatesNothing(t *testing.T)
 	assert.JSONEq(t, noTransactions, get(t, r.ports, everydayTransactions).body)
 }
 
+// Verifies: DH-1622
 func TestATransactionForAnUnknownCustomerOrAccountIsNotFoundWithNoIdentifierInTheDetail(t *testing.T) {
 	r := anOpenAccount(t)
 

@@ -56,6 +56,7 @@ func TestTheRegisterStatusesGiveEachStatusItsRegistrationAndTheTimeOfTheLastResp
 	}`, resp.body)
 }
 
+// Verifies: DH-1632, DH-1633
 func TestTheRegisterStatusesAreFilteredAndSortedByTheQuery(t *testing.T) {
 	registered, notRegistered := true, false
 

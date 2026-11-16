@@ -25,7 +25,7 @@ const (
 	brandID    = "8a6bd0a4-9c3e-4bfb-9a0e-3a64c3ef0d61"
 	cookieName = "__Host-bank-session-" + brandID
 	// The type of the 403 for a session cookie with no valid session.
-	sessionEndedType = "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#session"
+	sessionEndedType = "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0010"
 )
 
 // customers is a store of customers in memory, with the rules of the data holder for a create.
@@ -239,6 +239,7 @@ func assertExpired(t *testing.T, resp response) {
 	assert.Empty(t, cookie.Domain)
 }
 
+// Verifies: DH-1741, DH-1742
 func TestASignUpCreatesTheCustomerAndStartsASession(t *testing.T) {
 	store := newCustomers()
 	s := newSite(t, store)
@@ -276,6 +277,7 @@ func TestTheSessionCookieHasOnlyTheIDWithTheHostPrefixAndNoExpiry(t *testing.T) 
 	assert.GreaterOrEqual(t, len(cookie.Value), 22, "at least 128 bits in base64")
 }
 
+// Verifies: DH-1735, DH-1736
 func TestASignUpWithValuesThatAreNotValidGivesAFieldErrorForEachValueInPlainLanguage(t *testing.T) {
 	store := newCustomers()
 	s := newSite(t, store)
@@ -311,6 +313,7 @@ func TestASignUpWithValuesThatAreNotValidGivesAFieldErrorForEachValueInPlainLang
 	}, details)
 }
 
+// Verifies: DH-1719
 func TestASignUpOrASignInWithABodyThatIsNotValidGives400(t *testing.T) {
 	s := newSite(t, newCustomers(quoll))
 
@@ -327,6 +330,7 @@ func TestASignUpOrASignInWithABodyThatIsNotValidGives400(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1739
 func TestASignInWithAPasswordFieldIsRefused(t *testing.T) {
 	s := newSite(t, newCustomers(quoll))
 
@@ -340,6 +344,7 @@ func TestASignInWithAPasswordFieldIsRefused(t *testing.T) {
 	assert.NotContains(t, resp.body, "correct horse")
 }
 
+// Verifies: DH-1740
 func TestASignInWithAnIdentifierThatNoCustomerHasGivesAFieldError(t *testing.T) {
 	s := newSite(t, newCustomers(quoll))
 
@@ -368,6 +373,7 @@ func TestASignInWithTheEmailAddressInADifferentCaseStartsASessionOfTheCustomer(t
 	assert.JSONEq(t, `{"customerNumber": "00047291", "firstName": "Zebracorn", "lastName": "Quoll"}`, session.body)
 }
 
+// Verifies: DH-1737
 func TestASignUpWithAnEmailAddressInUseGives409WithAFieldErrorInPlainLanguage(t *testing.T) {
 	store := newCustomers(quoll)
 	store.createErr = fmt.Errorf("add the customer: %w", app.ErrEmailAddressUsed)
@@ -433,6 +439,7 @@ func TestACustomerCanHaveMoreThanOneSession(t *testing.T) {
 	assert.Equal(t, http.StatusOK, s.readSession(second).status)
 }
 
+// Verifies: DH-1743
 func TestWithNoSessionCookieTheSessionIsForbidden(t *testing.T) {
 	s := newSite(t, newCustomers(quoll))
 
@@ -443,6 +450,7 @@ func TestWithNoSessionCookieTheSessionIsForbidden(t *testing.T) {
 	assert.Empty(t, resp.header.Values("Set-Cookie"))
 }
 
+// Verifies: DH-1744
 func TestASessionCookieWithNoValidSessionSaysThatTheSessionEndedAndExpiresTheCookie(t *testing.T) {
 	s := newSite(t, newCustomers(quoll))
 
@@ -476,6 +484,7 @@ func TestASignOutEndsTheSessionAndExpiresTheCookie(t *testing.T) {
 	assert.Equal(t, http.StatusForbidden, s.readSession(cookie).status)
 }
 
+// Verifies: DH-1706
 func TestASignOutWithNoValidSessionAlsoExpiresTheCookie(t *testing.T) {
 	s := newSite(t, newCustomers(quoll))
 
@@ -587,6 +596,7 @@ func TestTheSiteRefusesAChangeFromADifferentOrigin(t *testing.T) {
 }
 
 // DESIGN.md, Session: the rule of the account routes, also at a read of the session.
+// Verifies: DH-1744
 func TestAReadOfTheSessionOfACustomerThatTheDataHolderNoLongerHasEndsTheSession(t *testing.T) {
 	store := newCustomers(quoll)
 	s := newSite(t, store)

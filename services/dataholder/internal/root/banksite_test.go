@@ -103,7 +103,9 @@ func TestTheWorkersNeedNoBankSiteSetting(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// The site and Get Products read the same store at the same time (DESIGN.md: Site API).
+// The site and Get Products read the same store at the same time.
+//
+// Verifies: DH-1728, DH-1729
 func TestTheBankSiteGivesTheProductsOfGetProductsAndGetProductDetailForEachPresetBrand(t *testing.T) {
 	now := time.Date(2026, 11, 2, 0, 0, 0, 0, time.UTC)
 	clock := func() time.Time { return now }
