@@ -52,27 +52,27 @@ flowchart LR
 
 ## Black-box tests
 
-- <a id="conf-0005"></a>**CONF-0005** A test calls the deployed components only through their network interfaces, as a CDR participant or a consumer does. For example, a test does not read a database, and it does not import the code of a service. ([Judgement: black-box tests of the deployment](#conf-0034))
+- <a id="conf-0005"></a>**CONF-0005** A test calls the deployed components only through their network interfaces, as a CDR participant or a consumer does. For example, a test does not read a database, and it does not import the code of a service. ([Judgement: tests call only the network interfaces of the deployment](#conf-0034))
 - <a id="conf-0006"></a>**CONF-0006** A test acts as the participant does, in these ways. ([the conformance suite acts as a participant](../services/dataholder/design/non-functional-requirements.md#dh-0015))
   - It finds the base URIs of a brand through the Register.
   - It gets each SSA from the Register.
   - It acts as the browser of the consumer in an authorisation flow.
-- <a id="conf-0007"></a>**CONF-0007** A test checks each response of a CDS API against the pinned CDS OpenAPI specification of the target CDS version, in addition to the checks of the test. ([Judgement: each CDS response against the pinned specification](#conf-0035))
+- <a id="conf-0007"></a>**CONF-0007** A test checks each response of a CDS API against the pinned CDS OpenAPI specification of the target CDS version, in addition to the checks of the test. ([Judgement: tests check each CDS response against the pinned specification](#conf-0035))
 - <a id="conf-0008"></a>**CONF-0008** Each pinned specification file is a copy of the CDS file, with no change. ([Judgement: pinned specifications with no change](#conf-0036))
 - <a id="conf-0009"></a>**CONF-0009** A `SOURCE.md` file next to the pinned specification files gives their source and checksum. ([Judgement: pinned specifications with no change](#conf-0036))
 
 ## Environment
 
-- <a id="conf-0010"></a>**CONF-0010** The suite runs in the `conformance` compose service on the lab network, with `mise run conformance`. ([Judgement: the suite on the lab network](#conf-0037))
-- <a id="conf-0011"></a>**CONF-0011** The suite serves the JWKS and the endpoints of the software products that it acts as. ([Judgement: the suite on the lab network](#conf-0037))
+- <a id="conf-0010"></a>**CONF-0010** The suite runs in the `conformance` compose service on the lab network, with `mise run conformance`. ([Judgement: the suite runs on the lab network](#conf-0037))
+- <a id="conf-0011"></a>**CONF-0011** The suite serves the JWKS and the endpoints of the software products that it acts as. ([Judgement: the suite runs on the lab network](#conf-0037))
 - <a id="conf-0012"></a>**CONF-0012** A test gets each setting from an environment variable, which `compose.yaml` gives. ([Judgement: a missing setting fails the test](#conf-0038))
 - <a id="conf-0013"></a>**CONF-0013** When an environment variable is not set, the test fails. It does not skip. ([Judgement: a missing setting fails the test](#conf-0038))
 - <a id="conf-0014"></a>**CONF-0014** The test files have the build tag `conformance`, so `mise run test` does not run them. ([Judgement: a build tag for the conformance tests](#conf-0039))
 
 ## Runs and data
 
-- <a id="conf-0015"></a>**CONF-0015** The suite passes in one run after a new lab: `mise run reset && mise run up && mise run conformance`. ([Judgement: one run after a new lab](#conf-0040))
-- <a id="conf-0016"></a>**CONF-0016** A test can change the seed data in a way that cannot be reversed. Thus, a second run with no lab reset can fail. ([Judgement: one run after a new lab](#conf-0040))
+- <a id="conf-0015"></a>**CONF-0015** The suite passes in one run after a new lab: `mise run reset && mise run up && mise run conformance`. ([Judgement: the suite passes in one run after a new lab](#conf-0040))
+- <a id="conf-0016"></a>**CONF-0016** A test can change the seed data in a way that cannot be reversed. Thus, a second run with no lab reset can fail. ([Judgement: the suite passes in one run after a new lab](#conf-0040))
 - <a id="conf-0017"></a>**CONF-0017** No test, requirement or acceptance criterion needs a second run of the suite. ([Judgement: no second run of the suite](#conf-0041))
 - <a id="conf-0018"></a>**CONF-0018** One test proves a full sequence. For example, one test registers, deletes and registers again. ([Judgement: one test for each sequence](#conf-0042))
 - <a id="conf-0019"></a>**CONF-0019** When a step of a sequence fails, the test stops, because the next steps depend on it. ([Judgement: one test for each sequence](#conf-0042))
@@ -96,20 +96,20 @@ Each row is an exception to the subject of a test or to the check of each CDS re
 | ID | Test | Exception | Source |
 |---|---|---|---|
 | <a id="conf-0029"></a>**CONF-0029** | The data holder tests of the end of eligibility, the removal of a software product and the notices | The test reads the arrangements of a customer from the operator interface. It uses them to see the end reason of an arrangement and the outcome of a notice. | [Judgement: the operator interface shows the end of an arrangement](#conf-0047) |
-| <a id="conf-0030"></a>**CONF-0030** | The data holder test of the logo | The test checks the `Content-Security-Policy` and `X-Content-Type-Options` headers of the logo, which the CDR does not define. | [Judgement: the headers of the logo](#conf-0048) |
-| <a id="conf-0031"></a>**CONF-0031** | The data holder test of the stylesheets and the font of the authentication page | The test checks that the stylesheets of the page, and one font that they refer to, load from the origin of the page. The CDR does not define the styles of the page. | [Judgement: the styles of the authentication page](#conf-0049) |
+| <a id="conf-0030"></a>**CONF-0030** | The data holder test of the logo | The test checks the `Content-Security-Policy` and `X-Content-Type-Options` headers of the logo, which the CDR does not define. | [Judgement: the logo test checks the headers that stop a script](#conf-0048) |
+| <a id="conf-0031"></a>**CONF-0031** | The data holder test of the stylesheets and the font of the authentication page | The test checks that the stylesheets of the page, and one font that they refer to, load from the origin of the page. The CDR does not define the styles of the page. | [Judgement: the test checks that the authentication page styles load from its origin](#conf-0049) |
 | <a id="conf-0032"></a>**CONF-0032** | The Register tests of Get SSA | The test does not check a response with the status 200 against the specification. | [Judgement: no schema check of the SSA body](#conf-0050) |
 | <a id="conf-0033"></a>**CONF-0033** | The Register test of an unknown path | The test does not check the response against the specification. | [Judgement: no schema check of an unknown path](#conf-0051) |
 
 ## Judgements
 
-### <a id="conf-0034"></a>CONF-0034 Black-box tests of the deployment
+### <a id="conf-0034"></a>CONF-0034 Tests call only the network interfaces of the deployment
 
 - Kind: choice
 - Basis: Step 3.2. A conformance test checks the deployed component from the outside, as a participant does ([ADR 0019][adr-0019]).
 - Reason: The suite then tests the deployment, and it can run against a different implementation of a component. The Go `internal` rule makes an import of service code impossible.
 
-### <a id="conf-0035"></a>CONF-0035 Each CDS response against the pinned specification
+### <a id="conf-0035"></a>CONF-0035 Tests check each CDS response against the pinned specification
 
 - Kind: choice
 - Basis: Step 3.2. The CDS OpenAPI specification gives the fields, types and enumerations of each response ([ADR 0011][adr-0011]).
@@ -121,7 +121,7 @@ Each row is an exception to the subject of a test or to the check of each CDS re
 - Basis: Step 1. The CDS text and specifications as written are the first source.
 - Reason: An edit makes the check agree with the component, not with the CDS. The checksum shows that the file has no edit.
 
-### <a id="conf-0037"></a>CONF-0037 The suite on the lab network
+### <a id="conf-0037"></a>CONF-0037 The suite runs on the lab network
 
 - Kind: choice
 - Basis: Step 3.3. The data holder calls the JWKS and the endpoints of each software product ([the conformance suite acts as a participant](../services/dataholder/design/non-functional-requirements.md#dh-0015)).
@@ -139,7 +139,7 @@ Each row is an exception to the subject of a test or to the check of each CDS re
 - Basis: Step 3.3. `mise run test` needs only PostgreSQL ([README: Development][readme-development]).
 - Reason: The conformance tests need the full lab deployment. A build tag keeps them out of `mise run test` with no other configuration.
 
-### <a id="conf-0040"></a>CONF-0040 One run after a new lab
+### <a id="conf-0040"></a>CONF-0040 The suite passes in one run after a new lab
 
 - Kind: choice
 - Basis: Step 3.3. A new lab is quick to make, and its data has no value ([AGENTS.md][agents]).
@@ -187,13 +187,13 @@ Each row is an exception to the subject of a test or to the check of each CDS re
 - Basis: Step 3.1. The subject is a CDR behaviour, but no CDR API shows the end reason of an arrangement or the outcome of a notice to the test.
 - Reason: In production, the consumer dashboard of the data holder shows these values. The operator interface gives the same values to the test.
 
-### <a id="conf-0048"></a>CONF-0048 The headers of the logo
+### <a id="conf-0048"></a>CONF-0048 The logo test checks the headers that stop a script
 
 - Kind: choice
 - Basis: Step 3.1. The CDS makes the `logoUri` of a brand mandatory ([CDS: Register API schemas][cds-register-schemas]), and a data recipient opens that URL.
 - Reason: Only the URL that the Register gives proves that the deployed public listener serves the logo with the headers that stop a script in it ([data holder specification][dataholder-design]).
 
-### <a id="conf-0049"></a>CONF-0049 The styles of the authentication page
+### <a id="conf-0049"></a>CONF-0049 The test checks that the authentication page styles load from its origin
 
 - Kind: choice
 - Basis: Step 3.3. The data holder pages work with no styles ([data holder specification][dataholder-design]).
