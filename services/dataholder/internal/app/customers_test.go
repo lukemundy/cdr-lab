@@ -164,6 +164,7 @@ func now() time.Time {
 	return time.Date(2026, 10, 15, 21, 30, 0, 0, time.FixedZone("AWST", 8*60*60))
 }
 
+// Verifies: DH-1201
 func TestANewCustomerGetsACustomerNumberAndTheTimeOfItsLastChange(t *testing.T) {
 	store := newFakeCustomerStore()
 	customers := app.Customers{Store: store, Now: now, Random: random(1)}
@@ -223,6 +224,7 @@ func TestACustomerWithAnEmailAddressInUseIsNotCreatedAndTriesNoOtherNumber(t *te
 	assert.Len(t, store.customers, 1)
 }
 
+// Verifies: DH-1200, DH-1203, DH-1206
 func TestACustomerIsIdentifiedByItsCustomerNumberOrItsEmailAddressInAnyCase(t *testing.T) {
 	store := newFakeCustomerStore()
 	store.customers["00000001"] = customer()

@@ -316,6 +316,7 @@ func formToken(t *testing.T, body string) string {
 	return match[1]
 }
 
+// Verifies: DH-1211, DH-1213
 func TestTheFirstPageAsksOnlyForTheEmailAddressOrTheCustomerNumberInOneField(t *testing.T) {
 	b := newBrowser(t)
 
@@ -335,6 +336,7 @@ func TestTheFirstPageAsksOnlyForTheEmailAddressOrTheCustomerNumberInOneField(t *
 	assert.NotContains(t, first.body, "https://")
 }
 
+// Verifies: DH-1212, DH-1215
 func TestTheFirstPageNamesTheBrandOfTheDataRecipientAndSaysThatNoPasswordIsNecessary(t *testing.T) {
 	first := newBrowser(t).get()
 
@@ -379,6 +381,7 @@ func TestTwoFlowsGetDifferentFormTokens(t *testing.T) {
 	assert.NotEqual(t, formToken(t, first.body), formToken(t, second.body))
 }
 
+// Verifies: DH-1216
 func TestACancelDeniesTheFlowAndWritesNoPage(t *testing.T) {
 	b := newBrowser(t)
 	token := formToken(t, b.get().body)
@@ -444,6 +447,7 @@ func TestAReloadShowsTheSamePageWithTheSameFormToken(t *testing.T) {
 	assert.Equal(t, formToken(t, first.body), formToken(t, again.body))
 }
 
+// Verifies: DH-1220, DH-1221
 func TestACustomerNumberGetsTheOTPPageAndAnEmailWithAnOTP(t *testing.T) {
 	b := newBrowser(t)
 
@@ -479,6 +483,7 @@ func TestTheEmailAddressInADifferentCaseGetsTheSameOTPPageAsTheCustomerNumber(t 
 	assert.NotContains(t, emailPage.body, "Alex@Example.COM", "the page does not repeat the entry")
 }
 
+// Verifies: DH-1223
 func TestAnEmailAddressThatNoCustomerHasGetsTheSameOTPPageAndNoEmail(t *testing.T) {
 	known, unknown := newBrowser(t), newBrowser(t)
 
@@ -495,6 +500,7 @@ func TestAnEmailAddressThatNoCustomerHasGetsTheSameOTPPageAndNoEmail(t *testing.
 	)
 }
 
+// Verifies: DH-1223
 func TestACustomerNumberThatDoesNotExistGetsTheSameOTPPageAndNoEmail(t *testing.T) {
 	known, unknown := newBrowser(t), newBrowser(t)
 
@@ -525,6 +531,7 @@ func TestAnEmptyIdentifierIsABadRequestAndSendsNothing(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1222
 func TestTheCorrectOTPGivesTheConsentPage(t *testing.T) {
 	b := newBrowser(t)
 	b.identify(knownCustomer)
@@ -551,6 +558,7 @@ func TestAnIncorrectOTPGivesTheOTPPageAgainWithANotice(t *testing.T) {
 	assert.NotContains(t, again.body, "000000", "the page does not repeat the entry")
 }
 
+// Verifies: DH-1230
 func TestTheThirdIncorrectOTPDeniesTheFlow(t *testing.T) {
 	b := newBrowser(t)
 	b.identify(knownCustomer)
@@ -563,6 +571,7 @@ func TestTheThirdIncorrectOTPDeniesTheFlow(t *testing.T) {
 	assert.Empty(t, third.body)
 }
 
+// Verifies: DH-1225, DH-1226
 func TestAnOTPIsRefusedAfter5MinutesAndAfterOneUse(t *testing.T) {
 	t.Run("after 5 minutes", func(t *testing.T) {
 		b := newBrowser(t)
@@ -581,6 +590,7 @@ func TestAnOTPIsRefusedAfter5MinutesAndAfterOneUse(t *testing.T) {
 	})
 }
 
+// Verifies: DH-1228
 func TestANewOTPReplacesThePreviousOne(t *testing.T) {
 	b := newBrowser(t)
 	b.identify(knownCustomer)
@@ -594,6 +604,7 @@ func TestANewOTPReplacesThePreviousOne(t *testing.T) {
 	assert.Contains(t, b.enter(b.mail.otps[1]).body, `value="confirm"`)
 }
 
+// Verifies: DH-1229
 func TestTheFlowSends3OTPsAtMost(t *testing.T) {
 	b := newBrowser(t)
 	b.identify(knownCustomer)
@@ -610,6 +621,7 @@ func TestTheFlowSends3OTPsAtMost(t *testing.T) {
 	assert.Contains(t, b.enter(b.mail.otps[2]).body, `value="confirm"`, "the third OTP stays valid")
 }
 
+// Verifies: DH-1231
 func TestAMailFailureEndsTheFlowAsTemporarilyUnavailable(t *testing.T) {
 	b := newBrowser(t)
 	b.mail.err = errors.New("the SMTP server is not available")
@@ -620,7 +632,7 @@ func TestAMailFailureEndsTheFlowAsTemporarilyUnavailable(t *testing.T) {
 	assert.Empty(t, failed.body)
 }
 
-// Verifies: DH-0825
+// Verifies: DH-0825, DH-1216
 func TestACancelOnTheOTPPageAndOnTheConsentPageDeniesTheFlow(t *testing.T) {
 	t.Run("OTP page", func(t *testing.T) {
 		b := newBrowser(t)
