@@ -48,6 +48,7 @@ func arrangementOf(t *testing.T, customer account, arrangementID string) operato
 
 // This test is the full sequence of the end of eligibility: a close that leaves an open account ends nothing, and
 // the close of the last open account ends each arrangement that did not end, with one notice for each.
+// Verifies: DH-0904, DH-0918, DH-0920
 func TestTheCloseOfTheLastOpenAccountEndsEachArrangementOfTheCustomer(t *testing.T) {
 	client := registered(t, noticeProduct)
 	other := registered(t, secondNoticeProduct)

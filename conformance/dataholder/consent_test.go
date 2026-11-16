@@ -164,6 +164,7 @@ func (a account) confirm(consent webPage, accountIDs ...string) webPage {
 	return a.browser.submit(consent, "confirm", url.Values{"account": accountIDs})
 }
 
+// Verifies: DH-0801, DH-0802
 func TestTheConsentPageNamesTheLegalEntityTheBrandAndTheSoftwareProduct(t *testing.T) {
 	client := registered(t, allScopesProduct)
 
@@ -174,6 +175,7 @@ func TestTheConsentPageNamesTheLegalEntityTheBrandAndTheSoftwareProduct(t *testi
 	assert.Contains(t, text(consent), "the application "+allScopesProductName+".")
 }
 
+// Verifies: DH-0803, DH-0804
 func TestTheConsentPageHasTheDataLanguageOfTheCDSForTheScopesOfTheRequestOnly(t *testing.T) {
 	client := registered(t, allScopesProduct)
 
@@ -210,6 +212,7 @@ func TestTheConsentPageHasTheDataLanguageOfTheCDSForTheScopesOfTheRequestOnly(t 
 	}
 }
 
+// Verifies: DH-0811
 func TestASharingDurationOf24HoursOrLessIsADisclosureOnOneOccasion(t *testing.T) {
 	client := registered(t, allScopesProduct)
 
@@ -223,6 +226,7 @@ func TestASharingDurationOf24HoursOrLessIsADisclosureOnOneOccasion(t *testing.T)
 	}
 }
 
+// Verifies: DH-0812
 func TestALongerSharingDurationShowsTheDurationAndTheDateOnWhichTheSharingEnds(t *testing.T) {
 	client := registered(t, allScopesProduct)
 
@@ -261,6 +265,7 @@ func TestALongerSharingDurationShowsTheDurationAndTheDateOnWhichTheSharingEnds(t
 	}
 }
 
+// Verifies: DH-0815, DH-0816
 func TestTheConsentPageSaysThatTheDataIncludesEarlierDataAndHowToWithdraw(t *testing.T) {
 	client := registered(t, allScopesProduct)
 
@@ -273,6 +278,7 @@ func TestTheConsentPageSaysThatTheDataIncludesEarlierDataAndHowToWithdraw(t *tes
 	assert.NotContains(t, consent.body, "<script")
 }
 
+// Verifies: DH-0819, DH-0820
 func TestTheConsentPageListsOnlyTheAccountsOfTheCustomerWithMaskedNumbersAndNoneSelected(t *testing.T) {
 	client := registered(t, allScopesProduct)
 	customer, other := newAccount(t), newAccount(t)
@@ -292,6 +298,7 @@ func TestTheConsentPageListsOnlyTheAccountsOfTheCustomerWithMaskedNumbersAndNone
 	assert.True(t, canConfirm(consent))
 }
 
+// Verifies: DH-0826
 func TestAConfirmationThatBreaksAnAccountRuleIsRefusedAndTheFlowContinues(t *testing.T) {
 	client := registered(t, allScopesProduct)
 	other := newAccount(t)
@@ -336,6 +343,7 @@ func TestAConfirmationThatBreaksAnAccountRuleIsRefusedAndTheFlowContinues(t *tes
 	}
 }
 
+// Verifies: DH-0822
 func TestARequestWithNoBankScopeHasNoAccountSelection(t *testing.T) {
 	client := registered(t, allScopesProduct)
 	customer := newAccount(t)
@@ -353,6 +361,7 @@ func TestARequestWithNoBankScopeHasNoAccountSelection(t *testing.T) {
 	assert.NotEmpty(t, client.responseClaims(t, confirmed)["code"])
 }
 
+// Verifies: DH-0823
 func TestACustomerWithNoOpenAccountCanOnlyCancel(t *testing.T) {
 	client := registered(t, allScopesProduct)
 
@@ -379,6 +388,7 @@ func TestACustomerWithNoOpenAccountCanOnlyCancel(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0825
 func TestACancelOnTheConsentPageGivesTheSoftwareProductASignedAccessDeniedResponse(t *testing.T) {
 	client := registered(t, allScopesProduct)
 	customer := newAccount(t)
@@ -442,6 +452,7 @@ func TestTwoConfirmationsOfOneCustomerGiveDifferentCodes(t *testing.T) {
 	assert.NotEqual(t, firstCode, secondCode)
 }
 
+// Verifies: DH-0845
 func TestAConsentFormWithoutItsProtectionAgainstCrossSiteRequestForgeryIsRefused(t *testing.T) {
 	client := registered(t, allScopesProduct)
 	customer := newAccount(t)

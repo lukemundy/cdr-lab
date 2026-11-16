@@ -33,6 +33,7 @@ func consentRequest(scopes ...string) domain.ConsentRequest {
 	}
 }
 
+// Verifies: DH-0828, DH-0829
 func TestAnArrangementRecordsTheConsent(t *testing.T) {
 	request := consentRequest("openid", "bank:accounts.basic:read")
 
@@ -78,6 +79,7 @@ func TestAnArrangementHasEachSelectedAccountOneTime(t *testing.T) {
 	assert.Equal(t, []string{"account-2", "account-1"}, got.AccountIDs)
 }
 
+// Verifies: DH-0826
 func TestAnArrangementWithABankScopeNeedsAnAccount(t *testing.T) {
 	_, err := domain.NewArrangement(
 		"arrangement-1", consentRequest("openid", "bank:accounts.basic:read"), ownAccounts(), nil, confirmedAt,
@@ -86,6 +88,7 @@ func TestAnArrangementWithABankScopeNeedsAnAccount(t *testing.T) {
 	assert.ErrorIs(t, err, domain.ErrNoAccountSelected)
 }
 
+// Verifies: DH-0826
 func TestAnArrangementRefusesAnAccountThatTheCustomerDoesNotHave(t *testing.T) {
 	_, err := domain.NewArrangement(
 		"arrangement-1", consentRequest("openid", "bank:accounts.basic:read"), ownAccounts(),
@@ -95,6 +98,7 @@ func TestAnArrangementRefusesAnAccountThatTheCustomerDoesNotHave(t *testing.T) {
 	assert.ErrorIs(t, err, domain.ErrAccountNotOfCustomer)
 }
 
+// Verifies: DH-0826
 func TestACustomerWithNoOpenAccountCannotGiveAConsent(t *testing.T) {
 	for _, scopes := range [][]string{{"openid", "profile"}, {"openid", "bank:accounts.basic:read"}} {
 		_, err := domain.NewArrangement("arrangement-1", consentRequest(scopes...), nil, nil, confirmedAt)
@@ -103,6 +107,7 @@ func TestACustomerWithNoOpenAccountCannotGiveAConsent(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0822
 func TestAnArrangementWithNoBankScopeHasNoAccounts(t *testing.T) {
 	got, err := domain.NewArrangement(
 		"arrangement-1", consentRequest("openid", "profile"), ownAccounts(), []string{"account-1"}, confirmedAt,
@@ -161,6 +166,7 @@ func TestAnArrangementEndsAtTheTimeAndForTheReasonOfTheCommand(t *testing.T) {
 	assert.Equal(t, domain.EndReasonRevokedByDataRecipient, ended.EndReason)
 }
 
+// Verifies: DH-0834, DH-0901
 func TestAnArrangementEndsAtTheEndOfItsSharing(t *testing.T) {
 	state := createdState(t, time.Hour)
 
@@ -180,6 +186,7 @@ func TestAnArrangementEndsAtItsEndOrElseAtTheEndOfItsSharing(t *testing.T) {
 	assert.Equal(t, endedAt, domain.ApplyArrangement(state, events[0]).EndsAt())
 }
 
+// Verifies: DH-0907
 func TestAnArrangementThatEndedDoesNotEndAgain(t *testing.T) {
 	state := createdState(t, time.Hour)
 	events, err := domain.HandleArrangement(state, end(confirmedAt.Add(time.Minute)))
@@ -214,6 +221,7 @@ func withdraw(at time.Time) domain.WithdrawArrangement {
 	return domain.WithdrawArrangement{WithdrawnAt: at, Method: domain.WithdrawalMethodAlternative}
 }
 
+// Verifies: DH-0917
 func TestAWithdrawalEndsTheArrangementAndRecordsItsMethod(t *testing.T) {
 	for _, method := range []domain.WithdrawalMethod{
 		domain.WithdrawalMethodConsumerDashboard, domain.WithdrawalMethodAlternative,

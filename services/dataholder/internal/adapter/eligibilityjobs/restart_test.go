@@ -21,6 +21,7 @@ import (
 
 const waitForWork = 10 * time.Second
 
+// Verifies: DH-0923
 func TestTheJobEndsTheArrangementsAtTheTimeOfTheCloseAfterAStopBetweenTheCloseAndTheEnd(t *testing.T) {
 	pool, inserter := newInserter(t)
 	events := eventstore.New(pool, arrangementstore.Projections()...)
