@@ -135,6 +135,7 @@ func TestTheCRLNumbersIncreaseAcrossARestart(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0712
 func TestARenewalSignsANewCRLNoLaterThan24HoursAfterTheCurrentOne(t *testing.T) {
 	store, c := &caStore{}, &clock{now: issueTime}
 	authority := newCA(store, c)
@@ -158,6 +159,7 @@ func TestARenewalSignsANewCRLNoLaterThan24HoursAfterTheCurrentOne(t *testing.T) 
 	assert.Less(t, app.CRLRenewalAge, 24*time.Hour)
 }
 
+// Verifies: REG-0712
 func TestARenewalAfterAStopOfMoreThanSevenDaysSignsANewCRL(t *testing.T) {
 	store, c := &caStore{}, &clock{now: issueTime}
 	authority := newCA(store, c)
@@ -241,6 +243,7 @@ func TestTheCRLKeepsEachRevocationAcrossARestart(t *testing.T) {
 	assert.Equal(t, int64(3), crl.Number)
 }
 
+// Verifies: REG-0706
 func TestASecondRevocationOfACertificateChangesNothing(t *testing.T) {
 	store, c := &caStore{}, &clock{now: issueTime}
 	authority := newCA(store, c)
@@ -258,6 +261,7 @@ func TestASecondRevocationOfACertificateChangesNothing(t *testing.T) {
 	assert.Equal(t, before, store.state)
 }
 
+// Verifies: REG-0705
 func TestTheCARevokesOnlyACertificateThatTheIntermediateSigned(t *testing.T) {
 	store, c := &caStore{}, &clock{now: issueTime}
 	lab := testLab()
@@ -306,6 +310,7 @@ func (s failingStore) Revocations(context.Context, app.RevocationPageQuery) ([]a
 	return nil, 0, s.err
 }
 
+// Verifies: REG-0728
 func TestTheCheckRefusesARevokedCertificateAtOnce(t *testing.T) {
 	store, c := &caStore{}, &clock{now: issueTime}
 	authority := newCA(store, c)
@@ -319,6 +324,7 @@ func TestTheCheckRefusesARevokedCertificateAtOnce(t *testing.T) {
 	require.NoError(t, authority.CheckRevocation(t.Context(), issuedClient(t)), "only the revoked certificate")
 }
 
+// Verifies: REG-0729
 func TestTheCheckRefusesEachCertificateWhenTheCAHasNoCurrentCRL(t *testing.T) {
 	store, c := &caStore{}, &clock{now: issueTime}
 	authority := newCA(store, c)
@@ -333,6 +339,7 @@ func TestTheCheckRefusesEachCertificateWhenTheCAHasNoCurrentCRL(t *testing.T) {
 	require.ErrorIs(t, authority.CheckRevocation(t.Context(), cert), app.ErrNoCurrentCRL)
 }
 
+// Verifies: REG-0727
 func TestTheCheckRefusesACertificateThatTheIntermediateDidNotSign(t *testing.T) {
 	store, c := &caStore{}, &clock{now: issueTime}
 	authority := newCA(store, c)

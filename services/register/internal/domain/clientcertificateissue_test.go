@@ -21,6 +21,7 @@ func clientSubject() pkix.Name {
 	}
 }
 
+// Verifies: REG-0610
 func TestIssueClientCertificateRegistersTheIssuedCertificate(t *testing.T) {
 	events, state := execute(
 		t,
@@ -34,6 +35,7 @@ func TestIssueClientCertificateRegistersTheIssuedCertificate(t *testing.T) {
 	assert.Equal(t, []string{thumbprintA}, clientCertificates(t, state.DataRecipient, "sp-active"))
 }
 
+// Verifies: REG-0609
 func TestIssueClientCertificateIsPermittedInEachStatusExceptRemoved(t *testing.T) {
 	for _, id := range []string{"sp-active", "sp-inactive", "sp-under-inactive-brand"} {
 		events, _ := execute(
@@ -78,6 +80,7 @@ func TestAClientCSRSubjectWithTheNamesOfTheRecordBreaksNoRule(t *testing.T) {
 	assert.Empty(t, rules)
 }
 
+// Verifies: REG-0606, REG-0607
 func TestAClientCSRSubjectMustHaveTheNamesOfTheRecord(t *testing.T) {
 	tests := map[string]struct {
 		change func(*pkix.Name)
@@ -124,6 +127,7 @@ func TestAClientCSRSubjectMustHaveTheNamesOfTheRecord(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0608
 func TestANameOfMoreThan64CharactersCannotBeInAClientCertificate(t *testing.T) {
 	state := statusFixture(domain.DataRecipientActive)
 	productName, brandName := strings.Repeat("é", 65), strings.Repeat("b", 65)

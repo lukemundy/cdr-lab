@@ -37,6 +37,7 @@ func serve(t *testing.T, s source, method, path string) *httptest.ResponseRecord
 
 var current = source{crl: app.CRL{Number: 3, DER: []byte{0x30, 0x03, 0x01, 0x02, 0x03}}}
 
+// Verifies: REG-0718
 func TestGetGivesTheCurrentCRLInDER(t *testing.T) {
 	rec := serve(t, current, http.MethodGet, crlPath)
 
@@ -46,6 +47,7 @@ func TestGetGivesTheCurrentCRLInDER(t *testing.T) {
 	assert.Equal(t, current.crl.DER, rec.Body.Bytes())
 }
 
+// Verifies: REG-0719
 func TestHeadGivesTheHeadersOfGetWithNoBody(t *testing.T) {
 	rec := serve(t, current, http.MethodHead, crlPath)
 
@@ -55,6 +57,7 @@ func TestHeadGivesTheHeadersOfGetWithNoBody(t *testing.T) {
 	assert.Empty(t, rec.Body.Bytes())
 }
 
+// Verifies: REG-0720
 func TestAnotherMethodGives405WithTheAllowedMethods(t *testing.T) {
 	for _, method := range []string{http.MethodPost, http.MethodPut, http.MethodDelete} {
 		rec := serve(t, current, method, crlPath)
@@ -64,12 +67,14 @@ func TestAnotherMethodGives405WithTheAllowedMethods(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0721
 func TestAnotherPathGives404(t *testing.T) {
 	for _, path := range []string{"/", "/crl/", "/crl/other.crl", crlPath + "/x"} {
 		assert.Equal(t, http.StatusNotFound, serve(t, current, http.MethodGet, path).Code, path)
 	}
 }
 
+// Verifies: REG-0722
 func TestNoCurrentCRLGives503(t *testing.T) {
 	for _, err := range []error{app.ErrNoCurrentCRL, errors.New("database failure")} {
 		rec := serve(t, source{err: err}, http.MethodGet, crlPath)

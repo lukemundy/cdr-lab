@@ -17,6 +17,7 @@ func pemOf(t *testing.T, raw []byte) string {
 	return string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: raw}))
 }
 
+// Verifies: REG-0702, REG-0703
 func TestARevocationRequestGivesTheFirstCertificateAndTheReason(t *testing.T) {
 	cert := issuedClient(t)
 	chain := pemOf(t, cert.Raw) + pemOf(t, testLab().CDRIntermediate.Certificate.Raw)
@@ -29,6 +30,7 @@ func TestARevocationRequestGivesTheFirstCertificateAndTheReason(t *testing.T) {
 	assert.Equal(t, ca.CessationOfOperation, gotReason)
 }
 
+// Verifies: REG-0704
 func TestARevocationRequestNamesEachFieldThatIsNotValid(t *testing.T) {
 	text, reason := "not a certificate", "unknown"
 	csr := "-----BEGIN CERTIFICATE REQUEST-----\nAAAA\n-----END CERTIFICATE REQUEST-----\n"
