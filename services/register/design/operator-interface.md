@@ -16,21 +16,21 @@ This area gives the lab-only HTTP API that creates and changes participants, reg
 
 ## Creates, adds and changes
 
-- <a id="reg-0809"></a>**REG-0809** The lab operator can create a data recipient and a data holder. The request body is one legal entity in [the format of the load file](deployment.md#reg-0905), with its brands and, for a data recipient, their software products. ([Judgement: the format of the load file for a create or an add](#reg-0888))
+- <a id="reg-0809"></a>**REG-0809** The lab operator can create a data recipient and a data holder. The request body is one legal entity in [the format of the load file](deployment.md#reg-0905), with its brands and, for a data recipient, their software products. ([Judgement: a create or an add has the format of the load file](#reg-0888))
 - <a id="reg-0810"></a>**REG-0810** When a legal entity with the same identifier exists, a create gives 409. ([RFC 9110, section 15.5.10][rfc9110-409])
-- <a id="reg-0811"></a>**REG-0811** The lab operator can add a brand to a legal entity, and a software product to a data recipient brand. The request body is one brand or one software product in the format of the load file. ([Judgement: the format of the load file for a create or an add](#reg-0888))
-- <a id="reg-0812"></a>**REG-0812** The body of an add of a data recipient brand can have the software products of the brand. ([Judgement: the format of the load file for a create or an add](#reg-0888))
+- <a id="reg-0811"></a>**REG-0811** The lab operator can add a brand to a legal entity, and a software product to a data recipient brand. The request body is one brand or one software product in the format of the load file. ([Judgement: a create or an add has the format of the load file](#reg-0888))
+- <a id="reg-0812"></a>**REG-0812** The body of an add of a data recipient brand can have the software products of the brand. ([Judgement: a create or an add has the format of the load file](#reg-0888))
 - <a id="reg-0813"></a>**REG-0813** The body of a create or an add gives the identifier of each new record, with [the rules of an identifier](participants.md#reg-0219). ([CDS: Register API schemas][cds-register-schemas]; [Judgement: the lab operator gives the identifiers](#reg-0889))
-- <a id="reg-0814"></a>**REG-0814** The body of a create or an add can give each status to each record, with the status rules. For example, the lab operator can add a software product that is INACTIVE. ([Judgement: a status in a create or an add](#reg-0890))
-- <a id="reg-0815"></a>**REG-0815** A create and an add give 201 with no body. ([RFC 9110, section 15.3.2][rfc9110-201]; [Judgement: the response of a create or an add](#reg-0891))
-- <a id="reg-0816"></a>**REG-0816** The `Location` header of a create or an add gives the path of the new record in the operator interface. For example, a create of a data holder gives `/v1/data-holders/{legalEntityId}`. ([RFC 9110, section 15.3.2][rfc9110-201]; [Judgement: the response of a create or an add](#reg-0891))
+- <a id="reg-0814"></a>**REG-0814** The body of a create or an add can give each status to each record, with the status rules. For example, the lab operator can add a software product that is INACTIVE. ([Judgement: a create or an add can give each status](#reg-0890))
+- <a id="reg-0815"></a>**REG-0815** A create and an add give 201 with no body. ([RFC 9110, section 15.3.2][rfc9110-201]; [Judgement: a create or an add gives 201 with a `Location` and no body](#reg-0891))
+- <a id="reg-0816"></a>**REG-0816** The `Location` header of a create or an add gives the path of the new record in the operator interface. For example, a create of a data holder gives `/v1/data-holders/{legalEntityId}`. ([RFC 9110, section 15.3.2][rfc9110-201]; [Judgement: a create or an add gives 201 with a `Location` and no body](#reg-0891))
 - <a id="reg-0817"></a>**REG-0817** A change is a `PUT` on the path of the record. A change gives 204. ([RFC 9110, section 9.3.4][rfc9110-put]; [Judgement: a change replaces each field of the record](#reg-0892))
 - <a id="reg-0818"></a>**REG-0818** The body of a change gives each field of the record in the format of the load file, except the identifiers, the status, the brands, the software products and the client certificates. ([Judgement: a change replaces each field of the record](#reg-0892))
 - <a id="reg-0819"></a>**REG-0819** When a field is not in the body of a change, the field has no value after the change. ([RFC 9110, section 9.3.4][rfc9110-put]; [Judgement: a change replaces each field of the record](#reg-0892))
 - <a id="reg-0820"></a>**REG-0820** The identifiers of a record do not change. ([Judgement: identifiers that do not change](#reg-0893))
 - <a id="reg-0821"></a>**REG-0821** The path of a data holder brand has its `dataHolderBrandId`. When the brand has no `dataHolderBrandId`, the path has its `interimId`. ([CDS: Register API schemas][cds-register-schemas])
-- <a id="reg-0822"></a>**REG-0822** After a create, an add or a change, the participant obeys the participant model and the status rules, the same as after a load. ([Judgement: the format of the load file for a create or an add](#reg-0888))
-- <a id="reg-0823"></a>**REG-0823** For a create, an add or a change, the Register checks the full legal entity, with its brands and software products. For example, an add of an ACTIVE software product to an INACTIVE brand gives 409. ([Judgement: the format of the load file for a create or an add](#reg-0888))
+- <a id="reg-0822"></a>**REG-0822** After a create, an add or a change, the participant obeys the participant model and the status rules, the same as after a load. ([Judgement: a create or an add has the format of the load file](#reg-0888))
+- <a id="reg-0823"></a>**REG-0823** For a create, an add or a change, the Register checks the full legal entity, with its brands and software products. For example, an add of an ACTIVE software product to an INACTIVE brand gives 409. ([Judgement: a create or an add has the format of the load file](#reg-0888))
 
 ## Visibility of a change
 
@@ -62,7 +62,7 @@ This area gives the lab-only HTTP API that creates and changes participants, reg
 
 ## Key sets
 
-- <a id="reg-0846"></a>**REG-0846** The lab operator can publish the next key of a key set, and then activate it. The [two steps of a key change](authorisation-server.md#reg-0468) apply. ([Judgement: the steps of a key change](authorisation-server.md#reg-0482))
+- <a id="reg-0846"></a>**REG-0846** The lab operator can publish the next key of a key set, and then activate it. The [two steps of a key change](authorisation-server.md#reg-0468) apply. ([Judgement: a key change in two operator steps, with no timer](authorisation-server.md#reg-0482))
 - <a id="reg-0847"></a>**REG-0847** When the key set has a next key, a publish gives 409. ([RFC 9110, section 15.5.10][rfc9110-409])
 - <a id="reg-0848"></a>**REG-0848** When the key set has no next key, an activation gives 409. ([RFC 9110, section 15.5.10][rfc9110-409])
 - <a id="reg-0849"></a>**REG-0849** When the key set is not `access-token` or `ssa`, the response is 404. ([RFC 9110, section 15.5.5][rfc9110-404])
@@ -76,13 +76,13 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 
 ## Bodies and errors
 
-- <a id="reg-0852"></a>**REG-0852** When a request body is not one JSON object, the response is 400. For example, a body with [a JSON value after its first JSON value](../../../pkg/platform/jsonhttp/DESIGN.md#body-0002) gets 400. ([RFC 8259, section 2][rfc8259-2]; [Judgement: 400 or 409 for a refused body](#reg-0894))
-- <a id="reg-0853"></a>**REG-0853** When a request body has [a field that the action does not accept](../../../pkg/platform/jsonhttp/DESIGN.md#body-0001), the response is 400. ([Judgement: 400 or 409 for a refused body](#reg-0894))
-- <a id="reg-0854"></a>**REG-0854** When a request body is larger than 1 MiB, the response is 400. ([Judgement: a body limit of 1 MiB](#reg-0895))
-- <a id="reg-0855"></a>**REG-0855** When a request body does not obey the participant model, the response is 400. For example, a URI with the `http` scheme gets 400. ([Judgement: 400 or 409 for a refused body](#reg-0894))
-- <a id="reg-0856"></a>**REG-0856** When a request body obeys the participant model but breaks a status rule, the response is 409. For example, an ACTIVE software product of an INACTIVE brand gets 409. ([RFC 9110, section 15.5.10][rfc9110-409]; [Judgement: 400 or 409 for a refused body](#reg-0894))
+- <a id="reg-0852"></a>**REG-0852** When a request body is not one JSON object, the response is 400. For example, a body with [a JSON value after its first JSON value](../../../pkg/platform/jsonhttp/DESIGN.md#body-0002) gets 400. ([RFC 8259, section 2][rfc8259-2]; [Judgement: 400 for a body that is not valid alone, and 409 for a conflict](#reg-0894))
+- <a id="reg-0853"></a>**REG-0853** When a request body has [a field that the action does not accept](../../../pkg/platform/jsonhttp/DESIGN.md#body-0001), the response is 400. ([Judgement: 400 for a body that is not valid alone, and 409 for a conflict](#reg-0894))
+- <a id="reg-0854"></a>**REG-0854** When a request body is larger than 1 MiB, the response is 400. ([Judgement: a body limit of 1 MiB, with 400 and not 413](#reg-0895))
+- <a id="reg-0855"></a>**REG-0855** When a request body does not obey the participant model, the response is 400. For example, a URI with the `http` scheme gets 400. ([Judgement: 400 for a body that is not valid alone, and 409 for a conflict](#reg-0894))
+- <a id="reg-0856"></a>**REG-0856** When a request body obeys the participant model but breaks a status rule, the response is 409. For example, an ACTIVE software product of an INACTIVE brand gets 409. ([RFC 9110, section 15.5.10][rfc9110-409]; [Judgement: 400 for a body that is not valid alone, and 409 for a conflict](#reg-0894))
 - <a id="reg-0857"></a>**REG-0857** When a request body is not valid, the `detail` names each record and rule that fails. ([RFC 9457, section 3.1.4][rfc9457-detail])
-- <a id="reg-0858"></a>**REG-0858** When an identifier in the body is the identifier of a different record, the response is 409. This applies also when that record is REMOVED or is a different kind of participant. ([an identifier is unique across all participant records](participants.md#reg-0221); [Judgement: 400 or 409 for a refused body](#reg-0894))
+- <a id="reg-0858"></a>**REG-0858** When an identifier in the body is the identifier of a different record, the response is 409. This applies also when that record is REMOVED or is a different kind of participant. ([an identifier is unique across all participant records](participants.md#reg-0221); [Judgement: 400 for a body that is not valid alone, and 409 for a conflict](#reg-0894))
 - <a id="reg-0859"></a>**REG-0859** When an identifier in the body is in use, the `detail` gives the identifier. ([RFC 9457, section 3.1.4][rfc9457-detail])
 - <a id="reg-0860"></a>**REG-0860** When the status rules do not permit a status action, the response is 409, and the `detail` names the rule. ([RFC 9110, section 15.5.10][rfc9110-409])
 - <a id="reg-0861"></a>**REG-0861** When the record of an action does not exist, the response is 404. ([RFC 9110, section 15.5.5][rfc9110-404])
@@ -96,17 +96,17 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 | <a id="reg-0864"></a>**REG-0864** | Activate, deactivate or remove a software product | `POST /v1/data-recipients/{legalEntityId}/software-products/{softwareProductId}/{activate,deactivate,remove}` | 204 | [Judgement: a lab-only operator interface](#reg-0880) |
 | <a id="reg-0865"></a>**REG-0865** | Register a client certificate for a software product | `POST /v1/data-recipients/{legalEntityId}/software-products/{softwareProductId}/certificates` | 204 | [Judgement: a lab-only operator interface](#reg-0880) |
 | <a id="reg-0866"></a>**REG-0866** | Remove a client certificate of a software product | `DELETE /v1/data-recipients/{legalEntityId}/software-products/{softwareProductId}/certificates/{thumbprint}` | 204 | [Judgement: a removal as a `DELETE` on the thumbprint](#reg-0884) |
-| <a id="reg-0867"></a>**REG-0867** | Create a data recipient | `POST /v1/data-recipients` | 201 | [Judgement: the response of a create or an add](#reg-0891) |
+| <a id="reg-0867"></a>**REG-0867** | Create a data recipient | `POST /v1/data-recipients` | 201 | [Judgement: a create or an add gives 201 with a `Location` and no body](#reg-0891) |
 | <a id="reg-0868"></a>**REG-0868** | Change the details of a data recipient | `PUT /v1/data-recipients/{legalEntityId}` | 204 | [Judgement: a change replaces each field of the record](#reg-0892) |
-| <a id="reg-0869"></a>**REG-0869** | Add a brand to a data recipient | `POST /v1/data-recipients/{legalEntityId}/brands` | 201 | [Judgement: the response of a create or an add](#reg-0891) |
+| <a id="reg-0869"></a>**REG-0869** | Add a brand to a data recipient | `POST /v1/data-recipients/{legalEntityId}/brands` | 201 | [Judgement: a create or an add gives 201 with a `Location` and no body](#reg-0891) |
 | <a id="reg-0870"></a>**REG-0870** | Change the details of a data recipient brand | `PUT /v1/data-recipients/{legalEntityId}/brands/{brandId}` | 204 | [Judgement: a change replaces each field of the record](#reg-0892) |
 | <a id="reg-0871"></a>**REG-0871** | Activate, deactivate or remove a data recipient brand | `POST /v1/data-recipients/{legalEntityId}/brands/{brandId}/{activate,deactivate,remove}` | 204 | [Judgement: a lab-only operator interface](#reg-0880) |
-| <a id="reg-0872"></a>**REG-0872** | Add a software product to a data recipient brand | `POST /v1/data-recipients/{legalEntityId}/brands/{brandId}/software-products` | 201 | [Judgement: the response of a create or an add](#reg-0891) |
+| <a id="reg-0872"></a>**REG-0872** | Add a software product to a data recipient brand | `POST /v1/data-recipients/{legalEntityId}/brands/{brandId}/software-products` | 201 | [Judgement: a create or an add gives 201 with a `Location` and no body](#reg-0891) |
 | <a id="reg-0873"></a>**REG-0873** | Change the details of a software product | `PUT /v1/data-recipients/{legalEntityId}/software-products/{softwareProductId}` | 204 | [Judgement: a change replaces each field of the record](#reg-0892) |
-| <a id="reg-0874"></a>**REG-0874** | Create a data holder | `POST /v1/data-holders` | 201 | [Judgement: the response of a create or an add](#reg-0891) |
+| <a id="reg-0874"></a>**REG-0874** | Create a data holder | `POST /v1/data-holders` | 201 | [Judgement: a create or an add gives 201 with a `Location` and no body](#reg-0891) |
 | <a id="reg-0875"></a>**REG-0875** | Change the details of a data holder | `PUT /v1/data-holders/{legalEntityId}` | 204 | [Judgement: a change replaces each field of the record](#reg-0892) |
 | <a id="reg-0876"></a>**REG-0876** | Remove a data holder | `POST /v1/data-holders/{legalEntityId}/remove` | 204 | [Judgement: a lab-only operator interface](#reg-0880) |
-| <a id="reg-0877"></a>**REG-0877** | Add a brand to a data holder | `POST /v1/data-holders/{legalEntityId}/brands` | 201 | [Judgement: the response of a create or an add](#reg-0891) |
+| <a id="reg-0877"></a>**REG-0877** | Add a brand to a data holder | `POST /v1/data-holders/{legalEntityId}/brands` | 201 | [Judgement: a create or an add gives 201 with a `Location` and no body](#reg-0891) |
 | <a id="reg-0878"></a>**REG-0878** | Change the details of a data holder brand | `PUT /v1/data-holders/{legalEntityId}/brands/{brandId}` | 204 | [Judgement: a change replaces each field of the record](#reg-0892) |
 | <a id="reg-0879"></a>**REG-0879** | Activate, deactivate or remove a data holder brand | `POST /v1/data-holders/{legalEntityId}/brands/{brandId}/{activate,deactivate,remove}` | 204 | [Judgement: a lab-only operator interface](#reg-0880) |
 | <a id="reg-0896"></a>**REG-0896** | Publish the next key of a key set, or activate it. `{keySet}` is `access-token` or `ssa`. | `POST /v1/key-sets/{keySet}/{publish-next,activate-next}` | 204 | [Judgement: a lab-only operator interface](#reg-0880) |
@@ -161,7 +161,7 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 - Basis: Step 2. The token endpoint checks the registered certificates when it issues a token ([ACCC Developer Portal: Token Endpoint][accc-token]).
 - Reason: An access token is valid for 5 minutes. A check of the certificates at each secure API call adds a database read for a short window.
 
-### <a id="reg-0888"></a>REG-0888 The format of the load file for a create or an add
+### <a id="reg-0888"></a>REG-0888 A create or an add has the format of the load file
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no API to create participants.
@@ -173,13 +173,13 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 - Basis: Step 3.3. In production, the Register issues the identifiers ([CDS: Register API schemas][cds-register-schemas]).
 - Reason: The lab services get their identifiers in their configuration before they start, as with the load file. A GUID is the usual value.
 
-### <a id="reg-0890"></a>REG-0890 A status in a create or an add
+### <a id="reg-0890"></a>REG-0890 A create or an add can give each status
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no API to create participants.
 - Reason: The load permits each status, so a create and an add do too. A lab user can then make a record in each status to test a data holder or a data recipient.
 
-### <a id="reg-0891"></a>REG-0891 The response of a create or an add
+### <a id="reg-0891"></a>REG-0891 A create or an add gives 201 with a `Location` and no body
 
 - Kind: choice
 - Basis: Step 3.2. A `POST` that makes a resource gives 201 with a `Location` header ([RFC 9110, section 15.3.2][rfc9110-201]).
@@ -197,13 +197,13 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 - Basis: Step 3.3. The CDS does not say if an identifier can change.
 - Reason: Participants keep the identifiers in their caches and their registrations, and the events name each record by its identifier. A new record is the way to get a new identifier.
 
-### <a id="reg-0894"></a>REG-0894 400 or 409 for a refused body
+### <a id="reg-0894"></a>REG-0894 400 for a body that is not valid alone, and 409 for a conflict
 
 - Kind: choice
 - Basis: Step 3.2. A conflict with the current state of the target resource is 409 ([RFC 9110, section 15.5.10][rfc9110-409]).
 - Reason: A body that is not valid alone is a client error (400). A body that is valid alone but does not agree with the current state of the Register is a conflict. The status rules already give 409.
 
-### <a id="reg-0895"></a>REG-0895 A body limit of 1 MiB
+### <a id="reg-0895"></a>REG-0895 A body limit of 1 MiB, with 400 and not 413
 
 - Kind: choice
 - Basis: Step 3.2. [RFC 9110, section 15.5.14][rfc9110-413] gives 413 for content that is larger than the server accepts.

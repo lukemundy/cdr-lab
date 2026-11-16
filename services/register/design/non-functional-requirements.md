@@ -4,15 +4,15 @@ This area gives the non-functional requirements that apply to all of the Registe
 
 ## Propagation
 
-- <a id="reg-0001"></a>**REG-0001** Propagation: when a participant status changes, each Register API gives the new status within 1 second. For example, 1 second after the lab operator makes a software product INACTIVE, Get Software Products Statuses gives INACTIVE for it. ([CDS: Metadata Cache Management][cds-metadata-cache]; [Judgement: a status change at once](#reg-0020))
+- <a id="reg-0001"></a>**REG-0001** Propagation: when a participant status changes, each Register API gives the new status within 1 second. For example, 1 second after the lab operator makes a software product INACTIVE, Get Software Products Statuses gives INACTIVE for it. ([CDS: Metadata Cache Management][cds-metadata-cache]; [Judgement: each API gives a new status within 1 second](#reg-0020))
 
 ## Performance
 
-- <a id="reg-0002"></a>**REG-0002** Performance: on a development workstation at 50 requests each second, 95 % of API calls complete within 200 ms. ([Judgement: a response time target for the lab](#reg-0021))
+- <a id="reg-0002"></a>**REG-0002** Performance: on a development workstation at 50 requests each second, 95 % of API calls complete within 200 ms. ([Judgement: a target of 200 ms, below the lowest CDS threshold](#reg-0021))
 
 ## Restart
 
-- <a id="reg-0003"></a>**REG-0003** Restart: after a restart, the Register has the same values of these data. ([Judgement: the state that a restart keeps](#reg-0022))
+- <a id="reg-0003"></a>**REG-0003** Restart: after a restart, the Register has the same values of these data. ([Judgement: a restart keeps the participants, keys, revocations and CRL number](#reg-0022))
   - the participants and their statuses
   - the signing keys
   - the revocations of CDR certificates
@@ -51,19 +51,19 @@ The Register also obeys the [Telemetry library](../../../pkg/platform/telemetry/
 
 ## Judgements
 
-### <a id="reg-0020"></a>REG-0020 A status change at once
+### <a id="reg-0020"></a>REG-0020 Each API gives a new status within 1 second
 
 - Kind: choice
 - Basis: Step 3.3. A data holder must react to a status change within 5 minutes ([CDS: Metadata Cache Management][cds-metadata-cache]). The CDS gives no time for the Register.
 - Reason: A Register that adds no delay leaves all of the 5 minutes to the data holder. A test of a data holder then does not wait for the Register.
 
-### <a id="reg-0021"></a>REG-0021 A response time target for the lab
+### <a id="reg-0021"></a>REG-0021 A target of 200 ms, below the lowest CDS threshold
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no response time for the Register. Its thresholds for data holder APIs are 1,000 ms or more ([CDS: Non-functional Requirements][cds-nfrs]).
 - Reason: A target below those thresholds shows a slow change early. A development workstation can send 50 requests each second.
 
-### <a id="reg-0022"></a>REG-0022 The state that a restart keeps
+### <a id="reg-0022"></a>REG-0022 A restart keeps the participants, keys, revocations and CRL number
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no rule for the restart of the Register. A CRL number is never used two times ([RFC 5280, section 5.2.3][rfc5280-crl-number]).

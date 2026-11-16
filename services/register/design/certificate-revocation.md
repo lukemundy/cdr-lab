@@ -6,10 +6,10 @@ This area gives the revocation of a CDR certificate, the CRL that the Register s
 
 - <a id="reg-0700"></a>**REG-0700** The lab operator can revoke a certificate of the mock CDR intermediate through the operator interface. ([ACCC CP, section 4.9.3][accc-cp]; [Judgement: the Register is the CDR intermediate CA (ADR 0022)][adr-0022])
 - <a id="reg-0701"></a>**REG-0701** The lab operator can also revoke a certificate that the lab set-up issued, which the Register does not know. ([Judgement: the certificate identifies the certificate to revoke](#reg-0740))
-- <a id="reg-0702"></a>**REG-0702** The request body of a revocation is a JSON object with these two fields. Each field is required. ([ACCC CP, section 4.9.3][accc-cp]; [Judgement: the form of a revocation request](#reg-0741); [Judgement: the certificate identifies the certificate to revoke](#reg-0740))
+- <a id="reg-0702"></a>**REG-0702** The request body of a revocation is a JSON object with these two fields. Each field is required. ([ACCC CP, section 4.9.3][accc-cp]; [Judgement: a revocation is a JSON `POST` on a path with no participant](#reg-0741); [Judgement: the certificate identifies the certificate to revoke](#reg-0740))
   - `certificate`: one PEM certificate, or a PEM chain with the certificate first, as an issue gives it.
   - `reason`: one of [the revocation reasons of a CDR certificate](../../../pkg/ca/DESIGN.md#ca-0041), for example `keyCompromise`.
-- <a id="reg-0703"></a>**REG-0703** When the `certificate` is a PEM chain, the Register revokes the first certificate. ([Judgement: a PEM chain in a revocation](#reg-0743))
+- <a id="reg-0703"></a>**REG-0703** When the `certificate` is a PEM chain, the Register revokes the first certificate. ([Judgement: the Register revokes the first certificate of a PEM chain](#reg-0743))
 - <a id="reg-0704"></a>**REG-0704** When the request body breaks one of these rules, the response is 400, and the `detail` names each field that fails. ([RFC 9110, section 15.5.1][rfc9110-400])
   - The body is a JSON object with the two fields.
   - The `certificate` starts with a PEM certificate.
@@ -25,7 +25,7 @@ This area gives the revocation of a CDR certificate, the CRL that the Register s
 ## CRL
 
 - <a id="reg-0711"></a>**REG-0711** When the Register starts, it signs a new CRL. ([Judgement: a new CRL at each start](#reg-0749))
-- <a id="reg-0712"></a>**REG-0712** The Register signs a new CRL no later than 24 hours after the `thisUpdate` of the current CRL, also after a suspend of the host. ([a new CRL at least once every 24 hours](../../../pki/DESIGN.md#pki-0061); [Judgement: 24 hours from the `thisUpdate` of the current CRL](#reg-0750))
+- <a id="reg-0712"></a>**REG-0712** The Register signs a new CRL no later than 24 hours after the `thisUpdate` of the current CRL, also after a suspend of the host. ([a new CRL at least once every 24 hours](../../../pki/DESIGN.md#pki-0061); [Judgement: a new CRL 24 hours after the `thisUpdate` of the current CRL](#reg-0750))
 - <a id="reg-0713"></a>**REG-0713** The Register serves only its newest CRL. ([ACCC CP, section 4.9.7][accc-cp])
 - <a id="reg-0714"></a>**REG-0714** A request never gets a CRL that is only partly written. ([ACCC CPS, section 4.10.2][accc-cps])
 - <a id="reg-0715"></a>**REG-0715** The CRL listener is a plain HTTP listener, separate from each other listener of the Register. ([RFC 5280, section 4.2.1.13][rfc5280-crldp]; [Judgement: a plain HTTP CRL listener with no authentication](#reg-0751))
@@ -51,7 +51,7 @@ This area gives the revocation of a CDR certificate, the CRL that the Register s
 
 | ID | Action | Method and path | Success | Source |
 |---|---|---|---|---|
-| <a id="reg-0731"></a>**REG-0731** | Revoke a certificate of the mock CDR intermediate | `POST /v1/cdr-certificates/revoke` | 204 | [Judgement: the form of a revocation request](#reg-0741); [Judgement: the response of a revocation](#reg-0742) |
+| <a id="reg-0731"></a>**REG-0731** | Revoke a certificate of the mock CDR intermediate | `POST /v1/cdr-certificates/revoke` | 204 | [Judgement: a revocation is a JSON `POST` on a path with no participant](#reg-0741); [Judgement: a revocation gives 204 with no content](#reg-0742) |
 
 ## Judgements
 
@@ -61,19 +61,19 @@ This area gives the revocation of a CDR certificate, the CRL that the Register s
 - Basis: Step 3.3. A request must identify the certificate to revoke ([ACCC CP, section 4.9.3][accc-cp]). The Participant Portal revokes a certificate from its list of the valid certificates of the participant ([ACCC Participant Portal User Guide, sections 10.6.4 and 10.7.3][accc-portal-guide]).
 - Reason: The Register keeps only thumbprints, and it has no record of the certificates of the lab set-up, so it cannot get a certificate from a thumbprint. A serial number alone does not let the Register check that the intermediate signed the certificate. The certificate gives the serial number and a signature that the Register can check.
 
-### <a id="reg-0741"></a>REG-0741 The form of a revocation request
+### <a id="reg-0741"></a>REG-0741 A revocation is a JSON `POST` on a path with no participant
 
 - Kind: choice
 - Basis: Step 3.3. The CDS defines no interface to revoke a certificate.
 - Reason: The request has two values, and the operator interface already takes JSON bodies. An action is a `POST` on a path that ends with the action, as each status action is. The path is not under a participant, because a certificate of the lab set-up has no participant in the Register.
 
-### <a id="reg-0742"></a>REG-0742 The response of a revocation
+### <a id="reg-0742"></a>REG-0742 A revocation gives 204 with no content
 
 - Kind: choice
 - Basis: Step 3.2. A response with no content is 204 ([RFC 9110, section 15.3.5][rfc9110-204]).
 - Reason: A revocation makes no resource that a `GET` gives. [The CRL lists the certificate with its reason](../../../pki/DESIGN.md#pki-0053), so the CRL gives the result.
 
-### <a id="reg-0743"></a>REG-0743 A PEM chain in a revocation
+### <a id="reg-0743"></a>REG-0743 The Register revokes the first certificate of a PEM chain
 
 - Kind: choice
 - Basis: Step 3.3. An issue gives the certificate and then the intermediate ([RFC 8555, section 9.1][rfc8555-chain]).
@@ -115,7 +115,7 @@ This area gives the revocation of a CDR certificate, the CRL that the Register s
 - Basis: Step 3.3. The ACCC issues a CRL at least once every 24 hours, also with no change ([ACCC CP, section 4.9.7, Table 1][accc-cp]). The sources give no rule for a start.
 - Reason: A CRL at each start makes sure that the current CRL has the signature of the intermediate key that the Register reads. With [a next update 7 days after the issue](../../../pkg/ca/DESIGN.md#ca-0047), the CRL stays current for 6 days after the Register stops.
 
-### <a id="reg-0750"></a>REG-0750 24 hours from the `thisUpdate` of the current CRL
+### <a id="reg-0750"></a>REG-0750 A new CRL 24 hours after the `thisUpdate` of the current CRL
 
 - Kind: choice
 - Basis: Step 3.3. The [ACCC CP, section 4.9.7, Table 1][accc-cp] gives a CRL at least once every 24 hours, with no start time. A background job follows [ADR 0010][adr-0010].
