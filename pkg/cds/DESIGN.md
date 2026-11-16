@@ -45,9 +45,9 @@ flowchart LR
 
 - <a id="cdsl-0001"></a>**CDSL-0001** A service must give each versioned endpoint its lowest and its highest supported version. ([CDS: HTTP Headers][cds-http-headers])
 - <a id="cdsl-0002"></a>**CDSL-0002** When a request to a versioned endpoint has no `x-v` header, the response is 400 with `urn:au-cds:error:cds-all:Header/Missing`. ([CDS: Missing Required Header][cds-error-400-header-missing])
-- <a id="cdsl-0003"></a>**CDSL-0003** When `x-v` or `x-min-v` is not a positive integer, the response is 400 with `urn:au-cds:error:cds-all:Header/InvalidVersion`. ([CDS: Invalid Version][cds-error-400-invalid-version]; [Judgement: 400 for a version value that is not valid](#cdsl-0059))
-- <a id="cdsl-0004"></a>**CDSL-0004** A positive integer in a version header has only decimal digits and a value of 1 or more. For example, `003` is valid, and `+3` is not valid. ([CDS: Invalid Version][cds-error-400-invalid-version]; [Judgement: the format of a version header](#cdsl-0060))
-- <a id="cdsl-0005"></a>**CDSL-0005** A version value that is too large for an integer is higher than each supported version. ([Judgement: the format of a version header](#cdsl-0060))
+- <a id="cdsl-0003"></a>**CDSL-0003** When `x-v` or `x-min-v` is not a positive integer, the response is 400 with `urn:au-cds:error:cds-all:Header/InvalidVersion`. ([CDS: Invalid Version][cds-error-400-invalid-version]; [Judgement: 400 for a version value that is not valid, as the CDS says](#cdsl-0059))
+- <a id="cdsl-0004"></a>**CDSL-0004** A positive integer in a version header has only decimal digits and a value of 1 or more. For example, `003` is valid, and `+3` is not valid. ([CDS: Invalid Version][cds-error-400-invalid-version]; [Judgement: only decimal digits in a version header, with leading zeros](#cdsl-0060))
+- <a id="cdsl-0005"></a>**CDSL-0005** A version value that is too large for an integer is higher than each supported version. ([Judgement: only decimal digits in a version header, with leading zeros](#cdsl-0060))
 - <a id="cdsl-0006"></a>**CDSL-0006** The endpoint serves the highest supported version between `x-min-v` and `x-v`. ([CDS: HTTP Headers][cds-http-headers])
 - <a id="cdsl-0007"></a>**CDSL-0007** When `x-min-v` is equal to or higher than `x-v`, the endpoint ignores `x-min-v`. ([CDS: HTTP Headers][cds-http-headers])
 - <a id="cdsl-0008"></a>**CDSL-0008** When the endpoint supports no requested version, the response is 406 with `urn:au-cds:error:cds-all:Header/UnsupportedVersion`. ([CDS: Unsupported Version][cds-error-406-unsupported-version])
@@ -74,7 +74,7 @@ flowchart LR
 - <a id="cdsl-0020"></a>**CDSL-0020** When `page` is not a positive integer, the response is 400 with `urn:au-cds:error:cds-all:Field/Invalid`, and the `detail` is `page`. ([CDS: Invalid Field][cds-error-400-field-invalid])
 - <a id="cdsl-0021"></a>**CDSL-0021** When `page-size` is not a positive integer or is more than 1000, the response is 400 with `urn:au-cds:error:cds-all:Field/InvalidPageSize`. ([CDS: Invalid Page Size][cds-error-400-invalid-page-size]; [CDS: Pagination][cds-pagination])
 - <a id="cdsl-0022"></a>**CDSL-0022** A `page` or a `page-size` with an empty value is the same as an absent parameter. ([Judgement: an empty page parameter is absent](#cdsl-0063))
-- <a id="cdsl-0023"></a>**CDSL-0023** When the requested page is after the last page, the response is 422 with `urn:au-cds:error:cds-all:Field/InvalidPage`, and the `detail` is the number of pages. ([CDS: Invalid Page][cds-error-422-invalid-page]; [Judgement: 422 for a page out of range](#cdsl-0064))
+- <a id="cdsl-0023"></a>**CDSL-0023** When the requested page is after the last page, the response is 422 with `urn:au-cds:error:cds-all:Field/InvalidPage`, and the `detail` is the number of pages. ([CDS: Invalid Page][cds-error-422-invalid-page]; [Judgement: 422 for a page out of range, as the CDS says](#cdsl-0064))
 - <a id="cdsl-0024"></a>**CDSL-0024** Page 1 of an empty list is in range. ([CDS: Pagination][cds-pagination])
 - <a id="cdsl-0025"></a>**CDSL-0025** The `links` object of a page has `self`, which is the link of the requested page. ([CDS: Pagination][cds-pagination])
 - <a id="cdsl-0026"></a>**CDSL-0026** When the list has records, `links` has `first` and `last`. ([CDS: Pagination][cds-pagination])
@@ -97,7 +97,7 @@ flowchart LR
 - <a id="cdsl-0037"></a>**CDSL-0037** Each response of an endpoint with the CORS rules has `Access-Control-Allow-Origin: *`, also an error response. ([CDS: CORS][cds-cors])
 - <a id="cdsl-0038"></a>**CDSL-0038** Each response that is not a preflight response has `Access-Control-Expose-Headers` with the list of headers that the service gives. ([Fetch: CORS protocol][fetch-cors])
 - <a id="cdsl-0039"></a>**CDSL-0039** When a request is `OPTIONS` with an `Access-Control-Request-Method` header, the response is a preflight response: 204 with `Access-Control-Allow-Origin: *` and `Access-Control-Allow-Methods: GET`. ([Fetch: CORS protocol][fetch-cors])
-- <a id="cdsl-0040"></a>**CDSL-0040** When a preflight request has `Access-Control-Request-Headers`, the response has an `Access-Control-Allow-Headers` that contains the requested headers. ([Fetch: CORS protocol][fetch-cors]; [Judgement: the requested headers in a CORS preflight](#cdsl-0065))
+- <a id="cdsl-0040"></a>**CDSL-0040** When a preflight request has `Access-Control-Request-Headers`, the response has an `Access-Control-Allow-Headers` that contains the requested headers. ([Fetch: CORS protocol][fetch-cors]; [Judgement: the CORS preflight permits each requested header](#cdsl-0065))
 
 ## TLS and mTLS
 
@@ -120,20 +120,20 @@ These rules apply to a service that uses the CRL check of the library as its rev
 - <a id="cdsl-0052"></a>**CDSL-0052** When the last CRL that the CRL check loaded is older than the maximum age, the CRL check loads the CRL again. ([Judgement: a maximum CRL age of 1 minute](#cdsl-0068))
 - <a id="cdsl-0053"></a>**CDSL-0053** The default maximum age is 1 minute. ([Judgement: a maximum CRL age of 1 minute](#cdsl-0068))
 - <a id="cdsl-0054"></a>**CDSL-0054** With a maximum age of 0, the CRL check loads the CRL at each check. ([Judgement: a maximum CRL age of 1 minute](#cdsl-0068))
-- <a id="cdsl-0055"></a>**CDSL-0055** When a load fails and the last CRL is before its next update, the CRL check uses the last CRL. ([RFC 5280, section 5.1.2.5][rfc5280-next-update]; [Judgement: the last CRL after a failed load](#cdsl-0069))
-- <a id="cdsl-0056"></a>**CDSL-0056** When the CRL check uses the last CRL after a failed load, it loads the CRL again after the longer of the maximum age and 1 minute. ([Judgement: the last CRL after a failed load](#cdsl-0069))
-- <a id="cdsl-0057"></a>**CDSL-0057** Telemetry: when the CRL check uses the last CRL after a failed load, it logs a warning. ([Judgement: the last CRL after a failed load](#cdsl-0069))
+- <a id="cdsl-0055"></a>**CDSL-0055** When a load fails and the last CRL is before its next update, the CRL check uses the last CRL. ([RFC 5280, section 5.1.2.5][rfc5280-next-update]; [Judgement: the last CRL stays in use after a failed load](#cdsl-0069))
+- <a id="cdsl-0056"></a>**CDSL-0056** When the CRL check uses the last CRL after a failed load, it loads the CRL again after the longer of the maximum age and 1 minute. ([Judgement: the last CRL stays in use after a failed load](#cdsl-0069))
+- <a id="cdsl-0057"></a>**CDSL-0057** Telemetry: when the CRL check uses the last CRL after a failed load, it logs a warning. ([Judgement: the last CRL stays in use after a failed load](#cdsl-0069))
 - <a id="cdsl-0058"></a>**CDSL-0058** While the CRL server can be reached, a revocation takes effect within the maximum age. ([Judgement: a maximum CRL age of 1 minute](#cdsl-0068))
 
 ## Judgements
 
-### <a id="cdsl-0059"></a>CDSL-0059 400 for a version value that is not valid
+### <a id="cdsl-0059"></a>CDSL-0059 400 for a version value that is not valid, as the CDS says
 
 - Kind: conflict
 - Basis: Step 1. The CDS gives 400 ([CDS: Invalid Version][cds-error-400-invalid-version]). A DSB guide says that 406 is also suitable ([CDR Support: Error scenarios and responses][support-error-scenarios]).
 - Reason: The CDS is the first source.
 
-### <a id="cdsl-0060"></a>CDSL-0060 The format of a version header
+### <a id="cdsl-0060"></a>CDSL-0060 Only decimal digits in a version header, with leading zeros
 
 - Kind: choice
 - Basis: Step 2. The CDS requires a positive integer ([CDS: Invalid Version][cds-error-400-invalid-version]). Leading zeros are valid ([CDR Support: Allowed values for x-v and x-min-v][support-version-values]).
@@ -157,13 +157,13 @@ These rules apply to a service that uses the CRL check of the library as its rev
 - Basis: Step 3.3. The CDS does not say what an empty parameter value means ([CDS: Pagination][cds-pagination]).
 - Reason: The two parameters are optional. A client that makes a query from a form can send a name with no value.
 
-### <a id="cdsl-0064"></a>CDSL-0064 422 for a page out of range
+### <a id="cdsl-0064"></a>CDSL-0064 422 for a page out of range, as the CDS says
 
 - Kind: conflict
 - Basis: Step 1. The CDS says that the code must be supported ([CDS: Invalid Page][cds-error-422-invalid-page]). A DSB guide also permits 200 and 400 ([CDR Support: Error scenarios and responses][support-error-scenarios]). The Register OpenAPI specification lists no 422 for Get Data Holder Brands, but it gives no other code.
 - Reason: The CDS is the first source.
 
-### <a id="cdsl-0065"></a>CDSL-0065 The requested headers in a CORS preflight
+### <a id="cdsl-0065"></a>CDSL-0065 The CORS preflight permits each requested header
 
 - Kind: choice
 - Basis: Step 3.1. The CDS requires that CORS protections are disabled on unauthenticated APIs ([CDS: CORS][cds-cors]). The DSB guidance gives a minimum list of headers ([CDR Support: CORS support][support-cors]). The production Register also permits the requested headers.
@@ -187,7 +187,7 @@ These rules apply to a service that uses the CRL check of the library as its rev
 - Basis: Step 3.3. The CDS gives no time ([CDS: Certificate Validation][cds-cert-validation]).
 - Reason: A revocation must take effect quickly. A burst of connections must cause one load.
 
-### <a id="cdsl-0069"></a>CDSL-0069 The last CRL after a failed load
+### <a id="cdsl-0069"></a>CDSL-0069 The last CRL stays in use after a failed load
 
 - Kind: choice
 - Basis: Step 3.2. A CRL is valid until its next update ([RFC 5280, section 5.1.2.5][rfc5280-next-update]).
