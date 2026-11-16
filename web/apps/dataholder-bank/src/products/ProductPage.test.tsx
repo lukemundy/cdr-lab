@@ -17,6 +17,7 @@ import {
 const terms = () =>
   [...document.querySelectorAll("main dl > div")].map((row) => row.textContent ?? "");
 
+// Verifies: DH-1815, DH-1819
 test("the detail shows each field of a deposit product in plain language", async () => {
   serveProducts([
     product("saver", {
@@ -109,6 +110,7 @@ test("the detail shows each field of a deposit product in plain language", async
     .toHaveAttribute("href", "/products/saver/open");
 });
 
+// Verifies: DH-1815, DH-1816
 test("the detail shows each field of a lending product, and the note of a tailored product", async () => {
   serveProducts([
     product("home", {
@@ -175,6 +177,7 @@ test.each(productCategoryValues)(
   },
 );
 
+// Verifies: DH-1817
 test("a product that is not current shows the not found page", async () => {
   serveProducts([]);
 

@@ -122,6 +122,7 @@ test.each(pages)(
   },
 );
 
+// Verifies: DH-1832
 test("the pages say Bank when the data holder gives no brand", async () => {
   serveProducts([]);
   worker.use(http.untyped.get("/api/brand", () => Response.error()));

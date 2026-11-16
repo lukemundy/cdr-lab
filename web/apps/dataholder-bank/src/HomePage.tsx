@@ -45,8 +45,8 @@ export function HomePage() {
   );
 }
 
-// The updraft layout shows everyday and savings accounts first, in its large tile (services/dataholder/DESIGN.md,
-// Online bank site: Presentation). The other groups stay in the order of the CDS.
+// The updraft layout shows everyday and savings accounts first, in its large tile
+// (services/dataholder/design/online-bank-site.md, Layouts). The other groups stay in the order of the CDS.
 const isEveryday = (group: CategoryGroup) => group.category === "TRANS_AND_SAVINGS_ACCOUNTS";
 
 function inLayoutOrder(groups: CategoryGroup[], layout: string | undefined): CategoryGroup[] {

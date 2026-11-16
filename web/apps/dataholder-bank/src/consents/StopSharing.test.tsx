@@ -42,6 +42,7 @@ const problem = (status: number, detail: string) =>
 const dialog = () => page.getByRole("alertdialog");
 const stopSharing = () => page.getByRole("button", { name: "Stop sharing" });
 
+// Verifies: DH-1924
 test("an ended consent has no action to stop the sharing", async () => {
   serveConsents([consent("arrangement-1", { status: "ENDED", endedAt: "2026-10-20T12:00:00Z" })]);
 
@@ -51,6 +52,7 @@ test("an ended consent has no action to stop the sharing", async () => {
   expect(stopSharing().query()).toBeNull();
 });
 
+// Verifies: DH-1926, DH-1929
 test("the confirmation names the app and the data recipient, and shows the messages of the CDS word for word", async () => {
   serveConsents([
     consent("arrangement-1", { clientName: "Budget Planner", brandName: "Planner Co" }),
@@ -79,6 +81,7 @@ test("the confirmation names the app and the data recipient, and shows the messa
   await expectNoAxeViolations(document.documentElement);
 });
 
+// Verifies: DH-1925
 test("a cancel sends no withdrawal", async () => {
   const requests = serveWithdrawals(
     [consent("arrangement-1")],
@@ -93,6 +96,7 @@ test("a cancel sends no withdrawal", async () => {
   expect(requests).toEqual([]);
 });
 
+// Verifies: DH-1931, DH-1932
 test("a withdrawal says that the sharing stopped, and shows the consent in the ended group", async () => {
   const consents = [consent("arrangement-1", { clientName: "Budget Planner" })];
   const requests = serveWithdrawals(consents, end(consents));
@@ -112,6 +116,7 @@ test("a withdrawal says that the sharing stopped, and shows the consent in the e
   expect(requests).toEqual(["arrangement-1"]);
 });
 
+// Verifies: DH-1933
 test("a withdrawal of a consent that ended keeps the dialog, says that the consent changed, then shows the current state", async () => {
   const consents = [consent("arrangement-1", { clientName: "Budget Planner" })];
   const requests = serveWithdrawals(consents, (arrangementId) => {
@@ -141,6 +146,7 @@ test("a withdrawal of a consent that ended keeps the dialog, says that the conse
   expect(requests).toEqual(["arrangement-1"]);
 });
 
+// Verifies: DH-1934, DH-1935
 test("a withdrawal that fails keeps the dialog open with the error, and the site does not send it again", async () => {
   const requests = serveWithdrawals([consent("arrangement-1")], () =>
     problem(500, "The data holder could not complete the request."),
@@ -157,6 +163,7 @@ test("a withdrawal that fails keeps the dialog open with the error, and the site
 });
 
 describe.each(presets)("with the preset $name", (preset) => {
+  // Verifies: DH-1854, DH-1856
   test("the confirmation of a withdrawal passes the accessibility checks and has no horizontal scroll at 320 CSS px", async () => {
     serveConsents([consent("arrangement-1")]);
 

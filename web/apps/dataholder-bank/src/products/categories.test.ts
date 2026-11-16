@@ -19,6 +19,7 @@ function product(
   };
 }
 
+// Verifies: DH-1812
 test("the groups are in the order of the categories of the CDS, with only the categories that have a product", () => {
   const groups = groupByCategory([
     product("loan", "Home Loan", "RESIDENTIAL_MORTGAGES"),
@@ -35,6 +36,7 @@ test("the groups are in the order of the categories of the CDS, with only the ca
   ]);
 });
 
+// Verifies: DH-1813
 test("in a group, the products are in the order of their names", () => {
   const [group] = groupByCategory([
     product("c", "zip Saver", "TRANS_AND_SAVINGS_ACCOUNTS"),
