@@ -6,7 +6,7 @@ import { useRef, type ReactNode } from "react";
 import { cn } from "../lib/cn";
 import { focusRing } from "../lib/focus";
 
-// The parts of the consumer pages of the data holder (DESIGN.md, Consumer pages). They use the classes of
+// The parts of the consumer pages of the data holder (design/consumer-pages.md). They use the classes of
 // consumer-pages.css, so that the Go pages and a React consumer UI have one source for the look. A UI imports
 // consumer.css for them.
 

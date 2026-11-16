@@ -32,6 +32,7 @@ function renderFilterBar(search = "", status = "") {
   return { container, calls };
 }
 
+// Verifies: UI-0269
 test("the filter bar is a search landmark, and each field has a visible label", async () => {
   const { container } = renderFilterBar();
 
@@ -84,6 +85,7 @@ function fakeTimers() {
   });
 }
 
+// Verifies: UI-0271
 test("the search applies 300 ms after the last key press, one time for each pause, with no submit", async () => {
   fakeTimers();
   const { calls } = renderFilterBar();
@@ -101,6 +103,7 @@ test("the search applies 300 ms after the last key press, one time for each paus
   expect(calls.searches).toEqual(["Mock Recipient"]);
 });
 
+// Verifies: UI-0271
 test("the Enter key applies the search at once, and the delay then does not apply it again", async () => {
   fakeTimers();
   const { calls } = renderFilterBar();
@@ -130,6 +133,7 @@ test("there is no Search button", async () => {
   await expect.element(page.getByRole("button", { name: "Search" })).not.toBeInTheDocument();
 });
 
+// Verifies: UI-0272
 test("the clear button shows only when the field has text", async () => {
   renderFilterBar();
   const clear = page.getByRole("button", { name: "Clear search" });
@@ -139,6 +143,7 @@ test("the clear button shows only when the field has text", async () => {
   await expect.element(clear).toBeVisible();
 });
 
+// Verifies: UI-0272
 test("the clear button empties the field, applies the empty search at once and puts the focus in the field", async () => {
   const searches: string[] = [];
   const container = render(
@@ -157,6 +162,7 @@ test("the clear button empties the field, applies the empty search at once and p
   expect(searches).toEqual([""]);
 });
 
+// Verifies: UI-0273
 test("the field keeps the focus and the text that the user types while the search applies", async () => {
   render(<ControlledFilterBar />);
   const field = page.getByRole("searchbox", { name: "Name" });
@@ -188,6 +194,7 @@ test("a change of the search outside the field, for example in the URL, updates 
   await expect.element(field).toHaveValue("Other");
 });
 
+// Verifies: UI-0274
 test("a filter applies when the user selects a value with the keyboard", async () => {
   const { calls } = renderFilterBar();
 
@@ -196,6 +203,7 @@ test("a filter applies when the user selects a value with the keyboard", async (
   expect(calls.statuses).toEqual(["SUSPENDED"]);
 });
 
+// Verifies: UI-0201, UI-0202
 test("the keyboard reaches each field and the clear button with a visible focus", async () => {
   renderFilterBar("Bank");
 
@@ -207,6 +215,7 @@ test("the keyboard reaches each field and the clear button with a visible focus"
   expectVisibleFocus(page.getByRole("combobox", { name: "Status" }).element());
 });
 
+// Verifies: UI-0094
 test("each control is 24 by 24 CSS px or more", () => {
   renderFilterBar("Bank");
 

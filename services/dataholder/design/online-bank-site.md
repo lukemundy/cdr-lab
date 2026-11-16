@@ -85,7 +85,7 @@ Each brand has one layout. The table gives the shapes of each layout.
 - <a id="dh-1849"></a>**DH-1849** Each page has a footer with two statements. The password statement is first, and the text of the footer of the consumer pages is second. ([Judgement: the password statement in the footer](#dh-1891); [the footer of the consumer pages](authorisation.md#dh-0837))
 - <a id="dh-1850"></a>**DH-1850** The first statement of the footer says that third parties do not need the password of the consumer to get CDR data. ([CDS: Common Authentication Standards][cds-cx-authentication]; [Judgement: the password statement in the footer](#dh-1891))
 - <a id="dh-1851"></a>**DH-1851** The second statement of the footer is the text of the [footer of the consumer pages](authorisation.md#dh-0837). The site API gives this text. A brand directory cannot change or remove it. ([the data holder gives the text of the footer](authorisation.md#dh-0838))
-- <a id="dh-1852"></a>**DH-1852** The footer has no link. ([design system: Consumer pages][ui-consumer-pages]; [Judgement: no CDR policy on the site](#dh-1892))
+- <a id="dh-1852"></a>**DH-1852** The footer has no link. ([Judgement: no CDR policy on the site](#dh-1892))
 
 ## Accessibility
 
@@ -217,7 +217,6 @@ The site API also obeys [route patterns in place of raw paths](../../../pkg/plat
 [cds-common-field-types]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#common-field-types
 [cds-product-categories]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#product-categories
 [cds-cx-authentication]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#consumer-experience_common-authentication-standards
-[ui-consumer-pages]: ../../../web/packages/ui/DESIGN.md#consumer-pages
 [wcag-1-1-1]: https://www.w3.org/TR/WCAG22/#non-text-content
 [wcag-1-4-3]: https://www.w3.org/TR/WCAG22/#contrast-minimum
 [wcag-1-4-10]: https://www.w3.org/TR/WCAG22/#reflow

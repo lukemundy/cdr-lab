@@ -19,6 +19,7 @@ test("a link in text passes the accessibility checks", async () => {
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0225
 test("a link is underlined, so that it is different from text also without colour", () => {
   render(<Link href="#history">history</Link>);
 
@@ -26,6 +27,7 @@ test("a link is underlined, so that it is different from text also without colou
   expect(style.textDecorationLine).toContain("underline");
 });
 
+// Verifies: UI-0201, UI-0202
 test("the keyboard focuses the link with a visible focus, and Enter follows it", async () => {
   render(<Link href="#followed">history</Link>);
 
@@ -56,6 +58,7 @@ test("a router can give the element of the link, and the link keeps its style", 
   expect(getComputedStyle(link).textDecorationLine).toContain("underline");
 });
 
+// Verifies: UI-0226, UI-0230
 test("the icon of a link is before its text, is not underlined, and assistive technology does not announce it", async () => {
   const container = render(
     <Link href="#change" icon={Pencil}>

@@ -15,6 +15,7 @@ const industries = [
 const group = () => page.getByRole("group", { name: "Industries" });
 const checkbox = (name: string) => page.getByRole("checkbox", { name });
 
+// Verifies: UI-0314
 test("a checkbox group is a fieldset with a legend, and a checkbox for each option", async () => {
   const container = render(
     <CheckboxGroup label="Industries" name="industries" options={industries} />,
@@ -29,6 +30,7 @@ test("a checkbox group is a fieldset with a legend, and a checkbox for each opti
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0315
 test("the group has one help text and one error message, and the screen reader reads them for the group", async () => {
   const container = render(
     <CheckboxGroup
@@ -69,6 +71,7 @@ test("the default values are checked, and a click on a label changes its checkbo
   await expect.element(checkbox("Telco")).not.toBeChecked();
 });
 
+// Verifies: UI-0201, UI-0202
 test("the keyboard reaches each checkbox with a visible focus, and Space changes it", async () => {
   render(<CheckboxGroup label="Industries" name="industries" options={industries} />);
 
@@ -80,6 +83,7 @@ test("the keyboard reaches each checkbox with a visible focus, and Space changes
   expectVisibleFocus(checkbox("Energy").element());
 });
 
+// Verifies: UI-0094
 test("each checkbox with its label is a target of 24 by 24 CSS px or more", () => {
   render(<CheckboxGroup label="Industries" name="industries" options={industries} />);
 
@@ -100,6 +104,7 @@ test("a disabled group disables each checkbox", async () => {
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0306
 test("in a form, the group gives each checked value, and shows the error of a value in the group", async () => {
   let got: FormData | undefined;
   const container = render(

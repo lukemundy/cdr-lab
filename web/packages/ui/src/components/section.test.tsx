@@ -7,6 +7,7 @@ import { Link } from "./link";
 import { PageHeader } from "./page-header";
 import { Section } from "./section";
 
+// Verifies: UI-0231
 test("a section is a region that its heading names, with its description and links", async () => {
   const container = render(
     <Section
@@ -29,6 +30,7 @@ test("a section is a region that its heading names, with its description and lin
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0233
 test("a section under the page header has a level 2 heading, and each nested section is one level below its parent", async () => {
   const container = render(
     <>
@@ -76,6 +78,7 @@ test("a section needs only a title", async () => {
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0231
 test("the links of a section are directly after its heading, on the same line", () => {
   render(
     <Section title="Legal entity" links={<Link href="#change">Change details</Link>}>
@@ -95,6 +98,7 @@ test("the links of a section are directly after its heading, on the same line", 
   expect(link.bottom).toBeGreaterThan(heading.top);
 });
 
+// Verifies: UI-0234, UI-0235
 test("a card section has a border, a title bar with its heading and links, and a nested card has a different background", async () => {
   const container = render(
     <Section card title="Mock Brand" links={<Link href="#change">Change brand</Link>}>
@@ -122,6 +126,7 @@ test("a card section has a border, a title bar with its heading and links, and a
 const fontSizeOf = (name: string) =>
   Number.parseFloat(getComputedStyle(page.getByRole("heading", { name }).element()).fontSize);
 
+// Verifies: UI-0049
 test("each heading level from 2 to 4 has a smaller font than the level above it", () => {
   render(
     <Section title="Brands">
@@ -137,6 +142,7 @@ test("each heading level from 2 to 4 has a smaller font than the level above it"
   expect(fontSizeOf("Mock Brand")).toBeGreaterThan(fontSizeOf("Software products"));
 });
 
+// Verifies: UI-0238, UI-0239
 test("a collapsible card starts collapsed, with its heading, status and links visible, and its button opens it", async () => {
   const container = render(
     <Section
@@ -186,6 +192,7 @@ test("a collapsible card can start open", async () => {
   await expect.element(page.getByText("Brand details")).toBeVisible();
 });
 
+// Verifies: UI-0240
 test("a find in the page opens the collapsible card of the text that it finds", async () => {
   render(
     <Section card collapsible title="Mock Brand">
@@ -204,6 +211,7 @@ test("a find in the page opens the collapsible card of the text that it finds", 
     .toHaveAttribute("aria-expanded", "true");
 });
 
+// Verifies: UI-0244
 test("Show all and Hide all open and close each collapsible card in the section, also nested cards", async () => {
   const container = render(
     <Section title="Brands" showAll="brands">
@@ -261,6 +269,7 @@ test("a collapsed card is only as tall as its title bar", () => {
   );
 });
 
+// Verifies: UI-0223
 test("the button of a collapsible card shows the pointer cursor", () => {
   render(
     <Section card collapsible title="Mock Brand">
@@ -273,6 +282,7 @@ test("the button of a collapsible card shows the pointer cursor", () => {
   );
 });
 
+// Verifies: UI-0244
 test("Show all of a nested section opens only its cards, and Show all of the outer section also opens them", async () => {
   render(
     <Section title="Brands" showAll="brands">

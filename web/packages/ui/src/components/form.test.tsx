@@ -47,6 +47,7 @@ const refusal: FormRefusal = {
   ],
 };
 
+// Verifies: UI-0321
 test("a form has its fields, a submit button that names the action and a Cancel link", async () => {
   const container = renderForm(() => Promise.resolve(undefined));
 
@@ -62,6 +63,7 @@ test("a form has its fields, a submit button that names the action and a Cancel 
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0325
 test("the form gives the values to the submit, and the server checks them", async () => {
   let got: FormData | undefined;
   renderForm((data) => {
@@ -77,6 +79,7 @@ test("the form gives the values to the submit, and the server checks them", asyn
   expect(got?.get("accreditationLevel")).toBe("SPONSORED");
 });
 
+// Verifies: UI-0323
 test("while the request runs, the submit button is busy, a status says so, and a second submit sends nothing", async () => {
   let calls = 0;
   let finish: ((refusal: FormRefusal | undefined) => void) | undefined;
@@ -102,6 +105,7 @@ test("while the request runs, the submit button is busy, a status says so, and a
   await expect.element(page.getByRole("status")).toHaveTextContent("");
 });
 
+// Verifies: UI-0324, UI-0327, UI-0331
 test("after a refusal, the error summary has the focus, and each field shows its error and keeps its value", async () => {
   const container = renderForm(() => Promise.resolve(refusal));
   const name = page.getByRole("textbox", { name: "Legal entity name" });
@@ -132,6 +136,7 @@ test("after a refusal, the error summary has the focus, and each field shows its
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0327
 test("the error summary is at the top of the form", async () => {
   renderForm(() => Promise.resolve(refusal));
 
@@ -142,6 +147,7 @@ test("the error summary is at the top of the form", async () => {
   expect(form.firstElementChild?.contains(page.getByRole("alert").element())).toBe(true);
 });
 
+// Verifies: UI-0331
 test("a link of the error summary moves the focus to its field", async () => {
   renderForm(() => Promise.resolve(refusal));
   await page.getByRole("button", { name: "Save changes" }).click();
@@ -163,6 +169,7 @@ test("a link of the error summary moves the focus to its field", async () => {
   );
 });
 
+// Verifies: UI-0329
 test("a refusal that names no field shows only in the error summary, and the focus moves to it again", async () => {
   const conflict: FormRefusal = {
     problem: {
@@ -189,6 +196,7 @@ test("a refusal that names no field shows only in the error summary, and the foc
   await expect.poll(() => summary.element().parentElement === document.activeElement).toBe(true);
 });
 
+// Verifies: UI-0332
 test("a submit that fails with no problem details says that the change did not complete", async () => {
   renderForm(() => Promise.reject(new Error("no network")));
 
@@ -205,6 +213,7 @@ test("a submit that fails with no problem details says that the change did not c
     .toBeVisible();
 });
 
+// Verifies: UI-0306
 test("a field error of a list item or of a nested value shows at the field of the list or of the value", async () => {
   render(
     <Form

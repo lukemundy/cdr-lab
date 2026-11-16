@@ -73,6 +73,7 @@ func TestADifferentBrandShowsOnTheSamePagesWithItsNameEscaped(t *testing.T) {
 	}
 }
 
+// Verifies: DH-2600, DH-2601
 func TestEachPageOfTheFlowGivesItsStep(t *testing.T) {
 	pages := eachPage(t, bankName)
 
@@ -90,7 +91,7 @@ func TestEachPageHasTheNameOfTheBankInItsTitle(t *testing.T) {
 	assert.Contains(t, pages["refused"].body, "<title>Coastal Bank cannot continue</title>")
 }
 
-// web/packages/ui/DESIGN.md (Consumer pages).
+// Verifies: UI-0029
 func TestEachPageUsesTheComfortableDensity(t *testing.T) {
 	for name, p := range eachPage(t, bankName) {
 		t.Run(name, func(t *testing.T) {
@@ -99,6 +100,7 @@ func TestEachPageUsesTheComfortableDensity(t *testing.T) {
 	}
 }
 
+// Verifies: DH-2602, UI-0364, UI-0365
 func TestAPageOfAFlowHasAHeroWithTheDataRecipientAndTheMarkOfTheBank(t *testing.T) {
 	pages := eachPage(t, bankName)
 
@@ -118,6 +120,7 @@ func TestAPageOfAFlowHasAHeroWithTheDataRecipientAndTheMarkOfTheBank(t *testing.
 	assert.NotContains(t, pages["refused"].body, "cp-hero", "the refused page has no data recipient")
 }
 
+// Verifies: UI-0371
 func TestTheStepOfAPageHasAProgressBarThatIsOnlyDecoration(t *testing.T) {
 	pages := eachPage(t, bankName)
 

@@ -20,7 +20,7 @@ export type FieldErrorItem = { pointer: string; detail: string };
 
 export type FormRefusal = { problem: Problem; fieldErrors?: readonly FieldErrorItem[] | undefined };
 
-// DESIGN.md, Decisions: a form that fails with no problem details.
+// design/forms-and-dialogs.md, UI-0332: a form that fails with no problem details.
 const unexpectedProblem: Problem = {
   title: "The change did not complete",
   detail: "The change did not complete. Refresh the page to see the current state, then try again.",

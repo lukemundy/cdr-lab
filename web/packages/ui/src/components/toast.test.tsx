@@ -39,6 +39,7 @@ function renderToast() {
   };
 }
 
+// Verifies: UI-0336
 test("a toast shows in a live region, so that it is announced as a status message", async () => {
   const { button, region, toast } = renderToast();
 
@@ -51,6 +52,7 @@ test("a toast shows in a live region, so that it is announced as a status messag
 });
 
 // Base UI hides the close button from assistive technology until the toast has the pointer or the focus.
+// Verifies: UI-0337
 test("the close button of a toast closes it", async () => {
   const { button, toast } = renderToast();
 
@@ -64,6 +66,7 @@ test("the close button of a toast closes it", async () => {
   await expect.element(toast).not.toBeInTheDocument();
 });
 
+// Verifies: UI-0338
 test("a toast closes by itself after 5 seconds", async () => {
   const { button, toast } = renderToast();
   vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });
@@ -78,6 +81,7 @@ test("a toast closes by itself after 5 seconds", async () => {
   await expect.element(toast).not.toBeInTheDocument();
 });
 
+// Verifies: UI-0338
 test("a toast does not close while it has the pointer", async () => {
   const { button, toast } = renderToast();
   vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });
@@ -93,6 +97,7 @@ test("a toast does not close while it has the pointer", async () => {
   await expect.element(toast).not.toBeInTheDocument();
 });
 
+// Verifies: UI-0338, UI-0341
 test("the keyboard moves the focus to the toast with F6, the toast does not close while it has the focus, and Enter on its close button closes it", async () => {
   const { button, toast } = renderToast();
   vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });

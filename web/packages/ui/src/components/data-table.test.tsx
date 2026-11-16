@@ -46,6 +46,7 @@ function renderTable(props: Partial<DataTableProps<Recipient>> = {}) {
   return { container, calls };
 }
 
+// Verifies: UI-0260
 test("the table has a name, column headers and a row for each record", async () => {
   const { container } = renderTable();
 
@@ -63,6 +64,7 @@ test("the table has a name, column headers and a row for each record", async () 
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0265
 test("the sorted column has aria-sort, and the other columns have none", async () => {
   renderTable({ sort: { column: "status", direction: "descending" } });
 
@@ -74,6 +76,7 @@ test("the sorted column has aria-sort, and the other columns have none", async (
     .not.toHaveAttribute("aria-sort");
 });
 
+// Verifies: UI-0265
 test("a status message gives the sort", async () => {
   renderTable({ sort: { column: "name", direction: "ascending" } });
 
@@ -82,6 +85,7 @@ test("a status message gives the sort", async () => {
     .toHaveTextContent("Sorted by Name, ascending");
 });
 
+// Verifies: UI-0264
 test("a sort button sorts an unsorted column ascending, and turns a sorted column the other way", async () => {
   const { calls } = renderTable({ sort: { column: "name", direction: "ascending" } });
 
@@ -94,6 +98,7 @@ test("a sort button sorts an unsorted column ascending, and turns a sorted colum
   ]);
 });
 
+// Verifies: UI-0263
 test("a column that does not enable sorting has no sort button", async () => {
   renderTable();
 
@@ -101,6 +106,7 @@ test("a column that does not enable sorting has no sort button", async () => {
   expect(page.getByRole("button", { name: "Brands" }).elements()).toEqual([]);
 });
 
+// Verifies: UI-0201, UI-0202
 test("the keyboard sorts with a visible focus", async () => {
   const { calls } = renderTable();
 
@@ -111,6 +117,7 @@ test("the keyboard sorts with a visible focus", async () => {
   expect(calls.sorts).toEqual([{ column: "name", direction: "descending" }]);
 });
 
+// Verifies: UI-0094
 test("each sort button is 24 by 24 CSS px or more", () => {
   renderTable();
 
@@ -118,6 +125,7 @@ test("each sort button is 24 by 24 CSS px or more", () => {
   expectTargetSize(page.getByRole("button", { name: "Status" }).element());
 });
 
+// Verifies: UI-0262
 test("the pagination is below the table and changes the page", async () => {
   const { container, calls } = renderTable();
 
@@ -130,6 +138,7 @@ test("the pagination is below the table and changes the page", async () => {
   expect(container).toContainElement(navigation);
 });
 
+// Verifies: UI-0262
 test("with no rows, the table shows the empty state", async () => {
   const { container } = renderTable({ rows: [], rowCount: 0, pageCount: 0 });
 
@@ -137,6 +146,7 @@ test("with no rows, the table shows the empty state", async () => {
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0262
 test("while it loads, the table is busy and shows the loading state", async () => {
   const { container } = renderTable({ status: { state: "loading" } });
 
@@ -146,6 +156,7 @@ test("while it loads, the table is busy and shows the loading state", async () =
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0262
 test("after an error, the table shows the problem in the error state", async () => {
   const { container } = renderTable({
     status: { state: "error", problem: { title: "Service Unavailable", detail: "Try again." } },

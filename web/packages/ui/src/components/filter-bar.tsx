@@ -19,7 +19,7 @@ const fieldClasses = cn(
   focusRing,
 );
 
-// DESIGN.md, Decisions: when the search of the filter bar applies.
+// design/components.md, UI-0271: when the search of the filter bar applies.
 const searchDelayMs = 300;
 
 type SearchProps =

@@ -28,6 +28,7 @@ function renderDialog() {
   };
 }
 
+// Verifies: UI-0290, UI-0291
 test("the trigger opens a modal dialog with its title and description, and the focus goes into it", async () => {
   const { trigger, dialog } = renderDialog();
 
@@ -41,6 +42,7 @@ test("the trigger opens a modal dialog with its title and description, and the f
   await expectNoAxeViolations(document.body);
 });
 
+// Verifies: UI-0201, UI-0291
 test("the keyboard opens the dialog, Tab stays in it, and Escape closes it and gives the focus back to the trigger", async () => {
   const { trigger, dialog } = renderDialog();
 
@@ -100,6 +102,7 @@ function RemovableRecord() {
   );
 }
 
+// Verifies: UI-0292
 test("when the control that opened the dialog does not exist at the close, the focus goes to the element that the UI gives", async () => {
   render(<RemovableRecord />);
 

@@ -23,15 +23,15 @@ This area gives the actions of the lab-only operator console and its create form
 
 - <a id="dh-1452"></a>**DH-1452** Each create is a form on its own page, with its own URL. A URL of a form is never the URL of a record. ([Judgement: the same action and form rules in each console](#dh-1517))
 - <a id="dh-1453"></a>**DH-1453** Each create form obeys these rules. ([WCAG 2.2, SC 3.3.1][wcag-3-3-1]; [SC 3.3.2][wcag-3-3-2]; [SC 3.3.3][wcag-3-3-3]; [SC 2.4.3][wcag-2-4-3]; [GOV.UK Design System: Error summary][govuk-error-summary]; [GOV.UK Design System: Question pages][govuk-question-pages]; [Judgement: the same action and form rules in each console](#dh-1517))
-  - The label of each field that the console API schema does not require says "(optional)".
+  - Each field that the console API schema does not require is an [optional field](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0326).
   - The console removes the white space at the start and at the end of each value. It sends an optional field that has no value as no field.
   - The console does not check the values. The data holder checks each value.
   - When the data holder refuses the value of a field, the console shows the `detail` of the field error as the error message of that field.
-  - After a refusal, the form shows an error summary at its top, and the focus moves to the summary. The summary gives the `detail` of the problem, and a link to each field that has an error. A refusal that names no field shows only in the summary.
+  - After a refusal, the form shows the [error summary](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0327). The summary gives the `detail` of the problem. A refusal that names no field shows only in the summary.
   - After a refusal, the form keeps each value that the lab operator gave.
-  - While the request runs, the submit button is busy, and the form sends no second request.
+  - While the request runs, the form is [busy](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0323).
   - After a success, the console goes to the page that the create gives, and the focus moves to the heading of that page.
-  - Each form has a "Cancel" link back to the page that opened it. A cancel sends no request, and the console does not ask the lab operator to confirm it.
+  - Each form has a ["Cancel" link](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0321) back to the page that opened it. A cancel sends no request, and the console does not ask the lab operator to confirm it.
 - <a id="dh-1454"></a>**DH-1454** The list of the customers has the action "Create customer". ([create a customer](operator-interface.md#dh-0720))
 - <a id="dh-1455"></a>**DH-1455** After a create of a customer, the console goes to the detail of the new customer. The toast gives the new customer number. ([Judgement: the customer number in the toast](#dh-1518))
 - <a id="dh-1456"></a>**DH-1456** The detail of a customer has the action "Create account", also when the customer has no open account. ([Judgement: a new account for each customer](#dh-1519))
@@ -83,7 +83,7 @@ This area gives the actions of the lab-only operator console and its create form
 ### <a id="dh-1521"></a>DH-1521 The group of the extended data
 
 - Kind: choice
-- Basis: Step 3.3. The design system has no group of fields that opens and closes ([design system DESIGN.md][ui-design]).
+- Basis: Step 3.3. The design system has no group of fields that opens and closes ([the form fields of the design system](../../../web/packages/ui/design/forms-and-dialogs.md)).
 - Reason: A collapsed group hides its field errors and the targets of the links of the error summary. The values of the group are the only sign that the lab operator wants it, so an empty group sends nothing.
 
 ### <a id="dh-1522"></a>DH-1522 The time of a transaction in the form
@@ -96,7 +96,6 @@ This area gives the actions of the lab-only operator console and its create form
 [cds-product-categories]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#product-categories
 [adr-0012]: ../../../docs/adr/0012-utc-for-all-times.md
 [adr-0014]: ../../../docs/adr/0014-web-uis-as-embedded-react-single-page-applications.md
-[ui-design]: ../../../web/packages/ui/DESIGN.md
 [wcag-2-4-3]: https://www.w3.org/TR/WCAG22/#focus-order
 [wcag-3-3-1]: https://www.w3.org/TR/WCAG22/#error-identification
 [wcag-3-3-2]: https://www.w3.org/TR/WCAG22/#labels-or-instructions

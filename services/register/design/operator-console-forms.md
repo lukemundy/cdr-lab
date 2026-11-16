@@ -21,8 +21,8 @@ This area gives the forms of the operator console that create, add and change pa
   - "Add software product" for each data recipient brand
   - "Change software product" for each software product
 - <a id="reg-1409"></a>**REG-1409** The console shows each link to a form for each record in each status. For example, a REMOVED brand has "Change brand". ([Judgement: links to the forms in each status](#reg-1484))
-- <a id="reg-1410"></a>**REG-1410** Each link to a form is directly after the heading of its record. ([design system DESIGN.md: Components][ui-components])
-- <a id="reg-1411"></a>**REG-1411** "Add software product" is at the heading "Software products" of its brand. ([design system DESIGN.md: Components][ui-components])
+- <a id="reg-1410"></a>**REG-1410** Each link to a form is directly after the heading of its record. ([the links of a section](../../../web/packages/ui/design/components.md#ui-0231))
+- <a id="reg-1411"></a>**REG-1411** "Add software product" is at the heading "Software products" of its brand. ([the links of a section](../../../web/packages/ui/design/components.md#ui-0231))
 
 ## Fields
 
@@ -34,12 +34,12 @@ This area gives the forms of the operator console that create, add and change pa
 - <a id="reg-1420"></a>**REG-1420** The status rules apply to the status field. For example, a software product of an INACTIVE brand must be INACTIVE or REMOVED. ([the Register checks the full legal entity](operator-interface.md#reg-0823); [Judgement: ACTIVE selected first](#reg-1486))
 - <a id="reg-1421"></a>**REG-1421** A change form shows the current value of each field. ([a field that is not in the body of a change](operator-console-change-api.md#reg-1324))
 - <a id="reg-1422"></a>**REG-1422** A change form shows the identifiers of the record as text that the lab operator cannot change. ([the identifiers of a record do not change](operator-interface.md#reg-0820))
-- <a id="reg-1423"></a>**REG-1423** A choice of one value from a fixed set is a native select. For example, the accreditation level and the status are selects. ([WCAG 2.2, SC 1.3.1][wcag-1-3-1]; [Judgement: the controls of a list](#reg-1487))
-- <a id="reg-1424"></a>**REG-1424** A choice of more than one value from a fixed set is a group of checkboxes. For example, the industries of a data holder brand are checkboxes. ([WCAG 2.2, SC 1.3.1][wcag-1-3-1]; [Judgement: the controls of a list](#reg-1487))
-- <a id="reg-1425"></a>**REG-1425** A list of values that the lab operator writes is a text area with one value on each line. For example, the redirect URIs and the scopes are text areas. ([WCAG 2.2, SC 1.3.1][wcag-1-3-1]; [Judgement: the controls of a list](#reg-1487))
-- <a id="reg-1426"></a>**REG-1426** The endpoints of a data holder brand are a group of fields with a legend. ([WCAG 2.2, SC 1.3.1][wcag-1-3-1])
-- <a id="reg-1427"></a>**REG-1427** In a create, a select of a required value that has no usual value has no selected value. For example, the accreditation level of a data recipient has no selected value. ([Judgement: no accreditation level selected first](#reg-1488))
-- <a id="reg-1428"></a>**REG-1428** The label of each field that the console API schema does not require says "(optional)". A required field has no mark. ([WCAG 2.2, SC 3.3.2][wcag-3-3-2]; [GOV.UK Design System: Question pages][govuk-question-pages])
+- <a id="reg-1423"></a>**REG-1423** A choice of one value from a fixed set is a [select](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0308). For example, the accreditation level and the status are selects. ([WCAG 2.2, SC 1.3.1][wcag-1-3-1]; [Judgement: the controls of a list](#reg-1487))
+- <a id="reg-1424"></a>**REG-1424** A choice of more than one value from a fixed set is a [checkbox group](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0314). For example, the industries of a data holder brand are checkboxes. ([WCAG 2.2, SC 1.3.1][wcag-1-3-1]; [Judgement: the controls of a list](#reg-1487))
+- <a id="reg-1425"></a>**REG-1425** A list of values that the lab operator writes is a [text area with one value on each line](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0310). For example, the redirect URIs and the scopes are text areas. ([WCAG 2.2, SC 1.3.1][wcag-1-3-1]; [Judgement: the controls of a list](#reg-1487))
+- <a id="reg-1426"></a>**REG-1426** The endpoints of a data holder brand are a [group of related fields](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0317). ([WCAG 2.2, SC 1.3.1][wcag-1-3-1])
+- <a id="reg-1427"></a>**REG-1427** In a create, a select of a required value that has no usual value has [no selected value](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0309). For example, the accreditation level of a data recipient has no selected value. ([Judgement: no accreditation level selected first](#reg-1488))
+- <a id="reg-1428"></a>**REG-1428** Each field that the console API schema does not require is an optional field, as the design system gives it. ([the label of an optional field](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0326))
 - <a id="reg-1429"></a>**REG-1429** The help text of the identifier fields of a data holder brand says that a brand with no `dataHolderBrandId` needs only its public details. ([WCAG 2.2, SC 3.3.2][wcag-3-3-2]; [Judgement: only the public details for a brand of product data](participants.md#reg-0261))
 
 ## Values that the console sends
@@ -56,19 +56,19 @@ This area gives the forms of the operator console that create, add and change pa
 - <a id="reg-1436"></a>**REG-1436** When the Register refuses the value of a field, the console shows the `detail` of the field error as the error message of that field. ([the field errors of the console API](operator-console-change-api.md#reg-1328); [WCAG 2.2, SC 3.3.1][wcag-3-3-1]; [SC 3.3.3][wcag-3-3-3])
 - <a id="reg-1437"></a>**REG-1437** The error of an item of a list shows at the field of the list. For example, a refused redirect URI shows at the redirect URIs. ([WCAG 2.2, SC 3.3.1][wcag-3-3-1])
 - <a id="reg-1438"></a>**REG-1438** A refusal that names no field shows in the error summary of the form. For example, a stale version shows in the error summary. ([a refusal that names no field](operator-console-change-api.md#reg-1330); [WCAG 2.2, SC 3.3.1][wcag-3-3-1])
-- <a id="reg-1439"></a>**REG-1439** After a refusal, the form shows an error summary at its top, and the focus moves to the summary. ([GOV.UK Design System: Error summary][govuk-error-summary]; [Judgement: the error summary of a form](#reg-1490))
-- <a id="reg-1440"></a>**REG-1440** The error summary gives the `detail` of the problem, and a link to each field that has an error. ([design system DESIGN.md: Components][ui-components]; [Judgement: the error summary of a form](#reg-1490))
+- <a id="reg-1439"></a>**REG-1439** After a refusal, the form shows the error summary of the design system. ([the error summary of a form](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0327); [the focus on the error summary](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0331); [Judgement: the error summary of a form](#reg-1490))
+- <a id="reg-1440"></a>**REG-1440** The error summary gives the `detail` of the problem, and a link to each field that has an error. ([the links of the error summary](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0330); [Judgement: the error summary of a form](#reg-1490))
 - <a id="reg-1441"></a>**REG-1441** After a refusal, the form keeps each value that the lab operator gave, and the version that it loaded. ([Judgement: the values after a refusal](#reg-1491))
 - <a id="reg-1442"></a>**REG-1442** When the version is stale, the lab operator opens the form again to see the current values. The form does not get the current values by itself. ([Judgement: the values after a refusal](#reg-1491))
 
 ## Submit, success and cancel
 
-- <a id="reg-1443"></a>**REG-1443** While the request runs, the submit button is busy, and the form sends no second request. ([design system DESIGN.md: Components][ui-components]; [Judgement: no automatic second request](operator-console-actions.md#reg-1284))
+- <a id="reg-1443"></a>**REG-1443** While the request runs, the form is busy, as the design system gives it. ([the busy state of a form](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0323); [Judgement: no automatic second request](operator-console-actions.md#reg-1284))
 - <a id="reg-1444"></a>**REG-1444** The console never sends a create, an add or a change again by itself. ([Judgement: no automatic second request](operator-console-actions.md#reg-1284))
 - <a id="reg-1445"></a>**REG-1445** After a success, the console goes to the detail of the participant and shows the result in a toast. ([WCAG 2.2, SC 4.1.3][wcag-4-1-3])
 - <a id="reg-1446"></a>**REG-1446** After a success, the focus moves to the heading of the detail, because the page of the form no longer exists. ([WCAG 2.2, SC 2.4.3][wcag-2-4-3])
-- <a id="reg-1447"></a>**REG-1447** After a success, the card of the record that the form changed or added is open. For example, after an add of a software product, the card of the new software product is open. ([the cards of a detail](operator-console.md#reg-1413))
-- <a id="reg-1448"></a>**REG-1448** Each form has a "Cancel" link back to the page that opened it. ([design system DESIGN.md: Components][ui-components]; [Judgement: no confirmation of a cancel](#reg-1492))
+- <a id="reg-1447"></a>**REG-1447** After a success, the card of the record that the form changed or added is open. For example, after an add of a software product, the card of the new software product is open. ([the cards of a detail](operator-console.md#reg-1413); [the cards that are open after a form](../../../web/packages/ui/design/components.md#ui-0242))
+- <a id="reg-1448"></a>**REG-1448** Each form has a "Cancel" link back to the page that opened it. ([the Cancel link of a form](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0321); [Judgement: no confirmation of a cancel](#reg-1492))
 - <a id="reg-1449"></a>**REG-1449** A cancel sends no request. The console does not ask the lab operator to confirm a cancel, and gives no warning about values that it did not send. ([Judgement: no confirmation of a cancel](#reg-1492))
 
 ## Judgements
@@ -154,7 +154,6 @@ This area gives the forms of the operator console that create, add and change pa
 [adr-0013]: ../../../docs/adr/0013-hexagonal-architecture-with-an-internal-composition-root.md
 [adr-0014]: ../../../docs/adr/0014-web-uis-as-embedded-react-single-page-applications.md
 [rfc9562-v4]: https://www.rfc-editor.org/rfc/rfc9562#section-5.4
-[ui-components]: ../../../web/packages/ui/DESIGN.md#components
 [wcag-1-3-1]: https://www.w3.org/TR/WCAG22/#info-and-relationships
 [wcag-2-4-3]: https://www.w3.org/TR/WCAG22/#focus-order
 [wcag-3-3-1]: https://www.w3.org/TR/WCAG22/#error-identification
@@ -163,4 +162,3 @@ This area gives the forms of the operator console that create, add and change pa
 [wcag-3-3-4]: https://www.w3.org/TR/WCAG22/#error-prevention-legal-financial-data
 [wcag-4-1-3]: https://www.w3.org/TR/WCAG22/#status-messages
 [govuk-error-summary]: https://design-system.service.gov.uk/components/error-summary/
-[govuk-question-pages]: https://design-system.service.gov.uk/patterns/question-pages/

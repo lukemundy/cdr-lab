@@ -31,6 +31,7 @@ function renderConfirmation(props: Partial<ConfirmationDialogProps> = {}) {
   };
 }
 
+// Verifies: UI-0293
 test("a confirmation is an alert dialog that names the action and its effect, and passes the accessibility checks", async () => {
   const { trigger, dialog } = renderConfirmation();
 
@@ -46,6 +47,7 @@ test("a confirmation is an alert dialog that names the action and its effect, an
   await expectNoAxeViolations(document.body);
 });
 
+// Verifies: UI-0293
 test("a confirmation with more than one effect gives the effects in a list", async () => {
   const effects = [
     "Mock Recipient One changes from ACTIVE to SUSPENDED.",
@@ -61,6 +63,7 @@ test("a confirmation with more than one effect gives the effects in a list", asy
   await expectNoAxeViolations(document.body);
 });
 
+// Verifies: UI-0291, UI-0294
 test("Cancel closes the confirmation with no change, and the focus goes back to the trigger", async () => {
   const { onConfirm, trigger, dialog } = renderConfirmation();
 
@@ -82,6 +85,7 @@ test("Escape closes the confirmation with no change", async () => {
   expect(onConfirm).not.toHaveBeenCalled();
 });
 
+// Verifies: UI-0295
 test("the first focus is on Cancel, also when the action can be reversed", async () => {
   const { trigger, dialog } = renderConfirmation();
 
@@ -92,6 +96,7 @@ test("the first focus is on Cancel, also when the action can be reversed", async
     .toBe(dialog.getByRole("button", { name: "Cancel" }).element());
 });
 
+// Verifies: UI-0295, UI-0296
 test("for an action that cannot be reversed, the confirmation says so, and the first focus is on Cancel", async () => {
   const { trigger, dialog } = renderConfirmation({ irreversible: true });
 
@@ -106,6 +111,7 @@ test("for an action that cannot be reversed, the confirmation says so, and the f
   await expectNoAxeViolations(document.body);
 });
 
+// Verifies: UI-0201
 test("the keyboard opens the confirmation, moves to the confirm button and confirms", async () => {
   const { onConfirm, trigger, dialog } = renderConfirmation();
 
@@ -124,6 +130,7 @@ test("the keyboard opens the confirmation, moves to the confirm button and confi
   expect(document.activeElement).toBe(trigger.element());
 });
 
+// Verifies: UI-0298
 test("while the action runs, the confirm button is busy, a status message says so, and the confirmation stays open", async () => {
   // The test resolves the promise, so that it can see the confirmation while the action runs.
   const action = Promise.withResolvers<Problem | undefined>();
@@ -146,6 +153,7 @@ test("while the action runs, the confirm button is busy, a status message says s
   expect(document.activeElement).toBe(trigger.element());
 });
 
+// Verifies: UI-0299
 test("when the action fails, the confirmation stays open and shows the problem in an alert", async () => {
   const problem = {
     title: "Conflict",
@@ -166,6 +174,7 @@ test("when the action fails, the confirmation stays open and shows the problem i
   expect(onConfirm).toHaveBeenCalledOnce();
 });
 
+// Verifies: UI-0300
 test("when the action throws, the confirmation stays open and tells the operator what to do", async () => {
   const { trigger, dialog } = renderConfirmation({
     onConfirm: () =>
@@ -221,6 +230,7 @@ function SuspendableRecord() {
   );
 }
 
+// Verifies: UI-0292
 test("when the trigger does not exist after the action, the focus goes to the element that the UI gives", async () => {
   render(<SuspendableRecord />);
 

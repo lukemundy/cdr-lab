@@ -7,6 +7,7 @@ import { Fieldset } from "./fieldset";
 import { Form } from "./form";
 import { TextField } from "./form-field";
 
+// Verifies: UI-0317
 test("a fieldset is a group of fields with a legend that names the group", async () => {
   const container = render(
     <Fieldset legend="Endpoints">
@@ -23,6 +24,7 @@ test("a fieldset is a group of fields with a legend that names the group", async
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0306
 test("in a form, each field of the fieldset shows the error of its nested value", async () => {
   const container = render(
     <Form

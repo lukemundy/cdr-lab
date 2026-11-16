@@ -18,6 +18,7 @@ This area gives the authentication of a consumer with a one-time password, the O
 - <a id="dh-1210"></a>**DH-1210** The only authentication flow is Redirect to Web with an OTP. ([CDS: Fallback Authentication Flows][cds-fallback-flows])
 - <a id="dh-1211"></a>**DH-1211** The first page of the authentication asks for the email address or the customer number in one field. It asks for nothing else. ([CDS: User Identifiers][cds-user-identifiers]; [Judgement: two user identifiers in one field](#dh-1270))
 - <a id="dh-1212"></a>**DH-1212** The first page says that the data recipient does not need the password of the consumer to get CDR data. It also says that the consumer must not give a password. ([CDS: Common Authentication Standards][cds-cx-authentication])
+- <a id="dh-2605"></a>**DH-2605** The first authentication page and the OTP page each have their password statement in a [note](../../../web/packages/ui/design/consumer-pages.md#ui-0384) below the card. ([Judgement: one design system for all UIs (ADR 0016)][adr-0016])
 - <a id="dh-1213"></a>**DH-1213** The authentication pages never ask for a password. ([Judgement: no password on the authentication pages](#dh-1273))
 - <a id="dh-1214"></a>**DH-1214** The authentication pages have no link for forgotten details. They offer no other products or services, and they have no reference to other documents. ([CDS: Redirect to Web with One Time Password][cds-cx-otp]; [CDS: Common Authentication Standards][cds-cx-authentication])
 - <a id="dh-1215"></a>**DH-1215** The authentication pages name the data recipient with its brand name. The brand name is the `org_name` of the registration. ([CX Guidelines: Redirect to Web with One Time Password][cx-otp])
@@ -27,6 +28,7 @@ This area gives the authentication of a consumer with a one-time password, the O
 
 - <a id="dh-1220"></a>**DH-1220** When the consumer gives the user identifier of a customer, the data holder makes an OTP. It sends the OTP by email to the email address of that customer. ([CDS: One-Time Password Credential Requirements][cds-otp]; [Judgement: the OTP by email](#dh-1276))
 - <a id="dh-1221"></a>**DH-1221** After the consumer gives a user identifier, the next page asks for the OTP. ([CDS: Redirect to Web with One Time Password][cds-cx-otp])
+- <a id="dh-2604"></a>**DH-2604** The OTP page has one field for the OTP, with `autocomplete="one-time-code"`. It does not have one field for each digit. ([WCAG 2.2, SC 3.3.8][wcag-3-3-8]; [Judgement: one field for the OTP](#dh-2612))
 - <a id="dh-1222"></a>**DH-1222** When the consumer enters the correct OTP, the data holder authenticates the customer of that OTP. The authorisation is then for that customer. ([CDS: One-Time Password Credential Requirements][cds-otp])
 - <a id="dh-1223"></a>**DH-1223** When no customer has the user identifier, the data holder sends no email and shows the same OTP page. No OTP is then correct. ([CDS: One-Time Password Credential Requirements][cds-otp]; [Judgement: no enumeration of user identifiers](#dh-1274))
 - <a id="dh-1224"></a>**DH-1224** An OTP has 6 decimal digits from a cryptographic random source. When a [fixed OTP](#dh-1264) applies, the OTP has the fixed value. ([CDS: One-Time Password Credential Requirements][cds-otp]; [Judgement: the limits of an OTP](#dh-1277))
@@ -168,6 +170,13 @@ These rules are lab-only. A production data holder has its own channel for the O
 - Basis: Step 3.3. No source gives a test feature for the authentication of a mock data holder.
 - Reason: The browser of the OpenID conformance suite cannot read the mail sink, and it must authenticate with no manual step. The other customers keep a random OTP.
 
+### <a id="dh-2612"></a>DH-2612 One field for the OTP
+
+- Kind: choice
+- Basis: Step 3.2. An authentication must not require a cognitive function test, for example a transcription, unless a mechanism helps ([WCAG 2.2, SC 3.3.8][wcag-3-3-8]).
+- Reason: One field takes an OTP that the consumer pastes, and the OTP that the browser fills in. The OTP is one value, so it has one label and one error message.
+
+[adr-0016]: ../../../docs/adr/0016-design-system-on-shadcn-base-ui-and-dtcg-tokens.md
 [adr-0023]: ../../../docs/adr/0023-give-the-brand-of-a-data-holder-as-a-strict-brand-directory.md
 [caniemail-css-variables]: https://www.caniemail.com/features/css-variables/
 [caniemail-modern-colour]: https://www.caniemail.com/features/css-modern-color/

@@ -8,6 +8,7 @@ import { render } from "../test/render";
 import { Button } from "./button";
 
 describe.each(["primary", "secondary", "danger", "quiet"] as const)("the %s button", (variant) => {
+  // Verifies: UI-0220, UI-0221
   test("passes the accessibility checks when enabled, disabled and busy", async () => {
     const container = render(
       <>
@@ -24,6 +25,7 @@ describe.each(["primary", "secondary", "danger", "quiet"] as const)("the %s butt
     await expectNoAxeViolations(container);
   });
 
+  // Verifies: UI-0094
   test("is 24 by 24 CSS px or more, also with only an icon", () => {
     render(
       <>
@@ -39,6 +41,7 @@ describe.each(["primary", "secondary", "danger", "quiet"] as const)("the %s butt
   });
 });
 
+// Verifies: UI-0201, UI-0202
 test("the keyboard focuses the button with a visible focus, and Enter and Space activate it", async () => {
   let clicks = 0;
   render(<Button onClick={() => clicks++}>Save</Button>);
@@ -51,12 +54,14 @@ test("the keyboard focuses the button with a visible focus, and Enter and Space 
   expect(clicks).toBe(2);
 });
 
+// Verifies: UI-0221
 test("a disabled button is disabled for assistive technology", async () => {
   render(<Button disabled>Save</Button>);
 
   await expect.element(page.getByRole("button", { name: "Save" })).toBeDisabled();
 });
 
+// Verifies: UI-0221
 test("a busy button says that it is busy, keeps its focus and does not act", async () => {
   let clicks = 0;
   render(
@@ -95,6 +100,7 @@ test("a button does not submit a form unless its type is submit", async () => {
   expect(submits).toBe(1);
 });
 
+// Verifies: UI-0222, UI-0230
 test("the icon of a button is before its text, and assistive technology does not announce it", async () => {
   const container = render(<Button icon={Pencil}>Change</Button>);
   const button = page.getByRole("button", { name: "Change" });
@@ -105,6 +111,7 @@ test("the icon of a button is before its text, and assistive technology does not
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0222
 test("a busy button shows the busy indicator in place of its icon", () => {
   render(
     <Button icon={Pencil} busy>
@@ -120,6 +127,7 @@ test("a busy button shows the busy indicator in place of its icon", () => {
   expect(icons[0]).toHaveClass("motion-safe:animate-spin");
 });
 
+// Verifies: UI-0223
 test("an enabled button shows the pointer cursor", () => {
   render(<Button>Save</Button>);
 

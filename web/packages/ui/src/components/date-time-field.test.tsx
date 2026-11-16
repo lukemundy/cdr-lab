@@ -18,6 +18,7 @@ function localParts(utc: string): number[] {
   ];
 }
 
+// Verifies: UI-0313
 test("a time in the time zone of the browser becomes the same instant in UTC", () => {
   const utc = utcOf("2026-10-26T14:05:30");
 
@@ -26,6 +27,7 @@ test("a time in the time zone of the browser becomes the same instant in UTC", (
   expect(localParts(utcOf("2026-01-15T23:59"))).toEqual([2026, 1, 15, 23, 59, 0]);
 });
 
+// Verifies: UI-0313
 test("the offset of the time is the offset of the browser at that instant, also with daylight saving", () => {
   for (const local of ["2026-01-15T12:00", "2026-07-15T12:00"]) {
     const offsetMinutes = new Date(local).getTimezoneOffset();
@@ -42,6 +44,7 @@ test("an empty value stays empty, and a value that is not a time goes to the ser
   expect(utcOf("zebracorn")).toBe("zebracorn");
 });
 
+// Verifies: UI-0302
 test("a date-time field has a visible label, help text and error, and the keyboard reaches it", async () => {
   const container = render(
     <DateTimeField
@@ -65,6 +68,7 @@ test("a date-time field has a visible label, help text and error, and the keyboa
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0311
 test("the value of a date-time field has seconds and no offset", async () => {
   render(<DateTimeField label="Posting time" name="postingDateTime" />);
   const field = page.getByLabelText("Posting time");
