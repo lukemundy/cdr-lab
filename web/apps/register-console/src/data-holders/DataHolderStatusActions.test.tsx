@@ -109,6 +109,7 @@ const buttonNames = (name: string) =>
     .map((button) => button.element().textContent);
 
 describe("the status actions of a data holder", () => {
+  // Verifies: REG-1219
   test("show only the actions that the console API gives, for the legal entity and each brand", async () => {
     serveDetails(active);
 
@@ -121,6 +122,7 @@ describe("the status actions of a data holder", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1203, REG-1212, REG-1213
   test("a removal names each brand that it removes, says that it cannot be reversed, sends the version, and shows the new state", async () => {
     const requests = serveDetails(active, removed);
     worker.use(
@@ -162,6 +164,7 @@ describe("the status actions of a data holder", () => {
     expect(buttonNames("Console Bank")).toEqual([]);
   });
 
+  // Verifies: REG-1202
   test("a brand action sends the version to the path of the brand, with the interim ID when the brand has no brand ID", async () => {
     const requests = serveDetails(active);
     for (const action of ["deactivate", "remove"] as const) {

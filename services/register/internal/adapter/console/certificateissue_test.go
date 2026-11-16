@@ -130,6 +130,7 @@ func postIssue(t *testing.T, issuer *fakeIssuer, target, body string) response {
 	return post(t, console.Ports{Issuer: issuer}, target, body)
 }
 
+// Verifies: REG-1311, REG-1312, REG-1334, REG-1335
 func TestAnIssueGivesTheChainAndTheThumbprintOfTheCertificate(t *testing.T) {
 	for name, route := range issueRoutes {
 		t.Run(name, func(t *testing.T) {
@@ -163,6 +164,7 @@ func TestAnIssueGivesTheChainAndTheThumbprintOfTheCertificate(t *testing.T) {
 	}
 }
 
+// Verifies: REG-1333
 func TestAnIssueRefusesABodyThatIsNotTheVersionAndTheCSR(t *testing.T) {
 	_, csrText := csrPEM(t)
 
@@ -216,6 +218,7 @@ func TestAnIssueRefusesACSRThatIsNotOnePEMCSR(t *testing.T) {
 	}
 }
 
+// Verifies: REG-1336
 func TestAnIssueGivesTheRuleThatRefusesIt(t *testing.T) {
 	rulesErr := domain.CSRRulesError{Rules: []string{"subject C is required", `subject O must be the brand name "App"`}}
 	ruleErr := statusRuleError(t)

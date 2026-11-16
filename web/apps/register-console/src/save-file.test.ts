@@ -7,6 +7,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+// Verifies: REG-1247
 test("a save gives the text with no change in a file with the name", async () => {
   const saves = captureSaves();
   const text = "-----BEGIN CERTIFICATE-----\nAAAA\n-----END CERTIFICATE-----\n";

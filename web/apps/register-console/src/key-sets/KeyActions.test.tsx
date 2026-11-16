@@ -100,6 +100,7 @@ const key = (set: string, state: string) =>
   page.getByRole("region", { name: set, exact: true }).getByRole("region", { name: state });
 
 describe("the key actions of a key set", () => {
+  // Verifies: REG-1219
   test("offer only the step that the console API gives for each key set", async () => {
     serveKeySets(ssaPublished);
 
@@ -111,6 +112,7 @@ describe("the key actions of a key set", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1210, REG-1215
   test("a publish names the previous key that leaves the JWKS, sends the version, and shows the new state", async () => {
     const requests = serveKeySets(ssaAfterChange, ssaPublished);
     serveStep(requests, "publish-next", "success");
@@ -158,6 +160,7 @@ describe("the key actions of a key set", () => {
       );
   });
 
+  // Verifies: REG-1216
   test("an activation names the key that starts to sign and the key that becomes the previous key", async () => {
     const requests = serveKeySets(ssaPublished, ssaActivated);
     serveStep(requests, "activate-next", "success");
@@ -187,6 +190,7 @@ describe("the key actions of a key set", () => {
     await expect.element(key("SSA keys", "Previous key").getByText("ssa-2")).toBeVisible();
   });
 
+  // Verifies: REG-1220
   test("a refused step shows the detail in the confirmation, also when the current state no longer permits the step", async () => {
     serveStep(serveKeySets(ssaPublished, ssaActivated), "activate-next", "conflict");
     renderApp("/signing-keys");
