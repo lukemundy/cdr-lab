@@ -12,6 +12,7 @@ import (
 )
 
 // The Register signs the CRL, so a revocation needs no wait for a CRL that a relying party keeps.
+// Verifies: PKI-0053
 func TestARevokedCertificateIsOnTheCRLAndTheRegisterRefusesItAtOnce(t *testing.T) {
 	baseURL := labtest.Env(t, "REGISTER_SECURE_URL")
 	client := labtest.ClientCertificate(t, "PKI_REVOCATION_CLIENT_CERT", "PKI_REVOCATION_CLIENT_KEY")

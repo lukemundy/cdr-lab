@@ -54,6 +54,7 @@ func TestLoadAuthorityGivesTheIntermediateWithItsKeyAndCRLURL(t *testing.T) {
 	assert.Equal(t, "http://ca.example/crl", authority.CRLURL)
 }
 
+// Verifies: PKI-0074
 func TestLoadAuthorityReadsAKeyFileThatAnyUserCanRead(t *testing.T) {
 	_, certFile, keyFile := intermediateFiles(t, 0o644)
 

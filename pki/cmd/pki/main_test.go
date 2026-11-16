@@ -101,6 +101,7 @@ func TestInitFailsWhenOnlySomeLabCAFilesExist(t *testing.T) {
 	assert.Contains(t, stderr, "cdr/intermediate.key is missing")
 }
 
+// Verifies: PKI-0002, PKI-0011, PKI-0013
 func TestIssueGivesCertificatesThatOpenSSLVerifiesAgainstTheCDRChainOnly(t *testing.T) {
 	dir := newLabDir(t)
 
@@ -165,6 +166,7 @@ func TestIssueGivesCertificatesThatOpenSSLVerifiesAgainstTheCDRChainOnly(t *test
 	}
 }
 
+// Verifies: PKI-0014
 func TestIssueRefusesACSRThatBreaksTheCDSProfile(t *testing.T) {
 	dir := newLabDir(t)
 	cert := filepath.Join(t.TempDir(), "issued.crt")
@@ -177,6 +179,7 @@ func TestIssueRefusesACSRThatBreaksTheCDSProfile(t *testing.T) {
 	assert.NoFileExists(t, cert)
 }
 
+// Verifies: PKI-0022, PKI-0023
 func TestIssueRefusesAServerCSRWithANameThatIsNotAHostName(t *testing.T) {
 	dir := newLabDir(t)
 	cert := filepath.Join(t.TempDir(), "issued.crt")
@@ -195,6 +198,7 @@ func TestIssueRefusesAServerCSRWithANameThatIsNotAHostName(t *testing.T) {
 	assert.NoFileExists(t, cert)
 }
 
+// Verifies: PKI-0011, PKI-0077
 func TestIssuePublicGivesAKeyAndACertificateThatChainOnlyToThePublicRoot(t *testing.T) {
 	dir := newLabDir(t)
 	out := t.TempDir()
@@ -281,6 +285,7 @@ func TestAnUnknownCommandGivesTheUsage(t *testing.T) {
 }
 
 // The Register keeps the only list of revocations, and signs each CRL.
+// Verifies: PKI-0067
 func TestThePKICommandDoesNotRevokeOrSignACRL(t *testing.T) {
 	dir := newLabDir(t)
 
@@ -305,6 +310,7 @@ func issueClient(t *testing.T, dir, name string) string {
 	return cert
 }
 
+// Verifies: PKI-0040
 func TestACDRCertificateGivesTheCRLURL(t *testing.T) {
 	dir := newLabDir(t)
 	cert := issueClient(t, dir, "Recipient App Web")

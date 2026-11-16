@@ -48,6 +48,7 @@ func TestASavedLabLoadsAgain(t *testing.T) {
 	assert.True(t, lab.PublicRoot.Key.Public().(*rsa.PublicKey).Equal(got.PublicRoot.Key.Public()))
 }
 
+// Verifies: PKI-0073, PKI-0074
 func TestOnlyTheOwnerCanReadTheRootKeys(t *testing.T) {
 	dir := t.TempDir()
 	require.NoError(t, labdir.Save(dir, newLab(t)))
@@ -68,6 +69,7 @@ func TestOnlyTheOwnerCanReadTheRootKeys(t *testing.T) {
 	}
 }
 
+// Verifies: PKI-0013
 func TestTheCDRBundleHasTheIntermediateAndTheRoot(t *testing.T) {
 	dir := t.TempDir()
 	lab := newLab(t)
