@@ -116,7 +116,7 @@ const customerRoute = createRoute({
   component: CustomerPage,
 });
 
-// The URL of a form is never the URL of a record (services/register/DESIGN.md, Operator console).
+// The URL of a form is never the URL of a record (services/dataholder/design/operator-console-create.md, DH-1452).
 const createCustomerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/create/customer",
@@ -139,7 +139,7 @@ const transactionsRoute = createRoute({
   component: TransactionsPage,
 });
 
-// The URL of a form is never the URL of a record (services/register/DESIGN.md, Operator console).
+// The URL of a form is never the URL of a record (services/dataholder/design/operator-console-create.md, DH-1452).
 const createTransactionRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/customers/$customerNumber/accounts/$accountId/create-transaction",

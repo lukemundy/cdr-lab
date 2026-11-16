@@ -77,6 +77,7 @@ async function fillRequiredFields() {
 }
 
 describe("the add of a software product", () => {
+  // Verifies: REG-1417, REG-1419
   test("opens from the brand, with a new UUID, empty fields and the status ACTIVE", async () => {
     serve();
     const router = await renderDetail(`/data-recipients/${id}`);
@@ -99,6 +100,7 @@ describe("the add of a software product", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1431, REG-1432, REG-1434
   test("sends the version, each list with no empty line, and no optional field that has no value", async () => {
     const bodies = serve();
     const router = renderApp(formURL);
@@ -132,6 +134,7 @@ describe("the add of a software product", () => {
     expect(router.state.location.pathname).toBe(`/data-recipients/${id}`);
   });
 
+  // Verifies: REG-1420, REG-1436
   test("shows a status that breaks a status rule at the status field", async () => {
     const rule =
       "status is ACTIVE, but data recipient brand b-1 is INACTIVE: a software product of an INACTIVE brand must be INACTIVE or REMOVED";
@@ -157,6 +160,7 @@ describe("the add of a software product", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1438
   test("shows a stale version in the error summary", async () => {
     const detail =
       "The data recipient changed after the version in the request. The Register changed nothing.";

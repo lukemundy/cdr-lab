@@ -59,6 +59,7 @@ const field = (name: string) => page.getByRole("textbox", { name, exact: true })
 const save = () => page.getByRole("button", { name: /^Save changes/ });
 
 describe("the change of a data recipient brand", () => {
+  // Verifies: REG-1421, REG-1422
   test("opens from the detail, and shows the current values and the brand ID as text", async () => {
     serveChange(204);
     const router = renderApp(`/data-recipients/${id}`);
@@ -75,6 +76,7 @@ describe("the change of a data recipient brand", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1433, REG-1434, REG-1445, REG-1447
   test("sends each field with the loaded version, then shows the detail with a toast and the brand open", async () => {
     const bodies = serveChange(204);
     const router = renderApp(`/data-recipients/${id}/brands/${brandId}/change`);
@@ -98,6 +100,7 @@ describe("the change of a data recipient brand", () => {
       .toHaveAttribute("aria-expanded", "true");
   });
 
+  // Verifies: REG-1436, REG-1440
   test("shows a refused value at its field and in the error summary", async () => {
     serveChange(400);
     renderApp(`/data-recipients/${id}/brands/${brandId}/change`);
