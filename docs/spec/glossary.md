@@ -103,7 +103,7 @@ This glossary gives one term for each concept that two or more specifications us
 
 ### User
 
-- Lab term: a person who uses a web UI. Use it only in the design system specification, where a rule applies to each UI.
+- Lab term: a person who uses a lab UI in a browser, that is a [web UI](#web-ui) or the [consumer pages](#consumer-pages). Use it only in the design system specification, where a rule applies to each UI.
 - Not the same as: [CDR consumer](#cdr-consumer), [lab operator](#lab-operator). In a service specification, name the role.
 
 ## Consent and authorisation
@@ -269,7 +269,7 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 ### Console API
 
-- Lab term: the HTTP API of an operator console, for its web UI only.
+- Lab term: the HTTP API of an operator console, for the console only.
 
 ### Consumer pages
 
@@ -278,11 +278,11 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 ### Consumer UI
 
-- Lab term: a lab web UI for a consumer, for example the consumer pages or the online bank site ([design system DESIGN.md][ui-design]).
+- Lab term: a lab UI for a consumer in a browser: the consumer pages or the online bank site ([design system DESIGN.md][ui-design]).
 
 ### Design system
 
-- Lab term: the tokens, components and rules of the lab web UIs ([design system DESIGN.md][ui-design]).
+- Lab term: the tokens, components and rules of the lab UIs in a browser ([design system DESIGN.md][ui-design]).
 
 ### Health probes
 
@@ -327,7 +327,7 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 ### Operator console
 
-- Lab term: the lab-only web UI of a service for the lab operator.
+- Lab term: the lab-only browser UI of a service for the lab operator. It is a [web UI](#web-ui).
 - Short form: console.
 
 ### Operator interface
