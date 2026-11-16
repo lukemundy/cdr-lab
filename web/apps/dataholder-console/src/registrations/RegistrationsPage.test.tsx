@@ -23,6 +23,7 @@ function serve(data: Registration[]) {
 const table = () => page.getByRole("table", { name: "Client registrations" });
 
 describe("the client registrations page", () => {
+  // Verifies: DH-1428
   test("shows each registration with its identifiers, its times and the Register status of its software product", async () => {
     const noStatus: Registration = registration(
       otherId,

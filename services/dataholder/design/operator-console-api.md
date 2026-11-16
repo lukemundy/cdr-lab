@@ -1,6 +1,6 @@
 # Mock data holder: Operator console API
 
-This area gives the console API of the operator console. The console API is JSON over HTTP on the listener of the console, and only the console uses it. It obeys the [web UI library](../../../pkg/platform/consolehttp/DESIGN.md): [the `/api/` prefix](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0011), [404 for a path that is not an operation](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0012), [the page parameters](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0014), [the page sizes](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0015), [400 for a page that is not valid](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0016) and [an empty parameter is absent](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0017). The [operator console](../DESIGN.md#operator-console) gives the UI.
+This area gives the console API of the operator console. The console API is JSON over HTTP on the listener of the console, and only the console uses it. It obeys the [web UI library](../../../pkg/platform/consolehttp/DESIGN.md): [the `/api/` prefix](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0011), [404 for a path that is not an operation](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0012), [the page parameters](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0014), [the page sizes](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0015), [400 for a page that is not valid](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0016) and [an empty parameter is absent](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0017). The [operator console](operator-console.md) gives the UI.
 
 ## Operations
 
@@ -40,15 +40,15 @@ This area gives the console API of the operator console. The console API is JSON
 - <a id="dh-1625"></a>**DH-1625** The list of the customers, the transactions of an account and the arrangements of a registration are in pages. ([Judgement: pages only for the lists that grow](#dh-1682))
 - <a id="dh-1626"></a>**DH-1626** The accounts and the arrangements of a customer, the registrations and the participant statuses are each one response, with no pages. ([Judgement: pages only for the lists that grow](#dh-1682))
 - <a id="dh-1627"></a>**DH-1627** The transactions of an account are newest first. ([Judgement: pages only for the lists that grow](#dh-1682))
-- <a id="dh-1628"></a>**DH-1628** A search of the list of the customers finds a part of the customer number, the first name, the last name or the email address, with no difference for upper and lower case. For example, `jane` finds `Jane@example.test`. ([the search of the customers](../DESIGN.md#decisions))
+- <a id="dh-1628"></a>**DH-1628** A search of the list of the customers finds a part of the customer number, the first name, the last name or the email address, with no difference for upper and lower case. For example, `jane` finds `Jane@example.test`. ([Judgement: the records of one customer](operator-console.md#dh-1503))
 - <a id="dh-1629"></a>**DH-1629** The list of the customers is sorted by one of these values, and then by the customer number. The default is the last name. ([Judgement: the sorts of the console lists](#dh-1683))
   - the last name
   - the customer number
   - the time of the last change
   - the number of open accounts
   - the number of arrangements that did not end
-- <a id="dh-1630"></a>**DH-1630** An arrangement did not end when it has no end, and the end of its sharing is after the time of the request. ([the count of the arrangements of a customer](../DESIGN.md#decisions))
-- <a id="dh-1631"></a>**DH-1631** The registrations are sorted by one of these values, and then by the client ID. The default is the `client_name`. ([Judgement: the sorts of the console lists](#dh-1683); [Judgement: the client name as the default order of the registrations](#dh-1684))
+- <a id="dh-1630"></a>**DH-1630** An arrangement did not end when it has no end, and the end of its sharing is after the time of the request. ([Judgement: the count of the arrangements that did not end](operator-console.md#dh-1502))
+- <a id="dh-1631"></a>**DH-1631** The registrations are sorted by one of these values, and then by the client ID. The default is the `client_name`. ([Judgement: the sorts of the console lists](#dh-1683); [Judgement: the client name as the default order of the registrations](#dh-1684); [Judgement: the counts of the arrangements of a registration](operator-console.md#dh-1509))
   - the `client_name`
   - the time of the registration
   - the number of arrangements of the client ID that did not end
@@ -56,14 +56,14 @@ This area gives the console API of the operator console. The console API is JSON
 - <a id="dh-1632"></a>**DH-1632** The participant statuses are filtered by the registration: all (the default), registered or not registered. ([CDS: Metadata Cache Management][cds-metadata-cache])
 - <a id="dh-1633"></a>**DH-1633** The participant statuses are sorted by the name (the default) or by the status, and then by the software product ID. ([Judgement: the sorts of the console lists](#dh-1683))
 - <a id="dh-1634"></a>**DH-1634** In a sort of the participant statuses by the name, each software product with no registration comes after the registered software products, in both directions. ([Judgement: a software product with no registration after the names](#dh-1685))
-- <a id="dh-1635"></a>**DH-1635** The arrangements of a registration are each arrangement of its client ID, also an arrangement that ended. ([the arrangements of a registration](../DESIGN.md#decisions))
-- <a id="dh-1636"></a>**DH-1636** Each arrangement of a registration has its `arrangementId`, the customer number, the `firstName` and the `lastName` of the customer, the status, the time of the confirmation and the end of the sharing. ([the customer in the arrangements of a registration](../DESIGN.md#decisions))
-- <a id="dh-1637"></a>**DH-1637** The arrangements of a registration are newest first by the time of the confirmation, and then by the `arrangementId`. ([the arrangements of a registration](../DESIGN.md#decisions))
-- <a id="dh-1638"></a>**DH-1638** The detail of a registration does not give its arrangements. ([the arrangements of a registration](../DESIGN.md#decisions))
+- <a id="dh-1635"></a>**DH-1635** The arrangements of a registration are each arrangement of its client ID, also an arrangement that ended. ([Judgement: the arrangements of a registration in pages](operator-console.md#dh-1511))
+- <a id="dh-1636"></a>**DH-1636** Each arrangement of a registration has its `arrangementId`, the customer number, the `firstName` and the `lastName` of the customer, the status, the time of the confirmation and the end of the sharing. ([Judgement: the customer in the arrangements of a registration](operator-console.md#dh-1512))
+- <a id="dh-1637"></a>**DH-1637** The arrangements of a registration are newest first by the time of the confirmation, and then by the `arrangementId`. ([Judgement: the arrangements of a registration in pages](operator-console.md#dh-1511))
+- <a id="dh-1638"></a>**DH-1638** The detail of a registration does not give its arrangements. ([Judgement: the arrangements of a registration in pages](operator-console.md#dh-1511))
 
 ## Customers, arrangements and registrations
 
-- <a id="dh-1639"></a>**DH-1639** The detail of a customer gives, for each arrangement, its client ID, and if a registration has that client ID now. ([the link from an arrangement to a registration](../DESIGN.md#decisions))
+- <a id="dh-1639"></a>**DH-1639** The detail of a customer gives, for each arrangement, its client ID, and if a registration has that client ID now. ([Judgement: the link from an arrangement to its registration](operator-console.md#dh-1508))
 - <a id="dh-1640"></a>**DH-1640** The status of an arrangement is `ENDED` after an event ended it, and at and after the end of its sharing. Otherwise it is `CURRENT`. ([the end of an arrangement](end-of-an-arrangement.md#dh-0900); [Judgement: the status of an arrangement in the console API](#dh-1686))
 - <a id="dh-1641"></a>**DH-1641** An arrangement has `endedAt` and `endReason` only when an event ended it. ([operator interface: the end of an arrangement](operator-interface.md#dh-0760); [Judgement: the status of an arrangement in the console API](#dh-1686))
 - <a id="dh-1642"></a>**DH-1642** A registration has these fields. The list and the detail give the same object. ([CDS: Dynamic Client Registration][cds-dcr-endpoints]; [Judgement: the registrations in the console API](#dh-1687))
@@ -96,14 +96,14 @@ This area gives the console API of the operator console. The console API is JSON
 ## Overview
 
 - <a id="dh-1661"></a>**DH-1661** The overview gives the counts and the 10 newest changes in one response, from one read of the database. ([Judgement: one read for the overview](#dh-1693))
-- <a id="dh-1662"></a>**DH-1662** The changes of the overview are newest first. ([the changes in the overview](../DESIGN.md#decisions))
-- <a id="dh-1663"></a>**DH-1663** Each change of the overview has `time` (UTC) and `kind`. When the kind has them, it also has these fields. ([the changes in the overview](../DESIGN.md#decisions); [ADR 0012][adr-0012])
+- <a id="dh-1662"></a>**DH-1662** The changes of the overview are newest first. ([Judgement: the changes in the overview](operator-console.md#dh-1501))
+- <a id="dh-1663"></a>**DH-1663** Each change of the overview has `time` (UTC) and `kind`. When the kind has them, it also has these fields. ([Judgement: the changes in the overview](operator-console.md#dh-1501); [ADR 0012][adr-0012])
   - `customerNumber`
   - `clientId`, `clientName` and `clientRegistered` (if a registration has the client ID now)
   - `productName`
   - `sharingEndsAt`
   - `endReason` and `withdrawalMethod`
-- <a id="dh-1664"></a>**DH-1664** The overview has no name or email address of a customer, no display name of an account and no account number. ([the content of the overview](../DESIGN.md#decisions))
+- <a id="dh-1664"></a>**DH-1664** The overview has no name or email address of a customer, no display name of an account and no account number. ([Judgement: the content of the overview](operator-console.md#dh-1500))
 
 ## Judgements
 
