@@ -17,6 +17,7 @@ func requireInvalidGrant(t *testing.T, r reply) {
 	assert.Equal(t, "invalid_grant", r.body["error"])
 }
 
+// Verifies: AUTH-0205
 func TestTheTokenResponsesHaveTheArrangementID(t *testing.T) {
 	_, recipient := newAuthServer(t)
 
@@ -42,6 +43,7 @@ func TestAClientCredentialsResponseHasNoArrangementID(t *testing.T) {
 	assert.NotContains(t, resp.body, "cdr_arrangement_id")
 }
 
+// Verifies: AUTH-0210, AUTH-0215, AUTH-0216
 func TestTheIDTokenHasTheSubjectAndTheAuthenticationOfTheConsent(t *testing.T) {
 	server, recipient := newAuthServer(t)
 
@@ -60,6 +62,7 @@ func TestTheIDTokenHasTheSubjectAndTheAuthenticationOfTheConsent(t *testing.T) {
 	}
 }
 
+// Verifies: AUTH-0209
 func TestTheRefreshTokenExpiresWhenTheSharingOfTheConsentEnds(t *testing.T) {
 	server, recipient := newAuthServer(t)
 
@@ -70,6 +73,7 @@ func TestTheRefreshTokenExpiresWhenTheSharingOfTheConsentEnds(t *testing.T) {
 	assert.Equal(t, grant.Store["sharing_ends_at"], grant.RefreshTokenExpiresAt)
 }
 
+// Verifies: AUTH-0211
 func TestARefreshDoesNotChangeTheRefreshToken(t *testing.T) {
 	_, recipient := newAuthServer(t)
 	refreshToken := recipient.exchange(recipient.authorise(sharing))["refresh_token"].(string)
@@ -85,6 +89,7 @@ func TestARefreshDoesNotChangeTheRefreshToken(t *testing.T) {
 	}
 }
 
+// Verifies: AUTH-0202, AUTH-0203
 func TestEachLaterUseOfACodeGivesInvalidGrantAndEndsItsRefreshToken(t *testing.T) {
 	_, recipient := newAuthServer(t)
 	a := recipient.authorise(sharing)
@@ -95,6 +100,7 @@ func TestEachLaterUseOfACodeGivesInvalidGrantAndEndsItsRefreshToken(t *testing.T
 	requireInvalidGrant(t, recipient.refreshAs(clientID, tokens["refresh_token"].(string)))
 }
 
+// Verifies: AUTH-0204
 func TestAnExchangeThatFailsEndsTheCode(t *testing.T) {
 	_, recipient := newAuthServer(t)
 	a := recipient.authorise(sharing)
@@ -105,12 +111,14 @@ func TestAnExchangeThatFailsEndsTheCode(t *testing.T) {
 	requireInvalidGrant(t, recipient.exchangeAs(clientID, a))
 }
 
+// Verifies: AUTH-0202
 func TestACodeOfADifferentClientGivesInvalidGrant(t *testing.T) {
 	_, recipient := newAuthServer(t)
 
 	requireInvalidGrant(t, recipient.exchangeAs(otherClientID, recipient.authorise(sharing)))
 }
 
+// Verifies: AUTH-0202
 func TestAnExpiredCodeGivesInvalidGrant(t *testing.T) {
 	server, recipient := newAuthServer(t)
 	a := recipient.authorise(sharing)
@@ -123,6 +131,7 @@ func TestAnExpiredCodeGivesInvalidGrant(t *testing.T) {
 	requireInvalidGrant(t, recipient.exchangeAs(clientID, a))
 }
 
+// Verifies: AUTH-0212
 func TestARefreshTokenThatTheClientCannotUseGivesInvalidGrant(t *testing.T) {
 	server, recipient := newAuthServer(t)
 	refreshToken := recipient.exchange(recipient.authorise(sharing))["refresh_token"].(string)
@@ -139,6 +148,7 @@ func TestARefreshTokenThatTheClientCannotUseGivesInvalidGrant(t *testing.T) {
 	requireInvalidGrant(t, recipient.refreshAs(clientID, refreshToken))
 }
 
+// Verifies: AUTH-0213
 func TestARefreshWithANewCertificateGivesATokenThatIsBoundToIt(t *testing.T) {
 	server, recipient := newAuthServer(t)
 	tokens := recipient.exchange(recipient.authorise(sharing))
@@ -158,6 +168,7 @@ func TestARefreshWithANewCertificateGivesATokenThatIsBoundToIt(t *testing.T) {
 	assert.Equal(t, before, server.claims(t, again.body["access_token"].(string))["cnf"])
 }
 
+// Verifies: AUTH-0219
 func TestIntrospectionOfARefreshTokenOfTheClientGivesTheArrangement(t *testing.T) {
 	server, recipient := newAuthServer(t)
 	refreshToken := recipient.exchange(recipient.authorise(sharing))["refresh_token"].(string)
@@ -176,6 +187,7 @@ func TestIntrospectionOfARefreshTokenOfTheClientGivesTheArrangement(t *testing.T
 	assert.Equal(t, "no-store", resp.header.Get("Cache-Control"))
 }
 
+// Verifies: AUTH-0220
 func TestIntrospectionOfEachOtherTokenGivesOnlyNotActive(t *testing.T) {
 	server, recipient := newAuthServer(t)
 	tokens := recipient.exchange(recipient.authorise(sharing))
@@ -205,6 +217,7 @@ func TestIntrospectionOfEachOtherTokenGivesOnlyNotActive(t *testing.T) {
 	}
 }
 
+// Verifies: AUTH-0221
 func TestIntrospectionRefusesARequestThatIsNotValid(t *testing.T) {
 	_, recipient := newAuthServer(t)
 	refreshToken := recipient.exchange(recipient.authorise(sharing))["refresh_token"].(string)

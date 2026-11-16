@@ -10,6 +10,7 @@ import (
 	"github.com/lukemundy/cdr-lab/pkg/authserver/internal/cdsrules"
 )
 
+// Verifies: AUTH-0208
 func TestAnAccessTokenOfAConsentHasNoLifetimeAfterTheEndOfTheSharing(t *testing.T) {
 	now := time.Date(2026, 10, 17, 9, 0, 0, 0, time.UTC)
 	grant := func(sharingDuration time.Duration, endsIn time.Duration) *goidc.Grant {

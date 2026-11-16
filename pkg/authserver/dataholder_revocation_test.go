@@ -106,6 +106,7 @@ func (b *bank) consentTokenValid(token string) bool {
 	return true
 }
 
+// Verifies: AUTH-0224
 func TestARevokedAccessTokenOfAConsentIsRefusedAndANewAccessTokenFromTheRefreshTokenIsValid(t *testing.T) {
 	b := newBank(t)
 	tokens := b.exchange(b.authorise(hour))
@@ -120,6 +121,7 @@ func TestARevokedAccessTokenOfAConsentIsRefusedAndANewAccessTokenFromTheRefreshT
 	assert.True(t, b.consentTokenValid(r.body["access_token"].(string)))
 }
 
+// Verifies: AUTH-0224
 func TestARevokedClientCredentialsTokenIsRefused(t *testing.T) {
 	b := newBank(t)
 	accessToken := b.accessToken()
@@ -130,6 +132,7 @@ func TestARevokedClientCredentialsTokenIsRefused(t *testing.T) {
 	require.ErrorIs(t, err, authserver.ErrInvalidToken)
 }
 
+// Verifies: AUTH-0223
 func TestARevokedRefreshTokenEndsEachTokenOfItsGrant(t *testing.T) {
 	b := newBank(t)
 	tokens := b.exchange(b.authorise(hour))
@@ -145,6 +148,7 @@ func TestARevokedRefreshTokenEndsEachTokenOfItsGrant(t *testing.T) {
 	assert.False(t, b.consentTokenValid(refreshed.body["access_token"].(string)))
 }
 
+// Verifies: AUTH-0225
 func TestATokenOfADifferentClientGivesUnauthorizedClientAndDoesNotChange(t *testing.T) {
 	b := newBank(t)
 	tokens := b.exchange(b.authorise(hour))
@@ -162,6 +166,7 @@ func TestATokenOfADifferentClientGivesUnauthorizedClientAndDoesNotChange(t *test
 	require.NoError(t, err)
 }
 
+// Verifies: AUTH-0226
 func TestRevocationOfAValueThatIsNotAnActiveTokenOfTheClientGivesOKAndChangesNothing(t *testing.T) {
 	b := newBank(t)
 	tokens := b.exchange(b.authorise(hour))
@@ -183,6 +188,7 @@ func TestRevocationOfAValueThatIsNotAnActiveTokenOfTheClientGivesOKAndChangesNot
 	assert.Equal(t, true, b.introspect(tokens["refresh_token"].(string)).body["active"])
 }
 
+// Verifies: AUTH-0222
 func TestTheTokenTypeHintHasNoEffect(t *testing.T) {
 	b := newBank(t)
 	tokens := b.exchange(b.authorise(hour))
@@ -200,6 +206,7 @@ func TestTheTokenTypeHintHasNoEffect(t *testing.T) {
 	assert.Equal(t, true, b.introspect(refreshToken).body["active"])
 }
 
+// Verifies: AUTH-0032, AUTH-0227
 func TestRevocationRefusesARequestThatIsNotValid(t *testing.T) {
 	b := newBank(t)
 
