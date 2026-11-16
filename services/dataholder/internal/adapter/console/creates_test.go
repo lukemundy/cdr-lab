@@ -35,6 +35,7 @@ func (r records) withCreates() records {
 	return r
 }
 
+// Verifies: DH-1653
 func TestACreateOfACustomerGivesTheLocationOfTheNewCustomerAndNoBody(t *testing.T) {
 	r := newRecords(t).withCreates()
 
@@ -87,7 +88,7 @@ func TestACustomerWithTheEmailAddressOfADifferentCustomerGivesAConflictAtTheEmai
 	assert.Contains(t, get(t, r.ports, "/api/customers").body, `"totalRecords":1`)
 }
 
-// Verifies: PROB-0002, PROB-0003
+// Verifies: PROB-0002, PROB-0003, DH-1656
 func TestACustomerThatTheRulesRefuseGivesAnErrorAtEachFieldAndIsNotCreated(t *testing.T) {
 	r := newRecords(t).withCreates()
 
@@ -108,6 +109,7 @@ func TestACustomerThatTheRulesRefuseGivesAnErrorAtEachFieldAndIsNotCreated(t *te
 	assert.JSONEq(t, `{"data": [], "totalRecords": 0}`, get(t, r.ports, "/api/customers").body)
 }
 
+// Verifies: DH-1620
 func TestACreateOfACustomerWithABodyThatIsNotValidIsABadRequestWithNoValue(t *testing.T) {
 	r := newRecords(t).withCreates()
 
@@ -154,6 +156,7 @@ func accountsOf(t *testing.T, ports console.Ports, customerNumber string) accoun
 	return detail
 }
 
+// Verifies: DH-1653
 func TestACreateOfAnAccountGivesTheLocationOfTheNewAccountAndNoBody(t *testing.T) {
 	r := newRecords(t).withCreates()
 	addCustomer(t, r.customers, "00000001", "Alex", "Example")
@@ -217,6 +220,7 @@ func TestAnAccountThatTheRulesRefuseGivesAnErrorAtEachFieldAndIsNotCreated(t *te
 	assert.Empty(t, accountsOf(t, r.ports, "00000001").Accounts)
 }
 
+// Verifies: DH-1657
 func TestACreditLimitWithNoValidFormatGivesAnErrorAtTheCreditLimitAndAtEachOtherRefusedValue(t *testing.T) {
 	r := newRecords(t).withCreates()
 	addCustomer(t, r.customers, "00000001", "Alex", "Example")
@@ -241,6 +245,7 @@ func TestACreditLimitWithNoValidFormatGivesAnErrorAtTheCreditLimitAndAtEachOther
 	assert.Empty(t, accountsOf(t, r.ports, "00000001").Accounts)
 }
 
+// Verifies: DH-1660
 func TestAnAccountWithTheBSBAndAccountNumberOfADifferentAccountGivesAConflictAtTheAccountNumber(t *testing.T) {
 	r := newRecords(t).withCreates()
 	addCustomer(t, r.customers, "00000001", "Alex", "Example")
@@ -265,6 +270,7 @@ func TestAnAccountWithTheBSBAndAccountNumberOfADifferentAccountGivesAConflictAtT
 	assert.Empty(t, accountsOf(t, r.ports, "00000001").Accounts)
 }
 
+// Verifies: DH-1622
 func TestACreateOfAnAccountForAnUnknownCustomerIsNotFoundWithNoCustomerNumber(t *testing.T) {
 	r := newRecords(t).withCreates()
 

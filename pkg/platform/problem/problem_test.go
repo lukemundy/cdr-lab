@@ -94,18 +94,16 @@ func TestNoFieldErrorsIsAProblemWithNoType(t *testing.T) {
 	)
 }
 
-func TestATypedProblemHasTheTypeAndTheTitleOfTheService(t *testing.T) {
+// Verifies: PROB-0010
+func TestASessionThatEndedHasTheSessionEndedType(t *testing.T) {
 	rec := httptest.NewRecorder()
 
-	problem.WriteTyped(
-		rec, "https://service.example/problems#session-ended", "The session ended", http.StatusForbidden,
-		"Sign in again.",
-	)
+	problem.WriteSessionEnded(rec, http.StatusForbidden, "Sign in again.")
 
 	require.Equal(t, http.StatusForbidden, rec.Code)
 	assert.Equal(t, "application/problem+json", rec.Header().Get("Content-Type"))
 	assert.JSONEq(t, `{
-		"type": "https://service.example/problems#session-ended",
+		"type": "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0010",
 		"title": "The session ended",
 		"status": 403,
 		"detail": "Sign in again."

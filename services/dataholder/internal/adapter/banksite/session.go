@@ -24,7 +24,6 @@ type Customers interface {
 }
 
 const (
-	sessionEndedType = "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#session"
 	// A sign-up, a sign-in or an open is a few hundred bytes.
 	maxBodyBytes = 4 << 10
 	notSignedIn  = "We could not sign you in. Check your email address or customer number."
@@ -74,9 +73,7 @@ func (s sessions) refuse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.expire(w)
-	problem.WriteTyped(
-		w, sessionEndedType, "The session ended", http.StatusForbidden, "The bank signed you out. Sign in again.",
-	)
+	problem.WriteSessionEnded(w, http.StatusForbidden, "The bank signed you out. Sign in again.")
 }
 
 // start ends the session of the request, so that each sign-in and sign-up has a new session ID.

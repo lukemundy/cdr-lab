@@ -101,6 +101,7 @@ func signedInGet(t *testing.T, reader *accounts, target string) response {
 	})
 }
 
+// Verifies: DH-1745, DH-1750, DH-1751
 func TestTheAccountsAreThoseOfTheCustomerOfTheSessionWithTheFieldsOfTheCDSAndTheBalance(t *testing.T) {
 	resp := signedInGet(t, &accounts{list: []app.AccountDetail{everyday()}}, "/api/accounts")
 
@@ -121,6 +122,7 @@ func arrangement(id, clientName string) domain.ArrangementState {
 	}}
 }
 
+// Verifies: DH-1762
 func TestTheCloseOfTheLastOpenAccountGivesEachArrangementThatEndsWithItsClientName(t *testing.T) {
 	ended := arrangement("arrangement-3", "Ended App")
 	ended.EndedAt, ended.EndReason = now.Add(-time.Minute), domain.EndReasonRevokedByDataRecipient
@@ -151,6 +153,7 @@ func TestTheCloseOfTheLastOpenAccountGivesEachArrangementThatEndsWithItsClientNa
 	assert.JSONEq(t, `[]`, string(body.Accounts[1].Actions), "a closed account has no action")
 }
 
+// Verifies: DH-1763
 func TestTheCloseOfAnAccountThatIsNotTheLastOpenAccountEndsNoArrangement(t *testing.T) {
 	second := everyday()
 	second.Account.AccountID = "account-2"
@@ -172,6 +175,7 @@ func TestACustomerWithNoAccountsHasAnEmptyList(t *testing.T) {
 	assert.JSONEq(t, `{"accounts": []}`, resp.body)
 }
 
+// Verifies: DH-1747
 func TestTheBalanceHasTheFieldsOfBankingBalance(t *testing.T) {
 	resp := signedInGet(t, &accounts{list: []app.AccountDetail{everyday()}}, "/api/accounts/account-1/balance")
 
@@ -179,6 +183,7 @@ func TestTheBalanceHasTheFieldsOfBankingBalance(t *testing.T) {
 	assert.JSONEq(t, `{"currentBalance": "-4.50", "availableBalance": "95.50", "creditLimit": "100.00"}`, resp.body)
 }
 
+// Verifies: DH-1746, DH-1748
 func TestTheTransactionsHaveTheFieldsOfBankingTransactionV2WithTheIdentifiersOfTheDataHolder(t *testing.T) {
 	posted := time.Date(2026, 10, 31, 1, 2, 3, 0, time.FixedZone("AWST", 8*60*60))
 	reader := &accounts{
@@ -219,6 +224,7 @@ func TestTheTransactionsHaveTheFieldsOfBankingTransactionV2WithTheIdentifiersOfT
 	]}`, resp.body)
 }
 
+// Verifies: DH-1754
 func TestTheTransactionsHaveThePageOfTheRequest(t *testing.T) {
 	reader := &accounts{list: []app.AccountDetail{everyday()}}
 
@@ -242,6 +248,7 @@ func TestAPageThatIsNotValidIsABadRequest(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1743
 func TestTheAccountDataNeedsASession(t *testing.T) {
 	for _, target := range []string{
 		"/api/accounts", "/api/accounts/account-1/balance", "/api/accounts/account-1/transactions",
@@ -259,6 +266,7 @@ func TestTheAccountDataNeedsASession(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1753
 func TestAnAccountOfADifferentCustomerIsNotFound(t *testing.T) {
 	for _, target := range []string{"/api/accounts/account-9/balance", "/api/accounts/account-9/transactions"} {
 		t.Run(target, func(t *testing.T) {
@@ -284,6 +292,7 @@ func TestAFailureOfTheAccountDataIsAServerError(t *testing.T) {
 }
 
 // The operator interface has no removal of a customer, but a session must not outlive its customer in each case.
+// Verifies: DH-1744
 func TestASessionOfACustomerThatTheDataHolderNoLongerHasEnds(t *testing.T) {
 	for _, target := range []string{
 		"/api/accounts", "/api/accounts/account-1/balance", "/api/accounts/account-1/transactions",
