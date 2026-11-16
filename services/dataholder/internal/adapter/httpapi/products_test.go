@@ -148,6 +148,7 @@ func TestGetProductsAsksForTheCurrentProductsAtTheTimeOfTheRequestWhenTheRequest
 	}
 }
 
+// Verifies: DH-0243
 func TestGetProductsAsksForTheFiltersAndThePageOfTheRequestAndGivesThemInEachLink(t *testing.T) {
 	reader := oneHomeLoan()
 	reader.total = 5
@@ -188,6 +189,7 @@ func TestGetProductsAsksForTheFiltersAndThePageOfTheRequestAndGivesThemInEachLin
 	}, body.Links)
 }
 
+// Verifies: DH-0238
 func TestGetProductsAcceptsEachValueOfTheEffectiveFilter(t *testing.T) {
 	for _, effective := range []app.Effective{app.EffectiveCurrent, app.EffectiveFuture, app.EffectiveAll} {
 		t.Run(string(effective), func(t *testing.T) {

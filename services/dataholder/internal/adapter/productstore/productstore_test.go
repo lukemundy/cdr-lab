@@ -93,6 +93,7 @@ func TestImportProductsKeepsEachFieldOfAProduct(t *testing.T) {
 	assert.Equal(t, saver.Name, stored.Name)
 }
 
+// Verifies: DH-0227
 func TestImportProductsRefusesAStoreThatHasProducts(t *testing.T) {
 	pool := newPool(t)
 	store := productstore.New(pool)

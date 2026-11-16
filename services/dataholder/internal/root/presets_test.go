@@ -22,7 +22,7 @@ import (
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/domain"
 )
 
-// These tests check the rules of DESIGN.md (Brand directory, Product reference data) for each preset brand. The
+// These tests check the rules of design/brand.md and design/product-reference-data.md for each preset brand. The
 // contrast of each preset is a test of the design system (web/packages/tokens).
 
 func presetBrands(t *testing.T) map[string]branddir.Brand {
@@ -58,6 +58,7 @@ func catalogue(t *testing.T, brand branddir.Brand) []domain.Product {
 // test top-level domain does not occur in these names.
 var blockedWords = regexp.MustCompile(`(?i)\b(mock|example|sample|demo|test|fake|dummy)\b`)
 
+// Verifies: DH-0361
 func TestNoNameOfAPresetBrandHasABlockedWord(t *testing.T) {
 	for name, brand := range presetBrands(t) {
 		t.Run(name, func(t *testing.T) {
@@ -82,6 +83,7 @@ func TestEachPresetBrandHasTheBSBOfTheDecision(t *testing.T) {
 	}, bsbs)
 }
 
+// Verifies: DH-0222, DH-0223
 func TestTheCatalogueOfEachPresetBrandHasFiveCategoriesAFutureProductAndAPastProduct(t *testing.T) {
 	now := time.Now()
 
@@ -158,6 +160,7 @@ func (c catalogueReader) Product(_ context.Context, id string) (domain.Product, 
 	return domain.Product{}, app.ErrProductNotFound
 }
 
+// Verifies: DH-0225
 func TestTheProductResponsesOfEachPresetBrandAreValidAgainstTheCDSSpecification(t *testing.T) {
 	specJSON, err := os.ReadFile("../../../../conformance/dataholder/spec/cds_banking.json")
 	require.NoError(t, err)

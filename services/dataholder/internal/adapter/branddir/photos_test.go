@@ -93,6 +93,7 @@ func TestAValidDirectoryWithNoPhotosHasNoPhotos(t *testing.T) {
 	assert.Empty(t, brand.Photos())
 }
 
+// Verifies: DH-0335
 func TestTheBrandFileHasALayoutOfTheSite(t *testing.T) {
 	for name, file := range map[string]string{
 		"missing": `{"brandName": "Coastal Bank", "bsb": "376100"}`,
@@ -127,6 +128,7 @@ func TestEachLayoutHasTheAspectRatioOfItsHeroPhoto(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0351, DH-0352, DH-0353
 func TestEachPhotoIsAWebPImageOfItsSizeAndAspectRatio(t *testing.T) {
 	tests := map[string]struct {
 		file string
@@ -184,6 +186,7 @@ func TestEachPhotoIsAWebPImageOfItsSizeAndAspectRatio(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0352, DH-0353
 func TestAPhotoCanBeAtItsLimits(t *testing.T) {
 	_, err := load(t, withPhotos(t, map[string][]byte{
 		"hero.webp":                   webp(lossy, 2400, 1800, 256<<10),
@@ -195,6 +198,7 @@ func TestAPhotoCanBeAtItsLimits(t *testing.T) {
 }
 
 // A brand directory can be one ConfigMap, which is at most 1 MiB.
+// Verifies: DH-0357
 func TestTheBrandDirectoryIs1MiBOrLessInAll(t *testing.T) {
 	dir := validDir(t)
 	tokens := dir["tokens.json"].Data
@@ -206,6 +210,7 @@ func TestTheBrandDirectoryIs1MiBOrLessInAll(t *testing.T) {
 	require.ErrorContains(t, err, "the files of the brand directory are more than 1 MiB in all: give 1 MiB or less")
 }
 
+// Verifies: DH-0341
 func TestTheTokensHaveAHeadingFontOfTheDataHolder(t *testing.T) {
 	dir := validDir(t)
 	changeTokens(t, dir, func(tokens map[string]map[string]any) { setValue(tokens, "font", "heading", "Papyrus") })

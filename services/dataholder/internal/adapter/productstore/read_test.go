@@ -54,6 +54,7 @@ func effective(id string, from, to *time.Time) domain.Product {
 	return p
 }
 
+// Verifies: DH-0241, DH-0242
 func TestProductsGivesTheNewestLastUpdatedFirstAndThenTheOrderOfProductID(t *testing.T) {
 	store := storeWith(
 		t,
@@ -82,6 +83,7 @@ func TestProductsGivesEachFieldOfAProduct(t *testing.T) {
 	assert.Equal(t, []domain.Product{saver}, page)
 }
 
+// Verifies: DH-0219, DH-0220, DH-0238
 func TestProductsGivesTheProductsThatAreEffectiveAtTheTimeOfTheQuery(t *testing.T) {
 	store := storeWith(
 		t,
@@ -115,6 +117,7 @@ func TestProductsGivesTheProductsThatAreEffectiveAtTheTimeOfTheQuery(t *testing.
 	}
 }
 
+// Verifies: DH-0237
 func TestProductsGivesOnlyTheProductsThatMatchEachFilter(t *testing.T) {
 	loan := updated("loan", hourAfter)
 	loan.ProductCategory = domain.CategoryPersLoans
