@@ -621,7 +621,7 @@ jobs:
           docker push --all-tags "$DATAHOLDER_IMAGE"
           docker logout ghcr.io
 
-  # Known vulnerabilities and known malicious packages (MAL- advisories) in the Go and npm dependencies.
+  # The structure of the specifications and the Verifies comments of the tests (ADR 0024).
   spec:
     needs: changes
     if: needs.changes.outputs.spec == 'true'
@@ -637,6 +637,7 @@ jobs:
       - name: Check the specifications
         run: mise run lint:spec
 
+  # Known vulnerabilities and known malicious packages (MAL- advisories) in the Go and npm dependencies.
   audit:
     needs: changes
     if: needs.changes.outputs.audit == 'true'
