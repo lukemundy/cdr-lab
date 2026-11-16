@@ -101,7 +101,7 @@ func TestInitFailsWhenOnlySomeLabCAFilesExist(t *testing.T) {
 	assert.Contains(t, stderr, "cdr/intermediate.key is missing")
 }
 
-// Verifies: PKI-0002, PKI-0011, PKI-0013
+// Verifies: PKI-0002, PKI-0013, CA-0009
 func TestIssueGivesCertificatesThatOpenSSLVerifiesAgainstTheCDRChainOnly(t *testing.T) {
 	dir := newLabDir(t)
 
@@ -166,7 +166,7 @@ func TestIssueGivesCertificatesThatOpenSSLVerifiesAgainstTheCDRChainOnly(t *test
 	}
 }
 
-// Verifies: PKI-0014
+// Verifies: CA-0010
 func TestIssueRefusesACSRThatBreaksTheCDSProfile(t *testing.T) {
 	dir := newLabDir(t)
 	cert := filepath.Join(t.TempDir(), "issued.crt")
@@ -179,7 +179,7 @@ func TestIssueRefusesACSRThatBreaksTheCDSProfile(t *testing.T) {
 	assert.NoFileExists(t, cert)
 }
 
-// Verifies: PKI-0022, PKI-0023
+// Verifies: CA-0018, CA-0019
 func TestIssueRefusesAServerCSRWithANameThatIsNotAHostName(t *testing.T) {
 	dir := newLabDir(t)
 	cert := filepath.Join(t.TempDir(), "issued.crt")
@@ -198,7 +198,7 @@ func TestIssueRefusesAServerCSRWithANameThatIsNotAHostName(t *testing.T) {
 	assert.NoFileExists(t, cert)
 }
 
-// Verifies: PKI-0011, PKI-0077
+// Verifies: PKI-0077, CA-0009
 func TestIssuePublicGivesAKeyAndACertificateThatChainOnlyToThePublicRoot(t *testing.T) {
 	dir := newLabDir(t)
 	out := t.TempDir()
@@ -310,7 +310,7 @@ func issueClient(t *testing.T, dir, name string) string {
 	return cert
 }
 
-// Verifies: PKI-0040
+// Verifies: CA-0034
 func TestACDRCertificateGivesTheCRLURL(t *testing.T) {
 	dir := newLabDir(t)
 	cert := issueClient(t, dir, "Recipient App Web")

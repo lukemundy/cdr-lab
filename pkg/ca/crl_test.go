@@ -12,7 +12,7 @@ import (
 	"github.com/lukemundy/cdr-lab/pkg/ca"
 )
 
-// Verifies: PKI-0054, PKI-0056, PKI-0057, PKI-0058, PKI-0060
+// Verifies: CA-0042, CA-0044, CA-0045, CA-0046, CA-0047
 func TestTheCRLIsSignedByTheIntermediateAndValidForSevenDays(t *testing.T) {
 	lab := newLab(t)
 	revoked := []ca.Revocation{
@@ -49,7 +49,7 @@ func TestAnEmptyCRLIsValid(t *testing.T) {
 	assert.Empty(t, crl.RevokedCertificateEntries)
 }
 
-// Verifies: PKI-0051
+// Verifies: CA-0041
 func TestParseReasonAcceptsOnlyTheReasonsForALeafCertificate(t *testing.T) {
 	for name, want := range map[string]ca.Reason{
 		"unspecified":          ca.Unspecified,
@@ -72,7 +72,7 @@ func TestParseReasonAcceptsOnlyTheReasonsForALeafCertificate(t *testing.T) {
 	}
 }
 
-// Verifies: PKI-0040
+// Verifies: CA-0034
 func TestACDRCertificateHasTheCRLURLOfItsIssuer(t *testing.T) {
 	lab := newLab(t)
 	lab.CDRIntermediate.CRLURL = "http://register:8085/crl/cdr-intermediate.crl"
@@ -104,7 +104,7 @@ func TestAReasonGivesItsRFC5280Name(t *testing.T) {
 	}
 }
 
-// Verifies: PKI-0055
+// Verifies: CA-0043
 func TestAnUnspecifiedRevocationHasNoReasonCode(t *testing.T) {
 	lab := newLab(t)
 
