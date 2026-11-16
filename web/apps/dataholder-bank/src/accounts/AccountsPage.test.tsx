@@ -22,6 +22,7 @@ const terms = (within: Element) =>
 const noSharing =
   "You cannot share your data under the Consumer Data Right until you have an open account.";
 
+// Verifies: DH-2200, DH-2201
 test("the accounts page shows the open accounts, then the closed accounts in a group", async () => {
   serveAccounts([
     account("account-1", {
@@ -73,6 +74,7 @@ test("the accounts page shows the open accounts, then the closed accounts in a g
   expect(page.getByText(noSharing).query()).toBeNull();
 });
 
+// Verifies: DH-2202
 test("a customer with no account sees that they cannot share data", async () => {
   serveAccounts([]);
 
@@ -83,6 +85,7 @@ test("a customer with no account sees that they cannot share data", async () => 
   expect(page.getByRole("region", { name: "Closed accounts" }).query()).toBeNull();
 });
 
+// Verifies: DH-2202
 test("a customer with only closed accounts sees that they cannot share data", async () => {
   serveAccounts([account("account-2", { displayName: "Old Saver", openStatus: "CLOSED" })]);
 

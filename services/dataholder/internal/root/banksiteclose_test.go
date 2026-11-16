@@ -16,7 +16,7 @@ import (
 
 // All customer, account and arrangement data in this file is invented.
 
-// DESIGN.md: Tests of the end of eligibility through the site.
+// Verifies: DH-2244, DH-0918
 func TestTheSiteCloseOfTheLastOpenAccountEndsEachConsentOfTheCustomerForTheEndOfEligibility(t *testing.T) {
 	lab := newSiteLab(t)
 	lab.consent(t, "arrangement-1", "account-1")
@@ -62,6 +62,7 @@ func TestTheSiteCloseOfTheLastOpenAccountEndsEachConsentOfTheCustomerForTheEndOf
 	}
 }
 
+// Verifies: DH-2245
 func TestASiteCloseAfterAConsentStartsAfterTheReadOfTheCloseActionChangesNothing(t *testing.T) {
 	lab := newSiteLab(t)
 	lab.consent(t, "arrangement-1", "account-1")

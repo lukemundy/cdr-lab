@@ -26,6 +26,7 @@ const rows = () =>
     [...row.querySelectorAll("[data-cell]")].map((cell) => cell.textContent),
   );
 
+// Verifies: DH-2203, DH-2206, DH-2207
 test("the page of an account shows its fields, its balance and its transactions", async () => {
   serveAccounts([card], {
     "account-1": [
@@ -81,6 +82,7 @@ test("the page of an account shows its fields, its balance and its transactions"
   await expect.element(page.getByText("Merchant category code:5814")).toBeVisible();
 });
 
+// Verifies: DH-2205
 test("the transactions have pages", async () => {
   const many = Array.from({ length: 27 }, (_, i) =>
     transaction(`transaction-${i}`, { description: `Purchase ${i + 1}` }),
@@ -109,6 +111,7 @@ test("an account with no transactions says so", async () => {
   expect(page.getByRole("navigation", { name: "Pages of transactions" }).query()).toBeNull();
 });
 
+// Verifies: DH-2209
 test("an account of a different customer, or that does not exist, is not found", async () => {
   serveAccounts([card]);
 

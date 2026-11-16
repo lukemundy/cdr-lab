@@ -71,7 +71,7 @@ func TestNoNameOfAPresetBrandHasABlockedWord(t *testing.T) {
 	}
 }
 
-// DESIGN.md, Decisions: the BSB of an account that the consumer opens. Each preset has a BSB of its own.
+// Each preset has a BSB of its own for the accounts that the consumer opens.
 func TestEachPresetBrandHasTheBSBOfTheDecision(t *testing.T) {
 	bsbs := map[string]string{}
 	for name, brand := range presetBrands(t) {

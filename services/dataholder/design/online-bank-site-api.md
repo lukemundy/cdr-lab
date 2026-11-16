@@ -80,10 +80,10 @@ This area gives the API of the online bank site. The site API is JSON over HTTP 
 
 ## Open and close
 
-- <a id="dh-1756"></a>**DH-1756** An open has the field `productId`. The product ID is in the body, not in the path. ([the opening of an account](../DESIGN.md#opening-of-an-account))
-- <a id="dh-1757"></a>**DH-1757** An open has the field `creditLimit` only for revolving credit, and the field `loanAmount` only for a loan. ([the value of the open of a lending product](../DESIGN.md#decisions))
-- <a id="dh-1758"></a>**DH-1758** The `creditLimit` and the `loanAmount` of an open are AmountStrings, with [the rule of the operator interface for a `creditLimit`](operator-interface.md#dh-0741), and they are more than `0.00`. ([the amount on the open page](../DESIGN.md#decisions))
-- <a id="dh-1759"></a>**DH-1759** An open of a product that is not current, or that does not exist, gives 400 with a field error at `/productId`. ([the opening of an account](../DESIGN.md#opening-of-an-account))
+- <a id="dh-1756"></a>**DH-1756** An open has the field `productId`. The product ID is in the body, not in the path. ([the open of an account of a product](online-bank-site-accounts.md#dh-2210))
+- <a id="dh-1757"></a>**DH-1757** An open has the field `creditLimit` only for revolving credit, and the field `loanAmount` only for a loan. ([Judgement: a credit limit for revolving credit and a drawdown for a loan](online-bank-site-accounts.md#dh-2302))
+- <a id="dh-1758"></a>**DH-1758** The `creditLimit` and the `loanAmount` of an open are AmountStrings, with [the rule of the operator interface for a `creditLimit`](operator-interface.md#dh-0741), and they are more than `0.00`. ([Judgement: an amount as a person types it on the open page](online-bank-site-accounts.md#dh-2303))
+- <a id="dh-1759"></a>**DH-1759** An open of a product that is not current, or that does not exist, gives 400 with a field error at `/productId`. ([the product of an open](online-bank-site-accounts.md#dh-2224))
 - <a id="dh-1760"></a>**DH-1760** An amount that is absent, not valid, or for a product of a different kind gives 400 with a field error at its field. For example, a `loanAmount` for a credit card gives a field error at `/loanAmount`. ([Judgement: each field error shows at its field](../../../pkg/platform/problem/DESIGN.md#prob-0009))
 - <a id="dh-1761"></a>**DH-1761** A successful open gives 201 with the new account, with the fields of an account in the list of the accounts, and with no `Location` header. ([Judgement: the new account in the response to an open](#dh-1797))
 - <a id="dh-1762"></a>**DH-1762** Each open account in the list of the accounts has the action `close`, with each arrangement that the close ends: its `arrangementId` and its `clientName`, in the sequence of their confirmation. ([the end of eligibility](end-of-an-arrangement.md#dh-0918); [Judgement: the close of the operator console](#dh-1796))

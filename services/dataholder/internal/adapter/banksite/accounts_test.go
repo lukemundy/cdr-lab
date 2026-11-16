@@ -122,7 +122,7 @@ func arrangement(id, clientName string) domain.ArrangementState {
 	}}
 }
 
-// Verifies: DH-1762
+// Verifies: DH-1762, DH-2243
 func TestTheCloseOfTheLastOpenAccountGivesEachArrangementThatEndsWithItsClientName(t *testing.T) {
 	ended := arrangement("arrangement-3", "Ended App")
 	ended.EndedAt, ended.EndReason = now.Add(-time.Minute), domain.EndReasonRevokedByDataRecipient
@@ -266,7 +266,7 @@ func TestTheAccountDataNeedsASession(t *testing.T) {
 	}
 }
 
-// Verifies: DH-1753
+// Verifies: DH-1753, DH-2209
 func TestAnAccountOfADifferentCustomerIsNotFound(t *testing.T) {
 	for _, target := range []string{"/api/accounts/account-9/balance", "/api/accounts/account-9/transactions"} {
 		t.Run(target, func(t *testing.T) {

@@ -158,8 +158,8 @@ func (d accountData) sitePost(t *testing.T, path, body string) *httptest.Respons
 	return rec
 }
 
-// DESIGN.md, Opening of an account: the account of an open has the category and the name of its product, and the BSB
-// of the brand directory. The site gives no BSB, so Get Account Detail shows it.
+// The site gives no BSB, so Get Account Detail shows it.
+// Verifies: DH-2225, DH-2232
 func TestAnAccountThatTheConsumerOpensOnTheSiteShowsOnTheSiteAndInTheAPIsOfTheNextConsent(t *testing.T) {
 	data := newOpenedAccount(t, time.Now().UTC().Truncate(time.Second), everydayProduct(), `{"productId": "everyday"}`)
 
@@ -210,8 +210,7 @@ func withoutActions(r record) record {
 	return clone
 }
 
-// DESIGN.md, Opening of an account: revolving credit gets the credit limit, and a loan gets a drawdown of the loan
-// amount. The values are those of an account that the operator creates with the same credit limit and transaction.
+// Verifies: DH-2225, DH-2227, DH-2229, DH-2230
 func TestALendingAccountThatTheConsumerOpensHasTheValueOfTheConsumerInTheAPIsOfTheNextConsent(t *testing.T) {
 	at := time.Now().UTC().Truncate(time.Second)
 

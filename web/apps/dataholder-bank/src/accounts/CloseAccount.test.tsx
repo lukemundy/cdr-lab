@@ -55,6 +55,7 @@ const problem = (status: number, detail: string) =>
 
 const dialog = () => page.getByRole("alertdialog");
 
+// Verifies: DH-2240
 test("a closed account has no close action", async () => {
   serveAccounts([account("account-2", { displayName: "Old Saver", openStatus: "CLOSED" })]);
 
@@ -64,6 +65,7 @@ test("a closed account has no close action", async () => {
   expect(page.getByRole("button", { name: "Close account" }).query()).toBeNull();
 });
 
+// Verifies: DH-2241, DH-2242
 test("the confirmation of an account that is not the last names the account and its balance, and no consent", async () => {
   serveAccounts([
     account("account-1", {
@@ -84,6 +86,7 @@ test("the confirmation of an account that is not the last names the account and 
   await expectNoAxeViolations(document.documentElement);
 });
 
+// Verifies: DH-2243, DH-2248
 test("the close of the last open account names each app whose consent ends, then shows the closed account", async () => {
   const accounts = [lastAccount()];
   const requests = serveCloses(accounts, closeOf(accounts));
@@ -118,6 +121,7 @@ test("the close of the last open account names each app whose consent ends, then
   expect(requests).toEqual([{ accountId: "account-1", ends: ["arrangement-1", "arrangement-2"] }]);
 });
 
+// Verifies: DH-2245
 test("a close that now ends different consents keeps the dialog as it was, says that the accounts changed, and loads the new state", async () => {
   const accounts = [lastAccount()];
   const requests = serveCloses(accounts, () => {
@@ -158,6 +162,7 @@ test("a close that now ends different consents keeps the dialog as it was, says 
   expect(requests).toHaveLength(1);
 });
 
+// Verifies: DH-2249
 test("a close that fails keeps the dialog open with the error, and the site does not send it again", async () => {
   const requests = serveCloses([lastAccount()], () =>
     problem(500, "The data holder could not complete the request."),

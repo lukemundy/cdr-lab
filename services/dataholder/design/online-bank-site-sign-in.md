@@ -19,7 +19,7 @@ This area gives the sign-up, the sign-in, the sign-out and the session of the on
 - <a id="dh-2012"></a>**DH-2012** After a successful sign-up, the site shows the new customer number on a page of its own, with a copy button. ([Judgement: a session after a sign-up](#dh-2103))
 - <a id="dh-2013"></a>**DH-2013** The customer number page says that the consumer signs in to the site with this number or with the email address. ([CDS: User Identifiers][cds-user-identifiers])
 - <a id="dh-2014"></a>**DH-2014** The customer number page says that an app that gets the data of the consumer under the Consumer Data Right asks for the email address or this number. It also says that the app then asks for a one-time password that the brand sends to the email address. ([CDS: User Identifiers][cds-user-identifiers]; [the OTP by email](consumer-authentication.md#dh-1220))
-- <a id="dh-2015"></a>**DH-2015** A new customer of a sign-up has no account. The data holder opens no account at a sign-up. For example, the consumer then [opens an account on the site](../DESIGN.md#opening-of-an-account), or the operator opens one. ([Judgement: no account at a sign-up](#dh-2101))
+- <a id="dh-2015"></a>**DH-2015** A new customer of a sign-up has no account. The data holder opens no account at a sign-up. For example, the consumer then [opens an account on the site](online-bank-site-accounts.md#dh-2210), or the operator opens one. ([Judgement: no account at a sign-up](#dh-2101))
 
 ## Sign-in and sign-out
 
@@ -38,7 +38,7 @@ This area gives the sign-up, the sign-in, the sign-out and the session of the on
 - <a id="dh-2028"></a>**DH-2028** When a session ended, the sign-in page says that the data holder signed the consumer out. ([the session-ended type](../../../pkg/platform/problem/DESIGN.md#prob-0010); [the response to an ended session](online-bank-site-api.md#dh-1744))
 - <a id="dh-2029"></a>**DH-2029** Each page of the site shows whether the consumer is signed in. ([CDR Rules][cdr-rules], rule 1.15(1)(f))
 - <a id="dh-2030"></a>**DH-2030** When the consumer is signed in, the header of each page has these items. ([CDR Rules][cdr-rules], rule 1.15(1)(f): "prominently displayed and readily accessible")
-  - a link to [the accounts page](../DESIGN.md#accounts-balances-and-transactions)
+  - a link to [the accounts page](online-bank-site-accounts.md#dh-2200)
   - a link "Data sharing" to [the consumer dashboard](consumer-dashboard.md#dh-1900)
   - a control to sign out
 - <a id="dh-2031"></a>**DH-2031** After a successful sign-in, the site shows the accounts page. After a sign-out, the site shows the sign-in page. ([Judgement: the pages after a sign-in and a sign-out](#dh-2117))

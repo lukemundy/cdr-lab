@@ -21,7 +21,7 @@ The [operator interface](operator-interface.md) gives the fields of a request th
   - the time of its creation
   - a status, open or closed
   - the time of its close, when it is closed
-- <a id="dh-1006"></a>**DH-1006** An account is open when the lab operator creates it, or when the consumer opens it on the online bank site. ([the opening of an account](../DESIGN.md#opening-of-an-account); [Judgement: only the close of an account changes the customer data](operator-interface.md#dh-0772))
+- <a id="dh-1006"></a>**DH-1006** An account is open when the lab operator creates it, or when the consumer opens it on the online bank site. ([the open of an account on the site](online-bank-site-accounts.md#dh-2210); [Judgement: only the close of an account changes the customer data](operator-interface.md#dh-0772))
 - <a id="dh-1007"></a>**DH-1007** The lab operator, or the consumer on the online bank site, can close an open account. A closed account cannot open again. ([Judgement: only the close of an account changes the customer data](operator-interface.md#dh-0772); [Judgement: a closed account stays in its arrangements](#dh-1160))
 - <a id="dh-1008"></a>**DH-1008** A customer is eligible while the customer has an open account. When the customer has no open account, [the arrangements of the customer end](end-of-an-arrangement.md#dh-0918). ([CDR Rules][cdr-rules], rule 1.10B(1)(b))
 - <a id="dh-1009"></a>**DH-1009** Each account can be accessed online. ([CDR Rules][cdr-rules], Schedule 3, clause 2.1)
