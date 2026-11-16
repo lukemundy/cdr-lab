@@ -107,6 +107,7 @@ func addCustomer(t *testing.T, store *customerstore.Store, number, first, last s
 	}))
 }
 
+// Verifies: DH-1615
 func TestTheDocumentClosesEachObjectSchema(t *testing.T) {
 	assert.NoError(t, loadSpec(t).CheckClosed())
 }
@@ -153,6 +154,7 @@ func TestTheCustomersGiveOnePageWithTheCountsAndTheTotal(t *testing.T) {
 	}], "totalRecords": 2}`, resp.body)
 }
 
+// Verifies: DH-1628, DH-1629
 func TestTheCustomersAreSearchedAndSortedByTheQuery(t *testing.T) {
 	store, events := newStore(t)
 	addCustomer(t, store, "00000001", "Alex", "Example")

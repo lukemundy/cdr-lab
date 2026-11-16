@@ -104,6 +104,7 @@ describe("the create of an account", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: DH-1458
   test("offers each product category of the CDS, and no category until the operator selects one", async () => {
     serveCreate(noAccounts);
     renderApp(`/customers/${number}/create-account`);
@@ -114,6 +115,7 @@ describe("the create of an account", () => {
     expect(options).toHaveLength(14);
   });
 
+  // Verifies: DH-1456
   test("is there for a customer whose only account is closed", async () => {
     serveCreate(onlyClosed);
     renderApp(`/customers/${number}`);
@@ -121,6 +123,7 @@ describe("the create of an account", () => {
     await expect.element(page.getByRole("link", { name: "Create account" })).toBeVisible();
   });
 
+  // Verifies: DH-1453, DH-1457
   test("sends each field with no white space, then shows the new account with a toast", async () => {
     const bodies = serveCreate(noAccounts, { status: 201 });
     const router = renderApp(`/customers/${number}/create-account`);
@@ -157,6 +160,7 @@ describe("the create of an account", () => {
     expect(bodies).toEqual([expect.objectContaining({ creditLimit: "500.00" })]);
   });
 
+  // Verifies: DH-1453
   test("shows each refused value at its field and in the summary, and keeps the values", async () => {
     const bodies = serveCreate(noAccounts, { status: 400, body: refusal });
     renderApp(`/customers/${number}/create-account`);
@@ -195,6 +199,7 @@ describe("the create of an account", () => {
     await expect.element(field("BSB")).toHaveAccessibleDescription("");
   });
 
+  // Verifies: DH-1453
   test("Cancel goes back to the detail and sends nothing", async () => {
     const bodies = serveCreate(noAccounts);
     const router = renderApp(`/customers/${number}/create-account`);

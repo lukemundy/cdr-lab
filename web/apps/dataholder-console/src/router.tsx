@@ -44,7 +44,6 @@ function Layout() {
   });
   const name = brand.data?.brandName ?? fallbackName;
 
-  // The title of the browser tab gives the brand name (services/dataholder/DESIGN.md, Presentation).
   useEffect(() => {
     document.title = name;
   }, [name]);

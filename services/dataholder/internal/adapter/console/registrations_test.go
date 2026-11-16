@@ -64,6 +64,7 @@ type registrationTimes struct {
 	LastUpdated  time.Time `json:"lastUpdated"`
 }
 
+// Verifies: DH-1642
 func TestTheRegistrationsGiveEachRegistrationWithItsMetadataTimesAndRegisterStatusAndNoSSA(t *testing.T) {
 	r := newRecords(t)
 	r.register(t, registration("client-1", "software-1"))
@@ -150,6 +151,7 @@ func TestTheDetailOfARegistrationGivesTheValuesAndTheTimeOfTheLastUpdate(t *test
 	assert.True(t, detail.LastUpdated.After(detail.RegisteredAt), "the update changes the time of the last change")
 }
 
+// Verifies: DH-1622
 func TestAnUnknownRegistrationIsNotFoundWithNoIdentifierInTheDetail(t *testing.T) {
 	resp := get(t, newRecords(t).ports, "/api/registrations/client-zebracorn")
 
@@ -186,6 +188,7 @@ type registrationCounts struct {
 	} `json:"data"`
 }
 
+// Verifies: DH-1631
 func TestTheRegistrationsGiveTheNumbersOfTheArrangementsOfTheClientAndSortByEachKey(t *testing.T) {
 	r := newRecords(t)
 	r.register(t, registration("client-1", "software-1"))
@@ -244,6 +247,7 @@ func TestTheRegistrationsRefuseASortOrAnOrderThatIsNotKnown(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1638
 func TestTheDetailOfARegistrationGivesTheCountsAndNoArrangements(t *testing.T) {
 	r := newRecords(t)
 	r.register(t, registration("client-1", "software-1"))
@@ -264,6 +268,7 @@ func TestTheDetailOfARegistrationGivesTheCountsAndNoArrangements(t *testing.T) {
 	assert.Equal(t, 1, detail.CurrentArrangementCount)
 }
 
+// Verifies: DH-1636, DH-1637
 func TestTheArrangementsOfARegistrationAreNewestFirstInPagesWithTheCustomerAndTheStatus(t *testing.T) {
 	r := newRecords(t)
 	r.register(t, registration("client-1", "software-1"))
@@ -306,6 +311,7 @@ func TestARegistrationWithNoArrangementsGivesAnEmptyPage(t *testing.T) {
 	assert.JSONEq(t, `{"data": [], "totalRecords": 0}`, resp.body)
 }
 
+// Verifies: DH-1622
 func TestTheArrangementsOfAnUnknownRegistrationAreNotFoundWithNoIdentifierInTheDetail(t *testing.T) {
 	resp := get(t, newRecords(t).ports, "/api/registrations/client-zebracorn/arrangements")
 

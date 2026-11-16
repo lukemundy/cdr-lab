@@ -25,7 +25,7 @@ export { productCategoryValues } from "./schema.gen";
 const api = createClient<paths>();
 
 export const sessionEndedType =
-  "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#session";
+  "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0010" as const;
 
 export function problemOf(error: unknown): Problem {
   return problemOfService(error, "the bank");
