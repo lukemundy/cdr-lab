@@ -57,6 +57,7 @@ func (m *memoryStatusStore) Save(
 	return nil
 }
 
+// Verifies: DH-0685
 func TestARefreshSavesTheStatusesAndTheETagOfTheResponse(t *testing.T) {
 	source := &fakeStatusSource{response: app.StatusResponse{
 		Statuses: map[string]string{"software-1": "ACTIVE", "software-2": "REMOVED"}, ETag: `"v1"`,
@@ -85,6 +86,7 @@ func TestANotModifiedResponseKeepsTheStatuses(t *testing.T) {
 	assert.Equal(t, `"v1"`, store.etag)
 }
 
+// Verifies: DH-0687
 func TestAStatusThatIsNotKnownKeepsThePreviousStatus(t *testing.T) {
 	source := &fakeStatusSource{response: app.StatusResponse{
 		Statuses: map[string]string{"software-1": "SUSPENDED", "software-2": "INACTIVE"}, ETag: `"v2"`,
@@ -102,6 +104,7 @@ func TestAStatusThatIsNotKnownKeepsThePreviousStatus(t *testing.T) {
 	}, store.statuses, "a status that is not known or not given keeps the previous status")
 }
 
+// Verifies: DH-0686
 func TestARegisterThatDoesNotRespondKeepsTheStatuses(t *testing.T) {
 	source := &fakeStatusSource{err: errors.New("no connection")}
 	store := &memoryStatusStore{}
@@ -144,6 +147,7 @@ func clientStatuses() app.ClientStatuses {
 	}
 }
 
+// Verifies: DH-0682, DH-0688
 func TestAClientHasTheStatusOfTheSoftwareProductOfItsRegistration(t *testing.T) {
 	tests := map[string]struct {
 		want   domain.SoftwareProductStatus

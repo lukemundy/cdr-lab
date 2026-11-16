@@ -136,6 +136,7 @@ func TestSoftwareStatementRefusesABodyThatIsNotAJWT(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0610
 func TestVerifySSAGivesTheClaimsOfAnSSAThatTheRegisterSigned(t *testing.T) {
 	f := newFixture(t)
 	ssa := sign(t, jose.PS256, f.registerKey, map[string]any{
@@ -153,6 +154,7 @@ func TestVerifySSAGivesTheClaimsOfAnSSAThatTheRegisterSigned(t *testing.T) {
 	assert.Equal(t, []string{"https://recipient.example/cb"}, claims.RedirectURIs)
 }
 
+// Verifies: DH-0610
 func TestVerifySSARefusesAnSSAThatTheRegisterDidNotSign(t *testing.T) {
 	f := newFixture(t)
 	other := rsaKey(t, "register-1")
@@ -173,6 +175,7 @@ func TestVerifySSARefusesAnSSAThatTheRegisterDidNotSign(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0614
 func TestVerifySSAGetsTheRegisterJWKSAgainForAKeyIDThatItDoesNotHave(t *testing.T) {
 	f := newFixture(t)
 	_, err := f.verifier.VerifySSA(t.Context(), sign(t, jose.PS256, f.registerKey, map[string]any{}))
@@ -199,6 +202,7 @@ func TestVerifySSAGetsTheRegisterJWKSOneTimeForKeysThatItHas(t *testing.T) {
 	assert.EqualValues(t, 1, f.register.requests.Load())
 }
 
+// Verifies: DH-0614
 func TestVerifySSADoesNotGetTheRegisterJWKSAgainBeforeTheMinimumInterval(t *testing.T) {
 	f := newFixture(t)
 	unknown := sign(t, jose.PS256, rsaKey(t, "invented"), map[string]any{})
@@ -221,6 +225,7 @@ func TestVerifySSAGivesAServerFailureWhenTheRegisterJWKSIsNotAvailable(t *testin
 	assert.NotErrorIs(t, err, app.ErrInvalidJWT)
 }
 
+// Verifies: DH-0622
 func TestVerifyRequestGivesTheClaimsOfARequestThatTheSoftwareProductSigned(t *testing.T) {
 	f := newFixture(t)
 	ec := ecKey(t, "recipient-ec")
@@ -258,6 +263,7 @@ func TestVerifyRequestGivesTheClaimsOfARequestThatTheSoftwareProductSigned(t *te
 	}
 }
 
+// Verifies: DH-0622
 func TestVerifyRequestRefusesARequestThatTheSoftwareProductDidNotSign(t *testing.T) {
 	f := newFixture(t)
 	claims := map[string]any{"iss": "software-1"}

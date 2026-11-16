@@ -72,6 +72,7 @@ func TestAValidSSAIsAccepted(t *testing.T) {
 	assert.NoError(t, validSSA().Validate(now))
 }
 
+// Verifies: DH-0615, DH-0616, DH-0617, DH-0618, DH-0619
 func TestAnSSAWithAClaimThatIsNotValidIsRefused(t *testing.T) {
 	tests := map[string]struct {
 		change      func(*domain.SSA)
@@ -106,6 +107,7 @@ func TestAnSSAWithAClaimThatIsNotValidIsRefused(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0635, DH-0636
 func TestARegistrationHasTheValuesOfTheSSAAndTheRequest(t *testing.T) {
 	ssa := validSSA()
 	ssa.SectorIdentifierURI = "https://recipient.example/sector.json"
@@ -147,6 +149,7 @@ func TestARegistrationHasTheValuesOfTheSSAAndTheRequest(t *testing.T) {
 	}, registration)
 }
 
+// Verifies: DH-0640, DH-0641
 func TestARegistrationHasTheDefaultsForClaimsThatTheRequestDoesNotHave(t *testing.T) {
 	request := validRequest()
 	request.RedirectURIs = nil
@@ -165,6 +168,7 @@ func TestARegistrationHasTheDefaultsForClaimsThatTheRequestDoesNotHave(t *testin
 	assert.Equal(t, "web", registration.ApplicationType)
 }
 
+// Verifies: DH-0630
 func TestARegistrationHasOnlyTheResponseTypeCode(t *testing.T) {
 	request := validRequest()
 	request.ResponseTypes = []string{"code id_token", "code"}
@@ -175,6 +179,7 @@ func TestARegistrationHasOnlyTheResponseTypeCode(t *testing.T) {
 	assert.Equal(t, []string{"code"}, registration.ResponseTypes)
 }
 
+// Verifies: DH-0631, DH-0652
 func TestARequestWithARedirectURIThatTheSSADoesNotHaveIsRefused(t *testing.T) {
 	request := validRequest()
 	request.RedirectURIs = []string{"https://recipient.example/cb1", "https://other.example/cb"}
@@ -184,6 +189,7 @@ func TestARequestWithARedirectURIThatTheSSADoesNotHaveIsRefused(t *testing.T) {
 	requireRegistrationError(t, err, domain.InvalidRedirectURI, "redirect_uris")
 }
 
+// Verifies: DH-0604, DH-0605, DH-0606, DH-0607, DH-0624, DH-0625, DH-0626, DH-0627, DH-0628, DH-0629
 func TestARequestWithAClaimThatIsNotValidIsRefused(t *testing.T) {
 	tests := map[string]struct {
 		change      func(*domain.RegistrationRequest)
@@ -247,6 +253,7 @@ func TestARequestWithAClaimThatIsNotValidIsRefused(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0607
 func TestAnExpOfExactly10MinutesIsAccepted(t *testing.T) {
 	request := validRequest()
 	request.ExpiresAt = now.Add(10 * time.Minute).Unix()
@@ -256,6 +263,7 @@ func TestAnExpOfExactly10MinutesIsAccepted(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Verifies: DH-0632, DH-0651
 func TestASoftwareProductRegistersOneTime(t *testing.T) {
 	registration, err := domain.NewRegistration(validSSA(), validRequest(), issuer, now)
 	require.NoError(t, err)
@@ -295,6 +303,7 @@ func registeredState(t *testing.T) domain.ClientRegistrationState {
 	)
 }
 
+// Verifies: DH-0671
 func TestAnUpdateReplacesAllValuesButNotTheClientIDAndItsIssueTime(t *testing.T) {
 	state := registeredState(t)
 	request := validRequest()
@@ -319,6 +328,7 @@ func TestAnUpdateReplacesAllValuesButNotTheClientIDAndItsIssueTime(t *testing.T)
 	assert.Equal(t, []string{"https://recipient.example/cb2"}, updated.Registration.RedirectURIs)
 }
 
+// Verifies: DH-0670
 func TestAnUpdateWithAnSSAOfADifferentSoftwareProductIsRefused(t *testing.T) {
 	ssa := validSSA()
 	ssa.SoftwareID = "software-2"
@@ -335,6 +345,7 @@ func TestAnUpdateWithAnSSAOfADifferentSoftwareProductIsRefused(t *testing.T) {
 	requireRegistrationError(t, err, domain.InvalidSoftwareStatement, "software_id")
 }
 
+// Verifies: DH-0675
 func TestADeletionRemovesTheRegistrationAndTheSoftwareProductCanRegisterAgain(t *testing.T) {
 	state := registeredState(t)
 

@@ -104,6 +104,7 @@ func withdraw() request {
 	return request{method: http.MethodPost, path: withdrawPath, header: authorised()}
 }
 
+// Verifies: DH-0726, DH-0758
 func TestTheArrangementsOfTheCustomerOfThePathAreRead(t *testing.T) {
 	arrangements := &fakeArrangements{states: []domain.ArrangementState{activeArrangement(), withdrawnArrangement()}}
 
@@ -122,6 +123,7 @@ func TestACustomerWithNoArrangementsHasAnEmptyList(t *testing.T) {
 	assert.JSONEq(t, "[]", rec.Body.String())
 }
 
+// Verifies: DH-0727
 func TestAWithdrawalGivesTheEndedArrangement(t *testing.T) {
 	arrangements := &fakeArrangements{}
 

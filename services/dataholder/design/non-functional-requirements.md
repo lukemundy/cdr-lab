@@ -22,7 +22,7 @@ This area gives the non-functional requirements that apply to all of the data ho
   - the revoked access tokens
 - <a id="dh-0004"></a>**DH-0004** Restart: when the data holder restarts during an authorisation flow, the flow can fail. The consumer then starts a new authorisation flow. ([Judgement: the state that a restart keeps](#dh-0022))
 - <a id="dh-0005"></a>**DH-0005** Restart: a restart ends each session of the online bank site. The consumer then signs in again. ([Judgement: the state that a restart keeps](#dh-0022); [the session of the online bank site](../DESIGN.md#session))
-- <a id="dh-0006"></a>**DH-0006** Restart: after a restart, the data holder gets the statuses of the software products from the Register again. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [the reaction to participant statuses](../DESIGN.md#register-statuses))
+- <a id="dh-0006"></a>**DH-0006** Restart: after a restart, the data holder gets the statuses of the software products from the Register again. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [the get of the participant statuses](registration.md#dh-0679))
 
 ## Telemetry
 

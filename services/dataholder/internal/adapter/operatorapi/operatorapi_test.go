@@ -184,6 +184,7 @@ func requireProblem(t *testing.T, rec *httptest.ResponseRecorder, status int) st
 	return problem.Detail
 }
 
+// Verifies: DH-0720
 func TestACustomerIsCreatedAndReturnedWithItsCustomerNumber(t *testing.T) {
 	customers := &fakeCustomers{customerNumber: customerNumber}
 
@@ -203,6 +204,7 @@ func TestACustomerIsCreatedAndReturnedWithItsCustomerNumber(t *testing.T) {
 	)
 }
 
+// Verifies: DH-0722
 func TestAnAccountIsCreatedForTheCustomerOfThePathAndReturned(t *testing.T) {
 	customers := &fakeCustomers{}
 
@@ -234,6 +236,7 @@ func TestAnAccountIsCreatedWithItsCreditLimit(t *testing.T) {
 	assert.Equal(t, domain.Amount(150_000), customers.account.CreditLimit)
 }
 
+// Verifies: DH-0731, DH-0741
 func TestACreditLimitThatIsNotAnAmountWithTwoDecimalDigitsIsRefusedWithoutItsValue(t *testing.T) {
 	customers := &fakeCustomers{}
 
@@ -246,6 +249,7 @@ func TestACreditLimitThatIsNotAnAmountWithTwoDecimalDigitsIsRefusedWithoutItsVal
 	assert.Nil(t, customers.account)
 }
 
+// Verifies: DH-0723
 func TestAnAccountIsClosedAndReturned(t *testing.T) {
 	customers := &fakeCustomers{}
 
@@ -256,6 +260,7 @@ func TestAnAccountIsClosedAndReturned(t *testing.T) {
 	assert.Equal(t, [2]string{customerNumber, accountID}, customers.closed)
 }
 
+// Verifies: DH-0721
 func TestACustomerIsReadWithItsAccounts(t *testing.T) {
 	customers := &fakeCustomers{record: app.CustomerRecord{
 		Customer: domain.Customer{
@@ -318,6 +323,7 @@ func TestABodyThatIsNotTheExpectedJSONObjectIsRefused(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0730
 func TestAnAccountBodyWithAnUnknownFieldIsRefused(t *testing.T) {
 	customers := &fakeCustomers{}
 

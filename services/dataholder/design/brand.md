@@ -10,7 +10,7 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 - <a id="dh-0303"></a>**DH-0303** The instance gets its base URIs from its configuration. ([Judgement: the brand of an instance from its configuration](#dh-0370))
 - <a id="dh-0304"></a>**DH-0304** The brand name is the `brandName` of the brand on the Register. ([CDS: Register API schemas][cds-register-schemas])
 - <a id="dh-0305"></a>**DH-0305** The brand directory gives the brand name. The data holder has no other setting for the brand name. ([Judgement: one source of the brand name](#dh-0371))
-- <a id="dh-0306"></a>**DH-0306** The consumer pages, the operator console and the OTP email show the brand name. ([the brand on the consumer pages](../DESIGN.md#presentation-of-the-consumer-pages); [the brand in the console](../DESIGN.md#presentation); [the OTP email](../DESIGN.md#the-otp-email))
+- <a id="dh-0306"></a>**DH-0306** The consumer pages, the operator console and the OTP email show the brand name. ([the brand on the consumer pages](authorisation.md#dh-0836); [the brand in the console](../DESIGN.md#presentation); [the OTP email](../DESIGN.md#the-otp-email))
 - <a id="dh-0307"></a>**DH-0307** The brand ID is the `dataHolderBrandId` of the brand on the Register. The configuration gives it. ([CDS: Register API schemas][cds-register-schemas])
 - <a id="dh-0308"></a>**DH-0308** When the data holder calls a software product, the client ID of the brand is its brand ID. ([CDS: Data Holders calling Data Recipients][cds-dh-calling-dr])
 - <a id="dh-0309"></a>**DH-0309** The brand has a record on the Register. Its `publicBaseUri` and its `productBaseUri` are the base URIs of the instance. ([CDS: Participant Endpoints][cds-participant-endpoints]; [CDS: Register API schemas][cds-register-schemas])
@@ -57,7 +57,7 @@ This area gives the brand of a data holder instance: the brand directory, the pr
   - `layout`: the layout of the online bank site
 - <a id="dh-0332"></a>**DH-0332** The `brandName` has 1 to 200 characters, and it is not only white space. ([CDS: Register API schemas][cds-register-schemas])
 - <a id="dh-0333"></a>**DH-0333** The `brandName` has no control character. For example, the data holder refuses a brand name with a line break. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
-- <a id="dh-0334"></a>**DH-0334** The `bsb` has 6 digits, and it obeys the rule of a `bsb` in the operator interface. ([the rule of a BSB](../DESIGN.md#operator-interface); [Opening of an account](../DESIGN.md#opening-of-an-account))
+- <a id="dh-0334"></a>**DH-0334** The `bsb` has 6 digits, and it obeys the rule of a `bsb` in the operator interface. ([the rule of a BSB](operator-interface.md#dh-0739); [Opening of an account](../DESIGN.md#opening-of-an-account))
 - <a id="dh-0335"></a>**DH-0335** The `layout` is one of these values. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023]; [the layouts of the online bank site](../DESIGN.md#presentation-1))
   - `meadow`
   - `ledger`

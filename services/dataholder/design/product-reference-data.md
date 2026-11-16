@@ -115,7 +115,7 @@ This area gives the products of the brand, their load, and the public APIs Get P
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no maximum for the `name` of a product ([CDS: BankingProductV6][cds-schema-product]).
-- Reason: An account that a consumer opens on the online bank site gets the name of its product ([Opening of an account](../DESIGN.md#opening-of-an-account)), and the `productName` of an account has 1 to 100 characters ([Operator interface](../DESIGN.md#operator-interface)). With the rule in the load, each product can open, and an open cannot fail because of its name.
+- Reason: An account that a consumer opens on the online bank site gets the name of its product ([Opening of an account](../DESIGN.md#opening-of-an-account)), and the `productName` of an account has 1 to 100 characters ([the length of a product name of an account](operator-interface.md#dh-0737)). With the rule in the load, each product can open, and an open cannot fail because of its name.
 
 ### <a id="dh-0264"></a>DH-0264 The effective period of a product
 
