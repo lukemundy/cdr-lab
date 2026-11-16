@@ -31,15 +31,15 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 
 ## Customers and accounts
 
-- <a id="dh-0734"></a>**DH-0734** A `lastName` has 1 to 100 characters. A `firstName` has 100 characters at most. ([Judgement: the fields of a customer, an account and a transaction](#dh-0771))
+- <a id="dh-0734"></a>**DH-0734** A `lastName` has 1 to 100 characters. A `firstName` has 100 characters at most. ([Judgement: only the required CDS fields and the named optional fields](#dh-0771))
 - <a id="dh-0735"></a>**DH-0735** An `emailAddress` is one address of RFC 5321. ([RFC 5321, section 4.1.2][rfc5321-mailbox])
 - <a id="dh-0736"></a>**DH-0736** When a different customer of the brand has the `emailAddress`, with no difference for upper and lower case, the response is 409. The `detail` does not contain the address. ([RFC 9110, section 15.5.10][rfc9110-409]; [the uniqueness of the email address](consumer-authentication.md#dh-1202))
-- <a id="dh-0737"></a>**DH-0737** A `displayName` and a `productName` have 1 to 100 characters. ([Judgement: the fields of a customer, an account and a transaction](#dh-0771))
+- <a id="dh-0737"></a>**DH-0737** A `displayName` and a `productName` have 1 to 100 characters. ([Judgement: only the required CDS fields and the named optional fields](#dh-0771))
 - <a id="dh-0738"></a>**DH-0738** A `productCategory` is a value of `BankingProductCategoryV2`. ([CDS: Product Categories][cds-product-categories])
-- <a id="dh-0739"></a>**DH-0739** A `bsb` has 6 digits, and an `accountNumber` has 6 to 10 digits. ([Judgement: the fields of a customer, an account and a transaction](#dh-0771))
+- <a id="dh-0739"></a>**DH-0739** A `bsb` has 6 digits, and an `accountNumber` has 6 to 10 digits. ([Judgement: only the required CDS fields and the named optional fields](#dh-0771))
 - <a id="dh-0740"></a>**DH-0740** The pair of `bsb` and `accountNumber` is unique in the brand. A second account with the same pair gets 409. ([RFC 9110, section 15.5.10][rfc9110-409])
 - <a id="dh-0741"></a>**DH-0741** A `creditLimit` is an AmountString with exactly 2 decimal digits, and it is zero or more. For example, `500.00`. ([CDS: Common Field Types][cds-common-field-types]; [Judgement: two decimal digits in an amount from the lab operator](#dh-0773))
-- <a id="dh-0742"></a>**DH-0742** When the `creditLimit` is absent, it is `0.00`. ([Judgement: the fields of a customer, an account and a transaction](#dh-0771))
+- <a id="dh-0742"></a>**DH-0742** When the `creditLimit` is absent, it is `0.00`. ([Judgement: only the required CDS fields and the named optional fields](#dh-0771))
 - <a id="dh-0743"></a>**DH-0743** The operator interface gives the account number in full, with no mask. ([CDS: Common Field Types][cds-common-field-types]; [Judgement: no mask of the account number for the lab operator](#dh-0774))
 - <a id="dh-0744"></a>**DH-0744** The lab operator cannot remove a customer, an account or a transaction. ([Judgement: only the close of an account changes the customer data](#dh-0772))
 - <a id="dh-0745"></a>**DH-0745** The lab operator cannot change a customer or a transaction. The only change to an account is its close. ([Judgement: only the close of an account changes the customer data](#dh-0772))
@@ -48,9 +48,9 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 
 ## Transactions
 
-- <a id="dh-0748"></a>**DH-0748** The transaction fields have the names, the types and the enumerations of `BankingTransactionV2` and `BankingTransactionDetailV3`. ([CDS: BankingTransactionDetailV3][cds-schema-transaction-detail]; [Judgement: the fields of a customer, an account and a transaction](#dh-0771))
+- <a id="dh-0748"></a>**DH-0748** The transaction fields have the names, the types and the enumerations of `BankingTransactionV2` and `BankingTransactionDetailV3`. ([CDS: BankingTransactionDetailV3][cds-schema-transaction-detail]; [Judgement: only the required CDS fields and the named optional fields](#dh-0771))
 - <a id="dh-0749"></a>**DH-0749** An `amount` is an AmountString with exactly 2 decimal digits. For example, `-12.50`. ([CDS: Common Field Types][cds-common-field-types]; [Judgement: two decimal digits in an amount from the lab operator](#dh-0773))
-- <a id="dh-0750"></a>**DH-0750** A `description` has 1 to 500 characters. ([Judgement: the fields of a customer, an account and a transaction](#dh-0771))
+- <a id="dh-0750"></a>**DH-0750** A `description` has 1 to 500 characters. ([Judgement: only the required CDS fields and the named optional fields](#dh-0771))
 - <a id="dh-0751"></a>**DH-0751** When the `reference` is absent, it is an empty string. ([CDS: BankingTransactionDetailV3][cds-schema-transaction-detail])
 - <a id="dh-0752"></a>**DH-0752** A `POSTED` transaction has a `postingDateTime`. ([CDS: BankingTransactionDetailV3][cds-schema-transaction-detail])
 - <a id="dh-0753"></a>**DH-0753** A `PENDING` transaction has an `executionDateTime`. ([CDS: BankingTransactionDetailV3][cds-schema-transaction-detail])
@@ -92,7 +92,7 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 - Basis: Step 3.3. The CDS gives no interface for the customer data of a data holder. A production data holder gets the data from its banking systems.
 - Reason: The lab needs invented customers, accounts and transactions for each test. A JSON API on its own listener lets a lab user and the conformance suite create them, with no access to the CDR APIs.
 
-### <a id="dh-0771"></a>DH-0771 The fields of a customer, an account and a transaction
+### <a id="dh-0771"></a>DH-0771 Only the required CDS fields and the named optional fields
 
 - Kind: choice
 - Basis: Step 3.3. The CDS marks many fields of the schemas as optional ([CDS: BankingTransactionDetailV3][cds-schema-transaction-detail]).

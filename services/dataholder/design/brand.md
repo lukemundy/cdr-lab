@@ -9,7 +9,7 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 - <a id="dh-0302"></a>**DH-0302** The instance gets the identity of its brand from its configuration. For example, the configuration selects the brand directory and gives the brand ID. ([Judgement: the brand of an instance from its configuration](#dh-0370))
 - <a id="dh-0303"></a>**DH-0303** The instance gets its base URIs from its configuration. ([Judgement: the brand of an instance from its configuration](#dh-0370))
 - <a id="dh-0304"></a>**DH-0304** The brand name is the `brandName` of the brand on the Register. ([CDS: Register API schemas][cds-register-schemas])
-- <a id="dh-0305"></a>**DH-0305** The brand directory gives the brand name. The data holder has no other setting for the brand name. ([Judgement: one source of the brand name](#dh-0371))
+- <a id="dh-0305"></a>**DH-0305** The brand directory gives the brand name. The data holder has no other setting for the brand name. ([Judgement: the brand directory is the one source of the brand name](#dh-0371))
 - <a id="dh-0306"></a>**DH-0306** The consumer pages, the operator console and the OTP email show the brand name. ([the brand on the consumer pages](authorisation.md#dh-0836); [the brand in the console](operator-console.md#dh-1466); [the brand name as the sender name of the OTP email](consumer-authentication.md#dh-1244))
 - <a id="dh-0307"></a>**DH-0307** The brand ID is the `dataHolderBrandId` of the brand on the Register. The configuration gives it. ([CDS: Register API schemas][cds-register-schemas])
 - <a id="dh-0308"></a>**DH-0308** When the data holder calls a software product, the client ID of the brand is its brand ID. ([CDS: Data Holders calling Data Recipients][cds-dh-calling-dr])
@@ -21,11 +21,11 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 
 ## Selection of the brand
 
-- <a id="dh-0314"></a>**DH-0314** The configuration selects the brand with exactly one of these two settings. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023]; [Judgement: the names of the brand settings](#dh-0373))
+- <a id="dh-0314"></a>**DH-0314** The configuration selects the brand with exactly one of these two settings. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023]; [Judgement: brand settings whose names start with `DATA_HOLDER_BRAND`](#dh-0373))
   - `DATA_HOLDER_BRAND`: the name of a preset brand
   - `DATA_HOLDER_BRAND_DIR`: the path of a brand directory
 - <a id="dh-0315"></a>**DH-0315** The two brand settings have no default. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
-- <a id="dh-0316"></a>**DH-0316** The subcommands `api`, `serve` and `seed` need one brand setting. The subcommand `worker` needs no brand setting. ([a process needs only the settings that it uses](non-functional-requirements.md#dh-0010); [Judgement: the names of the brand settings](#dh-0373))
+- <a id="dh-0316"></a>**DH-0316** The subcommands `api`, `serve` and `seed` need one brand setting. The subcommand `worker` needs no brand setting. ([a process needs only the settings that it uses](non-functional-requirements.md#dh-0010); [Judgement: brand settings whose names start with `DATA_HOLDER_BRAND`](#dh-0373))
 - <a id="dh-0317"></a>**DH-0317** When both brand settings are present, or neither, a subcommand that needs one does not start. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 - <a id="dh-0318"></a>**DH-0318** The preset brands are brand directories that the data holder contains. Each instance can run each preset brand with no file outside the data holder. ([Judgement: the final image contains only the binary (ADR 0018)][adr-0018]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 - <a id="dh-0319"></a>**DH-0319** A lab user adds a brand with a brand directory and configuration only, with no change to the code. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
@@ -51,7 +51,7 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 | <a id="dh-0329"></a>**DH-0329** | `category-<anchor>.webp` | No | The photo of a CDS product category on the online bank site, with the anchor of the category. For example, `category-term-deposits.webp`. | [CDS: Product Categories][cds-product-categories]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 | <a id="dh-0330"></a>**DH-0330** | `ATTRIBUTION.md` | No | The source, the author and the licence of each photo, 16 KiB or less. The data holder does not read or serve it. | [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 
-- <a id="dh-0331"></a>**DH-0331** The brand file `brand.json` has these fields, and all are required. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023]; [Judgement: the field name of the brand name](#dh-0374))
+- <a id="dh-0331"></a>**DH-0331** The brand file `brand.json` has these fields, and all are required. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023]; [Judgement: the field name `brandName`, as on the Register](#dh-0374))
   - `brandName`: the brand name
   - `bsb`: the BSB of the accounts that a consumer opens on the online bank site
   - `layout`: the layout of the online bank site
@@ -64,7 +64,7 @@ This area gives the brand of a data holder instance: the brand directory, the pr
   - `horizon`
   - `updraft`
 - <a id="dh-0336"></a>**DH-0336** `tokens.json` has each token of a brand of the design system. A missing token is an error. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
-- <a id="dh-0337"></a>**DH-0337** A catalogue with no products is valid. For example, `products.json` can be `{"products": []}`. ([Judgement: a catalogue with no products](#dh-0375))
+- <a id="dh-0337"></a>**DH-0337** A catalogue with no products is valid. For example, `products.json` can be `{"products": []}`. ([Judgement: a catalogue with no products is valid](#dh-0375))
 
 ## Validation of the brand directory
 
@@ -75,14 +75,14 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 - <a id="dh-0342"></a>**DH-0342** Each colour of `tokens.json` is in the sRGB gamut. ([colour values in OKLCH](../../../web/packages/ui/design/tokens-and-brands.md#ui-0012))
 - <a id="dh-0343"></a>**DH-0343** Each pair of text and background roles of a brand has a contrast of 4.5:1 or more. Each focus ring and each control boundary has a contrast of 3:1 or more against its background. ([WCAG 2.2, SC 1.4.3][wcag-1-4-3]; [WCAG 2.2, SC 1.4.11][wcag-1-4-11]; [the text contrast of a brand](../../../web/packages/ui/design/tokens-and-brands.md#ui-0013); [the focus ring contrast of a brand](../../../web/packages/ui/design/tokens-and-brands.md#ui-0014))
 - <a id="dh-0344"></a>**DH-0344** At start-up, the data holder does not check the contrast of a brand. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
-- <a id="dh-0345"></a>**DH-0345** Each SVG file is well-formed XML with an `svg` root element in the SVG namespace and a `viewBox`. It is 100 KiB or less. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023]; [Judgement: the SVG namespace and a square mark](#dh-0376))
-- <a id="dh-0347"></a>**DH-0347** The `viewBox` of `mark.svg` is square. ([Judgement: the SVG namespace and a square mark](#dh-0376))
-- <a id="dh-0348"></a>**DH-0348** `logo.png` is a valid PNG image of 100 KiB or less. It is exactly 96 pixels high and 768 pixels wide or less. ([Judgement: the size of `logo.png`](#dh-0377))
-- <a id="dh-0349"></a>**DH-0349** The aspect ratio of `logo.png` is the aspect ratio of the `viewBox` of `logo.svg`, with a tolerance of 2 %. The aspect ratio is the width divided by the height. ([Judgement: the size of `logo.png`](#dh-0377))
+- <a id="dh-0345"></a>**DH-0345** Each SVG file is well-formed XML with an `svg` root element in the SVG namespace and a `viewBox`. It is 100 KiB or less. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023]; [Judgement: SVG files in the SVG namespace, and a square mark](#dh-0376))
+- <a id="dh-0347"></a>**DH-0347** The `viewBox` of `mark.svg` is square. ([Judgement: SVG files in the SVG namespace, and a square mark](#dh-0376))
+- <a id="dh-0348"></a>**DH-0348** `logo.png` is a valid PNG image of 100 KiB or less. It is exactly 96 pixels high and 768 pixels wide or less. ([Judgement: a `logo.png` 96 pixels high and at most 768 pixels wide](#dh-0377))
+- <a id="dh-0349"></a>**DH-0349** The aspect ratio of `logo.png` is the aspect ratio of the `viewBox` of `logo.svg`, with a tolerance of 2 %. The aspect ratio is the width divided by the height. ([Judgement: a `logo.png` 96 pixels high and at most 768 pixels wide](#dh-0377))
 - <a id="dh-0350"></a>**DH-0350** Each JSON file is 1 MiB or less. ([Kubernetes: ConfigMaps][k8s-configmap]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 - <a id="dh-0351"></a>**DH-0351** Each photo is a WebP image that is not animated. ([RFC 9649][rfc9649]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
-- <a id="dh-0352"></a>**DH-0352** `hero.webp` is 256 KiB or less and 1200 to 2400 pixels wide. Its aspect ratio is the aspect ratio of the layout, with a tolerance of 2 %. ([Judgement: the size of the photos](#dh-0378))
-- <a id="dh-0353"></a>**DH-0353** Each category photo is 96 KiB or less and 800 to 1200 pixels wide. Its aspect ratio is 4:3, with a tolerance of 2 %. ([Judgement: the size of the photos](#dh-0378))
+- <a id="dh-0352"></a>**DH-0352** `hero.webp` is 256 KiB or less and 1200 to 2400 pixels wide. Its aspect ratio is the aspect ratio of the layout, with a tolerance of 2 %. ([Judgement: photo sizes that are sharp at a pixel ratio of 2](#dh-0378))
+- <a id="dh-0353"></a>**DH-0353** Each category photo is 96 KiB or less and 800 to 1200 pixels wide. Its aspect ratio is 4:3, with a tolerance of 2 %. ([Judgement: photo sizes that are sharp at a pixel ratio of 2](#dh-0378))
 - <a id="dh-0354"></a>**DH-0354** The data holder reads the size of each image, and the animation flag of each photo, in the header of the file before it decodes the image. ([RFC 9649][rfc9649]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 - <a id="dh-0355"></a>**DH-0355** The name of a category photo has the anchor of one of the CDS product categories. The data holder refuses a different name. ([CDS: Product Categories][cds-product-categories]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 - <a id="dh-0356"></a>**DH-0356** A photo of a category with no current product is valid. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
@@ -92,12 +92,12 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 
 ## Preset brands
 
-- <a id="dh-0346"></a>**DH-0346** The data holder contains these four preset brands. `wattle-bank` is the default preset brand. ([Judgement: the names of the preset brands](#dh-0379))
+- <a id="dh-0346"></a>**DH-0346** The data holder contains these four preset brands. `wattle-bank` is the default preset brand. ([Judgement: the name of the preset brand for each name of its instance](#dh-0379))
   - `wattle-bank`, with the brand name "Wattle Bank"
   - `redgum-bank`
   - `harbour-bank`
   - `kestrel-bank`
-- <a id="dh-0360"></a>**DH-0360** In the lab, the compose service, the host name, the database and the certificate directory of an instance have the name of its preset brand. For example, the instance of `wattle-bank` has the host name `wattle-bank`. ([Judgement: the names of the preset brands](#dh-0379))
+- <a id="dh-0360"></a>**DH-0360** In the lab, the compose service, the host name, the database and the certificate directory of an instance have the name of its preset brand. For example, the instance of `wattle-bank` has the host name `wattle-bank`. ([Judgement: the name of the preset brand for each name of its instance](#dh-0379))
 - <a id="dh-0361"></a>**DH-0361** The brand names, the product names, the email addresses and the host names of each preset brand and of the lab configuration do not contain "Mock", "Example" or a similar word. ([Judgement: realistic names in the lab](#dh-0380))
 - <a id="dh-0362"></a>**DH-0362** An invented domain uses the top-level domain `.test`. For example, `wattlebank.test`. ([RFC 6761, section 6.2][rfc6761-test]; [Judgement: `.test` for an invented domain](#dh-0381))
 - <a id="dh-0363"></a>**DH-0363** By default, the lab runs one preset brand: the default preset brand. ([Judgement: one preset brand by default](deployment.md#dh-1360))
@@ -112,7 +112,7 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 - Basis: Step 3.3. The CDS gives each brand its own issuer ([CDS: Multi-Brand Support][cds-multi-brand]), and gives no rule for how an instance gets its brand.
 - Reason: The lab can then run more than one brand from one image. A brand can change its host names with no change to the data holder.
 
-### <a id="dh-0371"></a>DH-0371 One source of the brand name
+### <a id="dh-0371"></a>DH-0371 The brand directory is the one source of the brand name
 
 - Kind: choice
 - Basis: Step 3.3. [ADR 0023][adr-0023] puts the brand name in `brand.json`, and does not say whether a setting can also give it.
@@ -124,43 +124,43 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 - Basis: Step 3.3. The CDS makes `logoUri` mandatory for a data holder brand, and does not say who serves the logo ([CDS: Register API schemas][cds-register-schemas]).
 - Reason: A data recipient can then show the logo of the brand that the consumer selects. The `logoUri` needs a fixed URL on the public base URI.
 
-### <a id="dh-0373"></a>DH-0373 The names of the brand settings
+### <a id="dh-0373"></a>DH-0373 Brand settings whose names start with `DATA_HOLDER_BRAND`
 
 - Kind: choice
 - Basis: Step 3.3. [ADR 0023][adr-0023] gives two settings and does not name them.
 - Reason: The names of the other brand settings start with `DATA_HOLDER_BRAND`. `seed` needs the brand name to check the `brand` of each product, also for a load file.
 
-### <a id="dh-0374"></a>DH-0374 The field name of the brand name
+### <a id="dh-0374"></a>DH-0374 The field name `brandName`, as on the Register
 
 - Kind: choice
 - Basis: Step 3.3. The Register gives the brand name as `brandName` ([CDS: Register API schemas][cds-register-schemas]).
 - Reason: The brand file uses the field name of the Register, as a load file uses the names of the CDS.
 
-### <a id="dh-0375"></a>DH-0375 A catalogue with no products
+### <a id="dh-0375"></a>DH-0375 A catalogue with no products is valid
 
 - Kind: choice
 - Basis: Step 3.3. A brand on the Register with no `productBaseUri` has no product reference data endpoints ([CDS: Participant Endpoints][cds-participant-endpoints]).
 - Reason: A user brand that tests only the authentication and the authorisation needs no products.
 
-### <a id="dh-0376"></a>DH-0376 The SVG namespace and a square mark
+### <a id="dh-0376"></a>DH-0376 SVG files in the SVG namespace, and a square mark
 
 - Kind: choice
 - Basis: Step 3.3. [ADR 0023][adr-0023] gives the SVG structure, and the design system shows the mark in a row of the hero ([the row of the hero](../../../web/packages/ui/design/consumer-pages.md#ui-0365)).
 - Reason: A browser does not show an SVG file with no SVG namespace as an image. A `viewBox` that is not square cannot give a square mark.
 
-### <a id="dh-0377"></a>DH-0377 The size of `logo.png`
+### <a id="dh-0377"></a>DH-0377 A `logo.png` 96 pixels high and at most 768 pixels wide
 
 - Kind: choice
 - Basis: Step 3.3. [ADR 0023][adr-0023] requires a fixed height, a maximum width and the aspect ratio of `logo.svg`, and does not give the numbers.
 - Reason: The email shows the logo 48 CSS px high, and 96 pixels gives a sharp image on a screen with a pixel ratio of 2. A width of 768 pixels (an aspect ratio of 8) is more than each preset logo needs, and the size limit is the limit of the SVG files. The tolerance permits the rounding of the width to a whole pixel.
 
-### <a id="dh-0378"></a>DH-0378 The size of the photos
+### <a id="dh-0378"></a>DH-0378 Photo sizes that are sharp at a pixel ratio of 2
 
 - Kind: choice
 - Basis: Step 3.3. [ADR 0023][adr-0023] requires a minimum and a maximum width for each photo, and does not give the numbers.
 - Reason: The widths give a sharp photo on a screen with a pixel ratio of 2 at the size of the layouts. The limits keep a preset brand with seven photos in one ConfigMap ([Kubernetes: ConfigMaps][k8s-configmap]).
 
-### <a id="dh-0379"></a>DH-0379 The names of the preset brands
+### <a id="dh-0379"></a>DH-0379 The name of the preset brand for each name of its instance
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no rule for the names of the brands of a mock data holder.

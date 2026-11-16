@@ -14,8 +14,8 @@ This area gives the lab-only online bank site of the brand: its pages and their 
 
 - <a id="dh-1805"></a>**DH-1805** The landing page has a heading that names the brand, one sentence about the brand, and a link to the product list. ([Judgement: one text of the landing page for each brand](#dh-1880))
 - <a id="dh-1806"></a>**DH-1806** The data holder gives the text of the landing page, with the brand name in it. A brand directory does not change it. ([Judgement: one text of the landing page for each brand](#dh-1880))
-- <a id="dh-1807"></a>**DH-1807** The landing page has one link for each product category that has a current product. The link has the name of the category and the number of its current products. ([CDS: Product Categories][cds-product-categories]; [Judgement: the product categories on the landing page](#dh-1881))
-- <a id="dh-1808"></a>**DH-1808** Each link of a product category goes to the group of that category in the product list. ([Judgement: the product categories on the landing page](#dh-1881))
+- <a id="dh-1807"></a>**DH-1807** The landing page has one link for each product category that has a current product. The link has the name of the category and the number of its current products. ([CDS: Product Categories][cds-product-categories]; [Judgement: a link for each product category on the landing page](#dh-1881))
+- <a id="dh-1808"></a>**DH-1808** Each link of a product category goes to the group of that category in the product list. ([Judgement: a link for each product category on the landing page](#dh-1881))
 - <a id="dh-1809"></a>**DH-1809** The landing page has a short statement that the brand shares the data of a consumer under the Consumer Data Right only with the authorisation of the consumer. ([Judgement: a statement about CDR sharing on the landing page](#dh-1882))
 - <a id="dh-1810"></a>**DH-1810** The text of the site makes no claim about rates, awards or customers. It copies no text of a real bank. ([Judgement: no claim and no copied text on the site](#dh-1883); [Judgement: a footer that says the pages are a demonstration](authorisation.md#dh-0860))
 
@@ -23,8 +23,8 @@ This area gives the lab-only online bank site of the brand: its pages and their 
 
 - <a id="dh-1811"></a>**DH-1811** The product list shows each current product of the brand. It shows no future product, and no product whose `effectiveTo` is in the past. ([CDS: Get Products][cds-get-products]; [a current product](product-reference-data.md#dh-0219); [Judgement: only current products on the site](online-bank-site-api.md#dh-1786))
 - <a id="dh-1812"></a>**DH-1812** The product list puts the products in groups by `productCategory`, in the order of the categories in the CDS. Only a category with a current product has a group. ([CDS: Product Categories][cds-product-categories])
-- <a id="dh-1813"></a>**DH-1813** In a group, the products are in the order of their names. ([Judgement: the order of the products in a group](#dh-1884))
-- <a id="dh-1814"></a>**DH-1814** For each product, the product list shows its name and its description, and links to the detail of the product. ([CDS: BankingProductV6][cds-schema-product]; [Judgement: the name and the description in the product list](#dh-1885))
+- <a id="dh-1813"></a>**DH-1813** In a group, the products are in the order of their names. ([Judgement: the products in a group in the order of their names](#dh-1884))
+- <a id="dh-1814"></a>**DH-1814** For each product, the product list shows its name and its description, and links to the detail of the product. ([CDS: BankingProductV6][cds-schema-product]; [Judgement: only the name and the description in the product list](#dh-1885))
 - <a id="dh-1815"></a>**DH-1815** The detail of a product shows each of these fields that the data holder holds for the product. ([CDS: BankingProductDetailV7][cds-schema-product-detail])
   - the name, the category and the description
   - `isTailored`
@@ -34,8 +34,8 @@ This area gives the lab-only online bank site of the brand: its pages and their 
   - each field of a rate, a fee or a feature that has a value
 - <a id="dh-1816"></a>**DH-1816** When `isTailored` is true, the detail of the product says that the rates and the fees can be different for the consumer. ([CDS: BankingProductDetailV7][cds-schema-product-detail])
 - <a id="dh-1817"></a>**DH-1817** When a product is not current, or does not exist, its detail is the "not found" page of the site. ([Judgement: only current products on the site](online-bank-site-api.md#dh-1786))
-- <a id="dh-1818"></a>**DH-1818** The site shows the same products and the same values as Get Products and Get Product Detail of the brand at the same time. ([the products of the site API](online-bank-site-api.md#dh-1729); [Judgement: one source of the products](online-bank-site-api.md#dh-1785))
-- <a id="dh-1819"></a>**DH-1819** The site shows a label in plain language for each value of a CDS enumeration. The label gives the meaning that the CDS gives for the value. For example, the site shows a label for `TRANS_AND_SAVINGS_ACCOUNTS` and for `MONTHLY_ACCOUNT_FEE`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [CDS: Product Categories][cds-product-categories]; [plain language in a consumer UI](../../../web/packages/ui/design/content.md#ui-0142); [Judgement: the CDS enumerations in the OpenAPI document](online-bank-site-api.md#dh-1787))
+- <a id="dh-1818"></a>**DH-1818** The site shows the same products and the same values as Get Products and Get Product Detail of the brand at the same time. ([the products of the site API](online-bank-site-api.md#dh-1729); [Judgement: the products from the same source as Get Products](online-bank-site-api.md#dh-1785))
+- <a id="dh-1819"></a>**DH-1819** The site shows a label in plain language for each value of a CDS enumeration. The label gives the meaning that the CDS gives for the value. For example, the site shows a label for `TRANS_AND_SAVINGS_ACCOUNTS` and for `MONTHLY_ACCOUNT_FEE`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [CDS: Product Categories][cds-product-categories]; [plain language in a consumer UI](../../../web/packages/ui/design/content.md#ui-0142); [Judgement: the values of each CDS enumeration in the OpenAPI document](online-bank-site-api.md#dh-1787))
 - <a id="dh-1820"></a>**DH-1820** The site shows each RateString as a percentage. For example, `0.0125` shows as "1.25%". ([CDS: Common Field Types][cds-common-field-types]; [the formats with `Intl` and `en-AU`](../../../web/packages/ui/design/content.md#ui-0160))
 - <a id="dh-1821"></a>**DH-1821** The site shows each AmountString as an amount. ([CDS: Common Field Types][cds-common-field-types]; [the format of an amount](../../../web/packages/ui/design/content.md#ui-0157))
 - <a id="dh-1822"></a>**DH-1822** The site shows each ISO 8601 duration in words. For example, `P1M` shows as "each month" for an `applicationFrequency`, and `P55D` shows as "55 days". ([CDS: Common Field Types][cds-common-field-types]; [plain language in a consumer UI](../../../web/packages/ui/design/content.md#ui-0142))
@@ -49,7 +49,7 @@ This area gives the lab-only online bank site of the brand: its pages and their 
 - <a id="dh-1827"></a>**DH-1827** Headings use the heading font of the brand. The other text uses the body font. ([what a brand can change](../../../web/packages/ui/design/tokens-and-brands.md#ui-0031))
 - <a id="dh-1828"></a>**DH-1828** Each page shows the logo of the brand on the brand colour, with the brand name as its text alternative. ([WCAG 2.2, SC 1.1.1][wcag-1-1-1])
 - <a id="dh-1829"></a>**DH-1829** Each page has a link to the product list. ([Judgement: a brand changes only colours, fonts, radius and logo](../../../web/packages/ui/design/tokens-and-brands.md#ui-0059))
-- <a id="dh-1830"></a>**DH-1830** The pages of the site have no "Secure" label, no hero with the data recipient and no step indicator. ([Judgement: a site that does not look like the consumer pages](#dh-1890); [Judgement: the separation of the sign-in from the CDR authentication](online-bank-site-sign-in.md#dh-2111))
+- <a id="dh-1830"></a>**DH-1830** The pages of the site have no "Secure" label, no hero with the data recipient and no step indicator. ([Judgement: a site that does not look like the consumer pages](#dh-1890); [Judgement: a note on the sign-in, and no links to the CDR authentication](online-bank-site-sign-in.md#dh-2111))
 - <a id="dh-1831"></a>**DH-1831** The title of each page is the name of the page, then "<brand name> online banking". For example, "Data sharing - <brand name> online banking". ([Judgement: a site that does not look like the consumer pages](#dh-1890))
 - <a id="dh-1832"></a>**DH-1832** Until the site API gives the brand, and when it fails, the pages say "Bank" in place of the brand name. ([Judgement: "Bank" before the brand name is known](#dh-1893))
 - <a id="dh-1833"></a>**DH-1833** The site shows dates and amounts with the rules of the design system: Australian English and the locale `en-AU`. ([the formats with `Intl` and `en-AU`](../../../web/packages/ui/design/content.md#ui-0160))
@@ -103,8 +103,8 @@ The site API also obeys [route patterns in place of raw paths](../../../pkg/plat
 - <a id="dh-1859"></a>**DH-1859** Telemetry: no log of the site API contains a query string or a path value. ([no personal information in telemetry](non-functional-requirements.md#dh-0008); [Judgement: OpenTelemetry for traces, metrics and logs (ADR 0006)][adr-0006])
 - <a id="dh-1860"></a>**DH-1860** Telemetry: no log of an open or a close of an account contains the product ID or an arrangement ID. ([no personal information in telemetry](non-functional-requirements.md#dh-0008); [Judgement: no product ID and no data recipient name in the telemetry of the site](#dh-1894))
 - <a id="dh-1861"></a>**DH-1861** Telemetry: the web UI of the site sends no telemetry. ([Judgement: web UIs as single-page applications that the service embeds (ADR 0014)][adr-0014])
-- <a id="dh-1862"></a>**DH-1862** Performance: on a development workstation, the landing page and the product list of the largest preset catalogue show within 1 second. ([Judgement: the performance limits of the site](#dh-1895))
-- <a id="dh-1863"></a>**DH-1863** Performance: on a development workstation, the first page of 10,000 transactions of an account shows within 1 second. ([Judgement: the performance limits of the site](#dh-1895))
+- <a id="dh-1862"></a>**DH-1862** Performance: on a development workstation, the landing page and the product list of the largest preset catalogue show within 1 second. ([Judgement: limits of 1 second, as for the operator consoles](#dh-1895))
+- <a id="dh-1863"></a>**DH-1863** Performance: on a development workstation, the first page of 10,000 transactions of an account shows within 1 second. ([Judgement: limits of 1 second, as for the operator consoles](#dh-1895))
 
 ## Judgements
 
@@ -114,7 +114,7 @@ The site API also obeys [route patterns in place of raw paths](../../../pkg/plat
 - Basis: Step 3.3. The brand directory has no field for the text of the landing page ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023]).
 - Reason: A new field changes the contract of the brand directory, and the site needs no text for each brand. The site API gives the brand name and the text of the footer, so the footer has one source, as on the consumer pages.
 
-### <a id="dh-1881"></a>DH-1881 The product categories on the landing page
+### <a id="dh-1881"></a>DH-1881 A link for each product category on the landing page
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives the product categories, but no rule for a web site of a data holder ([CDS: Product Categories][cds-product-categories]).
@@ -132,13 +132,13 @@ The site API also obeys [route patterns in place of raw paths](../../../pkg/plat
 - Basis: Step 3.1. The sources give no rule for the text of a mock data holder.
 - Reason: The brand is invented. The text of the site must not deceive a person.
 
-### <a id="dh-1884"></a>DH-1884 The order of the products in a group
+### <a id="dh-1884"></a>DH-1884 The products in a group in the order of their names
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives the order of the categories, not the order of the products in a category ([CDS: Product Categories][cds-product-categories]).
 - Reason: A consumer finds a product by its name.
 
-### <a id="dh-1885"></a>DH-1885 The name and the description in the product list
+### <a id="dh-1885"></a>DH-1885 Only the name and the description in the product list
 
 - Kind: choice
 - Basis: Step 3.3. `name` and `description` are required fields of a product ([CDS: BankingProductV6][cds-schema-product]).
@@ -198,7 +198,7 @@ The site API also obeys [route patterns in place of raw paths](../../../pkg/plat
 - Basis: Step 3.1. The telemetry contains no personal information ([ADR 0006][adr-0006]).
 - Reason: With the session, a product ID tells which product a consumer has. The name of a data recipient tells with which app a consumer shares data.
 
-### <a id="dh-1895"></a>DH-1895 The performance limits of the site
+### <a id="dh-1895"></a>DH-1895 Limits of 1 second, as for the operator consoles
 
 - Kind: choice
 - Basis: Step 3.3. The CDS performance requirements are for the CDR APIs, not for a web site ([the response time target of the APIs](non-functional-requirements.md#dh-0001)).
