@@ -40,6 +40,7 @@ func TestADataHolderThatDidNotStartHasNoSigningKeys(t *testing.T) {
 	assert.Empty(t, keys)
 }
 
+// Verifies: DH-0504
 func TestEnsureSigningKeyCreatesOneKeyAndKeepsItAtTheNextStart(t *testing.T) {
 	store := newStore(t)
 

@@ -1,6 +1,6 @@
 # Mock data holder: Product reference data
 
-This area gives the products of the brand, their load, and the public APIs Get Products, Get Product Detail, Get Status and Get Outages. The [endpoint table of the APIs](../DESIGN.md#endpoints) gives the path, the version and the base URI of each API.
+This area gives the products of the brand, their load, and the public APIs Get Products, Get Product Detail, Get Status and Get Outages. The endpoint table of the API standards gives the path, the version and the base URI of each API: [Get Products](api-standards.md#dh-0400), [Get Product Detail](api-standards.md#dh-0401), [Get Status](api-standards.md#dh-0402) and [Get Outages](api-standards.md#dh-0403).
 
 ## Product fields
 
