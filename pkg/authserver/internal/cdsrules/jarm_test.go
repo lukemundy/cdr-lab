@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Verifies: AUTH-0104, AUTH-0105, AUTH-0106, AUTH-0107
 func TestTheAuthorisationResponseIsASignedJARMResponse(t *testing.T) {
 	server, recipient := newAuthServer(t)
 
