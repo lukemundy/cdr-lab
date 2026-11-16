@@ -146,8 +146,8 @@ Rules for all components:
 - No component uses only colour to give information. ([WCAG 2.2, SC 1.4.1][wcag-1-4-1])
 - A component with motion uses no motion when the user asks for reduced motion (`prefers-reduced-motion`). ([WCAG 2.2, SC 2.3.3][wcag-2-3-3]; judgement: the AAA criterion costs nothing with tokens for motion)
 - Each input and each control that has a border uses the strong border, so that its boundary has 3:1 or more ([WCAG 2.2, SC 1.4.11][wcag-1-4-11]). The border role is only for decorative lines, for example dividers.
-- A component renders no `<style>` or `<script>` element, sets no `style` attribute from a string, and assigns no HTML string, so that the UIs can use a strict CSP with Trusted Types. A style that a script sets through the CSSOM (for example the React `style` prop) is permitted, because the CSP does not control it ([MDN: style-src][mdn-style-src]). Judgement: the console CSP requires this ([Register DESIGN.md: Operator console][register-console]).
-- Each component works with no CSP or Trusted Types violation under this CSP, which is the CSP of the Register console: `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; require-trusted-types-for 'script'`. A test page with each component in each state checks this.
+- A component renders no `<style>` or `<script>` element, sets no `style` attribute from a string, and assigns no HTML string, so that the UIs can use a strict CSP with Trusted Types. A style that a script sets through the CSSOM (for example the React `style` prop) is permitted, because the CSP does not control it ([MDN: style-src][mdn-style-src]). Judgement: [the CSP of each web UI](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0007) requires this.
+- Each component works with no CSP or Trusted Types violation under [the CSP of each web UI](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0007). A test page with each component in each state checks this.
 
 ## Accessibility
 

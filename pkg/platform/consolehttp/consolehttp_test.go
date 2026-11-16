@@ -91,6 +91,7 @@ func TestTheRootGivesTheHTMLPage(t *testing.T) {
 	assert.Equal(t, indexHTML, rec.Body.String())
 }
 
+// Verifies: CNSL-0006, CNSL-0007
 func TestEachResponseHasTheSecurityHeadersAndNoCORSHeaders(t *testing.T) {
 	tests := map[string]struct {
 		method, target string
@@ -151,6 +152,7 @@ func TestEachResponseHasTheSecurityHeadersAndNoCORSHeaders(t *testing.T) {
 	}
 }
 
+// Verifies: CNSL-0005
 func TestAChangeFromADifferentOriginIsRefused(t *testing.T) {
 	tests := map[string]http.Header{
 		"cross-site":                 {"Sec-Fetch-Site": {"cross-site"}},
@@ -183,6 +185,7 @@ func TestAChangeFromTheSameOriginIsNotRefused(t *testing.T) {
 	}
 }
 
+// Verifies: CNSL-0008, CNSL-0009, CNSL-0010
 func TestTheCacheRulesDependOnTheFile(t *testing.T) {
 	tests := map[string]struct {
 		method, target, cacheControl string
@@ -215,6 +218,7 @@ func TestAFileOfTheUIHasItsContentType(t *testing.T) {
 	assert.Equal(t, `console.log("console")`, rec.Body.String())
 }
 
+// Verifies: CNSL-0013
 func TestAnUnknownPathOutsideTheAPIGivesTheHTMLPage(t *testing.T) {
 	for _, target := range []string{"/data-recipients", "/data-recipients/1/history", "/assets/", "/index.html/x"} {
 		t.Run(target, func(t *testing.T) {
@@ -233,6 +237,7 @@ func TestAHEADRequestGetsTheHeadersOfTheHTMLPage(t *testing.T) {
 	assert.Empty(t, rec.Body.String())
 }
 
+// Verifies: CNSL-0012
 func TestAnUnknownAPIPathIsNotFound(t *testing.T) {
 	for _, method := range []string{http.MethodGet, http.MethodPost, http.MethodDelete} {
 		t.Run(method, func(t *testing.T) {
@@ -270,6 +275,7 @@ func TestAConsoleWithNoAllowedHostIsAnError(t *testing.T) {
 	assert.ErrorContains(t, err, consolehttp.Console.AllowedHostsEnv)
 }
 
+// Verifies: CNSL-0004
 func TestARequestWithAHostThatIsNotAllowedIsRefused(t *testing.T) {
 	hosts := map[string]string{
 		"DNS rebinding name":  "attacker.example:8084",
@@ -314,6 +320,7 @@ func TestARequestWithAnAllowedHostIsNotRefused(t *testing.T) {
 	}
 }
 
+// Verifies: CNSL-0002
 func TestTheConsoleIsOffUnlessTheSettingTurnsItOn(t *testing.T) {
 	tests := []struct {
 		value   string
@@ -356,6 +363,7 @@ func TestAnEnabledConsoleGetsTheAllowedHostsOfTheSetting(t *testing.T) {
 	}, got)
 }
 
+// Verifies: CNSL-0003
 func TestAnEnabledConsoleNeedsValidAllowedHosts(t *testing.T) {
 	for _, value := range []string{"", " ", "127.0.0.1:8084,", "localhost:", "http://localhost:8084"} {
 		t.Run(value, func(t *testing.T) {

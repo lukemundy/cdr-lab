@@ -103,7 +103,7 @@ This glossary gives one term for each concept that two or more specifications us
 
 ### User
 
-- Lab term: a person who uses a web UI. Use it only in the design system specification, where a rule applies to each UI.
+- Lab term: a person who uses a lab UI in a browser, that is a [web UI](#web-ui) or the [consumer pages](#consumer-pages). Use it only in the design system specification, where a rule applies to each UI.
 - Not the same as: [CDR consumer](#cdr-consumer), [lab operator](#lab-operator). In a service specification, name the role.
 
 ## Consent and authorisation
@@ -269,7 +269,7 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 ### Console API
 
-- Lab term: the HTTP API of an operator console, for its web UI only.
+- Lab term: the HTTP API of an operator console, for the console only.
 
 ### Consumer pages
 
@@ -278,11 +278,11 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 ### Consumer UI
 
-- Lab term: a lab web UI for a consumer, for example the consumer pages or the online bank site ([design system DESIGN.md][ui-design]).
+- Lab term: a lab UI for a consumer in a browser: the consumer pages or the online bank site ([design system DESIGN.md][ui-design]).
 
 ### Design system
 
-- Lab term: the tokens, components and rules of the lab web UIs ([design system DESIGN.md][ui-design]).
+- Lab term: the tokens, components and rules of the lab UIs in a browser ([design system DESIGN.md][ui-design]).
 
 ### Health probes
 
@@ -327,7 +327,7 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 ### Operator console
 
-- Lab term: the lab-only web UI of a service for the lab operator.
+- Lab term: the lab-only browser UI of a service for the lab operator. It is a [web UI](#web-ui).
 - Short form: console.
 
 ### Operator interface
@@ -361,6 +361,12 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 - Not the same as: [authentication](#authentication). The data holder keeps them separate.
 - Do not use: login, log in.
 
+### Web UI
+
+- Lab term: a lab-only browser UI and its API on one listener, with one origin ([web UI library DESIGN.md][consolehttp-design]). The web UIs are the operator consoles, with their console APIs, and the online bank site, with its API.
+- Not the same as: [operator console](#operator-console) and [online bank site](#online-bank-site), which are each one web UI.
+- Not the same as: [consumer pages](#consumer-pages), which are on the public listener.
+
 ## Data
 
 ### CDR data
@@ -375,6 +381,7 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 [adr-0024]: ../adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md
 [brands-readme]: ../../services/dataholder/brands/README.md
 [conformance-design]: ../../conformance/DESIGN.md
+[consolehttp-design]: ../../pkg/platform/consolehttp/DESIGN.md
 [pki-design]: ../../pki/DESIGN.md
 [readme-component-types]: ../../README.md#component-types
 [readme-data]: ../../README.md#data
