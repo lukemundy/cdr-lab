@@ -550,7 +550,7 @@ export interface paths {
         };
         /**
          * The access token key set and the SSA key set, with no key material
-         * @description The key ID, the state and the creation time of each key. The response has no private key and no public key: the JWKS endpoints give the public keys (services/register/DESIGN.md, Console API).
+         * @description The key ID, the state and the creation time of each key. The response has no private key and no public key: the JWKS endpoints give the public keys (services/register/design/operator-console-api.md).
          */
         get: operations["listKeySets"];
         put?: never;
@@ -701,7 +701,7 @@ export interface paths {
         };
         /**
          * One page of the events of a data recipient legal entity, newest first by stream version
-         * @description Each entry gives only the fields of the table of event types in services/register/DESIGN.md (Operator console, Functions). No entry gives the payload or the metadata of an event.
+         * @description Each entry gives only the fields of the table of the history in services/register/design/operator-console.md. No entry gives the payload or the metadata of an event.
          */
         get: operations["getDataRecipientHistory"];
         put?: never;
@@ -721,7 +721,7 @@ export interface paths {
         };
         /**
          * One page of the events of a data holder legal entity, newest first by stream version
-         * @description Each entry gives only the fields of the table of event types in services/register/DESIGN.md (Operator console, Functions). No entry gives the payload or the metadata of an event.
+         * @description Each entry gives only the fields of the table of the history in services/register/design/operator-console.md. No entry gives the payload or the metadata of an event.
          */
         get: operations["getDataHolderHistory"];
         put?: never;

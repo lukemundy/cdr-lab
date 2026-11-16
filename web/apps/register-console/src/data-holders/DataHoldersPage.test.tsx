@@ -21,6 +21,7 @@ const searchbox = () =>
   page.getByRole("searchbox", { name: "Search by legal entity or brand name" });
 
 describe("the data holders page", () => {
+  // Verifies: REG-1004
   test("shows each data holder of the page, with its brands, industries and the total", async () => {
     serve({
       data: [
@@ -72,6 +73,7 @@ describe("the data holders page", () => {
     await expect.element(page.getByText("No data holders match")).toBeVisible();
   });
 
+  // Verifies: REG-1052
   test("a URL gives the API the same filter, search, sort and page", async () => {
     const requests = serve({ data: [holder("Mock Holdings Ltd")], totalRecords: 60 });
 
@@ -125,6 +127,7 @@ describe("the data holders page", () => {
       .toBe("?status=ACTIVE&q=mutual&sort=status&order=asc&page=2&pageSize=25");
   });
 
+  // Verifies: REG-1053, REG-1054
   test("a typed search applies with no click and adds no history entry", async () => {
     const requests = serve({ data: [holder("Mock Holdings Ltd")], totalRecords: 1 });
     const router = renderApp("/data-holders");
@@ -182,6 +185,7 @@ describe("the data holders page", () => {
     await expect.element(alert.getByText("pageSize must be 100 or less")).toBeVisible();
   });
 
+  // Verifies: REG-1060
   test("passes the automated accessibility checks", async () => {
     serve({
       data: [holder("Mock Holdings Ltd"), holder("Former Bank Ltd", { status: "REMOVED" })],

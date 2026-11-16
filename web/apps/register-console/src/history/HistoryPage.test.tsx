@@ -100,6 +100,7 @@ const timeline = () => page.getByRole("list", { name: "History" });
 const entries = () => [...timeline().element().querySelectorAll(":scope > li")];
 
 describe("the history page", () => {
+  // Verifies: REG-1014, REG-1015
   test("shows each event newest first with its time, text, event type and only the fields of the table", async () => {
     const queries = serveRecipient(suspension);
 
@@ -152,6 +153,7 @@ describe("the history page", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1038
   test("shows the issue of a client certificate with the software product and the thumbprint", async () => {
     serveRecipient([
       {
@@ -182,6 +184,7 @@ describe("the history page", () => {
     expect(definitionOf(issue, "Thumbprint").textContent).toContain(thumbprint);
   });
 
+  // Verifies: REG-1055
   test("gives the page of the URL to the API and keeps the next page in the URL", async () => {
     const queries = serveRecipient(suspension.slice(0, 2), 60);
 
@@ -205,6 +208,7 @@ describe("the history page", () => {
     expect(queries).toEqual(["?pageSize=25"]);
   });
 
+  // Verifies: REG-1013
   test("the detail links to the history, and the history links back to the detail", async () => {
     serveRecipient(suspension);
     const router = renderApp(`/data-recipients/${id}`);
@@ -263,6 +267,7 @@ describe("the history page", () => {
       .toHaveAttribute("aria-current", "page");
   });
 
+  // Verifies: REG-1040
   test("shows the issue of a server certificate with the brand and the thumbprint", async () => {
     serveHolder([
       {

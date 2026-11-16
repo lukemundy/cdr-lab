@@ -21,7 +21,7 @@ import { pageSize, validatePageSearch, type PageSearch } from "@cdr-lab/console/
 
 type HistoryEntry = DataRecipientHistoryEntry | DataHolderHistoryEntry;
 
-// The texts of the table of event types in the Register DESIGN.md (Operator console, Functions).
+// The texts of the table of the history in services/register/design/operator-console.md.
 const eventTexts = {
   DataRecipientImported: "Loaded into the Register",
   DataHolderImported: "Loaded into the Register",

@@ -32,6 +32,7 @@ func dataHolder(id, name string, status domain.DataHolderStatus, brands ...domai
 	}
 }
 
+// Verifies: REG-1116, REG-1126
 func TestDataHoldersGiveOnePageWithTheBrandCountTheIndustriesAndTheTotal(t *testing.T) {
 	queries := seedParticipants(t, domain.Participants{DataHolders: []domain.DataHolder{
 		dataHolder("dh-1", "Alpha Ltd", domain.DataHolderActive,
@@ -54,6 +55,7 @@ func TestDataHoldersGiveOnePageWithTheBrandCountTheIndustriesAndTheTotal(t *test
 	]}`, resp.body)
 }
 
+// Verifies: REG-1124
 func TestDataHoldersGiveTheDataHolderOfABrandName(t *testing.T) {
 	queries := seedParticipants(t, domain.Participants{DataHolders: []domain.DataHolder{
 		dataHolder("dh-1", "Mock Holdings Ltd", domain.DataHolderActive,

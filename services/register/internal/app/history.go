@@ -9,8 +9,8 @@ import (
 	"github.com/lukemundy/cdr-lab/services/register/internal/domain"
 )
 
-// HistoryEntry has only the fields that the table of event types in the Register DESIGN.md gives, so that no payload
-// gets to a reader.
+// HistoryEntry has only the fields that the table of the history in services/register/design/operator-console.md
+// gives, so that no payload gets to a reader.
 type HistoryEntry struct {
 	StreamVersion int64
 	EventType     string

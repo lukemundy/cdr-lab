@@ -93,6 +93,7 @@ func seedForActions(t *testing.T) console.Ports {
 	return console.Ports{Readers: queries, Operator: app.NewOperator(store)}
 }
 
+// Verifies: REG-1131, REG-1132, REG-1134
 func TestADataRecipientDetailGivesTheVersionAndThePermittedActionsWithTheirCascade(t *testing.T) {
 	detail := detailOf(t, seedForActions(t), "dr-1")
 
@@ -176,6 +177,7 @@ func TestEachSoftwareProductActionChangesTheSoftwareProduct(t *testing.T) {
 	}
 }
 
+// Verifies: REG-1100
 func TestEachBrandActionChangesTheBrandAndItsSoftwareProducts(t *testing.T) {
 	ports := seedForActions(t)
 	queries := ports.Readers.(*readmodel.Queries)
@@ -215,6 +217,7 @@ func TestEachBrandActionChangesTheBrandAndItsSoftwareProducts(t *testing.T) {
 	assert.JSONEq(t, `[]`, string(detailOf(t, ports, "dr-1").Brands[0].Actions))
 }
 
+// Verifies: REG-1140
 func TestAnActionWithAVersionThatIsNotCurrentChangesNothing(t *testing.T) {
 	ports := seedForActions(t)
 	require.Equal(t, http.StatusNoContent, post(t, ports, "/api/data-recipients/dr-1/suspend", `{"version": 1}`).status)

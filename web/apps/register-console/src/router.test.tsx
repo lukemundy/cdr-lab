@@ -4,6 +4,7 @@ import { page } from "vitest/browser";
 
 import { http, renderApp, worker } from "./test/app";
 
+// Verifies: REG-1051
 test("the header says CDR Register", async () => {
   worker.use(
     http.get("/api/data-recipients", ({ response }) =>

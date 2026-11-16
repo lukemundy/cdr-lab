@@ -66,6 +66,7 @@ const valueOf = (regionName: string, term: string) =>
   definitionOf(region(regionName).element(), term).textContent;
 
 describe("the data holder page", () => {
+  // Verifies: REG-1010, REG-1011
   test("shows the legal entity and each field of each brand", async () => {
     const requests = serve(detail);
 
@@ -176,6 +177,7 @@ describe("the data holder page", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1006
   test("a row of the list links to the detail, and the navigation item stays current", async () => {
     serve(detail);
     worker.use(
