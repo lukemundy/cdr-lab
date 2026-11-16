@@ -69,6 +69,7 @@ func ids(accounts []app.ConsentAccount) []string {
 	return found
 }
 
+// Verifies: DH-1060
 func TestTheAccountsOfAnArrangementAreInTheSequenceOfTheirCreationWithTheIdentifiersOfTheSoftwareProduct(t *testing.T) {
 	data, arrangementID := consentWithAccounts(t)
 
@@ -79,6 +80,7 @@ func TestTheAccountsOfAnArrangementAreInTheSequenceOfTheirCreationWithTheIdentif
 	assert.Equal(t, []string{idOfAccount1 + "=account-1", idOfAccount2 + "=account-2"}, ids(got))
 }
 
+// Verifies: DH-1061
 func TestTheAccountsOfAnArrangementMatchEachFilter(t *testing.T) {
 	owned, notOwned := true, false
 
