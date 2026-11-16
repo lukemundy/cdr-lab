@@ -228,7 +228,7 @@ func TestGetProductsEffectiveGivesTheCurrentTheFutureOrAllProducts(t *testing.T)
 	future := idsWhere(all, func(p listedProduct) bool { return p.future(now) })
 	past := idsWhere(all, func(p listedProduct) bool { return p.EffectiveTo != nil && !now.Before(*p.EffectiveTo) })
 
-	// The lab brand has a future product and a product that is no longer offered (DESIGN.md: Product reference data).
+	// The lab brand has a future product and a product that is no longer offered (data holder DH-0223).
 	require.NotEmpty(t, future)
 	require.NotEmpty(t, past)
 
@@ -472,7 +472,7 @@ func TestGetProductDetailGivesTheFeaturesFeesAndRatesOfTheProducts(t *testing.T)
 		}
 	}
 
-	// The catalogue of a retail bank has a deposit product and a lending product (DESIGN.md: Product reference data).
+	// The catalogue of a retail bank has a deposit product and a lending product (data holder DH-0222).
 	for _, field := range []string{"features", "fees", "depositRates", "lendingRates"} {
 		assert.True(t, given[field], "no product has %s", field)
 	}

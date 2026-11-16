@@ -6,7 +6,7 @@ import { consoleColor, participantConsoleRoles } from "./shell.ts";
 import { loadTokens, toColor } from "./tokens.ts";
 
 // The preset brands of the data holder (services/dataholder/brands). Each one has the colour roles of the design
-// system, and services/dataholder/DESIGN.md (Brand directory) requires the same contrast as for the brands here.
+// system, and services/dataholder/design/brand.md requires the same contrast as for the brands here.
 const presetsURL = new URL("../../../../services/dataholder/brands/", import.meta.url);
 
 const presets = await Promise.all(
