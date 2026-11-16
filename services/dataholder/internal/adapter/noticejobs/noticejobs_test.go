@@ -96,6 +96,7 @@ func requireCancelled(t *testing.T, err error) {
 	require.ErrorAs(t, err, &cancel)
 }
 
+// Verifies: DH-0933, DH-0939
 func TestADeliveredNoticeIsRecordedCompleteWithItsLastAttempt(t *testing.T) {
 	notices := &fakeNotices{result: attemptResult("status 204", domain.NoticeDelivered)}
 
@@ -109,6 +110,7 @@ func TestADeliveredNoticeIsRecordedCompleteWithItsLastAttempt(t *testing.T) {
 	}, notices.recorded)
 }
 
+// Verifies: DH-0935
 func TestARefusedNoticeIsRecordedFailedWithNoNewAttempt(t *testing.T) {
 	notices := &fakeNotices{result: attemptResult("status 400", domain.NoticeRefused)}
 
@@ -120,6 +122,7 @@ func TestARefusedNoticeIsRecordedFailedWithNoNewAttempt(t *testing.T) {
 	}}, notices.recorded)
 }
 
+// Verifies: DH-0934, DH-0940
 func TestANoticeToTryAgainRecordsTheAttemptAndGetsANewAttemptWithTheResultAsItsError(t *testing.T) {
 	notices := &fakeNotices{result: attemptResult("status 503", domain.NoticeTryAgain)}
 
@@ -131,6 +134,7 @@ func TestANoticeToTryAgainRecordsTheAttemptAndGetsANewAttemptWithTheResultAsItsE
 	}}, notices.recorded)
 }
 
+// Verifies: DH-0936
 func TestTheThirdAttemptThatFailsIsRecordedFailed(t *testing.T) {
 	notices := &fakeNotices{result: attemptResult("no connection", domain.NoticeTryAgain)}
 
@@ -152,6 +156,7 @@ func TestAJobForANoticeThatIsNotPendingEndsWithNoRecord(t *testing.T) {
 	assert.Empty(t, notices.recorded)
 }
 
+// Verifies: DH-0936
 func TestTheSecondAttemptIs10SecondsAndTheThird60SecondsAfterTheAttemptBefore(t *testing.T) {
 	worker := noticejobs.Worker{}
 

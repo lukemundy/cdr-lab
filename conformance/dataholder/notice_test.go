@@ -76,6 +76,7 @@ func requireNoticeStatus(t *testing.T, customer account, arrangementID, want str
 		waitForNotice, pollInterval, "the notice becomes %s", want)
 }
 
+// Verifies: DH-0903, DH-0924, DH-0925
 func TestTheSoftwareProductGetsASignedNoticeAfterAWithdrawal(t *testing.T) {
 	client := registered(t, noticeProduct)
 	customer, arrangementID := withdrawn(t, client, http.StatusNoContent)
@@ -142,6 +143,7 @@ func TestANoticeWithA5xxResponseStaysPendingForANewAttempt(t *testing.T) {
 	assert.Equal(t, "PENDING", noticeStatusOf(t, customer, arrangementID))
 }
 
+// Verifies: DH-0902
 func TestARevocationByTheSoftwareProductSendsNoNotice(t *testing.T) {
 	client := registered(t, noticeProduct)
 	customer := newEligibleAccount(t)

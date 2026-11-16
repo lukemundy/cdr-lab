@@ -60,6 +60,7 @@ func noticeJobs(t *testing.T, client *river.Client[pgx.Tx]) []*rivertype.JobRow 
 	return listed.Jobs
 }
 
+// Verifies: DH-0924
 func TestAnEndThatNeedsANoticeInsertsOneJob(t *testing.T) {
 	_, store, inserter := newStore(t)
 
@@ -72,6 +73,7 @@ func TestAnEndThatNeedsANoticeInsertsOneJob(t *testing.T) {
 	assert.Equal(t, 3, listed[0].MaxAttempts)
 }
 
+// Verifies: DH-0924
 func TestAnEndThatNeedsNoNoticeInsertsNoJob(t *testing.T) {
 	_, store, inserter := newStore(t)
 
@@ -123,6 +125,7 @@ func requireAttempt(t *testing.T, attempted <-chan int, want int) {
 	}
 }
 
+// Verifies: DH-0938
 func TestANoticeContinuesItsAttemptsAfterARestart(t *testing.T) {
 	pool, store, inserter := newStore(t)
 	notices := &sequenceNotices{attempted: make(chan int, 2)}

@@ -29,6 +29,7 @@ func serveStatic(t *testing.T, path string) *httptest.ResponseRecorder {
 	return rec
 }
 
+// Verifies: DH-0846
 func TestTheStylesheetAndTheFontsOfThePagesAreOnTheStaticPath(t *testing.T) {
 	tests := map[string]struct{ contentType, body string }{
 		"/static/consumer.css":            {"text/css; charset=utf-8", "body {}"},

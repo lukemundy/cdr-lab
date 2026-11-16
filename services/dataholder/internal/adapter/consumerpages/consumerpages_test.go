@@ -389,6 +389,7 @@ func TestACancelDeniesTheFlowAndWritesNoPage(t *testing.T) {
 	assert.Empty(t, cancelled.body)
 }
 
+// Verifies: DH-0845
 func TestAFormWithoutItsProtectionAgainstCrossSiteRequestForgeryIsRefused(t *testing.T) {
 	tests := map[string]func(b *browser, token string) url.Values{
 		"no form token": func(*browser, string) url.Values { return url.Values{"action": {"cancel"}} },
@@ -422,6 +423,7 @@ func TestAFormWithoutItsProtectionAgainstCrossSiteRequestForgeryIsRefused(t *tes
 	}
 }
 
+// Verifies: DH-0845
 func TestTheFlowContinuesAfterARefusedForm(t *testing.T) {
 	b := newBrowser(t)
 	token := formToken(t, b.get().body)
@@ -618,6 +620,7 @@ func TestAMailFailureEndsTheFlowAsTemporarilyUnavailable(t *testing.T) {
 	assert.Empty(t, failed.body)
 }
 
+// Verifies: DH-0825
 func TestACancelOnTheOTPPageAndOnTheConsentPageDeniesTheFlow(t *testing.T) {
 	t.Run("OTP page", func(t *testing.T) {
 		b := newBrowser(t)
