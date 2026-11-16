@@ -14,22 +14,22 @@ This area gives the language of the UIs and the format of dates, times, amounts 
 - <a id="ui-0144"></a>**UI-0144** A date in a table can have the form "22 Oct 2026". ([Style Manual: Dates and time][style-dates])
 - <a id="ui-0145"></a>**UI-0145** A date never has a two-digit year. ([Style Manual: Dates and time][style-dates])
 - <a id="ui-0146"></a>**UI-0146** A time has the form "2:05 pm". ([Style Manual: Dates and time][style-dates])
-- <a id="ui-0147"></a>**UI-0147** A time shows in the time zone of the browser, with its offset from UTC at that instant. For example, "2:05 pm UTC+8" or "1:59 am UTC+10". ([Judgement: UTC for all times (ADR 0012)][adr-0012]; [Judgement: the time zone of a time](#ui-0165))
-- <a id="ui-0148"></a>**UI-0148** The offset is "UTC", a sign and the hours, with the minutes when they are not zero. It is not a time zone name or an abbreviation. For example, "UTC+10:30" or "UTC-3:30". ([Judgement: the time zone of a time](#ui-0165))
-- <a id="ui-0149"></a>**UI-0149** When the offset is zero, the time has the label "UTC". ([Judgement: the time zone of a time](#ui-0165))
-- <a id="ui-0150"></a>**UI-0150** No server, cookie or account keeps the time zone of a user. ([Judgement: the time zone of a time](#ui-0165))
-- <a id="ui-0151"></a>**UI-0151** A screen reader gets the offset in words. For example, "UTC plus 8 hours" or "UTC minus 3 hours 30 minutes". ([Judgement: the offset for a screen reader](#ui-0166))
-- <a id="ui-0152"></a>**UI-0152** The visible offset is hidden from assistive technology. ([Judgement: the offset for a screen reader](#ui-0166))
-- <a id="ui-0153"></a>**UI-0153** A copy of a time has the visible text only. ([Judgement: the offset for a screen reader](#ui-0166))
+- <a id="ui-0147"></a>**UI-0147** A time shows in the time zone of the browser, with its offset from UTC at that instant. For example, "2:05 pm UTC+8" or "1:59 am UTC+10". ([Judgement: UTC for all times (ADR 0012)][adr-0012]; [Judgement: the browser time zone with the UTC offset at that instant](#ui-0165))
+- <a id="ui-0148"></a>**UI-0148** The offset is "UTC", a sign and the hours, with the minutes when they are not zero. It is not a time zone name or an abbreviation. For example, "UTC+10:30" or "UTC-3:30". ([Judgement: the browser time zone with the UTC offset at that instant](#ui-0165))
+- <a id="ui-0149"></a>**UI-0149** When the offset is zero, the time has the label "UTC". ([Judgement: the browser time zone with the UTC offset at that instant](#ui-0165))
+- <a id="ui-0150"></a>**UI-0150** No server, cookie or account keeps the time zone of a user. ([Judgement: the browser time zone with the UTC offset at that instant](#ui-0165))
+- <a id="ui-0151"></a>**UI-0151** A screen reader gets the offset in words. For example, "UTC plus 8 hours" or "UTC minus 3 hours 30 minutes". ([Judgement: the offset in words for a screen reader](#ui-0166))
+- <a id="ui-0152"></a>**UI-0152** The visible offset is hidden from assistive technology. ([Judgement: the offset in words for a screen reader](#ui-0166))
+- <a id="ui-0153"></a>**UI-0153** A copy of a time has the visible text only. ([Judgement: the offset in words for a screen reader](#ui-0166))
 - <a id="ui-0154"></a>**UI-0154** A time in a timeline has seconds. For example, "2:05:07 pm UTC+8". ([Judgement: seconds in a timeline](#ui-0167))
-- <a id="ui-0155"></a>**UI-0155** A date with a time has the date in full, a comma, the time and the offset. For example, "23 October 2026, 2:05:07 pm UTC+8". ([Style Manual: Dates and time][style-dates]; [Judgement: the format of a date with a time](#ui-0168))
-- <a id="ui-0156"></a>**UI-0156** When a time value is not valid, the UI shows the value as text, with no `time` element. ([HTML: the time element][html-time]; [Judgement: a time value that is not valid](#ui-0169))
+- <a id="ui-0155"></a>**UI-0155** A date with a time has the date in full, a comma, the time and the offset. For example, "23 October 2026, 2:05:07 pm UTC+8". ([Style Manual: Dates and time][style-dates]; [Judgement: the full date, a comma, the time and the offset](#ui-0168))
+- <a id="ui-0156"></a>**UI-0156** When a time value is not valid, the UI shows the value as text, with no `time` element. ([HTML: the time element][html-time]; [Judgement: the raw text for a time value that is not valid](#ui-0169))
 
 ## Amounts
 
 - <a id="ui-0157"></a>**UI-0157** An amount has the form "$1,234.50", with 2 decimal digits. ([Style Manual: Currency][style-currency])
 - <a id="ui-0158"></a>**UI-0158** In a consumer UI, a negative amount has a minus sign. For example, "-$12.00". ([Style Manual: Currency][style-currency])
-- <a id="ui-0159"></a>**UI-0159** A console does not use the accounting format for an amount. For example, a console does not show "($12.00)". ([Judgement: amounts in a console](#ui-0170))
+- <a id="ui-0159"></a>**UI-0159** A console does not use the accounting format for an amount. For example, a console does not show "($12.00)". ([Judgement: no accounting format for amounts in a console](#ui-0170))
 
 ## Formats
 
@@ -42,13 +42,13 @@ This area gives the language of the UIs and the format of dates, times, amounts 
 
 ## Judgements
 
-### <a id="ui-0165"></a>UI-0165 The time zone of a time
+### <a id="ui-0165"></a>UI-0165 The browser time zone with the UTC offset at that instant
 
 - Kind: choice
 - Basis: Step 3.3. [ADR 0012][adr-0012] permits a different time zone where a person sees the time. The browser gives the offset at each instant, so the UI needs no time zone data.
 - Reason: An offset is not ambiguous, and a lab operator can compare it directly with a time in UTC, for example in the logs. The abbreviations of `Intl` for `en-AU` are not the same in each place, and some have more than one meaning, for example "CST". The offset changes with daylight saving, so the two times of a repeated hour are different.
 
-### <a id="ui-0166"></a>UI-0166 The offset for a screen reader
+### <a id="ui-0166"></a>UI-0166 The offset in words for a screen reader
 
 - Kind: choice
 - Basis: Step 3.3. No source gives how a screen reader reads an offset.
@@ -60,19 +60,19 @@ This area gives the language of the UIs and the format of dates, times, amounts 
 - Basis: Step 3.3. No source gives the precision of a time in a timeline.
 - Reason: More than one event can occur in one minute. For example, an operator action and its cascade.
 
-### <a id="ui-0168"></a>UI-0168 The format of a date with a time
+### <a id="ui-0168"></a>UI-0168 The full date, a comma, the time and the offset
 
 - Kind: choice
 - Basis: Step 3.3. The Style Manual gives the date and the time, but not one form for the two together ([Style Manual: Dates and time][style-dates]).
 - Reason: The text between the parts of `Intl` changes from one ICU version to the next, for example "at" or a comma. Thus the UI puts the parts together itself.
 
-### <a id="ui-0169"></a>UI-0169 A time value that is not valid
+### <a id="ui-0169"></a>UI-0169 The raw text for a time value that is not valid
 
 - Kind: choice
 - Basis: Step 3.3. The API contract gives each time as a `date-time`, so only a defect gives a different value.
 - Reason: One raw value is better for the user than a page that stops.
 
-### <a id="ui-0170"></a>UI-0170 Amounts in a console
+### <a id="ui-0170"></a>UI-0170 No accounting format for amounts in a console
 
 - Kind: choice
 - Basis: Step 3.3. The Style Manual gives no accounting format ([Style Manual: Currency][style-currency]).

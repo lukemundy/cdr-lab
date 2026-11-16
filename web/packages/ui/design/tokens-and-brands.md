@@ -34,18 +34,18 @@ This area gives the design tokens, their tiers, the colour roles and their contr
   - primary action, with its hover and pressed states
   - secondary action
   - success, warning, danger and information, each with a background, a border and a text value
-- <a id="ui-0011"></a>**UI-0011** The modal backdrop is a dark colour with transparency. ([Judgement: the colour of the modal backdrop](#ui-0058))
+- <a id="ui-0011"></a>**UI-0011** The modal backdrop is a dark colour with transparency. ([Judgement: a dark transparent modal backdrop with no contrast minimum](#ui-0058))
 - <a id="ui-0012"></a>**UI-0012** Each colour value is in OKLCH. ([CSS Color 4: OKLCH][css-oklch]; [Judgement: OKLCH colour values](#ui-0055))
 - <a id="ui-0013"></a>**UI-0013** In each brand, each pair of a text role and a background role has a contrast of 4.5:1 or more. For example, the muted text on the surface. ([WCAG 2.2, SC 1.4.3][wcag-1-4-3])
 - <a id="ui-0014"></a>**UI-0014** In each brand, the focus ring and the strong border have a contrast of 3:1 or more against each background role. ([WCAG 2.2, SC 1.4.11][wcag-1-4-11])
 - <a id="ui-0015"></a>**UI-0015** The text on a primary action has a contrast of 4.5:1 or more against the primary action and its hover and pressed states, in each brand. ([WCAG 2.2, SC 1.4.3][wcag-1-4-3])
-- <a id="ui-0016"></a>**UI-0016** In the console of a participant, each pair of a brand role and a lab brand role that the console shell shows has the same contrast as a pair in one brand. For example, the link of the brand on the page header band. ([text contrast](#ui-0013); [focus ring contrast](#ui-0014); [Judgement: the brand in a console](#ui-0060))
-- <a id="ui-0017"></a>**UI-0017** The primary action colour has no contrast minimum against the background roles. ([WCAG 2.2, Understanding SC 1.4.11][understanding-1-4-11]; [Judgement: the contrast pairs of the primary action colour](#ui-0057))
-- <a id="ui-0018"></a>**UI-0018** A link uses the link role, not the primary action colour. ([Judgement: the contrast pairs of the primary action colour](#ui-0057))
+- <a id="ui-0016"></a>**UI-0016** In the console of a participant, each pair of a brand role and a lab brand role that the console shell shows has the same contrast as a pair in one brand. For example, the link of the brand on the page header band. ([text contrast](#ui-0013); [focus ring contrast](#ui-0014); [Judgement: the participant brand in the shell, with the lab fonts and radius](#ui-0060))
+- <a id="ui-0017"></a>**UI-0017** The primary action colour has no contrast minimum against the background roles. ([WCAG 2.2, Understanding SC 1.4.11][understanding-1-4-11]; [Judgement: no contrast minimum for the primary action colour](#ui-0057))
+- <a id="ui-0018"></a>**UI-0018** A link uses the link role, not the primary action colour. ([Judgement: no contrast minimum for the primary action colour](#ui-0057))
 - <a id="ui-0019"></a>**UI-0019** The strong border is the boundary of a control. ([WCAG 2.2, SC 1.4.11][wcag-1-4-11])
-- <a id="ui-0020"></a>**UI-0020** The border role and the status borders are decorative, and they have no contrast minimum. For example, a divider between table rows uses the border role. ([WCAG 2.2, SC 1.4.11][wcag-1-4-11]; [Judgement: the contrast of the border role](#ui-0056))
+- <a id="ui-0020"></a>**UI-0020** The border role and the status borders are decorative, and they have no contrast minimum. For example, a divider between table rows uses the border role. ([WCAG 2.2, SC 1.4.11][wcag-1-4-11]; [Judgement: no contrast minimum for the border role](#ui-0056))
 - <a id="ui-0021"></a>**UI-0021** The accent is decoration only. No information depends on it, and it has no contrast minimum. ([WCAG 2.2, SC 1.4.1][wcag-1-4-1]; [WCAG 2.2, SC 1.4.11][wcag-1-4-11])
-- <a id="ui-0022"></a>**UI-0022** The modal backdrop has no contrast minimum. ([WCAG 2.2, SC 1.4.11][wcag-1-4-11]; [Judgement: the colour of the modal backdrop](#ui-0058))
+- <a id="ui-0022"></a>**UI-0022** The modal backdrop has no contrast minimum. ([WCAG 2.2, SC 1.4.11][wcag-1-4-11]; [Judgement: a dark transparent modal backdrop with no contrast minimum](#ui-0058))
 
 ## Scales and densities
 
@@ -65,11 +65,11 @@ This area gives the design tokens, their tiers, the colour roles and their contr
 ## Brands
 
 - <a id="ui-0030"></a>**UI-0030** A brand is a set of values for the brand modifier of the tokens. ([DTCG Resolver][dtcg-resolver]; [Judgement: one design system (ADR 0016)][adr-0016])
-- <a id="ui-0031"></a>**UI-0031** A brand can change only these: the colour roles, the body font, the heading font, the radius and the logo. ([Judgement: what a brand can change](#ui-0059))
-- <a id="ui-0032"></a>**UI-0032** A brand cannot change the spacing scale, the type scale or the structure of a component. ([Judgement: what a brand can change](#ui-0059))
+- <a id="ui-0031"></a>**UI-0031** A brand can change only these: the colour roles, the body font, the heading font, the radius and the logo. ([Judgement: a brand changes only colours, fonts, radius and logo](#ui-0059))
+- <a id="ui-0032"></a>**UI-0032** A brand cannot change the spacing scale, the type scale or the structure of a component. ([Judgement: a brand changes only colours, fonts, radius and logo](#ui-0059))
 - <a id="ui-0033"></a>**UI-0033** The lab brand is the neutral brand of the design system. ([Judgement: one design system (ADR 0016)][adr-0016])
-- <a id="ui-0034"></a>**UI-0034** A console uses the lab brand for each role that the brand of a participant does not give to the console. ([Judgement: the brand in a console](#ui-0060))
-- <a id="ui-0035"></a>**UI-0035** The console of a participant uses these roles of the brand of that participant. ([Judgement: the brand in a console](#ui-0060))
+- <a id="ui-0034"></a>**UI-0034** A console uses the lab brand for each role that the brand of a participant does not give to the console. ([Judgement: the participant brand in the shell, with the lab fonts and radius](#ui-0060))
+- <a id="ui-0035"></a>**UI-0035** The console of a participant uses these roles of the brand of that participant. ([Judgement: the participant brand in the shell, with the lab fonts and radius](#ui-0060))
   - brand, and text on the brand
   - hero, and text on the hero
   - accent
@@ -77,7 +77,7 @@ This area gives the design tokens, their tiers, the colour roles and their contr
   - link
   - primary action, with its hover and pressed states
   - text on a primary action
-- <a id="ui-0036"></a>**UI-0036** The console of a participant uses the body font, the heading font and the radius of the lab brand. ([Judgement: the brand in a console](#ui-0060))
+- <a id="ui-0036"></a>**UI-0036** The console of a participant uses the body font, the heading font and the radius of the lab brand. ([Judgement: the participant brand in the shell, with the lab fonts and radius](#ui-0060))
 
 ## Typography
 
@@ -85,13 +85,13 @@ This area gives the design tokens, their tiers, the colour roles and their contr
 - <a id="ui-0041"></a>**UI-0041** The fonts are a fixed set, which [`fonts.json`](../../tokens/fonts.json) gives. ([Judgement: a fixed set of fonts](#ui-0065))
 - <a id="ui-0042"></a>**UI-0042** A brand uses a font of the set. ([Judgement: a fixed set of fonts](#ui-0065))
 - <a id="ui-0043"></a>**UI-0043** Each font of the set has a licence that permits self-hosting. Its licence text is next to its files. ([OWASP ASVS 5.0, V3.6.1][asvs-v3]; [Judgement: a fixed set of fonts](#ui-0065))
-- <a id="ui-0044"></a>**UI-0044** The lab brand uses Inter for text. ([Judgement: the fonts of the lab brand](#ui-0061))
-- <a id="ui-0045"></a>**UI-0045** The lab brand uses JetBrains Mono for identifiers, thumbprints and keys. ([Judgement: the fonts of the lab brand](#ui-0061))
+- <a id="ui-0044"></a>**UI-0044** The lab brand uses Inter for text. ([Judgement: Inter and JetBrains Mono for the lab brand](#ui-0061))
+- <a id="ui-0045"></a>**UI-0045** The lab brand uses JetBrains Mono for identifiers, thumbprints and keys. ([Judgement: Inter and JetBrains Mono for the lab brand](#ui-0061))
 - <a id="ui-0046"></a>**UI-0046** Amounts and numbers in tables use tabular figures. ([Judgement: tabular figures](#ui-0062))
-- <a id="ui-0047"></a>**UI-0047** In a consumer UI, body text is 16 CSS px or more. ([Judgement: the smallest body text in a consumer UI](#ui-0063))
+- <a id="ui-0047"></a>**UI-0047** In a consumer UI, body text is 16 CSS px or more. ([Judgement: body text of 16 CSS px or more in a consumer UI](#ui-0063))
 - <a id="ui-0048"></a>**UI-0048** A user can resize text to 200 % with no loss of content or function. ([WCAG 2.2, SC 1.4.4][wcag-1-4-4])
-- <a id="ui-0049"></a>**UI-0049** Each heading level from h1 to h4 has a smaller font size than the level above it. ([Judgement: the heading sizes](#ui-0064))
-- <a id="ui-0050"></a>**UI-0050** The headings h4, h5 and h6 have the same font size. ([Judgement: the heading sizes](#ui-0064))
+- <a id="ui-0049"></a>**UI-0049** Each heading level from h1 to h4 has a smaller font size than the level above it. ([Judgement: a smaller font size at each heading level to h4](#ui-0064))
+- <a id="ui-0050"></a>**UI-0050** The headings h4, h5 and h6 have the same font size. ([Judgement: a smaller font size at each heading level to h4](#ui-0064))
 
 ## Judgements
 
@@ -101,37 +101,37 @@ This area gives the design tokens, their tiers, the colour roles and their contr
 - Basis: Step 3.2. Lightness steps in OKLCH are even ([CSS Color 4: OKLCH][css-oklch]). Each supported browser supports `oklch()` ([MDN: oklch()][mdn-oklch]).
 - Reason: Even lightness steps make the colour ramp of a new brand easier. A ramp then needs less adjustment.
 
-### <a id="ui-0056"></a>UI-0056 The contrast of the border role
+### <a id="ui-0056"></a>UI-0056 No contrast minimum for the border role
 
 - Kind: choice
 - Basis: Step 3.2. SC 1.4.11 does not apply to a border that is not necessary to identify a component or its state ([WCAG 2.2, SC 1.4.11][wcag-1-4-11]).
 - Reason: Only the boundary of a control and the focus ring need 3:1. A divider of 3:1 on each table row makes a dense console difficult to read.
 
-### <a id="ui-0057"></a>UI-0057 The contrast pairs of the primary action colour
+### <a id="ui-0057"></a>UI-0057 No contrast minimum for the primary action colour
 
 - Kind: choice
 - Basis: Step 3.2. A button with a text label needs no boundary of 3:1, because the text identifies the component ([WCAG 2.2, Understanding SC 1.4.11][understanding-1-4-11]).
 - Reason: A brand with a light primary colour, for example yellow, can then use it for its buttons. The text on the primary action keeps 4.5:1, and the link role keeps 4.5:1 against each background. The pairs of the focus ring and the strong border stay.
 
-### <a id="ui-0058"></a>UI-0058 The colour of the modal backdrop
+### <a id="ui-0058"></a>UI-0058 A dark transparent modal backdrop with no contrast minimum
 
 - Kind: choice
 - Basis: Step 3.2. The backdrop is not text and not the boundary of a control ([WCAG 2.2, SC 1.4.11][wcag-1-4-11]).
 - Reason: A dimmed page shows that the dialog is modal. A semantic role lets a brand change it.
 
-### <a id="ui-0059"></a>UI-0059 What a brand can change
+### <a id="ui-0059"></a>UI-0059 A brand changes only colours, fonts, radius and logo
 
 - Kind: choice
 - Basis: Step 3.3. [ADR 0016][adr-0016] gives one set of components for more than one brand.
 - Reason: The brands must look different, but a component must work the same in each brand. An app can arrange the components differently for each brand, as [the online bank site of the data holder](../../../../services/dataholder/design/online-bank-site.md) does with its layouts.
 
-### <a id="ui-0060"></a>UI-0060 The brand in a console
+### <a id="ui-0060"></a>UI-0060 The participant brand in the shell, with the lab fonts and radius
 
 - Kind: choice
 - Basis: Step 3.3. [ADR 0016][adr-0016] says that each participant has its own brand, and that the consoles have a neutral lab brand.
 - Reason: The console of a participant shows more of its brand in the shell and stays a dense tool for the lab operator. The brand colour is white for some brands, so the side navigation uses the hero colour, which is dark in each preset brand. A different font changes the width of each table column, so the font stays the same.
 
-### <a id="ui-0061"></a>UI-0061 The fonts of the lab brand
+### <a id="ui-0061"></a>UI-0061 Inter and JetBrains Mono for the lab brand
 
 - Kind: choice
 - Basis: Step 3.3. Inter and JetBrains Mono have the SIL Open Font License 1.1, which permits self-hosting.
@@ -143,13 +143,13 @@ This area gives the design tokens, their tiers, the colour roles and their contr
 - Basis: Step 3.3. No source gives a figure style for a UI.
 - Reason: Digits with one width align in columns.
 
-### <a id="ui-0063"></a>UI-0063 The smallest body text in a consumer UI
+### <a id="ui-0063"></a>UI-0063 Body text of 16 CSS px or more in a consumer UI
 
 - Kind: choice
 - Basis: Step 3.3. No source gives a minimum text size.
 - Reason: iOS Safari zooms into a form field with smaller text, which moves the layout.
 
-### <a id="ui-0064"></a>UI-0064 The heading sizes
+### <a id="ui-0064"></a>UI-0064 A smaller font size at each heading level to h4
 
 - Kind: choice
 - Basis: Step 3.3. No source gives the sizes of the heading levels.
