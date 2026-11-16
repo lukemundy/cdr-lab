@@ -70,16 +70,16 @@ The rules of this group are for the APIs on the resource base URI and for the Us
 ## Get Customer
 
 - <a id="dh-1050"></a>**DH-1050** Get Customer returns the customer of the arrangement with `customerUType` `person` and a `CommonPerson` object. ([CDS: Get Customer][cds-get-customer])
-- <a id="dh-1051"></a>**DH-1051** The person has `lastName`, `firstName` when the customer has one, `middleNames` as an empty list, and `lastUpdateTime`. The `lastUpdateTime` is the time of the last change to the customer. ([CDS: CommonPerson][cds-schema-person]; [Judgement: the fields of a person](#dh-1158))
-- <a id="dh-1052"></a>**DH-1052** The person has no `prefix`, no `suffix` and no occupation. ([CDS: CommonPerson][cds-schema-person]; [Judgement: the fields of a person](#dh-1158))
+- <a id="dh-1051"></a>**DH-1051** The person has `lastName`, `firstName` when the customer has one, `middleNames` as an empty list, and `lastUpdateTime`. The `lastUpdateTime` is the time of the last change to the customer. ([CDS: CommonPerson][cds-schema-person]; [Judgement: no prefix, no suffix and no occupation for a person](#dh-1158))
+- <a id="dh-1052"></a>**DH-1052** The person has no `prefix`, no `suffix` and no occupation. ([CDS: CommonPerson][cds-schema-person]; [Judgement: no prefix, no suffix and no occupation for a person](#dh-1158))
 
 ## Accounts
 
 - <a id="dh-1060"></a>**DH-1060** Get Accounts returns the accounts of the arrangement as `BankingAccountV3` records, in the sequence of their creation. ([CDS: Get Accounts][cds-get-accounts])
 - <a id="dh-1061"></a>**DH-1061** Get Accounts supports the filters `product-category`, `open-status` (default `ALL`) and `is-owned`. An account must match each filter in the request. For example, `open-status=CLOSED` gives only the closed accounts. ([CDS: Get Accounts][cds-get-accounts])
-- <a id="dh-1062"></a>**DH-1062** An account record has these fields: `accountId`, `displayName`, `maskedNumber`, `productCategory`, `productName`, `openStatus`, `isOwned` with the value `true`, `accountOwnership` with the value `ONE_PARTY`, and `creationDate`. ([CDS: BankingAccountV3][cds-schema-account]; [Judgement: the optional fields of an account](#dh-1159))
+- <a id="dh-1062"></a>**DH-1062** An account record has these fields: `accountId`, `displayName`, `maskedNumber`, `productCategory`, `productName`, `openStatus`, `isOwned` with the value `true`, `accountOwnership` with the value `ONE_PARTY`, and `creationDate`. ([CDS: BankingAccountV3][cds-schema-account]; [Judgement: a minimum set of optional fields for an account](#dh-1159))
 - <a id="dh-1063"></a>**DH-1063** A closed account stays in the CDR data of an arrangement that has it, with `openStatus` `CLOSED` and its transactions. ([CDR Rules][cdr-rules], Schedule 3, clause 3.2(7); [Judgement: a closed account stays in its arrangements](#dh-1160))
-- <a id="dh-1064"></a>**DH-1064** Get Account Detail returns one account of the arrangement as a `BankingAccountDetailV5` record. It adds `bsb` and `accountNumber`, with digits only. It has no other optional field. ([CDS: Get Account Detail][cds-get-account-detail]; [Judgement: the optional fields of an account](#dh-1159))
+- <a id="dh-1064"></a>**DH-1064** Get Account Detail returns one account of the arrangement as a `BankingAccountDetailV5` record. It adds `bsb` and `accountNumber`, with digits only. It has no other optional field. ([CDS: Get Account Detail][cds-get-account-detail]; [Judgement: a minimum set of optional fields for an account](#dh-1159))
 
 ## Balances
 
@@ -87,8 +87,8 @@ The rules of this group are for the APIs on the resource base URI and for the Us
 - <a id="dh-1071"></a>**DH-1071** Get Bulk Balances returns the balances of the accounts of the arrangement, with [the filters of Get Accounts](#dh-1061). ([CDS: Get Bulk Balances][cds-get-bulk-balances])
 - <a id="dh-1072"></a>**DH-1072** Get Balances For Specific Accounts returns the balances of the accounts in `data.accountIds`. ([CDS: Get Balances For Specific Accounts][cds-get-balances-specific])
 - <a id="dh-1073"></a>**DH-1073** A balance has `accountId`, `currentBalance`, `availableBalance` and `creditLimit`, from [the balances of the account](#dh-1013). It has no `amortisedLimit`, no `currency` and no `purses`, so the currency is the default `AUD`. ([CDS: BankingBalance][cds-schema-balance])
-- <a id="dh-1074"></a>**DH-1074** Get Balances For Specific Accounts gives one balance for each different `accountId` in `data.accountIds`, in the sequence of Get Accounts, with pagination. For example, an `accountId` that is in the list two times gives one balance. ([CDS: Get Balances For Specific Accounts][cds-get-balances-specific]; [Judgement: the accounts of Get Balances For Specific Accounts](#dh-1161))
-- <a id="dh-1075"></a>**DH-1075** When `data.accountIds` is empty, Get Balances For Specific Accounts gives an empty list. ([CDS: Get Balances For Specific Accounts][cds-get-balances-specific]; [Judgement: the accounts of Get Balances For Specific Accounts](#dh-1161))
+- <a id="dh-1074"></a>**DH-1074** Get Balances For Specific Accounts gives one balance for each different `accountId` in `data.accountIds`, in the sequence of Get Accounts, with pagination. For example, an `accountId` that is in the list two times gives one balance. ([CDS: Get Balances For Specific Accounts][cds-get-balances-specific]; [Judgement: one balance for each different accountId, in the sequence of Get Accounts](#dh-1161))
+- <a id="dh-1075"></a>**DH-1075** When `data.accountIds` is empty, Get Balances For Specific Accounts gives an empty list. ([CDS: Get Balances For Specific Accounts][cds-get-balances-specific]; [Judgement: one balance for each different accountId, in the sequence of Get Accounts](#dh-1161))
 
 ## Transactions
 
@@ -180,13 +180,13 @@ The rules of this group are for the APIs on the resource base URI and for the Us
 - Basis: Step 3.3. The CDS forbids an identifier with meaning and an identifier that two software products share, and it names a hash for a `transactionId` ([CDS: ID Permanence][cds-id-permanence]; [CDS: BankingTransactionV2][cds-schema-transaction]). The ACCC suggests an identifier for the subject, or for the subject and the client ([CDR Support: ID Permanence and PPID][support-ppid]).
 - Reason: A hash needs no stored value for each pair of resource and software product, and one method for accounts and transactions is one rule to keep correct. The internal identifiers are random UUIDs that no data recipient gets, so a party cannot predict or reverse the hash, and a key adds nothing. A new registration keeps the software product ID, so the identifiers stay the same.
 
-### <a id="dh-1158"></a>DH-1158 The fields of a person
+### <a id="dh-1158"></a>DH-1158 No prefix, no suffix and no occupation for a person
 
 - Kind: choice
 - Basis: Step 3.3. Only `lastName` and `middleNames` are required, and the occupation is optional ([CDS: CommonPerson][cds-schema-person]).
 - Reason: The lab needs no more personal data.
 
-### <a id="dh-1159"></a>DH-1159 The optional fields of an account
+### <a id="dh-1159"></a>DH-1159 A minimum set of optional fields for an account
 
 - Kind: choice
 - Basis: Step 3.3. The CDS marks the other fields of an account and its detail as optional ([CDS: BankingAccountV3][cds-schema-account]; [CDS: Get Account Detail][cds-get-account-detail]).
@@ -198,7 +198,7 @@ The rules of this group are for the APIs on the resource base URI and for the Us
 - Basis: Step 3.3. The data of a closed account is voluntary consumer data ([CDR Rules][cdr-rules], Schedule 3, clause 3.2(7); [CDR Support: Closed accounts in the banking and non-bank lenders sectors][support-closed-accounts]).
 - Reason: A data recipient can then test `openStatus` and its filter. A consumer selects an account so that its data is shared, and the arrangements end when the customer has no open account.
 
-### <a id="dh-1161"></a>DH-1161 The accounts of Get Balances For Specific Accounts
+### <a id="dh-1161"></a>DH-1161 One balance for each different accountId, in the sequence of Get Accounts
 
 - Kind: choice
 - Basis: Step 3.3. The schema permits an empty `accountIds`, and it gives no rule for a duplicate or for the sequence ([CDS: Get Balances For Specific Accounts][cds-get-balances-specific]).

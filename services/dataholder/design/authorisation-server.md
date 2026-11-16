@@ -49,8 +49,8 @@ The library gives the tokens of an arrangement. The data holder gives [the subje
 
 - <a id="dh-0509"></a>**DH-0509** The `sub` is a pairwise identifier. For each pair of customer and sector identifier, the data holder creates a random RFC 4122 version 4 UUID and keeps it. ([CDS: Sub Claim][cds-sub-claim]; [DSB: standards-maintenance issue 480][dsb-issue-480]; [OpenID Connect Core, section 8.1][oidc-core-pairwise])
 - <a id="dh-0510"></a>**DH-0510** The sector identifier is the host of the `sector_identifier_uri` of the registration. ([OpenID Connect Core, section 8.1][oidc-core-pairwise])
-- <a id="dh-0511"></a>**DH-0511** When the registration has no `sector_identifier_uri`, the sector identifier is the host of the `redirect_uris`. ([OpenID Connect Core, section 8.1][oidc-core-pairwise]; [Judgement: the sector identifier of a registration with no sector_identifier_uri](#dh-0535))
-- <a id="dh-0512"></a>**DH-0512** When the registration has no `sector_identifier_uri` and its `redirect_uris` have more than one host, the sector identifier is the software product ID. ([Judgement: the sector identifier of a registration with no sector_identifier_uri](#dh-0535))
+- <a id="dh-0511"></a>**DH-0511** When the registration has no `sector_identifier_uri`, the sector identifier is the host of the `redirect_uris`. ([OpenID Connect Core, section 8.1][oidc-core-pairwise]; [Judgement: the redirect host, or the software product ID, as the sector identifier](#dh-0535))
+- <a id="dh-0512"></a>**DH-0512** When the registration has no `sector_identifier_uri` and its `redirect_uris` have more than one host, the sector identifier is the software product ID. ([Judgement: the redirect host, or the software product ID, as the sector identifier](#dh-0535))
 - <a id="dh-0513"></a>**DH-0513** The `sub` of a customer is the same in each arrangement with the same sector identifier, also after the software product registers again. ([CDR Support: ID Permanence and PPID][support-ppid])
 
 ## Judgements
@@ -85,7 +85,7 @@ The library gives the tokens of an arrangement. The data holder gives [the subje
 - Basis: Step 3.3. RFC 6749 says that the authorisation server informs the resource owner of the error, and it gives no content ([section 4.1.2.1][rfc6749-authorisation-errors]).
 - Reason: The consumer cannot correct a fault in the request of the software product.
 
-### <a id="dh-0535"></a>DH-0535 The sector identifier of a registration with no sector_identifier_uri
+### <a id="dh-0535"></a>DH-0535 The redirect host, or the software product ID, as the sector identifier
 
 - Kind: conflict
 - Basis: Step 3.2. OpenID Connect requires a `sector_identifier_uri` for redirect URIs with more than one host ([section 8.1][oidc-core-pairwise]), but the CDS marks the SSA claim as optional ([CDS: SSA Definition][cds-ssa-definition]).

@@ -16,9 +16,9 @@ This area gives the registration of a software product with an SSA, registration
 - <a id="dh-0604"></a>**DH-0604** The `aud` of a request JWT is the issuer, or a list that contains the issuer. ([CDS: Registration Request using JWT][cds-registration-request])
 - <a id="dh-0605"></a>**DH-0605** The `iss` of a request JWT is the `software_id` of the SSA. ([CDS: Registration Request using JWT][cds-registration-request])
 - <a id="dh-0606"></a>**DH-0606** The data holder refuses a request JWT that is expired. ([CDS: Registration Request using JWT][cds-registration-request])
-- <a id="dh-0607"></a>**DH-0607** The data holder refuses a request JWT whose `exp` is more than 10 minutes after the time of the request. ([Judgement: the lifetime and the reuse of a request JWT](#dh-0701))
-- <a id="dh-0608"></a>**DH-0608** The data holder refuses a request JWT whose `jti` it accepted in the last hour, from any software product. For example, a second `POST` with the same request JWT gets `invalid_client_metadata`. ([CDS: Registration Request using JWT][cds-registration-request]; [Judgement: the lifetime and the reuse of a request JWT](#dh-0701))
-- <a id="dh-0609"></a>**DH-0609** The data holder refuses a registration request body that is larger than 64 KiB. ([Judgement: the maximum size of a registration request](#dh-0702))
+- <a id="dh-0607"></a>**DH-0607** The data holder refuses a request JWT whose `exp` is more than 10 minutes after the time of the request. ([Judgement: a request JWT of 10 minutes at most, with no reuse for 1 hour](#dh-0701))
+- <a id="dh-0608"></a>**DH-0608** The data holder refuses a request JWT whose `jti` it accepted in the last hour, from any software product. For example, a second `POST` with the same request JWT gets `invalid_client_metadata`. ([CDS: Registration Request using JWT][cds-registration-request]; [Judgement: a request JWT of 10 minutes at most, with no reuse for 1 hour](#dh-0701))
+- <a id="dh-0609"></a>**DH-0609** The data holder refuses a registration request body that is larger than 64 KiB. ([Judgement: a registration request of 64 KiB at most](#dh-0702))
 
 ## Validation of the SSA
 
@@ -32,7 +32,7 @@ This area gives the registration of a software product with an SSA, registration
 - <a id="dh-0617"></a>**DH-0617** The SSA has each claim that the SSA definition marks as required. For example, the data holder refuses an SSA with no `revocation_uri`. ([CDS: SSA Definition][cds-ssa-definition])
 - <a id="dh-0618"></a>**DH-0618** The `software_roles` of the SSA is `data-recipient-software-product`. ([CDS: SSA Definition][cds-ssa-definition])
 - <a id="dh-0619"></a>**DH-0619** The `jwks_uri` of the SSA is an `https` URL. When it is not, the data holder refuses the SSA. ([CDS: Transaction Security][cds-transaction-security]; [CDR Support: Egress policy for calls from DH to ADRs][support-egress])
-- <a id="dh-0620"></a>**DH-0620** The data holder does not keep the `jti` of an SSA. A software product can use one SSA again until the SSA expires. ([CDS: SSA Definition][cds-ssa-definition]; [Judgement: the reuse of an SSA](#dh-0704))
+- <a id="dh-0620"></a>**DH-0620** The data holder does not keep the `jti` of an SSA. A software product can use one SSA again until the SSA expires. ([CDS: SSA Definition][cds-ssa-definition]; [Judgement: an SSA can be used again until it expires](#dh-0704))
 - <a id="dh-0621"></a>**DH-0621** At registration, the data holder does not check the participant status of the software product. ([CDS: Software Statement Assertion][cds-ssa]; [Judgement: no status check at registration](#dh-0705))
 
 ## Validation of the request
@@ -84,11 +84,11 @@ The data holder uses these `error` values:
 
 | ID | Condition | `error` | Source |
 |---|---|---|---|
-| <a id="dh-0650"></a>**DH-0650** | The SSA is absent or is not a JWT, its signature is not valid, its `kid` is not in the Register JWKS, it is expired, or one of its claims is absent or not valid | `invalid_software_statement` | [CDS: Registration Errors][cds-registration-errors]; [Judgement: the error codes of a registration](#dh-0708) |
-| <a id="dh-0651"></a>**DH-0651** | The `software_id` of the SSA has a registration | `invalid_software_statement` | [CDS: Registration Errors][cds-registration-errors]; [Judgement: the error codes of a registration](#dh-0708) |
-| <a id="dh-0652"></a>**DH-0652** | A value of `redirect_uris` is not in the SSA | `invalid_redirect_uri` | [CDS: Registration Errors][cds-registration-errors]; [Judgement: the error codes of a registration](#dh-0708) |
-| <a id="dh-0653"></a>**DH-0653** | The body is not a JWT or is larger than 64 KiB, the request JWT has a signature, an `aud`, an `iss`, an `exp`, a `jti` or a client metadata value that is not valid, or a required claim is absent | `invalid_client_metadata` | [CDS: Registration Errors][cds-registration-errors]; [Judgement: the error codes of a registration](#dh-0708) |
-| <a id="dh-0654"></a>**DH-0654** | The data holder cannot get the keys at the `jwks_uri` of the SSA | `invalid_client_metadata` | [CDS: Registration Errors][cds-registration-errors]; [Judgement: the error codes of a registration](#dh-0708) |
+| <a id="dh-0650"></a>**DH-0650** | The SSA is absent or is not a JWT, its signature is not valid, its `kid` is not in the Register JWKS, it is expired, or one of its claims is absent or not valid | `invalid_software_statement` | [CDS: Registration Errors][cds-registration-errors]; [Judgement: invalid_software_statement for a fault in the SSA and for a duplicate](#dh-0708) |
+| <a id="dh-0651"></a>**DH-0651** | The `software_id` of the SSA has a registration | `invalid_software_statement` | [CDS: Registration Errors][cds-registration-errors]; [Judgement: invalid_software_statement for a fault in the SSA and for a duplicate](#dh-0708) |
+| <a id="dh-0652"></a>**DH-0652** | A value of `redirect_uris` is not in the SSA | `invalid_redirect_uri` | [CDS: Registration Errors][cds-registration-errors]; [Judgement: invalid_software_statement for a fault in the SSA and for a duplicate](#dh-0708) |
+| <a id="dh-0653"></a>**DH-0653** | The body is not a JWT or is larger than 64 KiB, the request JWT has a signature, an `aud`, an `iss`, an `exp`, a `jti` or a client metadata value that is not valid, or a required claim is absent | `invalid_client_metadata` | [CDS: Registration Errors][cds-registration-errors]; [Judgement: invalid_software_statement for a fault in the SSA and for a duplicate](#dh-0708) |
+| <a id="dh-0654"></a>**DH-0654** | The data holder cannot get the keys at the `jwks_uri` of the SSA | `invalid_client_metadata` | [CDS: Registration Errors][cds-registration-errors]; [Judgement: invalid_software_statement for a fault in the SSA and for a duplicate](#dh-0708) |
 
 - <a id="dh-0655"></a>**DH-0655** The data holder does not use the error `unapproved_software_statement`. ([RFC 7591, section 3.2.2][rfc7591-errors]; [Judgement: no unapproved_software_statement](#dh-0709))
 - <a id="dh-0656"></a>**DH-0656** When the data holder cannot get the Register JWKS, it responds with 500 and the error `server_error`. ([RFC 7591, section 3.2.2][rfc7591-errors]; [Judgement: server_error when the Register JWKS is not available](#dh-0710))
@@ -99,17 +99,17 @@ The data holder uses these `error` values:
 - <a id="dh-0658"></a>**DH-0658** Each registration management request has an access token as a bearer token. ([RFC 6750][rfc6750]; [CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints])
 - <a id="dh-0659"></a>**DH-0659** The access token is active, has the scope `cdr:registration`, and is bound to the client certificate of the request. ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]; [CDS: Holder of Key Mechanism][cds-hok])
 - <a id="dh-0660"></a>**DH-0660** The access token is a token of the client in the path. ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints])
-- <a id="dh-0661"></a>**DH-0661** When the data holder refuses a registration management request, the response has no body. ([`cds_dcr.json`][cds-openapi-dcr]; [Judgement: the errors of registration management](#dh-0711))
+- <a id="dh-0661"></a>**DH-0661** When the data holder refuses a registration management request, the response has no body. ([`cds_dcr.json`][cds-openapi-dcr]; [Judgement: 401 or 403 with no body for registration management errors](#dh-0711))
 
 The data holder gives these refusals:
 
 | ID | Condition | Response | Source |
 |---|---|---|---|
-| <a id="dh-0662"></a>**DH-0662** | The request has no bearer token | 401 with `WWW-Authenticate: Bearer` | [RFC 6750, section 3.1][rfc6750-errors]; [Judgement: the errors of registration management](#dh-0711) |
-| <a id="dh-0663"></a>**DH-0663** | The token is not known, is expired, is revoked, is not bound to the client certificate, or is a token of a deleted registration | 401 with `WWW-Authenticate: Bearer error="invalid_token"` | [RFC 6750, section 3.1][rfc6750-errors]; [RFC 8705, section 3][rfc8705-binding]; [Judgement: the errors of registration management](#dh-0711) |
-| <a id="dh-0664"></a>**DH-0664** | The path has a client ID that does not exist | 401 with `WWW-Authenticate: Bearer error="invalid_token"` | [`cds_dcr.json`][cds-openapi-dcr]; [Judgement: the errors of registration management](#dh-0711) |
-| <a id="dh-0665"></a>**DH-0665** | The token does not have the scope `cdr:registration` | 403 with `WWW-Authenticate: Bearer error="insufficient_scope", scope="cdr:registration"` | [RFC 6750, section 3.1][rfc6750-errors]; [Judgement: the errors of registration management](#dh-0711) |
-| <a id="dh-0666"></a>**DH-0666** | The path has the client ID of a different registration | 403 | [`cds_dcr.json`][cds-openapi-dcr]; [Judgement: the errors of registration management](#dh-0711) |
+| <a id="dh-0662"></a>**DH-0662** | The request has no bearer token | 401 with `WWW-Authenticate: Bearer` | [RFC 6750, section 3.1][rfc6750-errors]; [Judgement: 401 or 403 with no body for registration management errors](#dh-0711) |
+| <a id="dh-0663"></a>**DH-0663** | The token is not known, is expired, is revoked, is not bound to the client certificate, or is a token of a deleted registration | 401 with `WWW-Authenticate: Bearer error="invalid_token"` | [RFC 6750, section 3.1][rfc6750-errors]; [RFC 8705, section 3][rfc8705-binding]; [Judgement: 401 or 403 with no body for registration management errors](#dh-0711) |
+| <a id="dh-0664"></a>**DH-0664** | The path has a client ID that does not exist | 401 with `WWW-Authenticate: Bearer error="invalid_token"` | [`cds_dcr.json`][cds-openapi-dcr]; [Judgement: 401 or 403 with no body for registration management errors](#dh-0711) |
+| <a id="dh-0665"></a>**DH-0665** | The token does not have the scope `cdr:registration` | 403 with `WWW-Authenticate: Bearer error="insufficient_scope", scope="cdr:registration"` | [RFC 6750, section 3.1][rfc6750-errors]; [Judgement: 401 or 403 with no body for registration management errors](#dh-0711) |
+| <a id="dh-0666"></a>**DH-0666** | The path has the client ID of a different registration | 403 | [`cds_dcr.json`][cds-openapi-dcr]; [Judgement: 401 or 403 with no body for registration management errors](#dh-0711) |
 
 - <a id="dh-0667"></a>**DH-0667** `GET` gives 200 with the registration, in the format of the registration response. ([CDS: RegistrationProperties][cds-schema-registration-properties])
 - <a id="dh-0668"></a>**DH-0668** The `software_statement` of a `GET` response is the SSA of the last request that the data holder accepted. ([CDS: RegistrationProperties][cds-schema-registration-properties])
@@ -120,9 +120,9 @@ The data holder gives these refusals:
 - <a id="dh-0673"></a>**DH-0673** A `DELETE` deletes the registration and gives 204. ([CDS: DCR APIs][cds-dcr-apis]; [Judgement: support for the deletion of a registration](#dh-0712))
 - <a id="dh-0674"></a>**DH-0674** After a `DELETE`, client authentication with the client ID of the registration fails. ([CDS: DCR APIs][cds-dcr-apis])
 - <a id="dh-0675"></a>**DH-0675** After a `DELETE`, the software product can register again. It then gets a new client ID. ([Judgement: support for the deletion of a registration](#dh-0712))
-- <a id="dh-0676"></a>**DH-0676** When a software product deletes its registration, the arrangements of the client do not end. ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]; [Judgement: the arrangements of a deleted registration](#dh-0713))
-- <a id="dh-0677"></a>**DH-0677** After a `DELETE`, the data holder accepts no token of the client. ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]; [Judgement: the arrangements of a deleted registration](#dh-0713))
-- <a id="dh-0678"></a>**DH-0678** The lab operator can [withdraw an arrangement](operator-interface.md#dh-0727) of a deleted registration. ([Judgement: the arrangements of a deleted registration](#dh-0713))
+- <a id="dh-0676"></a>**DH-0676** When a software product deletes its registration, the arrangements of the client do not end. ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]; [Judgement: a deleted registration keeps its arrangements](#dh-0713))
+- <a id="dh-0677"></a>**DH-0677** After a `DELETE`, the data holder accepts no token of the client. ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]; [Judgement: a deleted registration keeps its arrangements](#dh-0713))
+- <a id="dh-0678"></a>**DH-0678** The lab operator can [withdraw an arrangement](operator-interface.md#dh-0727) of a deleted registration. ([Judgement: a deleted registration keeps its arrangements](#dh-0713))
 
 ## Participant statuses
 
@@ -135,10 +135,10 @@ The data holder gives these refusals:
 - <a id="dh-0685"></a>**DH-0685** The request for the statuses has `If-None-Match` with the `ETag` of the last response. ([CDS: Metadata Cache Management][cds-metadata-cache])
 - <a id="dh-0686"></a>**DH-0686** When the Register does not respond, the data holder keeps the previous status of each software product, with no time limit. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities])
 - <a id="dh-0687"></a>**DH-0687** When the response has no status, or a status that is not known, for a software product, the data holder keeps the previous status of that software product. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities])
-- <a id="dh-0688"></a>**DH-0688** When the data holder has no status for a software product, the software product gets the responses for INACTIVE. ([Judgement: a software product with no status](#dh-0715))
-- <a id="dh-0689"></a>**DH-0689** The readiness probe fails until the data holder gets the statuses one time. ([the readiness probe](../../../pkg/platform/httpserver/DESIGN.md#srv-0002); [Judgement: a software product with no status](#dh-0715))
-- <a id="dh-0690"></a>**DH-0690** When the data holder gets the status REMOVED for a software product, it ends each arrangement of each registration of that software product at once. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [CDR Support: Status of consent when an ADR Software Product is "Removed"][support-removed]; [Judgement: the time of the clean-up for a REMOVED software product](#dh-0716))
-- <a id="dh-0691"></a>**DH-0691** When the data holder gets the status REMOVED for a software product, it deletes each registration of that software product. Client authentication with the client ID then fails, and the data holder accepts no token of the client. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [CDR Support: Status of consent when an ADR Software Product is "Removed"][support-removed]; [Judgement: the time of the clean-up for a REMOVED software product](#dh-0716))
+- <a id="dh-0688"></a>**DH-0688** When the data holder has no status for a software product, the software product gets the responses for INACTIVE. ([Judgement: INACTIVE for a software product with no status](#dh-0715))
+- <a id="dh-0689"></a>**DH-0689** The readiness probe fails until the data holder gets the statuses one time. ([the readiness probe](../../../pkg/platform/httpserver/DESIGN.md#srv-0002); [Judgement: INACTIVE for a software product with no status](#dh-0715))
+- <a id="dh-0690"></a>**DH-0690** When the data holder gets the status REMOVED for a software product, it ends each arrangement of each registration of that software product at once. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [CDR Support: Status of consent when an ADR Software Product is "Removed"][support-removed]; [Judgement: the clean-up at once when a software product is REMOVED](#dh-0716))
+- <a id="dh-0691"></a>**DH-0691** When the data holder gets the status REMOVED for a software product, it deletes each registration of that software product. Client authentication with the client ID then fails, and the data holder accepts no token of the client. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [CDR Support: Status of consent when an ADR Software Product is "Removed"][support-removed]; [Judgement: the clean-up at once when a software product is REMOVED](#dh-0716))
 - <a id="dh-0692"></a>**DH-0692** The data holder sends no notice to the data recipient for an arrangement that a REMOVED status ends. ([CDR Support: Status of consent when an ADR Software Product is "Removed"][support-removed])
 - <a id="dh-0693"></a>**DH-0693** A software product that is REMOVED cannot register again. The Register gives an SSA only to an ACTIVE software product. ([CDS: Software Statement Assertion][cds-ssa])
 
@@ -165,13 +165,13 @@ The authorisation server library gives the reaction at [the PAR endpoint](../../
 - Basis: Step 3.3. The CDS gives the status code for a media type that is not supported, and no body for it ([CDS: HTTP Response Codes][cds-http-response-codes]).
 - Reason: No registration error code of RFC 7591 fits the condition. The status code is sufficient for a client.
 
-### <a id="dh-0701"></a>DH-0701 The lifetime and the reuse of a request JWT
+### <a id="dh-0701"></a>DH-0701 A request JWT of 10 minutes at most, with no reuse for 1 hour
 
 - Kind: choice
 - Basis: Step 3.3. The CDS says only that the `jti` prevents the reuse of the token, and gives no lifetime ([CDS: Registration Request using JWT][cds-registration-request]).
 - Reason: A short limit keeps the window for a stolen request small. A request is not valid for longer than 10 minutes, so a memory of 1 hour adds nothing. The [authorisation server library uses the same limit for a client assertion](../../../pkg/authserver/design/client-authentication.md#auth-0033).
 
-### <a id="dh-0702"></a>DH-0702 The maximum size of a registration request
+### <a id="dh-0702"></a>DH-0702 A registration request of 64 KiB at most
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no size limit for a registration request ([CDS: Registration Request using JWT][cds-registration-request]).
@@ -183,7 +183,7 @@ The authorisation server library gives the reaction at [the PAR endpoint](../../
 - Basis: Step 3.3. The CDS requires the check of the SSA signature with the Register JWKS, and gives no cache rule for it ([CDS: Registration Validation][cds-registration-validation]).
 - Reason: The Register can change its key, and a registration must then not need a restart of the data holder. The limit stops an SSA with an invented `kid` from making a call to the Register for each request. The Register publishes a new key before it signs with it, so a JWKS from after that time has the key.
 
-### <a id="dh-0704"></a>DH-0704 The reuse of an SSA
+### <a id="dh-0704"></a>DH-0704 An SSA can be used again until it expires
 
 - Kind: choice
 - Basis: Step 3.3. The SSA definition says that its `jti` prevents the reuse of the SSA, but no rule requires that a data holder refuses a second use ([CDS: SSA Definition][cds-ssa-definition]).
@@ -207,7 +207,7 @@ The authorisation server library gives the reaction at [the PAR endpoint](../../
 - Basis: Step 2. ACCC guidance says that a data holder gets the document at the `sector_identifier_uri` at `POST` and `PUT`, and refuses the request when it cannot get it ([CDR Support: Guidance on Dynamic Client Registration][support-dcr]). OpenID Connect requires that the document contains each registered redirect URI ([OpenID Connect Core, section 8.1][oidc-core-pairwise]).
 - Reason: The data holder registers the `sector_identifier_uri` as the SSA gives it, and uses only its host for the pairwise `sub`. An older DSB article with the same procedure is under review, but that does not withdraw the guidance.
 
-### <a id="dh-0708"></a>DH-0708 The error codes of a registration
+### <a id="dh-0708"></a>DH-0708 invalid_software_statement for a fault in the SSA and for a duplicate
 
 - Kind: choice
 - Basis: Step 3.2. The CDS gives the four codes of RFC 7591, and no table of conditions ([CDS: Registration Errors][cds-registration-errors]). For a duplicate registration, the CDS requires 400 and gives no code. Its example, which is not normative, uses `invalid_software_statement`.
@@ -225,7 +225,7 @@ The authorisation server library gives the reaction at [the PAR endpoint](../../
 - Basis: Step 3.2. RFC 7591 gives no error code for a fault that is not in the request ([RFC 7591, section 3.2.2][rfc7591-errors]).
 - Reason: The cause is not the request, so a 400 code would be wrong. `server_error` with 500 is the usual OAuth 2.0 response for a fault of the server.
 
-### <a id="dh-0711"></a>DH-0711 The errors of registration management
+### <a id="dh-0711"></a>DH-0711 401 or 403 with no body for registration management errors
 
 - Kind: choice
 - Basis: Step 3.2. The DCR OpenAPI specification gives 401 for an "unknown or invalid Client or invalid access token" and 403 when the client "does not have permission", with no body schema ([`cds_dcr.json`][cds-openapi-dcr]). [RFC 6750, section 3.1][rfc6750-errors] gives the error values. A certificate that does not match gives `invalid_token` ([RFC 8705, section 3][rfc8705-binding]).
@@ -237,7 +237,7 @@ The authorisation server library gives the reaction at [the PAR endpoint](../../
 - Basis: Step 3.3. The CDS marks `DELETE` of a registration as optional ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]).
 - Reason: A lab user and the conformance suite can then register a software product again with no reset of the lab.
 
-### <a id="dh-0713"></a>DH-0713 The arrangements of a deleted registration
+### <a id="dh-0713"></a>DH-0713 A deleted registration keeps its arrangements
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no rule for the arrangements of a registration that the software product deletes ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]).
@@ -249,13 +249,13 @@ The authorisation server library gives the reaction at [the PAR endpoint](../../
 - Basis: Step 3.3. The CDS says that the data holder "SHOULD" use the statuses of the data recipients and of the software products ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]). The reactions are the same for each data recipient status with the same software product status, because the Register changes the status of each software product when its data recipient changes ([CDS: Status Mapping][cds-status-mapping]).
 - Reason: One API gives the same behaviour with one cache.
 
-### <a id="dh-0715"></a>DH-0715 A software product with no status
+### <a id="dh-0715"></a>DH-0715 INACTIVE for a software product with no status
 
 - Kind: choice
 - Basis: Step 3.1. The CDS says to keep the previous status, and gives no rule for a software product with no previous status ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]).
 - Reason: Data must not go to a software product whose status is not known. INACTIVE stops the sharing and changes no arrangement. A registration needs an SSA from the Register, so each registered software product has a status after the next request to the Register.
 
-### <a id="dh-0716"></a>DH-0716 The time of the clean-up for a REMOVED software product
+### <a id="dh-0716"></a>DH-0716 The clean-up at once when a software product is REMOVED
 
 - Kind: choice
 - Basis: Step 3.3. The CDS permits a batch, for example each night ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]). The ACCC also permits it each time the Register cache is refreshed ([CDR Support: Status of consent when an ADR Software Product is "Removed"][support-removed]).
