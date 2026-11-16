@@ -195,7 +195,7 @@ A judgement is in the Judgements section of the file that has its requirements. 
 
 Heading pattern: `^### <a id="(?<anchor>[a-z]{2,5}-[0-9]{4})"></a>(?<id>[A-Z]{2,5}-[0-9]{4}) (?<title>.+)$`
 
-The title is a short noun phrase with no full stop. The link text to the judgement uses the same title. A choice with no alternative is not a judgement.
+The title states the decision, as an ADR title does, so that a reader of the title alone knows what the component does. It is a short phrase with no full stop. For example: "One base URI for the public endpoints", not "The base URI". The link text is `Judgement:` and the title. Only the case of the first letter can differ. A choice with no alternative is not a judgement.
 
 ## Links
 
@@ -274,7 +274,7 @@ In each specification file, these are errors:
 - An overview (`DESIGN.md` or `design/README.md`) with no Library specifications section or no Withdrawn section.
 - A Library specifications table that does not agree with the direct `pkg/` imports of the component, without its tests. A sub-package counts as its library.
 
-In all Markdown files except this file, a link with an identifier anchor as its fragment must go to an identifier that exists.
+In all Markdown files except this file, a link with an identifier anchor as its fragment must go to an identifier that exists. A `Judgement:` link must go to a judgement, with its title as text.
 
 In each test file (`_test.go`, `.test.ts`, `.test.tsx`, `.spec.ts`, `.spec.tsx`), a `// Verifies` line must agree with [Verifies comments](#verifies-comments), and each identifier must be a requirement that exists. A requirement that no `// Verifies:` comment refers to gives a warning.
 

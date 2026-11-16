@@ -73,6 +73,19 @@ func TestCheck(t *testing.T) {
 			},
 		},
 		{
+			fixture: "judgement-link",
+			wantErrors: []string{
+				"docs/adr/0001-a.md:3: the link text \"two\" is not the title of judgement PKI-0003: \"One `CA`\"",
+				"pki/DESIGN.md:10: the link text \"a `CA`\" is not the title of judgement PKI-0003: \"One `CA`\"",
+				"pki/DESIGN.md:11: the Judgement: link goes to PKI-0001, which is not a judgement",
+			},
+			wantWarnings: []string{
+				"pki/DESIGN.md:9: requirement PKI-0001 has no test that verifies it",
+				"pki/DESIGN.md:10: requirement PKI-0002 has no test that verifies it",
+				"pki/DESIGN.md:11: requirement PKI-0004 has no test that verifies it",
+			},
+		},
+		{
 			fixture: "sub-heading",
 			wantErrors: []string{
 				"pki/DESIGN.md:11: only a judgement can have a heading below ##, in the Judgements section",
