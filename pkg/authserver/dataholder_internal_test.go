@@ -176,6 +176,7 @@ func authoriseAt(t *testing.T, session goidc.AuthnSession, lifetime, after time.
 	return rec.Code
 }
 
+// Verifies: AUTH-0066
 func TestARequestURIIsValidFor60Seconds(t *testing.T) {
 	const (
 		lifetime = dataHolderRequestURILifetimeSeconds * time.Second
@@ -189,6 +190,7 @@ func TestARequestURIIsValidFor60Seconds(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, authoriseAt(t, session, lifetime, lifetime, target))
 }
 
+// Verifies: AUTH-0103
 func TestAFlowIsValidFor10Minutes(t *testing.T) {
 	const (
 		lifetime = dataHolderFlowLifetimeSeconds * time.Second

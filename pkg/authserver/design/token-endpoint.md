@@ -1,6 +1,6 @@
 # Authorisation server library: Token endpoint
 
-This area gives the token endpoint of each authorisation server: the grants, the client credentials token, the token response and the errors. It also gives the verification of an access token for a service. The area Tokens of an arrangement gives the rules of the authorisation code grant and the refresh token grant.
+This area gives the token endpoint of each authorisation server: the grants, the client credentials token, the token response and the errors. It also gives the verification of an access token for a service. The area [Tokens of an arrangement](tokens-of-an-arrangement.md) gives the rules of the authorisation code grant and the refresh token grant.
 
 ## Grants
 

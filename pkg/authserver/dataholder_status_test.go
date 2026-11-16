@@ -37,6 +37,7 @@ func (c *clientStatuses) set(clientID string, active bool) {
 	c.inactive[clientID] = !active
 }
 
+// Verifies: AUTH-0110
 func TestAPushedRequestOfAClientThatIsNotActiveIsRefused(t *testing.T) {
 	b := newBank(t)
 	b.statuses.set(registeredClientID, false)
@@ -44,6 +45,7 @@ func TestAPushedRequestOfAClientThatIsNotActiveIsRefused(t *testing.T) {
 	requirePushRefused(t, b.push(b.requestObject()), http.StatusBadRequest, "unauthorized_client")
 }
 
+// Verifies: AUTH-0114
 func TestAPushedRequestWithAClientAssertionThatIsNotValidGetsInvalidClientBeforeTheStatus(t *testing.T) {
 	b := newBank(t)
 	b.statuses.set(registeredClientID, false)
@@ -54,6 +56,7 @@ func TestAPushedRequestWithAClientAssertionThatIsNotValidGetsInvalidClientBefore
 	requirePushRefused(t, b.par(form), http.StatusUnauthorized, "invalid_client")
 }
 
+// Verifies: AUTH-0111
 func TestAnAuthorisationOfAClientThatIsNotActiveEndsWithUnauthorizedClient(t *testing.T) {
 	t.Run("at the authorisation endpoint", func(t *testing.T) {
 		b := newBank(t)
@@ -83,6 +86,7 @@ func TestAnAuthorisationOfAClientThatIsNotActiveEndsWithUnauthorizedClient(t *te
 	})
 }
 
+// Verifies: AUTH-0112
 func TestTheCodeAndRefreshGrantsOfAClientThatIsNotActiveAreRefused(t *testing.T) {
 	b := newBank(t)
 	tokens := b.exchange(b.authorise(hour))
@@ -120,6 +124,7 @@ func TestTheCodeOfAClientThatIsNotActiveIsNotRevokedWhenADifferentClientSendsIt(
 	b.exchange(code)
 }
 
+// Verifies: AUTH-0113
 func TestAClientThatIsNotActiveGetsAClientCredentialsToken(t *testing.T) {
 	b := newBank(t)
 	b.statuses.set(registeredClientID, false)
@@ -129,6 +134,7 @@ func TestAClientThatIsNotActiveGetsAClientCredentialsToken(t *testing.T) {
 	require.Equal(t, http.StatusOK, reply.status, reply.body)
 }
 
+// Verifies: AUTH-0114
 func TestATokenRequestWithAClientAssertionThatIsNotValidGetsInvalidClientBeforeTheStatus(t *testing.T) {
 	b := newBank(t)
 	code := b.authorise(hour)

@@ -249,6 +249,7 @@ func TestARefreshTokenIsIssuedOnlyForASharingDuration(t *testing.T) {
 	assert.Contains(t, b.exchange(b.authorise(1)), "refresh_token")
 }
 
+// Verifies: AUTH-0109
 func TestAnAuthorisationCodeIsValidFor60Seconds(t *testing.T) {
 	b := newBank(t)
 	a := b.authorise(hour)

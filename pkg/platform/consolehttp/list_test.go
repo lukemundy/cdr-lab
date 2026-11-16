@@ -10,6 +10,7 @@ import (
 	"github.com/lukemundy/cdr-lab/pkg/platform/consolehttp"
 )
 
+// Verifies: CNSL-0015
 func TestAPageHasDefaults(t *testing.T) {
 	page, pageSize, err := consolehttp.ParsePage(url.Values{})
 
@@ -18,6 +19,7 @@ func TestAPageHasDefaults(t *testing.T) {
 	assert.Equal(t, 25, pageSize)
 }
 
+// Verifies: CNSL-0014
 func TestAPageIsInTheQuery(t *testing.T) {
 	page, pageSize, err := consolehttp.ParsePage(url.Values{"page": {"3"}, "pageSize": {"100"}})
 
@@ -26,6 +28,7 @@ func TestAPageIsInTheQuery(t *testing.T) {
 	assert.Equal(t, 100, pageSize)
 }
 
+// Verifies: CNSL-0016
 func TestAPageThatIsNotValidIsAnError(t *testing.T) {
 	tests := map[string]struct {
 		query url.Values

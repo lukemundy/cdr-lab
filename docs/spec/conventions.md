@@ -200,6 +200,8 @@ This table is the registry of the codes. A new specification adds its code to th
 | `pkg/cds` | `CDSL` |
 | `pkg/authserver` | `AUTH` |
 | `pkg/ca` | `CA` |
+| `pkg/platform/consolehttp` | `CNSL` |
+| `pkg/platform/asset` | `ASSET` |
 | `pkg/platform/telemetry` | `TELE` |
 | `pkg/platform/httpserver` | `SRV` |
 | `pkg/platform/database` | `DBASE` |
