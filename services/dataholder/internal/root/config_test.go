@@ -238,6 +238,7 @@ func TestTheAPIsLoadTheConsoleSettings(t *testing.T) {
 	assert.ErrorContains(t, err, "CONSOLE_ALLOWED_HOSTS")
 }
 
+// Verifies: DH-1487
 func TestTheWorkersNeedNoConsoleSettingAndNoBrandSetting(t *testing.T) {
 	setOnly(t, workerMode)
 	t.Setenv("CONSOLE_ENABLED", "true")

@@ -69,6 +69,7 @@ const actionsOf = (name: string) =>
   page.getByRole("group", { name: `Actions of ${name}`, exact: true });
 
 describe("the withdrawal of a consent", () => {
+  // Verifies: DH-1447
   test("an arrangement that did not end has a withdraw action, and an arrangement that ended has none", async () => {
     serve(current, current, "success");
 
@@ -111,6 +112,7 @@ describe("the withdrawal of a consent", () => {
     expect(actionsOf("Recipient Web").getByRole("button").query()).toBeNull();
   });
 
+  // Verifies: DH-1448, DH-1449
   test("a withdrawal of an arrangement that a different tab withdrew shows the refusal in the dialog, and then the current state", async () => {
     const requests = serve(current, withdrawn, "conflict");
     await renderDetail();

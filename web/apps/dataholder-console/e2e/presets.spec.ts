@@ -31,6 +31,7 @@ for (const { name, block } of presets) {
   const consoleURL = `http://localhost:${block}84`;
   const operatorURL = `http://localhost:${block}82`;
 
+  // Verifies: DH-1479
   test(`each page of the console of ${name} passes the automated accessibility checks`, async ({
     page,
   }) => {
@@ -79,6 +80,7 @@ for (const { name, block } of presets) {
 }
 
 // With the logo hidden, the colour of the side navigation tells the banks apart.
+// Verifies: DH-1470
 test("the side navigation of each running bank has a colour of its own", () => {
   test.skip(navigationColours.size < 2, "fewer than two banks run in this lab");
   expect(new Set(navigationColours.values()).size).toBe(navigationColours.size);

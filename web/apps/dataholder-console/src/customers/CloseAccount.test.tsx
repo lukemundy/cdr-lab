@@ -97,6 +97,7 @@ const actionsOf = (name: string) =>
   page.getByRole("group", { name: `Actions of ${name}`, exact: true });
 
 describe("the close of an account", () => {
+  // Verifies: DH-1447
   test("an open account has a close action, and a closed account has none", async () => {
     serve(lastOpen, lastOpen, "success");
 
@@ -132,6 +133,7 @@ describe("the close of an account", () => {
     expect(actionsOf("Everyday").getByRole("button").query()).toBeNull();
   });
 
+  // Verifies: DH-1445
   test("the confirmation of the close of the last open account names each arrangement that ends and its notice", async () => {
     serve(lastOpen, lastOpen, "success");
     await renderDetail();
@@ -151,6 +153,7 @@ describe("the close of an account", () => {
       );
   });
 
+  // Verifies: DH-1448, DH-1449
   test("a close of an account that a different tab closed shows the refusal in the dialog, and then the current state", async () => {
     const requests = serve(twoOpen, lastOpen, "conflict");
     await renderDetail();

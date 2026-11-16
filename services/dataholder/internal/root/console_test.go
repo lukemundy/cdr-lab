@@ -18,6 +18,7 @@ var ui = fstest.MapFS{"index.html": {Data: []byte("<!doctype html><title>Data ho
 // The host of a request from httptest.NewRequestWithContext.
 var testConsole = consolehttp.Config{Enabled: true, AllowedHosts: []string{"example.com"}}
 
+// Verifies: DH-1481
 func TestWithoutTheSettingTheDataHolderOpensNoConsoleListener(t *testing.T) {
 	listeners, err := consoleListeners(consolehttp.Config{}, ui, console.Ports{})
 
@@ -41,6 +42,7 @@ func TestWithTheSettingTheConsolePortGivesTheHTMLPage(t *testing.T) {
 	assert.NotEmpty(t, rec.Header().Get("Content-Security-Policy"))
 }
 
+// Verifies: DH-1482
 func TestTheConsolePortRefusesAHostThatIsNotAllowed(t *testing.T) {
 	listeners, err := consoleListeners(testConsole, ui, console.Ports{})
 	require.NoError(t, err)

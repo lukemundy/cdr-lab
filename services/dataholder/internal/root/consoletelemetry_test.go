@@ -217,6 +217,7 @@ func metricText(t *testing.T, reader *sdkmetric.ManualReader) string {
 	return strings.ToLower(strings.Join(parts, "\n"))
 }
 
+// Verifies: DH-1488, DH-1489
 func TestTheConsolePutsNoCustomerAccountOrTransactionDataInTheSpansMetricsOrLogs(t *testing.T) {
 	spans, metrics, logs := recordTelemetry(t)
 

@@ -35,6 +35,7 @@ func serveBrandFile(t *testing.T, host string) *httptest.ResponseRecorder {
 }
 
 // The CSP of the console permits images and styles from the same origin only (DESIGN.md: Listener and security).
+// Verifies: DH-1485
 func TestTheConsoleServesTheBrandFilesWithTheResponseHeadersOfTheConsole(t *testing.T) {
 	rec := serveBrandFile(t, "example.com")
 
@@ -45,6 +46,7 @@ func TestTheConsoleServesTheBrandFilesWithTheResponseHeadersOfTheConsole(t *test
 	assert.Equal(t, "no-cache", rec.Header().Get("Cache-Control"))
 }
 
+// Verifies: DH-1485
 func TestTheConsoleRefusesABrandFileForAHostThatIsNotAllowed(t *testing.T) {
 	rec := serveBrandFile(t, "rebound.test")
 
