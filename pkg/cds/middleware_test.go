@@ -21,6 +21,7 @@ func run(t *testing.T, h http.Handler) *httptest.ResponseRecorder {
 
 func noContent(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusNoContent) }
 
+// Verifies: CDSL-0037, CDSL-0038
 func TestAllowAnyOriginSetsOnlyTheCORSHeaders(t *testing.T) {
 	rec := run(t, cds.AllowAnyOrigin(http.HandlerFunc(noContent), "x-v", "x-fapi-interaction-id"))
 

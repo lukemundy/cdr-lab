@@ -67,6 +67,7 @@ func handshake(t *testing.T, srv *httptest.Server, cfg *tls.Config) (*tls.Conn, 
 	return conn.(*tls.Conn), nil
 }
 
+// Verifies: CDSL-0041, CDSL-0042
 func TestThePublicAPIsAcceptTLS13AndTheTLS12SuitesThatTheCDSPermits(t *testing.T) {
 	srv, roots := publicTLSServer(t)
 
@@ -92,6 +93,7 @@ func TestThePublicAPIsAcceptTLS13AndTheTLS12SuitesThatTheCDSPermits(t *testing.T
 	}
 }
 
+// Verifies: CDSL-0041, CDSL-0042
 func TestThePublicAPIsRefuseOtherTLSVersionsAndSuites(t *testing.T) {
 	srv, roots := publicTLSServer(t)
 
@@ -126,6 +128,7 @@ func TestThePublicAPIsRefuseOtherTLSVersionsAndSuites(t *testing.T) {
 	}
 }
 
+// Verifies: CDSL-0043
 func TestThePublicAPIsDoNotRequestAClientCertificate(t *testing.T) {
 	srv, roots := publicTLSServer(t)
 	requested := false

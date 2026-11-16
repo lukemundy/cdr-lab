@@ -109,6 +109,7 @@ func (a *authority) checker() *revocation.Checker {
 	return revocation.NewChecker([]*x509.Certificate{a.cert})
 }
 
+// Verifies: CDSL-0048
 func TestACertificateThatIsNotOnTheCRLIsAccepted(t *testing.T) {
 	a := newAuthority(t)
 	a.publish(99)
@@ -118,6 +119,7 @@ func TestACertificateThatIsNotOnTheCRLIsAccepted(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Verifies: CDSL-0049
 func TestACertificateThatIsOnTheCRLIsRevoked(t *testing.T) {
 	a := newAuthority(t)
 	a.publish(2)
@@ -127,6 +129,7 @@ func TestACertificateThatIsOnTheCRLIsRevoked(t *testing.T) {
 	assert.ErrorIs(t, err, revocation.ErrRevoked)
 }
 
+// Verifies: CDSL-0048, CDSL-0050, CDSL-0051
 func TestTheCheckFailsWhenTheRevocationStatusIsNotKnown(t *testing.T) {
 	other := newAuthority(t)
 
@@ -178,6 +181,7 @@ func TestTheCheckFailsWhenTheRevocationStatusIsNotKnown(t *testing.T) {
 	}
 }
 
+// Verifies: CDSL-0052, CDSL-0053
 func TestTheCRLIsCachedForAShortTime(t *testing.T) {
 	a := newAuthority(t)
 	a.publish()
@@ -213,6 +217,7 @@ func (a *authority) checkerAt(now *time.Time, cert *x509.Certificate) *revocatio
 	return checker
 }
 
+// Verifies: CDSL-0055
 func TestTheLastCRLIsUsedWhenAReloadFails(t *testing.T) {
 	other := newAuthority(t)
 
@@ -251,6 +256,7 @@ func TestTheLastCRLIsUsedWhenAReloadFails(t *testing.T) {
 	}
 }
 
+// Verifies: CDSL-0050, CDSL-0051
 func TestTheLastCRLIsNotUsedAfterItsNextUpdate(t *testing.T) {
 	a := newAuthority(t)
 	a.publish()
@@ -266,6 +272,7 @@ func TestTheLastCRLIsNotUsedAfterItsNextUpdate(t *testing.T) {
 	assert.ErrorIs(t, checker.Check(t.Context(), cert), revocation.ErrStatusUnknown)
 }
 
+// Verifies: CDSL-0056
 func TestAFailedReloadIsTriedAgainAfterTheRetryInterval(t *testing.T) {
 	a := newAuthority(t)
 	a.publish()
@@ -303,6 +310,8 @@ func TestTheFirstLoadIsTriedAgainAtEachCheckUntilItSucceeds(t *testing.T) {
 	assert.EqualValues(t, 2, a.requests.Load())
 }
 
+// Verifies: CDSL-0057
+//
 //nolint:paralleltest // the test changes the default logger
 func TestAFailedReloadThatUsesTheLastCRLGivesAWarning(t *testing.T) {
 	var logs bytes.Buffer
@@ -332,6 +341,7 @@ func TestAFailedReloadThatUsesTheLastCRLGivesAWarning(t *testing.T) {
 	assert.Contains(t, entry["error"], "503")
 }
 
+// Verifies: CDSL-0054
 func TestACheckerWithAMaximumAgeOfZeroLoadsTheCRLAtEachCheck(t *testing.T) {
 	a := newAuthority(t)
 	a.publish()
@@ -346,6 +356,7 @@ func TestACheckerWithAMaximumAgeOfZeroLoadsTheCRLAtEachCheck(t *testing.T) {
 	assert.EqualValues(t, 2, a.requests.Load())
 }
 
+// Verifies: CDSL-0056
 func TestAFailedReloadIsTriedAgainAfterTheRetryIntervalAlsoWithAMaximumAgeOfZero(t *testing.T) {
 	a := newAuthority(t)
 	a.publish()

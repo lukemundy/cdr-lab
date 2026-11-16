@@ -12,6 +12,7 @@ import (
 	"github.com/lukemundy/cdr-lab/pkg/cds"
 )
 
+// Verifies: CDSL-0034, CDSL-0035
 func TestNewResponseGivesTheDataWithALinkToTheRequestAndAnEmptyMeta(t *testing.T) {
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/cds-au/v1/things/a%20b?ignored=1", nil)
 

@@ -113,6 +113,7 @@ func mutualTLSRequest(
 
 func notRevoked(context.Context, *x509.Certificate) error { return nil }
 
+// Verifies: CDSL-0044
 func TestTheSecureAPIsAcceptAClientCertificateFromTheCDRCA(t *testing.T) {
 	ca := newTestCA(t)
 	client := ca.issue(t, x509.ExtKeyUsageClientAuth)
@@ -129,6 +130,7 @@ func TestTheSecureAPIsAcceptAClientCertificateFromTheCDRCA(t *testing.T) {
 	assert.Equal(t, client.Certificate[0], checked.Raw)
 }
 
+// Verifies: CDSL-0044, CDSL-0047
 func TestTheSecureAPIsRefuseOtherClients(t *testing.T) {
 	ca := newTestCA(t)
 	fromCA, fromOtherCA := ca.issue(t, x509.ExtKeyUsageClientAuth), newTestCA(t).issue(t, x509.ExtKeyUsageClientAuth)
@@ -155,6 +157,7 @@ func TestTheSecureAPIsRefuseOtherClients(t *testing.T) {
 	}
 }
 
+// Verifies: CDSL-0041, CDSL-0042
 func TestTheSecureAPIsUseTheTLSVersionsAndSuitesOfThePublicAPIs(t *testing.T) {
 	ca := newTestCA(t)
 	server := ca.issue(t, x509.ExtKeyUsageServerAuth, "register")

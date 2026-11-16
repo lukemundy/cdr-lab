@@ -22,6 +22,7 @@ func requestVersions(t *testing.T, header http.Header) *httptest.ResponseRecorde
 	return rec
 }
 
+// Verifies: CDSL-0004, CDSL-0005, CDSL-0006, CDSL-0007
 func TestVersionedServesTheHighestSupportedVersionOfTheRequest(t *testing.T) {
 	tests := map[string]struct {
 		header http.Header
@@ -44,6 +45,7 @@ func TestVersionedServesTheHighestSupportedVersionOfTheRequest(t *testing.T) {
 	}
 }
 
+// Verifies: CDSL-0002, CDSL-0003, CDSL-0004, CDSL-0008
 func TestVersionedRefusesARequestWithNoSupportedVersion(t *testing.T) {
 	tests := map[string]struct {
 		header http.Header

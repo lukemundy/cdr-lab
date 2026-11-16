@@ -29,6 +29,7 @@ func parsePage(t *testing.T, query string) (cds.Page, bool, *httptest.ResponseRe
 	return page, ok, rec
 }
 
+// Verifies: CDSL-0017, CDSL-0018, CDSL-0019, CDSL-0022
 func TestParsePageGivesThePageOfTheRequestOrTheCDSDefaults(t *testing.T) {
 	tests := map[string]struct {
 		query string
@@ -50,6 +51,7 @@ func TestParsePageGivesThePageOfTheRequestOrTheCDSDefaults(t *testing.T) {
 	}
 }
 
+// Verifies: CDSL-0020, CDSL-0021
 func TestParsePageRefusesAPageOrAPageSizeThatIsNotValid(t *testing.T) {
 	const (
 		invalid         = "urn:au-cds:error:cds-all:Field/Invalid"
@@ -125,6 +127,7 @@ func writePage(
 	return rec
 }
 
+// Verifies: CDSL-0024, CDSL-0025, CDSL-0026, CDSL-0027, CDSL-0028, CDSL-0031
 func TestWritePageGivesTheLinksAndMetaOfTheCDSPaginationRules(t *testing.T) {
 	link := func(page int) string {
 		return fmt.Sprintf("%s%s?page=%d&page-size=2", pageBaseURL, pagePath, page)
@@ -187,6 +190,7 @@ func TestWritePageGivesTheLinksAndMetaOfTheCDSPaginationRules(t *testing.T) {
 	}
 }
 
+// Verifies: CDSL-0029
 func TestWritePageGivesEachLinkTheFiltersOfTheRequest(t *testing.T) {
 	filters := url.Values{"updated-since": {"2026-10-01T08:00:00+08:00"}, "brand": {"Mock Bank"}}
 
@@ -205,6 +209,7 @@ func TestWritePageGivesEachLinkTheFiltersOfTheRequest(t *testing.T) {
 	assert.Equal(t, url.Values{"updated-since": {"2026-10-01T08:00:00+08:00"}, "brand": {"Mock Bank"}}, filters)
 }
 
+// Verifies: CDSL-0023
 func TestWritePageRefusesAPageThatIsOutOfRange(t *testing.T) {
 	tests := map[string]struct {
 		page, total int
@@ -238,6 +243,7 @@ func TestAPageNumberThatIsTooLargeForAnIntegerIsOutOfRange(t *testing.T) {
 	assert.LessOrEqual(t, page.Number, math.MaxInt32)
 }
 
+// Verifies: CDSL-0032
 func TestWriteTransactionPageAddsThatEachQueryParameterIsSupported(t *testing.T) {
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, pagePath, nil)
