@@ -11,6 +11,7 @@ import (
 	"github.com/lukemundy/cdr-lab/pkg/ca"
 )
 
+// Verifies: REG-0617
 func TestTheOperatorGetsTheCABundleThatTheMTLSListenersTrust(t *testing.T) {
 	handlers := lab(t)
 

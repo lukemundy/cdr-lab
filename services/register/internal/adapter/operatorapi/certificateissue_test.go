@@ -108,6 +108,7 @@ func selfSigned(t *testing.T, cn string) *x509.Certificate {
 	return cert
 }
 
+// Verifies: REG-0612
 func TestAnIssueGivesTheCertificateAndTheIntermediateInPEM(t *testing.T) {
 	for name, route := range issueRoutes {
 		t.Run(name, func(t *testing.T) {
@@ -129,6 +130,7 @@ func TestAnIssueGivesTheCertificateAndTheIntermediateInPEM(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0602
 func TestAnIssueRefusesABodyThatIsNotOnePEMCSR(t *testing.T) {
 	_, one := csrPEM(t)
 
@@ -150,6 +152,7 @@ func TestAnIssueRefusesABodyThatIsNotOnePEMCSR(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0605
 func TestAnIssueGivesTheRuleThatRefusesIt(t *testing.T) {
 	ruleErr := statusRuleError(t)
 	rulesErr := domain.CSRRulesError{Rules: []string{"subject C is required", `subject O must be the brand name "App"`}}

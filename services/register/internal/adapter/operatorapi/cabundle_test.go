@@ -36,6 +36,7 @@ func getCABundle(
 	return rec
 }
 
+// Verifies: REG-0616
 func TestTheCABundleGivesEachCertificateOfTheBundleInPEMInTheSameOrder(t *testing.T) {
 	intermediate, root := selfSigned(t, "Intermediate"), selfSigned(t, "Root")
 
