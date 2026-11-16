@@ -19,9 +19,9 @@ This area gives the rules that apply to all Register APIs: the endpoints, the ve
 - <a id="reg-0307"></a>**REG-0307** The TLS APIs and the mTLS APIs have different base URIs. For example, production uses `api.cdr.gov.au` and `secure.api.cdr.gov.au`. ([CDS: Register APIs][cds-register-apis])
 - <a id="reg-0308"></a>**REG-0308** On a data holder API, `{industry}` accepts `banking`, `energy`, `non-bank-lending`, `telco` and `all`. ([CDS: Register API schemas][cds-register-schemas])
 - <a id="reg-0309"></a>**REG-0309** On a data recipient API and on [Get SSA](software-statement-assertion.md#reg-0400), `{industry}` accepts only `all`. ([CDS: Register API schemas][cds-register-schemas])
-- <a id="reg-0310"></a>**REG-0310** On Get Data Holder Statuses, an `{industry}` other than `all` gives only the data holder legal entities that have a brand in that industry. The status of the brand does not matter. ([CDS: Get Data Holder Statuses][cds-get-dh-statuses]; [Judgement: the industry on Get Data Holder Statuses](#reg-0382))
+- <a id="reg-0310"></a>**REG-0310** On Get Data Holder Statuses, an `{industry}` other than `all` gives only the data holder legal entities that have a brand in that industry. The status of the brand does not matter. ([CDS: Get Data Holder Statuses][cds-get-dh-statuses]; [Judgement: Get Data Holder Statuses filters by the industry of a brand in each status](#reg-0382))
 - <a id="reg-0311"></a>**REG-0311** On Get Data Holder Statuses, `all` gives all data holder legal entities. ([CDS: Get Data Holder Statuses][cds-get-dh-statuses])
-- <a id="reg-0312"></a>**REG-0312** The Register checks the version headers of a request before its `{industry}`. For example, a request with an unsupported `x-v` and an invalid `{industry}` gets 406. ([Judgement: the sequence of the request checks](#reg-0371))
+- <a id="reg-0312"></a>**REG-0312** The Register checks the version headers of a request before its `{industry}`. For example, a request with an unsupported `x-v` and an invalid `{industry}` gets 406. ([Judgement: the Register checks the version before the `{industry}`](#reg-0371))
 
 ## Versioning and headers
 
@@ -34,8 +34,8 @@ Each error response uses [the CDS error format](../../../pkg/cds/DESIGN.md#cdsl-
 
 | ID | Condition | Status | Error code | Source |
 |---|---|---|---|---|
-| <a id="reg-0315"></a>**REG-0315** | An invalid `{industry}` on Get Data Holder Brands Summary | 404 | `urn:au-cds:error:cds-register:Field/InvalidIndustry` | [CDS: Invalid Industry][cds-error-invalid-industry]; [CDS: Get Data Holder Brands Summary][cds-get-dh-brands-summary]; [Judgement: the error of an invalid industry](#reg-0370) |
-| <a id="reg-0316"></a>**REG-0316** | An invalid `{industry}` on each other API, also an industry that the API does not accept, for example `banking` on a data recipient API | 400 | `urn:au-cds:error:cds-all:Field/Invalid` | [CDS: Invalid Field][cds-error-400-field-invalid]; [ACCC Developer Portal: Known Issues][accc-known-issues]; [Judgement: the error of an invalid industry](#reg-0370) |
+| <a id="reg-0315"></a>**REG-0315** | An invalid `{industry}` on Get Data Holder Brands Summary | 404 | `urn:au-cds:error:cds-register:Field/InvalidIndustry` | [CDS: Invalid Industry][cds-error-invalid-industry]; [CDS: Get Data Holder Brands Summary][cds-get-dh-brands-summary]; [Judgement: 404 on the summary and 400 on the other APIs, as the ACCC says](#reg-0370) |
+| <a id="reg-0316"></a>**REG-0316** | An invalid `{industry}` on each other API, also an industry that the API does not accept, for example `banking` on a data recipient API | 400 | `urn:au-cds:error:cds-all:Field/Invalid` | [CDS: Invalid Field][cds-error-400-field-invalid]; [ACCC Developer Portal: Known Issues][accc-known-issues]; [Judgement: 404 on the summary and 400 on the other APIs, as the ACCC says](#reg-0370) |
 | <a id="reg-0317"></a>**REG-0317** | An `updated-since` that is not an RFC 3339 date-time | 400 | `urn:au-cds:error:cds-all:Field/InvalidDateTime` | [CDS: Error Codes][cds-error-codes] |
 | <a id="reg-0318"></a>**REG-0318** | An unknown path | 404 | `urn:au-cds:error:cds-all:Resource/NotFound` | [CDS: Error Codes][cds-error-codes] |
 
@@ -49,8 +49,8 @@ The secure APIs are Get Data Holder Brands and [Get SSA](software-statement-asse
 - <a id="reg-0321"></a>**REG-0321** When the bearer token is not valid, or when it is bound to a different client certificate, the response is 401 with `WWW-Authenticate: Bearer error="invalid_token"` and no body. ([CDS: Get Data Holder Brands][cds-get-dh-brands]; [RFC 6750, section 3.1][rfc6750-errors]; [a token is valid only with its client certificate](../../../pkg/authserver/design/token-endpoint.md#auth-0055))
 - <a id="reg-0322"></a>**REG-0322** When a valid token does not have the scope `cdr-register:read`, the response is 403 with `WWW-Authenticate: Bearer error="insufficient_scope"`. ([CDS: Get Data Holder Brands][cds-get-dh-brands]; [RFC 6750, section 3.1][rfc6750-errors])
 - <a id="reg-0323"></a>**REG-0323** A secure API checks the status of the caller on each call. When the software product or its data recipient is not ACTIVE, the response is 403 with `urn:au-cds:error:cds-all:Authorisation/AdrStatusNotActive`. ([CDS: Error Codes][cds-error-403-adr-not-active])
-- <a id="reg-0324"></a>**REG-0324** When the software product of the caller does not exist, the response is 403 with `urn:au-cds:error:cds-all:Authorisation/AdrStatusNotActive` and the `detail` REMOVED. ([CDS: Error Codes][cds-error-403-adr-not-active]; [Judgement: a caller with no software product](#reg-0384))
-- <a id="reg-0325"></a>**REG-0325** A secure API checks the bearer token first, then the status of the caller, then the checks of the public APIs. For example, a request with no token and an invalid `{industry}` gets 401. ([Judgement: the sequence of the checks on the secure APIs](#reg-0383))
+- <a id="reg-0324"></a>**REG-0324** When the software product of the caller does not exist, the response is 403 with `urn:au-cds:error:cds-all:Authorisation/AdrStatusNotActive` and the `detail` REMOVED. ([CDS: Error Codes][cds-error-403-adr-not-active]; [Judgement: a caller with no software product gets the response for REMOVED](#reg-0384))
+- <a id="reg-0325"></a>**REG-0325** A secure API checks the bearer token first, then the status of the caller, then the checks of the public APIs. For example, a request with no token and an invalid `{industry}` gets 401. ([Judgement: the token first, then the status of the caller, then the public checks](#reg-0383))
 
 ## Caching
 
@@ -70,8 +70,8 @@ The secure APIs are Get Data Holder Brands and [Get SSA](software-statement-asse
 - <a id="reg-0330"></a>**REG-0330** Get Data Holder Brands supports `page` and `page-size` with [the CDS pagination rules](../../../pkg/cds/DESIGN.md#cdsl-0017). ([CDS: Get Data Holder Brands][cds-get-dh-brands])
 - <a id="reg-0331"></a>**REG-0331** Get Data Holder Brands supports `updated-since`. It gives the brands with a `lastUpdated` at or after that time. ([CDS: Get Data Holder Brands][cds-get-dh-brands]; [Judgement: `updated-since` includes the same time](#reg-0375))
 - <a id="reg-0332"></a>**REG-0332** Each link of a page of Get Data Holder Brands keeps [the `updated-since` of the request](../../../pkg/cds/DESIGN.md#cdsl-0029). ([CDS: Get Data Holder Brands][cds-get-dh-brands])
-- <a id="reg-0333"></a>**REG-0333** Get Data Holder Brands returns each brand that has a `dataHolderBrandId`, in each status: ACTIVE, INACTIVE and REMOVED. ([CDS: Get Data Holder Brands][cds-get-dh-brands]; [Judgement: all brand statuses on Get Data Holder Brands](#reg-0378))
-- <a id="reg-0334"></a>**REG-0334** Get Data Holder Brands returns the brands in the order of their IDs. ([Judgement: the order of Get Data Holder Brands](#reg-0376))
+- <a id="reg-0333"></a>**REG-0333** Get Data Holder Brands returns each brand that has a `dataHolderBrandId`, in each status: ACTIVE, INACTIVE and REMOVED. ([CDS: Get Data Holder Brands][cds-get-dh-brands]; [Judgement: all brand statuses on Get Data Holder Brands, as the CDS says](#reg-0378))
+- <a id="reg-0334"></a>**REG-0334** Get Data Holder Brands returns the brands in the order of their IDs. ([Judgement: Get Data Holder Brands in the order of the IDs](#reg-0376))
 - <a id="reg-0335"></a>**REG-0335** The response of Get Data Holder Brands has no `ETag`. ([CDS: Get Data Holder Brands][cds-get-dh-brands]; [Judgement: no `ETag` on Get Data Holder Brands](#reg-0377))
 - <a id="reg-0336"></a>**REG-0336** The `lastUpdated` of a brand on Get Data Holder Brands is the time of the last change to its data holder. For example, a change to a different brand of the same data holder also changes it. ([CDS: Get Data Holder Brands][cds-get-dh-brands]; [Judgement: `lastUpdated` includes the changes to the children](#reg-0380))
 - <a id="reg-0337"></a>**REG-0337** A list API other than Get Data Holder Brands is not paginated. It uses [the response envelope with `links.self` and an empty `meta`](../../../pkg/cds/DESIGN.md#cdsl-0034). ([CDS: Register API schemas][cds-register-schemas])
@@ -85,7 +85,7 @@ The secure APIs are Get Data Holder Brands and [Get SSA](software-statement-asse
 ## CORS
 
 - <a id="reg-0344"></a>**REG-0344** The unauthenticated APIs use [the CORS rules](../../../pkg/cds/DESIGN.md#cdsl-0037), also for [a preflight request](../../../pkg/cds/DESIGN.md#cdsl-0039). ([CDS: CORS][cds-cors])
-- <a id="reg-0345"></a>**REG-0345** The CORS rules of the unauthenticated APIs [expose these headers](../../../pkg/cds/DESIGN.md#cdsl-0038), so that a web page can read them. ([Fetch: CORS protocol][fetch-cors]; [Judgement: the headers that a web page can read](#reg-0385))
+- <a id="reg-0345"></a>**REG-0345** The CORS rules of the unauthenticated APIs [expose these headers](../../../pkg/cds/DESIGN.md#cdsl-0038), so that a web page can read them. ([Fetch: CORS protocol][fetch-cors]; [Judgement: CORS exposes the version, `ETag` and interaction ID headers](#reg-0385))
   - `x-v`
   - `etag`
   - `x-fapi-interaction-id`
@@ -101,13 +101,13 @@ The secure APIs are Get Data Holder Brands and [Get SSA](software-statement-asse
 
 ## Judgements
 
-### <a id="reg-0370"></a>REG-0370 The error of an invalid industry
+### <a id="reg-0370"></a>REG-0370 404 on the summary and 400 on the other APIs, as the ACCC says
 
 - Kind: conflict
 - Basis: Step 2. On Get Data Holder Brands Summary, the CDS error list and the OpenAPI specification agree on 404 `Field/InvalidIndustry` ([CDS: Invalid Industry][cds-error-invalid-industry]). On the other APIs, the error list gives 404 `Field/InvalidIndustry` and the OpenAPI specification gives 400. The ACCC clarifies that current versions return 400 `Field/Invalid` ([ACCC Developer Portal: Known Issues][accc-known-issues]).
 - Reason: Where the CDS sources agree, the Register follows them. Where they do not agree, the ACCC guidance decides.
 
-### <a id="reg-0371"></a>REG-0371 The sequence of the request checks
+### <a id="reg-0371"></a>REG-0371 The Register checks the version before the `{industry}`
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no sequence. The rules for `{industry}` depend on the version: deprecated versions give 404 `Field/InvalidIndustry`, and current versions give 400 `Field/Invalid` ([ACCC Developer Portal: Known Issues][accc-known-issues]).
@@ -137,7 +137,7 @@ The secure APIs are Get Data Holder Brands and [Get SSA](software-statement-asse
 - Basis: Step 3.3. The CDS says only "updated since the specified date-time" ([CDS: Get Data Holder Brands][cds-get-dh-brands]).
 - Reason: With "after", a data recipient that polls with the last time that it saw can miss a change at the same time. A record that the API returns again is harmless.
 
-### <a id="reg-0376"></a>REG-0376 The order of Get Data Holder Brands
+### <a id="reg-0376"></a>REG-0376 Get Data Holder Brands in the order of the IDs
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no order ([CDS: Get Data Holder Brands][cds-get-dh-brands]).
@@ -149,7 +149,7 @@ The secure APIs are Get Data Holder Brands and [Get SSA](software-statement-asse
 - Basis: Step 1. The CDS OpenAPI specification gives no `If-None-Match` parameter and no `ETag` header for this API ([CDS: Get Data Holder Brands][cds-get-dh-brands]).
 - Reason: `updated-since` gives the incremental read of this API. An `ETag` adds a second way for no gain.
 
-### <a id="reg-0378"></a>REG-0378 All brand statuses on Get Data Holder Brands
+### <a id="reg-0378"></a>REG-0378 All brand statuses on Get Data Holder Brands, as the CDS says
 
 - Kind: conflict
 - Basis: Step 1. The schema gives the brand a `status` with all three values, and `updated-since` lets a data recipient poll for changes ([CDS: Get Data Holder Brands][cds-get-dh-brands]). An ACCC support article says that the API lists the brands "active for consumer data sharing" ([CDR Support: Brands in the CDR ecosystem][support-brands]). The article is not a specification and is not clear.
@@ -167,25 +167,25 @@ The secure APIs are Get Data Holder Brands and [Get SSA](software-statement-asse
 - Basis: Step 3.3. The CDS says only "the date/time that the Legal Entity was last updated" ([CDS: Get Data Recipients][cds-get-drs]).
 - Reason: A change to a brand or a software product is a change to the legal entity record that the API returns. A data holder that polls the API then sees each change. The brands of a data holder use the same rule.
 
-### <a id="reg-0382"></a>REG-0382 The industry on Get Data Holder Statuses
+### <a id="reg-0382"></a>REG-0382 Get Data Holder Statuses filters by the industry of a brand in each status
 
 - Kind: choice
 - Basis: Step 3.3. The CDS says only that the parameter is "the industry the participant is retrieving data for" ([CDS: Get Data Holder Statuses][cds-get-dh-statuses]). Get Data Holder Brands and the summary give only the brands of the industry.
 - Reason: One meaning of `{industry}` for each data holder API is the simplest. The brands of a REMOVED data holder are REMOVED, so the filter ignores the brand status, and the data recipients of that industry see that the data holder is REMOVED.
 
-### <a id="reg-0383"></a>REG-0383 The sequence of the checks on the secure APIs
+### <a id="reg-0383"></a>REG-0383 The token first, then the status of the caller, then the public checks
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no sequence ([CDS: Get Data Holder Brands][cds-get-dh-brands]).
 - Reason: A caller with no valid token then learns nothing about the API.
 
-### <a id="reg-0384"></a>REG-0384 A caller with no software product
+### <a id="reg-0384"></a>REG-0384 A caller with no software product gets the response for REMOVED
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no response for a token whose software product does not exist ([CDS: Error Codes][cds-error-403-adr-not-active]).
 - Reason: The Register never deletes a software product, so this cannot occur in practice. The response is the same as for a REMOVED software product, which is the nearest state.
 
-### <a id="reg-0385"></a>REG-0385 The headers that a web page can read
+### <a id="reg-0385"></a>REG-0385 CORS exposes the version, `ETag` and interaction ID headers
 
 - Kind: choice
 - Basis: Step 3.2. The CDS requires that CORS protections are disabled for these APIs ([CDS: CORS][cds-cors]). A browser hides each response header that the server does not expose ([Fetch: CORS protocol][fetch-cors]).

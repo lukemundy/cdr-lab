@@ -128,7 +128,7 @@ This area gives the console API of the operator console. The console API is JSON
 ### <a id="dh-1683"></a>DH-1683 The sort rules of the Register console, and sorts by a count
 
 - Kind: choice
-- Basis: Step 3.3. The Register console gives the rules: text in the byte order, a name with no difference for case, and the identifier of the record last ([Judgement: the sorts of a participant list](../../register/design/operator-console-api.md#reg-1174)).
+- Basis: Step 3.3. The Register console gives the rules: text in the byte order, a name with no difference for case, and the identifier of the record last ([Judgement: sorts in byte order, and then by the legal entity ID](../../register/design/operator-console-api.md#reg-1174)).
 - Reason: The same rules in both consoles. The sorts by a count let the operator find the records with the most use. The data holder calculates a count of the arrangements that did not end at the request, because it depends on the time of the request.
 
 ### <a id="dh-1684"></a>DH-1684 The client name as the default order of the registrations
