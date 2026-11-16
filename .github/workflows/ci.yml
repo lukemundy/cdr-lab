@@ -80,8 +80,11 @@ jobs:
           else
             {
               # Go tests check the brand directory contract against the token names and the fonts of the design system.
-              echo "go=$(changed "${shared[@]}" "${backend[@]}" .golangci.yml web/packages/tokens/tokens \
-                web/packages/tokens/fonts.json)"
+              # The test fixtures of tools/ are Markdown, so each change in tools/ counts.
+              go=$(changed "${shared[@]}" "${backend[@]}" .golangci.yml web/packages/tokens/tokens \
+                web/packages/tokens/fonts.json)
+              if [ "$(changed_all tools)" = true ]; then go=true; fi
+              echo "go=$go"
               echo "conformance=$(changed "${shared[@]}" "${backend[@]}" .dockerignore)"
               echo "web=$(changed "${shared[@]}" web services/register/internal/adapter/console/openapi.yaml \
                 services/dataholder/internal/adapter/console/openapi.yaml \

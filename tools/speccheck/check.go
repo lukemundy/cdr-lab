@@ -45,6 +45,7 @@ var (
 	definitionSiteRe  = regexp.MustCompile(`<a id="[^"]*"></a>(\*\*[^*]+\*\*|[A-Z]{2,5}-[0-9]{4})`)
 	verifiesRe        = regexp.MustCompile(`^\s*// Verifies: [A-Z]{2,5}-[0-9]{4}(, [A-Z]{2,5}-[0-9]{4})*$`)
 	verifiesIDRe      = regexp.MustCompile(`[A-Z]{2,5}-[0-9]{4}`)
+	subHeadingRe      = regexp.MustCompile(`^#{3,6}(\s|$)`)
 )
 
 var fixedHeadings = map[string]bool{
@@ -379,6 +380,10 @@ func (c *checker) readStructure(s *spec) {
 			if c.define(s, n, m[1], m[2], judgement) {
 				judgementID, judgementLine = m[2], n
 			}
+
+			return
+		case subHeadingRe.MatchString(line):
+			c.errorf(s.path, n, "only a judgement can have a heading below ##, in the Judgements section")
 
 			return
 		}

@@ -57,6 +57,17 @@ func TestCheck(t *testing.T) {
 			},
 		},
 		{
+			fixture: "sub-heading",
+			wantErrors: []string{
+				"pki/DESIGN.md:11: only a judgement can have a heading below ##, in the Judgements section",
+				"pki/DESIGN.md:17: only a judgement can have a heading below ##, in the Judgements section",
+				"pki/DESIGN.md:29: only a judgement can have a heading below ##, in the Judgements section",
+			},
+			wantWarnings: []string{
+				"pki/DESIGN.md:19: requirement PKI-0001 has no test that verifies it",
+			},
+		},
+		{
 			fixture: "no-source",
 			wantErrors: []string{
 				"pki/DESIGN.md:9: requirement PKI-0001 has no source",
