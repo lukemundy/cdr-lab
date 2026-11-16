@@ -44,9 +44,9 @@ This area gives the actions of the lab-only operator console and its create form
   - `status`
   - `extendedData.extensionUType`
   - `extendedData.nppPayload.service`
-- <a id="dh-1462"></a>**DH-1462** The fields of `extendedData` are in one group, with a legend. The group is always open. ([Judgement: the group of the extended data](#dh-1521))
-- <a id="dh-1463"></a>**DH-1463** The console sends `extendedData` only when a field of the group has a value. ([Judgement: the group of the extended data](#dh-1521))
-- <a id="dh-1464"></a>**DH-1464** The lab operator types each time of a transaction in a native date-time control, in the time zone of the browser, with seconds. The console sends each time in UTC. ([Judgement: UTC for all times (ADR 0012)][adr-0012]; [Judgement: the time of a transaction in the form](#dh-1522))
+- <a id="dh-1462"></a>**DH-1462** The fields of `extendedData` are in one group, with a legend. The group is always open. ([Judgement: the extended data in a group that is always open](#dh-1521))
+- <a id="dh-1463"></a>**DH-1463** The console sends `extendedData` only when a field of the group has a value. ([Judgement: the extended data in a group that is always open](#dh-1521))
+- <a id="dh-1464"></a>**DH-1464** The lab operator types each time of a transaction in a native date-time control, in the time zone of the browser, with seconds. The console sends each time in UTC. ([Judgement: UTC for all times (ADR 0012)][adr-0012]; [Judgement: local time with seconds in the form, sent in UTC](#dh-1522))
 
 ## Judgements
 
@@ -80,13 +80,13 @@ This area gives the actions of the lab-only operator console and its create form
 - Basis: Step 3.3. Only an open account gets a transaction ([create a transaction](operator-interface.md#dh-0724)).
 - Reason: A create changes no other record, so it needs no confirmation. The console API has no detail of a transaction, and the list shows each field.
 
-### <a id="dh-1521"></a>DH-1521 The group of the extended data
+### <a id="dh-1521"></a>DH-1521 The extended data in a group that is always open
 
 - Kind: choice
 - Basis: Step 3.3. The design system has no group of fields that opens and closes ([the form fields of the design system](../../../web/packages/ui/design/forms-and-dialogs.md)).
 - Reason: A collapsed group hides its field errors and the targets of the links of the error summary. The values of the group are the only sign that the lab operator wants it, so an empty group sends nothing.
 
-### <a id="dh-1522"></a>DH-1522 The time of a transaction in the form
+### <a id="dh-1522"></a>DH-1522 Local time with seconds in the form, sent in UTC
 
 - Kind: choice
 - Basis: Step 3.3. The API gets each time in UTC, and the UI shows each time in the time zone of the browser ([ADR 0012][adr-0012]).
