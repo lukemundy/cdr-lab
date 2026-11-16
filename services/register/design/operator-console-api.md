@@ -11,7 +11,7 @@ This area gives the console API of the operator console for the reads, the histo
 | <a id="reg-1102"></a>**REG-1102** | Activate, deactivate or remove a data holder brand | `POST /api/data-holders/{legalEntityId}/brands/{brandId}/{activate,deactivate,remove}` | 204 | [the transitions of a brand](participants.md#reg-0225) |
 
 - <a id="reg-1103"></a>**REG-1103** The OpenAPI document gives the path of each other read and status action. For example, the list of the data recipients is `GET /api/data-recipients`. ([Judgement: console API contracts in OpenAPI (ADR 0017)][adr-0017])
-- <a id="reg-1104"></a>**REG-1104** The `{brandId}` of a data holder brand in a path is its `dataHolderBrandId`. A brand with no `dataHolderBrandId` has its `interimId` in the path. ([the operator interface](../DESIGN.md#operator-interface))
+- <a id="reg-1104"></a>**REG-1104** The `{brandId}` of a data holder brand in a path is its `dataHolderBrandId`. A brand with no `dataHolderBrandId` has its `interimId` in the path. ([the path of a data holder brand in the operator interface](operator-interface.md#reg-0821))
 
 ## Requests and errors
 
@@ -20,8 +20,8 @@ This area gives the console API of the operator console for the reads, the histo
 - <a id="reg-1107"></a>**REG-1107** The paths of the console API have no version. For example, the path of the key sets is `/api/key-sets`. ([Judgement: the UI and the API ship together (ADR 0014)][adr-0014])
 - <a id="reg-1108"></a>**REG-1108** The console API ignores a query parameter that it does not know. For example, `GET /api/data-recipients?colour=red` gives the list. ([Judgement: an unknown query parameter is ignored](#reg-1170))
 - <a id="reg-1109"></a>**REG-1109** An error response is a [problem details](../../../docs/spec/glossary.md#problem-details) body with [the type `about:blank`](../../../pkg/platform/problem/DESIGN.md#prob-0001), except a refusal with [the field-errors type](../../../pkg/platform/problem/DESIGN.md#prob-0002). ([RFC 9457][rfc9457])
-- <a id="reg-1110"></a>**REG-1110** The status codes of an error are the codes of the operator interface: 400 for a request that is not valid, 404 for a record that does not exist, and 409 for a change that the status rules do not permit. ([the operator interface](../DESIGN.md#operator-interface); [RFC 9110, section 15.5.10][rfc9110-409])
-- <a id="reg-1111"></a>**REG-1111** A legal entity ID that no legal entity has gives 404. The `detail` does not contain the ID. ([RFC 9110, section 15.5.5][rfc9110-404]; [the operator interface](../DESIGN.md#operator-interface))
+- <a id="reg-1110"></a>**REG-1110** The status codes of an error are the codes of the operator interface: 400 for a request that is not valid, 404 for a record that does not exist, and 409 for a change that the status rules do not permit. ([Judgement: 400 or 409 for a refused body](operator-interface.md#reg-0894); [RFC 9110, section 15.5.10][rfc9110-409])
+- <a id="reg-1111"></a>**REG-1111** A legal entity ID that no legal entity has gives 404. The `detail` does not contain the ID. ([RFC 9110, section 15.5.5][rfc9110-404]; [a record that does not exist in the operator interface](operator-interface.md#reg-0861))
 - <a id="reg-1112"></a>**REG-1112** The console API gives each time in UTC. For example, `2026-10-23T01:02:03Z`. ([Judgement: UTC for all times (ADR 0012)][adr-0012])
 - <a id="reg-1113"></a>**REG-1113** Telemetry: the console API puts no request body in telemetry. For example, no certificate, CSR or CA bundle is in telemetry. ([no CDR data and no personal information in telemetry](../../../pkg/platform/telemetry/DESIGN.md#tele-0004); [Judgement: telemetry with OpenTelemetry (ADR 0006)][adr-0006])
 - <a id="reg-1114"></a>**REG-1114** Telemetry: a path with a thumbprint is in telemetry [as its route pattern](../../../pkg/platform/telemetry/DESIGN.md#tele-0005). For example, the thumbprint of a removed client certificate is not in a span name. ([Judgement: telemetry with OpenTelemetry (ADR 0006)][adr-0006])
@@ -167,7 +167,7 @@ This area gives the console API of the operator console for the reads, the histo
 ### <a id="reg-1183"></a>REG-1183 No body after an action
 
 - Kind: choice
-- Basis: Step 3.3. An action of the operator interface gives 204 with no body ([the operator interface](../DESIGN.md#operator-interface)).
+- Basis: Step 3.3. An action of the operator interface gives 204 with no body ([the operator interface](operator-interface.md#reg-0863)).
 - Reason: One response for each action in both interfaces is the least complex. The UI gets the data of its views again after each action.
 
 ### <a id="reg-1184"></a>REG-1184 Only the fields of the table in the history

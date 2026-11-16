@@ -81,7 +81,7 @@ A production data holder does not have these features. Real components must not 
   - the brand ID
   - the base URIs of the public APIs and of the secure APIs
   - the sender address of the OTP email
-- <a id="dh-1358"></a>**DH-1358** The brand ID and the base URIs of each set agree with the record of the brand in the example seed of the Register. ([Register: Deployment from published artifacts][register-deployment]; [Judgement: example values for each preset brand](#dh-1382))
+- <a id="dh-1358"></a>**DH-1358** The brand ID and the base URIs of each set agree with the record of the brand in the example seed of the Register. ([Register: the example seed of the four preset brands][register-deployment]; [Judgement: example values for each preset brand](#dh-1382))
 
 ## Judgements
 
@@ -228,4 +228,4 @@ A production data holder does not have these features. Real components must not 
 [readme-component-types]: ../../../README.md#component-types
 [readme-conventions]: ../../../README.md#other-conventions
 [register-chart]: ../../../charts/register/README.md
-[register-deployment]: ../../register/DESIGN.md#deployment-from-published-artifacts
+[register-deployment]: ../../register/design/deployment.md#reg-0920

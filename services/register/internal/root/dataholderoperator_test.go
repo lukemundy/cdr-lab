@@ -104,6 +104,7 @@ func observeHolders(t *testing.T, handlers map[int]http.Handler) holderView {
 	return v
 }
 
+// Verifies: REG-0809, REG-0811, REG-0817, REG-0825, REG-0827
 func TestTheOperatorCreatesChangesAndRemovesADataHolderAndThePublicAPIsShowEachChange(t *testing.T) {
 	handlers := lab(t)
 	holder := "/v1/data-holders/" + newDataHolder

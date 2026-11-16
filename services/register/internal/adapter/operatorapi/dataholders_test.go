@@ -34,6 +34,7 @@ func dataHolderBrand() domain.DataHolderBrand {
 	}
 }
 
+// Verifies: REG-0809, REG-0815, REG-0816, REG-0874
 func TestACreateOfADataHolderExecutesItsCommandAndGivesTheLocation(t *testing.T) {
 	operator := &fakeOperator{}
 
@@ -49,6 +50,7 @@ func TestACreateOfADataHolderExecutesItsCommandAndGivesTheLocation(t *testing.T)
 	}}, operator.dataHolderCommand)
 }
 
+// Verifies: REG-0811, REG-0877
 func TestAnAddOfADataHolderBrandExecutesItsCommandAndGivesTheLocation(t *testing.T) {
 	operator := &fakeOperator{}
 
@@ -60,6 +62,7 @@ func TestAnAddOfADataHolderBrandExecutesItsCommandAndGivesTheLocation(t *testing
 	assert.Equal(t, domain.AddDataHolderBrand{Brand: dataHolderBrand()}, operator.dataHolderCommand)
 }
 
+// Verifies: REG-0803, REG-0804, REG-0817, REG-0875, REG-0876, REG-0878, REG-0879
 func TestEachDataHolderChangeExecutesItsCommand(t *testing.T) {
 	const brand = "/v1/data-holders/dh-1/brands/dhb-1"
 
@@ -113,6 +116,7 @@ func TestEachDataHolderChangeExecutesItsCommand(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0852, REG-0853, REG-0854
 func TestABodyThatIsNotOneRecordOfTheActionIsABadRequest(t *testing.T) {
 	tests := map[string]struct{ method, path, body, wantDetail string }{
 		"not JSON": {http.MethodPost, "/v1/data-holders", "{", "The request body is not valid JSON"},
@@ -142,6 +146,7 @@ func TestABodyThatIsNotOneRecordOfTheActionIsABadRequest(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0810, REG-0855, REG-0858, REG-0861
 func TestDataHolderErrors(t *testing.T) {
 	_, notValid := domain.HandleDataHolder(domain.DataHolderState{}, domain.CreateDataHolder{})
 

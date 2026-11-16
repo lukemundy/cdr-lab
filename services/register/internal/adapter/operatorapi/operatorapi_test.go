@@ -97,6 +97,7 @@ func requireProblem(t *testing.T, rec *httptest.ResponseRecorder, status int) pr
 	return p
 }
 
+// Verifies: REG-0801, REG-0802, REG-0863, REG-0864
 func TestEachActionExecutesItsCommand(t *testing.T) {
 	const (
 		recipient = "/v1/data-recipients/dr-1"
@@ -180,6 +181,7 @@ func TestTheBearerSchemeIsNotCaseSensitive(t *testing.T) {
 	assert.Equal(t, http.StatusNoContent, rec.Code)
 }
 
+// Verifies: REG-0860, REG-0861, REG-0862
 func TestErrors(t *testing.T) {
 	ruleErr := statusRuleError(t)
 
@@ -295,6 +297,7 @@ func serveMethodBody(
 	return rec
 }
 
+// Verifies: REG-0836, REG-0865
 func TestACertificateIsRegisteredWithItsSHA256Thumbprint(t *testing.T) {
 	pemData, thumbprint := certificatePEM(t)
 	operator := &fakeOperator{}
@@ -310,6 +313,7 @@ func TestACertificateIsRegisteredWithItsSHA256Thumbprint(t *testing.T) {
 	)
 }
 
+// Verifies: REG-0835
 func TestABodyThatIsNotOnePEMCertificateIsRefused(t *testing.T) {
 	pemData, _ := certificatePEM(t)
 
@@ -351,6 +355,7 @@ func TestACertificateRequestWithoutTheOperatorTokenIsUnauthorised(t *testing.T) 
 
 const removalPath = certificatesPath + "/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 
+// Verifies: REG-0840, REG-0866
 func TestARemovalExecutesItsCommandWithTheThumbprintOfThePath(t *testing.T) {
 	operator := &fakeOperator{}
 
@@ -364,6 +369,7 @@ func TestARemovalExecutesItsCommandWithTheThumbprintOfThePath(t *testing.T) {
 	}, operator.command)
 }
 
+// Verifies: REG-0841
 func TestARemovalOfAThumbprintThatIsNotValidIsABadRequest(t *testing.T) {
 	_, notValid := domain.HandleDataRecipient(
 		domain.ApplyDataRecipient(domain.DataRecipientState{}, domain.DataRecipientImported{
@@ -423,6 +429,7 @@ func serveKeys(t *testing.T, keys *fakeKeys, path string, header http.Header) *h
 	return rec
 }
 
+// Verifies: REG-0846, REG-0896
 func TestTheKeyChangeActionsCallTheStepOfTheKeySet(t *testing.T) {
 	tests := map[string]struct {
 		path                 string
@@ -446,6 +453,7 @@ func TestTheKeyChangeActionsCallTheStepOfTheKeySet(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0847, REG-0848, REG-0849
 func TestKeyChangeErrors(t *testing.T) {
 	tests := map[string]struct {
 		path       string

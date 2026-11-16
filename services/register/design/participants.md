@@ -16,7 +16,7 @@ Each row gives one kind of participant record, its parent and its status values.
 
 ## Fields
 
-The Register checks the fields of a participant record each time that it gets one, for example from the load or from the [operator interface](../DESIGN.md#operator-interface).
+The Register checks the fields of a participant record each time that it gets one, for example from the [load](deployment.md#reg-0900) or from the [operator interface](operator-interface.md#reg-0800).
 
 - <a id="reg-0205"></a>**REG-0205** The name of a data holder legal entity has 36 characters or fewer. When a name is longer, the Register refuses it. For example, the load refuses a data holder with a name of 37 characters. ([CDS: Register API schemas][cds-register-schemas]; [Judgement: a data holder name of 36 characters at most](#reg-0260))
 - <a id="reg-0206"></a>**REG-0206** A data holder brand has one or more industries. Each industry is one of `banking`, `energy`, `non-bank-lending` and `telco`. ([CDS: Get Data Holder Brands][cds-get-dh-brands])
