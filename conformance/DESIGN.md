@@ -32,7 +32,7 @@ Out of scope:
 ## Black-box tests
 
 - A test calls the deployed components only through their network interfaces, as a CDR participant or a consumer does. It does not read a database, and it does not import the code of a service. Judgement: the suite then tests the deployment, and it can run against a different implementation of a component, for example the ACCC mock Register ([Register DESIGN.md][register-design]). The Go `internal` rule makes an import of service code impossible.
-- A test acts as the participant does: it finds the base URIs of a brand through the Register, gets each SSA from the Register, and acts as the browser of the consumer in an authorisation flow ([data holder DESIGN.md][dataholder-design]).
+- A test acts as the participant does: it finds the base URIs of a brand through the Register, gets each SSA from the Register, and acts as the browser of the consumer in an authorisation flow ([the conformance suite acts as a participant](../services/dataholder/design/non-functional-requirements.md#dh-0015)).
 - A test checks each response of a CDS API against the pinned CDS OpenAPI specification of the target CDS version, in addition to the checks of the test. Judgement: a field, a type or an enumeration that does not agree with the CDS then fails in each test that gets it ([ADR 0011][adr-0011]).
 - The pinned specification files are copies of the CDS files. Do not edit them. The `SOURCE.md` file next to them gives their source and checksum. Judgement: an edit makes the check agree with the component, not with the CDS.
 
@@ -61,8 +61,8 @@ Out of scope:
 | Test | Exception | Reason |
 |---|---|---|
 | The data holder tests of the end of eligibility, the removal of a software product and the notices (`eligibility_test.go`, `removal_test.go`, `notice_test.go`) | They read the arrangements of a customer from the operator interface to see the end reason of an arrangement and the outcome of a notice. | The subject is a CDR behaviour, but no CDR API shows these values to the test. In production, the consumer dashboard of the data holder shows them. |
-| The data holder test of the logo (`brand_test.go`) | It checks the `Content-Security-Policy` and `X-Content-Type-Options` headers of the logo, which the CDR does not define. | The CDS makes the `logoUri` of a brand mandatory ([CDS: Register API schemas][cds-register-schemas]), and a data recipient opens that URL. Only the URL that the Register gives proves that the deployed public listener serves the logo with the headers that stop a script in it ([data holder DESIGN.md][dataholder-design]). |
-| The data holder test of the stylesheets and the font of the authentication page (`brand_test.go`) | It checks that the stylesheets of the page and one font that they refer to load from the origin of the page. The CDR does not define the styles of the page. | The data holder pages work with no styles, so only a request to the deployed public listener shows that the image has the build of the styles and the fonts ([data holder DESIGN.md][dataholder-design]). |
+| The data holder test of the logo (`brand_test.go`) | It checks the `Content-Security-Policy` and `X-Content-Type-Options` headers of the logo, which the CDR does not define. | The CDS makes the `logoUri` of a brand mandatory ([CDS: Register API schemas][cds-register-schemas]), and a data recipient opens that URL. Only the URL that the Register gives proves that the deployed public listener serves the logo with the headers that stop a script in it ([data holder specification][dataholder-design]). |
+| The data holder test of the stylesheets and the font of the authentication page (`brand_test.go`) | It checks that the stylesheets of the page and one font that they refer to load from the origin of the page. The CDR does not define the styles of the page. | The data holder pages work with no styles, so only a request to the deployed public listener shows that the image has the build of the styles and the fonts ([data holder specification][dataholder-design]). |
 | The Register tests of Get SSA (`ssa_test.go`) | A response with the status 200 is not checked against the specification. | The response body is a JWT with no JSON quotes, which the string schema of the specification cannot validate ([Register DESIGN.md][register-design]). |
 | The Register test of an unknown path (`status_test.go`) | The response is not checked against the specification. | The specification has no such path. |
 
@@ -76,4 +76,4 @@ Out of scope:
 [agents]: ../AGENTS.md
 [readme-data]: ../README.md#data
 [register-design]: ../services/register/DESIGN.md
-[dataholder-design]: ../services/dataholder/DESIGN.md
+[dataholder-design]: ../services/dataholder/design/README.md

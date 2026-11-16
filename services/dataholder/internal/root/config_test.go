@@ -134,6 +134,7 @@ func TestTheConfigurationLoadsWhenEachSettingIsPresent(t *testing.T) {
 	assert.Equal(t, 4*time.Minute, cfg.workers.statusInterval)
 }
 
+// Verifies: DH-0010
 func TestEachModeLoadsWithOnlyTheSettingsThatItUses(t *testing.T) {
 	for name, m := range map[string]mode{"serve": serveMode, "api": apiMode, "worker": workerMode} {
 		t.Run(name, func(t *testing.T) {
@@ -146,6 +147,7 @@ func TestEachModeLoadsWithOnlyTheSettingsThatItUses(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0011
 func TestEachModeNeedsEachSettingThatItUses(t *testing.T) {
 	for name, m := range map[string]mode{"serve": serveMode, "api": apiMode, "worker": workerMode} {
 		for absent := range settingsOf(t, m) {

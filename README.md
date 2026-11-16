@@ -11,7 +11,7 @@ Early development. Two services run in the lab deployment, and a black-box confo
 | Service | Summary | Specification |
 |---|---|---|
 | Mock CDR Register | Participants and their statuses, SSAs, and the Register APIs | [DESIGN.md](services/register/DESIGN.md) |
-| Mock data holder | One banking brand for each instance, from four preset banks: product data, the authorisation server, consent, and the banking APIs of a consent | [DESIGN.md](services/dataholder/DESIGN.md) |
+| Mock data holder | One banking brand for each instance, from four preset brands: product data, the authorisation server, authorisations, and the banking APIs of an arrangement | [design/README.md](services/dataholder/design/README.md) |
 
 ## Target standards
 

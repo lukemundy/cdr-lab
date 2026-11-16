@@ -2,73 +2,7 @@
 
 This document gives the specification and the requirements for the mock data holder. It does not describe the implementation.
 
-## Purpose
-
-The mock data holder implements a CDR data holder brand as the CDS specifies it. Data recipients and public clients in this lab use it the same way they use a production data holder. A "real" component must be able to change from the mock data holder to a production data holder with a configuration change only.
-
-## Sources
-
-Target: Consumer Data Standards (CDS) 1.36.0. CDS links go to the 1.36.0 archive URL. While 1.36.0 is the current version, that URL redirects to the live site.
-
-The requirements follow the process in [README: Sources for requirements][readme-sources]. Each requirement links to its source. "Judgement" marks a requirement that the CDS and the ACCC do not state, and gives the reason.
-
-Background research, with the full detail and more sources, is in [`docs/research/`](../../docs/research/README.md).
-
-## Scope
-
-In scope:
-
-- One data holder brand of the industry `banking`.
-- The brand of the instance: a brand directory that the configuration selects, and preset brands in the data holder. The name, logo and colours of the brand on the consumer authentication and consent pages, on the OTP email and in the shell of the operator console, and its product catalogue.
-- The public (TLS) APIs: product reference data, Get Status and Get Outages.
-- The OpenID Provider configuration and the JWKS of the brand.
-- Dynamic Client Registration with an SSA, and registration management.
-- The token endpoint, for the client credentials, authorisation code and refresh token grants.
-- The PAR endpoint, the authorisation endpoint, the introspection endpoint, the UserInfo endpoint, the token revocation endpoint and the CDR arrangement revocation endpoint.
-- The authentication of a consumer with a one-time password, and the pages on which the consumer gives consent.
-- The APIs that give the data of a consent: Get Customer, Get Accounts, Get Account Detail, Get Account Balance, Get Bulk Balances, Get Balances For Specific Accounts, Get Transactions For Account and Get Transaction Detail.
-- The end of a consent: a revocation by the data recipient, a withdrawal by the consumer, the end of the sharing period and the end of the eligibility of the consumer, and the notice to the data recipient.
-- The reaction to the status of a software product on the Register.
-- The customers, accounts and transactions of the brand, and the lab-only operator interface that creates them, closes accounts and withdraws consents for a consumer.
-- The lab-only feature to load product reference data.
-- The lab-only operator console: a web UI for the staff of the bank.
-- The lab-only online bank site of the brand, for consumers: a landing page, the list and the detail of the current products, sign-up, sign-in and sign-out, the accounts of the consumer with their balances and transactions, the opening and the close of an account by the consumer, and the consumer dashboard, on which the consumer sees their CDR consents and withdraws a consent (see Online bank site).
-- The four preset brands in the lab at the same time, each as its own instance, behind a lab-only compose profile.
-- The publication of the data holder image and of a Helm chart from `main` by CI, so that an operator deploys a brand to Kubernetes with configuration only (see Deployment from published artifacts). The deployment itself is out of scope.
-
-Out of scope for now:
-
-- The other banking APIs: payees, direct debits, scheduled payments and instalment plans. Also Get Customer Detail. (See Decisions)
-- The amendment of a consent (see Decisions).
-- Customers that are organisations, joint accounts, secondary users and nominated representatives (see Decisions).
-- Redirect to App and decoupled authentication. The data holder has no app (see Decisions).
-- A change of the signing key of the data holder.
-- Encryption of ID tokens and of authorisation responses ([Judgement: no encryption of ID tokens or authorisation responses](../../pkg/authserver/design/configuration.md#auth-0017)).
-- The admin APIs: Get Metrics and Metadata Update.
-- The traffic thresholds of the CDS, and the 429 response for a request above them.
-- A CDR policy of the data holder. Rule 7.2(8) requires that each online service of the data holder makes it readily available, also the online bank site (see Decisions).
-- Real authentication of a consumer on the online bank site. The site checks no password (see Online bank site).
-- An email from the data holder to the consumer, other than the OTP email, for example at the end of a consent. The data holder notifies the data recipient, not the consumer (see Notice to the data recipient and Decisions).
-- The brand in the content of the operator console. Only the shell and the link and primary action colours show the brand (see Operator console).
-- A run of the conformance suite or of the OpenID conformance suite against a preset brand other than the default preset brand in CI.
-- A change of the brand of a running instance. A change needs a restart.
-- Other industries.
-- Deprecated endpoint versions. The mock serves only the current version of each endpoint (see Decisions).
-- Changes to the outcome of Get Status and Get Outages by the operator (see Decisions).
-- The mock CDR PKI. It is a separate component with its own design ([PKI DESIGN.md](../../pki/DESIGN.md)).
-
-## Actors
-
-| Actor | Uses |
-|---|---|
-| Public client | Get Products, Get Product Detail, Get Status, Get Outages |
-| Data recipient software product | OpenID Provider configuration, JWKS, registration, token endpoint, registration management, PAR endpoint, introspection endpoint, UserInfo endpoint, token revocation endpoint, CDR arrangement revocation endpoint, the customer and banking APIs of a consent |
-| Consumer | Authorisation endpoint, and the authentication and consent pages, in a browser. The online bank site, in a browser (lab-only) |
-| Lab operator | Operator interface, operator console, lab-only features |
-
-The data holder calls two other participants: the CDR Register, for its JWKS and the statuses of software products, and the CDR arrangement revocation endpoint of a software product.
-
-Source: [CDS: Banking APIs][cds-get-products], [CDS: Common APIs][cds-get-status], [CDS: Security Endpoints][cds-security-endpoints], [CDS: Consent][cds-consent], [CDS: Metadata Cache Management][cds-metadata-cache].
+The [overview of the specification](design/README.md) gives the summary, the context, the areas, the goals and the non-goals. Each area file in `design/` gives the rules of its area.
 
 ## Brand
 
@@ -407,7 +341,7 @@ The only authentication flow is Redirect to Web with a one-time password (OTP). 
 
 ### The OTP email
 
-These rules apply to each OTP email. The data holder sends no other email (see Scope).
+These rules apply to each OTP email. The data holder sends no other email ([non-goals](design/README.md#non-goals)).
 
 - The `From` header has the brand name as its display name and the sender address of the configuration as its address. The header is one valid header line for each brand name that the brand directory permits, also for a name with special characters or characters that are not ASCII. ([RFC 5322, section 3.4][rfc5322-3-4], [RFC 2047, section 5][rfc2047-5]; see Decisions)
 - The sender address of the configuration is an address only. The data holder does not start when the setting has a display name, and its error names the setting. Judgement: the brand directory is the only source of the name (see Brand), and an error at start-up is better than an error at the first OTP.
@@ -762,7 +696,7 @@ Rules for the actions:
 The console is a web UI. The [web UI library specification](../../pkg/platform/consolehttp/DESIGN.md) gives the rules of its listener, its browser security, its cache headers and its routes. These rules are the same as in the Register console ([Register DESIGN.md: Listener and security][register-console-listener]): its own listener, the setting `CONSOLE_ENABLED`, the setting `CONSOLE_ALLOWED_HOSTS` and its values, plain HTTP, and no login and no credential in the browser.
 
 - The console listener serves the logo and the mark of the brand, and a stylesheet that sets only the roles of the brand that the console uses, with [the `Host` allowlist](../../pkg/platform/consolehttp/DESIGN.md#cnsl-0004) and [the response headers](../../pkg/platform/consolehttp/DESIGN.md#cnsl-0007) of the console. Judgement: the Content Security Policy of the console permits images and styles from the same origin only, and the brand files of the public listener are on a different origin. (See Decisions.)
-- The data holder starts the console listener only in the process that runs the APIs. A process that runs only the workers needs no console setting. (See Non-functional requirements: Least privilege.)
+- The data holder starts the console listener only in the process that runs the APIs. A process that runs only the workers needs no console setting ([a process needs only the settings that it uses](design/non-functional-requirements.md#dh-0010)).
 
 ### Console API
 
@@ -905,7 +839,7 @@ The consumer must not confuse the sign-in of the site, which asks for a password
 - The open of a loan also adds one transaction to the account, in the same write as the account: the drawdown. When the write of the transaction fails, the data holder opens no account. The drawdown has the `type` `OTHER`, the `status` `POSTED`, the `description` "Loan drawdown", the `amount` minus the loan amount, an empty `reference`, and the time of the open as its `postingDateTime` and its `executionDateTime`. The account then has the current balance minus the loan amount and the available balance `0.00`, by the balance rule of Customers and accounts. ([CDS: BankingTransactionV2][cds-schema-transaction], [CDS: BankingBalance][cds-schema-balance]: `currentBalance` is "negative if the customer has money owing"; see Decisions)
 - The values of the APIs of a consent for a lending account that the consumer opens are the same as for an account that the operator creates with the same credit limit and, for a loan, the same transaction.
 - The account has no link to its product. A later change to the product, or its end, does not change the account. (See Decisions)
-- The new account is not in an arrangement that exists. The accounts of an arrangement do not change after the confirmation (see Scope: the amendment of a consent). The account is available for the next consent of the customer.
+- The new account is not in an arrangement that exists. The accounts of an arrangement do not change after the confirmation ([non-goals: the amendment of an authorisation](design/README.md#non-goals)). The account is available for the next consent of the customer.
 - The data holder decides the product with the same rule for a current product and the same products as the site API. A product that is not current and a product that does not exist give a field error in plain language, and the data holder opens no account.
 - After an open, the site shows the page of the new account, with a status message that names the product, and the focus on the heading of the page. ([WCAG 2.2, SC 4.1.3][wcag-4-1-3])
 - The busy state of the button stops a second open while the first is in progress. The site never sends an open again by itself. The data holder has no idempotency key for an open. (See Decisions)
@@ -937,7 +871,7 @@ The consumer dashboard is the online service of rule 1.15 of the CDR Rules. On i
   - For a current arrangement, the date on which the sharing ends. For an ended arrangement, the date on which it ended: the time of the event that ended it, or the end of its sharing. The page does not show the reason or the method of the end. ([CDR Support: Consumer Dashboard - revoked and expired consents][support-withdrawal-method]: "the CDR Rules do not require the method of withdrawal to be shown on the dashboard"; [CDR Support: Dashboards][support-dashboards])
   - For each data cluster, the date of the first and of the last disclosure, from the Record of disclosures. A data cluster with no disclosure shows "No data shared". This applies also to an ended arrangement. ([CDR Support: Privacy Safeguard 5 - dates on the consumer dashboards][support-dashboard-dates]: the first and the final disclosure date, "for both active and expired sharing arrangements"; [CDR Support: Data Holder Dashboard data sharing display at data cluster level][support-dashboard-clusters])
   - The message of the CDS about the handling of the data, with the brand name of the data recipient in place of each name of the data recipient: "You should check with <data recipient brand name> for more information on how they are handling your data, and for any other permissions you may have given them. See <data recipient brand name>'s CDR policy or their Dashboard for more information." ([CDS: Dashboard Standards][cds-dashboard-standards]: Data recipient handling details; see Decisions)
-- The page shows no accreditation number, no CDR receipt and no amendment. (See Scope and Decisions)
+- The page shows no accreditation number, no CDR receipt and no amendment. ([non-goals](design/README.md#non-goals); see Decisions)
 - Each current arrangement has the action "Stop sharing". An ended arrangement has no action. ([CDR Rules][cdr-rules], rule 1.15(1)(c); [CX Guidelines: Withdrawal][cx-withdrawal]: "Stop sharing")
 - Before a withdrawal, the site asks the consumer to confirm in a dialog. The dialog names the software product and the brand name of the data recipient. It says that the sharing stops at once, that the withdrawal cannot be reversed, and that the bank tells the data recipient. It has the actions "Stop sharing" and "Cancel". ([CDR Rules][cdr-rules], rule 1.15(1)(e); [WCAG 2.2, SC 3.3.4][wcag-3-3-4]; see Decisions)
 - The dialog shows the two messages of the CDS, with the brand name of the data recipient in place of the name of the data recipient ([CDS: Withdrawal Standards][cds-withdrawal-standards]: Withdrawing authorisation: Consequences and Redundant data; [CDR Rules][cdr-rules], rule 1.15(1)(d); see Decisions):
@@ -986,7 +920,7 @@ The site is a web UI. The [web UI library specification](../../pkg/platform/cons
 - The responses have no `Strict-Transport-Security` header. ([RFC 6797, Appendix B][rfc6797-b]: a browser applies an HSTS policy to each port of the host; see Decisions)
 - The site sets one cookie, the session cookie (see Session). The browser gets no token. ([ADR 0014][adr-0014]; see Decisions)
 - The site listener serves the brand stylesheet, the logo and the mark of the brand at the paths of the public listener (`/brand/styles.css`, `/brand/logo.svg` and `/brand/mark.svg`), the photos of the brand at `/brand/<file name>` (for example `/brand/hero.webp`), and the fonts of the fixed set, with [the `Host` allowlist](../../pkg/platform/consolehttp/DESIGN.md#cnsl-0004) and [the response headers](../../pkg/platform/consolehttp/DESIGN.md#cnsl-0007) of the site. Judgement: the Content Security Policy permits styles, fonts and images from the same origin only.
-- The data holder starts the site listener only in the process that runs the APIs. A process that runs only the workers needs no site setting. (See Non-functional requirements: Least privilege)
+- The data holder starts the site listener only in the process that runs the APIs. A process that runs only the workers needs no site setting ([a process needs only the settings that it uses](design/non-functional-requirements.md#dh-0010)).
 
 ### Site API
 
@@ -1035,7 +969,7 @@ The site API has [the `/api/` prefix](../../pkg/platform/consolehttp/DESIGN.md#c
 
 ### Non-functional requirements
 
-- Telemetry: the site API has the same server telemetry as the other listeners, and the rules of the data holder telemetry apply to it. The spans contain [no path value](../../pkg/platform/telemetry/DESIGN.md#tele-0005) and [no query string](../../pkg/platform/telemetry/DESIGN.md#tele-0007). No span, metric or log contains a request body, a cookie value, a session ID or a password. No log contains a query string or a path value. No log of a sign-up, a sign-in, a sign-out or the end of a session contains the customer number or the email address, also for a refused sign-up or sign-in. No log of an open or a close contains the customer number, the product ID, the BSB, the account number, the display name, the credit limit, the loan amount or an arrangement ID. No span, metric or log of the consent list, of a withdrawal on the site or of the record of a disclosure contains the customer number, an arrangement ID, the name of the software product, the brand name or the legal entity name of a data recipient, a data cluster or a time of a disclosure. Judgement: with the session, a product ID tells which product a consumer has, and the name of a data recipient tells with which app a consumer shares data. The UI sends no telemetry. ([ADR 0014][adr-0014], [ADR 0006][adr-0006]; see Non-functional requirements: Telemetry)
+- Telemetry: the site API has the same server telemetry as the other listeners, and the rules of the data holder telemetry apply to it. The spans contain [no path value](../../pkg/platform/telemetry/DESIGN.md#tele-0005) and [no query string](../../pkg/platform/telemetry/DESIGN.md#tele-0007). No span, metric or log contains a request body, a cookie value, a session ID or a password. No log contains a query string or a path value. No log of a sign-up, a sign-in, a sign-out or the end of a session contains the customer number or the email address, also for a refused sign-up or sign-in. No log of an open or a close contains the customer number, the product ID, the BSB, the account number, the display name, the credit limit, the loan amount or an arrangement ID. No span, metric or log of the consent list, of a withdrawal on the site or of the record of a disclosure contains the customer number, an arrangement ID, the name of the software product, the brand name or the legal entity name of a data recipient, a data cluster or a time of a disclosure. Judgement: with the session, a product ID tells which product a consumer has, and the name of a data recipient tells with which app a consumer shares data. The UI sends no telemetry. ([ADR 0014][adr-0014], [ADR 0006][adr-0006]; [no secret values in telemetry](design/non-functional-requirements.md#dh-0007), [no personal information in telemetry](design/non-functional-requirements.md#dh-0008))
 - Performance: on a development workstation, the landing page and the product list of the largest preset catalogue show within 1 second, and the first page of 10,000 transactions of an account shows within 1 second. Judgement: the same limits as the consoles.
 - Tests: tests in the data holder check the listener and the site API, and that the site gives the same products as Get Products and Get Product Detail for each preset brand. Component tests check each page with the brand of each preset brand at 320 CSS px. One browser test goes through the landing page, a category and the detail of a product against the lab. The conformance suite does not test the site. ([ADR 0019][adr-0019])
 - Tests of an open and a close: tests in the data holder check that an open of a product that is not current, of an unknown product, of a lending product with no valid amount and of a deposit product with an amount gives 400 and opens no account, that a failure of the write of the drawdown opens no account, that a close of a closed account gives 409, that a close of an account of a different customer gives 404, and that an open and a close need a session.
@@ -1095,27 +1029,13 @@ An operator deploys a data holder brand to Kubernetes from the image and the Hel
 - The chart README gives each value and each Secret that a deployment of a brand needs. The chart makes no Secrets.
 - The values give exactly one brand: a preset brand by its name, or the name of an existing ConfigMap that has a brand directory. The chart does not render when the values give no brand or two brands. The data holder gets the files of the ConfigMap as one directory. ([Kubernetes: ConfigMap volume][k8s-configmap-volume]; [ADR 0023][adr-0023]; see Decisions)
 - Before the data holder starts, the chart applies the migrations as the owner user, and then loads the product catalogue of the brand as the service user when the data holder has no products. The load starts only after the migrations complete. ([Kubernetes: init containers][k8s-init-containers]; [ADR 0020][adr-0020]; see Lab-only features and Decisions)
-- The chart runs one pod, and an upgrade stops the old pod before it starts the new pod. Judgement: the authorisation sessions and the sessions of the online bank site are in the memory of the process (see Non-functional requirements: Restart).
+- The chart runs one pod, and an upgrade stops the old pod before it starts the new pod. Judgement: the authorisation sessions and the sessions of the online bank site are in the memory of the process ([the state that a restart keeps](design/non-functional-requirements.md#dh-0022)).
 - The chart sets the Register JWKS URL from the base URI of the public APIs of the Register and the CDS path `/cdr-register/v1/jwks`. ([CDS: Register APIs][cds-register-apis]; see Decisions)
 - The interval of the Register statuses is a value with no default (see Register statuses and Decisions).
 - The chart has no value for the fixed OTPs (see Lab-only features and Decisions).
 - The operator console and the online bank site are off by default (see Decisions).
 - A deployment of one brand from the published image and chart passes its readiness probe, and Get Products and the OpenID Provider configuration answer on its public listener. The data holder is ready only after it gets the statuses from the Register (see Register statuses).
 - The repository has example values for each of the four preset brands, one set for each brand. Each set has only the values of its brand: the preset, the brand ID, the base URLs of the public and the secure APIs, and the sender address of the OTP email. The brand ID and the base URLs agree with the record of the brand in the example seed of the Register ([Register: Deployment from published artifacts][register-deployment]). A deployment adds the other values. (See Decisions)
-
-## Non-functional requirements
-
-These requirements are for the lab. The CDS non-functional requirements for data holders ([CDS: Non-functional Requirements][cds-nfrs]) are context only.
-
-- Performance: on a development workstation, 95% of API calls complete within 200 ms at 50 requests each second. The CDS thresholds are 1000 ms for Get Status and Get Outages, 1500 ms for the product reference data APIs, and 1000 ms to 4000 ms for the APIs of a consent ([CDS: Performance Requirements][cds-performance]).
-- Restart: the products, the registrations, the signing keys, the customers, the accounts, the transactions, the arrangements and their ends, the records of disclosures, the notices with their attempts and their outcomes, the subject identifiers, the resource identifiers, the refresh tokens and the revoked access tokens stay the same after a restart. An authorisation flow that is in progress at a restart can end. Each session of the online bank site ends at a restart, and the consumer signs in again. The data holder gets the statuses of software products again after a restart.
-- Telemetry: the data holder [sends traces, metrics and logs with OpenTelemetry](../../pkg/platform/telemetry/DESIGN.md#tele-0001), and its spans have [route patterns and not raw URLs](../../pkg/platform/telemetry/DESIGN.md#tele-0005). Telemetry contains no SSA, no request JWT, no client assertion, no request object, no `request_uri`, no authorisation code, no token, no self-signed JWT and no `cdr_arrangement_jwt`. It contains no customer number, no name, no email address, no OTP, no `sub`, no account data, no transaction data, no `accountId` or `transactionId`, no session ID of the online bank site and no password. It can contain the `x-fapi-interaction-id`. A test in the data holder checks that the telemetry of the first page of the consumer authentication, with a known and an unknown email address and with an email address in a different case, contains no email address.
-- Secrets: the repository contains no private keys. Keys and certificates are created when the lab is set up.
-- Least privilege: a process that runs only the APIs, or only the workers ([ADR 0010](../../docs/adr/0010-background-jobs-with-river.md)), needs only the settings that it uses. A process that runs only the workers needs no TLS key of the APIs, no operator token and no SMTP settings. A process does not start when a setting that it uses is not present, and its error names the setting. The usage text of the command gives the settings of each subcommand. Judgement: each deployment that has a secret that it does not use is one more location where the secret can be disclosed.
-- Portability: a real client changes between the mock data holder and a production data holder with configuration only: base URIs, trust anchors, client certificate, signing keys and identifiers.
-- Conformance: a black-box test suite checks each requirement in this document that the CDR defines, through the APIs only ([ADR 0019](../../docs/adr/0019-limit-the-conformance-suite-to-cdr-conformance.md)). It finds the base URIs and the brand name of the brand through the Register, as a client does, and it does not depend on the name of a preset brand. For the registration requirements, it gets each SSA from the Register, as a software product does. For the authentication and consent requirements, it acts as the browser of the consumer: it reads each page and sends each form. For the data of a consent, it gets tokens through that flow, and it creates the data with the operator interface. For the end of a consent, it serves the CDR arrangement revocation endpoint of a software product to get the notice, and it changes the statuses of software products with the operator interface of the Register.
-- Local run: the data holder runs with local Docker (Compose), with its dependencies.
-- Health: the data holder serves the [liveness probe](../../pkg/platform/httpserver/DESIGN.md#srv-0001) and the [readiness probe](../../pkg/platform/httpserver/DESIGN.md#srv-0002) on a plain HTTP listener that is separate from the CDR API listeners.
 
 ## Decisions
 
@@ -1189,7 +1109,6 @@ These requirements are for the lab. The CDS non-functional requirements for data
 | Optional fields of an account and its detail | `openStatus`, `isOwned`, `creationDate`, `bsb` and `accountNumber` only | The CDS marks the other fields as optional. Judgement: the account has no other data. Rates, fees and features of a product are in product reference data. |
 | Fields of a person | `lastName`, `firstName`, an empty `middleNames` and `lastUpdateTime` | `lastName` and `middleNames` are required ([CDS: CommonPerson][cds-schema-person]). Judgement: the lab needs no more personal data. Occupation is optional. |
 | UserInfo endpoint | Supported, with plain JSON | The CDS says "Data Holders MUST support a UserInfo endpoint" ([CDS: UserInfo endpoint][cds-userinfo-endpoint]). Its list of configuration fields says that `userinfo_endpoint` is necessary "only if OIDC Hybrid Flow is supported" ([CDS: OpenID Provider Configuration endpoint][cds-oidc-config]). The first rule is a direct requirement, and the hybrid flow is retired. OpenID Connect permits plain JSON when the registration does not ask for a signed response ([section 5.3.2][oidc-core-userinfo-response]). |
-| Traffic thresholds | Not enforced | Judgement: the lab has no such load, and a 429 response would make the conformance tests slow and not reliable. |
 | Format of a masked number | `xxx-xxx` for the BSB, a space, and the account number with only its last 4 digits | The CDS requires the number "as the full account number would normally be represented for display (including formatting) but with all digits except the last four replaced with a lower case x", and gives the example `xxx-xxx xxxxx1234` ([CDS: Common Field Types][cds-common-field-types]). |
 | Times, and the sharing period on the consent page | All times are UTC in the data holder. The consent page shows the end date in UTC with the label "UTC", and the duration in days and hours. | No source gives a time zone or a format for the page. Judgement: a time zone other than UTC is only for display, and a brand time zone is one more setting that the lab does not need. A duration in days and hours is exact for each value that a software product can ask for, to the hour. |
 | Confirmation that breaks an account rule | The consent page again, with the status 400. The flow continues. | The CDS requires that the consumer selects accounts and gives no response for a form that breaks the rule ([CDS: Authorisation Standards][cds-authorisation-standards]). Judgement: a browser sends such a form only when the consumer selects nothing or when the form is changed, and the consumer can correct the first condition. An account of a different customer gets the same response, so the response does not show which identifiers exist. |
@@ -1288,7 +1207,7 @@ These requirements are for the lab. The CDS non-functional requirements for data
 | Catalogue with no products | Valid. The `products.json` of a brand can be `{"products": []}`. | Judgement: a user brand that tests only the authentication and the consent needs no products, and a brand on the Register with no `productBaseUri` has no product reference data endpoints. |
 | Preset brands | `wattle-bank` ("Wattle Bank", the default preset brand), `redgum-bank`, `harbour-bank` and `kestrel-bank`. In the lab, the compose service, the host name, the database and the certificate directory of an instance have the name of its preset. | Judgement: one pattern for the names of each instance, so that a second brand in the lab uses the same pattern. |
 | Register records of the preset brands | The legal entity name is the brand name with "Limited", for example "Wattle Bank Limited". The `websiteUri` is `https://<name>bank.test`, and the sender address of the OTP email is `no-reply@<name>bank.test`. | Judgement: an Australian bank is a public company, and its name ends with "Limited". Each name is shorter than the limit of 36 characters of `legalEntityName` ([CDS: Register API schemas][cds-register-schemas]). |
-| Product data in the conformance suite | The suite gets the products from Get Products, and checks the order, the filters and the details against them. It has no list of the product IDs of a brand. | Judgement: the suite does not depend on the name of a preset brand (see Non-functional requirements), and a change of a catalogue then needs no change of the suite. |
+| Product data in the conformance suite | The suite gets the products from Get Products, and checks the order, the filters and the details against them. It has no list of the product IDs of a brand. | Judgement: the suite does not depend on the name of a preset brand ([a conformance suite that acts as a participant](design/non-functional-requirements.md#dh-0015)), and a change of a catalogue then needs no change of the suite. |
 | Profile of the other preset brands | `all-banks`. With no profile, the lab and CI run only the default preset brand. | Judgement: the lab and CI then need no more memory or time than with one brand. The name says what the profile adds, as the names `openid` and `telemetry` do. |
 | Ports of the other preset brands | `redgum-bank` 828x, `harbour-bank` 838x, `kestrel-bank` 848x, with the last digits of `wattle-bank` (818x) | Judgement: ports 8280 to 8484 are not used in the lab, and one pattern for each instance is the simplest to find. |
 | Databases, users and certificates with no profile | Created in each lab for all four instances | Judgement: the PostgreSQL image runs its initialisation scripts only when the data directory is empty ([PostgreSQL image][postgres-image-init]), so a database that only the profile creates is not there when a lab turns the profile on later. An empty database and three more certificates cost little. The grants of the application role then also do not depend on a service of the profile ([Compose: profiles][compose-profiles]). |

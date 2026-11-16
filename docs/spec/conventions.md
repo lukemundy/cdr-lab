@@ -439,42 +439,40 @@ Text that is not a requirement goes into the overview, or it goes away:
 
 ### Worked example: the data holder
 
-The table maps each `##` heading of `services/dataholder/DESIGN.md` on 2026-11-16 to its place. The words are the words of the heading today, with no Decisions rows. The judgements from the Decisions rows (20,664 words today) add to each area.
+The table maps each `##` heading of the one-file data holder specification to its place in [`services/dataholder/design/`](../../services/dataholder/design/README.md). The judgements from the Decisions rows go to the area of their rules.
 
-| Current heading | Words | Place |
-|---|---|---|
-| Purpose | 57 | Overview: summary |
-| Sources | 72 | Goes away |
-| Scope | 735 | Overview: goals and non-goals |
-| Actors | 136 | Overview: context diagram |
-| Brand | 1,453 | `brand.md` |
-| Product reference data | 538 | `product-reference-data.md`, with Get Products, Get Product Detail, Get Status and Get Outages from APIs |
-| Customers and accounts | 639 | `banking-apis.md`. The rules for user identifiers go to `consumer-authentication.md`. |
-| APIs | 1,965 | Split: each row of the endpoint table goes to the area of its API. Versioning, headers, errors and CORS go to `api-standards.md`. |
-| Authorisation server | 850 | `authorisation-server.md` |
-| Client registration | 1,060 | `client-registration.md` |
-| Registration management | 327 | `client-registration.md` |
-| Authorisation request | 863 | `authorisation-server.md` |
-| Consumer authentication | 1,252 | `consumer-authentication.md` |
-| Consent | 1,509 | `authorisation.md` |
-| Tokens of a consent | 604 | `tokens.md` |
-| Introspection | 169 | `tokens.md` |
-| Data of a consent | 1,478 | `banking-apis.md` |
-| The end of a consent | 1,463 | `authorisation.md` |
-| Register statuses | 558 | `client-registration.md`, because a status changes what a registration can do |
-| Transport security | 277 | `api-standards.md` |
-| Operator interface | 919 | `operator-interface.md` |
-| Operator console | 3,583 | `operator-console.md` |
-| Online bank site | 8,982 | Split by size: `online-bank-site.md` (the web UI) and `online-bank-site-api.md` (the site API, 1,651 words) |
-| Lab-only features | 845 | No area. Each rule goes to the area that it changes. For example, the product load goes to `product-reference-data.md`, and the four preset brands go to `deployment.md`. |
-| Deployment from published artifacts | 754 | `deployment.md` |
-| Non-functional requirements | 650 | `non-functional-requirements.md` |
-| Decisions | 20,664 | Judgements in the area of their rules |
-| Open questions | 997 | Judgements or tickets |
+| Old heading | Place |
+|---|---|
+| Purpose | Overview: summary |
+| Sources | Goes away |
+| Scope | Overview: goals and non-goals |
+| Actors | Overview: context diagram |
+| Brand | `brand.md` |
+| Product reference data | `product-reference-data.md`, with Get Products, Get Product Detail, Get Status and Get Outages from APIs, and the product load from Lab-only features |
+| Customers and accounts | `banking-apis.md`. The rules for user identifiers go to `consumer-authentication.md`. |
+| APIs | Split: each row of the endpoint table goes to the area of its API. Versioning, headers, errors and CORS go to `api-standards.md`. |
+| Authorisation server | `authorisation-server.md` |
+| Client registration | `registration.md`. The glossary term is "registration". |
+| Registration management | `registration.md` |
+| Authorisation request | `authorisation-server.md` |
+| Consumer authentication | `consumer-authentication.md` |
+| Consent | `authorisation.md` |
+| Tokens of a consent | `authorisation-server.md`. The tokens and introspection are too small for an area (step 4). |
+| Introspection | `authorisation-server.md` |
+| Data of a consent | `banking-apis.md` |
+| The end of a consent | `end-of-an-arrangement.md`. It has its own CDS sections, and with `authorisation.md` it can be more than 5,000 words. |
+| Register statuses | `registration.md`, because a status changes what a registration can do |
+| Transport security | `api-standards.md` |
+| Operator interface | `operator-interface.md` |
+| Operator console | Split by interface: `operator-console.md` (the web UI) and `operator-console-api.md` (the console API) |
+| Online bank site | Split by interface and capability: `online-bank-site.md` (the pages), `online-bank-site-sign-in.md`, `online-bank-site-accounts.md`, `consumer-dashboard.md` (its own CDS section) and `online-bank-site-api.md` |
+| Lab-only features | No area. Each rule goes to the area that it changes. For example, the product load goes to `product-reference-data.md`, and the four preset brands go to `deployment.md`. |
+| Deployment from published artifacts | `deployment.md` |
+| Non-functional requirements | `non-functional-requirements.md` |
+| Decisions | Judgements in the area of their rules |
+| Open questions | Judgements or tickets |
 
-The result is 15 area files. The web UI of the online bank site has approximately 7,300 words today, also its non-functional requirements. It can go below the limit when its copied text and repeated reasons go. If it does not, the consumer dashboard (894 words) becomes a separate area.
-
-Some rules of `api-standards.md`, `authorisation-server.md` and `tokens.md` move to `pkg/` library specifications in milestone 2 of the project, because a `pkg/` library implements them ([ADR 0024: Shared rules][adr-0024-shared]).
+The result is 19 area files. Some rules of the APIs, the authorisation server and the tokens are in `pkg/` library specifications, because a `pkg/` library implements them ([ADR 0024: Shared rules][adr-0024-shared]).
 
 ## Verifies comments
 
