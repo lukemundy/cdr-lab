@@ -42,6 +42,7 @@ test("a time with nanoseconds gives a valid datetime", () => {
   expect(renderTime("2026-10-23T14:05:07.123456789Z").dateTime).toBe("2026-10-23T14:05:07.123Z");
 });
 
+// Verifies: UI-0156
 test("a value that is not a time shows as it is, with no time element", async () => {
   const container = render(<LocalTime value="not a time" />);
 
@@ -56,6 +57,7 @@ test("the time has no accessibility violations", async () => {
 });
 
 describe.runIf(zone === "Australia/Perth")("in Australia/Perth", () => {
+  // Verifies: UI-0147, UI-0151, UI-0155
   test("the time shows in local time with its offset from UTC", () => {
     const time = renderTime("2026-10-23T06:05:07Z");
 
@@ -63,6 +65,7 @@ describe.runIf(zone === "Australia/Perth")("in Australia/Perth", () => {
     expect(spokenText(time)).toBe("23 October 2026, 2:05:07 pm UTC plus 8 hours");
   });
 
+  // Verifies: UI-0153
   test("a selection of the time has the visible text only", () => {
     const time = renderTime("2026-10-23T06:05:07Z");
 
@@ -96,6 +99,7 @@ describe.runIf(zone === "Australia/Sydney")("in Australia/Sydney", () => {
   });
 
   // Daylight saving ends on 5 April 2026 at 3:00 am, when the clock goes back to 2:00 am, so 2:30 am occurs two times.
+  // Verifies: UI-0147
   test("the two times of a repeated hour at the end of daylight saving have different offsets", () => {
     const first = renderTime("2026-04-04T15:30:00Z");
     const second = renderTime("2026-04-04T16:30:00Z");
@@ -107,6 +111,7 @@ describe.runIf(zone === "Australia/Sydney")("in Australia/Sydney", () => {
 });
 
 describe.runIf(zone === "UTC")("in UTC", () => {
+  // Verifies: UI-0149
   test("the time shows in UTC with the label UTC", () => {
     const time = renderTime("2026-10-23T06:05:07Z");
 
@@ -122,6 +127,7 @@ describe.runIf(zone === "UTC")("in UTC", () => {
 });
 
 describe.runIf(zone === "America/St_Johns")("in America/St_Johns", () => {
+  // Verifies: UI-0148, UI-0151, UI-0152
   test("a negative offset shows its hours and minutes, and a screen reader says minus", () => {
     const time = renderTime("2026-01-15T12:00:00Z");
 

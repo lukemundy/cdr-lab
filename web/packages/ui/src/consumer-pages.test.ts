@@ -22,7 +22,7 @@ const images = import.meta.glob<string>(
   },
 );
 
-// DESIGN.md (Layout): a consumer UI reflows with no horizontal scroll at 320 CSS px.
+// A consumer UI reflows with no horizontal scroll at 320 CSS px (design/layout.md, UI-0086).
 const narrowWidth = 320;
 
 const baseName = (path: string) =>

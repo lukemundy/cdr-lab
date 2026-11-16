@@ -13,7 +13,7 @@ This area gives the sign-up, the sign-in, the sign-out and the session of the on
 - <a id="dh-2006"></a>**DH-2006** The sign-up page gives an example email address on the reserved domain `.test`. For example, `name@example.test`. ([RFC 6761, section 6.2][rfc6761-test]; [Judgement: no rule for the domain of the email address](#dh-2102))
 - <a id="dh-2007"></a>**DH-2007** The data holder does not refuse an email address on a domain other than `.test`. ([Judgement: no rule for the domain of the email address](#dh-2102))
 - <a id="dh-2008"></a>**DH-2008** When the data holder refuses a value of a sign-up, the page shows the error at its field and in an error summary. ([WCAG 2.2, SC 3.3.1][wcag-3-3-1])
-- <a id="dh-2009"></a>**DH-2009** The text of each error of a sign-up is in plain language, and the site API gives it. For example, the text for a last name that is not valid is "Enter a last name of 1 to 100 characters". ([design system DESIGN.md: Content][ui-content]; [the plain-language detail of a field error](online-bank-site-api.md#dh-1736))
+- <a id="dh-2009"></a>**DH-2009** The text of each error of a sign-up is in plain language, and the site API gives it. For example, the text for a last name that is not valid is "Enter a last name of 1 to 100 characters". ([plain language in a consumer UI](../../../web/packages/ui/design/content.md#ui-0142); [the plain-language detail of a field error](online-bank-site-api.md#dh-1736))
 - <a id="dh-2010"></a>**DH-2010** When a different customer of the brand has the email address, the page shows the refusal at the email address. The text says that the address is in use, and that the consumer can sign in or give a different address. ([the uniqueness of the email address](operator-interface.md#dh-0736))
 - <a id="dh-2011"></a>**DH-2011** A successful sign-up starts a session for the new customer. ([Judgement: a session after a sign-up](#dh-2103))
 - <a id="dh-2012"></a>**DH-2012** After a successful sign-up, the site shows the new customer number on a page of its own, with a copy button. ([Judgement: a session after a sign-up](#dh-2103))
@@ -170,7 +170,7 @@ The site is a web UI. The [web UI library specification](../../../pkg/platform/c
 ### <a id="dh-2110"></a>DH-2110 CSRF protection by the origin check
 
 - Kind: choice
-- Basis: Step 3.2. Fetch Metadata is the primary protection against CSRF for modern browsers, with the check of `Origin` as the fallback ([OWASP CSRF Prevention Cheat Sheet][owasp-csrf]). [Go: CrossOriginProtection][go-crossoriginprotection] does both, and the design system supports modern browsers only ([design system DESIGN.md][ui-design]).
+- Basis: Step 3.2. Fetch Metadata is the primary protection against CSRF for modern browsers, with the check of `Origin` as the fallback ([OWASP CSRF Prevention Cheat Sheet][owasp-csrf]). [Go: CrossOriginProtection][go-crossoriginprotection] does both, and the design system supports modern browsers only ([the supported browsers](../../../web/packages/ui/design/layout.md#ui-0096)).
 - Reason: The check also applies to the sign-in, so login CSRF needs no session before the sign-in. A different lab port is a different origin, so the check also refuses a change from a different lab UI.
 
 ### <a id="dh-2111"></a>DH-2111 The separation of the sign-in from the CDR authentication
@@ -233,8 +233,6 @@ The site is a web UI. The [web UI library specification](../../../pkg/platform/c
 [rfc6265bis-host]: https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-rfc6265bis#section-4.1.3.2
 [rfc6761-test]: https://www.rfc-editor.org/rfc/rfc6761#section-6.2
 [rfc6797-b]: https://www.rfc-editor.org/rfc/rfc6797#appendix-B
-[ui-content]: ../../../web/packages/ui/DESIGN.md#content
-[ui-design]: ../../../web/packages/ui/DESIGN.md
 [wcag-1-3-5]: https://www.w3.org/TR/WCAG22/#identify-input-purpose
 [wcag-2-2-1]: https://www.w3.org/TR/WCAG22/#timing-adjustable
 [wcag-3-3-1]: https://www.w3.org/TR/WCAG22/#error-identification

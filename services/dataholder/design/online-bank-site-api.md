@@ -118,7 +118,7 @@ This area gives the API of the online bank site. The site API is JSON over HTTP 
 ### <a id="dh-1781"></a>DH-1781 A plain-language detail for each field error
 
 - Kind: choice
-- Basis: Step 3.2. The `detail` of the operator interface names the fields in camelCase, which a consumer does not read ([design system DESIGN.md: Content][ui-content]).
+- Basis: Step 3.2. The `detail` of the operator interface names the fields in camelCase, which a consumer does not read ([plain language in a consumer UI](../../../web/packages/ui/design/content.md#ui-0142)).
 - Reason: The site API gives the text, so the UI has no copy of the rules, as in the operator console.
 
 ### <a id="dh-1785"></a>DH-1785 One source of the products
@@ -209,7 +209,6 @@ This area gives the API of the online bank site. The site API is JSON over HTTP 
 [adr-0014]: ../../../docs/adr/0014-web-uis-as-embedded-react-single-page-applications.md
 [adr-0017]: ../../../docs/adr/0017-console-api-contracts-in-openapi.md
 [adr-0019]: ../../../docs/adr/0019-limit-the-conformance-suite-to-cdr-conformance.md
-[ui-content]: ../../../web/packages/ui/DESIGN.md#content
 [cdr-rules]: https://www.legislation.gov.au/F2020L00094/latest/text
 [cds-arrangement-id]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-arrangement-id
 [cds-common-field-types]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#common-field-types

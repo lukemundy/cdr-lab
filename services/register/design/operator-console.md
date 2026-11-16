@@ -81,8 +81,8 @@ The table gives the text and the fields of each event type in the history.
 
 ## Presentation
 
-- <a id="reg-1048"></a>**REG-1048** The console is for desktop browsers. It is usable at a viewport width of 1280 CSS px and more. ([Judgement: web UIs that the service embeds (ADR 0014)][adr-0014])
-- <a id="reg-1049"></a>**REG-1049** The console has the shell of a console of the design system, with the neutral lab brand for each role and the compact density. ([design system DESIGN.md: Brands][ui-brands])
+- <a id="reg-1048"></a>**REG-1048** The console is for desktop browsers, with the minimum width of a console of the design system. ([the minimum width of a console](../../../web/packages/ui/design/layout.md#ui-0070); [Judgement: web UIs that the service embeds (ADR 0014)][adr-0014])
+- <a id="reg-1049"></a>**REG-1049** The console has the shell of a console of the design system, with the lab brand for each role and the compact density. ([the lab brand for each role that a participant brand does not give](../../../web/packages/ui/design/tokens-and-brands.md#ui-0034); [the compact density of a console](../../../web/packages/ui/design/tokens-and-brands.md#ui-0028))
 - <a id="reg-1050"></a>**REG-1050** The side navigation marks the section of each page as current, also when the URL of the page is not under the URL of the section. For example, each form of a data recipient, a brand or a software product marks "Data recipients". ([Judgement: the current section in the side navigation](#reg-1087))
 - <a id="reg-1051"></a>**REG-1051** The header and the title of the browser tab give the name "CDR Register". ([Judgement: the name "CDR Register"](#reg-1088))
 - <a id="reg-1052"></a>**REG-1052** The filter, the sort and the page of a list are in the URL. For example, a reload of a list shows the same filter, sort and page. ([Judgement: the view in the URL](#reg-1089))
@@ -90,10 +90,10 @@ The table gives the text and the fields of each event type in the history.
 - <a id="reg-1054"></a>**REG-1054** A search replaces the history entry of the list. A filter, a sort and a page add a history entry. ([Judgement: the browser history of a list](#reg-1090))
 - <a id="reg-1055"></a>**REG-1055** The detail and the history of a participant each have their own URL. The page of the history is in the URL. ([Judgement: the detail and the history on two pages](#reg-1091))
 - <a id="reg-1056"></a>**REG-1056** The CDR certificates page has its own URL. The page of the list of the revocations is in the URL. ([Judgement: the view in the URL](#reg-1089))
-- <a id="reg-1057"></a>**REG-1057** The console shows each time in the time zone of the browser, with its offset from UTC. For example, "2:05 pm UTC+8". ([design system DESIGN.md: Content][ui-content]; [Judgement: the time zone of the browser](#reg-1092))
+- <a id="reg-1057"></a>**REG-1057** The console shows each time in the time zone of the browser, as the design system gives it. ([the time zone and the offset of a time](../../../web/packages/ui/design/content.md#ui-0147); [Judgement: the time zone of the browser](#reg-1092))
 - <a id="reg-1058"></a>**REG-1058** The console loads no image from a participant. It shows a logo URI as text. ([OWASP ASVS 5.0, V3.6.1][asvs-v3]; [the Content Security Policy of the web UI](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0007))
 - <a id="reg-1059"></a>**REG-1059** The console shows each URI of a participant as text with a copy button, not as a link. For example, a redirect URI has a copy button. ([Judgement: the URIs of a participant as text](#reg-1093))
-- <a id="reg-1060"></a>**REG-1060** The console has the accessibility level of an operator console in the design system: the automated checks pass, with no other target. ([design system DESIGN.md: Accessibility][ui-accessibility])
+- <a id="reg-1060"></a>**REG-1060** The console has the accessibility level of an operator console. ([the accessibility level of an operator console](../../../web/packages/ui/design/accessibility.md#ui-0111))
 
 ## Listener and security
 
@@ -159,7 +159,7 @@ The console is a web UI. The [web UI library](../../../pkg/platform/consolehttp/
 ### <a id="reg-1087"></a>REG-1087 The current section in the side navigation
 
 - Kind: choice
-- Basis: Step 3.3. The design system gives the side navigation, but not the section of a form ([design system DESIGN.md: Layout][ui-layout]).
+- Basis: Step 3.3. The design system gives the side navigation, but not the section of a form ([the structure of a console](../../../web/packages/ui/design/layout.md#ui-0071)).
 - Reason: The lab operator sees where they are in the console. A form is part of the section of its record.
 
 ### <a id="reg-1088"></a>REG-1088 The name "CDR Register"
@@ -220,8 +220,4 @@ The console is a web UI. The [web UI library](../../../pkg/platform/consolehttp/
 [cds-nfrs]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#non-functional-requirements
 [fetch-metadata]: https://w3c.github.io/webappsec-fetch-metadata/
 [asvs-v3]: https://github.com/OWASP/ASVS/blob/v5.0.0_release/5.0/en/0x12-V3-Web-Frontend-Security.md
-[ui-brands]: ../../../web/packages/ui/DESIGN.md#brands
-[ui-layout]: ../../../web/packages/ui/DESIGN.md#layout
 [ui-components]: ../../../web/packages/ui/DESIGN.md#components
-[ui-content]: ../../../web/packages/ui/DESIGN.md#content
-[ui-accessibility]: ../../../web/packages/ui/DESIGN.md#accessibility

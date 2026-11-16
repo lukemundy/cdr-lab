@@ -25,7 +25,7 @@ export default defineConfig({
   ],
   lint: {
     rules: {
-      // DESIGN.md (Decisions): colour values are in OKLCH.
+      // Colour values are in OKLCH (web/packages/ui/design/tokens-and-brands.md, UI-0012).
       "core/colorspace": ["error", { colorSpace: "oklch" }],
       // A colour outside sRGB changes in the browser, so its contrast test is not valid.
       "core/max-gamut": ["error", { gamut: "srgb" }],

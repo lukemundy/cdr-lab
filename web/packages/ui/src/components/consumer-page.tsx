@@ -23,7 +23,7 @@ export type ConsumerShellProps = {
 };
 
 // The shell has no "Secure" label, no hero and no step: those are the parts of the CDR authentication pages only. A
-// consumer UI has the comfortable density (DESIGN.md, Tokens).
+// consumer UI has the comfortable density (design/tokens-and-brands.md, UI-0029).
 export function ConsumerShell({
   brandName,
   logo,

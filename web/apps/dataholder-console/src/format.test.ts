@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 
 import { formatAmount, formatBsb, formatDate } from "./format";
 
-// Verifies: DH-1477
+// Verifies: DH-1477, UI-0157
 test("an amount has its sign, the dollar sign, the group separators and 2 decimal digits", () => {
   expect(formatAmount("2500.00")).toBe("$2,500.00");
   expect(formatAmount("-4.50")).toBe("-$4.50");

@@ -94,7 +94,7 @@ test("the footer has no link", () => {
   expect(document.querySelectorAll("footer a")).toHaveLength(0);
 });
 
-// DESIGN.md (Layout): in a consumer UI, each control is 44 by 44 CSS px or more.
+// Verifies: UI-0093
 test("each link of the shell and each button link is 44 CSS px high or more", () => {
   shell();
 

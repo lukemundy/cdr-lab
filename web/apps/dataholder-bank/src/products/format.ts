@@ -2,8 +2,8 @@ import type { components } from "../api/schema.gen";
 
 type Schemas = components["schemas"];
 
-// The formats of CDS values for a consumer (CDS: Common Field Types), in Australian English (packages/ui/DESIGN.md,
-// Content). A value that is not in its format shows as it is, so that the page never hides data.
+// The formats of CDS values for a consumer (CDS: Common Field Types), in Australian English
+// (packages/ui/design/content.md). A value that is not in its format shows as it is, so that the page never hides data.
 
 const locale = "en-AU";
 

@@ -35,24 +35,24 @@ This area gives the lab-only online bank site of the brand: its pages and their 
 - <a id="dh-1816"></a>**DH-1816** When `isTailored` is true, the detail of the product says that the rates and the fees can be different for the consumer. ([CDS: BankingProductDetailV7][cds-schema-product-detail])
 - <a id="dh-1817"></a>**DH-1817** When a product is not current, or does not exist, its detail is the "not found" page of the site. ([Judgement: only current products on the site](online-bank-site-api.md#dh-1786))
 - <a id="dh-1818"></a>**DH-1818** The site shows the same products and the same values as Get Products and Get Product Detail of the brand at the same time. ([the products of the site API](online-bank-site-api.md#dh-1729); [Judgement: one source of the products](online-bank-site-api.md#dh-1785))
-- <a id="dh-1819"></a>**DH-1819** The site shows a label in plain language for each value of a CDS enumeration. The label gives the meaning that the CDS gives for the value. For example, the site shows a label for `TRANS_AND_SAVINGS_ACCOUNTS` and for `MONTHLY_ACCOUNT_FEE`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [CDS: Product Categories][cds-product-categories]; [design system: Content][ui-content]; [Judgement: the CDS enumerations in the OpenAPI document](online-bank-site-api.md#dh-1787))
-- <a id="dh-1820"></a>**DH-1820** The site shows each RateString as a percentage. For example, `0.0125` shows as "1.25%". ([CDS: Common Field Types][cds-common-field-types]; [design system: Content][ui-content])
-- <a id="dh-1821"></a>**DH-1821** The site shows each AmountString as an amount. ([CDS: Common Field Types][cds-common-field-types]; [design system: Content][ui-content])
-- <a id="dh-1822"></a>**DH-1822** The site shows each ISO 8601 duration in words. For example, `P1M` shows as "each month" for an `applicationFrequency`, and `P55D` shows as "55 days". ([CDS: Common Field Types][cds-common-field-types]; [design system: Content][ui-content])
+- <a id="dh-1819"></a>**DH-1819** The site shows a label in plain language for each value of a CDS enumeration. The label gives the meaning that the CDS gives for the value. For example, the site shows a label for `TRANS_AND_SAVINGS_ACCOUNTS` and for `MONTHLY_ACCOUNT_FEE`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [CDS: Product Categories][cds-product-categories]; [plain language in a consumer UI](../../../web/packages/ui/design/content.md#ui-0142); [Judgement: the CDS enumerations in the OpenAPI document](online-bank-site-api.md#dh-1787))
+- <a id="dh-1820"></a>**DH-1820** The site shows each RateString as a percentage. For example, `0.0125` shows as "1.25%". ([CDS: Common Field Types][cds-common-field-types]; [the formats with `Intl` and `en-AU`](../../../web/packages/ui/design/content.md#ui-0160))
+- <a id="dh-1821"></a>**DH-1821** The site shows each AmountString as an amount. ([CDS: Common Field Types][cds-common-field-types]; [the format of an amount](../../../web/packages/ui/design/content.md#ui-0157))
+- <a id="dh-1822"></a>**DH-1822** The site shows each ISO 8601 duration in words. For example, `P1M` shows as "each month" for an `applicationFrequency`, and `P55D` shows as "55 days". ([CDS: Common Field Types][cds-common-field-types]; [plain language in a consumer UI](../../../web/packages/ui/design/content.md#ui-0142))
 - <a id="dh-1823"></a>**DH-1823** The site shows an `additionalValue` in the format that the CDS gives for its type. When the type gives no format, the site shows the value as text. ([CDS: BankingProductDetailV7][cds-schema-product-detail])
 - <a id="dh-1824"></a>**DH-1824** When the site does not know a path, it shows its "not found" page. ([Judgement: routes in the browser](#dh-1886))
 
 ## Presentation
 
-- <a id="dh-1825"></a>**DH-1825** The site uses the tokens and the components of the design system, with the colours, the fonts and the radius of the brand. ([design system: Brands][ui-brands]; [Judgement: one design system (ADR 0016)][adr-0016])
-- <a id="dh-1826"></a>**DH-1826** The site has a shell of its own, with a header, a main area and a footer. It does not use the shell of the operator console. ([design system: Brands][ui-brands])
-- <a id="dh-1827"></a>**DH-1827** Headings use the heading font of the brand. The other text uses the body font. ([design system: Brands][ui-brands])
+- <a id="dh-1825"></a>**DH-1825** The site uses the tokens and the components of the design system, with the colours, the fonts and the radius of the brand. ([what a brand can change](../../../web/packages/ui/design/tokens-and-brands.md#ui-0031); [Judgement: one design system (ADR 0016)][adr-0016])
+- <a id="dh-1826"></a>**DH-1826** The site has a shell of its own, with a header, a main area and a footer. It does not use the shell of the operator console. ([the structure of a console](../../../web/packages/ui/design/layout.md#ui-0071))
+- <a id="dh-1827"></a>**DH-1827** Headings use the heading font of the brand. The other text uses the body font. ([what a brand can change](../../../web/packages/ui/design/tokens-and-brands.md#ui-0031))
 - <a id="dh-1828"></a>**DH-1828** Each page shows the logo of the brand on the brand colour, with the brand name as its text alternative. ([WCAG 2.2, SC 1.1.1][wcag-1-1-1])
-- <a id="dh-1829"></a>**DH-1829** Each page has a link to the product list. ([design system: Brands][ui-brands])
+- <a id="dh-1829"></a>**DH-1829** Each page has a link to the product list. ([Judgement: what a brand can change](../../../web/packages/ui/design/tokens-and-brands.md#ui-0059))
 - <a id="dh-1830"></a>**DH-1830** The pages of the site have no "Secure" label, no hero with the data recipient and no step indicator. ([Judgement: a site that does not look like the consumer pages](#dh-1890); [Judgement: the separation of the sign-in from the CDR authentication](online-bank-site-sign-in.md#dh-2111))
 - <a id="dh-1831"></a>**DH-1831** The title of each page is the name of the page, then "<brand name> online banking". For example, "Data sharing - <brand name> online banking". ([Judgement: a site that does not look like the consumer pages](#dh-1890))
 - <a id="dh-1832"></a>**DH-1832** Until the site API gives the brand, and when it fails, the pages say "Bank" in place of the brand name. ([Judgement: "Bank" before the brand name is known](#dh-1893))
-- <a id="dh-1833"></a>**DH-1833** The site shows dates and amounts with the rules of the design system: Australian English and the locale `en-AU`. ([design system: Content][ui-content])
+- <a id="dh-1833"></a>**DH-1833** The site shows dates and amounts with the rules of the design system: Australian English and the locale `en-AU`. ([the formats with `Intl` and `en-AU`](../../../web/packages/ui/design/content.md#ui-0160))
 
 ## Layouts
 
@@ -89,10 +89,10 @@ Each brand has one layout. The table gives the shapes of each layout.
 
 ## Accessibility
 
-- <a id="dh-1853"></a>**DH-1853** The site meets WCAG 2.2 Level AA, with the brand of each preset brand. ([Judgement: one design system (ADR 0016)][adr-0016]; [design system: Accessibility][ui-accessibility])
-- <a id="dh-1854"></a>**DH-1854** The automated accessibility checks pass on each page, with the brand of each preset brand. ([Judgement: one design system (ADR 0016)][adr-0016]; [design system: Accessibility][ui-accessibility])
-- <a id="dh-1855"></a>**DH-1855** Each page is designed for a viewport width of 360 CSS px. ([design system: Layout][ui-layout])
-- <a id="dh-1856"></a>**DH-1856** Each page is usable at a viewport width of 320 CSS px, with no horizontal scroll. ([WCAG 2.2, SC 1.4.10][wcag-1-4-10]; [design system: Layout][ui-layout])
+- <a id="dh-1853"></a>**DH-1853** The site meets WCAG 2.2 Level AA, with the brand of each preset brand. ([Judgement: one design system (ADR 0016)][adr-0016]; [the accessibility level of a consumer UI](../../../web/packages/ui/design/accessibility.md#ui-0110))
+- <a id="dh-1854"></a>**DH-1854** The automated accessibility checks pass on each page, with the brand of each preset brand. ([Judgement: one design system (ADR 0016)][adr-0016]; [each page passes the automated checks](../../../web/packages/ui/design/accessibility.md#ui-0114))
+- <a id="dh-1855"></a>**DH-1855** Each page is designed for a viewport width of 360 CSS px. ([the design width of a consumer UI](../../../web/packages/ui/design/layout.md#ui-0085))
+- <a id="dh-1856"></a>**DH-1856** Each page is usable at a viewport width of 320 CSS px, with no horizontal scroll. ([WCAG 2.2, SC 1.4.10][wcag-1-4-10]; [the reflow of a consumer UI](../../../web/packages/ui/design/layout.md#ui-0086))
 
 ## Non-functional requirements
 
@@ -217,11 +217,7 @@ The site API also obeys [route patterns in place of raw paths](../../../pkg/plat
 [cds-common-field-types]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#common-field-types
 [cds-product-categories]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#product-categories
 [cds-cx-authentication]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#consumer-experience_common-authentication-standards
-[ui-brands]: ../../../web/packages/ui/DESIGN.md#brands
 [ui-consumer-pages]: ../../../web/packages/ui/DESIGN.md#consumer-pages
-[ui-content]: ../../../web/packages/ui/DESIGN.md#content
-[ui-accessibility]: ../../../web/packages/ui/DESIGN.md#accessibility
-[ui-layout]: ../../../web/packages/ui/DESIGN.md#layout
 [wcag-1-1-1]: https://www.w3.org/TR/WCAG22/#non-text-content
 [wcag-1-4-3]: https://www.w3.org/TR/WCAG22/#contrast-minimum
 [wcag-1-4-10]: https://www.w3.org/TR/WCAG22/#reflow

@@ -1,7 +1,7 @@
 import axe from "axe-core";
 import { expect } from "vitest";
 
-// DESIGN.md, Accessibility.
+// The tags of the automated checks (design/accessibility.md, UI-0112).
 const axeTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
 // A fade gives a lower contrast while it runs, so axe waits for each animation that ends, which a busy spinner does not.
@@ -29,7 +29,7 @@ export function expectVisibleFocus(element: Element): void {
   expect(Number.parseFloat(style.outlineWidth)).toBeGreaterThanOrEqual(2);
 }
 
-// DESIGN.md, Layout: in a console, each control is 24 by 24 CSS px or more.
+// In a console, each control is 24 by 24 CSS px or more (design/layout.md, UI-0094).
 export function expectTargetSize(element: Element): void {
   const { width, height } = element.getBoundingClientRect();
   expect(width).toBeGreaterThanOrEqual(24);

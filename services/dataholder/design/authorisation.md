@@ -87,7 +87,7 @@ These rules apply to each page of the authentication and of the authorisation. T
 - <a id="dh-0846"></a>**DH-0846** The data holder serves the stylesheet at `/static/consumer.css` and the fonts at `/static/fonts/` on the public listener, with no authentication. ([Judgement: consumer pages with no script and no content from other hosts](#dh-0861); [the cache rule of a fixed file](../../../pkg/platform/asset/DESIGN.md#asset-0001))
 - <a id="dh-0847"></a>**DH-0847** The data holder serves the logo, the mark and the styles of the brand on the public listener, with no authentication. They contain no CDR data. A browser [checks each file again before it uses it](../../../pkg/platform/asset/DESIGN.md#asset-0001). ([Judgement: consumer pages with no script and no content from other hosts](#dh-0861))
 - <a id="dh-2090"></a>**DH-2090** The public listener serves the styles of the brand at `/brand/styles.css`, the logo at `/brand/logo.svg` and the mark at `/brand/mark.svg`. ([Judgement: the paths of the brand files](#dh-2120))
-- <a id="dh-2091"></a>**DH-2091** The stylesheet of the brand sets the custom properties of the design system under the selector `:root:root`. Thus the sequence of the stylesheets on a page has no effect. ([design system DESIGN.md: Brands][ui-brands]; [Judgement: the paths of the brand files](#dh-2120))
+- <a id="dh-2091"></a>**DH-2091** The stylesheet of the brand sets the custom properties of the design system under the selector `:root:root`. Thus the sequence of the stylesheets on a page has no effect. ([a brand is a set of values for the brand modifier](../../../web/packages/ui/design/tokens-and-brands.md#ui-0030); [Judgement: the paths of the brand files](#dh-2120))
 - <a id="dh-0848"></a>**DH-0848** A response with an SVG file of the brand does not permit scripts, also when a browser opens its URL directly. ([MDN: CSP sandbox][mdn-csp-sandbox]; [Judgement: no script in an SVG file of the brand](#dh-0863))
 
 ## Judgements
@@ -205,6 +205,5 @@ These rules apply to each page of the authentication and of the authorisation. T
 [support-closed-accounts]: https://cdr-support.zendesk.com/hc/en-us/articles/14519397304079
 [support-dashboards]: https://cdr-support.zendesk.com/hc/en-us/articles/6140622825231
 [support-error-scenarios]: https://cdr-support.zendesk.com/hc/en-us/articles/5729181240591
-[ui-brands]: ../../../web/packages/ui/DESIGN.md#brands
 [wcag-1-1-1]: https://www.w3.org/TR/WCAG22/#non-text-content
 [wcag-1-4-10]: https://www.w3.org/TR/WCAG22/#reflow

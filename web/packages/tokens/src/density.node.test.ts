@@ -3,7 +3,7 @@ import { expect, test } from "vitest";
 
 const tokensCSS = await readFile(new URL("../dist/tokens.css", import.meta.url), "utf8");
 
-// DESIGN.md (Tokens): a density changes only spacing, control heights and table row heights.
+// Verifies: UI-0027
 test("the comfortable density sets only the density tokens, under its own selector", () => {
   const block = /\[data-density="comfortable"\] \{([^}]*)\}/.exec(tokensCSS)?.[1] ?? "";
   const names = [...block.matchAll(/(--ds-[\w-]+):/g)].map((m) => m[1] ?? "");

@@ -43,7 +43,7 @@ This area gives the actions of the operator console, the rules for each action, 
 - <a id="reg-1227"></a>**REG-1227** The software product card has the button "Issue certificate" after "Register certificate", in its action row. ([design system DESIGN.md: Components][ui-components]; [Judgement: the place of the certificate actions](#reg-1286))
 - <a id="reg-1228"></a>**REG-1228** The data holder brand card has the button "Issue certificate" after its status actions, in its action row. ([design system DESIGN.md: Components][ui-components]; [Judgement: the place of the certificate actions](#reg-1286))
 - <a id="reg-1229"></a>**REG-1229** The console shows each "Issue certificate" button only when the console API permits the action. For example, a REMOVED software product has no button. ([the permitted certificate actions](operator-console-api.md#reg-1136); [the server certificate actions of a brand](operator-console-api.md#reg-1137))
-- <a id="reg-1230"></a>**REG-1230** The side navigation has the section "CDR certificates" after "Signing keys", with its own page. ([design system DESIGN.md: Layout][ui-layout]; [Judgement: the place of the certificate actions](#reg-1286))
+- <a id="reg-1230"></a>**REG-1230** The side navigation has the section "CDR certificates" after "Signing keys", with its own page. ([the structure of a console](../../../web/packages/ui/design/layout.md#ui-0071); [Judgement: the place of the certificate actions](#reg-1286))
 - <a id="reg-1231"></a>**REG-1231** The CDR certificates page shows the CDR CA bundle with a "Save as file" button, then a "Revoke certificate" button in an action row, then the list of the revocations. ([design system DESIGN.md: Components][ui-components]; [Judgement: the place of the certificate actions](#reg-1286))
 - <a id="reg-1232"></a>**REG-1232** An issue is a dialog with one PEM CSR field and a CSR file input. The field and the input have the rules of the registration of a client certificate. ([the request body of an issue](certificate-management.md#reg-0602))
 - <a id="reg-1233"></a>**REG-1233** The help text of the CSR field says that the Register needs only the CSR, and never the private key. ([ACCC CPS, section 3.2.1][accc-cps]; [the Register never gets the private key](certificate-management.md#reg-0603))
@@ -154,7 +154,7 @@ This area gives the actions of the operator console, the rules for each action, 
 
 - Kind: choice
 - Basis: Step 3.3. The Register does not keep the certificate, so a second request cannot get it again ([the Register keeps only the thumbprint](certificate-management.md#reg-0614)).
-- Reason: One way to save is the least complex for the three files. An ID is unique and has only characters that are safe in a file name, but a name can have other characters. The design system button and text area do the work, so the design system gets no new component for one UI ([design system DESIGN.md: Scope][ui-scope]).
+- Reason: One way to save is the least complex for the three files. An ID is unique and has only characters that are safe in a file name, but a name can have other characters. The design system button and text area do the work, so the design system gets no new component for one UI ([design system overview](../../../web/packages/ui/design/README.md)).
 
 ### <a id="reg-1291"></a>REG-1291 The errors of a CSR and of a revocation
 
@@ -186,7 +186,5 @@ This area gives the actions of the operator console, the rules for each action, 
 [apg-dialog]: https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
 [html-download]: https://html.spec.whatwg.org/multipage/links.html#downloading-resources
 [rfc9110-idempotent]: https://www.rfc-editor.org/rfc/rfc9110#name-idempotent-methods
-[ui-scope]: ../../../web/packages/ui/DESIGN.md#scope
-[ui-layout]: ../../../web/packages/ui/DESIGN.md#layout
 [ui-components]: ../../../web/packages/ui/DESIGN.md#components
 [ui-decisions]: ../../../web/packages/ui/DESIGN.md#decisions
