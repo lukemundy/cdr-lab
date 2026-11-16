@@ -20,8 +20,6 @@ const (
 		"or the data holder has no brand with this ID."
 	badChangeBody = "The request body must be a JSON object with only the version of the participant, " +
 		"an integer of 1 or more, and the fields of the change."
-	// The console API OpenAPI document defines this problem type with this URI.
-	fieldErrorsType = "https://github.com/lukemundy/cdr-lab/blob/main/services/register/DESIGN.md#console-api"
 )
 
 // A change request embeds versioned next to the fields of the change.
@@ -165,5 +163,5 @@ func writeRefusedValues(w http.ResponseWriter, status int, recordID string, err 
 		messages = append(messages, o.Error())
 	}
 
-	problem.WriteFieldErrors(w, fieldErrorsType, status, strings.Join(messages, "\n"), errs)
+	problem.WriteFieldErrors(w, status, strings.Join(messages, "\n"), errs)
 }

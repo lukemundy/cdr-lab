@@ -24,9 +24,7 @@ type Customers interface {
 }
 
 const (
-	designURL        = "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md"
-	fieldErrorsType  = designURL + "#site-api"
-	sessionEndedType = designURL + "#session"
+	sessionEndedType = "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#session"
 	// A sign-up, a sign-in or an open is a few hundred bytes.
 	maxBodyBytes = 4 << 10
 	notSignedIn  = "We could not sign you in. Check your email address or customer number."
@@ -202,7 +200,7 @@ var fieldTexts = map[string]string{
 
 func writeSignUpError(w http.ResponseWriter, r *http.Request, err error) {
 	if errors.Is(err, app.ErrEmailAddressUsed) {
-		problem.WriteFieldErrors(w, fieldErrorsType, http.StatusConflict, "", []problem.FieldError{{
+		problem.WriteFieldErrors(w, http.StatusConflict, "", []problem.FieldError{{
 			Pointer: problem.FieldPointer("emailAddress"), Detail: emailInUse,
 		}})
 
@@ -225,7 +223,7 @@ func writeSignUpError(w http.ResponseWriter, r *http.Request, err error) {
 		errs = append(errs, problem.FieldError{Pointer: problem.FieldPointer(f.Field), Detail: text})
 	}
 
-	problem.WriteFieldErrors(w, fieldErrorsType, http.StatusBadRequest, "", errs)
+	problem.WriteFieldErrors(w, http.StatusBadRequest, "", errs)
 }
 
 // signInRequest has no password: the UI does not send it, and a body with a password field is not valid.
@@ -250,7 +248,7 @@ func signIn(customers Customers, s sessions) http.Handler {
 
 		record, err := customers.Identify(r.Context(), request.Identifier)
 		if errors.Is(err, app.ErrCustomerNotFound) {
-			problem.WriteFieldErrors(w, fieldErrorsType, http.StatusBadRequest, notSignedIn, []problem.FieldError{{
+			problem.WriteFieldErrors(w, http.StatusBadRequest, notSignedIn, []problem.FieldError{{
 				Pointer: problem.FieldPointer("identifier"), Detail: notSignedIn,
 			}})
 

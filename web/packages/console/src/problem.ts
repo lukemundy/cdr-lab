@@ -1,9 +1,11 @@
 import type { FieldErrorItem, FormRefusal } from "@cdr-lab/ui/form";
 import type { Problem } from "@cdr-lab/ui/states";
 
-// The API document of each service defines its own problem type for field errors.
+export const fieldErrorsType =
+  "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002";
+
 export type FieldErrorsProblem = {
-  type: string;
+  type: typeof fieldErrorsType;
   title: string;
   status: number;
   detail: string;
@@ -12,7 +14,6 @@ export type FieldErrorsProblem = {
 
 export function hasFieldErrors(
   problem: Problem | FieldErrorsProblem,
-  fieldErrorsType: string,
 ): problem is FieldErrorsProblem {
   return "type" in problem && problem.type === fieldErrorsType;
 }
@@ -22,11 +23,11 @@ export class ProblemError extends Error {
   readonly status: number;
   readonly fieldErrors: readonly FieldErrorItem[];
 
-  constructor(problem: Problem | FieldErrorsProblem, status: number, fieldErrorsType: string) {
+  constructor(problem: Problem | FieldErrorsProblem, status: number) {
     super(problem.title);
     this.problem = problem;
     this.status = status;
-    this.fieldErrors = hasFieldErrors(problem, fieldErrorsType) ? problem.errors : [];
+    this.fieldErrors = hasFieldErrors(problem) ? problem.errors : [];
   }
 }
 

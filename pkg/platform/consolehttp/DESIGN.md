@@ -25,9 +25,9 @@ flowchart LR
 
 | Library | Specification |
 |---|---|
-| `pkg/platform/hostallowlist` | None. |
+| `pkg/platform/hostallowlist` | [Host allowlist library](../hostallowlist/DESIGN.md) |
 | `pkg/platform/httproute` | None. |
-| `pkg/platform/problem` | None. |
+| `pkg/platform/problem` | [Problem details library](../problem/DESIGN.md) |
 
 ## Goals
 
@@ -38,8 +38,8 @@ flowchart LR
 ## Non-goals
 
 - TLS, a login and cookies. The specification of each service gives them. For example, the operator consoles use plain HTTP, and the online bank site uses TLS and a session cookie.
-- The format of the values of the `Host` allowlist, and their comparison. The specification of each service gives them.
-- The format of a problem details body.
+- The format of the values of the `Host` allowlist, and their comparison. The [Host allowlist library](../hostallowlist/DESIGN.md) gives them.
+- The format of a problem details body. The [problem details library](../problem/DESIGN.md) gives it.
 - The operations of each API, the total of a list and the other query parameters. The specification of each service gives them.
 - The brand files that a service serves on the listener.
 

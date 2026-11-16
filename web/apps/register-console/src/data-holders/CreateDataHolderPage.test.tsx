@@ -48,7 +48,7 @@ function serveCreate(...results: Result[]) {
 const idNotUnique = "legalEntityId is not unique: a different record has it";
 
 const refusal = {
-  type: "https://github.com/lukemundy/cdr-lab/blob/main/services/register/DESIGN.md#console-api",
+  type: "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002",
   title: "Values in the request are not valid",
   status: 409,
   detail: "One or more values in the request are not valid.",

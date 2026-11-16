@@ -20,7 +20,7 @@ const cdrPages = import.meta.glob<string>(
 
 function fieldErrors(errors: { pointer: string; detail: string }[], status = 400) {
   return {
-    type: "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#site-api" as const,
+    type: "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002" as const,
     title: "Values in the request are not valid" as const,
     status,
     detail: "One or more values in the request are not valid.",

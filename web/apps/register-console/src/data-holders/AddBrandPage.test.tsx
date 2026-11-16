@@ -43,7 +43,7 @@ function serve(result: Result = { status: 201 }) {
 }
 
 const fieldErrorsType =
-  "https://github.com/lukemundy/cdr-lab/blob/main/services/register/DESIGN.md#console-api";
+  "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002";
 
 const field = (name: string) => page.getByRole("textbox", { name, exact: true });
 const status = () => page.getByRole("combobox", { name: "Status" });

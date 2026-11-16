@@ -499,7 +499,7 @@ export interface components {
         /** @description RFC 9457 problem details for values that the data holder refuses. */
         FieldErrorsProblem: {
             /** @enum {string} */
-            type: "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#site-api";
+            type: "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002";
             /** @enum {string} */
             title: "Values in the request are not valid";
             status: number;
@@ -953,5 +953,5 @@ export const transactionStatusValues: ReadonlyArray<FlattenedDeepRequired<compon
 export const problemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["Problem"]["type"]> = ["about:blank"];
 export const sessionEndedProblemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["SessionEndedProblem"]["type"]> = ["https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#session"];
 export const sessionEndedProblemTitleValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["SessionEndedProblem"]["title"]> = ["The session ended"];
-export const fieldErrorsProblemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FieldErrorsProblem"]["type"]> = ["https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#site-api"];
+export const fieldErrorsProblemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FieldErrorsProblem"]["type"]> = ["https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002"];
 export const fieldErrorsProblemTitleValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FieldErrorsProblem"]["title"]> = ["Values in the request are not valid"];

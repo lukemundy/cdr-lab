@@ -39,7 +39,7 @@ flowchart LR
 | Library | Specification |
 |---|---|
 | `pkg/cds` | [CDS HTTP library](../../cds/DESIGN.md) |
-| `pkg/platform/jsonhttp` | None. |
+| `pkg/platform/jsonhttp` | [JSON body library](../../platform/jsonhttp/DESIGN.md) |
 
 ## Goals
 

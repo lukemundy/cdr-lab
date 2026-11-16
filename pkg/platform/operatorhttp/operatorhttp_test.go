@@ -61,6 +61,7 @@ func serveHost(t *testing.T, requestHost string, header http.Header) (rec *httpt
 	return rec, called
 }
 
+// Verifies: OPI-0001
 func TestARequestWithTheOperatorTokenReachesTheHandler(t *testing.T) {
 	for _, scheme := range []string{"Bearer", "bearer"} {
 		t.Run(scheme, func(t *testing.T) {
@@ -72,6 +73,7 @@ func TestARequestWithTheOperatorTokenReachesTheHandler(t *testing.T) {
 	}
 }
 
+// Verifies: OPI-0001, OPI-0002, OPI-0003
 func TestARequestWithoutTheOperatorTokenIsUnauthorised(t *testing.T) {
 	const (
 		noErrorChallenge, invalidChallenge = `Bearer`, `Bearer error="invalid_token"`
@@ -119,6 +121,7 @@ func TestARequestWithoutTheOperatorTokenIsUnauthorised(t *testing.T) {
 	}
 }
 
+// Verifies: OPI-0005
 func TestARequestForAHostThatIsNotAllowedIsRefusedBeforeTheTokenCheck(t *testing.T) {
 	for name, header := range map[string]http.Header{
 		"operator token": {"Authorization": {"Bearer " + token}},
@@ -140,6 +143,7 @@ func setEnv(t *testing.T, tokenValue, hostsValue string) {
 	t.Setenv(operatorhttp.AllowedHostsEnv, hostsValue)
 }
 
+// Verifies: OPI-0004, OPI-0006
 func TestLoadConfigGetsTheTokenAndTheAllowedHosts(t *testing.T) {
 	setEnv(t, token, "127.0.0.1:8082, Register:8082")
 
@@ -149,6 +153,7 @@ func TestLoadConfigGetsTheTokenAndTheAllowedHosts(t *testing.T) {
 	assert.Equal(t, operatorhttp.Config{Token: token, AllowedHosts: []string{"127.0.0.1:8082", "register:8082"}}, got)
 }
 
+// Verifies: OPI-0004, OPI-0006
 func TestLoadConfigNeedsEachSetting(t *testing.T) {
 	tests := map[string]struct {
 		token, hosts, wantEnv string

@@ -15,7 +15,7 @@ import (
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/domain"
 )
 
-const fieldErrorsType = "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#site-api"
+const fieldErrorsType = "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002"
 
 // opener opens the account opened for the customer signedIn into the list of reader, and keeps the product ID of the
 // request.
@@ -124,6 +124,7 @@ func TestAnOpenGivesTheCreditLimitAndTheLoanAmountOfTheRequestToTheOpener(t *tes
 	assert.Equal(t, domain.OpeningInput{CreditLimit: new("5000.00"), LoanAmount: new("1.00")}, o.input)
 }
 
+// Verifies: PROB-0002
 func TestAnOpenThatTheDataHolderRefusesGivesAFieldErrorInPlainLanguage(t *testing.T) {
 	tests := map[string]struct {
 		err     error

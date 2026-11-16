@@ -18,7 +18,7 @@ import (
 
 const (
 	changeDetails     = "/api/data-recipients/dr-1/change"
-	fieldErrorsType   = "https://github.com/lukemundy/cdr-lab/blob/main/services/register/DESIGN.md#console-api"
+	fieldErrorsType   = "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002"
 	newDetailsRequest = `{"version": 1, "legalEntityName": "Alpha Group Pty Ltd", "accreditationNumber": "ADR-9",
 		"accreditationLevel": "SPONSORED", "logoUri": "https://recipient.example/new.png"}`
 )
@@ -282,6 +282,7 @@ func TestAChangeOfASoftwareProductWithEmptyListsGivesAnErrorAtTheFieldOfEachList
 	assert.Equal(t, int64(1), legalEntityOf(t, ports).Version)
 }
 
+// Verifies: PROB-0002, PROB-0003
 func TestAChangeOfABrandWithValuesThatTheParticipantModelRefusesGivesAnErrorAtEachField(t *testing.T) {
 	ports := seedForActions(t)
 

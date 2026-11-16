@@ -994,7 +994,7 @@ components:
       properties:
         type:
           type: string
-          enum: ["https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#site-api"]
+          enum: ["https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002"]
         title:
           type: string
           enum: [Values in the request are not valid]

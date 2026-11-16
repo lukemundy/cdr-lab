@@ -908,7 +908,7 @@ export interface components {
         /** @description RFC 9457 problem details for values that the Register refuses. The errors member gives each value of a field of the record. The detail gives each problem that names no field of the record. */
         FieldErrorsProblem: {
             /** @enum {string} */
-            type: "https://github.com/lukemundy/cdr-lab/blob/main/services/register/DESIGN.md#console-api";
+            type: "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002";
             /** @enum {string} */
             title: "Values in the request are not valid";
             status: number;

@@ -40,7 +40,7 @@ function Record({ refuse, requests }: { refuse: boolean; requests: Action[] }) {
         dialogOf={(action) => closeDialog(state, action)}
         run={async (action) => {
           requests.push(action);
-          if (refuse) throw new ProblemError(conflict, 409, "");
+          if (refuse) throw new ProblemError(conflict, 409);
         }}
         refresh={async () => {
           setActions([]);

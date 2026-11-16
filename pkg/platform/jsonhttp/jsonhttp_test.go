@@ -39,14 +39,17 @@ func TestDecodeRefusesABodyThatIsNotOneValueWithOnlyTheFieldsOfTheRequest(t *tes
 
 			assert.True(t, errors.As(err, &syntaxErr) || errors.Is(err, io.ErrUnexpectedEOF), err)
 		}},
+		// Verifies: BODY-0001
 		"an unknown field": {`{"name": "a", "other": 1}`, func(t *testing.T, err error) {
 			t.Helper()
 			assert.ErrorContains(t, err, `unknown field "other"`)
 		}},
+		// Verifies: BODY-0002
 		"two values": {`{"name": "a"} {"name": "b"}`, func(t *testing.T, err error) {
 			t.Helper()
 			assert.ErrorIs(t, err, jsonhttp.ErrMoreThanOneValue)
 		}},
+		// Verifies: BODY-0002
 		"a value after the object": {`{"name": "a"} 1`, func(t *testing.T, err error) {
 			t.Helper()
 			assert.ErrorIs(t, err, jsonhttp.ErrMoreThanOneValue)

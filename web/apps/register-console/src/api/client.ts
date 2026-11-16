@@ -51,7 +51,6 @@ export type DataRecipientCreate = Omit<DataRecipientCreateRequest, "accreditatio
   accreditationLevel?: AccreditationLevel | undefined;
 };
 export type AccreditationLevel = components["schemas"]["AccreditationLevel"];
-type FieldErrorsProblem = components["schemas"]["FieldErrorsProblem"];
 export type DataHolderDetail = components["schemas"]["DataHolderDetail"];
 export type DataHolderStatusAction = components["schemas"]["DataHolderStatusAction"];
 export type DataHolderBrandStatusAction = components["schemas"]["DataHolderBrandStatusAction"];
@@ -87,9 +86,6 @@ export type HistoryQuery = NonNullable<
 
 const api = createClient<paths>();
 
-const fieldErrorsType: FieldErrorsProblem["type"] =
-  "https://github.com/lukemundy/cdr-lab/blob/main/services/register/DESIGN.md#console-api";
-
 export function problemOf(error: unknown): Problem {
   return problemOfService(error, "the Register");
 }
@@ -99,7 +95,7 @@ export async function listDataRecipients(query: DataRecipientQuery, signal: Abor
     params: { query },
     signal,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -108,13 +104,13 @@ export async function listDataHolders(query: DataHolderQuery, signal: AbortSigna
     params: { query },
     signal,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
 export async function listKeySets(signal: AbortSignal) {
   const { data, error, response } = await api.GET("/api/key-sets", { signal });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -123,7 +119,7 @@ export async function getDataRecipient(legalEntityId: string, signal: AbortSigna
     params: { path: { legalEntityId } },
     signal,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -132,7 +128,7 @@ export async function getDataHolder(legalEntityId: string, signal: AbortSignal) 
     params: { path: { legalEntityId } },
     signal,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -145,7 +141,7 @@ export async function getDataRecipientHistory(
     params: { path: { legalEntityId }, query },
     signal,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -158,7 +154,7 @@ export async function getDataHolderHistory(
     params: { path: { legalEntityId }, query },
     signal,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -171,7 +167,7 @@ export async function changeDataRecipientStatus(
     params: { path: { legalEntityId } },
     body: { version },
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function changeDataRecipientBrandStatus(
@@ -184,7 +180,7 @@ export async function changeDataRecipientBrandStatus(
     `/api/data-recipients/{legalEntityId}/brands/{brandId}/${action}`,
     { params: { path: { legalEntityId, brandId } }, body: { version } },
   );
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function changeSoftwareProductStatus(
@@ -197,7 +193,7 @@ export async function changeSoftwareProductStatus(
     `/api/data-recipients/{legalEntityId}/software-products/{softwareProductId}/${action}`,
     { params: { path: { legalEntityId, softwareProductId } }, body: { version } },
   );
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function changeDataHolderStatus(
@@ -209,7 +205,7 @@ export async function changeDataHolderStatus(
     params: { path: { legalEntityId } },
     body: { version },
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function changeDataHolderBrandStatus(
@@ -222,7 +218,7 @@ export async function changeDataHolderBrandStatus(
     `/api/data-holders/{legalEntityId}/brands/{brandId}/${action}`,
     { params: { path: { legalEntityId, brandId } }, body: { version } },
   );
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function registerClientCertificate(
@@ -235,7 +231,7 @@ export async function registerClientCertificate(
     "/api/data-recipients/{legalEntityId}/software-products/{softwareProductId}/certificates",
     { params: { path: { legalEntityId, softwareProductId } }, body: { version, certificate } },
   );
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function issueClientCertificate(
@@ -248,7 +244,7 @@ export async function issueClientCertificate(
     "/api/data-recipients/{legalEntityId}/software-products/{softwareProductId}/certificates/issue",
     { params: { path: { legalEntityId, softwareProductId } }, body: { version, csr } },
   );
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -262,7 +258,7 @@ export async function issueServerCertificate(
     "/api/data-holders/{legalEntityId}/brands/{brandId}/certificates/issue",
     { params: { path: { legalEntityId, brandId } }, body: { version, csr } },
   );
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -276,7 +272,7 @@ export async function removeClientCertificate(
     "/api/data-recipients/{legalEntityId}/software-products/{softwareProductId}/certificates/{thumbprint}/remove",
     { params: { path: { legalEntityId, softwareProductId, thumbprint } }, body: { version } },
   );
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function changeKey(
@@ -288,7 +284,7 @@ export async function changeKey(
     params: { path: { keySet } },
     body: { version },
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function changeDataRecipientDetails(
@@ -300,7 +296,7 @@ export async function changeDataRecipientDetails(
     params: { path: { legalEntityId } },
     body: { version, ...details },
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function changeDataRecipientBrandDetails(
@@ -313,7 +309,7 @@ export async function changeDataRecipientBrandDetails(
     "/api/data-recipients/{legalEntityId}/brands/{brandId}/change",
     { params: { path: { legalEntityId, brandId } }, body: { version, ...details } },
   );
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function changeSoftwareProductDetails(
@@ -326,7 +322,7 @@ export async function changeSoftwareProductDetails(
     "/api/data-recipients/{legalEntityId}/software-products/{softwareProductId}/change",
     { params: { path: { legalEntityId, softwareProductId } }, body: { version, ...details } },
   );
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function createDataRecipient(create: DataRecipientCreate) {
@@ -334,7 +330,7 @@ export async function createDataRecipient(create: DataRecipientCreate) {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the Register checks the value, not the UI.
     body: create as DataRecipientCreateRequest,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function addDataRecipientBrand(
@@ -346,7 +342,7 @@ export async function addDataRecipientBrand(
     params: { path: { legalEntityId } },
     body: { version, ...add },
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function addSoftwareProduct(
@@ -359,12 +355,12 @@ export async function addSoftwareProduct(
     "/api/data-recipients/{legalEntityId}/brands/{brandId}/software-products",
     { params: { path: { legalEntityId, brandId } }, body: { version, ...add } },
   );
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function createDataHolder(create: DataHolderCreate) {
   const { error, response } = await api.POST("/api/data-holders", { body: create });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function changeDataHolderDetails(
@@ -376,7 +372,7 @@ export async function changeDataHolderDetails(
     params: { path: { legalEntityId } },
     body: { version, ...details },
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function addDataHolderBrand(
@@ -388,7 +384,7 @@ export async function addDataHolderBrand(
     params: { path: { legalEntityId } },
     body: { version, ...add },
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function changeDataHolderBrandDetails(
@@ -401,12 +397,12 @@ export async function changeDataHolderBrandDetails(
     "/api/data-holders/{legalEntityId}/brands/{brandId}/change",
     { params: { path: { legalEntityId, brandId } }, body: { version, ...details } },
   );
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function getCDRCABundle(signal: AbortSignal) {
   const { data, error, response } = await api.GET("/api/cdr-ca-bundle", { signal });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -415,7 +411,7 @@ export async function listRevocations(query: RevocationQuery, signal: AbortSigna
     params: { query },
     signal,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -427,11 +423,11 @@ export async function checkRevocation(values: RevocationValues) {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the Register checks the value, not the UI.
     body: values as RevocationRequest,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
 export async function revokeCertificate(request: RevocationRequest) {
   const { error, response } = await api.POST("/api/cdr-certificates/revoke", { body: request });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }

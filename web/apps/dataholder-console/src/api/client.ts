@@ -61,23 +61,19 @@ export type ExtensionUType = components["schemas"]["ExtensionUType"];
 
 const api = createClient<paths>();
 
-// The console API defines its own problem type for field errors (services/dataholder/DESIGN.md, Console API).
-const fieldErrorsType =
-  "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#console-api";
-
 export function problemOf(error: unknown): Problem {
   return problemOfService(error, "the data holder");
 }
 
 export async function getBrand(signal: AbortSignal) {
   const { data, error, response } = await api.GET("/api/brand", { signal });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
 export async function getOverview(signal: AbortSignal) {
   const { data, error, response } = await api.GET("/api/overview", { signal });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -86,14 +82,14 @@ export async function listCustomers(query: CustomerQuery, signal: AbortSignal) {
     params: { query },
     signal,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
 // Gives the customer number of the new customer, from the path of the Location header.
 export async function createCustomer(create: CustomerCreate): Promise<string> {
   const { error, response } = await api.POST("/api/customers", { body: create });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   const customerNumber = /^\/api\/customers\/([^/]+)$/.exec(
     response.headers.get("Location") ?? "",
   )?.[1];
@@ -106,7 +102,7 @@ export async function createAccount(customerNumber: string, create: AccountCreat
     params: { path: { customerNumber } },
     body: create,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function getCustomer(customerNumber: string, signal: AbortSignal) {
@@ -114,7 +110,7 @@ export async function getCustomer(customerNumber: string, signal: AbortSignal) {
     params: { path: { customerNumber } },
     signal,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -124,7 +120,7 @@ export async function closeAccount(customerNumber: string, accountId: string, en
     "/api/customers/{customerNumber}/accounts/{accountId}/close",
     { params: { path: { customerNumber, accountId } }, body: { ends } },
   );
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 // A withdrawal has no body: it ends only the arrangement of the path.
@@ -133,7 +129,7 @@ export async function withdrawArrangement(customerNumber: string, arrangementId:
     "/api/customers/{customerNumber}/arrangements/{arrangementId}/withdraw",
     { params: { path: { customerNumber, arrangementId } } },
   );
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function listTransactions(
@@ -146,7 +142,7 @@ export async function listTransactions(
     "/api/customers/{customerNumber}/accounts/{accountId}/transactions",
     { params: { path: { customerNumber, accountId }, query }, signal },
   );
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -164,7 +160,7 @@ export async function createTransaction(
       body: create as TransactionCreateRequest,
     },
   );
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function listSoftwareProductStatuses(
@@ -175,7 +171,7 @@ export async function listSoftwareProductStatuses(
     params: { query },
     signal,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -184,7 +180,7 @@ export async function listRegistrations(query: RegistrationQuery, signal: AbortS
     params: { query },
     signal,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -193,7 +189,7 @@ export async function getRegistration(clientId: string, signal: AbortSignal) {
     params: { path: { clientId } },
     signal,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -206,6 +202,6 @@ export async function listRegistrationArrangements(
     params: { path: { clientId }, query },
     signal,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }

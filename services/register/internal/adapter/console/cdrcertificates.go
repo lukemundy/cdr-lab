@@ -110,7 +110,7 @@ func revocationAction(
 				fields = append(fields, problem.FieldError{Pointer: problem.FieldPointer(e.Field), Detail: e.Detail})
 			}
 
-			problem.WriteFieldErrors(w, fieldErrorsType, http.StatusBadRequest, "", fields)
+			problem.WriteFieldErrors(w, http.StatusBadRequest, "", fields)
 
 			return
 		}
@@ -124,7 +124,7 @@ func revocationAction(
 
 		switch {
 		case errors.Is(err, app.ErrNotIssuedByTheIntermediate):
-			problem.WriteFieldErrors(w, fieldErrorsType, http.StatusBadRequest, "", []problem.FieldError{{
+			problem.WriteFieldErrors(w, http.StatusBadRequest, "", []problem.FieldError{{
 				Pointer: "#/certificate", Detail: "The mock CDR intermediate did not sign the certificate.",
 			}})
 		case errors.As(err, &revoked):

@@ -60,7 +60,7 @@ const serviceError = "extendedData.nppPayload.service must be a value of the CDS
 const payerError = "extendedData.payer must be present for a positive amount";
 
 const refusal = {
-  type: "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#console-api",
+  type: "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002",
   title: "Values in the request are not valid",
   status: 400,
   detail: "One or more values in the request are not valid.",

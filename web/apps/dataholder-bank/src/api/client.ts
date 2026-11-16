@@ -24,10 +24,8 @@ export { productCategoryValues } from "./schema.gen";
 
 const api = createClient<paths>();
 
-// The site API defines its own problem types (services/dataholder/DESIGN.md, Site API and Session).
-const design = "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md";
-const fieldErrorsType = `${design}#site-api`;
-export const sessionEndedType = `${design}#session`;
+export const sessionEndedType =
+  "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#session";
 
 export function problemOf(error: unknown): Problem {
   return problemOfService(error, "the bank");
@@ -35,7 +33,7 @@ export function problemOf(error: unknown): Problem {
 
 export async function getBrand(signal: AbortSignal) {
   const { data, error, response } = await api.GET("/api/brand", { signal });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -44,19 +42,19 @@ export async function getProduct(productId: string, signal: AbortSignal) {
     params: { path: { productId } },
     signal,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
 export async function listProducts(signal: AbortSignal) {
   const { data, error, response } = await api.GET("/api/products", { signal });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
 export async function signUp(body: SignUp) {
   const { data, error, response } = await api.POST("/api/customers", { body });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -64,23 +62,23 @@ export async function signUp(body: SignUp) {
 // identifier is the email address or the customer number.
 export async function signIn(identifier: string) {
   const { error, response } = await api.POST("/api/session", { body: { identifier } });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function getSession(signal: AbortSignal) {
   const { data, error, response } = await api.GET("/api/session", { signal });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
 export async function signOut() {
   const { error, response } = await api.DELETE("/api/session");
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function listAccounts(signal: AbortSignal) {
   const { data, error, response } = await api.GET("/api/accounts", { signal });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -89,7 +87,7 @@ export async function getBalance(accountId: string, signal: AbortSignal) {
     params: { path: { accountId } },
     signal,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -98,7 +96,7 @@ export async function listTransactions(accountId: string, page: number, signal: 
     params: { path: { accountId }, query: { page } },
     signal,
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -108,12 +106,12 @@ export async function closeAccount(accountId: string, ends: string[]) {
     params: { path: { accountId } },
     body: { ends },
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function openAccount(body: OpenAccountRequest) {
   const { data, error, response } = await api.POST("/api/accounts", { body });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
 
@@ -121,11 +119,11 @@ export async function withdrawConsent(arrangementId: string) {
   const { error, response } = await api.POST("/api/consents/{arrangementId}/withdraw", {
     params: { path: { arrangementId } },
   });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
 }
 
 export async function listConsents(signal: AbortSignal) {
   const { data, error, response } = await api.GET("/api/consents", { signal });
-  if (error) throw new ProblemError(error, response.status, fieldErrorsType);
+  if (error) throw new ProblemError(error, response.status);
   return data;
 }
