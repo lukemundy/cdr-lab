@@ -107,6 +107,7 @@ func changeRecipient(
 	}
 }
 
+// Verifies: REG-0809, REG-0811, REG-0817, REG-0828, REG-0829
 func TestTheOperatorCreatesAndChangesADataRecipientAndThePublicAPIsShowEachChange(t *testing.T) {
 	handlers := lab(t)
 	recipient := "/v1/data-recipients/" + newRecipient
@@ -148,6 +149,7 @@ func TestTheOperatorCreatesAndChangesADataRecipientAndThePublicAPIsShowEachChang
 	})
 }
 
+// Verifies: REG-0810, REG-0855, REG-0856, REG-0858
 func TestTheOperatorCannotMakeADataRecipientChangeThatTheRulesDoNotAllow(t *testing.T) {
 	handlers := lab(t)
 	budget := "/v1/data-recipients/" + mockBudgetRecipient

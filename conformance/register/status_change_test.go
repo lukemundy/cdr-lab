@@ -152,6 +152,7 @@ func change(t *testing.T, c statusChange) {
 
 // The operator interface only makes each status change: the subject is the CDS status rules and ETags of the public
 // APIs.
+// Verifies: REG-0227, REG-0328
 func TestThePublicAPIsShowEachStatusChangeWithItsCascadeAndANewETag(t *testing.T) {
 	steps := []struct {
 		name string

@@ -110,6 +110,7 @@ func TestTheExampleFileIsValidAndHasEachStatus(t *testing.T) {
 	assert.Equal(t, all, products)
 }
 
+// Verifies: REG-0920, REG-0921, REG-0922, REG-0923, REG-0924, REG-0925
 func TestThePresetBanksFileHasTheFourBanksOfTheLabOnTheirOwnHosts(t *testing.T) {
 	p := readSeed(t, "preset-banks.json")
 	lab := map[string]domain.DataHolder{}

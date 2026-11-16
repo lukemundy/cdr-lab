@@ -40,6 +40,7 @@ func recipientBrand() domain.DataRecipientBrand {
 	}
 }
 
+// Verifies: REG-0809, REG-0811, REG-0815, REG-0816, REG-0867, REG-0869, REG-0872
 func TestEachCreateAndAddOfADataRecipientExecutesItsCommandAndGivesTheLocation(t *testing.T) {
 	tests := map[string]struct {
 		path, body, location string
@@ -81,6 +82,7 @@ func TestEachCreateAndAddOfADataRecipientExecutesItsCommandAndGivesTheLocation(t
 	}
 }
 
+// Verifies: REG-0817, REG-0868, REG-0870, REG-0871, REG-0873
 func TestEachDataRecipientChangeExecutesItsCommand(t *testing.T) {
 	const brand = "/v1/data-recipients/dr-1/brands/drb-1"
 
@@ -139,6 +141,7 @@ func TestEachDataRecipientChangeExecutesItsCommand(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0818
 func TestAChangeOfASoftwareProductRefusesItsStatusAndCertificates(t *testing.T) {
 	for _, field := range []string{`"status": "ACTIVE"`, `"clientCertificates": []`, `"softwareProductId": "sp-2"`} {
 		t.Run(field, func(t *testing.T) {

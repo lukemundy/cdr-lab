@@ -9,9 +9,9 @@ This area gives the lab-only HTTP API that creates and changes participants, reg
 - <a id="reg-0802"></a>**REG-0802** The lab operator can activate, deactivate and remove a software product. ([CDS: Participant Statuses][cds-participant-statuses])
 - <a id="reg-0803"></a>**REG-0803** The lab operator can activate, deactivate and remove a data recipient brand and a data holder brand. ([CDS: Participant Statuses][cds-participant-statuses])
 - <a id="reg-0804"></a>**REG-0804** The lab operator can remove a data holder legal entity. ([CDS: Participant Statuses][cds-participant-statuses])
-- <a id="reg-0805"></a>**REG-0805** Each status action obeys [the status rules](../DESIGN.md#status-rules), also the cascades. For example, a suspension of a data recipient makes its ACTIVE software products INACTIVE. ([CDS: Status Mapping][cds-status-mapping])
+- <a id="reg-0805"></a>**REG-0805** Each status action obeys [the status transitions](participants.md#reg-0222) and [the cascades](participants.md#reg-0227). For example, a suspension of a data recipient makes its ACTIVE software products INACTIVE. ([CDS: Status Mapping][cds-status-mapping])
 - <a id="reg-0806"></a>**REG-0806** When the lab operator reinstates a data recipient to ACTIVE, the status of its software products does not change. The lab operator activates each software product. ([CDS: Status Mapping][cds-status-mapping])
-- <a id="reg-0807"></a>**REG-0807** A removal is a status action that sets the status REMOVED. ([CDS: Participant Statuses][cds-participant-statuses])
+- <a id="reg-0807"></a>**REG-0807** A removal is a status action that sets the status REMOVED. The Register deletes no record. ([CDS: Participant Statuses][cds-participant-statuses]; [Judgement: a removal is a change of status](participants.md#reg-0270))
 - <a id="reg-0808"></a>**REG-0808** A data recipient legal entity has no remove action, because it has no REMOVED status. Its revocation or its surrender is its removal. ([CDS: Participant Statuses][cds-participant-statuses])
 
 ## Creates, adds and changes
@@ -20,8 +20,8 @@ This area gives the lab-only HTTP API that creates and changes participants, reg
 - <a id="reg-0810"></a>**REG-0810** When a legal entity with the same identifier exists, a create gives 409. ([RFC 9110, section 15.5.10][rfc9110-409])
 - <a id="reg-0811"></a>**REG-0811** The lab operator can add a brand to a legal entity, and a software product to a data recipient brand. The request body is one brand or one software product in the format of the load file. ([Judgement: the format of the load file for a create or an add](#reg-0888))
 - <a id="reg-0812"></a>**REG-0812** The body of an add of a data recipient brand can have the software products of the brand. ([Judgement: the format of the load file for a create or an add](#reg-0888))
-- <a id="reg-0813"></a>**REG-0813** The body of a create or an add gives the identifier of each new record, with the rules of [the participant model](../DESIGN.md#participant-model). ([CDS: Register API schemas][cds-register-schemas]; [Judgement: the lab operator gives the identifiers](#reg-0889))
-- <a id="reg-0814"></a>**REG-0814** The body of a create or an add can give each status to each record, with the status rules. For example, the lab operator can create a data recipient that is SUSPENDED. ([Judgement: a status in a create or an add](#reg-0890))
+- <a id="reg-0813"></a>**REG-0813** The body of a create or an add gives the identifier of each new record, with [the rules of an identifier](participants.md#reg-0219). ([CDS: Register API schemas][cds-register-schemas]; [Judgement: the lab operator gives the identifiers](#reg-0889))
+- <a id="reg-0814"></a>**REG-0814** The body of a create or an add can give each status to each record, with the status rules. For example, the lab operator can add a software product that is INACTIVE. ([Judgement: a status in a create or an add](#reg-0890))
 - <a id="reg-0815"></a>**REG-0815** A create and an add give 201 with no body. ([RFC 9110, section 15.3.2][rfc9110-201]; [Judgement: the response of a create or an add](#reg-0891))
 - <a id="reg-0816"></a>**REG-0816** The `Location` header of a create or an add gives the path of the new record in the operator interface. For example, a create of a data holder gives `/v1/data-holders/{legalEntityId}`. ([RFC 9110, section 15.3.2][rfc9110-201]; [Judgement: the response of a create or an add](#reg-0891))
 - <a id="reg-0817"></a>**REG-0817** A change is a `PUT` on the path of the record. A change gives 204. ([RFC 9110, section 9.3.4][rfc9110-put]; [Judgement: a change replaces each field of the record](#reg-0892))
@@ -42,8 +42,8 @@ This area gives the lab-only HTTP API that creates and changes participants, reg
 - <a id="reg-0829"></a>**REG-0829** After a create or an add, each new software product is on Get Software Products Statuses. ([CDS: Register APIs][cds-register-apis])
 - <a id="reg-0830"></a>**REG-0830** After a change of a software product, the next SSA of the software product has the changed metadata. ([CDS: Get SSA][cds-get-ssa])
 - <a id="reg-0831"></a>**REG-0831** After a change of the JWKS URI of a software product, the token endpoint uses the changed JWKS URI for the next client assertion. ([CDS: Register APIs][cds-register-apis])
-- <a id="reg-0832"></a>**REG-0832** A create, an add and a change set [the `lastUpdated` of the legal entity](../DESIGN.md#caching-pagination-lists-and-cors). ([CDS: Register API schemas][cds-register-schemas])
-- <a id="reg-0833"></a>**REG-0833** A create, an add and a change change [the `ETag`](../DESIGN.md#caching-pagination-lists-and-cors) of each API whose response data changes. ([RFC 9110, section 8.8.3][rfc9110-etag])
+- <a id="reg-0832"></a>**REG-0832** A create, an add and a change set [the `lastUpdated` of the legal entity](register-apis.md#reg-0339). ([CDS: Register API schemas][cds-register-schemas])
+- <a id="reg-0833"></a>**REG-0833** A create, an add and a change change [the `ETag`](register-apis.md#reg-0328) of each API whose response data changes. ([RFC 9110, section 8.8.3][rfc9110-etag])
 
 ## Client certificates
 
@@ -62,7 +62,7 @@ This area gives the lab-only HTTP API that creates and changes participants, reg
 
 ## Key sets
 
-- <a id="reg-0846"></a>**REG-0846** The lab operator can publish the next key of a key set, and then activate it. ([the steps of a key change](../DESIGN.md#signing-keys))
+- <a id="reg-0846"></a>**REG-0846** The lab operator can publish the next key of a key set, and then activate it. The [two steps of a key change](authorisation-server.md#reg-0468) apply. ([Judgement: the steps of a key change](authorisation-server.md#reg-0482))
 - <a id="reg-0847"></a>**REG-0847** When the key set has a next key, a publish gives 409. ([RFC 9110, section 15.5.10][rfc9110-409])
 - <a id="reg-0848"></a>**REG-0848** When the key set has no next key, an activation gives 409. ([RFC 9110, section 15.5.10][rfc9110-409])
 - <a id="reg-0849"></a>**REG-0849** When the key set is not `access-token` or `ssa`, the response is 404. ([RFC 9110, section 15.5.5][rfc9110-404])
@@ -82,7 +82,7 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 - <a id="reg-0855"></a>**REG-0855** When a request body does not obey the participant model, the response is 400. For example, a URI with the `http` scheme gets 400. ([Judgement: 400 or 409 for a refused body](#reg-0894))
 - <a id="reg-0856"></a>**REG-0856** When a request body obeys the participant model but breaks a status rule, the response is 409. For example, an ACTIVE software product of an INACTIVE brand gets 409. ([RFC 9110, section 15.5.10][rfc9110-409]; [Judgement: 400 or 409 for a refused body](#reg-0894))
 - <a id="reg-0857"></a>**REG-0857** When a request body is not valid, the `detail` names each record and rule that fails. ([RFC 9457, section 3.1.4][rfc9457-detail])
-- <a id="reg-0858"></a>**REG-0858** When an identifier in the body is the identifier of a different record, the response is 409. This applies also when that record is REMOVED or is a different kind of participant. ([the participant model](../DESIGN.md#participant-model); [Judgement: 400 or 409 for a refused body](#reg-0894))
+- <a id="reg-0858"></a>**REG-0858** When an identifier in the body is the identifier of a different record, the response is 409. This applies also when that record is REMOVED or is a different kind of participant. ([an identifier is unique across all participant records](participants.md#reg-0221); [Judgement: 400 or 409 for a refused body](#reg-0894))
 - <a id="reg-0859"></a>**REG-0859** When an identifier in the body is in use, the `detail` gives the identifier. ([RFC 9457, section 3.1.4][rfc9457-detail])
 - <a id="reg-0860"></a>**REG-0860** When the status rules do not permit a status action, the response is 409, and the `detail` names the rule. ([RFC 9110, section 15.5.10][rfc9110-409])
 - <a id="reg-0861"></a>**REG-0861** When the record of an action does not exist, the response is 404. ([RFC 9110, section 15.5.5][rfc9110-404])

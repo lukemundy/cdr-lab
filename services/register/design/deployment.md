@@ -7,7 +7,7 @@ This area gives the lab-only participant load, the participant seed of the Helm 
 - <a id="reg-0900"></a>**REG-0900** The lab operator can load a full set of participant data from a file into a Register that has no participants. ([Judgement: no load into a Register with participants](#reg-0940))
 - <a id="reg-0901"></a>**REG-0901** When the Register has participants, the load refuses the file and changes nothing. ([Judgement: no load into a Register with participants](#reg-0940))
 - <a id="reg-0902"></a>**REG-0902** The load is separate from the start of the Register. The start of the Register does not need a file. ([Judgement: the seed in the chart is off by default](#reg-0943))
-- <a id="reg-0903"></a>**REG-0903** The load checks the full set against [the participant model](../DESIGN.md#participant-model) and [the status rules](../DESIGN.md#status-rules). ([CDS: Participant Statuses][cds-participant-statuses])
+- <a id="reg-0903"></a>**REG-0903** The load checks the full set against [the participant records](participants.md#reg-0200), [the status transitions](participants.md#reg-0222) and [the cascades](participants.md#reg-0227). ([CDS: Participant Statuses][cds-participant-statuses])
 - <a id="reg-0904"></a>**REG-0904** When one record is not valid, the load changes nothing, and it names each record and rule that fails. ([Judgement: no load into a Register with participants](#reg-0940))
 - <a id="reg-0905"></a>**REG-0905** The load file uses the field names of the CDS Register schemas. For example, a software product has the field `softwareProductId`. ([CDS: Register API schemas][cds-register-schemas]; [Judgement: the CDS field names in the load file](#reg-0941))
 - <a id="reg-0906"></a>**REG-0906** The load is a command of the Register binary, and it needs access to the Register database. ([Judgement: no load into a Register with participants](#reg-0940))
@@ -82,7 +82,7 @@ A deployment changes the endpoints of the example seed to the hosts of the deplo
 
 - Kind: choice
 - Basis: Step 3.2. `.test` is reserved for use in testing ([RFC 6761, section 6.2][rfc6761-test]).
-- Reason: A URI with a placeholder does not load, because each URI must be absolute with a host ([the participant model](../DESIGN.md#participant-model)), and a file that loads can be tested. The website of a brand is a fixed name of the brand, not a value of one deployment.
+- Reason: A URI with a placeholder does not load, because each URI must be absolute with a host ([each URI is absolute with a host](participants.md#reg-0215)), and a file that loads can be tested. The website of a brand is a fixed name of the brand, not a value of one deployment.
 
 [cds-participant-statuses]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#participant-statuses
 [cds-register-schemas]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api-schemas

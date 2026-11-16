@@ -25,6 +25,7 @@ func dataHolderStatusFixture() domain.DataHolderState {
 	return dataHolderState(dh)
 }
 
+// Verifies: REG-0231
 func TestTheRemovalOfADataHolderGivesEachBrandThatItRemoves(t *testing.T) {
 	actions := domain.PermittedDataHolderStatusActions(dataHolderStatusFixture())
 
@@ -40,6 +41,7 @@ func TestTheRemovalOfADataHolderGivesEachBrandThatItRemoves(t *testing.T) {
 	}}, actions.DataHolder)
 }
 
+// Verifies: REG-0225
 func TestTheActionsOfEachDataHolderBrandFollowTheStatusRules(t *testing.T) {
 	actions := domain.PermittedDataHolderStatusActions(dataHolderStatusFixture())
 
@@ -55,6 +57,7 @@ func TestTheActionsOfEachDataHolderBrandFollowTheStatusRules(t *testing.T) {
 	}, actions.Brands)
 }
 
+// Verifies: REG-0224
 func TestARemovedDataHolderHasNoAction(t *testing.T) {
 	state, _ := handleAndApply(t, dataHolderStatusFixture(), domain.RemoveDataHolder{})
 

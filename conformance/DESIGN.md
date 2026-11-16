@@ -63,7 +63,7 @@ Out of scope:
 | The data holder tests of the end of eligibility, the removal of a software product and the notices (`eligibility_test.go`, `removal_test.go`, `notice_test.go`) | They read the arrangements of a customer from the operator interface to see the end reason of an arrangement and the outcome of a notice. | The subject is a CDR behaviour, but no CDR API shows these values to the test. In production, the consumer dashboard of the data holder shows them. |
 | The data holder test of the logo (`brand_test.go`) | It checks the `Content-Security-Policy` and `X-Content-Type-Options` headers of the logo, which the CDR does not define. | The CDS makes the `logoUri` of a brand mandatory ([CDS: Register API schemas][cds-register-schemas]), and a data recipient opens that URL. Only the URL that the Register gives proves that the deployed public listener serves the logo with the headers that stop a script in it ([data holder specification][dataholder-design]). |
 | The data holder test of the stylesheets and the font of the authentication page (`brand_test.go`) | It checks that the stylesheets of the page and one font that they refer to load from the origin of the page. The CDR does not define the styles of the page. | The data holder pages work with no styles, so only a request to the deployed public listener shows that the image has the build of the styles and the fonts ([data holder specification][dataholder-design]). |
-| The Register tests of Get SSA (`ssa_test.go`) | A response with the status 200 is not checked against the specification. | The response body is a JWT with no JSON quotes, which the string schema of the specification cannot validate ([Register DESIGN.md][register-design]). |
+| The Register tests of Get SSA (`ssa_test.go`) | A response with the status 200 is not checked against the specification. | The response body is a JWT with no JSON quotes, which the string schema of the specification cannot validate ([the body of the SSA response][register-ssa-body]). |
 | The Register test of an unknown path (`status_test.go`) | The response is not checked against the specification. | The specification has no such path. |
 
 [adr-0006]: ../docs/adr/0006-telemetry.md
@@ -75,5 +75,5 @@ Out of scope:
 [readme-development]: ../README.md#development
 [agents]: ../AGENTS.md
 [readme-data]: ../README.md#data
-[register-design]: ../services/register/design/README.md
+[register-ssa-body]: ../services/register/design/software-statement-assertion.md#reg-0414
 [dataholder-design]: ../services/dataholder/design/README.md

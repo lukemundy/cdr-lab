@@ -347,6 +347,7 @@ func change(t *testing.T, handlers map[int]http.Handler, c statusChange) {
 	}
 }
 
+// Verifies: REG-0805, REG-0806
 func TestTheOperatorChangesStatusesWithTheStatusRules(t *testing.T) {
 	handlers := lab(t)
 
@@ -460,6 +461,7 @@ func TestTheOperatorChangesStatusesWithTheStatusRules(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0861
 func TestTheOperatorCannotChangeARecordThatDoesNotExist(t *testing.T) {
 	handlers := lab(t)
 
@@ -605,6 +607,7 @@ func clientCertificatePEM(t *testing.T) []byte {
 	return pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der})
 }
 
+// Verifies: REG-0834, REG-0838
 func TestTheOperatorRegistersAClientCertificateForASoftwareProductOneOrMoreTimes(t *testing.T) {
 	handlers := lab(t)
 	path := productAction(mockBudgetRecipient, mockBudgetWeb, "certificates")
@@ -617,6 +620,7 @@ func TestTheOperatorRegistersAClientCertificateForASoftwareProductOneOrMoreTimes
 	assert.Equal(t, http.StatusNoContent, status, "the same certificate again is not an error: %s", p.Detail)
 }
 
+// Verifies: REG-0835, REG-0839
 func TestTheOperatorCannotRegisterACertificateThatIsNotValidOrForARecordThatCannotUseIt(t *testing.T) {
 	handlers := lab(t)
 	certificate := clientCertificatePEM(t)
@@ -661,6 +665,7 @@ func TestTheOperatorCannotRegisterACertificateThatIsNotValidOrForARecordThatCann
 	}
 }
 
+// Verifies: REG-0846, REG-0847, REG-0848
 func TestTheOperatorChangesAKeySetOnlyInTheStepsOfAKeyChange(t *testing.T) {
 	handlers := lab(t)
 
@@ -679,6 +684,7 @@ func TestTheOperatorChangesAKeySetOnlyInTheStepsOfAKeyChange(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0849
 func TestTheOperatorCannotChangeAKeySetThatDoesNotExist(t *testing.T) {
 	handlers := lab(t)
 

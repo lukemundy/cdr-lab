@@ -62,6 +62,7 @@ func jwksAt(t *testing.T, url string) *jose.JSONWebKeySet {
 	return &set
 }
 
+// Verifies: REG-0400, REG-0413
 func TestADataRecipientGetsAnSSAForItsSoftwareProductThatVerifiesWithGetJWKS(t *testing.T) {
 	cert := activeTokenClient(t)
 	token := accessToken(t, idpTestActiveProduct, cert)
@@ -138,6 +139,7 @@ func TestADataRecipientGetsAnSSAForItsSoftwareProductThatVerifiesWithGetJWKS(t *
 	assert.NotEqual(t, jti, secondClaims["jti"], "each SSA has a different jti")
 }
 
+// Verifies: REG-0401, REG-0326, REG-0466
 func TestGetJWKSHasTheRequiredFieldsAndAnETag(t *testing.T) {
 	resp := call(t, registerJWKSPath, http.Header{})
 	require.Equal(t, http.StatusOK, resp.StatusCode, string(resp.body))
@@ -172,6 +174,7 @@ func TestGetJWKSHasTheRequiredFieldsAndAnETag(t *testing.T) {
 	assert.Empty(t, again.body)
 }
 
+// Verifies: REG-0403, REG-0404
 func TestGetSSARefusesABrandOrSoftwareProductThatIsNotOfTheCaller(t *testing.T) {
 	cert := activeTokenClient(t)
 	token := accessToken(t, idpTestActiveProduct, cert)
@@ -241,6 +244,7 @@ func TestGetSSAChecksTheTokenTheVersionAndTheIndustry(t *testing.T) {
 	requireSecureCDSError(t, industry, http.StatusBadRequest, "urn:au-cds:error:cds-all:Field/Invalid", "Invalid Field")
 }
 
+// Verifies: REG-0402
 func TestGetSSARefusesACallerThatIsNotActive(t *testing.T) {
 	cert := tokenClient(t, statusTestRecipient, statusTestProduct, "PKI_STATUS_CLIENT_CERT", "PKI_STATUS_CLIENT_KEY")
 	token := accessToken(t, statusTestProduct, cert)

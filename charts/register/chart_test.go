@@ -184,6 +184,7 @@ func TestThePodHasTheLeastPrivilege(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0913
 func TestTheSeedIsOffByDefault(t *testing.T) {
 	spec := charttest.Pod(t, charttest.MustRender(t))
 
@@ -195,6 +196,7 @@ func TestTheSeedIsOffByDefault(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0911, REG-0914, REG-0915, REG-0916, REG-0918
 func TestASeedConfigMapLoadsBeforeTheRegisterStarts(t *testing.T) {
 	objects := charttest.MustRender(t, "seed.configMap=register-seed")
 	spec := charttest.Pod(t, objects)

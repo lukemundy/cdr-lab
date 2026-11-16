@@ -41,6 +41,7 @@ type dataHolderStatus struct {
 	Status        string `json:"status"`
 }
 
+// Verifies: REG-0310, REG-0338
 func TestDataHolderStatusesGiveTheDataHoldersOfTheIndustryInAllStatuses(t *testing.T) {
 	var (
 		wattle  = dataHolderStatus{wattleBank, "ACTIVE"}
@@ -103,6 +104,7 @@ func brandsSummary(t *testing.T, industry string) []brandSummary {
 	return body.Data
 }
 
+// Verifies: REG-0341, REG-0342
 func TestTheBrandsSummaryGivesTheBrandsOfTheIndustryThatAreNotRemoved(t *testing.T) {
 	var (
 		wattle    = brandSummary{DataHolderBrandID: wattleBankBrand}

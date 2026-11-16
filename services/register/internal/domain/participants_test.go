@@ -17,6 +17,7 @@ func TestParticipantsWithUniqueIDsAreValid(t *testing.T) {
 	assert.NoError(t, p.Validate())
 }
 
+// Verifies: REG-0221
 func TestParticipantsRejectAnIDInMoreThanOneAggregate(t *testing.T) {
 	other := validDataRecipient()
 	other.LegalEntityID = "dr-2"
@@ -43,6 +44,7 @@ func TestParticipantsIgnoreADuplicateIDInOneAggregate(t *testing.T) {
 	)
 }
 
+// Verifies: REG-0221
 func TestParticipantsRejectAnInterimIDInMoreThanOneAggregate(t *testing.T) {
 	holder := validDataHolder()
 	holder.Brands[0].InterimID = "dr-1"

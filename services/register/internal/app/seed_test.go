@@ -95,6 +95,7 @@ func TestSeededParticipantsLoad(t *testing.T) {
 	assert.Equal(t, domain.DataRecipientState{Imported: true, DataRecipient: p.DataRecipients[0]}, state)
 }
 
+// Verifies: REG-0901
 func TestSeedFailsWhenTheStoreIsNotEmpty(t *testing.T) {
 	store := &memoryStore{appends: []eventsourcing.Append{{StreamType: "data-holder", StreamID: "dh-9"}}}
 
@@ -104,6 +105,7 @@ func TestSeedFailsWhenTheStoreIsNotEmpty(t *testing.T) {
 	assert.Len(t, store.appends, 1)
 }
 
+// Verifies: REG-0904
 func TestSeedGivesAllValidationErrorsAndAppendsNothing(t *testing.T) {
 	store := &memoryStore{}
 	p := participants()
