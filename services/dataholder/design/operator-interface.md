@@ -73,13 +73,13 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
   - `accountIds`: the account identifiers of the operator interface
   - `confirmedAt` and `sharingEndsAt`
 - <a id="dh-0759"></a>**DH-0759** The `clientName` of an arrangement is the `client_name` of the registration at the confirmation. A later change of the registration does not change it. ([CDR Rules][cdr-rules], rule 9.3; [Judgement: the client name of an arrangement at the confirmation](#dh-0775))
-- <a id="dh-0760"></a>**DH-0760** An arrangement that ended before `sharingEndsAt` also has `endedAt` and `endReason`. The `endReason` is one of these values. ([the end of an arrangement](../DESIGN.md#end-of-an-arrangement))
+- <a id="dh-0760"></a>**DH-0760** An arrangement that ended before `sharingEndsAt` also has `endedAt` and `endReason`. The `endReason` is one of these values. ([the end of an arrangement](end-of-an-arrangement.md#dh-0900))
   - `REVOKED_BY_DATA_RECIPIENT`
   - `WITHDRAWN_BY_CONSUMER`
   - `CONSUMER_NOT_ELIGIBLE`
   - `SOFTWARE_PRODUCT_REMOVED`
 - <a id="dh-0761"></a>**DH-0761** An arrangement with the end reason `WITHDRAWN_BY_CONSUMER` also has `withdrawalMethod`: `CONSUMER_DASHBOARD` or `ALTERNATIVE_METHOD`. ([CDR Rules][cdr-rules], rule 4.25(1))
-- <a id="dh-0762"></a>**DH-0762** An arrangement with a notice also has `noticeStatus`: `PENDING`, `COMPLETE` or `FAILED`. ([the notice to the data recipient](../DESIGN.md#notice-to-the-data-recipient))
+- <a id="dh-0762"></a>**DH-0762** An arrangement with a notice also has `noticeStatus`: `PENDING`, `COMPLETE` or `FAILED`. ([the notice to the data recipient](end-of-an-arrangement.md#dh-0924))
 - <a id="dh-0763"></a>**DH-0763** A request for an arrangement of a different customer gets 404. ([RFC 9110, section 15.5.5][rfc9110-404])
 - <a id="dh-0764"></a>**DH-0764** A withdrawal of an arrangement that ended gets 409. ([RFC 9110, section 15.5.10][rfc9110-409])
 - <a id="dh-0765"></a>**DH-0765** The lab operator cannot create an arrangement. The only change to an arrangement is a withdrawal. ([Judgement: only the close of an account changes the customer data](#dh-0772))

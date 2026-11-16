@@ -241,7 +241,7 @@ The authorisation server library gives the reaction at [the PAR endpoint](../../
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no rule for the arrangements of a registration that the software product deletes ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]).
-- Reason: A deletion is an act of the software product, not a withdrawal by the consumer or a REMOVED status, so the arrangements stay. With no registration, no token of the client can be accepted. The lab operator can end an arrangement, and the [notice goes to the `recipient_base_uri` at the confirmation](../DESIGN.md#notice-to-the-data-recipient).
+- Reason: A deletion is an act of the software product, not a withdrawal by the consumer or a REMOVED status, so the arrangements stay. With no registration, no token of the client can be accepted. The lab operator can end an arrangement, and the [notice goes to the `recipient_base_uri` at the confirmation](end-of-an-arrangement.md#dh-0926).
 
 ### <a id="dh-0714"></a>DH-0714 Only the statuses of software products
 

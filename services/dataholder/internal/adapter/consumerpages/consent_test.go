@@ -35,6 +35,7 @@ func (b *browser) confirm(accountIDs ...string) page {
 	return b.post(url.Values{"csrf_token": {token}, "action": {"confirm"}, "account": accountIDs})
 }
 
+// Verifies: DH-0801, DH-0802
 func TestTheConsentPageNamesTheLegalEntityTheBrandAndTheSoftwareProduct(t *testing.T) {
 	b := newBrowser(t)
 
@@ -45,6 +46,7 @@ func TestTheConsentPageNamesTheLegalEntityTheBrandAndTheSoftwareProduct(t *testi
 	assert.Contains(t, consent.body, "the application Budget Tracker")
 }
 
+// Verifies: DH-0801
 func TestTheConsentPageNamesTheBrandWhenTheRegistrationHasNoLegalEntityName(t *testing.T) {
 	b := newBrowser(t)
 	b.registrations.legalEntityName = ""
@@ -54,6 +56,7 @@ func TestTheConsentPageNamesTheBrandWhenTheRegistrationHasNoLegalEntityName(t *t
 	assert.Contains(t, consent.body, "Budget &lt;App&gt; &amp; Co asks Coastal Bank to share your data.")
 }
 
+// Verifies: DH-0803, DH-0804
 func TestTheConsentPageHasTheDataClustersOfTheScopesOnly(t *testing.T) {
 	b := newBrowser(t)
 	b.scopes = []string{"openid", "bank:accounts.detail:read", "profile"}
@@ -69,6 +72,7 @@ func TestTheConsentPageHasTheDataClustersOfTheScopesOnly(t *testing.T) {
 	assert.NotContains(t, consent.body, "openid")
 }
 
+// Verifies: DH-0811
 func TestTheConsentPageOfASharingDurationOf24HoursOrLessSaysOneTime(t *testing.T) {
 	for name, sharingDuration := range map[string]time.Duration{"none": 0, "24 hours": 24 * time.Hour} {
 		t.Run(name, func(t *testing.T) {
@@ -83,6 +87,7 @@ func TestTheConsentPageOfASharingDurationOf24HoursOrLessSaysOneTime(t *testing.T
 	}
 }
 
+// Verifies: DH-0812, DH-0813
 func TestTheConsentPageOfALongerSharingDurationHasTheDurationAndTheEndDate(t *testing.T) {
 	// The time of the browser is 10 October 2026, 09:00 UTC.
 	tests := map[string]struct {
@@ -112,6 +117,7 @@ func TestTheConsentPageOfALongerSharingDurationHasTheDurationAndTheEndDate(t *te
 	}
 }
 
+// Verifies: DH-0814
 func TestTheConsentPageShowsTheEndDateInUTC(t *testing.T) {
 	b := newBrowser(t)
 	b.now = time.Date(2026, 10, 10, 23, 30, 0, 0, time.FixedZone("AWST", 8*60*60))
@@ -123,6 +129,7 @@ func TestTheConsentPageShowsTheEndDateInUTC(t *testing.T) {
 	assert.Contains(t, consent.body, "until 12 October 2026 (UTC).")
 }
 
+// Verifies: DH-0815, DH-0816
 func TestTheConsentPageSaysThatTheDataIncludesEarlierDataAndHowToStop(t *testing.T) {
 	b := newBrowser(t)
 
@@ -137,6 +144,7 @@ func TestTheConsentPageSaysThatTheDataIncludesEarlierDataAndHowToStop(t *testing
 	)
 }
 
+// Verifies: DH-0819, DH-0820
 func TestTheConsentPageListsTheOpenAccountsOfTheCustomerWithMaskedNumbersAndNoneSelected(t *testing.T) {
 	b := newBrowser(t)
 
@@ -151,6 +159,7 @@ func TestTheConsentPageListsTheOpenAccountsOfTheCustomerWithMaskedNumbersAndNone
 	assert.NotContains(t, consent.body, "account-3", "a closed account")
 }
 
+// Verifies: DH-0822
 func TestTheConsentPageOfARequestWithNoBankScopeHasNoAccountSelection(t *testing.T) {
 	b := newBrowser(t)
 	b.scopes = []string{"openid", "common:customer.basic:read"}
@@ -162,6 +171,7 @@ func TestTheConsentPageOfARequestWithNoBankScopeHasNoAccountSelection(t *testing
 	assert.Contains(t, consent.body, `value="confirm"`)
 }
 
+// Verifies: DH-0823
 func TestACustomerWithNoOpenAccountCanOnlyCancel(t *testing.T) {
 	for name, scopes := range map[string][]string{
 		"a bank scope":    {"openid", "bank:accounts.basic:read"},
@@ -187,6 +197,7 @@ func TestACustomerWithNoOpenAccountCanOnlyCancel(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0827
 func TestAConfirmationCreatesAnArrangementAndApprovesTheFlow(t *testing.T) {
 	b := newBrowser(t)
 	b.sharingDuration = 90 * 24 * time.Hour
@@ -280,6 +291,7 @@ func (b *browser) approval() authserver.Outcome {
 	})
 }
 
+// Verifies: DH-0826
 func TestAConfirmationThatBreaksAnAccountRuleGivesTheConsentPageAgain(t *testing.T) {
 	tests := map[string]struct {
 		accountIDs []string
@@ -325,6 +337,7 @@ func TestAnActionThatTheConsentPageDoesNotHaveIsABadRequest(t *testing.T) {
 	assert.Len(t, b.mail.otps, 1)
 }
 
+// Verifies: DH-0845
 func TestAConsentFormWithoutItsProtectionAgainstCrossSiteRequestForgeryCreatesNoArrangement(t *testing.T) {
 	b := newBrowser(t)
 	b.consent()

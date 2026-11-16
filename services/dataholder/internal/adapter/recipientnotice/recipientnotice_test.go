@@ -79,6 +79,7 @@ func claimsOf(t *testing.T, token string, key authserver.SigningKey) map[string]
 	return claims
 }
 
+// Verifies: DH-0925, DH-0928, DH-0929, DH-0930, DH-0931, DH-0932
 func TestANoticeIsAPostWithTwoSignedJWTsAndOnlyTheArrangementJWTInTheBody(t *testing.T) {
 	var got received
 
