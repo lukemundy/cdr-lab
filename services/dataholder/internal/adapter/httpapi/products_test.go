@@ -127,6 +127,7 @@ func TestGetProductsGivesAnEmptyArrayWhenNoProductMatches(t *testing.T) {
 	}`, rec.Body.String())
 }
 
+// Verifies: DH-0443
 func TestGetProductsAsksForTheCurrentProductsAtTheTimeOfTheRequestWhenTheRequestHasNoParameters(t *testing.T) {
 	tests := map[string]string{
 		"no parameters":    "",
@@ -201,6 +202,7 @@ func TestGetProductsAcceptsEachValueOfTheEffectiveFilter(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0441, DH-0442
 func TestGetProductsRefusesAParameterThatIsNotValid(t *testing.T) {
 	const (
 		invalid         = "urn:au-cds:error:cds-all:Field/Invalid"
@@ -289,6 +291,7 @@ func TestGetProductDetailGivesAnEscapedLinkForAProductIDThatAURLMustEscape(t *te
 	assert.Equal(t, "https://bank.example/cds-au/v1/banking/products/home%20loan%2F1", body.Links["self"])
 }
 
+// Verifies: DH-0444
 func TestGetProductDetailRefusesAProductIDThatTheBrandDoesNotHave(t *testing.T) {
 	rec := sendTo(t, oneHomeLoan(), http.MethodGet, productsPath+"/car-loan", xv("7"))
 
@@ -298,6 +301,7 @@ func TestGetProductDetailRefusesAProductIDThatTheBrandDoesNotHave(t *testing.T) 
 	assert.Equal(t, "7", rec.Header().Get("x-v"))
 }
 
+// Verifies: DH-0431
 func TestTheProductAPIsServeOnlyTheirCurrentVersion(t *testing.T) {
 	paths := map[string]string{productsPath: "5", productsPath + "/home-loan": "7"}
 	for path, version := range paths {

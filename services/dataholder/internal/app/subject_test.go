@@ -9,6 +9,7 @@ import (
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/domain"
 )
 
+// Verifies: DH-0510, DH-0511, DH-0512
 func TestTheSectorIdentifierOfARegistration(t *testing.T) {
 	tests := map[string]struct {
 		registration domain.Registration
