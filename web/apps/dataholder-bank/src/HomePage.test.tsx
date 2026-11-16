@@ -3,6 +3,7 @@ import { page } from "vitest/browser";
 
 import { http, product, renderApp, serveBrand, serveProducts, worker } from "./test/app";
 
+// Verifies: DH-1805
 test("the home page names the bank, says what the site has and links to the products", async () => {
   serveProducts([]);
 
@@ -23,6 +24,7 @@ test("the home page names the bank, says what the site has and links to the prod
     .toHaveAttribute("href", "/products");
 });
 
+// Verifies: DH-1807, DH-1808
 test("the home page links to the group of each category that has a product, with the number of its products", async () => {
   serveProducts([
     product("loan", { productCategory: "RESIDENTIAL_MORTGAGES", name: "Home Loan" }),
@@ -43,6 +45,7 @@ test("the home page links to the group of each category that has a product, with
     .toHaveAttribute("href", "/products#residential-mortgages");
 });
 
+// Verifies: DH-1809
 test("the home page says that the bank shares data under the CDR only with the consent of the consumer", async () => {
   serveProducts([]);
 
@@ -82,10 +85,9 @@ test("the home page shows the problem when the products do not load", async () =
     .toHaveTextContent("Internal Server ErrorThe data holder could not complete the request.");
 });
 
-// DESIGN.md (Online bank site: Presentation): each photo is decoration, and the site asks only for a photo that the
-// brand has.
 const photos = () => [...document.querySelectorAll<HTMLImageElement>("main img")];
 
+// Verifies: DH-1834
 test("the home page has the layout of the brand", async () => {
   serveBrand({ layout: "ledger" });
   serveProducts([]);
@@ -97,6 +99,7 @@ test("the home page has the layout of the brand", async () => {
     .toBe("ledger");
 });
 
+// Verifies: DH-1841, DH-1844
 test("the home page shows the hero photo and the photo of each category as decoration", async () => {
   serveBrand({ photos: ["hero.webp", "category-residential-mortgages.webp"] });
   serveProducts([product("loan", { productCategory: "RESIDENTIAL_MORTGAGES", name: "Home Loan" })]);
@@ -112,6 +115,7 @@ test("the home page shows the hero photo and the photo of each category as decor
     ]);
 });
 
+// Verifies: DH-1845
 test("a brand with no photos shows a shape in the brand colour in place of each photo, and no image", async () => {
   serveBrand({ photos: [] });
   serveProducts([product("everyday")]);
@@ -125,6 +129,7 @@ test("a brand with no photos shows a shape in the brand colour in place of each 
   expect(document.querySelectorAll("main [data-photo-placeholder]")).toHaveLength(2);
 });
 
+// Verifies: DH-1840
 test("the updraft layout shows the everyday and savings accounts first, then the CDS order", async () => {
   serveBrand({ layout: "updraft" });
   serveProducts([

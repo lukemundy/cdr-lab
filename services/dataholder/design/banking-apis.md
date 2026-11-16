@@ -127,7 +127,7 @@ The rules of this group are for the APIs on the resource base URI and for the Us
 - <a id="dh-1118"></a>**DH-1118** When the data holder cannot write the record, the response is 500 with no CDR data. ([CDR Rules][cdr-rules], rule 9.3(1)(d); [Judgement: the record before the response](#dh-1172))
 - <a id="dh-1119"></a>**DH-1119** A response that is not 2xx gives no record. ([CDR Rules][cdr-rules], rule 9.3(1)(d))
 - <a id="dh-1120"></a>**DH-1120** A response to `HEAD` gives no record, because it has no body. ([RFC 9110, section 9.3.2][rfc9110-head])
-- <a id="dh-1121"></a>**DH-1121** The [consumer dashboard](../DESIGN.md#consumer-dashboard) shows a disclosure at the next read after the response. ([CDR Rules][cdr-rules], rule 7.9(1))
+- <a id="dh-1121"></a>**DH-1121** The [consumer dashboard](consumer-dashboard.md#dh-1919) shows a disclosure at the next read after the response. ([CDR Rules][cdr-rules], rule 7.9(1))
 - <a id="dh-1122"></a>**DH-1122** The data holder does not remove a record of a disclosure. ([CDR Rules][cdr-rules], rule 9.3(5); [Judgement: no removal of the records of disclosures](#dh-1175))
 
 ## Judgements

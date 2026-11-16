@@ -1,6 +1,6 @@
 # Mock data holder: Online bank site API
 
-This area gives the API of the online bank site. The site API is JSON over HTTP on the listener of the site, and only the site uses it. It obeys the [web UI library](../../../pkg/platform/consolehttp/DESIGN.md): [the `/api/` prefix](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0011) and [404 for a path that is not an operation](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0012). The [online bank site](../DESIGN.md#online-bank-site) gives the pages, the [sign-in and the session](online-bank-site-sign-in.md) and the listener.
+This area gives the API of the online bank site. The site API is JSON over HTTP on the listener of the site, and only the site uses it. It obeys the [web UI library](../../../pkg/platform/consolehttp/DESIGN.md): [the `/api/` prefix](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0011) and [404 for a path that is not an operation](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0012). The [online bank site](online-bank-site.md#dh-1801) gives the pages, the [sign-in and the session](online-bank-site-sign-in.md) and the listener.
 
 ## Operations
 
@@ -93,7 +93,7 @@ This area gives the API of the online bank site. The site API is JSON over HTTP 
 
 ## Authorisations
 
-- <a id="dh-1766"></a>**DH-1766** The list of the authorisations gives each arrangement of the customer of the session in one response, with no pages. Each arrangement has these fields. ([CDR Rules][cdr-rules], rule 1.15(3); [the consumer dashboard](../DESIGN.md#consumer-dashboard))
+- <a id="dh-1766"></a>**DH-1766** The list of the authorisations gives each arrangement of the customer of the session in one response, with no pages. Each arrangement has these fields. ([CDR Rules][cdr-rules], rule 1.15(3); [the consumer dashboard](consumer-dashboard.md#dh-1903))
   - `arrangementId`, `clientName` and `brandName`
   - `legalEntityName`, when the arrangement has one
   - `status`: `CURRENT` or `ENDED`, as in [the console API](operator-console-api.md#dh-1640)

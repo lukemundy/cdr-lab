@@ -12,7 +12,7 @@ import { formatPeriod } from "./period";
 import { StopSharing } from "./StopSharing";
 import { useConsents } from "./useConsents";
 
-// The consumer dashboard of rule 1.15 of the CDR Rules (services/dataholder/DESIGN.md, Consumer dashboard).
+// The consumer dashboard of rule 1.15 of the CDR Rules (services/dataholder/design/consumer-dashboard.md).
 export function ConsentsPage() {
   usePageTitle("Data sharing");
 

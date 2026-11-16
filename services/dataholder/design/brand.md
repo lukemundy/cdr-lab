@@ -47,7 +47,7 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 | <a id="dh-0325"></a>**DH-0325** | `logo.png` | Yes | The logo of `logo.svg` as a PNG image for the email, legible on the brand colour of the header of the email | [the logo in the OTP email](consumer-authentication.md#dh-1251); [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 | <a id="dh-0326"></a>**DH-0326** | `mark.svg` | Yes | A square symbol of the brand, for small sizes | [design system DESIGN.md: Brands][ui-brands] |
 | <a id="dh-0327"></a>**DH-0327** | `products.json` | Yes | The product catalogue of the brand, in the format of [a load file](product-reference-data.md#dh-0234) | [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
-| <a id="dh-0328"></a>**DH-0328** | `hero.webp` | No | The hero photo of the landing page of the online bank site, with the aspect ratio of the layout | [the presentation of the online bank site](../DESIGN.md#presentation); [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
+| <a id="dh-0328"></a>**DH-0328** | `hero.webp` | No | The hero photo of the landing page of the online bank site, with the aspect ratio of the layout | [the hero photo on the landing page](online-bank-site.md#dh-1841); [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 | <a id="dh-0329"></a>**DH-0329** | `category-<anchor>.webp` | No | The photo of a CDS product category on the online bank site, with the anchor of the category. For example, `category-term-deposits.webp`. | [CDS: Product Categories][cds-product-categories]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 | <a id="dh-0330"></a>**DH-0330** | `ATTRIBUTION.md` | No | The source, the author and the licence of each photo, 16 KiB or less. The data holder does not read or serve it. | [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 
@@ -58,7 +58,7 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 - <a id="dh-0332"></a>**DH-0332** The `brandName` has 1 to 200 characters, and it is not only white space. ([CDS: Register API schemas][cds-register-schemas])
 - <a id="dh-0333"></a>**DH-0333** The `brandName` has no control character. For example, the data holder refuses a brand name with a line break. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 - <a id="dh-0334"></a>**DH-0334** The `bsb` has 6 digits, and it obeys the rule of a `bsb` in the operator interface. ([the rule of a BSB](operator-interface.md#dh-0739); [Opening of an account](../DESIGN.md#opening-of-an-account))
-- <a id="dh-0335"></a>**DH-0335** The `layout` is one of these values. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023]; [the layouts of the online bank site](../DESIGN.md#presentation))
+- <a id="dh-0335"></a>**DH-0335** The `layout` is one of these values. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023]; [the layouts of the online bank site](online-bank-site.md#dh-1834))
   - `meadow`
   - `ledger`
   - `horizon`

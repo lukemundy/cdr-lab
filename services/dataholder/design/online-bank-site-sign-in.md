@@ -39,7 +39,7 @@ This area gives the sign-up, the sign-in, the sign-out and the session of the on
 - <a id="dh-2029"></a>**DH-2029** Each page of the site shows whether the consumer is signed in. ([CDR Rules][cdr-rules], rule 1.15(1)(f))
 - <a id="dh-2030"></a>**DH-2030** When the consumer is signed in, the header of each page has these items. ([CDR Rules][cdr-rules], rule 1.15(1)(f): "prominently displayed and readily accessible")
   - a link to [the accounts page](../DESIGN.md#accounts-balances-and-transactions)
-  - a link "Data sharing" to [the consumer dashboard](../DESIGN.md#consumer-dashboard)
+  - a link "Data sharing" to [the consumer dashboard](consumer-dashboard.md#dh-1900)
   - a control to sign out
 - <a id="dh-2031"></a>**DH-2031** After a successful sign-in, the site shows the accounts page. After a sign-out, the site shows the sign-in page. ([Judgement: the pages after a sign-in and a sign-out](#dh-2117))
 - <a id="dh-2032"></a>**DH-2032** A sign-out ends the session. ([OWASP ASVS 5.0, 7.4.1][asvs-v7])
@@ -78,7 +78,7 @@ The sign-in of the site asks for a password, and the CDR authentication does not
 - <a id="dh-2053"></a>**DH-2053** The sign-in page shows a note above the form. ([CDS: Common Authentication Standards][cds-cx-authentication]; [Judgement: the separation of the sign-in from the CDR authentication](#dh-2111))
 - <a id="dh-2054"></a>**DH-2054** The style of the note on the sign-in page is different from the style of the lock note of the consumer pages. ([Judgement: the separation of the sign-in from the CDR authentication](#dh-2111))
 - <a id="dh-2055"></a>**DH-2055** The note on the sign-in page says: "This is <brand name> online banking. This is a demonstration bank: any password works here, and you must not use a real password. When an app asks for your <brand name> data under the Consumer Data Right, you do not sign in here. <brand name> then asks only for your email address or customer number and a one-time password, and never for your password". ([CDS: Common Authentication Standards][cds-cx-authentication]: Authentication: Passwords; [Judgement: the separation of the sign-in from the CDR authentication](#dh-2111))
-- <a id="dh-2056"></a>**DH-2056** The title of the sign-in page is "Sign in - <brand name> online banking". ([the titles of the site](../DESIGN.md#presentation); [Judgement: the separation of the sign-in from the CDR authentication](#dh-2111))
+- <a id="dh-2056"></a>**DH-2056** The title of the sign-in page is "Sign in - <brand name> online banking". ([the titles of the site](online-bank-site.md#dh-1831); [Judgement: the separation of the sign-in from the CDR authentication](#dh-2111))
 - <a id="dh-2057"></a>**DH-2057** The heading of the sign-in page is "Sign in to online banking". ([Judgement: the separation of the sign-in from the CDR authentication](#dh-2111))
 - <a id="dh-2058"></a>**DH-2058** The site and the consumer pages are on different origins. ([a listener of its own for the site](#dh-2063); [Judgement: the separation of the sign-in from the CDR authentication](#dh-2111))
 - <a id="dh-2059"></a>**DH-2059** The site has no link to the consumer pages. ([Judgement: the separation of the sign-in from the CDR authentication](#dh-2111))

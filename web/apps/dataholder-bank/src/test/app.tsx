@@ -68,7 +68,7 @@ export const worker = setupWorker(
   http.get("/api/session", ({ response }) => response(403).json(noSession)),
 );
 
-// DESIGN.md (Online bank site): each page is usable at 320 CSS px with no horizontal scroll.
+// services/dataholder/design/online-bank-site.md (Accessibility): each page is usable at 320 CSS px with no horizontal scroll.
 export const narrowWidth = 320;
 
 // No worker.stop() after the file: in Firefox, it also stops the mocks of the next test file.

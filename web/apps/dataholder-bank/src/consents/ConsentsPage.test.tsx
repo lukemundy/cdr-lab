@@ -24,6 +24,7 @@ const handling = (brandName: string) =>
   `other permissions you may have given them. See ${brandName}'s CDR policy or their Dashboard for more ` +
   "information.";
 
+// Verifies: DH-1904
 test("the dashboard shows the current consents, then the ended consents in a group", async () => {
   serveConsents([
     consent("arrangement-3", { clientName: "Tax Helper", brandName: "Tax Co" }),
@@ -48,6 +49,7 @@ test("the dashboard shows the current consents, then the ended consents in a gro
   expect(terms(ended.element())).toContain("Ended:20 October 2026");
 });
 
+// Verifies: DH-1910, DH-1911, DH-1912, DH-1914, DH-1919
 test("a consent shows its data recipient, dates, accounts, data clusters and disclosures", async () => {
   serveConsents([
     consent("arrangement-1", {
@@ -121,6 +123,7 @@ test("a consent with no legal entity name, no account and one occasion shows onl
   expect(card.getByRole("heading", { name: "Accounts" }).query()).toBeNull();
 });
 
+// Verifies: DH-1908
 test("a customer with no consent sees that they share no data", async () => {
   serveConsents([]);
 
@@ -155,6 +158,7 @@ test("a failure of the site API shows the problem", async () => {
     .toBeVisible();
 });
 
+// Verifies: DH-1901
 test("with no session, the dashboard goes to the sign-in page", async () => {
   renderApp("/data-sharing");
 
@@ -180,6 +184,7 @@ test("when the session ends, the dashboard goes to the sign-in page, which says 
 });
 
 describe.each(presets)("with the preset $name", (preset) => {
+  // Verifies: DH-1854, DH-1856
   test("the dashboard passes the accessibility checks and has no horizontal scroll at 320 CSS px", async () => {
     serveConsents([
       consent("arrangement-2", { clientName: "Budget Planner With A Very Long Software Name" }),

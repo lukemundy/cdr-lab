@@ -6,7 +6,7 @@ This area gives the lab-only operator console: its functions, its presentation, 
 
 - <a id="dh-1400"></a>**DH-1400** The operator console is a web UI for the lab operator. It shows the customers, their accounts, their transactions and their arrangements, the notices to the data recipients, the registrations and the participant statuses of the software products. ([Judgement: web UIs that the service embeds (ADR 0014)][adr-0014])
 - <a id="dh-1401"></a>**DH-1401** The operator console is a lab-only feature. A real component does not depend on it. ([Judgement: web UIs that the service embeds (ADR 0014)][adr-0014])
-- <a id="dh-1402"></a>**DH-1402** The operator console is not a consumer dashboard. It does not meet rule 1.15, because the consumer dashboard is an online service for the consumer. The [consumer dashboard](../DESIGN.md#consumer-dashboard) is on the online bank site. ([CDR Rules][cdr-rules], rule 1.15(1))
+- <a id="dh-1402"></a>**DH-1402** The operator console is not a consumer dashboard. It does not meet rule 1.15, because the consumer dashboard is an online service for the consumer. The [consumer dashboard](consumer-dashboard.md#dh-1900) is on the online bank site. ([CDR Rules][cdr-rules], rule 1.15(1))
 
 ## Overview
 

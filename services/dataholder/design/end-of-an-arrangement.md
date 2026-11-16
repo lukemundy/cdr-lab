@@ -28,7 +28,7 @@ The authorisation server library gives [the CDR arrangement revocation endpoint]
 
 ## Withdrawal by the consumer
 
-- <a id="dh-0912"></a>**DH-0912** The consumer can withdraw an authorisation on the [consumer dashboard](../DESIGN.md#consumer-dashboard) of the online bank site. ([CDR Rules][cdr-rules], rule 4.25(1)(a); [CDR Support: Withdrawal of authorisation to disclose CDR data and notification][support-withdrawal-notification])
+- <a id="dh-0912"></a>**DH-0912** The consumer can withdraw an authorisation on the [consumer dashboard](consumer-dashboard.md#dh-1924) of the online bank site. ([CDR Rules][cdr-rules], rule 4.25(1)(a); [CDR Support: Withdrawal of authorisation to disclose CDR data and notification][support-withdrawal-notification])
 - <a id="dh-0913"></a>**DH-0913** When the consumer asks the brand to withdraw an authorisation, the operator withdraws it with the [operator interface](operator-interface.md#dh-0727) or the [operator console](operator-console-create.md#dh-1443). This is the simple alternative method of communication. ([CDR Rules][cdr-rules], rule 4.25(1)(b); [CDR Support: Withdrawal of authorisation to disclose CDR data and notification][support-withdrawal-notification])
 - <a id="dh-0914"></a>**DH-0914** Only the consumer dashboard shows the messages of the CDS Withdrawal Standards. The operator interface and the operator console do not show them. ([CDS: Withdrawal Standards][cds-withdrawal-standards]; [Judgement: the withdrawal messages only on the consumer dashboard](#dh-0951))
 - <a id="dh-0915"></a>**DH-0915** A withdrawal has its effect at the time of the request: the request of the consumer on the dashboard, or the request of the operator. ([CDR Rules][cdr-rules], rule 4.25(2), rule 4.26(1)(a) and (b))

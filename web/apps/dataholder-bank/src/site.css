@@ -1,4 +1,4 @@
-/* The layouts of the online bank site, selected by data-layout on the shell (services/dataholder/DESIGN.md, Presentation). */
+/* The layouts of the online bank site, selected by data-layout on the shell (services/dataholder/design/online-bank-site.md, Layouts). */
 @layer components {
   .bank {
     display: flex;

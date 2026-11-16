@@ -109,8 +109,7 @@ func TestTheCatalogueOfEachPresetBrandHasFiveCategoriesAFutureProductAndAPastPro
 	}
 }
 
-// DESIGN.md, Online bank site: Presentation. Each preset has a layout of its own, a hero photo and a photo for each
-// category that has a current product.
+// Verifies: DH-1834
 func TestEachPresetBrandHasALayoutOfItsOwnAndAPhotoForEachCurrentCategory(t *testing.T) {
 	now := time.Now()
 	layouts := map[string]string{}
