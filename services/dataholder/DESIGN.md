@@ -43,7 +43,7 @@ Out of scope for now:
 - Customers that are organisations, joint accounts, secondary users and nominated representatives (see Decisions).
 - Redirect to App and decoupled authentication. The data holder has no app (see Decisions).
 - A change of the signing key of the data holder.
-- Encryption of ID tokens and of authorisation responses (see Decisions).
+- Encryption of ID tokens and of authorisation responses ([Judgement: no encryption of ID tokens or authorisation responses](../../pkg/authserver/design/configuration.md#auth-0017)).
 - The admin APIs: Get Metrics and Metadata Update.
 - The traffic thresholds of the CDS, and the 429 response for a request above them.
 - A CDR policy of the data holder. Rule 7.2(8) requires that each online service of the data holder makes it readily available, also the online bank site (see Decisions).
@@ -253,60 +253,34 @@ The security endpoints have no fixed path, except the OpenID Provider configurat
 
 ## Authorisation server
 
+The data holder serves the data holder authorisation server of the [authorisation server library](../../pkg/authserver/design/README.md). This section gives only the choices of the data holder.
+
 ### OpenID Provider configuration and JWKS
 
-- The issuer is an `https` URL with no query and no fragment. The OpenID Provider configuration is at `<issuer>/.well-known/openid-configuration`, and its `issuer` is that same URL. ([OpenID Connect Discovery, section 4.3][oidc-discovery-validation]; see Decisions)
-- The configuration has each field that the CDS requires as a minimum, with these values ([CDS: OpenID Provider Configuration endpoint][cds-oidc-config]):
-
-| Field | Value |
-|---|---|
-| `issuer` | The issuer |
-| `jwks_uri`, `authorization_endpoint` | URLs on the TLS listener |
-| `registration_endpoint`, `token_endpoint`, `userinfo_endpoint`, `introspection_endpoint`, `revocation_endpoint`, `pushed_authorization_request_endpoint`, `cdr_arrangement_revocation_endpoint` | URLs on the mTLS listener |
-| `scopes_supported` | The supported scopes (see below) |
-| `claims_supported` | `sub`, `acr`, `auth_time`, `name`, `given_name`, `family_name`, `updated_at` ([CDS: Scopes and Claims][cds-scopes-and-claims]), and `sharing_duration` ([CDS: Request Object][cds-request-object]: the data holder "MUST support an additional claim" with this name; see Decisions) |
-| `claims_parameter_supported` | `true` ([CDS: Request Object][cds-request-object]: the request object has `sharing_duration` and the `acr` request in `claims`) |
-| `acr_values_supported` | `urn:cds.au:cdr:2` |
-| `subject_types_supported` | `pairwise` |
-| `grant_types_supported` | `authorization_code`, `client_credentials`, `refresh_token` |
-| `response_types_supported` | `code` |
-| `response_modes_supported` | `jwt` |
-| `code_challenge_methods_supported` | `S256` |
-| `token_endpoint_auth_methods_supported` | `private_key_jwt` |
-| `token_endpoint_auth_signing_alg_values_supported`, `request_object_signing_alg_values_supported` | `PS256`, `ES256` |
-| `id_token_signing_alg_values_supported`, `authorization_signing_alg_values_supported` | `PS256` |
-| `tls_client_certificate_bound_access_tokens`, `require_pushed_authorization_requests` | `true` |
-
-- The configuration does not have the fields for the encryption of ID tokens or of authorisation responses. (See Decisions)
+- The issuer is an `https` URL with no query and no fragment. ([OpenID Connect Discovery, section 4.3][oidc-discovery-validation]; see Decisions)
+- The OpenID Provider configuration is [below the issuer](../../pkg/authserver/design/configuration.md#auth-0001), and it has [the fields and values of the data holder configuration](../../pkg/authserver/design/configuration.md#auth-0004).
 - The supported scopes are `openid`, `profile`, `cdr:registration`, `common:customer.basic:read`, `bank:accounts.basic:read`, `bank:accounts.detail:read` and `bank:transactions:read`. ([CDS: Scopes and Claims][cds-scopes-and-claims], [CDS: Authorisation Scopes][cds-authorisation-scopes]; see Decisions)
-- The JWKS has the public key of each signing key of the data holder. No two keys have the same `kid`. ([CDS: JSON Web Key Set endpoint][cds-jwks-endpoint])
+- The JWKS has [the public key of each signing key](../../pkg/authserver/design/configuration.md#auth-0006). The data holder gives [each key a different key ID](../../pkg/authserver/design/configuration.md#auth-0008).
 - The `jwksEndpoint` of the brand on the Register is the `jwks_uri` of the configuration. Judgement: the CDS permits two URLs, and one key set is the least complex.
 
 ### Signing keys
 
-- The data holder signs with PS256 only. Its keys are RSA keys of 2048 bits or longer. ([FAPI 1.0 Advanced, section 8.6][fapi-algorithms]; see Decisions)
+- The data holder signs [with PS256 only](../../pkg/authserver/design/configuration.md#auth-0009), and its keys are [RSA keys of 2048 bits or longer](../../pkg/authserver/design/configuration.md#auth-0012).
 - The data holder creates its signing key when it has none. (See Decisions)
 
 ### Client authentication
 
-- A software product authenticates with `private_key_jwt`: a request has `client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer` and a `client_assertion`. The data holder supports no other method. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
-- The `iss` and the `sub` of the assertion are the client ID that the data holder issued. The `client_id` parameter is optional. When it is present, it is equal to the `iss`. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
-- The data holder validates the assertion signature with the keys at the `jwks_uri` of the registration. It accepts PS256 and ES256. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt], [FAPI 1.0 Advanced, section 8.6][fapi-algorithms])
-- The data holder accepts its issuer, the URL of its token endpoint, or the URL of the endpoint called as the assertion `aud`. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
-- The data holder refuses an assertion with no `jti` or no `exp`, an assertion that is expired, and an assertion whose `jti` it accepted before. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
-- The data holder refuses an assertion whose `exp` is more than 10 minutes after the time of the request. (See Decisions)
+- A software product authenticates with [`private_key_jwt`](../../pkg/authserver/design/client-authentication.md#auth-0020). Its client ID is the client ID that the data holder issued at the registration.
+- The data holder gives the `jwks_uri` of the registration to [validate the assertion signature](../../pkg/authserver/design/client-authentication.md#auth-0025).
+- The data holder refuses an assertion that breaks a rule of the library, for example [a `jti` that it accepted before](../../pkg/authserver/design/client-authentication.md#auth-0030) or [an `exp` more than 10 minutes ahead](../../pkg/authserver/design/client-authentication.md#auth-0031).
 
 ### Token endpoint
 
-- The token endpoint accepts the grant types `client_credentials`, `authorization_code` and `refresh_token`. A different grant type gives 400 `unsupported_grant_type`. ([CDS: Data Recipients calling Data Holders][cds-dr-calling-dh], [RFC 6749, section 5.2][rfc6749-errors])
-- The rules for the `authorization_code` and `refresh_token` grants are in "Tokens of a consent". The rules below that name a client credentials token are for that grant only. Each other rule is for all grants.
-- A client whose registration does not have the grant type of the request in its `grant_types` gets 400 `unauthorized_client`. ([RFC 6749, section 5.2][rfc6749-errors])
-- A client credentials token has only the scope `cdr:registration`. A request with no `scope` gets this scope. A request for a different scope gives 400 `invalid_scope`, as does a request from a client whose registration does not have `cdr:registration`. ([CDS: Authorisation Scopes][cds-authorisation-scopes]: the scope "MUST never be included in the same access token as a CDR Data scope"; see Decisions)
-- The access token is bound to the client certificate of the request, as RFC 8705 specifies. ([CDS: Holder of Key Mechanism][cds-hok], [RFC 8705, section 3][rfc8705-binding])
-- The access token expires 5 minutes after it is issued. A client credentials token has no refresh token. ([CDS: Access Token][cds-access-token]: between 2 and 10 minutes; [RFC 6749, section 4.4.3][rfc6749-client-credentials])
-- The response has `access_token`, `token_type` with the value `Bearer`, `expires_in` and `scope`. It has `Cache-Control: no-store`. ([RFC 6749, section 5.1][rfc6749-token-response]; the CDS examples have no `token_type`, and they are not normative)
-- Errors follow RFC 6749, section 5.2. A client authentication that fails gives 401 `invalid_client`, also when the client ID does not exist. Each other error gives 400. ([RFC 6749, section 5.2][rfc6749-errors])
-- The data holder does not compare the client certificate with the Register data of the software product. ([CDS: Holder of Key Mechanism][cds-hok]: the CDS requires only that the token and the certificate match)
+- The token endpoint accepts [three grant types](../../pkg/authserver/design/token-endpoint.md#auth-0035). The rules for the `authorization_code` and `refresh_token` grants are in "Tokens of a consent".
+- A client credentials token has [only the scope `cdr:registration`](../../pkg/authserver/design/token-endpoint.md#auth-0038), and it [expires 5 minutes after it is issued](../../pkg/authserver/design/token-endpoint.md#auth-0043).
+- Each access token is [bound to the client certificate of the token request](../../pkg/authserver/design/token-endpoint.md#auth-0045).
+- Errors have [the format and the codes of RFC 6749, section 5.2](../../pkg/authserver/design/token-endpoint.md#auth-0048). A failed client authentication gives [401 `invalid_client`](../../pkg/authserver/design/client-authentication.md#auth-0032).
+- The data holder [does not compare the client certificate with the Register data](../../pkg/authserver/design/token-endpoint.md#auth-0054).
 
 ## Client registration
 
@@ -330,7 +304,7 @@ The security endpoints have no fixed path, except the OpenID Provider configurat
 
 - The data holder verifies the signature of the request JWT with the keys at the `jwks_uri` of the SSA. ([CDS: Registration Validation][cds-registration-validation])
 - The `jwks_uri` is an `https` URL. The data holder connects to any host, and trusts only the public CAs in its configuration for that connection. It has no allowlist of data recipient hosts. ([CDR Support: Egress policy for calls from DH to ADRs][support-egress]; [CDS: Transaction Security][cds-transaction-security])
-- `token_endpoint_auth_method` is `private_key_jwt`. `token_endpoint_auth_signing_alg` and `request_object_signing_alg` are `PS256` or `ES256`. `id_token_signed_response_alg` and `authorization_signed_response_alg` are `PS256`. `application_type`, when present, is `web`. ([CDS: Registration Request using JWT][cds-registration-request]; see Decisions for `PS256`)
+- `token_endpoint_auth_method` is `private_key_jwt`. `token_endpoint_auth_signing_alg` and `request_object_signing_alg` are `PS256` or `ES256`. `id_token_signed_response_alg` and `authorization_signed_response_alg` are `PS256`. `application_type`, when present, is `web`. ([CDS: Registration Request using JWT][cds-registration-request]; [Judgement: the signing algorithms](../../pkg/authserver/design/configuration.md#auth-0013))
 - Each value of `grant_types` is `client_credentials`, `authorization_code` or `refresh_token`. ([CDS: Registration Request using JWT][cds-registration-request])
 - `response_types` contains `code`. The data holder registers only `code`, also when the request has `code id_token`. (See Decisions)
 - `redirect_uris`, when present, has only values that are in the `redirect_uris` of the SSA. ([CDS: Registration Request using JWT][cds-registration-request])
@@ -343,7 +317,7 @@ The security endpoints have no fixed path, except the OpenID Provider configurat
 - The `scope` of the registration has the scopes of the SSA that the data holder supports, in the sequence of the SSA. ([CDS: Registration Validation][cds-registration-validation])
 - The `redirect_uris` of the registration are those of the request. When the request has none, they are those of the SSA.
 - When the request has no `request_object_signing_alg`, the registration has `PS256`. When it has no `application_type`, the registration has `web`. ([CDS: Registration Request using JWT][cds-registration-request]: "data holders are expected to respond with an appropriate default value")
-- The data holder ignores each claim of the request that it does not support, with no error. This includes the claims for the encryption of ID tokens and of authorisation responses. ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]; see Decisions)
+- The data holder ignores each claim of the request that it does not support, with no error. This includes the claims for the encryption of ID tokens and of authorisation responses. ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]; [Judgement: no encryption of ID tokens or authorisation responses](../../pkg/authserver/design/configuration.md#auth-0017))
 
 ### Registration response
 
@@ -498,7 +472,7 @@ After the authentication, one page asks the consumer for the authorisation to di
 
 - At the end of a flow, the data holder redirects the browser to the `redirect_uri` of the request object, with one query parameter, `response`. It is a JWT that the data holder signs with PS256. ([CDS: Authorization Code Flow][cds-code-flow], [JARM, section 2.3.1][jarm-query]; see Decisions)
 - The JWT has `iss` (the issuer), `aud` (the client ID) and `exp`, which is 10 minutes after the time of the response. For a confirmation it has `code`. For an error it has `error` and `error_description`. It has `state` when the request object has one. ([JARM, section 2.1][jarm-response]: a lifetime of 10 minutes at most is recommended)
-- The response is not encrypted. ([CDS: Authorization Code Flow][cds-code-flow]; see Decisions)
+- The response is not encrypted. ([CDS: Authorization Code Flow][cds-code-flow]; [Judgement: no encryption of ID tokens or authorisation responses](../../pkg/authserver/design/configuration.md#auth-0017))
 - The authorisation code is valid for 60 seconds and for one use. ([RFC 6749, section 4.1.2][rfc6749-code]: 10 minutes at most; see Decisions)
 
 ### CDR arrangement
@@ -538,7 +512,7 @@ These rules apply to each page of the authentication and the consent.
 
 ### ID token
 
-- The data holder signs the ID token with PS256. It does not encrypt it. ([CDS: Baseline ID Token requirements][cds-id-token]; see Decisions)
+- The data holder signs the ID token with PS256. It does not encrypt it. ([CDS: Baseline ID Token requirements][cds-id-token]; [Judgement: the signing algorithms](../../pkg/authserver/design/configuration.md#auth-0013); [Judgement: no encryption of ID tokens or authorisation responses](../../pkg/authserver/design/configuration.md#auth-0017))
 - The ID token has `iss`, `sub`, `aud`, `exp`, `iat`, `auth_time`, `acr` and `nonce`. The `acr` is `urn:cds.au:cdr:2`. ([OpenID Connect Core, section 2][oidc-core-id-token], [CDS: Claims][cds-claims])
 - The ID token has no claim with personal information, and no `sharing_expires_at` or `refresh_token_expires_at`. ([CDS: Baseline ID Token requirements][cds-id-token]: "MUST NOT contain any Personal Information (PI) claims")
 
@@ -1206,19 +1180,14 @@ These requirements are for the lab. The CDS non-functional requirements for data
 | Load into a data holder that has products | Refused | Judgement: a merge of two sets can leave a `lastUpdated` that is not correct. A reset is simple in the lab. |
 | Issuer and hosts | The issuer is the `infosecBaseUri`, on the TLS listener. The mTLS endpoints are on a second listener. | OpenID Connect Discovery requires that the `issuer` is the URL prefix of the configuration ([section 4.3][oidc-discovery-validation]), and the configuration endpoint is a TLS endpoint ([CDS: OpenID Provider Configuration endpoint][cds-oidc-config]). The CDS example has an issuer on the mTLS host, which does not obey that rule and is not normative. |
 | Paths of the security endpoints | Not specified. A client gets each URL from the configuration. | The CDS gives a path only for the configuration ([CDS: Participant Endpoints][cds-participant-endpoints]). The DCR OpenAPI specification has the server URL `https://mtls.dh.example.com/cds-au/v1`, and the security profile examples use `/register`. A client that reads the configuration works with each. |
-| `acr_values_supported` and `claims_supported` | `urn:cds.au:cdr:2`, and the claims that the CDS requires | The CDS requires the two fields ([CDS: OpenID Provider Configuration endpoint][cds-oidc-config]). Judgement: these are the minimum values. The change that adds consumer authentication can add values. |
 | Supported scopes | `openid`, `profile`, `cdr:registration`, and the scopes of the banking and common APIs that are in the plan for this data holder | The CDS requires `openid` and `profile` ([CDS: Scopes and Claims][cds-scopes-and-claims]). Judgement: a scope with no API gives a consent that discloses nothing. Add a scope with the first API that needs it. |
-| Signing algorithms | The data holder signs with PS256 only. It accepts PS256 and ES256 from clients. | FAPI 1.0 Advanced permits PS256 and ES256 ([section 8.6][fapi-algorithms]). Data recipients must support the two ([CDR Support: Guidance on Dynamic Client Registration][support-dcr]). Judgement: one algorithm for the data holder is the least complex, and the mock Register does the same. |
-| Encryption of ID tokens and of authorisation responses | Not supported. The registration claims for it are ignored. | ID token encryption is only for the hybrid flow, which the CDS retired on 12 May 2025 ([CDS: Registration Request using JWT][cds-registration-request]). Encryption of authorisation responses is optional for a data holder ([CDS: OpenID Provider Configuration endpoint][cds-oidc-config]). The data holder ignores the fields that it does not support ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]). |
 | `response_types` with `code id_token` | Accepted when `code` is also present. Only `code` is registered. | The CDS schema still lists `code id_token`, but data recipients "SHALL only use" `code` from 12 May 2025 ([CDS: Registration Request using JWT][cds-registration-request]). An authorisation server can replace a requested value ([RFC 7591, section 2][rfc7591-metadata]). Judgement: a data recipient that still sends the two values can then register, and the response shows what is registered. |
 | Signing key storage | In the data holder database. The data holder creates the key when it has none. | Judgement: the key must stay the same after a restart, and the repository must contain no keys. The mock Register does the same. The lab database is not encrypted. |
 | Status of the software product at registration | Not checked | The CDS does not require the check. The Register issues an SSA only for an ACTIVE software product of an ACTIVE data recipient, and the SSA is valid for 10 minutes ([CDS: SSA][cds-ssa]). Register statuses gives the reaction at the other endpoints. |
-| `sharing_duration` in `claims_supported` | Present | The CDS example of the configuration does not have it, but the CDS calls it a claim that the data holder must support ([CDS: Request Object][cds-request-object]). The OpenID conformance suite requires it for the CDR profile. |
 | Second visit with a `request_uri`, before the consumer completes the flow | Refused with the error page | The CDS requires that the data holder "MUST reject the reuse of request_uri values" ([CDS: Request Object, Data Holders][cds-request-object-dh]). FAPI recommends one-time use at the completion of the flow, and the OpenID conformance suite tests that recommendation. The CDS wins. |
 | TLS probes of the OpenID conformance suite | The failures of the conditions `DisallowInsecureCipher` and `CheckForBCP195InsecureFAPICiphers` are accepted | The suite probes TLS 1.2 on the resource endpoint with no client certificate. The mTLS listener ends that handshake with the alert `handshake_failure`, as it must for a client with no certificate ([CDS: Transaction Security][cds-transaction-security]), and the suite reports the closed connection as a failure. A handshake with a cipher suite that the CDS does not permit also gets `handshake_failure`. |
 | `sector_identifier_uri` | Registered and returned as the SSA gives it. The data holder does not get the document. It uses only the host of the URL, for the pairwise `sub`. | The DSB article that requires the document at registration is under review. See Open questions. |
 | Lifetime and reuse of a registration request JWT | `exp` not more than 10 minutes after the request. A `jti` is accepted one time, across all software products, for 1 hour. | The CDS says only that the `jti` is "used to prevent reuse of the token" ([CDS: Registration Request using JWT][cds-registration-request]), and gives no lifetime. Judgement: a short limit keeps the window for a stolen request small, and a request is not valid for longer than the limit, so a longer memory adds nothing. The mock Register uses the same limits for client assertions. |
-| Lifetime and reuse of a client assertion | The same limits as a registration request JWT | The CDS requires that an assertion is used one time ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt]), and gives no lifetime. |
 | Reuse of an SSA | Permitted until the SSA expires | The SSA definition says that its `jti` is "used to prevent reuse of the SSA" ([CDS: SSA Definition][cds-ssa-definition]), but no rule requires that a data holder refuses a second use. Judgement: a software product can send one SSA in a `POST` and then in a `PUT`. The duplicate rule and the 10 minutes of the SSA limit a replay. |
 | Error code of each registration failure | See Registration errors | The CDS gives only the four codes of RFC 7591 and no table of conditions ([CDS: Registration Errors][cds-registration-errors]). Judgement: a fault in the SSA gives `invalid_software_statement`, a redirect URI that the SSA does not have gives `invalid_redirect_uri`, and each other fault of the request gives `invalid_client_metadata`. |
 | Error code of a duplicate registration | 400 `invalid_software_statement` | The CDS requires 400 and gives no code ([CDS: Registration Errors][cds-registration-errors]). Its example, which is not normative, uses this code. |
@@ -1226,8 +1195,6 @@ These requirements are for the lab. The CDS non-functional requirements for data
 | Limit on new requests for the Register JWKS | One time each second | Judgement: an SSA with an invented `kid` must not make the data holder call the Register for each request. The Register publishes a new key before it signs with it, so a data holder that has the JWKS from after that time has the key. |
 | Size of a registration request | 64 KiB at most | Judgement: an SSA and the client metadata are a few kilobytes. A limit protects the data holder from a large body. |
 | `unapproved_software_statement` | Not used | Judgement: the data holder approves each valid SSA of the Register, so the condition cannot occur. |
-| Scope of a client credentials token | `cdr:registration` only, and it is the default | The CDS forbids this scope and a CDR data scope in one token ([CDS: Authorisation Scopes][cds-authorisation-scopes]). The client credentials grant has no consumer, so a data scope has no meaning for it. RFC 6749 permits a default scope ([section 3.3][rfc6749-scope]). |
-| Access token lifetime | 5 minutes | The CDS permits 2 to 10 minutes ([CDS: Access Token][cds-access-token]). The mock Register uses 5 minutes. |
 | Errors of registration management | 401 and 403 with no body, and the `WWW-Authenticate` values of RFC 6750 | The DCR OpenAPI specification gives 401 for an "unknown or invalid Client or invalid access token" and 403 when the client "does not have permission", with no body schema ([`cds_dcr.json`][cds-openapi-dcr]). The error values are those of [RFC 6750, section 3.1][rfc6750-errors]. A certificate that does not match gives `invalid_token` ([RFC 8705, section 3][rfc8705-binding]). |
 | `DELETE` of a registration | Supported | The CDS marks it as optional ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]). Judgement: a lab user and the conformance tests can then register a software product again with no reset of the lab. |
 | CORS on the OpenID Provider configuration and the JWKS | `Access-Control-Allow-Origin: *` | The CDS says that these endpoints do "not require CORS" ([CDS: OpenID Provider Configuration endpoint][cds-oidc-config]), which does not forbid the header. Judgement: one behaviour for all TLS endpoints is the least complex. |
@@ -1514,7 +1481,6 @@ These requirements are for the lab. The CDS non-functional requirements for data
 [cds-multi-brand]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#multi-brand-support-separate-issuers-for-data-holder-brands
 [cds-scopes-and-claims]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#scopes-and-claims
 [cds-authorisation-scopes]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#authorisation-scopes
-[cds-private-key-jwt]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#private-key-jwt-client-authentication
 [cds-hok]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#holder-of-key-mechanism
 [cds-access-token]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#access-token
 [cds-ssa]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#software-statement-assertion-ssa
@@ -1531,7 +1497,6 @@ These requirements are for the lab. The CDS non-functional requirements for data
 [cds-cert-trust-model]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#certificate-trust-model
 [cds-openapi-dcr]: https://github.com/ConsumerDataStandardsAustralia/standards/blob/v1.36.0/docs/includes/swagger/cds_dcr.json
 [cds-consent]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#consent
-[cds-dr-calling-dh]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#data-recipients-calling-data-holders
 [cds-par-endpoint]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#pushed-authorisation-endpoint
 [cds-authorisation-endpoint]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#authorisation-endpoint
 [cds-introspection-endpoint]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#introspection-endpoint
@@ -1595,9 +1560,6 @@ These requirements are for the lab. The CDS non-functional requirements for data
 [oidc-core-refresh-response]: https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokenResponse
 [oidc-discovery-validation]: https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfigurationValidation
 [oidc-core-pairwise]: https://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg
-[rfc6749-scope]: https://www.rfc-editor.org/rfc/rfc6749#section-3.3
-[rfc6749-client-credentials]: https://www.rfc-editor.org/rfc/rfc6749#section-4.4.3
-[rfc6749-token-response]: https://www.rfc-editor.org/rfc/rfc6749#section-5.1
 [rfc6749-errors]: https://www.rfc-editor.org/rfc/rfc6749#section-5.2
 [rfc6749-code]: https://www.rfc-editor.org/rfc/rfc6749#section-4.1.2
 [rfc6749-authorisation-errors]: https://www.rfc-editor.org/rfc/rfc6749#section-4.1.2.1

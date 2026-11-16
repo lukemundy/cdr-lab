@@ -198,6 +198,7 @@ This table is the registry of the codes. A new specification adds its code to th
 | `conformance` | `CONF` |
 | `web/packages/ui` | `UI` |
 | `pkg/cds` | `CDSL` |
+| `pkg/authserver` | `AUTH` |
 | `pkg/ca` | `CA` |
 
 A code has 2 to 5 capital letters. A code is not the name of a standard, and it is not an existing code with one letter changed. For example, `CDS` is the name of a standard, and `CON` is too near to `CONF`.

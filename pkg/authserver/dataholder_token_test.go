@@ -228,6 +228,7 @@ func leaf(t *testing.T, cert tls.Certificate) *x509.Certificate {
 	return parsed
 }
 
+// Verifies: AUTH-0038, AUTH-0042, AUTH-0043, AUTH-0046, AUTH-0047
 func TestARegisteredClientGetsARegistrationTokenThatIsBoundToItsCertificate(t *testing.T) {
 	b := newBank(t)
 
@@ -250,6 +251,7 @@ func TestARegisteredClientGetsARegistrationTokenThatIsBoundToItsCertificate(t *t
 	)
 }
 
+// Verifies: AUTH-0039
 func TestAClientCredentialsRequestWithNoScopeGetsTheRegistrationScope(t *testing.T) {
 	b := newBank(t)
 	form := b.form(b.assertion())
@@ -261,6 +263,7 @@ func TestAClientCredentialsRequestWithNoScopeGetsTheRegistrationScope(t *testing
 	assert.Equal(t, "cdr:registration", r.body["scope"])
 }
 
+// Verifies: AUTH-0040
 func TestAClientCredentialsTokenHasOnlyTheRegistrationScope(t *testing.T) {
 	for _, scope := range []string{"bank:accounts.basic:read", "cdr:registration bank:accounts.basic:read", "openid"} {
 		t.Run(scope, func(t *testing.T) {
@@ -273,6 +276,7 @@ func TestAClientCredentialsTokenHasOnlyTheRegistrationScope(t *testing.T) {
 	}
 }
 
+// Verifies: AUTH-0037, AUTH-0041
 func TestAClientWhoseRegistrationDoesNotPermitTheRequestIsRefused(t *testing.T) {
 	tests := map[string]struct {
 		change func(*authserver.DataHolderClient)
@@ -299,6 +303,7 @@ func TestAClientWhoseRegistrationDoesNotPermitTheRequestIsRefused(t *testing.T) 
 	}
 }
 
+// Verifies: AUTH-0026, AUTH-0027
 func TestTheDataHolderTokenEndpointAcceptsItsThreeAudiencesAndTwoAlgorithms(t *testing.T) {
 	b := newBank(t)
 
@@ -325,6 +330,7 @@ func TestTheDataHolderTokenEndpointAcceptsItsThreeAudiencesAndTwoAlgorithms(t *t
 	}
 }
 
+// Verifies: AUTH-0025, AUTH-0028, AUTH-0029, AUTH-0030, AUTH-0031, AUTH-0032
 func TestTheDataHolderTokenEndpointRefusesAnAssertionThatIsNotValid(t *testing.T) {
 	b := newBank(t)
 
@@ -360,6 +366,7 @@ func TestTheDataHolderTokenEndpointRefusesAnAssertionThatIsNotValid(t *testing.T
 	}
 }
 
+// Verifies: AUTH-0036
 func TestTheDataHolderTokenEndpointRefusesOtherGrants(t *testing.T) {
 	for _, grant := range []string{"urn:ietf:params:oauth:grant-type:jwt-bearer", "password"} {
 		t.Run(grant, func(t *testing.T) {
@@ -372,6 +379,7 @@ func TestTheDataHolderTokenEndpointRefusesOtherGrants(t *testing.T) {
 	}
 }
 
+// Verifies: AUTH-0055
 func TestVerifyAccessTokenRefusesATokenThatTheClientCannotUse(t *testing.T) {
 	b := newBank(t)
 	token := b.accessToken()
