@@ -1,7 +1,7 @@
 import Color from "colorjs.io";
 
-// The colours of the console shell, each a mix of two roles (web/packages/ui/DESIGN.md, Layout). theme.css gives
-// each one as a Tailwind colour.
+// The colours of the console shell, each a mix of two roles (web/packages/ui/design/layout.md, UI-0083). theme.css
+// gives each one as a Tailwind colour.
 export interface ShellMix {
   id: string;
   role: string;
@@ -22,8 +22,8 @@ export function shellMixCSS({ id, role, percent, base }: ShellMix) {
   return `--color-${id.replace(".", "-")}: color-mix(in oklab, ${variable(role)} ${percent}%, ${variable(base)});`;
 }
 
-// The roles that the brand of a participant gives to its console (web/packages/ui/DESIGN.md, Brands). The data holder
-// serves the same list (services/dataholder/internal/adapter/branddir, consoleProperties).
+// The roles that the brand of a participant gives to its console (web/packages/ui/design/tokens-and-brands.md,
+// UI-0035). The data holder serves the same list (services/dataholder/internal/adapter/branddir, consoleProperties).
 export const participantConsoleRoles = [
   "color.brand",
   "color.fg-on-brand",

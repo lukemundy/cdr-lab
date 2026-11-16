@@ -33,7 +33,7 @@ export const contrastPairs = [...text, ...nonText];
 const shell = ["shell.band", "shell.page"];
 
 // The pairs of the console shell, where a role of the brand of a participant can meet a role of the lab brand
-// (web/packages/ui/DESIGN.md, Tokens).
+// (web/packages/ui/design/tokens-and-brands.md, UI-0016).
 export const consoleShellPairs: ContrastPair[] = [
   ...pairs(["color.fg-on-hero"], ["color.hero", "shell.nav-hover", "shell.nav-current"], 4.5),
   ...pairs(["color.fg", "color.fg-muted", "color.heading", "color.link"], shell, 4.5),

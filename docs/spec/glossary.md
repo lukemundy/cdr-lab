@@ -299,7 +299,7 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 ### Lab brand
 
-- Lab term: the neutral brand of the design system, for each role that the brand of a participant does not give ([design system DESIGN.md: Brands][ui-brands]).
+- Lab term: the neutral brand of the design system, for each role that the brand of a participant does not give ([the lab brand](../../web/packages/ui/design/tokens-and-brands.md#ui-0033)).
 
 ### Load file
 
@@ -386,7 +386,6 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 [readme-component-types]: ../../README.md#component-types
 [readme-data]: ../../README.md#data
 [readme-lab]: ../../README.md#lab-deployment
-[ui-brands]: ../../web/packages/ui/DESIGN.md#brands
 [ui-design]: ../../web/packages/ui/DESIGN.md
 [accc-cert-mgmt]: https://consumerdataright.atlassian.net/wiki/spaces/DP/pages/360415310/Certificate+Management
 [cdr-act]: https://www.legislation.gov.au/C2004A00109/latest/text

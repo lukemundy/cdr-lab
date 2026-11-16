@@ -48,7 +48,7 @@ var contract = []tokenGroup{
 }
 
 // consoleProperties are the only roles of the brand in the console: the roles of the console shell, the link and the
-// primary action (web/packages/ui/DESIGN.md, Brands). The console uses the lab brand for the rest.
+// primary action (web/packages/ui/design/tokens-and-brands.md, UI-0035). The console uses the lab brand for the rest.
 var consoleProperties = []string{
 	"--ds-color-brand", "--ds-color-fg-on-brand", "--ds-color-hero", "--ds-color-fg-on-hero", "--ds-color-accent",
 	"--ds-color-heading", "--ds-color-link", "--ds-color-primary", "--ds-color-primary-hover",

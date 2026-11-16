@@ -94,21 +94,21 @@ This area gives the lab-only operator console: its functions, its presentation, 
 
 ## Presentation
 
-- <a id="dh-1465"></a>**DH-1465** The console is for desktop browsers. It is usable at a viewport width of 1280 CSS px and more. ([Judgement: web UIs that the service embeds (ADR 0014)][adr-0014])
+- <a id="dh-1465"></a>**DH-1465** The console is for desktop browsers, with the minimum width of a console of the design system. ([the minimum width of a console](../../../web/packages/ui/design/layout.md#ui-0070); [Judgement: web UIs that the service embeds (ADR 0014)][adr-0014])
 - <a id="dh-1466"></a>**DH-1466** The header of the console shows the logo of the brand on the brand colour, and the label "Operator console". The text alternative of the logo is the brand name. ([WCAG 2.2, SC 1.1.1][wcag-1-1-1]; [Judgement: the brand in the console](#dh-1523))
 - <a id="dh-1467"></a>**DH-1467** The console gets the brand name from the console API. Until the response, and when the request fails, the header and the tab title say "Data holder". ([one source of the brand name](brand.md#dh-0305); [Judgement: the source of the brand name in the UI](#dh-1524))
-- <a id="dh-1468"></a>**DH-1468** The console has the shell of a console of the design system. The brand gives the roles that the design system gives to the console of a participant: the shell colours, the link and the primary action. ([design system DESIGN.md: Brands][ui-brands]; [Judgement: the brand in the console](#dh-1523))
-- <a id="dh-1469"></a>**DH-1469** The rest of the console uses the neutral lab brand, with its font, its radius and the compact density. ([design system DESIGN.md: Layout][ui-layout]; [Judgement: the brand in the console](#dh-1523))
+- <a id="dh-1468"></a>**DH-1468** The console has the shell of a console of the design system, with the roles of the brand that the console of a participant uses. ([the roles of the brand in the console of a participant](../../../web/packages/ui/design/tokens-and-brands.md#ui-0035); [Judgement: the brand in the console](#dh-1523))
+- <a id="dh-1469"></a>**DH-1469** The rest of the console uses the lab brand, with its fonts and its radius, and the compact density. ([the lab brand for the other roles](../../../web/packages/ui/design/tokens-and-brands.md#ui-0034); [the fonts and the radius of the lab brand](../../../web/packages/ui/design/tokens-and-brands.md#ui-0036); [the compact density of a console](../../../web/packages/ui/design/tokens-and-brands.md#ui-0028); [Judgement: the brand in the console](#dh-1523))
 - <a id="dh-1470"></a>**DH-1470** The side navigation of each preset brand is not white. With the logo hidden, the colours of the shell tell the console of each preset brand from the console of each other preset brand and from the Register console. ([Judgement: consoles that differ in one look](#dh-1525))
 - <a id="dh-1471"></a>**DH-1471** "Overview" is the first item of the side navigation. ([Judgement: the content of the overview](#dh-1500))
 - <a id="dh-1472"></a>**DH-1472** The title of the browser tab is the brand name. The icon of the tab is [the mark of the brand](brand.md#dh-0326). ([Judgement: the brand in the console](#dh-1523))
 - <a id="dh-1473"></a>**DH-1473** The search, the sort and the page of a list are in the URL. For example, a reload of a list shows the same search, sort and page. ([Judgement: the same action and form rules in each console](operator-console-create.md#dh-1517))
 - <a id="dh-1474"></a>**DH-1474** A search replaces the history entry of the list. A sort and a page add a history entry. ([Judgement: the same action and form rules in each console](operator-console-create.md#dh-1517))
 - <a id="dh-1475"></a>**DH-1475** The detail of a customer, the transactions of an account and the detail of a registration each have their own URL. The page of the arrangements of a registration is in the URL of the detail of the registration. ([Judgement: the same action and form rules in each console](operator-console-create.md#dh-1517))
-- <a id="dh-1476"></a>**DH-1476** The console shows each time in the time zone of the browser, with its offset from UTC. For example, "2:05 pm UTC+8". ([Judgement: UTC for all times (ADR 0012)][adr-0012]; [design system DESIGN.md: Content][ui-content])
-- <a id="dh-1477"></a>**DH-1477** An amount shows with its sign and 2 decimal digits. A pending transaction shows as pending. ([design system DESIGN.md: Content][ui-content]; [CDS: BankingTransactionDetailV3][cds-schema-transaction-detail])
+- <a id="dh-1476"></a>**DH-1476** The console shows each time in the time zone of the browser, as the design system gives it. ([Judgement: UTC for all times (ADR 0012)][adr-0012]; [the time zone and the offset of a time](../../../web/packages/ui/design/content.md#ui-0147))
+- <a id="dh-1477"></a>**DH-1477** An amount shows in the format of the design system. A pending transaction shows as pending. ([the format of an amount](../../../web/packages/ui/design/content.md#ui-0157); [no accounting format in a console](../../../web/packages/ui/design/content.md#ui-0159); [CDS: BankingTransactionDetailV3][cds-schema-transaction-detail])
 - <a id="dh-1478"></a>**DH-1478** A BSB shows as two groups of three digits with a hyphen. For example, `062-000`. Its copy button copies the 6 digits. ([Judgement: the format of a BSB](#dh-1526))
-- <a id="dh-1479"></a>**DH-1479** The console has the accessibility level of an operator console in the design system: the automated checks pass, with no other target. ([design system DESIGN.md: Accessibility][ui-accessibility])
+- <a id="dh-1479"></a>**DH-1479** The console has the accessibility level of an operator console. ([the accessibility level of an operator console](../../../web/packages/ui/design/accessibility.md#ui-0111))
 
 ## Listener and security
 
@@ -226,7 +226,7 @@ The console is a web UI. The [web UI library](../../../pkg/platform/consolehttp/
 ### <a id="dh-1523"></a>DH-1523 The brand in the console
 
 - Kind: choice
-- Basis: Step 3.3. The design system gives the roles of the brand in the console of a participant ([design system DESIGN.md: Brands][ui-brands]).
+- Basis: Step 3.3. The design system gives the roles of the brand in the console of a participant ([the roles of the brand in the console of a participant](../../../web/packages/ui/design/tokens-and-brands.md#ui-0035)).
 - Reason: The console shows the brand and stays a dense tool for the lab operator. A different font changes the width of each table column. The label "Operator console" stops the lab operator from mistaking the console for a consumer page.
 
 ### <a id="dh-1524"></a>DH-1524 The source of the brand name in the UI
@@ -238,7 +238,7 @@ The console is a web UI. The [web UI library](../../../pkg/platform/consolehttp/
 ### <a id="dh-1525"></a>DH-1525 Consoles that differ in one look
 
 - Kind: choice
-- Basis: Step 3.3. The brand colour is white for three preset brands, so the side navigation uses the hero colour ([design system DESIGN.md: Brands][ui-brands]).
+- Basis: Step 3.3. The brand colour is white for three preset brands, so the side navigation uses the hero colour ([the side navigation on the hero colour](../../../web/packages/ui/design/layout.md#ui-0076)).
 - Reason: A lab operator who has more than one console open finds the tab of a brand in one look.
 
 ### <a id="dh-1526"></a>DH-1526 The format of a BSB
@@ -274,9 +274,5 @@ The console is a web UI. The [web UI library](../../../pkg/platform/consolehttp/
 [adr-0006]: ../../../docs/adr/0006-telemetry.md
 [adr-0012]: ../../../docs/adr/0012-utc-for-all-times.md
 [adr-0014]: ../../../docs/adr/0014-web-uis-as-embedded-react-single-page-applications.md
-[ui-brands]: ../../../web/packages/ui/DESIGN.md#brands
-[ui-layout]: ../../../web/packages/ui/DESIGN.md#layout
-[ui-content]: ../../../web/packages/ui/DESIGN.md#content
-[ui-accessibility]: ../../../web/packages/ui/DESIGN.md#accessibility
 [asvs-v3]: https://github.com/OWASP/ASVS/blob/v5.0.0_release/5.0/en/0x12-V3-Web-Frontend-Security.md
 [wcag-1-1-1]: https://www.w3.org/TR/WCAG22/#non-text-content

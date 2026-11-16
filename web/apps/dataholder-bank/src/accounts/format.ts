@@ -1,6 +1,6 @@
 import type { Transaction } from "../api/client";
 
-// The formats of the account data for a consumer, in Australian English (packages/ui/DESIGN.md, Content). A value that
+// The formats of the account data for a consumer, in Australian English (packages/ui/design/content.md). A value that
 // is not in its format shows as it is, so that the page never hides data.
 
 const locale = "en-AU";

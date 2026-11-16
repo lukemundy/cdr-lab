@@ -47,7 +47,7 @@ test("with no logo, the header has the name as text and not the brand colour", a
   expect(banner.element().className).not.toContain("bg-brand");
 });
 
-// The console of a participant shows its brand in the shell (DESIGN.md: Brands, Layout).
+// Verifies: UI-0075
 test("with a logo, the header shows the logo with the name as its alternative and the label on the brand colour", async () => {
   const container = renderShell({ logo: "/brand/logo.svg", label: "Operator console" });
 
@@ -61,11 +61,13 @@ test("with a logo, the header shows the logo with the name as its alternative an
   await expectNoAxeViolations(container);
 });
 
+// Verifies: UI-0075
 test("the header has a rule in the accent colour, with and without a logo", async () => {
   renderShell();
   expect(page.getByRole("banner").element().className).toContain("border-accent");
 });
 
+// Verifies: UI-0076, UI-0081
 test("the navigation is on the hero colour, and the main area on the shell page colour", async () => {
   const container = renderShell({ logo: "/brand/logo.svg", label: "Operator console" });
 
@@ -76,7 +78,7 @@ test("the navigation is on the hero colour, and the main area on the shell page 
   await expectNoAxeViolations(container);
 });
 
-// The focus role has less than 3:1 on the hero colour of some brands (DESIGN.md: Decisions).
+// Verifies: UI-0078
 test("the focus ring in the navigation is the text colour on the hero", async () => {
   renderShell();
 
@@ -88,6 +90,7 @@ test("the focus ring in the navigation is the text colour on the hero", async ()
   expect(style.outlineColor).toBe(style.color);
 });
 
+// Verifies: UI-0077
 test("the current item has its own background and a bar that does not use the accent", async () => {
   renderShell();
 
@@ -163,6 +166,7 @@ test("the keyboard reaches each navigation item with a visible focus", async () 
   expectVisibleFocus(page.getByRole("link", { name: "Data holders" }).element());
 });
 
+// Verifies: UI-0094
 test("each navigation item is 24 by 24 CSS px or more", () => {
   renderShell();
 

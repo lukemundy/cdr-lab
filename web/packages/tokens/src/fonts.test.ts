@@ -39,7 +39,7 @@ test.each(fonts.map(({ family }) => family))(
   },
 );
 
-// DESIGN.md (Typography): numbers in tables use tabular figures.
+// Verifies: UI-0046
 test("the body font has tabular figures", async () => {
   await document.fonts.load('16px "Inter Variable"');
   const font = "16px var(--ds-font-body)";

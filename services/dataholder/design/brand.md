@@ -42,10 +42,10 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 | ID | File | Required | Content | Source |
 |---|---|---|---|---|
 | <a id="dh-0322"></a>**DH-0322** | `brand.json` | Yes | The fields of [the brand file](#dh-0331) | [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
-| <a id="dh-0323"></a>**DH-0323** | `tokens.json` | Yes | The values of the brand for the semantic colour roles, the body font, the heading font and the radius of the design system. They are in the token format of the design system, with literal values only. | [design system DESIGN.md: Brands][ui-brands]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
+| <a id="dh-0323"></a>**DH-0323** | `tokens.json` | Yes | The values of the brand for the semantic colour roles, the body font, the heading font and the radius of the design system. They are in the token format of the design system, with literal values only. | [what a brand can change](../../../web/packages/ui/design/tokens-and-brands.md#ui-0031); [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 | <a id="dh-0324"></a>**DH-0324** | `logo.svg` | Yes | The logo, legible on the brand colour of the header of the pages and on white | [design system DESIGN.md: Consumer pages][ui-consumer-pages] |
 | <a id="dh-0325"></a>**DH-0325** | `logo.png` | Yes | The logo of `logo.svg` as a PNG image for the email, legible on the brand colour of the header of the email | [the logo in the OTP email](consumer-authentication.md#dh-1251); [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
-| <a id="dh-0326"></a>**DH-0326** | `mark.svg` | Yes | A square symbol of the brand, for small sizes | [design system DESIGN.md: Brands][ui-brands] |
+| <a id="dh-0326"></a>**DH-0326** | `mark.svg` | Yes | A square symbol of the brand, for small sizes | [a brand can change the logo](../../../web/packages/ui/design/tokens-and-brands.md#ui-0031) |
 | <a id="dh-0327"></a>**DH-0327** | `products.json` | Yes | The product catalogue of the brand, in the format of [a load file](product-reference-data.md#dh-0234) | [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 | <a id="dh-0328"></a>**DH-0328** | `hero.webp` | No | The hero photo of the landing page of the online bank site, with the aspect ratio of the layout | [the hero photo on the landing page](online-bank-site.md#dh-1841); [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 | <a id="dh-0329"></a>**DH-0329** | `category-<anchor>.webp` | No | The photo of a CDS product category on the online bank site, with the anchor of the category. For example, `category-term-deposits.webp`. | [CDS: Product Categories][cds-product-categories]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
@@ -72,8 +72,8 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 - <a id="dh-0339"></a>**DH-0339** The contract of the brand directory has no format version. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 - <a id="dh-0340"></a>**DH-0340** The data holder ignores each entry of the directory whose name starts with `..`. For example, it ignores the `..data` entry of a ConfigMap volume. ([Kubernetes: atomic_writer.go][k8s-atomic-writer]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 - <a id="dh-0341"></a>**DH-0341** The body font and the heading font of a brand are each one of a fixed set of fonts that the data holder contains. A brand with a different font is a change to the design system. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
-- <a id="dh-0342"></a>**DH-0342** Each colour of `tokens.json` is in the sRGB gamut. ([design system DESIGN.md: Tokens][ui-design])
-- <a id="dh-0343"></a>**DH-0343** Each pair of text and background roles of a brand has a contrast of 4.5:1 or more. Each focus ring and each control boundary has a contrast of 3:1 or more against its background. ([WCAG 2.2, SC 1.4.3][wcag-1-4-3]; [WCAG 2.2, SC 1.4.11][wcag-1-4-11]; [design system DESIGN.md: Tokens][ui-design])
+- <a id="dh-0342"></a>**DH-0342** Each colour of `tokens.json` is in the sRGB gamut. ([colour values in OKLCH](../../../web/packages/ui/design/tokens-and-brands.md#ui-0012))
+- <a id="dh-0343"></a>**DH-0343** Each pair of text and background roles of a brand has a contrast of 4.5:1 or more. Each focus ring and each control boundary has a contrast of 3:1 or more against its background. ([WCAG 2.2, SC 1.4.3][wcag-1-4-3]; [WCAG 2.2, SC 1.4.11][wcag-1-4-11]; [the text contrast of a brand](../../../web/packages/ui/design/tokens-and-brands.md#ui-0013); [the focus ring contrast of a brand](../../../web/packages/ui/design/tokens-and-brands.md#ui-0014))
 - <a id="dh-0344"></a>**DH-0344** At start-up, the data holder does not check the contrast of a brand. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 - <a id="dh-0345"></a>**DH-0345** Each SVG file is well-formed XML with an `svg` root element in the SVG namespace and a `viewBox`. It is 100 KiB or less. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023]; [Judgement: the SVG namespace and a square mark](#dh-0376))
 - <a id="dh-0347"></a>**DH-0347** The `viewBox` of `mark.svg` is square. ([Judgement: the SVG namespace and a square mark](#dh-0376))
@@ -145,7 +145,7 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 ### <a id="dh-0376"></a>DH-0376 The SVG namespace and a square mark
 
 - Kind: choice
-- Basis: Step 3.3. [ADR 0023][adr-0023] gives the SVG structure, and the design system requires a square mark ([design system DESIGN.md: Brands][ui-brands]).
+- Basis: Step 3.3. [ADR 0023][adr-0023] gives the SVG structure, and the design system requires a square mark ([design system DESIGN.md: Consumer pages][ui-consumer-pages]).
 - Reason: A browser does not show an SVG file with no SVG namespace as an image. A `viewBox` that is not square cannot give a square mark.
 
 ### <a id="dh-0377"></a>DH-0377 The size of `logo.png`
@@ -186,9 +186,7 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 [cds-product-categories]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#product-categories
 [adr-0018]: ../../../docs/adr/0018-container-images-with-a-web-ui-build-stage.md
 [adr-0023]: ../../../docs/adr/0023-give-the-brand-of-a-data-holder-as-a-strict-brand-directory.md
-[ui-brands]: ../../../web/packages/ui/DESIGN.md#brands
 [ui-consumer-pages]: ../../../web/packages/ui/DESIGN.md#consumer-pages
-[ui-design]: ../../../web/packages/ui/DESIGN.md
 [wcag-1-4-3]: https://www.w3.org/TR/WCAG22/#contrast-minimum
 [wcag-1-4-11]: https://www.w3.org/TR/WCAG22/#non-text-contrast
 [k8s-configmap]: https://kubernetes.io/docs/concepts/configuration/configmap/

@@ -129,7 +129,7 @@ func TestTheConsoleGetsTheLogoAndTheMarkAsSVGFilesThatCannotRunAScript(t *testin
 }
 
 // The content of the console stays in the lab brand, so the stylesheet sets only the roles of the console shell, the
-// link and the primary action (web/packages/ui/DESIGN.md, Brands).
+// link and the primary action (web/packages/ui/design/tokens-and-brands.md, UI-0035).
 // Verifies: DH-1486
 func TestTheConsoleStylesSetOnlyTheRolesThatTheConsoleUses(t *testing.T) {
 	rec := get(t, serveConsoleBrand(t, validDir(t)), "/brand/console.css", nil)

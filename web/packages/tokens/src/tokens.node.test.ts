@@ -3,7 +3,8 @@ import { consoleShellPairs, contrastPairs } from "./contrast.ts";
 import { consoleColor } from "./shell.ts";
 import { colorRoles, loadTokens, toColor } from "./tokens.ts";
 
-// The semantic colour roles of web/packages/ui/DESIGN.md (Tokens). A new role needs a change to that list first.
+// The semantic colour roles (web/packages/ui/design/tokens-and-brands.md, UI-0010). A new role needs a change to that
+// list first.
 const designRoles = [
   "color.page",
   "color.surface",
@@ -35,7 +36,8 @@ const designRoles = [
 
 const { resolver, permutations } = await loadTokens();
 
-test("the semantic colour roles are the roles of the DESIGN.md", () => {
+// Verifies: UI-0010
+test("the semantic colour roles are the roles of the specification", () => {
   for (const input of permutations) {
     expect(new Set(colorRoles(resolver.apply(input)))).toEqual(new Set(designRoles));
   }
@@ -49,10 +51,12 @@ describe.each(permutations)("permutation %o", (input) => {
     return toColor(token.$value);
   };
 
+  // Verifies: UI-0013, UI-0014, UI-0015
   test.each(contrastPairs)("$fg on $bg has a contrast of $min:1 or more", ({ fg, bg, min }) => {
     expect(color(fg).contrast(color(bg), "WCAG21")).toBeGreaterThanOrEqual(min);
   });
 
+  // Verifies: UI-0016
   test.each(consoleShellPairs)(
     "console shell: $fg on $bg has a contrast of $min:1 or more",
     ({ fg, bg, min }) => {

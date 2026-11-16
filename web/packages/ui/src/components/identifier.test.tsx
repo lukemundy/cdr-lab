@@ -11,6 +11,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+// Verifies: UI-0162
 test("the identifier shows the full value in the monospace font, with a copy button", async () => {
   const container = render(<Identifier value={id} label="legal entity ID" />);
 

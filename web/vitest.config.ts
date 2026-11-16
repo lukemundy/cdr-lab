@@ -26,7 +26,7 @@ export default defineConfig({
           exclude: [nodeTests, consoleTests],
           // A wait for a response and a render can take some seconds on a busy runner.
           expect: { poll: { timeout: 5000 } },
-          // WebKit is a supported browser, but CI does not test it (packages/ui/DESIGN.md, Decisions).
+          // WebKit is a supported browser, but CI does not test it: WebKit needs system libraries on each CI run.
           browser: {
             enabled: true,
             headless: true,
