@@ -40,10 +40,10 @@ None.
 
 - <a id="ca-0001"></a>**CA-0001** The CDR CA has one root CA and one issuing intermediate CA. ([ACCC: Certificate Management][accc-cert-mgmt])
 - <a id="ca-0002"></a>**CA-0002** Each CA signs with SHA-256 with RSA. ([CP section 6.1.5, Table 5][accc-cp])
-- <a id="ca-0003"></a>**CA-0003** The root certificate and the intermediate certificate are CA certificates with the key usages `keyCertSign` and `cRLSign`. ([Judgement: the profiles of the production certificates and CRL](#ca-0049))
-- <a id="ca-0004"></a>**CA-0004** The intermediate certificate has a path length of 0. ([Judgement: the profiles of the production certificates and CRL](#ca-0049))
+- <a id="ca-0003"></a>**CA-0003** The root certificate and the intermediate certificate are CA certificates with the key usages `keyCertSign` and `cRLSign`. ([Judgement: the certificates and the CRL copy the production profiles](#ca-0049))
+- <a id="ca-0004"></a>**CA-0004** The intermediate certificate has a path length of 0. ([Judgement: the certificates and the CRL copy the production profiles](#ca-0049))
 - <a id="ca-0005"></a>**CA-0005** The root certificate is valid for 20 years. ([CP section 6.3.2, Table 6][accc-cp])
-- <a id="ca-0006"></a>**CA-0006** The intermediate certificate is valid for 10 years. ([CP section 6.3.2, Table 6][accc-cp]; [Judgement: the profiles of the production certificates and CRL](#ca-0049))
+- <a id="ca-0006"></a>**CA-0006** The intermediate certificate is valid for 10 years. ([CP section 6.3.2, Table 6][accc-cp]; [Judgement: the certificates and the CRL copy the production profiles](#ca-0049))
 - <a id="ca-0007"></a>**CA-0007** The subject of the CDR root and of the CDR intermediate has the O `cdr-lab` and the OU `Consumer Data Right`. ([Judgement: mock CA names that are not from the ACCC](#ca-0048))
 - <a id="ca-0008"></a>**CA-0008** The CDR CA certificates have no ACCC name and no ACCC certificate policy OID. ([Judgement: mock CA names that are not from the ACCC](#ca-0048))
 - <a id="ca-0009"></a>**CA-0009** The public CA is separate from the CDR CA, and no certificate of one CA chains to the other. ([CDS: Participant Endpoints][cds-participant-endpoints]; observed on 2026-10-02: `api.cdr.gov.au` has a certificate from a public CA)
@@ -65,22 +65,22 @@ The CSR profile is the [CDS: Certificate Signing Request Profile][cds-csr-profil
 - <a id="ca-0016"></a>**CA-0016** In a server CSR, the CN is the primary DNS name. ([CDS: Certificate Signing Request Profile][cds-csr-profile])
 - <a id="ca-0017"></a>**CA-0017** The subject alternative names of a server CSR are DNS names only. ([CDS: Certificate Signing Request Profile][cds-csr-profile])
 - <a id="ca-0018"></a>**CA-0018** The CN of a server CSR is a host name: only letters, digits, hyphens and dots, with no wildcard, and not an IP address. ([ACCC Participant Portal User Guide, section 10.6.2][accc-portal-guide]; [RFC 1123, section 2.1][rfc1123-names])
-- <a id="ca-0019"></a>**CA-0019** Each DNS name of a server CSR obeys the host name rules of the CN. ([Judgement: the host name rules for each name in a server CSR](#ca-0050))
+- <a id="ca-0019"></a>**CA-0019** Each DNS name of a server CSR obeys the host name rules of the CN. ([Judgement: the CN host name rules for each name in a server CSR](#ca-0050))
 - <a id="ca-0020"></a>**CA-0020** Each label of a host name has 1 to 63 characters, and does not start or end with a hyphen. ([RFC 1123, section 2.1][rfc1123-names]; [RFC 1035, section 2.3.4][rfc1035-size])
 - <a id="ca-0021"></a>**CA-0021** A host name has 253 characters or fewer. ([RFC 1035, section 2.3.4][rfc1035-size])
 - <a id="ca-0022"></a>**CA-0022** The CN of a server CSR has 64 characters or fewer. ([RFC 5280, Appendix A][rfc5280-bounds])
-- <a id="ca-0023"></a>**CA-0023** A host name with no dot is valid, for example `wattle-bank`. ([Judgement: the host name rules for each name in a server CSR](#ca-0050))
+- <a id="ca-0023"></a>**CA-0023** A host name with no dot is valid, for example `wattle-bank`. ([Judgement: the CN host name rules for each name in a server CSR](#ca-0050))
 - <a id="ca-0024"></a>**CA-0024** A client CSR has no subject alternative names. ([CDS: Certificate Signing Request Profile][cds-csr-profile])
 
 ## Certificate profile
 
 A CDR certificate copies the profile of the production server certificate of `secure.api.cdr.gov.au`, from "CDR Intermediate CA 2025".
 
-- <a id="ca-0025"></a>**CA-0025** The subject of a CDR certificate is the subject of its CSR. ([Judgement: the profiles of the production certificates and CRL](#ca-0049))
-- <a id="ca-0026"></a>**CA-0026** A CDR certificate is valid for 13 months from its issue. ([ACCC: Certificate FAQ][accc-cert-faq]; [Judgement: the profiles of the production certificates and CRL](#ca-0049))
+- <a id="ca-0025"></a>**CA-0025** The subject of a CDR certificate is the subject of its CSR. ([Judgement: the certificates and the CRL copy the production profiles](#ca-0049))
+- <a id="ca-0026"></a>**CA-0026** A CDR certificate is valid for 13 months from its issue. ([ACCC: Certificate FAQ][accc-cert-faq]; [Judgement: the certificates and the CRL copy the production profiles](#ca-0049))
 - <a id="ca-0027"></a>**CA-0027** A certificate is never valid after its issuer expires. ([CP section 6.3.2][accc-cp])
-- <a id="ca-0028"></a>**CA-0028** A CDR certificate has the key usage `digitalSignature` in a critical extension. ([Judgement: the profiles of the production certificates and CRL](#ca-0049))
-- <a id="ca-0029"></a>**CA-0029** The basic constraints of a CDR certificate say that it is not a CA. ([Judgement: the profiles of the production certificates and CRL](#ca-0049))
+- <a id="ca-0028"></a>**CA-0028** A CDR certificate has the key usage `digitalSignature` in a critical extension. ([Judgement: the certificates and the CRL copy the production profiles](#ca-0049))
+- <a id="ca-0029"></a>**CA-0029** The basic constraints of a CDR certificate say that it is not a CA. ([Judgement: the certificates and the CRL copy the production profiles](#ca-0049))
 - <a id="ca-0030"></a>**CA-0030** A server certificate has the extended key usage `serverAuth` only. ([CP section 6.1.7][accc-cp]; [Judgement: one extended key usage for each certificate type](#ca-0051))
 - <a id="ca-0031"></a>**CA-0031** A client certificate has the extended key usage `clientAuth` only. ([CP section 6.1.7][accc-cp]; [Judgement: one extended key usage for each certificate type](#ca-0051))
 - <a id="ca-0032"></a>**CA-0032** A CDR certificate never has the extended key usage `anyExtendedKeyUsage`. ([CP section 6.1.7][accc-cp])
@@ -117,13 +117,13 @@ A CDR certificate copies the profile of the production server certificate of `se
 - Basis: Step 3.1. The ACCC issues the production CDR certificates under its certificate policy ([CP][accc-cp]).
 - Reason: The mock certificates are not from the ACCC. They must not look as if they are.
 
-### <a id="ca-0049"></a>CA-0049 The profiles of the production certificates and CRL
+### <a id="ca-0049"></a>CA-0049 The certificates and the CRL copy the production profiles
 
 - Kind: choice
 - Basis: Step 3.2. On 2026-10-02, we observed "CDR Root CA", "CDR Intermediate CA 2025", the server certificate of `secure.api.cdr.gov.au` and the CRL of "CDR Intermediate CA 2025". The [CP section 6.3.2, Table 6][accc-cp] gives only maximums, for example 15 years for an intermediate.
 - Reason: A mock component copies the behaviour of its production equivalent ([README: Component types][readme-component-types]). A relying party that works with the mock certificates then works with the production certificates.
 
-### <a id="ca-0050"></a>CA-0050 The host name rules for each name in a server CSR
+### <a id="ca-0050"></a>CA-0050 The CN host name rules for each name in a server CSR
 
 - Kind: choice
 - Basis: Step 3.2. The [ACCC Participant Portal User Guide, section 10.6.2][accc-portal-guide] gives the host name rules for the CN only. The [CDS: Certificate Signing Request Profile][cds-csr-profile] calls the subject alternative names secondary DNS names, and [RFC 1123, section 2.1][rfc1123-names] gives the syntax of a host name.

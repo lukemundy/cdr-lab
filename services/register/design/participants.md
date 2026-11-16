@@ -46,7 +46,7 @@ The Register checks the fields of a participant record each time that it gets on
 
 - <a id="reg-0219"></a>**REG-0219** Each identifier of a participant record is a string of 36 characters or fewer. ([CDS: Register API schemas][cds-register-schemas])
 - <a id="reg-0220"></a>**REG-0220** The Register issues each identifier as a GUID. ([CDS: Register API schemas][cds-register-schemas]; [Judgement: GUIDs for identifiers](#reg-0264))
-- <a id="reg-0221"></a>**REG-0221** Each identifier is unique across all participant records, not only across the records of one kind. For example, no software product has the identifier of a data holder brand. ([Judgement: one identifier for each record](#reg-0265))
+- <a id="reg-0221"></a>**REG-0221** Each identifier is unique across all participant records, not only across the records of one kind. For example, no software product has the identifier of a data holder brand. ([Judgement: each identifier is unique across all participant records](#reg-0265))
 
 ## Status transitions
 
@@ -59,8 +59,8 @@ The Register checks the fields of a participant record each time that it gets on
   - ACTIVE to INACTIVE or REMOVED
   - INACTIVE to ACTIVE or REMOVED
   - REMOVED is final
-- <a id="reg-0224"></a>**REG-0224** A data holder legal entity changes status only from ACTIVE to REMOVED. REMOVED is final. ([CDS: Participant Statuses][cds-participant-statuses]; [Judgement: the transitions of a data holder legal entity](#reg-0266))
-- <a id="reg-0225"></a>**REG-0225** A data holder brand and a data recipient brand change status only with the transitions of a software product. ([CDS: Participant Statuses][cds-participant-statuses]; [Judgement: the transitions of a brand](#reg-0267))
+- <a id="reg-0224"></a>**REG-0224** A data holder legal entity changes status only from ACTIVE to REMOVED. REMOVED is final. ([CDS: Participant Statuses][cds-participant-statuses]; [Judgement: a data holder legal entity changes only from ACTIVE to REMOVED](#reg-0266))
+- <a id="reg-0225"></a>**REG-0225** A data holder brand and a data recipient brand change status only with the transitions of a software product. ([CDS: Participant Statuses][cds-participant-statuses]; [Judgement: a brand has the transitions of a software product](#reg-0267))
 - <a id="reg-0226"></a>**REG-0226** The Register never returns a status value that is not in the [participant records](#reg-0200). ([CDS: Participant Statuses][cds-participant-statuses])
 
 ## Cascades
@@ -69,10 +69,10 @@ The Register checks the fields of a participant record each time that it gets on
 - <a id="reg-0228"></a>**REG-0228** When a data recipient legal entity becomes REVOKED or SURRENDERED, each of its software products that is not REMOVED becomes REMOVED at the same time. ([CDS: Status Mapping][cds-status-mapping])
 - <a id="reg-0229"></a>**REG-0229** When a data recipient legal entity is SUSPENDED, REVOKED or SURRENDERED, none of its software products is ACTIVE. ([CDS: Status Mapping][cds-status-mapping])
 - <a id="reg-0230"></a>**REG-0230** A software product can change status with no change to its data recipient. For example, the lab operator makes one software product INACTIVE, and its data recipient stays ACTIVE. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities])
-- <a id="reg-0231"></a>**REG-0231** When a data holder legal entity becomes REMOVED, each of its brands that is not REMOVED becomes REMOVED at the same time. ([Judgement: the cascade of a brand status](#reg-0268))
-- <a id="reg-0232"></a>**REG-0232** When a data recipient brand becomes INACTIVE, each of its ACTIVE software products becomes INACTIVE at the same time. ([CDS: Status Mapping][cds-status-mapping]; [Judgement: the cascade of a brand status](#reg-0268))
-- <a id="reg-0233"></a>**REG-0233** When a data recipient brand becomes REMOVED, each of its software products that is not REMOVED becomes REMOVED at the same time. ([CDS: Status Mapping][cds-status-mapping]; [Judgement: the cascade of a brand status](#reg-0268))
-- <a id="reg-0234"></a>**REG-0234** When a data recipient brand becomes ACTIVE, its software products do not change. ([Judgement: the cascade of a brand status](#reg-0268))
+- <a id="reg-0231"></a>**REG-0231** When a data holder legal entity becomes REMOVED, each of its brands that is not REMOVED becomes REMOVED at the same time. ([Judgement: a brand status and a data holder removal cascade to the child records](#reg-0268))
+- <a id="reg-0232"></a>**REG-0232** When a data recipient brand becomes INACTIVE, each of its ACTIVE software products becomes INACTIVE at the same time. ([CDS: Status Mapping][cds-status-mapping]; [Judgement: a brand status and a data holder removal cascade to the child records](#reg-0268))
+- <a id="reg-0233"></a>**REG-0233** When a data recipient brand becomes REMOVED, each of its software products that is not REMOVED becomes REMOVED at the same time. ([CDS: Status Mapping][cds-status-mapping]; [Judgement: a brand status and a data holder removal cascade to the child records](#reg-0268))
+- <a id="reg-0234"></a>**REG-0234** When a data recipient brand becomes ACTIVE, its software products do not change. ([Judgement: a brand status and a data holder removal cascade to the child records](#reg-0268))
 - <a id="reg-0235"></a>**REG-0235** A record is never more active than its parent. ([Judgement: a record is not more active than its parent](#reg-0269))
   - A software product of an INACTIVE data recipient brand is INACTIVE or REMOVED.
   - A software product of a REMOVED data recipient brand is REMOVED.
@@ -115,25 +115,25 @@ The Register checks the fields of a participant record each time that it gets on
 - Basis: Step 3.3. The CDS gives a string of 36 characters or fewer, and no format ([CDS: Register API schemas][cds-register-schemas]).
 - Reason: A GUID is unique with no coordination. It has 36 characters, so it is in the limit.
 
-### <a id="reg-0265"></a>REG-0265 One identifier for each record
+### <a id="reg-0265"></a>REG-0265 Each identifier is unique across all participant records
 
 - Kind: choice
 - Basis: Step 3.3. The CDS does not say if an identifier is unique across the kinds of records ([CDS: Register API schemas][cds-register-schemas]).
 - Reason: GUIDs are unique in all cases, so the rule costs nothing. It prevents a mix-up between records.
 
-### <a id="reg-0266"></a>REG-0266 The transitions of a data holder legal entity
+### <a id="reg-0266"></a>REG-0266 A data holder legal entity changes only from ACTIVE to REMOVED
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no state diagram for data holders ([CDS: Participant Statuses][cds-participant-statuses]).
 - Reason: The CDS diagrams make REMOVED final for a software product, so REMOVED has one meaning for each record. A data holder legal entity has no INACTIVE status, so its only change is to REMOVED. A REMOVED identifier is then never in use again, the same as for a software product ([CDR Support: Removed software product][support-removed-sp]).
 
-### <a id="reg-0267"></a>REG-0267 The transitions of a brand
+### <a id="reg-0267"></a>REG-0267 A brand has the transitions of a software product
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no state diagram for brands ([CDS: Participant Statuses][cds-participant-statuses]).
 - Reason: A brand has the same three status values as a software product. The same transitions give the same value the same meaning for each record.
 
-### <a id="reg-0268"></a>REG-0268 The cascade of a brand status
+### <a id="reg-0268"></a>REG-0268 A brand status and a data holder removal cascade to the child records
 
 - Kind: choice
 - Basis: Step 3.3. The CDS cascades only a data recipient status ([CDS: Status Mapping][cds-status-mapping]).

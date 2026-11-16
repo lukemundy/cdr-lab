@@ -4,7 +4,7 @@ This area gives the forms of the operator console that create, add and change pa
 
 ## Forms
 
-- <a id="reg-1400"></a>**REG-1400** The console does the creates, the adds and the changes of the operator interface, with the same rules. For example, an add in the console has the status rules of an add in the operator interface. ([the creates, the adds and the changes of the operator interface](operator-interface.md#reg-0809); [Judgement: creates and changes in the console](#reg-1480))
+- <a id="reg-1400"></a>**REG-1400** The console does the creates, the adds and the changes of the operator interface, with the same rules. For example, an add in the console has the status rules of an add in the operator interface. ([the creates, the adds and the changes of the operator interface](operator-interface.md#reg-0809); [Judgement: the console creates and changes participants](#reg-1480))
 - <a id="reg-1401"></a>**REG-1401** A create of a data recipient or of a data holder makes the legal entity with no brands. For example, the lab operator adds each brand after the create. ([Judgement: a create of the legal entity only](#reg-1481))
 - <a id="reg-1402"></a>**REG-1402** The lab operator can add a brand to a legal entity, and a software product to a data recipient brand. ([the add of a brand or a software product](operator-interface.md#reg-0811))
 - <a id="reg-1403"></a>**REG-1403** The lab operator can change the details of a legal entity, a brand or a software product. A change form has the fields that a change in the operator interface replaces. ([the body of a change in the operator interface](operator-interface.md#reg-0818))
@@ -14,8 +14,8 @@ This area gives the forms of the operator console that create, add and change pa
 
 ## Links to the forms
 
-- <a id="reg-1407"></a>**REG-1407** The list of the data recipients has the action "Create data recipient". The list of the data holders has the action "Create data holder". ([Judgement: creates and changes in the console](#reg-1480))
-- <a id="reg-1408"></a>**REG-1408** The detail of a participant has these links to the forms. ([Judgement: creates and changes in the console](#reg-1480))
+- <a id="reg-1407"></a>**REG-1407** The list of the data recipients has the action "Create data recipient". The list of the data holders has the action "Create data holder". ([Judgement: the console creates and changes participants](#reg-1480))
+- <a id="reg-1408"></a>**REG-1408** The detail of a participant has these links to the forms. ([Judgement: the console creates and changes participants](#reg-1480))
   - "Change details" and "Add brand" for the legal entity
   - "Change brand" for each brand
   - "Add software product" for each data recipient brand
@@ -28,15 +28,15 @@ This area gives the forms of the operator console that create, add and change pa
 
 - <a id="reg-1415"></a>**REG-1415** A create form and an add form give each field of one record in the format of the load file, with the identifiers and the status. ([the body of a create](operator-console-change-api.md#reg-1325); [the body of an add](operator-console-change-api.md#reg-1326))
 - <a id="reg-1416"></a>**REG-1416** A create form and an add form have no fields for a child record or a client certificate. ([the body of a create](operator-console-change-api.md#reg-1325); [Judgement: a create of the legal entity only](#reg-1481))
-- <a id="reg-1417"></a>**REG-1417** For each identifier of a create or an add, the form shows a new random UUID in a field that the lab operator can change. For example, the lab operator gives the brand ID from the configuration of a lab service. ([RFC 9562, section 5.4][rfc9562-v4]; [Judgement: new identifiers in a form](#reg-1485))
-- <a id="reg-1418"></a>**REG-1418** The add form of a data holder brand shows the UUID in the `dataHolderBrandId` field. Its `interimId` field is empty. ([the identifiers of a data holder brand](participants.md#reg-0208); [Judgement: new identifiers in a form](#reg-1485))
+- <a id="reg-1417"></a>**REG-1417** For each identifier of a create or an add, the form shows a new random UUID in a field that the lab operator can change. For example, the lab operator gives the brand ID from the configuration of a lab service. ([RFC 9562, section 5.4][rfc9562-v4]; [Judgement: a form shows a new random UUID for each identifier](#reg-1485))
+- <a id="reg-1418"></a>**REG-1418** The add form of a data holder brand shows the UUID in the `dataHolderBrandId` field. Its `interimId` field is empty. ([the identifiers of a data holder brand](participants.md#reg-0208); [Judgement: a form shows a new random UUID for each identifier](#reg-1485))
 - <a id="reg-1419"></a>**REG-1419** The status of a create or an add is a field. Its values are the status values of the record, and ACTIVE is selected first. ([the participant records](participants.md#reg-0200); [a status in a create or an add](operator-interface.md#reg-0814); [Judgement: ACTIVE selected first](#reg-1486))
 - <a id="reg-1420"></a>**REG-1420** The status rules apply to the status field. For example, a software product of an INACTIVE brand must be INACTIVE or REMOVED. ([the Register checks the full legal entity](operator-interface.md#reg-0823); [Judgement: ACTIVE selected first](#reg-1486))
 - <a id="reg-1421"></a>**REG-1421** A change form shows the current value of each field. ([a field that is not in the body of a change](operator-console-change-api.md#reg-1324))
 - <a id="reg-1422"></a>**REG-1422** A change form shows the identifiers of the record as text that the lab operator cannot change. ([the identifiers of a record do not change](operator-interface.md#reg-0820))
-- <a id="reg-1423"></a>**REG-1423** A choice of one value from a fixed set is a [select](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0308). For example, the accreditation level and the status are selects. ([WCAG 2.2, SC 1.3.1][wcag-1-3-1]; [Judgement: the controls of a list](#reg-1487))
-- <a id="reg-1424"></a>**REG-1424** A choice of more than one value from a fixed set is a [checkbox group](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0314). For example, the industries of a data holder brand are checkboxes. ([WCAG 2.2, SC 1.3.1][wcag-1-3-1]; [Judgement: the controls of a list](#reg-1487))
-- <a id="reg-1425"></a>**REG-1425** A list of values that the lab operator writes is a [text area with one value on each line](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0310). For example, the redirect URIs and the scopes are text areas. ([WCAG 2.2, SC 1.3.1][wcag-1-3-1]; [Judgement: the controls of a list](#reg-1487))
+- <a id="reg-1423"></a>**REG-1423** A choice of one value from a fixed set is a [select](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0308). For example, the accreditation level and the status are selects. ([WCAG 2.2, SC 1.3.1][wcag-1-3-1]; [Judgement: text areas for lists, and selects and checkboxes for fixed sets](#reg-1487))
+- <a id="reg-1424"></a>**REG-1424** A choice of more than one value from a fixed set is a [checkbox group](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0314). For example, the industries of a data holder brand are checkboxes. ([WCAG 2.2, SC 1.3.1][wcag-1-3-1]; [Judgement: text areas for lists, and selects and checkboxes for fixed sets](#reg-1487))
+- <a id="reg-1425"></a>**REG-1425** A list of values that the lab operator writes is a [text area with one value on each line](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0310). For example, the redirect URIs and the scopes are text areas. ([WCAG 2.2, SC 1.3.1][wcag-1-3-1]; [Judgement: text areas for lists, and selects and checkboxes for fixed sets](#reg-1487))
 - <a id="reg-1426"></a>**REG-1426** The endpoints of a data holder brand are a [group of related fields](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0317). ([WCAG 2.2, SC 1.3.1][wcag-1-3-1])
 - <a id="reg-1427"></a>**REG-1427** In a create, a select of a required value that has no usual value has [no selected value](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0309). For example, the accreditation level of a data recipient has no selected value. ([Judgement: no accreditation level selected first](#reg-1488))
 - <a id="reg-1428"></a>**REG-1428** Each field that the console API schema does not require is an optional field, as the design system gives it. ([the label of an optional field](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0326))
@@ -44,11 +44,11 @@ This area gives the forms of the operator console that create, add and change pa
 
 ## Values that the console sends
 
-- <a id="reg-1430"></a>**REG-1430** The console removes the white space at the start and at the end of each value, and of each line of a list. ([Judgement: white space in a form](#reg-1489))
-- <a id="reg-1431"></a>**REG-1431** The console ignores an empty line of a list. For example, an empty last line of the redirect URIs gives no value. ([Judgement: white space in a form](#reg-1489))
+- <a id="reg-1430"></a>**REG-1430** The console removes the white space at the start and at the end of each value, and of each line of a list. ([Judgement: the console removes the white space at the ends of each value](#reg-1489))
+- <a id="reg-1431"></a>**REG-1431** The console ignores an empty line of a list. For example, an empty last line of the redirect URIs gives no value. ([Judgement: the console removes the white space at the ends of each value](#reg-1489))
 - <a id="reg-1432"></a>**REG-1432** The console sends an optional field that has no value as no field. For example, a change with no policy URI sends no `policyUri`. ([a field that is not in the body of a change](operator-console-change-api.md#reg-1324))
 - <a id="reg-1433"></a>**REG-1433** A change form sends each field of the change, also the fields that the lab operator did not change. ([the body of a change](operator-console-change-api.md#reg-1323); [a field that is not in the body of a change](operator-console-change-api.md#reg-1324))
-- <a id="reg-1434"></a>**REG-1434** A change form and an add form send the version of the participant that the form loaded. A create form sends no version. ([the version in the body of an action](operator-console-api.md#reg-1139); [Judgement: a version for a stale view](operator-console-api.md#reg-1180))
+- <a id="reg-1434"></a>**REG-1434** A change form and an add form send the version of the participant that the form loaded. A create form sends no version. ([the version in the body of an action](operator-console-api.md#reg-1139); [Judgement: a version in the body, and 409 for a stale view](operator-console-api.md#reg-1180))
 - <a id="reg-1435"></a>**REG-1435** The console does not check the values. The Register checks them with the rules of the participant model and the status rules, and the UI has no copy of the rules. ([the Register checks the full legal entity](operator-interface.md#reg-0823); [Judgement: hexagonal architecture (ADR 0013)][adr-0013])
 
 ## Refusals
@@ -56,10 +56,10 @@ This area gives the forms of the operator console that create, add and change pa
 - <a id="reg-1436"></a>**REG-1436** When the Register refuses the value of a field, the console shows the `detail` of the field error as the error message of that field. ([the field errors of the console API](operator-console-change-api.md#reg-1328); [WCAG 2.2, SC 3.3.1][wcag-3-3-1]; [SC 3.3.3][wcag-3-3-3])
 - <a id="reg-1437"></a>**REG-1437** The error of an item of a list shows at the field of the list. For example, a refused redirect URI shows at the redirect URIs. ([WCAG 2.2, SC 3.3.1][wcag-3-3-1])
 - <a id="reg-1438"></a>**REG-1438** A refusal that names no field shows in the error summary of the form. For example, a stale version shows in the error summary. ([a refusal that names no field](operator-console-change-api.md#reg-1330); [WCAG 2.2, SC 3.3.1][wcag-3-3-1])
-- <a id="reg-1439"></a>**REG-1439** After a refusal, the form shows the error summary of the design system. ([the error summary of a form](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0327); [the focus on the error summary](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0331); [Judgement: the error summary of a form](#reg-1490))
-- <a id="reg-1440"></a>**REG-1440** The error summary gives the `detail` of the problem, and a link to each field that has an error. ([the links of the error summary](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0330); [Judgement: the error summary of a form](#reg-1490))
-- <a id="reg-1441"></a>**REG-1441** After a refusal, the form keeps each value that the lab operator gave, and the version that it loaded. ([Judgement: the values after a refusal](#reg-1491))
-- <a id="reg-1442"></a>**REG-1442** When the version is stale, the lab operator opens the form again to see the current values. The form does not get the current values by itself. ([Judgement: the values after a refusal](#reg-1491))
+- <a id="reg-1439"></a>**REG-1439** After a refusal, the form shows the error summary of the design system. ([the error summary of a form](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0327); [the focus on the error summary](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0331); [Judgement: a form shows an error summary, also for a refusal with no field](#reg-1490))
+- <a id="reg-1440"></a>**REG-1440** The error summary gives the `detail` of the problem, and a link to each field that has an error. ([the links of the error summary](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0330); [Judgement: a form shows an error summary, also for a refusal with no field](#reg-1490))
+- <a id="reg-1441"></a>**REG-1441** After a refusal, the form keeps each value that the lab operator gave, and the version that it loaded. ([Judgement: a form keeps its values and its version after a refusal](#reg-1491))
+- <a id="reg-1442"></a>**REG-1442** When the version is stale, the lab operator opens the form again to see the current values. The form does not get the current values by itself. ([Judgement: a form keeps its values and its version after a refusal](#reg-1491))
 
 ## Submit, success and cancel
 
@@ -73,7 +73,7 @@ This area gives the forms of the operator console that create, add and change pa
 
 ## Judgements
 
-### <a id="reg-1480"></a>REG-1480 Creates and changes in the console
+### <a id="reg-1480"></a>REG-1480 The console creates and changes participants
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no API to create participants, and the operator interface creates and changes each record ([the creates, the adds and the changes of the operator interface](operator-interface.md#reg-0809)).
@@ -103,7 +103,7 @@ This area gives the forms of the operator console that create, add and change pa
 - Basis: Step 3.3. The domain permits a change and an add in each status, and refuses only a value or a status that breaks a rule ([the Register checks the full legal entity](operator-interface.md#reg-0823)).
 - Reason: A list of the permitted changes in the console API would always give each change.
 
-### <a id="reg-1485"></a>REG-1485 New identifiers in a form
+### <a id="reg-1485"></a>REG-1485 A form shows a new random UUID for each identifier
 
 - Kind: choice
 - Basis: Step 3.3. The Register issues GUIDs in production ([the Register issues each identifier as a GUID](participants.md#reg-0220)), and the lab operator gives the identifiers in the lab ([Judgement: the lab operator gives the identifiers](operator-interface.md#reg-0889)).
@@ -112,10 +112,10 @@ This area gives the forms of the operator console that create, add and change pa
 ### <a id="reg-1486"></a>REG-1486 ACTIVE selected first
 
 - Kind: choice
-- Basis: Step 3.3. The operator interface permits each status in a create or an add ([a status in a create or an add](operator-interface.md#reg-0814); [Judgement: a status in a create or an add](operator-interface.md#reg-0890)).
+- Basis: Step 3.3. The operator interface permits each status in a create or an add ([a status in a create or an add](operator-interface.md#reg-0814); [Judgement: a create or an add can give each status](operator-interface.md#reg-0890)).
 - Reason: ACTIVE is the usual status. With a fixed status of ACTIVE, an add under a parent that is not ACTIVE always fails, for example a software product of an INACTIVE brand. The field needs no rule in the UI, because the Register refuses a status that breaks a rule at the field of the status.
 
-### <a id="reg-1487"></a>REG-1487 The controls of a list
+### <a id="reg-1487"></a>REG-1487 Text areas for lists, and selects and checkboxes for fixed sets
 
 - Kind: choice
 - Basis: Step 3.2. [WCAG 2.2, SC 1.3.1][wcag-1-3-1] requires that the structure of a form is available to assistive technology.
@@ -127,22 +127,22 @@ This area gives the forms of the operator console that create, add and change pa
 - Basis: Step 3.3. The CDS gives no usual accreditation level ([the accreditation of a data recipient legal entity](participants.md#reg-0211)).
 - Reason: A value that the console selects can go to the Register with no decision of the lab operator. The Register then refuses a create with no level at its field.
 
-### <a id="reg-1489"></a>REG-1489 White space in a form
+### <a id="reg-1489"></a>REG-1489 The console removes the white space at the ends of each value
 
 - Kind: choice
 - Basis: Step 3.3. The CDS and the ACCC give no rule for a tool of the lab operator.
 - Reason: A value that the lab operator pastes often has white space or an empty last line. A space at the end of a URI or an identifier is never intended. This is not a rule of the Register, which still checks each value.
 
-### <a id="reg-1490"></a>REG-1490 The error summary of a form
+### <a id="reg-1490"></a>REG-1490 A form shows an error summary, also for a refusal with no field
 
 - Kind: choice
 - Basis: Step 3.2. [WCAG 2.2, SC 3.3.1][wcag-3-3-1] needs only the error at the field. The [GOV.UK Design System: Error summary][govuk-error-summary] shows a summary with a link to each field, and moves the focus to it.
 - Reason: A software product form is longer than one screen, so an error at a field far down the page is not seen. The summary also has the refusals that name no field, so the form has one place for errors.
 
-### <a id="reg-1491"></a>REG-1491 The values after a refusal
+### <a id="reg-1491"></a>REG-1491 A form keeps its values and its version after a refusal
 
 - Kind: choice
-- Basis: Step 3.3. The version check stops a change that is based on an old view ([Judgement: a version for a stale view](operator-console-api.md#reg-1180)).
+- Basis: Step 3.3. The version check stops a change that is based on an old view ([Judgement: a version in the body, and 409 for a stale view](operator-console-api.md#reg-1180)).
 - Reason: The lab operator does not lose their work. A form that takes a new version by itself would replace the change of a different person or tab with no decision of the lab operator.
 
 ### <a id="reg-1492"></a>REG-1492 No confirmation of a cancel

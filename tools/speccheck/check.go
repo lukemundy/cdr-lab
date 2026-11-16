@@ -25,7 +25,6 @@ const (
 // tell a requirement with a wrong identifier from a requirement with no source.
 var (
 	idRe              = regexp.MustCompile(idPattern)
-	anchorAnywhereRe  = regexp.MustCompile(`<a id="[a-z]{2,5}-[0-9]{4}"></a>`)
 	listItemPrefixRe  = regexp.MustCompile(`^- <a id="([^"]*)"></a>\*\*([^*]*)\*\*(.*)$`)
 	ruleAndSourcesRe  = regexp.MustCompile(`^ (.+\.) \((.+)\)$`)
 	tableIDCellRe     = regexp.MustCompile(`^<a id="([^"]*)"></a>\*\*([^*]*)\*\*$`)
@@ -91,7 +90,7 @@ type libraryRow struct {
 	line    int
 }
 
-// spec is one migrated specification file.
+// spec is one specification file.
 type spec struct {
 	path      string
 	component string
@@ -278,26 +277,10 @@ func outsideFences(lines []string, fn func(n int, line string)) {
 	}
 }
 
-// readSpec selects a migrated file and records its definitions. Each file of a design/ directory is migrated. A
-// DESIGN.md is migrated when it has the fixed heading Withdrawn.
+// readSpec records the definitions of a specification file and checks its structure.
 func (c *checker) readSpec(p, component string) {
 	lines, ok := c.readLines(p)
 	if !ok {
-		return
-	}
-
-	hasWithdrawn, hasAnchor := false, false
-
-	outsideFences(lines, func(_ int, line string) {
-		hasWithdrawn = hasWithdrawn || line == "## Withdrawn"
-		hasAnchor = hasAnchor || anchorAnywhereRe.MatchString(line)
-	})
-
-	if path.Base(p) == "DESIGN.md" && !hasWithdrawn {
-		if hasAnchor {
-			c.errorf(p, firstLine(lines, anchorAnywhereRe), "the file has identifiers but no Withdrawn section")
-		}
-
 		return
 	}
 
@@ -319,22 +302,26 @@ func (c *checker) readSpec(p, component string) {
 	c.readStructure(s)
 
 	isOverview := path.Base(p) == "DESIGN.md" || (path.Base(path.Dir(p)) == "design" && path.Base(p) == "README.md")
-	if isOverview && s.libraryLine == 0 {
+	if !isOverview {
+		return
+	}
+
+	if s.libraryLine == 0 {
 		c.errorf(p, 1, "the file has no Library specifications section")
 	}
-}
 
-func firstLine(lines []string, re *regexp.Regexp) int {
-	for i, line := range lines {
-		if re.MatchString(line) {
-			return i + 1
-		}
+	hasWithdrawn := false
+
+	outsideFences(lines, func(_ int, line string) {
+		hasWithdrawn = hasWithdrawn || line == "## Withdrawn"
+	})
+
+	if !hasWithdrawn {
+		c.errorf(p, 1, "the file has no Withdrawn section")
 	}
-
-	return 1
 }
 
-// readStructure reads the sections of a migrated file: the requirements, the judgements, the withdrawn list and the
+// readStructure reads the sections of a file: the requirements, the judgements, the withdrawn list and the
 // library table.
 func (c *checker) readStructure(s *spec) {
 	section := ""
@@ -544,7 +531,7 @@ func (c *checker) readLibraryRow(s *spec, n int, line string) {
 	s.libraries = append(s.libraries, libraryRow{library: m[1], line: n})
 }
 
-// checkLines finds bare identifiers and undefined reference link labels in a migrated file.
+// checkLines finds bare identifiers and undefined reference link labels in a specification file.
 func (c *checker) checkLines(s *spec) {
 	labels := map[string]bool{}
 

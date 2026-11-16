@@ -10,7 +10,7 @@ This area gives the client authentication of each endpoint that authenticates a 
 - <a id="auth-0023"></a>**AUTH-0023** The `client_id` parameter is optional. When it is present, it is equal to the `iss` of the assertion. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
 - <a id="auth-0024"></a>**AUTH-0024** A service must give the client ID and the JWKS URI of each client. ([CDS: Client Authentication][cds-client-auth])
 - <a id="auth-0025"></a>**AUTH-0025** The authorisation server validates the assertion signature with the keys at the JWKS URI of the client. ([CDS: Client Authentication][cds-client-auth]; [CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
-- <a id="auth-0026"></a>**AUTH-0026** The authorisation server accepts an assertion that is signed with PS256 or ES256. ([FAPI 1.0 Advanced, section 8.6][fapi-algorithms]; [Judgement: the signing algorithms](configuration.md#auth-0013))
+- <a id="auth-0026"></a>**AUTH-0026** The authorisation server accepts an assertion that is signed with PS256 or ES256. ([FAPI 1.0 Advanced, section 8.6][fapi-algorithms]; [Judgement: the server signs with PS256 and accepts PS256 or ES256](configuration.md#auth-0013))
 - <a id="auth-0027"></a>**AUTH-0027** The authorisation server accepts one of these values as the `aud` of the assertion. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
   - the issuer
   - the URL of the token endpoint
@@ -18,7 +18,7 @@ This area gives the client authentication of each endpoint that authenticates a 
 - <a id="auth-0028"></a>**AUTH-0028** The authorisation server refuses an assertion with no `jti` or no `exp`. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
 - <a id="auth-0029"></a>**AUTH-0029** The authorisation server refuses an assertion that is expired. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
 - <a id="auth-0030"></a>**AUTH-0030** The authorisation server refuses an assertion whose `jti` it accepted before. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
-- <a id="auth-0031"></a>**AUTH-0031** The authorisation server refuses an assertion whose `exp` is more than 10 minutes after the time of the request. ([Judgement: the maximum lifetime of a client assertion](#auth-0033))
+- <a id="auth-0031"></a>**AUTH-0031** The authorisation server refuses an assertion whose `exp` is more than 10 minutes after the time of the request. ([Judgement: a maximum client assertion lifetime of 10 minutes](#auth-0033))
 
 ## Refusal
 
@@ -26,7 +26,7 @@ This area gives the client authentication of each endpoint that authenticates a 
 
 ## Judgements
 
-### <a id="auth-0033"></a>AUTH-0033 The maximum lifetime of a client assertion
+### <a id="auth-0033"></a>AUTH-0033 A maximum client assertion lifetime of 10 minutes
 
 - Kind: choice
 - Basis: Step 3.3. The CDS requires that an assertion is used one time, and gives no lifetime ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt]).
