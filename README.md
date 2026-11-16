@@ -173,7 +173,7 @@ http --verify .lab/pki/cdr/ca-bundle.pem --cert .lab/pki/conformance/client.crt 
 - **Seed data:** one-shot compose services load [`services/register/seed/example.json`](services/register/seed/example.json) (participants) and the product catalogue of the data holder brand before the services start. To load a different set, change the file, then `mise run reset` and `mise run up`.
 - **Data holder brand:** each data holder instance gets its name, logo, colours and product catalogue from a preset brand or a mounted brand directory ([services/dataholder/brands](services/dataholder/brands/README.md), [ADR 0023](docs/adr/0023-give-the-brand-of-a-data-holder-as-a-strict-brand-directory.md)).
 - **Customer data:** the data holder operator interface creates customers, accounts and transactions ([data holder: operator interface](services/dataholder/design/operator-interface.md)). Use invented data only.
-- **Register operations:** the Register operator interface creates and changes participants, registers client certificates and changes statuses ([Register DESIGN.md](services/register/DESIGN.md#operator-interface)).
+- **Register operations:** the Register operator interface creates and changes participants, registers client certificates and changes statuses ([Register: operator interface](services/register/design/operator-interface.md#reg-0800)).
 
 ### Conformance tests
 

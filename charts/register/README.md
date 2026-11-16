@@ -17,7 +17,7 @@ helm install register oci://ghcr.io/lukemundy/cdr-lab/charts/register --version 
 
 ## Participant seed
 
-A Register from the chart starts with no participants. To start it with participants, make a ConfigMap with a seed file in the key `participants.json`, and give its name in `seed.configMap`. The seed is a lab-only feature, and it is off by default. The requirements are in the [Register DESIGN.md](../../services/register/DESIGN.md#deployment-from-published-artifacts).
+A Register from the chart starts with no participants. To start it with participants, make a ConfigMap with a seed file in the key `participants.json`, and give its name in `seed.configMap`. The seed is a lab-only feature, and it is off by default. The requirements are in the [Register specification](../../services/register/design/deployment.md#reg-0911).
 
 ```sh
 kubectl create configmap register-seed --from-file=participants.json=services/register/seed/preset-banks.json
