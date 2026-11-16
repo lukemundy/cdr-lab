@@ -196,6 +196,7 @@ func TestGetTransactionDetailGivesTheTransactionWithItsExtendedData(t *testing.T
 	}`, rec.Body.String())
 }
 
+// Verifies: DH-0448
 func TestTheTransactionAPIsGiveTheNotFoundErrorsOfTheCDS(t *testing.T) {
 	otherAccount := accountsPath + "/other-account/transactions"
 

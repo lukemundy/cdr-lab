@@ -176,6 +176,7 @@ func TestGetBalancesForSpecificAccountsGivesTheBalancesOfTheAccountsInTheBody(t 
 	}`, rec.Body.String())
 }
 
+// Verifies: DH-0452
 func TestGetBalancesForSpecificAccountsAcceptsABodyThatTheSchemaAccepts(t *testing.T) {
 	tests := map[string]struct {
 		body        string
@@ -210,6 +211,7 @@ func TestGetBalancesForSpecificAccountsAcceptsABodyThatTheSchemaAccepts(t *testi
 	}
 }
 
+// Verifies: DH-0446, DH-0447
 func TestGetBalancesForSpecificAccountsGivesAnErrorForEachAccountThatTheConsentDoesNotGive(t *testing.T) {
 	rec, _ := serveBalances(t, specificBalancesRequest(
 		t, balancesPath, `{"data": {"accountIds": ["unknown-1", "`+accountID+`", "unknown-2"]}}`,
@@ -224,6 +226,7 @@ func TestGetBalancesForSpecificAccountsGivesAnErrorForEachAccountThatTheConsentD
 	]}`, rec.Body.String())
 }
 
+// Verifies: DH-0449, DH-0450, DH-0451, DH-0453
 func TestGetBalancesForSpecificAccountsRefusesABodyThatIsNotValid(t *testing.T) {
 	tests := map[string]struct {
 		body   string
@@ -258,6 +261,7 @@ func TestGetBalancesForSpecificAccountsRefusesABodyThatIsNotValid(t *testing.T) 
 	}
 }
 
+// Verifies: DH-0454
 func TestGetBalancesForSpecificAccountsRefusesAContentTypeThatIsNotJSON(t *testing.T) {
 	for _, contentType := range []string{"", "text/plain", "application/jsonl", "application/x-www-form-urlencoded"} {
 		req := specificBalancesRequest(t, balancesPath, `{"data": {"accountIds": []}}`)

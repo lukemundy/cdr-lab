@@ -103,7 +103,7 @@ The rules of this group are for the APIs on the resource base URI and for the Us
 - <a id="dh-1088"></a>**DH-1088** The data holder gives only the transactions whose effective time is not more than 2 years before the time of the request. ([CDR Rules][cdr-rules], Schedule 3, clause 3.2(6)(a); [Judgement: transactions of 2 years at most](#dh-1166))
 - <a id="dh-1089"></a>**DH-1089** An `oldest-time` more than 2 years before the time of the request is not an error. ([CDR Support: Error scenarios and responses][support-error-scenarios]; [Judgement: transactions of 2 years at most](#dh-1166))
 - <a id="dh-1090"></a>**DH-1090** A transaction has `isDetailAvailable` with the value `true` only when it has `extendedData`. ([CDS: BankingTransactionV2][cds-schema-transaction]; [Judgement: detail only for a transaction with extended data](#dh-1167))
-- <a id="dh-1091"></a>**DH-1091** Get Transaction Detail returns one transaction of the account as a `BankingTransactionDetailV3` record, with its `extendedData`. [The 2-year limit](#dh-1088) applies. ([CDS: Get Transaction Detail][cds-get-transaction-detail]; [the error for a transaction with no detail](../DESIGN.md#errors))
+- <a id="dh-1091"></a>**DH-1091** Get Transaction Detail returns one transaction of the account as a `BankingTransactionDetailV3` record, with its `extendedData`. [The 2-year limit](#dh-1088) applies. ([CDS: Get Transaction Detail][cds-get-transaction-detail]; [the error for a transaction with no detail](api-standards.md#dh-0448))
 
 ## UserInfo
 

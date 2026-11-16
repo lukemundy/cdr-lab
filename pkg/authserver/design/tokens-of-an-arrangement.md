@@ -112,7 +112,7 @@ This area gives the tokens of a CDR arrangement at the data holder authorisation
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives 422 for an identifier that is not valid or not found, and no response for a request with no identifier ([CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation]). The CDS gives `Field/Missing` for a required field that is absent ([CDS: Missing Required Field][cds-error-400-field-missing]).
-- Reason: The rule is the same as for a required field on the other CDS APIs of the data holder ([data holder: Errors](../../../services/dataholder/DESIGN.md#errors)).
+- Reason: The rule is the same as for a required field on the other CDS APIs of the data holder ([a required field that is absent](../../../services/dataholder/design/api-standards.md#dh-0450)).
 
 [cds-access-token]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#access-token
 [cds-hok]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#holder-of-key-mechanism
