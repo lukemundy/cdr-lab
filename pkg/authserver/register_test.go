@@ -268,6 +268,7 @@ func requireError(t *testing.T, r reply, status int, code string) {
 	}
 }
 
+// Verifies: AUTH-0042, AUTH-0043, AUTH-0045, AUTH-0046, AUTH-0047
 func TestAnActiveSoftwareProductWithARegisteredCertificateGetsABoundToken(t *testing.T) {
 	l := newLab(t)
 
@@ -287,6 +288,7 @@ func TestAnActiveSoftwareProductWithARegisteredCertificateGetsABoundToken(t *tes
 	assert.InDelta(t, time.Now().Add(5*time.Minute).Unix(), claims["exp"], 5)
 }
 
+// Verifies: AUTH-0026
 func TestTheClientAssertionAlgorithms(t *testing.T) {
 	l := newLab(t)
 
@@ -316,6 +318,7 @@ func TestTheClientAssertionAlgorithms(t *testing.T) {
 	}
 }
 
+// Verifies: AUTH-0027
 func TestTheAcceptedAudiences(t *testing.T) {
 	l := newLab(t)
 
@@ -343,6 +346,7 @@ func TestTheAcceptedAudiences(t *testing.T) {
 	}
 }
 
+// Verifies: AUTH-0025, AUTH-0029, AUTH-0030, AUTH-0031, AUTH-0032, AUTH-0051, AUTH-0052, AUTH-0053
 func TestTheTokenEndpointRefusesAClientThatItCannotTrust(t *testing.T) {
 	otherKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	require.NoError(t, err)
@@ -423,6 +427,7 @@ func TestTheTokenEndpointRefusesAClientThatItCannotTrust(t *testing.T) {
 	}
 }
 
+// Verifies: AUTH-0034, AUTH-0036
 func TestTheTokenEndpointRefusesOtherGrantsAndScopes(t *testing.T) {
 	tests := map[string]struct {
 		field, value string
@@ -445,6 +450,7 @@ func TestTheTokenEndpointRefusesOtherGrantsAndScopes(t *testing.T) {
 	}
 }
 
+// Verifies: AUTH-0049
 func TestAStoreFailureIsAServerErrorWithNoDetail(t *testing.T) {
 	l := newLab(t)
 	l.clients[productID] = authserver.Client{}
@@ -523,6 +529,7 @@ func (l *lab) getPublic(path string) (*httptest.ResponseRecorder, map[string]any
 	return rec, body
 }
 
+// Verifies: AUTH-0001, AUTH-0002, AUTH-0003
 func TestTheOpenIDProviderConfiguration(t *testing.T) {
 	l := newLab(t)
 
@@ -557,6 +564,7 @@ func TestTheOpenIDProviderConfiguration(t *testing.T) {
 	}, body)
 }
 
+// Verifies: AUTH-0006, AUTH-0007
 func TestTheJWKSHasThePublicSigningKeyOnly(t *testing.T) {
 	l := newLab(t)
 

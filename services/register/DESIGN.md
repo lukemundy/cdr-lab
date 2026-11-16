@@ -138,13 +138,13 @@ The token endpoint path comes from the example OpenID Provider configuration in 
 - An invalid or missing bearer token gives 401 with a `WWW-Authenticate` header and no body. A request with no bearer token gets `Bearer`. A token that is not valid, or that is bound to a different client certificate, gets `Bearer error="invalid_token"`. A valid token without the scope `cdr-register:read` gets 403 with `Bearer error="insufficient_scope"`. ([CDS: Get Data Holder Brands][cds-get-dh-brands], [RFC 6750, section 3.1][rfc6750-errors])
 - An unknown path gives 404 with `urn:au-cds:error:cds-all:Resource/NotFound`. ([CDS: Error Codes][cds-error-codes])
 - An unexpected server error gives [500 with no cause in the `detail`](../../pkg/cds/DESIGN.md#cdsl-0015).
-- Token endpoint errors use the RFC 6749 section 5.2 format, with only the error codes of that section. A client that the Register cannot authenticate or trust gets 401 `invalid_client`. Judgement: the CDS does not define Register token errors, and RFC 6749 is the base protocol. ([RFC 6749, section 5.2][rfc6749-errors])
+- Token endpoint errors have [the format and the codes of RFC 6749, section 5.2](../../pkg/authserver/design/token-endpoint.md#auth-0048). A client that the Register cannot authenticate gets [401 `invalid_client`](../../pkg/authserver/design/client-authentication.md#auth-0032), as does [a client that the Register cannot trust](../../pkg/authserver/design/token-endpoint.md#auth-0053).
 
 ### Caching, pagination, lists and CORS
 
 - Get JWKS, Get Data Holder Brands Summary and the four status and recipient APIs return an `ETag` header. When `If-None-Match` matches the current `ETag`, the response is 304 with no body. ([CDS: Metadata Cache Management][cds-metadata-cache])
 - `ETag` and `If-None-Match` follow RFC 9110: the entity tag is in quotes, and `If-None-Match` uses the weak comparison. An `ETag` changes only when the response data changes. Judgement: the CDS does not give the format, so the HTTP standard applies. ([RFC 9110: ETag][rfc9110-etag])
-- Responses from these APIs and from Get OpenId Provider Config have `Cache-Control: no-cache`, so that clients check the `ETag` on each request. Judgement: the CDS does not give cache lifetimes for responses. A status change must reach data holders quickly ([CDS: Metadata Cache Management][cds-metadata-cache]), and a revalidation with `ETag` is the simplest way to make sure it does. ([RFC 9111: no-cache][rfc9111-no-cache])
+- Responses from these APIs have `Cache-Control: no-cache`, as [the OpenID Provider configuration](../../pkg/authserver/design/configuration.md#auth-0002) does, so that clients check the `ETag` on each request. Judgement: the CDS does not give cache lifetimes for responses. A status change must reach data holders quickly ([CDS: Metadata Cache Management][cds-metadata-cache]), and a revalidation with `ETag` is the simplest way to make sure it does. ([RFC 9111: no-cache][rfc9111-no-cache])
 - Get Data Holder Brands supports `page` and `page-size` with [the CDS pagination rules](../../pkg/cds/DESIGN.md#cdsl-0017), and `updated-since`. Each link of a page keeps [the `updated-since` of the request](../../pkg/cds/DESIGN.md#cdsl-0029). ([CDS: Get Data Holder Brands][cds-get-dh-brands])
 - Get Data Holder Brands returns the brands that have a `dataHolderBrandId`, in each status (ACTIVE, INACTIVE and REMOVED), in the order of their IDs. `updated-since` gives the brands with a `lastUpdated` at or after that time. The response has no `ETag`. (See Decisions)
 - The `lastUpdated` of a brand on Get Data Holder Brands is the time of the last change to its data holder, as on Get Data Holder Brands Summary.
@@ -158,18 +158,14 @@ The token endpoint path comes from the example OpenID Provider configuration in 
 
 ### Authorisation server
 
-- Get OpenId Provider Config returns all fields that the OpenAPI schema marks as required. It advertises `client_credentials`, `private_key_jwt`, scope `cdr-register:read` and `tls_client_certificate_bound_access_tokens: true`. ([CDS: Get OpenId Provider Config][cds-get-oidc], [CDS: Register Endpoints][cds-register-endpoints])
-- The token endpoint accepts only `grant_type=client_credentials` with `client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer`. ([CDS: Data Recipients calling the CDR Register][cds-dr-calling-register])
-- The client assertion `iss`, `sub` and `client_id` are the software product ID. The CDS also allows the brand ID but says it will be deprecated. Judgement: support only the software product ID. ([CDS: Data Recipients calling the CDR Register][cds-dr-calling-register])
-- The Register validates the client assertion signature with the keys at the software product's JWKS URI. ([CDS: Client Authentication][cds-client-auth])
-- The Register accepts PS256 and ES256 client assertions. The CDS does not name the algorithms for the Register token endpoint, and it refers to FAPI 1.0 Advanced for algorithms elsewhere. ([FAPI 1.0 Advanced, section 8.6][fapi-algorithms])
-- The Register accepts its issuer identifier, its token endpoint URL, or the URL of the endpoint called as the assertion `aud`. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
-- The Register rejects a client assertion whose `jti` it has already accepted. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
-- The Register issues a token only when the TLS client certificate is one of the certificates registered for the software product. It checks the full certificate, not only the common name. ([ACCC Developer Portal: Token Endpoint][accc-token]; the ACCC mock checks only the common name, [TokenController.cs][accc-mock-token])
-- The Register issues a token only when the software product is ACTIVE. ([ACCC Developer Portal: Token Endpoint][accc-token])
-- Access tokens are bound to the client certificate as RFC 8705 specifies: `cnf.x5t#S256` is the base64url SHA-256 thumbprint. ([CDS: Holder of Key Mechanism][cds-hok]; the ACCC mock uses a SHA-1 hex thumbprint, [TokenController.cs][accc-mock-token])
-- Access tokens are JWTs signed with PS256. They expire after 5 minutes. The Register issues no refresh tokens. The CDS gives no lifetime; its example shows 7200 seconds and is not normative. ([ACCC Developer Portal: Token Endpoint][accc-token])
-- Get Data Holder Brands and Get SSA reject a token when the TLS client certificate does not match the token's certificate binding. ([CDS: Holder of Key Mechanism][cds-hok])
+- The Register serves the Register authorisation server of the [authorisation server library](../../pkg/authserver/design/README.md). The rules below give only the choices of the Register.
+- The OpenID Provider configuration has [the fields and values of the Register configuration](../../pkg/authserver/design/configuration.md#auth-0003).
+- The token endpoint accepts [only the client credentials grant](../../pkg/authserver/design/token-endpoint.md#auth-0034), with [`private_key_jwt` client authentication](../../pkg/authserver/design/client-authentication.md#auth-0020).
+- The client ID of a software product is its software product ID. The CDS also allows the brand ID but says it will be deprecated. Judgement: support only the software product ID. ([CDS: Data Recipients calling the CDR Register][cds-dr-calling-register])
+- The Register gives the JWKS URI of the software product to [validate the client assertion signature](../../pkg/authserver/design/client-authentication.md#auth-0025).
+- The token endpoint issues a token only when [the client certificate is registered for the software product](../../pkg/authserver/design/token-endpoint.md#auth-0051) and [the software product is ACTIVE](../../pkg/authserver/design/token-endpoint.md#auth-0052).
+- An access token is [bound to the client certificate](../../pkg/authserver/design/token-endpoint.md#auth-0045) and [expires 5 minutes after it is issued](../../pkg/authserver/design/token-endpoint.md#auth-0043). The Register issues [no refresh token](../../pkg/authserver/design/token-endpoint.md#auth-0042).
+- Get Data Holder Brands and Get SSA accept a token only [with the client certificate that the token is bound to](../../pkg/authserver/design/token-endpoint.md#auth-0055).
 - Get Data Holder Brands and Get SSA check the caller's status on each call. When the software product or its data recipient is not ACTIVE, the response is 403 with `urn:au-cds:error:cds-all:Authorisation/AdrStatusNotActive`. ([CDS: Error Codes][cds-error-403-adr-not-active])
 
 ### Software Statement Assertion
@@ -185,9 +181,9 @@ The token endpoint path comes from the example OpenID Provider configuration in 
 ## Signing keys
 
 - The Register has one key set to sign access tokens (the OpenID Provider `jwks_uri`) and a different key set to sign SSAs (Get JWKS). ([CDS: Get OpenId Provider Config][cds-get-oidc])
-- Each published JWK has `alg`, `e`, `key_ops`, `kid`, `kty` and `n`. Keys are RSA, for PS256. ([CDS: JWK][cds-schema-jwk]) RSA keys are 2048 bits or longer. ([FAPI 1.0 Advanced, section 8.6][fapi-algorithms])
+- Each published JWK has [the members that the CDS requires](../../pkg/authserver/design/configuration.md#auth-0007). The keys of the two key sets are [RSA keys of 2048 bits or longer](../../pkg/authserver/design/configuration.md#auth-0012), for PS256.
 - The Register can change the key of each key set. During a key change, the JWKS publishes the old and the new key. Judgement: participants cache the JWKS, so a new key must be published before the Register uses it. A JWKS can hold more than one key. ([RFC 7517: JWK Set][rfc7517-jwks])
-- A key change has two steps. First the JWKS publishes the next key, and the Register still signs with the old key. Then the Register signs with the next key, and the JWKS still publishes the old key. An SSA or an access token that the old key signed stays valid until it expires. (See Decisions)
+- A key change has two steps. First the JWKS publishes the next key, and the Register still signs with the old key. Then the Register signs with the next key, and the JWKS still publishes the old key. An SSA that the old key signed stays valid until it expires, as does [an access token](../../pkg/authserver/design/token-endpoint.md#auth-0056). (See Decisions)
 - A key change of one key set does not change the other key set.
 
 ## Transport security
@@ -574,15 +570,10 @@ The CDS and the ACCC publish no non-functional requirements for the Register ([C
 | ETag format | RFC 9110 | The CDS does not give a format, so the HTTP standard applies. |
 | Cache-Control | `no-cache` | Judgement: see Caching, pagination, lists and CORS. |
 | Deprecated versions | Not served | A request for a deprecated version gives 406 on the mock. Serve current versions only until the lab is more established. |
-| Token refusal for a certificate that is not registered, or a software product that is not ACTIVE | 401 `invalid_client`, the same as for an assertion that is not valid | Judgement: RFC 6749 section 5.2 has no more specific code. One response for each cause also does not tell a caller which software products exist or which are ACTIVE. The Register log gives the cause to the operator. |
-| Error codes of the token endpoint | Only the codes of RFC 6749 section 5.2. A server failure gives 500 `server_error`. | Judgement: a client library that follows the RFC knows only these codes. RFC 6749 gives `server_error` only for the authorisation endpoint, but it is the usual code. |
-| Values in the OpenID Provider configuration that the Register does not use | `code_challenge_methods_supported` is empty. `response_types_supported` is `token`. `subject_types_supported` is `public`. `id_token_signing_alg_values_supported` is `PS256`. `claims_supported` has the claims of the access token. | The schema requires the fields, and the CDS says that clients can ignore three of them ([CDS: Get OpenId Provider Config][cds-get-oidc]). Judgement: the Register gives the values that are true for it. It supports no PKCE method. |
 | Uniqueness of a client assertion `jti` | Unique across all software products, for 1 hour | Judgement: the CDS says only that the Register must reject a `jti` that it accepted before. An assertion is valid for 10 minutes at most, so a longer memory adds nothing. |
-| Maximum lifetime of a client assertion | 10 minutes | Judgement: the CDS gives no limit. A short limit keeps the window for a stolen assertion small. |
 | Signing keys storage | In the Register database. The Register creates the access token key at its first start. | Judgement: the keys must stay the same after a restart, the repository must contain no keys, and the operator must be able to start a rotation. The database is the only state that the Register keeps. The lab database is not encrypted. |
 | Steps of a key change | Two operator actions: publish the next key, then activate it | Judgement: a new key must be in the JWKS before the Register signs with it, and only the operator knows when each party has the new JWKS. Two actions need no timer, and a lab user can keep the state "new key published, old key signs" to test a JWKS cache. |
 | When the previous key leaves the JWKS | When the operator publishes the next key of a later key change | Judgement: an SSA is valid for 10 minutes and an access token for 5 minutes, so a later key change is after the last use of the previous key in practice. This needs no timer. If two key changes complete in less than 10 minutes, an SSA of the first key can fail verification. |
-| Access token lifetime | 5 minutes | The CDS gives no lifetime. ACCC guidance ([Token Endpoint][accc-token]). |
 | Status of a record under a parent that is not active | Not more active than the parent | Judgement: the CDS gives no rule for brands. See Status rules. |
 | Uniqueness of identifiers | Unique across all participant records | Judgement: the CDS does not say. See Participant model. |
 | Scheme of a URI field | `https` only | `URIString` permits each scheme. But all HTTP calls must use HTTPS ([CDS: Transaction Security][cds-transaction-security]), a FAPI authorisation server must refuse a redirect URI that does not use `https` ([FAPI 1.0 Advanced, section 5.2.2][fapi-as]), and a sector identifier URI must use `https` ([OIDC Core, section 8.1][oidc-pairwise]). Judgement: a data holder cannot use an endpoint or a registration with a different scheme, so the Register refuses the value when the operator gives it, not when a participant uses it. A logo, a client URI or a policy is a web page for a consumer, and one rule for each URI field is simpler. |
@@ -743,9 +734,6 @@ The CDS and the ACCC publish no non-functional requirements for the Register ([C
 [cds-register-errors]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-errors
 [cds-known-register-errors]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#standardise-register-api-error-codes
 [cds-dr-calling-register]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#data-recipients-calling-the-cdr-register
-[cds-client-auth]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#client-authentication
-[cds-private-key-jwt]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#private-key-jwt-client-authentication
-[cds-hok]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#holder-of-key-mechanism
 [cds-ssa]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#software-statement-assertion-ssa
 [cds-ssa-definition]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#ssa-definition
 [cds-common-field-types]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#common-field-types
@@ -762,15 +750,12 @@ The CDS and the ACCC publish no non-functional requirements for the Register ([C
 [cds-error-400-field-invalid]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-400-field-invalid
 [cds-error-invalid-industry]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#register-error-404-field-invalid-industry
 [cds-cors]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cors
-[cds-schema-jwk]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api_schemas_tocSjwk
 [cds-schema-brand-summary]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api_schemas_tocSdataholderbrandsummaryv2
 [k8s-health]: https://kubernetes.io/docs/reference/using-api/health-checks/
-[fapi-algorithms]: https://openid.net/specs/openid-financial-api-part-2-1_0.html#algorithm-considerations
 [rfc9110-etag]: https://www.rfc-editor.org/rfc/rfc9110#name-etag
 [rfc9110-host]: https://www.rfc-editor.org/rfc/rfc9110#section-7.2
 [rfc9111-no-cache]: https://www.rfc-editor.org/rfc/rfc9111#name-no-cache-2
 [rfc7517-jwks]: https://www.rfc-editor.org/rfc/rfc7517#section-5
-[rfc6749-errors]: https://www.rfc-editor.org/rfc/rfc6749#section-5.2
 [rfc6750]: https://www.rfc-editor.org/rfc/rfc6750
 [rfc6750-errors]: https://www.rfc-editor.org/rfc/rfc6750#section-3.1
 [rfc9457]: https://www.rfc-editor.org/rfc/rfc9457
@@ -781,7 +766,6 @@ The CDS and the ACCC publish no non-functional requirements for the Register ([C
 [accc-mock-ssa-test]: https://github.com/ConsumerDataRight/mock-register/blob/b1bd1157befdf38d27f535b14b6fbc0a2007ac22/Source/CDR.Register.IntegrationTests/API/SSA/GetSoftwareStatementAssertion_Tests.cs#L416
 [accc-mock-dr-ssa]: https://github.com/ConsumerDataRight/mock-data-recipient/blob/3421e0dfa7a8cca59e17dee0d7778ac1c56e15d7/Source/CDR.DataRecipient.SDK/Services/Register/SsaService.cs#L46-L56
 [cds-registration-validation]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#registration-validation
-[accc-mock-token]: https://github.com/ConsumerDataRight/mock-register/blob/b1bd1157befdf38d27f535b14b6fbc0a2007ac22/Source/CDR.Register.Infosec/Controllers/TokenController.cs
 [accc-mock-dh-statuses]: https://github.com/ConsumerDataRight/mock-register/blob/b1bd1157befdf38d27f535b14b6fbc0a2007ac22/Source/CDR.Register.Repository/RegisterStatusRepository.cs#L65-L77
 [accc-brands-summary]: https://consumerdataright.atlassian.net/wiki/spaces/DP/pages/29851982
 [fetch-cors]: https://fetch.spec.whatwg.org/#http-cors-protocol
