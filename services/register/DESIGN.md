@@ -700,7 +700,7 @@ The CDS and the ACCC publish no non-functional requirements for the Register ([C
 | Source of the seed file in the chart | The name of an existing ConfigMap that the operator makes | Judgement: the data holder chart gets its brand directory the same way ([data holder: Decisions][dataholder-decisions]). With the file in the values, a change of the values after the first load has no effect, which a reader of the values does not expect. A list in a later values file replaces the full list ([Helm: values files][helm-values]), so a deployment copies the full file to change one host. A seed preset in the chart makes the Register chart depend on the presets of the data holder. |
 | Seed in the chart by default | Off | Judgement: the Register start does not need a file (see Lab-only features), and a deployment with no lab data stays possible. The data holder chart always loads its products, because each brand has a product catalogue. A Register has no default set of participants. |
 | Load of the seed file by the chart | A lab-only feature in the chart | Judgement: the Register is a mock, so its chart can run a lab-only feature, as the data holder chart does for its products. With no load, an operator makes each brand by hand in the operator console. |
-| Participants of the example seed | The four preset banks only, with no data recipients | Judgement: the data recipients of the lab seed are fixtures of the conformance suite, with hosts that are only in the lab. A data holder is ready when its list of software product statuses is empty ([data holder: Register statuses][dataholder-register-statuses]). |
+| Participants of the example seed | The four preset banks only, with no data recipients | Judgement: the data recipients of the lab seed are fixtures of the conformance suite, with hosts that are only in the lab. A data holder is ready when its list of software product statuses is empty ([data holder: readiness after the first participant statuses][dataholder-register-statuses]). |
 | Hosts of the example seed | Invented hosts on `.test`, one for each brand. The `websiteUri` keeps the value of the lab seed. | `.test` is reserved "for use in testing" ([RFC 6761, section 6.2][rfc6761-test]). Judgement: a URI with a placeholder does not load, because each URI must be absolute with a host (see Participant model), and a file that loads can be tested. The website of a brand is a fixed name of the brand, not a value of one deployment. |
 
 [cds-register-apis]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#register-apis
@@ -824,7 +824,7 @@ The CDS and the ACCC publish no non-functional requirements for the Register ([C
 [k8s-init-containers]: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
 [helm-values]: https://helm.sh/docs/chart_template_guide/values_files/
 [dataholder-decisions]: ../dataholder/DESIGN.md#decisions
-[dataholder-register-statuses]: ../dataholder/DESIGN.md#register-statuses
+[dataholder-register-statuses]: ../dataholder/design/registration.md#dh-0689
 [adr-0020]: ../../docs/adr/0020-service-migrations-create-roles-and-the-operator-creates-users.md
 [rfc6761-test]: https://www.rfc-editor.org/rfc/rfc6761#section-6.2
 [register-chart]: ../../charts/register/README.md

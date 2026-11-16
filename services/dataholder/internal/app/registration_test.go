@@ -192,6 +192,7 @@ func requireRegistrationError(t *testing.T, err error, code domain.RegistrationE
 	assert.Contains(t, registrationErr.Description, description)
 }
 
+// Verifies: DH-0633
 func TestAValidRequestRegistersTheSoftwareProductWithANewClientID(t *testing.T) {
 	j := validJWTs()
 
@@ -205,6 +206,7 @@ func TestAValidRequestRegistersTheSoftwareProductWithANewClientID(t *testing.T) 
 	assert.Equal(t, "https://recipient.example/jwks", j.keysFrom, "the keys come from the jwks_uri of the SSA")
 }
 
+// Verifies: DH-0632, DH-0651
 func TestASecondRegistrationOfTheSameSoftwareProductIsRefused(t *testing.T) {
 	j := validJWTs()
 	registrar := newRegistrar(j)
@@ -217,6 +219,7 @@ func TestASecondRegistrationOfTheSameSoftwareProductIsRefused(t *testing.T) {
 	requireRegistrationError(t, err, domain.InvalidSoftwareStatement, "software_id")
 }
 
+// Verifies: DH-0608
 func TestARequestJWTThatWasUsedBeforeIsRefused(t *testing.T) {
 	j := validJWTs()
 	registrar := newRegistrar(j)
@@ -385,6 +388,7 @@ func TestAnUpdateWithAnSSAOfADifferentSoftwareProductDoesNotUseTheJTI(t *testing
 	assert.NoError(t, err)
 }
 
+// Verifies: DH-0634, DH-0675
 func TestADeletionRemovesTheRegistrationAndANewRegistrationGetsANewClientID(t *testing.T) {
 	j := validJWTs()
 	registrar := registeredClient(t, j)

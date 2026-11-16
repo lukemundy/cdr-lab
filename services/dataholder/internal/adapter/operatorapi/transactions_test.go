@@ -26,6 +26,7 @@ func createTransaction(body string) request {
 	return request{method: http.MethodPost, path: transactionsPath, body: body, header: authorised()}
 }
 
+// Verifies: DH-0724
 func TestATransactionIsCreatedForTheAccountOfThePathAndReturned(t *testing.T) {
 	customers := &fakeCustomers{}
 
@@ -55,6 +56,7 @@ func TestATransactionIsCreatedForTheAccountOfThePathAndReturned(t *testing.T) {
 	assert.Contains(t, rec.Body.String(), `"amount":"-1200.00"`)
 }
 
+// Verifies: DH-0731, DH-0749
 func TestATransactionWithAnAmountOrATimeThatHasNoValidFormatIsRefusedWithoutItsValue(t *testing.T) {
 	tests := map[string]struct {
 		body string
@@ -126,6 +128,7 @@ func TestTheErrorsOfATransaction(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0725
 func TestTheTransactionsOfAnAccountAreRead(t *testing.T) {
 	customers := &fakeCustomers{}
 
