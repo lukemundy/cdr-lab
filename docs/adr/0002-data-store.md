@@ -5,7 +5,7 @@
 
 ## Context
 
-The Register must keep participant data, statuses and signing keys after a restart ([Register DESIGN.md: Non-functional requirements](../../services/register/DESIGN.md#non-functional-requirements)). Later services (data holders, data recipients) also keep state. The lab has no data store.
+The Register must keep participant data, statuses and signing keys after a restart ([the state that a restart of the Register keeps](../../services/register/design/non-functional-requirements.md#reg-0003)). Later services (data holders, data recipients) also keep state. The lab has no data store.
 
 We chose PostgreSQL as the data store at the start of the project, but we did not record the decision until now. The reasons are:
 

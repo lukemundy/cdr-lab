@@ -31,7 +31,7 @@ Out of scope:
 
 ## Black-box tests
 
-- A test calls the deployed components only through their network interfaces, as a CDR participant or a consumer does. It does not read a database, and it does not import the code of a service. Judgement: the suite then tests the deployment, and it can run against a different implementation of a component, for example the ACCC mock Register ([Register DESIGN.md][register-design]). The Go `internal` rule makes an import of service code impossible.
+- A test calls the deployed components only through their network interfaces, as a CDR participant or a consumer does. It does not read a database, and it does not import the code of a service. Judgement: the suite then tests the deployment, and it can run against a different implementation of a component. The Go `internal` rule makes an import of service code impossible.
 - A test acts as the participant does: it finds the base URIs of a brand through the Register, gets each SSA from the Register, and acts as the browser of the consumer in an authorisation flow ([the conformance suite acts as a participant](../services/dataholder/design/non-functional-requirements.md#dh-0015)).
 - A test checks each response of a CDS API against the pinned CDS OpenAPI specification of the target CDS version, in addition to the checks of the test. Judgement: a field, a type or an enumeration that does not agree with the CDS then fails in each test that gets it ([ADR 0011][adr-0011]).
 - The pinned specification files are copies of the CDS files. Do not edit them. The `SOURCE.md` file next to them gives their source and checksum. Judgement: an edit makes the check agree with the component, not with the CDS.
@@ -75,5 +75,5 @@ Out of scope:
 [readme-development]: ../README.md#development
 [agents]: ../AGENTS.md
 [readme-data]: ../README.md#data
-[register-design]: ../services/register/DESIGN.md
+[register-design]: ../services/register/design/README.md
 [dataholder-design]: ../services/dataholder/design/README.md
