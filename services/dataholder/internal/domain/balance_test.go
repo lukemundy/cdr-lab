@@ -8,6 +8,7 @@ import (
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/domain"
 )
 
+// Verifies: DH-1013, DH-1014
 func TestTheBalanceOfAnAccountComesFromItsTransactionsAndItsCreditLimit(t *testing.T) {
 	tests := map[string]struct {
 		creditLimit domain.Amount

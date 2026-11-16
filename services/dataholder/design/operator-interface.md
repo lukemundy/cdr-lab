@@ -61,7 +61,7 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
   - `extendedDescription`
 - <a id="dh-0755"></a>**DH-0755** A request for a transaction of an account of a different customer gets 404. ([RFC 9110, section 15.5.5][rfc9110-404])
 - <a id="dh-0756"></a>**DH-0756** A create of a transaction for a closed account gets 409. ([RFC 9110, section 15.5.10][rfc9110-409])
-- <a id="dh-0757"></a>**DH-0757** The `transactionId` of the operator interface is not the `transactionId` of the banking APIs. ([the resource identifiers](../DESIGN.md#resource-identifiers))
+- <a id="dh-0757"></a>**DH-0757** The `transactionId` of the operator interface is not the `transactionId` of the banking APIs. ([the resource identifiers of the banking APIs](banking-apis.md#dh-1041))
 
 ## Arrangements
 

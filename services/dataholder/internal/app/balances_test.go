@@ -37,6 +37,7 @@ func balanceIDs(balances []app.ConsentBalance) []string {
 	return found
 }
 
+// Verifies: DH-1013, DH-1014
 func TestTheBalanceOfAnAccountOfTheConsentComesFromItsTransactions(t *testing.T) {
 	data, arrangementID := consentWithBalances(t)
 
@@ -88,6 +89,7 @@ func TestTheBalancesOfAConsentMatchTheFiltersOfTheAccountsAndArePaginated(t *tes
 	assert.Equal(t, []string{idOfAccount2}, balanceIDs(second))
 }
 
+// Verifies: DH-1074
 func TestTheBalancesOfSpecificAccountsAreInTheSequenceOfTheConsentWithOneForEachAccount(t *testing.T) {
 	data, arrangementID := consentWithBalances(t)
 

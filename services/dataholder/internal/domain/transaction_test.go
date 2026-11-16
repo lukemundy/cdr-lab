@@ -163,6 +163,7 @@ func TestTheExtendedDataOfATransactionNamesEachRuleThatItBreaks(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1082
 func TestTheEffectiveTimeIsThePostingTimeOrElseTheExecutionTime(t *testing.T) {
 	executedAt := postedAt.Add(-time.Hour)
 	posted := postedTransaction()
@@ -174,6 +175,7 @@ func TestTheEffectiveTimeIsThePostingTimeOrElseTheExecutionTime(t *testing.T) {
 	assert.Equal(t, executedAt, pending.EffectiveTime())
 }
 
+// Verifies: DH-1090
 func TestOnlyATransactionWithExtendedDataHasDetail(t *testing.T) {
 	assert.False(t, postedTransaction().IsDetailAvailable())
 	assert.True(t, npp(-100).IsDetailAvailable())
