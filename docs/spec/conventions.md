@@ -143,7 +143,7 @@ The Areas table is the full list of the area files. Each `.md` file in the direc
 
 ### Area file
 
-The file is `design/<area>.md`. The file name is the area name in lower-kebab-case, for example `consent.md`.
+The file is `design/<area>.md`. The file name is the area name in lower-kebab-case, for example `authorisation.md`.
 
 ~~~markdown
 # <Component name>: <Area name>
@@ -349,16 +349,16 @@ A link to a requirement or a judgement has descriptive text and the lower-case a
 | Target | Form |
 |---|---|
 | The same file | `[<descriptive text>](#dh-0042)` |
-| A different file of the same component | `[<descriptive text>](consent.md#dh-0042)` |
+| A different file of the same component | `[<descriptive text>](authorisation.md#dh-0042)` |
 | A different component | `[<descriptive text>](../../pki/DESIGN.md#pki-0044)` |
 
 The descriptive text tells the reader what the rule says. It is not the identifier.
 
 For example:
 
-- Use: "The consumer selects the accounts on the consent page ([only open accounts are offered](#dh-0120))."
-- Not: "The consumer selects the accounts on the consent page ([DH-0120](#dh-0120))."
-- Not: "The consumer selects the accounts on the consent page (see DH-0120)."
+- Use: "The consumer selects the accounts on the authorisation page ([only open accounts are offered](#dh-0120))."
+- Not: "The consumer selects the accounts on the authorisation page ([DH-0120](#dh-0120))."
+- Not: "The consumer selects the accounts on the authorisation page (see DH-0120)."
 
 A link to a heading of a specification is permitted only for a link from outside the specifications, for example from a README. A heading anchor changes when the heading text changes.
 
@@ -383,7 +383,7 @@ flowchart LR
   dataholder["Mock data holder<br>[System]"]
   register["Mock CDR Register<br>[External system]"]
 
-  consumer -- "Authorises a consent<br>HTTPS" --> dataholder
+  consumer -- "Gives an authorisation<br>HTTPS" --> dataholder
   recipient -- "Registers and gets CDR data<br>HTTPS, mTLS" --> dataholder
   dataholder -- "Gets the software product statuses<br>HTTPS" --> register
 
@@ -401,7 +401,7 @@ flowchart LR
 [ADR 0024: Structure][adr-0024-structure] gives the rule for an area. These steps apply it:
 
 1. Make a list of the interfaces of the component. For example: an API, a web UI, an operator interface.
-2. Make a list of the capabilities that have their own section in the primary source. For example: consent.
+2. Make a list of the capabilities that have their own section in the primary source. For example: authorisation, from the CDS Authorisation Standards.
 3. Put each group of requirements into one item of the two lists.
 4. Merge a small group into a related area. For example, Introspection goes into the area of the tokens.
 5. When one area has more than 5,000 words, split it by interface, for example a web UI and its API. Do not split an area that is in the limit.
@@ -433,11 +433,11 @@ The table maps each `##` heading of `services/dataholder/DESIGN.md` on 2026-11-1
 | Registration management | 327 | `client-registration.md` |
 | Authorisation request | 863 | `authorisation-server.md` |
 | Consumer authentication | 1,252 | `consumer-authentication.md` |
-| Consent | 1,509 | `consent.md` |
+| Consent | 1,509 | `authorisation.md` |
 | Tokens of a consent | 604 | `tokens.md` |
 | Introspection | 169 | `tokens.md` |
 | Data of a consent | 1,478 | `banking-apis.md` |
-| The end of a consent | 1,463 | `consent.md` |
+| The end of a consent | 1,463 | `authorisation.md` |
 | Register statuses | 558 | `client-registration.md`, because a status changes what a registration can do |
 | Transport security | 277 | `api-standards.md` |
 | Operator interface | 919 | `operator-interface.md` |
