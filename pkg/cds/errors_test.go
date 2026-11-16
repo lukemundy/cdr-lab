@@ -10,6 +10,7 @@ import (
 	"github.com/lukemundy/cdr-lab/pkg/cds"
 )
 
+// Verifies: CDSL-0012, CDSL-0013, CDSL-0014
 func TestWriteErrorWritesTheCDSErrorEnvelope(t *testing.T) {
 	rec := httptest.NewRecorder()
 
@@ -24,6 +25,7 @@ func TestWriteErrorWritesTheCDSErrorEnvelope(t *testing.T) {
 	}]}`, rec.Body.String())
 }
 
+// Verifies: CDSL-0012
 func TestWriteErrorsWritesOneErrorForEachDetail(t *testing.T) {
 	rec := httptest.NewRecorder()
 

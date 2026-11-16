@@ -203,12 +203,8 @@ The security endpoints have no fixed path, except the OpenID Provider configurat
 ### Versioning and headers
 
 - The security endpoints have no version. They do not use `x-v` and `x-min-v`, and the rules for these two headers below do not apply to them. ([CDS: DCR APIs][cds-dcr-apis])
-- Each API in the first table of Endpoints requires `x-v` and accepts `x-min-v`. The response has the highest supported version between `x-min-v` and `x-v`. If `x-min-v` is equal to or higher than `x-v`, the data holder ignores `x-min-v`. ([CDS: HTTP Headers][cds-http-headers])
-- If no requested version is supported, the response is 406 with `urn:au-cds:error:cds-all:Header/UnsupportedVersion`. ([CDS: Error Codes][cds-error-406-unsupported-version])
-- If `x-v` or `x-min-v` is not a positive integer, the response is 400 with `urn:au-cds:error:cds-all:Header/InvalidVersion`. ([CDS: Error Codes][cds-error-400-invalid-version])
-- If `x-v` is missing, the response is 400 with `urn:au-cds:error:cds-all:Header/Missing`. ([CDS: Error Codes][cds-error-400-header-missing])
-- Each response after a successful version negotiation has an `x-v` header with the version served. ([CDS: HTTP Headers][cds-http-headers])
-- Each response has an `x-fapi-interaction-id` header. Its value is the request `x-fapi-interaction-id`, or a new RFC 4122 UUID when the request has none. The CDS requires the header only on authenticated APIs ([CDS: HTTP Headers][cds-http-headers]). Judgement: one behaviour for all APIs is simpler, and it helps tracing across participants.
+- Each API in the first table of Endpoints uses [the CDS version negotiation](../../pkg/cds/DESIGN.md#cdsl-0001), with the version of the table as its lowest and highest version.
+- Each response of the public listener and the mTLS listener has [the `x-fapi-interaction-id` of the request, or a new UUID](../../pkg/cds/DESIGN.md#cdsl-0010).
 - The APIs on the resource base URI require `x-fapi-auth-date`, as an HTTP-date. If it is missing, the response is 400 with `urn:au-cds:error:cds-all:Header/Missing`. If it is not an HTTP-date, the response is 400 with `urn:au-cds:error:cds-all:Header/Invalid`. In both cases, the `detail` is the name of the header. ([CDS: HTTP Headers][cds-http-headers]: "Required for all resource calls"; [CDR Support: Format for x-fapi-auth-date][support-auth-date]; see Decisions)
 - The data holder accepts `x-fapi-customer-ip-address` with an IPv4 or IPv6 address. A different value gives 400 with `urn:au-cds:error:cds-all:Header/Invalid`. ([FAPI 1.0 Baseline, section 6.2.1][fapi-baseline-resource]: the server "shall not reject requests" with a valid address; [CDS: Invalid Header][cds-error-400-header-invalid])
 - The data holder does not validate `x-cds-client-headers`. ([CDR Support: DH requirement for x-cds-client-headers][support-client-headers]: "A request should not be rejected based on the syntax of this header")
@@ -217,12 +213,11 @@ The security endpoints have no fixed path, except the OpenID Provider configurat
 ### Errors
 
 - The security endpoints and the operator interface have their own error formats (see Authorisation server, Authorisation request, Consumer authentication, Client registration, Registration management and Operator interface). The rules below are for all other requests.
-- Error responses use the CDS error envelope `{"errors": [{"code", "title", "detail"}]}`. The `title` is the title that the CDS error list gives for the code. The data holder omits the optional `meta` object, because it uses only standard CDS error codes. ([CDS: Error Codes][cds-error-codes])
-- A query parameter with a value that is not valid gives 400 with `urn:au-cds:error:cds-all:Field/Invalid`, and the `detail` is the name of the parameter. This includes an `effective` or a `product-category` that is not in its enumeration, and a `page` that is not a positive integer. ([CDS: Invalid Field][cds-error-400-field-invalid])
+- Error responses use [the CDS error format](../../pkg/cds/DESIGN.md#cdsl-0012).
+- A query parameter with a value that is not valid gives 400 with `urn:au-cds:error:cds-all:Field/Invalid`, and the `detail` is the name of the parameter. This includes an `effective` or a `product-category` that is not in its enumeration, and [a `page` that is not a positive integer](../../pkg/cds/DESIGN.md#cdsl-0020). ([CDS: Invalid Field][cds-error-400-field-invalid])
 - An `updated-since`, `oldest-time` or `newest-time` that is not an RFC 3339 date-time with an offset gives 400 with `urn:au-cds:error:cds-all:Field/InvalidDateTime`. ([CDS: Invalid Date][cds-error-400-invalid-date-time], [CDS: Common Field Types][cds-common-field-types]: times "MUST be offset relative to UTC")
-- An invalid `page-size` gives 400 with `urn:au-cds:error:cds-all:Field/InvalidPageSize`. This includes a `page-size` of more than 1000. ([CDS: Invalid Page Size][cds-error-400-invalid-page-size], [CDS: Pagination][cds-pagination])
-- A page out of range gives 422 with `urn:au-cds:error:cds-all:Field/InvalidPage`, and the `detail` is the number of pages. Page 1 of an empty list is in range. ([CDS: Invalid Page][cds-error-422-invalid-page])
-- A query parameter with an empty value is the same as a parameter that is absent. (See Decisions)
+- A `page-size` that is not valid, and a page out of range, give [the errors of CDS pagination](../../pkg/cds/DESIGN.md#cdsl-0021).
+- A query parameter with an empty value is the same as a parameter that is absent. For `page` and `page-size`, [the CDS HTTP library gives this rule](../../pkg/cds/DESIGN.md#cdsl-0022). (See Decisions)
 - A `productId` that the brand does not have gives 404 with `urn:au-cds:error:cds-all:Resource/Invalid`, and the `detail` is the `productId`. ([CDS: Invalid Resource][cds-error-404-resource-invalid])
 - An `accountId` in the path that the software product cannot get with the token gives 404 with `urn:au-cds:error:cds-banking:Authorisation/InvalidBankingAccount`, and the `detail` is the `accountId`. This includes an `accountId` that does not exist, an `accountId` of a different customer or software product, and an `accountId` of an account that is not in the arrangement. ([CDS: Invalid Banking Account][cds-error-404-invalid-banking-account]; see Decisions)
 - An `accountId` in a request body that the software product cannot get with the token gives 422 with `urn:au-cds:error:cds-banking:Authorisation/InvalidBankingAccount`. The response has one error for each such `accountId`, with the `accountId` as the `detail`, and no data. ([CDS: Invalid Banking Account][cds-error-422-invalid-banking-account]; [CDR Support: Error scenarios and responses][support-error-scenarios]: no partial response)
@@ -231,7 +226,7 @@ The security endpoints have no fixed path, except the OpenID Provider configurat
 - A request body of more than 64 KiB gives 413 with `urn:au-cds:error:cds-all:GeneralError/Expected`. (See Decisions)
 - A `POST` request with a `Content-Type` that is not `application/json` gives 415 with `urn:au-cds:error:cds-all:GeneralError/Expected`. ([CDS: HTTP Headers][cds-http-headers]; [CDS: HTTP Response Codes][cds-http-response-codes]; see Decisions)
 - An unknown path gives 404 with `urn:au-cds:error:cds-all:Resource/NotFound`. ([CDS: Resource Not Found][cds-error-404-not-found])
-- An unexpected server error gives 500 with `urn:au-cds:error:cds-all:GeneralError/Unexpected`. The `detail` does not show the cause. ([CDS: Unexpected Error][cds-error-5xx-unexpected])
+- An unexpected server error gives [500 with no cause in the `detail`](../../pkg/cds/DESIGN.md#cdsl-0015).
 
 ### Get Products and Get Product Detail
 
@@ -240,22 +235,21 @@ The security endpoints have no fixed path, except the OpenID Provider configurat
 - `updated-since` gives the products with a `lastUpdated` after that time. ([CDS: Get Products][cds-get-products])
 - `brand` gives the products whose `brand` is equal to the value. The comparison is exact and case sensitive. (See Decisions)
 - Get Products returns the products in descending order of `lastUpdated`. Products with the same `lastUpdated` are in the order of their `productId`. ([CDS: Get Products][cds-get-products]; the second order is judgement: pagination needs a stable order)
-- Get Products supports `page` (default 1) and `page-size` (default 25, maximum 1000). It returns `links` and `meta` as the CDS pagination rules require. `links` has `first` and `last` when the list has records, `prev` after the first page and `next` before the last page. Each link has `page`, `page-size` and the filters of the request. When the list has no records, `totalPages` is 0. ([CDS: Pagination][cds-pagination])
-- Get Product Detail returns one product as a `BankingProductDetailV7` record, with `links.self`. It returns a product that is not current. Judgement: Get Products with `effective=ALL` or `FUTURE` lists such a product, and a client must be able to read the detail of each product that the list gives.
+- Get Products supports `page` and `page-size` with [the CDS pagination rules](../../pkg/cds/DESIGN.md#cdsl-0017). Each link of a page keeps [the filters of the request](../../pkg/cds/DESIGN.md#cdsl-0029).
+- Get Product Detail returns one product as a `BankingProductDetailV7` record, in [the response envelope](../../pkg/cds/DESIGN.md#cdsl-0034). It returns a product that is not current. Judgement: Get Products with `effective=ALL` or `FUTURE` lists such a product, and a client must be able to read the detail of each product that the list gives.
 
 ### Get Status and Get Outages
 
 - Get Status returns the status `OK`. The `updateTime` is the time of the request. ([CDS: Get Status][cds-get-status]; see Decisions)
 - Get Outages returns an empty list of outages. ([CDS: Get Outages][cds-get-outages]; see Decisions)
-- The two responses have `links.self` and an empty `meta`. ([CDS: Payload Conventions][cds-payload-conventions])
+- The two responses use [the response envelope with `links.self` and an empty `meta`](../../pkg/cds/DESIGN.md#cdsl-0034).
 
 ### CORS
 
-- All responses from the TLS endpoints, including errors, have `Access-Control-Allow-Origin: *`, except the authorisation endpoint and the pages of its flow. This includes the OpenID Provider configuration and the JWKS, which the CDS says do "not require CORS". ([CDS: CORS][cds-cors], [CDS: OpenID Provider Configuration endpoint][cds-oidc-config]; see Decisions)
+- The TLS endpoints use [the CORS rules](../../pkg/cds/DESIGN.md#cdsl-0037), also for [a preflight request](../../pkg/cds/DESIGN.md#cdsl-0039), except the authorisation endpoint and the pages of its flow. This includes the OpenID Provider configuration and the JWKS, which the CDS says do "not require CORS". ([CDS: CORS][cds-cors], [CDS: OpenID Provider Configuration endpoint][cds-oidc-config]; see Decisions)
 - The mTLS endpoints do not permit cross-origin requests. Judgement: they are authenticated endpoints, and a web page in a browser has no CDR client certificate.
 - The authorisation endpoint and the pages of its flow do not permit cross-origin requests. Judgement: they are pages for a consumer and not an API, and a different web site must not read them. ([CDS: OpenID Provider Configuration endpoint][cds-oidc-config]: the authorisation endpoint does "not require CORS")
-- All responses from the TLS endpoints have `Access-Control-Expose-Headers: x-v, Retry-After, x-fapi-interaction-id`, so that a web page can read these headers. ([CDR Support: CORS support][support-cors])
-- A CORS preflight request (`OPTIONS` with `Access-Control-Request-Method`) to a TLS endpoint gives 204 with `Access-Control-Allow-Origin: *`, `Access-Control-Allow-Methods: GET`, and an `Access-Control-Allow-Headers` that contains the requested headers. ([Fetch: CORS protocol][fetch-cors]; see Decisions)
+- The CORS rules of the TLS endpoints [expose the headers](../../pkg/cds/DESIGN.md#cdsl-0038) `x-v`, `Retry-After` and `x-fapi-interaction-id`, so that a web page can read these headers. ([CDR Support: CORS support][support-cors])
 
 ## Authorisation server
 
@@ -583,7 +577,7 @@ These rules are for the APIs on the resource base URI and for the UserInfo endpo
 
 - The 401 responses, and each response of the UserInfo endpoint for a refused token, have no body.
 
-- The `links.self` of each response is the URL of the request on the resource base URI. Pagination follows the rules of Get Products: `page`, `page-size`, `links` and `meta`. ([CDS: Payload Conventions][cds-payload-conventions], [CDS: Pagination][cds-pagination])
+- Each response uses [the response envelope](../../pkg/cds/DESIGN.md#cdsl-0034), with [a `links.self` on the resource base URI](../../pkg/cds/DESIGN.md#cdsl-0035). A list uses [the CDS pagination rules](../../pkg/cds/DESIGN.md#cdsl-0017).
 - The data holder logs the `x-fapi-interaction-id` of each request. ([FAPI 1.0 Baseline, section 6.2.1][fapi-baseline-resource])
 
 ### Resource identifiers
@@ -611,7 +605,7 @@ These rules are for the APIs on the resource base URI and for the UserInfo endpo
 
 ### Transactions
 
-- Get Transactions For Account returns the transactions of one account of the arrangement as `BankingTransactionV2` records. The response has `meta.isQueryParamUnsupported` with the value `false`. ([CDS: Get Transactions For Account][cds-get-transactions])
+- Get Transactions For Account returns the transactions of one account of the arrangement as `BankingTransactionV2` records. The response has [`meta.isQueryParamUnsupported` with the value `false`](../../pkg/cds/DESIGN.md#cdsl-0032). ([CDS: Get Transactions For Account][cds-get-transactions])
 - The effective time of a transaction is its `postingDateTime` when it has one, and its `executionDateTime` when it does not. The list is in descending order of the effective time. Transactions with the same effective time are in descending order of their creation. ([CDS: Get Transactions For Account][cds-get-transactions]; the second order is judgement: pagination needs a stable order)
 - The filters are `oldest-time` (default: `newest-time` minus 90 days), `newest-time` (default: the time of the request), `min-amount`, `max-amount` and `text`. A transaction must match each filter in the request. The time filters include their limits, and they use the effective time. `text` gives the transactions whose `description` or `reference` contains the value, with no difference between upper case and lower case. ([CDS: Get Transactions For Account][cds-get-transactions]; see Decisions)
 - The data holder gives only the transactions whose effective time is not more than 2 years before the time of the request. An `oldest-time` before that time is not an error. ([CDR Rules][cdr-rules], Schedule 3, clause 3.2(6)(a); see Decisions)
@@ -724,10 +718,11 @@ These rules are for the APIs on the resource base URI and for the UserInfo endpo
 
 ## Transport security
 
-- All CDR endpoints use TLS 1.2 or higher, with the cipher suites that the CDS permits. With TLS 1.2, the only cipher suites are `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256` and `TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384`. TLS 1.3 is also permitted. ([CDS: Transaction Security][cds-transaction-security], [CDS: Ciphers][cds-ciphers])
-- The TLS endpoints present a certificate from a mock public CA, not from the mock CDR CA. They do not request client certificates. ([CDS: Participant Endpoints][cds-participant-endpoints], [CDS: Transaction Security][cds-transaction-security])
-- The mTLS endpoints are on a listener that is separate from the TLS endpoints. They present a server certificate from the mock CDR CA, and they accept only client certificates that chain to the mock CDR CA. ([CDS: Certificate Trust Model][cds-cert-trust-model], [CDS: Transaction Security][cds-transaction-security])
-- The data holder checks the revocation status of each client certificate with the CRL at the URL that the certificate gives. It refuses the certificate when it is revoked, and also when the data holder has no current CRL that the issuer signed. It loads the CRL again 1 minute after each load. The time is a setting of the data holder, which is optional, and with the value 0 the data holder loads the CRL at each check. When a load fails, it uses the last CRL that it loaded until the next update of that CRL, and it tries again 1 minute later, also when the setting is shorter. A revocation takes effect within the time of the setting while the CRL server can be reached. ([CDS: Certificate Validation][cds-cert-validation]; [RFC 5280, section 5.1.2.5][rfc5280-next-update]; see Decisions)
+- All CDR endpoints use [the TLS versions](../../pkg/cds/DESIGN.md#cdsl-0041) and [the TLS 1.2 cipher suites](../../pkg/cds/DESIGN.md#cdsl-0042) of the CDS HTTP library.
+- The TLS endpoints present a certificate from a mock public CA, not from the mock CDR CA. They [do not request client certificates](../../pkg/cds/DESIGN.md#cdsl-0043). ([CDS: Participant Endpoints][cds-participant-endpoints], [CDS: Transaction Security][cds-transaction-security])
+- The mTLS endpoints are on a listener that is separate from the TLS endpoints. They present a server certificate from the mock CDR CA, and they accept only [client certificates that chain to the CDR CA bundle](../../pkg/cds/DESIGN.md#cdsl-0044). ([CDS: Certificate Trust Model][cds-cert-trust-model])
+- The data holder checks the revocation status of each client certificate with [the CRL check of the CDS HTTP library](../../pkg/cds/DESIGN.md#cdsl-0048), and [refuses the certificate when the check fails](../../pkg/cds/DESIGN.md#cdsl-0047).
+- The [maximum CRL age](../../pkg/cds/DESIGN.md#cdsl-0052) is a setting of the data holder. The setting is optional, and [its default is 1 minute](../../pkg/cds/DESIGN.md#cdsl-0053). (See Decisions)
 - The data holder gets the base URL of the mTLS listener, its certificate and key, and the CA bundle for client certificates from its configuration.
 
 ## Operator interface
@@ -1089,7 +1084,7 @@ The site API has the rules of the console API of the data holder ([Console API](
 - The list of the consents gives each arrangement of the customer of the session in one response, with no pages: the `arrangementId`, the `clientName`, the `brandName`, the `legalEntityName` when the arrangement has one, the `status` (`CURRENT` or `ENDED`, as in the console API), `confirmedAt`, `sharingDurationSeconds`, `sharingEndsAt`, `endedAt` for an ended arrangement (the time of the event that ended it, or the end of its sharing), the `accounts` with the fields of an account in the list of the accounts and no `balance` and no `actions`, and the `dataClusters`. Each data cluster has its `name`, its `permissions`, and `firstDisclosedAt` and `lastDisclosedAt` when it has a disclosure. The data holder gives the language of the data clusters, so that the UI has no copy of the rules. (See Decisions)
 - A withdrawal sends no body, because it ends only the arrangement of its path. A successful withdrawal gives 204. A withdrawal of an arrangement that ended gives 409, and the data holder changes nothing. An arrangement of a different customer, or an arrangement that does not exist, gives 404, and the `detail` does not contain its identifier. (See Console API)
 - The arrangement IDs, the names of the data recipients and the disclosure times of the consents and of the close action go only to the customer of the session.
-- The transactions of an account take only `page` and `page-size`, with the defaults and the maximum of the CDS: 1 and 25, and at most 1000. The response gives the number of records and the number of pages. ([CDS: Pagination][cds-pagination])
+- The transactions of an account take only `page` and `page-size`, with [the defaults and the maximum of CDS pagination](../../pkg/cds/DESIGN.md#cdsl-0017). The response gives the number of records and the number of pages. ([CDS: Pagination][cds-pagination])
 
 | Action | Method and path | Success |
 |---|---|---|
@@ -1199,17 +1194,12 @@ These requirements are for the lab. The CDS non-functional requirements for data
 | Deprecated versions | Not served | A request for a deprecated version gives 406 on the mock. Data holders can retire version 4 of Get Products and version 6 of Get Product Detail from 10 August 2026 ([CDS: Get Products][cds-get-products], [CDS: Get Product Detail][cds-get-product-detail]). |
 | Product base URI | The same as the public base URI | The CDS permits it ([CDS: Participant Endpoints][cds-participant-endpoints]). Judgement: one base URI for all public endpoints is the least complex. |
 | Comparison of the `brand` filter | Exact and case sensitive | Judgement: the CDS says only "Filter results based on a specific brand" ([CDS: Get Products][cds-get-products]). A client gets the value from the `brand` field of a product, so an exact comparison is sufficient and the simplest. |
-| Query parameter with an empty value | The same as an absent parameter | Judgement: the CDS does not specify it. Each parameter of Get Products is optional, and a client that builds a query from a form can send a name with no value. The mock Register does the same for `updated-since`. |
+| Query parameter with an empty value | The same as an absent parameter | Judgement: the CDS does not specify it. Each parameter of Get Products is optional, and a client that builds a query from a form can send a name with no value. For `page` and `page-size`, the CDS HTTP library gives the same rule. The mock Register does the same for `updated-since`. |
 | `updated-since` comparison | `lastUpdated` after `updated-since` | The CDS says "updated after the specified date and time" ([CDS: Get Products][cds-get-products]). |
 | 404 Unavailable Resource on Get Product Detail | Not used | The CDS requires support for the code ([CDS: Get Product Detail][cds-get-product-detail]). A product in the mock is never temporarily unavailable, so the condition cannot occur. |
 | Outcome of Get Status and Get Outages | `OK`, and no outages | Judgement: the mock has no monitor of its own endpoints and no planned outages. A data holder that responds is functional. An operator feature to set a status or an outage can be added when a client needs to test it. |
 | `updateTime` of Get Status | The time of the request | It is the last time that the status was "updated, modified or verified" ([CDR Support: Get Status Payload Fields][support-status-fields]), and the data holder verifies the status at each request. |
-| `x-fapi-interaction-id` on public APIs | Returned | The CDS does not require it on unauthenticated APIs ([CDS: HTTP Headers][cds-http-headers]). Judgement: see Versioning and headers. |
-| Version header format | Only decimal digits, with a value of 1 or more. A value that is too large for an integer is higher than all supported versions. | The CDS requires a positive integer ([CDS: Invalid Version][cds-error-400-invalid-version]). Leading zeros are valid ([CDR Support: Allowed values for x-v and x-min-v][support-version-values]). Judgement: a sign or a space is not a usual integer format. |
-| Invalid version value | 400 `Header/InvalidVersion` | The CDS gives 400 ([CDS: Invalid Version][cds-error-400-invalid-version]). A DSB guide says that 406 is also suitable ([CDR Support: Error scenarios and responses][support-error-scenarios]). The CDS is the first source. |
-| Page out of range | 422 `Field/InvalidPage` | The CDS says that the code must be supported ([CDS: Invalid Page][cds-error-422-invalid-page]). A DSB guide also permits 200 and 400 ([CDR Support: Error scenarios and responses][support-error-scenarios]). The CDS is the first source. |
-| Sequence of request checks | Version headers first, then the path and query parameters. | Judgement: the CDS does not give a sequence. A response after a successful version negotiation has `x-v`, also when it is an error. |
-| Headers that a CORS preflight permits | The requested headers | Judgement: the CDS requires that CORS protections are disabled on unauthenticated APIs ([CDS: CORS][cds-cors]). The DSB guidance gives a minimum list ([CDR Support: CORS support][support-cors]), and the requested headers always include the headers of that list that the client sends. An allowlist would block a page that sends a harmless header and protects nothing. |
+| Sequence of request checks | Version headers first, then the path and query parameters. | Judgement: the CDS does not give a sequence. |
 | `additionalValue` of a product component | The load does not check it | The CDS gives a rule for each type value in a table for each component ([CDS: Product & Account Components][cds-product-components]), and not in the schema. Judgement: the load is a lab-only guard for the operator, and a check of each type value does not justify its cost now. The catalogues of the preset brands and of the lab brand obey the tables. |
 | Optional fields of a product | Only the effective dates, features, fees, deposit rates and lending rates | The schema marks all the other fields as optional, and the CDS gives a data holder more discretion for payloads with no customer ([CDS: Payload Conventions][cds-payload-conventions]). Judgement: these fields are sufficient for the most common products. Add a field when the lab needs it. The fields that are out are `brandName`, `brandGroup`, `applicationUri`, `additionalInformation`, `cardArt`, `bundles`, `constraints`, `eligibility` and `instalments`, and in the components, fee discounts, rate tiers and rate conditions. |
 | `isTailored` that is absent in a product file | `false` | Judgement: the response always has the field, and `false` is correct for a product with standard prices. |
@@ -1241,9 +1231,7 @@ These requirements are for the lab. The CDS non-functional requirements for data
 | Errors of registration management | 401 and 403 with no body, and the `WWW-Authenticate` values of RFC 6750 | The DCR OpenAPI specification gives 401 for an "unknown or invalid Client or invalid access token" and 403 when the client "does not have permission", with no body schema ([`cds_dcr.json`][cds-openapi-dcr]). The error values are those of [RFC 6750, section 3.1][rfc6750-errors]. A certificate that does not match gives `invalid_token` ([RFC 8705, section 3][rfc8705-binding]). |
 | `DELETE` of a registration | Supported | The CDS marks it as optional ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]). Judgement: a lab user and the conformance tests can then register a software product again with no reset of the lab. |
 | CORS on the OpenID Provider configuration and the JWKS | `Access-Control-Allow-Origin: *` | The CDS says that these endpoints do "not require CORS" ([CDS: OpenID Provider Configuration endpoint][cds-oidc-config]), which does not forbid the header. Judgement: one behaviour for all TLS endpoints is the least complex. |
-| Revocation status not known | Refuse the client certificate | Judgement: the CDS requires the check ([CDS: Certificate Validation][cds-cert-validation]) and does not say what to do when it cannot be done. To accept the certificate would let a revoked client connect when the CRL server is down. The status is not known only when the data holder has no current CRL (see the row "CRL load that fails"). The mock Register does the same. |
-| Age of a CRL that the data holder keeps | 1 minute at most while the CRL server can be reached, as an optional setting. The lab sets 0: the data holder loads the CRL at each check. | Judgement: the CDS gives no time. A revocation must take effect quickly, and a burst of connections must cause one load. A conformance test revokes a certificate and then checks the refusal at once, because the suite does not wait ([conformance DESIGN.md][conformance-design]). The CRL server of the lab is in the lab network, so a load at each check costs little. |
-| CRL load that fails | Use the last CRL until its next update. Try again 1 minute later, not at each connection. Log a warning. | A CRL is valid until its next update ([RFC 5280, section 5.1.2.5][rfc5280-next-update]). Judgement: when the Register serves the CRL ([ADR 0022][adr-0022]), a short outage of the Register would otherwise stop all mTLS clients of the data holder. A request to a CRL server that does not reply can take 5 seconds, so a new request at each connection would delay each handshake. The warning shows the outage, because the clients do not see it. The mock Register signs the CRL, so it uses its newest CRL and loads none. |
+| Maximum CRL age in the lab | The lab sets 0: the data holder loads the CRL at each check. | Judgement: a conformance test revokes a certificate and then checks the refusal at once, because the suite does not wait ([conformance DESIGN.md][conformance-design]). The CRL server of the lab is in the lab network, so a load at each check costs little. |
 | Health probe paths | `/livez` and `/readyz` | Judgement: see Non-functional requirements. |
 | Authentication flow | Redirect to Web with OTP only | A data holder with no app must support this flow ([CDS: Fallback Authentication Flows][cds-fallback-flows]). Redirect to App is for a data holder that has an app, from 10 May 2027. |
 | Delivery of the OTP | By email, through an SMTP server from the configuration. In the lab, the server is a mail sink. | The CDS requires "an existing channel or mechanism", at the discretion of the data holder ([CDS: One-Time Password Credential Requirements][cds-otp]), and an OTP does not have to go by SMS ([CDR Support: One Time Password (OTP)][support-otp]). No source gives a method for a test system. Judgement: email is a channel that a mock can have with the behaviour of a production data holder, and a mail sink makes sure that the lab sends no email to a real address. |
@@ -1514,16 +1502,9 @@ These requirements are for the lab. The CDS non-functional requirements for data
 [cds-error-codes]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-codes
 [cds-error-400-field-invalid]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-400-field-invalid
 [cds-error-400-invalid-date-time]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-400-field-invalid-date-time
-[cds-error-400-invalid-page-size]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-400-field-invalid-page-size
-[cds-error-400-invalid-version]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-400-header-invalid-version
-[cds-error-400-header-missing]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-400-header-missing
 [cds-error-404-resource-invalid]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-404-resource-invalid
 [cds-error-404-not-found]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-404-resource-not-found
-[cds-error-406-unsupported-version]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-406-header-unsupported-version
-[cds-error-422-invalid-page]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-422-field-invalid-page
-[cds-error-5xx-unexpected]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-5xx-unexpected-error
 [cds-transaction-security]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#transaction-security
-[cds-ciphers]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#ciphers
 [cds-security-endpoints]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#security-endpoints
 [cds-oidc-config]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#openid-provider-configuration-endpoint
 [cds-jwks-endpoint]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#json-web-key-set-endpoint
@@ -1548,8 +1529,6 @@ These requirements are for the lab. The CDS non-functional requirements for data
 [cds-http-response-codes]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#http-response-codes
 [cds-dh-responsibilities]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#data-holder-responsibilities
 [cds-cert-trust-model]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#certificate-trust-model
-[cds-cert-validation]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#certificate-validation
-[rfc5280-next-update]: https://www.rfc-editor.org/rfc/rfc5280#section-5.1.2.5
 [cds-openapi-dcr]: https://github.com/ConsumerDataStandardsAustralia/standards/blob/v1.36.0/docs/includes/swagger/cds_dcr.json
 [cds-consent]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#consent
 [cds-dr-calling-dh]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#data-recipients-calling-data-holders
@@ -1588,7 +1567,6 @@ These requirements are for the lab. The CDS non-functional requirements for data
 [support-product-base-uri]: https://cdr-support.zendesk.com/hc/en-us/articles/16505555811855
 [support-cors]: https://cdr-support.zendesk.com/hc/en-us/articles/900003054706
 [support-status-fields]: https://cdr-support.zendesk.com/hc/en-us/articles/900005173683
-[support-version-values]: https://cdr-support.zendesk.com/hc/en-us/articles/900004807083
 [support-error-scenarios]: https://cdr-support.zendesk.com/hc/en-us/articles/5729181240591
 [support-dcr]: https://cdr-support.zendesk.com/hc/en-us/articles/6828251436431
 [support-egress]: https://cdr-support.zendesk.com/hc/en-us/articles/4403543156751
@@ -1650,7 +1628,6 @@ These requirements are for the lab. The CDS non-functional requirements for data
 [rfc8705-binding]: https://www.rfc-editor.org/rfc/rfc8705#section-3
 [rfc8705-expiration]: https://www.rfc-editor.org/rfc/rfc8705#section-6.3
 [rfc8705-refresh]: https://www.rfc-editor.org/rfc/rfc8705#section-7.1
-[fetch-cors]: https://fetch.spec.whatwg.org/#http-cors-protocol
 [k8s-health]: https://kubernetes.io/docs/reference/using-api/health-checks/
 [cds-get-customer]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-common-api_get-customer
 [cds-get-accounts]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-banking-api_get-accounts
@@ -1706,7 +1683,6 @@ These requirements are for the lab. The CDS non-functional requirements for data
 [adr-0003]: ../../docs/adr/0003-event-sourcing.md
 [adr-0021]: ../../docs/adr/0021-record-one-business-fact-in-each-event-type.md
 [adr-0006]: ../../docs/adr/0006-telemetry.md
-[adr-0022]: ../../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
 [conformance-design]: ../../conformance/DESIGN.md
 [adr-0012]: ../../docs/adr/0012-utc-for-all-times.md
 [adr-0014]: ../../docs/adr/0014-web-uis-as-embedded-react-single-page-applications.md
