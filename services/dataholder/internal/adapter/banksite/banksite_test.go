@@ -211,7 +211,9 @@ func TestAFailureOfTheStoreIsAServerError(t *testing.T) {
 	}
 }
 
-// The CSP of the site permits styles and images from the same origin only (DESIGN.md: Listener and security).
+// The CSP of the site permits styles and images from the same origin only.
+//
+// Verifies: DH-2071, DH-2074
 func TestTheSiteServesTheBrandFilesWithTheResponseHeadersOfTheSite(t *testing.T) {
 	ports := banksite.Ports{BrandFiles: func(routes *httproute.Routes) {
 		routes.Handle("GET /brand/styles.css", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
@@ -226,6 +228,7 @@ func TestTheSiteServesTheBrandFilesWithTheResponseHeadersOfTheSite(t *testing.T)
 	assert.True(t, strings.HasPrefix(resp.header.Get("Content-Security-Policy"), "default-src 'self';"))
 }
 
+// Verifies: DH-2069
 func TestTheSiteHasNoHSTSAndThePagesOfTheProductsSetNoCookie(t *testing.T) {
 	for _, target := range []string{"/", "/products", "/api/brand", "/api/products"} {
 		t.Run(target, func(t *testing.T) {

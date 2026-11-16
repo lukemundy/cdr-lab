@@ -220,6 +220,7 @@ func TestTheTokensHaveAHeadingFontOfTheDataHolder(t *testing.T) {
 	require.ErrorContains(t, err, `tokens.json: font.heading: "Papyrus" is not a font of the data holder`)
 }
 
+// Verifies: DH-2071, DH-2072
 func TestTheSiteGetsEachPhotoOfTheBrand(t *testing.T) {
 	hero := webp(lossy, 1600, 1200, 1000)
 
