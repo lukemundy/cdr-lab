@@ -211,6 +211,7 @@ var lists = map[string]struct {
 	"data holder brands summary": {brandsSummaryPath, "2"},
 }
 
+// Verifies: REG-0306
 func TestDataRecipientsGiveEachDataRecipientWithOnlyTheFieldsOfTheSchema(t *testing.T) {
 	rec := serve(t, newReader(), dataRecipientsPath, v4())
 
@@ -244,6 +245,7 @@ func TestDataRecipientsGiveEachDataRecipientWithOnlyTheFieldsOfTheSchema(t *test
 	assert.Regexp(t, `^"[0-9a-f]{32}"$`, rec.Header().Get("ETag"))
 }
 
+// Verifies: REG-0305, REG-0313
 func TestDataRecipientsServeOnlyVersion4(t *testing.T) {
 	tests := map[string]struct {
 		header http.Header
@@ -299,6 +301,7 @@ func requireError(t *testing.T, rec *httptest.ResponseRecorder, status int, code
 	return body.Errors[0]
 }
 
+// Verifies: REG-0338
 func TestStatusListsGiveEachParticipant(t *testing.T) {
 	tests := map[string]struct {
 		path string
@@ -346,6 +349,7 @@ func TestListsGiveAnEmptyListWithNoParticipants(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0328
 func TestTheETagIsTheSameForTheSameDataAndChangesWithTheData(t *testing.T) {
 	reader := newReader()
 	first := serve(t, reader, recipientStatusesPath, v3()).Header().Get("ETag")
@@ -357,6 +361,7 @@ func TestTheETagIsTheSameForTheSameDataAndChangesWithTheData(t *testing.T) {
 	assert.NotEqual(t, first, changed)
 }
 
+// Verifies: REG-0326, REG-0327
 func TestIfNoneMatchGivesNotModifiedWhenAnEntityTagMatches(t *testing.T) {
 	etag := serve(t, newReader(), recipientStatusesPath, v3()).Header().Get("ETag")
 
@@ -499,6 +504,7 @@ func TestMissingVersionDetailIsTheHeaderName(t *testing.T) {
 	assert.Equal(t, "x-v", e.Detail)
 }
 
+// Verifies: REG-0310, REG-0311
 func TestDataHolderStatusesGiveEachDataHolderOfTheIndustry(t *testing.T) {
 	for _, industry := range []string{"all", "banking", "energy", "non-bank-lending", "telco"} {
 		t.Run(industry, func(t *testing.T) {
@@ -528,6 +534,7 @@ func TestDataHolderStatusesGiveEachDataHolderOfTheIndustry(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0302, REG-0313
 func TestDataHolderStatusesServeOnlyVersion2(t *testing.T) {
 	rec := serve(t, newReader(), holderStatusesPath, http.Header{"X-V": {"1"}})
 
@@ -540,6 +547,7 @@ func TestDataHolderStatusesServeOnlyVersion2(t *testing.T) {
 	)
 }
 
+// Verifies: REG-0316
 func TestAnIndustryThatIsNotValidOnDataHolderStatuses(t *testing.T) {
 	for _, industry := range []string{"foo", "Banking", "ALL"} {
 		t.Run(industry, func(t *testing.T) {
@@ -552,6 +560,7 @@ func TestAnIndustryThatIsNotValidOnDataHolderStatuses(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0309, REG-0316
 func TestAnIndustryOtherThanAllIsNotValidOnDataRecipientEndpoints(t *testing.T) {
 	for _, industry := range []string{"banking", "energy", "foo"} {
 		for name, l := range lists {
@@ -582,12 +591,14 @@ func TestAnIndustryOtherThanAllIsNotValidOnDataRecipientEndpoints(t *testing.T) 
 	}
 }
 
+// Verifies: REG-0312
 func TestTheVersionIsCheckedBeforeTheIndustry(t *testing.T) {
 	rec := serve(t, newReader(), "/cdr-register/v1/banking/data-recipients/status", http.Header{})
 
 	requireError(t, rec, http.StatusBadRequest, "urn:au-cds:error:cds-all:Header/Missing", "Missing Required Header")
 }
 
+// Verifies: REG-0318
 func TestAnUnknownPathIsNotFound(t *testing.T) {
 	for _, path := range []string{
 		"/",
@@ -635,6 +646,7 @@ func TestAllResponsesPermitAnyOrigin(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0314
 func TestTheResponseGivesTheRequestInteractionID(t *testing.T) {
 	for name, header := range map[string]http.Header{"success": v3(), "error": {}} {
 		t.Run(name, func(t *testing.T) {
@@ -680,6 +692,7 @@ func TestSelfLinkIgnoresATrailingSlashInTheBaseURL(t *testing.T) {
 	assert.Equal(t, baseURL+recipientStatusesPath, body.Links.Self)
 }
 
+// Verifies: REG-0340, REG-0341, REG-0342
 func TestTheBrandsSummaryGivesThePublicDetailsOfEachBrandOfTheIndustry(t *testing.T) {
 	for _, industry := range []string{"all", "banking", "energy", "non-bank-lending", "telco"} {
 		t.Run(industry, func(t *testing.T) {
@@ -715,6 +728,7 @@ func TestTheBrandsSummaryGivesThePublicDetailsOfEachBrandOfTheIndustry(t *testin
 	}
 }
 
+// Verifies: REG-0315
 func TestAnIndustryThatIsNotValidOnTheBrandsSummaryIsNotFound(t *testing.T) {
 	for _, industry := range []string{"foo", "Banking", "ALL"} {
 		t.Run(industry, func(t *testing.T) {
@@ -743,6 +757,7 @@ func preflight(t *testing.T, path string, header http.Header) *httptest.Response
 	return send(t, newReader(), http.MethodOptions, path, header)
 }
 
+// Verifies: REG-0344
 func TestAPreflightRequestPermitsGetWithTheRequestedHeadersFromAnyOrigin(t *testing.T) {
 	for name, l := range lists {
 		t.Run(name, func(t *testing.T) {
@@ -779,6 +794,7 @@ func TestAnOptionsRequestThatIsNotAPreflightIsNotAPreflightResponse(t *testing.T
 	assert.NotContains(t, rec.Header(), "Access-Control-Allow-Methods")
 }
 
+// Verifies: REG-0345
 func TestResponsesExposeTheCDSHeadersToAnyOrigin(t *testing.T) {
 	tests := map[string]struct {
 		path   string

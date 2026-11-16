@@ -191,6 +191,7 @@ var optionalURIFields = []uriField{
 	},
 }
 
+// Verifies: REG-0215
 func TestAURIFieldRefusesAValueThatIsNotAnHTTPSURIWithAHost(t *testing.T) {
 	values := map[string]string{
 		"not a URI":              "foo",
@@ -214,6 +215,7 @@ func TestAURIFieldRefusesAValueThatIsNotAnHTTPSURIWithAHost(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0216
 func TestAURIFieldAcceptsAnHTTPSURIAtTheMaximumLength(t *testing.T) {
 	prefix := "https://holder.example/"
 	value := prefix + strings.Repeat("a", domain.MaxURILength-len(prefix))
@@ -225,6 +227,7 @@ func TestAURIFieldAcceptsAnHTTPSURIAtTheMaximumLength(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0217
 func TestAURIFieldAcceptsAnHTTPSURIWithAPortAQueryAndPercentEncoding(t *testing.T) {
 	for _, f := range append(requiredURIFields, optionalURIFields...) {
 		t.Run(f.record+" "+f.field, func(t *testing.T) {
@@ -233,6 +236,7 @@ func TestAURIFieldAcceptsAnHTTPSURIWithAPortAQueryAndPercentEncoding(t *testing.
 	}
 }
 
+// Verifies: REG-0216
 func TestAURIFieldRefusesAValueLongerThanTheMaximumLength(t *testing.T) {
 	prefix := "https://holder.example/"
 	value := prefix + strings.Repeat("a", domain.MaxURILength-len(prefix)+1)
@@ -256,6 +260,7 @@ func TestARequiredURIFieldRefusesNoValue(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0218
 func TestAnOptionalURIFieldAcceptsNoValue(t *testing.T) {
 	dr := validDataRecipient()
 	product(&dr).SectorIdentifierURI, product(&dr).TOSURI, product(&dr).PolicyURI = "", "", ""

@@ -29,6 +29,7 @@ func (r reader) SoftwareProductClient(context.Context, string) (app.SoftwareProd
 	return r.client, r.err
 }
 
+// Verifies: REG-0457
 func TestAClientIsActiveOnlyWhenTheSoftwareProductIsActive(t *testing.T) {
 	for status, active := range map[domain.Status]bool{
 		domain.Active:   true,
@@ -89,6 +90,7 @@ func TestAJTIIsConsumedOneTime(t *testing.T) {
 	assert.ErrorIs(t, store.Consume(t.Context(), "jti-1"), authserver.ErrJTIUsed)
 }
 
+// Verifies: REG-0455
 func TestOldJTIsAreRemoved(t *testing.T) {
 	pool := newPool(t)
 	store := idp.NewStore(pool)
@@ -128,6 +130,7 @@ func TestTheSigningKeyIsCreatedOneTimeAndStaysTheSame(t *testing.T) {
 	assert.True(t, first[0].Key.Equal(second[0].Key))
 }
 
+// Verifies: REG-0465
 func TestEachKeySetHasItsOwnKey(t *testing.T) {
 	store := idp.NewStore(newPool(t))
 	require.NoError(t, store.EnsureSigningKey(t.Context(), app.AccessTokenKeys))
@@ -157,6 +160,7 @@ func keyIDs(t *testing.T, store *idp.Store, set app.KeySet) []string {
 	return ids
 }
 
+// Verifies: REG-0467, REG-0468
 func TestAKeyChangePublishesTheNextKeyBeforeItSigns(t *testing.T) {
 	pool := newPool(t)
 	store := idp.NewStore(pool)
@@ -188,6 +192,7 @@ func TestAKeyChangePublishesTheNextKeyBeforeItSigns(t *testing.T) {
 	assert.Equal(t, otherSet, keyIDs(t, store, app.AccessTokenKeys), "the other key set does not change")
 }
 
+// Verifies: REG-0469
 func TestTheNextKeyChangeRemovesThePreviousKey(t *testing.T) {
 	store := idp.NewStore(newPool(t))
 	require.NoError(t, store.EnsureSigningKey(t.Context(), app.SSAKeys))
@@ -284,6 +289,7 @@ func version(t *testing.T, store *idp.Store, set app.KeySet) int64 {
 	return keySet.Version
 }
 
+// Verifies: REG-0471
 func TestEachStepOfAKeyChangeChangesTheVersionOfItsKeySetOnly(t *testing.T) {
 	store := idp.NewStore(newPool(t))
 	require.NoError(t, store.EnsureSigningKey(t.Context(), app.SSAKeys))

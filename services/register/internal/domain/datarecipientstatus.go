@@ -17,7 +17,7 @@ func (e StatusRuleError) Error() string { return e.err.Error() }
 func (e StatusRuleError) Unwrap() error { return e.err }
 
 // Source: the state diagrams in CDS Participant Statuses. The CDS gives no diagram for data holders and brands: they
-// use the software product diagram, and REMOVED is final (Register DESIGN.md, Status rules).
+// use the software product diagram, and REMOVED is final (Register specification, design/participants.md).
 var (
 	dataRecipientTransitions = map[DataRecipientStatus][]DataRecipientStatus{
 		DataRecipientActive:    {DataRecipientSuspended, DataRecipientRevoked, DataRecipientSurrendered},

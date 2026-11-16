@@ -40,6 +40,7 @@ func TestImportDataHolderFailsWhenTheDataHolderExists(t *testing.T) {
 	assert.EqualError(t, err, `data holder "dh-1" already exists`)
 }
 
+// Verifies: REG-0235
 func TestImportDataHolderAppliesTheStatusRules(t *testing.T) {
 	tests := map[string]struct {
 		legalEntity domain.DataHolderStatus
@@ -96,6 +97,7 @@ func TestImportDataHolderRejectsInvalidFields(t *testing.T) {
 			func(dh *domain.DataHolder) { dh.Brands[0].Industries = nil },
 			`data holder brand "dhb-1": industries is required`,
 		},
+		// Verifies: REG-0206
 		"unknown industry": {
 			func(dh *domain.DataHolder) { dh.Brands[0].Industries = []domain.Industry{"all"} },
 			`data holder brand "dhb-1": industry "all" is not banking, energy, non-bank-lending or telco`,
@@ -116,14 +118,17 @@ func TestImportDataHolderRejectsInvalidFields(t *testing.T) {
 			func(dh *domain.DataHolder) { dh.Brands[0].DataHolderBrandID = "dh-1" },
 			`data holder brand "dh-1": the ID is not unique`,
 		},
+		// Verifies: REG-0208
 		"no brand ID and no interim ID": {
 			func(dh *domain.DataHolder) { dh.Brands[0].DataHolderBrandID = "" },
 			`data holder brand "": dataHolderBrandId or interimId is required`,
 		},
+		// Verifies: REG-0205
 		"legal entity name too long": {
 			func(dh *domain.DataHolder) { dh.LegalEntityName = strings.Repeat("n", 37) },
 			`data holder "dh-1": legalEntityName is longer than 36 characters`,
 		},
+		// Verifies: REG-0219
 		"interim ID too long": {
 			func(dh *domain.DataHolder) { dh.Brands[0].InterimID = strings.Repeat("i", 37) },
 			`data holder brand "dhb-1": interimId is longer than 36 characters`,
@@ -177,6 +182,7 @@ func TestADataHolderWithNoBrandsHasNoIndustries(t *testing.T) {
 	assert.Empty(t, dh.Industries())
 }
 
+// Verifies: REG-0206
 func TestParseIndustryAcceptsOnlyTheIndustriesOfTheCDS(t *testing.T) {
 	for _, s := range []string{"banking", "energy", "non-bank-lending", "telco"} {
 		industry, ok := domain.ParseIndustry(s)
@@ -203,6 +209,7 @@ func interimOnlyBrand() domain.DataHolderBrand {
 	}
 }
 
+// Verifies: REG-0210
 func TestABrandWithOnlyAnInterimIDNeedsOnlyItsPublicDetails(t *testing.T) {
 	dh := validDataHolder()
 	dh.Brands = append(dh.Brands, interimOnlyBrand())
@@ -212,6 +219,7 @@ func TestABrandWithOnlyAnInterimIDNeedsOnlyItsPublicDetails(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Verifies: REG-0208
 func TestABrandCanHaveABrandIDAndAnInterimID(t *testing.T) {
 	dh := validDataHolder()
 	dh.Brands[0].InterimID = "dhi-1"

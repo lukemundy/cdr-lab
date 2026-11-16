@@ -225,6 +225,7 @@ func TestGetDataHolderBrandsOmitsTheOptionalFieldsThatABrandDoesNotHave(t *testi
 	assert.NotContains(t, rec.Body.String(), "extensionBaseUri")
 }
 
+// Verifies: REG-0331
 func TestGetDataHolderBrandsFiltersByIndustryAndUpdatedSince(t *testing.T) {
 	l := newSecureLab()
 	since := time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC)
@@ -256,6 +257,7 @@ func TestGetDataHolderBrandsFiltersByIndustryAndUpdatedSince(t *testing.T) {
 	)
 }
 
+// Verifies: REG-0330, REG-0332
 func TestGetDataHolderBrandsGivesThePageOfTheRequestWithLinksAndMeta(t *testing.T) {
 	link := func(page int) string {
 		return fmt.Sprintf("%s%s?page=%d&page-size=2", secureBaseURL, brandsPath, page)
@@ -299,6 +301,7 @@ func TestGetDataHolderBrandsGivesAnEmptyArrayWhenNoBrandMatches(t *testing.T) {
 	}`, rec.Body.String())
 }
 
+// Verifies: REG-0317
 func TestGetDataHolderBrandsRefusesQueryParametersThatAreNotValid(t *testing.T) {
 	const (
 		invalid         = "urn:au-cds:error:cds-all:Field/Invalid"
@@ -337,6 +340,7 @@ func TestGetDataHolderBrandsRefusesQueryParametersThatAreNotValid(t *testing.T) 
 	}
 }
 
+// Verifies: REG-0319
 func TestGetDataHolderBrandsAcceptsTheMaximumPageSizeAndAnEmptyUpdatedSince(t *testing.T) {
 	l := newSecureLab()
 
@@ -363,6 +367,7 @@ func TestGetDataHolderBrandsRefusesAnIndustryThatIsNotValid(t *testing.T) {
 	assert.Empty(t, l.reader.queries)
 }
 
+// Verifies: REG-0300, REG-0313
 func TestGetDataHolderBrandsServesOnlyVersion3(t *testing.T) {
 	tests := map[string]struct {
 		header http.Header
@@ -384,6 +389,7 @@ func TestGetDataHolderBrandsServesOnlyVersion3(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0320, REG-0321, REG-0322
 func TestTheSecureAPIsRefuseARequestWithoutAValidToken(t *testing.T) {
 	tests := map[string]struct {
 		header    http.Header
@@ -438,6 +444,7 @@ func TestATokenVerificationFailureIsAnUnexpectedError(t *testing.T) {
 	assert.Empty(t, rec.Header().Get("WWW-Authenticate"))
 }
 
+// Verifies: REG-0323
 func TestTheSecureAPIsRefuseACallerThatIsNotActive(t *testing.T) {
 	tests := map[string]struct {
 		change func(c *app.SoftwareProductClient)

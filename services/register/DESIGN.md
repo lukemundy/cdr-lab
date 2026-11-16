@@ -2,152 +2,6 @@
 
 The [overview of the specification](design/README.md) gives the summary, the context, the areas, the goals and the non-goals. Each area file in `design/` gives the rules of its area.
 
-## Participant model
-
-| Entity | Parent | Status values |
-|---|---|---|
-| Data holder legal entity | none | ACTIVE, REMOVED |
-| Data holder brand | Data holder legal entity | ACTIVE, INACTIVE, REMOVED |
-| Data recipient legal entity | none | ACTIVE, SUSPENDED, REVOKED, SURRENDERED |
-| Data recipient brand | Data recipient legal entity | ACTIVE, INACTIVE, REMOVED |
-| Software product | Data recipient brand | ACTIVE, INACTIVE, REMOVED |
-
-Source: [CDS: Register API schemas][cds-register-schemas], [CDS: CDR Federation][cds-federation].
-
-- The name of a data holder legal entity has 36 characters or fewer. The `LegalEntityDetail` schema of Get Data Holder Brands gives this limit, which is shorter than the limit of the other name fields. The load refuses a longer name. ([CDS: Register API schemas][cds-register-schemas])
-- A data holder brand has one or more industries: `banking`, `energy`, `non-bank-lending`, `telco`. ([CDS: Get Data Holder Brands][cds-get-dh-brands])
-- A data holder brand has its endpoints (public, product, resource, infosec, admin and extension base URIs, website URI), its JWKS endpoint and an optional brand group. ([CDS: Participant Endpoints][cds-participant-endpoints], [CDS: Get Data Holder Brands][cds-get-dh-brands])
-- A data holder brand has a `dataHolderBrandId`, an `interimId` or both. A brand that shares only product data has no `dataHolderBrandId`. ([ACCC Developer Portal: Get Data Holder Brands Summary][accc-brands-summary])
-- A brand with no `dataHolderBrandId` needs only its public details: name, logo, industries, status and public base URI. Judgement: a brand that shares only product data has no secure endpoints, and Get Data Holder Brands, which shows the secure endpoints, requires `dataHolderBrandId` ([CDS: Register API schemas][cds-register-schemas]).
-- A data recipient legal entity has an accreditation number and an accreditation level (`UNRESTRICTED` or `SPONSORED`). ([CDS: Get Data Recipients][cds-get-drs])
-- A software product has the metadata that the SSA contains: name, description, client URI, logo URI, redirect URIs, sector identifier URI, terms of service URI, policy URI, JWKS URI, revocation URI, recipient base URI and scopes. ([CDS: SSA Definition][cds-ssa-definition])
-- A software product has a list of the client certificates that the Register trusts for it. ([ACCC Developer Portal: Token Endpoint][accc-token])
-- Text fields that the CDS Register schemas give a `maxLength` have that limit in characters. The load refuses a longer value. ([CDS: Register API schemas][cds-register-schemas])
-- Each URI field of a participant is an absolute URI with the `https` scheme and a host, of 1000 characters or fewer. This applies to each logo URI, each endpoint and the JWKS endpoint of a data holder brand, and each URI of a software product, also each redirect URI. An optional URI field with no value is valid. The load refuses a value that is not valid. The CDS gives these fields the type `URIString`, "A valid URI" ([CDS: Common field types][cds-common-field-types], [CDS: Register API schemas][cds-register-schemas], [CDS: RegistrationProperties schema][cds-dcr-schemas]), and a URI has only the characters of [RFC 3986, section 2][rfc3986-2]. The Register schemas give a URI `maxLength: 1000`. (See Decisions for `https` and for the length.)
-- All identifiers are strings of 36 characters or fewer. The Register issues identifiers as GUIDs. ([CDS: Register API schemas][cds-register-schemas]; GUIDs are judgement: they are unique without coordination and fit the 36-character limit)
-- Each identifier is unique across all participant records, not only across the records of one kind. Judgement: the CDS does not say. GUIDs are unique in all cases, so the rule costs nothing, and it prevents a mix-up between records.
-
-## Status rules
-
-- Data recipient legal entity transitions are only these ([CDS: Participant Statuses][cds-participant-statuses], state diagram):
-  - ACTIVE to SUSPENDED, REVOKED or SURRENDERED
-  - SUSPENDED to ACTIVE, REVOKED or SURRENDERED
-  - REVOKED to ACTIVE
-  - SURRENDERED is final.
-- Software product transitions are only these ([CDS: Participant Statuses][cds-participant-statuses], state diagram):
-  - ACTIVE to INACTIVE or REMOVED
-  - INACTIVE to ACTIVE or REMOVED
-  - REMOVED is final.
-- When a data recipient legal entity changes status, its software products change at the same time. SUSPENDED gives INACTIVE. REVOKED or SURRENDERED gives REMOVED. ([CDS: Status Mapping][cds-status-mapping])
-- When a data recipient legal entity is SUSPENDED, REVOKED or SURRENDERED, none of its software products can be ACTIVE. ([CDS: Status Mapping][cds-status-mapping])
-- A software product can change status without a change to its data recipient. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities])
-- Data holder legal entity transitions are only ACTIVE to REMOVED. REMOVED is final. Judgement: the CDS gives no state diagram for data holders ([CDS: Participant Statuses][cds-participant-statuses]). REMOVED is final in the software product diagram, and the same value has the same meaning for each record. (See Decisions.)
-- Data holder brand and data recipient brand transitions are the same as the software product transitions. Judgement: the CDS gives no state diagram for brands, and a brand has the same three status values as a software product. (See Decisions.)
-- When a data holder legal entity becomes REMOVED, each of its brands that is not REMOVED becomes REMOVED at the same time.
-- When a data recipient brand becomes INACTIVE, each of its ACTIVE software products becomes INACTIVE at the same time. When it becomes REMOVED, each of its software products that is not REMOVED becomes REMOVED. When it becomes ACTIVE, its software products do not change. Judgement: this is the cascade of a data recipient legal entity ([CDS: Status Mapping][cds-status-mapping]), applied to the brand, and it keeps the rule below.
-- A record cannot be more active than its parent. Judgement: the CDS gives no rule for brands, and a brand that is not active cannot share data. Thus:
-  - A software product of an INACTIVE data recipient brand is INACTIVE or REMOVED.
-  - A software product of a REMOVED data recipient brand is REMOVED.
-  - A brand of a REMOVED data holder legal entity is REMOVED.
-- The Register never issues a REMOVED software product identifier again. ([CDR Support: Removed software product][support-removed-sp]) The Register deletes no record: a removal is a change to the status REMOVED, and the identifier stays in use. Judgement: the same rule for each identifier is simpler, and the events of a record stay ([ADR 0003][adr-0003]).
-- The Register never returns a status value that is not in the enumerations above. ([CDS: Participant Statuses][cds-participant-statuses])
-- A status change is visible in all API responses immediately after the change. A suspension, revocation or surrender takes effect when it is on the Register ([CDR Rules, rule 5.22][cdr-rules]), and data holders must react within 5 minutes ([CDS: Metadata Cache Management][cds-metadata-cache]).
-
-## APIs
-
-### Endpoints
-
-| API | Method and path | Version | Transport | Auth |
-|---|---|---|---|---|
-| [Get OpenId Provider Config][cds-get-oidc] | `GET /idp/.well-known/openid-configuration` | none | TLS | none |
-| Access token signing keys | `jwks_uri` in the OpenID Provider configuration | none | TLS | none |
-| [Get JWKS][cds-get-jwks] (SSA and outbound signing keys) | `GET /cdr-register/v1/jwks` | none | TLS | none |
-| Token endpoint | `POST /idp/connect/token` | none | mTLS | `private_key_jwt` |
-| [Get Data Holder Brands][cds-get-dh-brands] | `GET /cdr-register/v1/{industry}/data-holders/brands` | 3 | mTLS | Bearer, `cdr-register:read` |
-| [Get Software Statement Assertion][cds-get-ssa] | `GET /cdr-register/v1/{industry}/data-recipients/brands/{dataRecipientBrandId}/software-products/{softwareProductId}/ssa` | 4 | mTLS | Bearer, `cdr-register:read` |
-| [Get Data Holder Brands Summary][cds-get-dh-brands-summary] | `GET /cdr-register/v1/{industry}/data-holders/brands/summary` | 2 | TLS | none |
-| [Get Data Holder Statuses][cds-get-dh-statuses] | `GET /cdr-register/v1/{industry}/data-holders/status` | 2 | TLS | none |
-| [Get Software Products Statuses][cds-get-sp-statuses] | `GET /cdr-register/v1/{industry}/data-recipients/brands/software-products/status` | 3 | TLS | none |
-| [Get Data Recipients Statuses][cds-get-dr-statuses] | `GET /cdr-register/v1/{industry}/data-recipients/status` | 3 | TLS | none |
-| [Get Data Recipients][cds-get-drs] | `GET /cdr-register/v1/{industry}/data-recipients` | 4 | TLS | none |
-
-The token endpoint path comes from the example OpenID Provider configuration in [CDS: Register Endpoints][cds-register-endpoints].
-
-- Request and response bodies obey the CDS 1.36.0 Register OpenAPI specification ([`cds_register.json` at v1.36.0][cds-openapi]), except where a requirement below says otherwise.
-- The TLS APIs and the mTLS APIs have different base URLs, as `api.cdr.gov.au` and `secure.api.cdr.gov.au` do in production. ([CDS: Register APIs][cds-register-apis])
-- `{industry}` accepts `banking`, `energy`, `non-bank-lending`, `telco` and `all` on data holder APIs. It accepts only `all` on data recipient APIs and the SSA API. ([CDS: Register API schemas][cds-register-schemas])
-- On Get Data Holder Statuses, an `{industry}` other than `all` gives only the data holder legal entities that have a brand in that industry. The status of the brand does not matter. `all` gives all data holder legal entities. The CDS says only that the parameter is "the industry the participant is retrieving data for" ([CDS: Get Data Holder Statuses][cds-get-dh-statuses]). The ACCC mock Register filters by industry ([RegisterStatusRepository.cs][accc-mock-dh-statuses]). See Decisions for the brand status.
-
-### Versioning and headers
-
-- The APIs with a version in the Endpoints table use [the CDS version negotiation](../../pkg/cds/DESIGN.md#cdsl-0001), with that version as their lowest and highest version.
-- The responses of the public APIs and the secure APIs have [the `x-fapi-interaction-id` of the request, or a new UUID](../../pkg/cds/DESIGN.md#cdsl-0010).
-
-### Errors
-
-- Error responses use [the CDS error format](../../pkg/cds/DESIGN.md#cdsl-0012).
-- An invalid `{industry}` value on Get Data Holder Brands Summary gives 404 with `urn:au-cds:error:cds-register:Field/InvalidIndustry`. The CDS error list and the OpenAPI specification agree on this. ([CDS: Invalid Industry][cds-error-invalid-industry], [CDS: Get Data Holder Brands Summary][cds-get-dh-brands-summary])
-- An invalid `{industry}` value on all other endpoints gives 400 with `urn:au-cds:error:cds-all:Field/Invalid`. This includes a valid industry that the endpoint does not allow, for example `banking` on a data recipient endpoint. The CDS error list says 404 `Field/InvalidIndustry`, and the OpenAPI specification says 400 "Invalid Path Parameter". The ACCC clarifies that current versions return 400 `Field/Invalid`. ([CDS: Invalid Field][cds-error-400-field-invalid], [ACCC Developer Portal: Known Issues][accc-known-issues])
-- A `page` or a `page-size` that is not valid, and a page out of range, give [the errors of CDS pagination](../../pkg/cds/DESIGN.md#cdsl-0020).
-- An `updated-since` that is not an RFC 3339 date-time gives 400 with `urn:au-cds:error:cds-all:Field/InvalidDateTime`. An empty `updated-since` is ignored. ([CDS: Error Codes][cds-error-codes])
-- An invalid or missing bearer token gives 401 with a `WWW-Authenticate` header and no body. A request with no bearer token gets `Bearer`. A token that is not valid, or that is bound to a different client certificate, gets `Bearer error="invalid_token"`. A valid token without the scope `cdr-register:read` gets 403 with `Bearer error="insufficient_scope"`. ([CDS: Get Data Holder Brands][cds-get-dh-brands], [RFC 6750, section 3.1][rfc6750-errors])
-- An unknown path gives 404 with `urn:au-cds:error:cds-all:Resource/NotFound`. ([CDS: Error Codes][cds-error-codes])
-- An unexpected server error gives [500 with no cause in the `detail`](../../pkg/cds/DESIGN.md#cdsl-0015).
-- Token endpoint errors have [the format and the codes of RFC 6749, section 5.2](../../pkg/authserver/design/token-endpoint.md#auth-0048). A client that the Register cannot authenticate gets [401 `invalid_client`](../../pkg/authserver/design/client-authentication.md#auth-0032), as does [a client that the Register cannot trust](../../pkg/authserver/design/token-endpoint.md#auth-0053).
-
-### Caching, pagination, lists and CORS
-
-- Get JWKS, Get Data Holder Brands Summary and the four status and recipient APIs return an `ETag` header. When `If-None-Match` matches the current `ETag`, the response is 304 with no body. ([CDS: Metadata Cache Management][cds-metadata-cache])
-- `ETag` and `If-None-Match` follow RFC 9110: the entity tag is in quotes, and `If-None-Match` uses the weak comparison. An `ETag` changes only when the response data changes. Judgement: the CDS does not give the format, so the HTTP standard applies. ([RFC 9110: ETag][rfc9110-etag])
-- Responses from these APIs have `Cache-Control: no-cache`, as [the OpenID Provider configuration](../../pkg/authserver/design/configuration.md#auth-0002) does, so that clients check the `ETag` on each request. Judgement: the CDS does not give cache lifetimes for responses. A status change must reach data holders quickly ([CDS: Metadata Cache Management][cds-metadata-cache]), and a revalidation with `ETag` is the simplest way to make sure it does. ([RFC 9111: no-cache][rfc9111-no-cache])
-- Get Data Holder Brands supports `page` and `page-size` with [the CDS pagination rules](../../pkg/cds/DESIGN.md#cdsl-0017), and `updated-since`. Each link of a page keeps [the `updated-since` of the request](../../pkg/cds/DESIGN.md#cdsl-0029). ([CDS: Get Data Holder Brands][cds-get-dh-brands])
-- Get Data Holder Brands returns the brands that have a `dataHolderBrandId`, in each status (ACTIVE, INACTIVE and REMOVED), in the order of their IDs. `updated-since` gives the brands with a `lastUpdated` at or after that time. The response has no `ETag`. (See Decisions)
-- The `lastUpdated` of a brand on Get Data Holder Brands is the time of the last change to its data holder, as on Get Data Holder Brands Summary.
-- Other list APIs are not paginated. They use [the response envelope with `links.self` and an empty `meta`](../../pkg/cds/DESIGN.md#cdsl-0034). ([CDS: Register API schemas][cds-register-schemas])
-- Status and recipient lists include entities in all statuses, not only ACTIVE. The Register must tell data holders about status changes through these APIs, so it must return the statuses that are not ACTIVE. ([CDS: Participant Statuses][cds-participant-statuses])
-- Get Data Holder Brands Summary includes brands that have only an `interimId` and no `dataHolderBrandId`. ([CDS: DataHolderBrandSummaryV2][cds-schema-brand-summary], [ACCC Developer Portal: Get Data Holder Brands Summary][accc-brands-summary])
-- Get Data Holder Brands Summary includes ACTIVE and INACTIVE brands, and not REMOVED brands. An `{industry}` other than `all` gives only the brands that have that industry. ([ACCC Developer Portal: Get Data Holder Brands Summary][accc-brands-summary]; see Decisions for the statuses)
-- The `lastUpdated` of a brand on Get Data Holder Brands Summary is the time of the last change to its data holder. Judgement: the same rule as the data recipient `lastUpdated` (see Decisions).
-- The unauthenticated APIs use [the CORS rules](../../pkg/cds/DESIGN.md#cdsl-0037), also for [a preflight request](../../pkg/cds/DESIGN.md#cdsl-0039).
-- The CORS rules of the unauthenticated APIs [expose the headers](../../pkg/cds/DESIGN.md#cdsl-0038) `x-v`, `etag` and `x-fapi-interaction-id`, so that a web page can read these headers. ([Fetch: CORS protocol][fetch-cors]; judgement: the CDS requires that CORS protections are disabled ([CDS: CORS][cds-cors]), and a browser hides these headers otherwise)
-
-### Authorisation server
-
-- The Register serves the Register authorisation server of the [authorisation server library](../../pkg/authserver/design/README.md). The rules below give only the choices of the Register.
-- The OpenID Provider configuration has [the fields and values of the Register configuration](../../pkg/authserver/design/configuration.md#auth-0003).
-- The token endpoint accepts [only the client credentials grant](../../pkg/authserver/design/token-endpoint.md#auth-0034), with [`private_key_jwt` client authentication](../../pkg/authserver/design/client-authentication.md#auth-0020).
-- The client ID of a software product is its software product ID. The CDS also allows the brand ID but says it will be deprecated. Judgement: support only the software product ID. ([CDS: Data Recipients calling the CDR Register][cds-dr-calling-register])
-- The Register gives the JWKS URI of the software product to [validate the client assertion signature](../../pkg/authserver/design/client-authentication.md#auth-0025).
-- The token endpoint issues a token only when [the client certificate is registered for the software product](../../pkg/authserver/design/token-endpoint.md#auth-0051) and [the software product is ACTIVE](../../pkg/authserver/design/token-endpoint.md#auth-0052).
-- An access token is [bound to the client certificate](../../pkg/authserver/design/token-endpoint.md#auth-0045) and [expires 5 minutes after it is issued](../../pkg/authserver/design/token-endpoint.md#auth-0043). The Register issues [no refresh token](../../pkg/authserver/design/token-endpoint.md#auth-0042).
-- Get Data Holder Brands and Get SSA accept a token only [with the client certificate that the token is bound to](../../pkg/authserver/design/token-endpoint.md#auth-0055).
-- Get Data Holder Brands and Get SSA check the caller's status on each call. When the software product or its data recipient is not ACTIVE, the response is 403 with `urn:au-cds:error:cds-all:Authorisation/AdrStatusNotActive`. ([CDS: Error Codes][cds-error-403-adr-not-active])
-
-### Software Statement Assertion
-
-- The Register issues an SSA only for an ACTIVE software product of an ACTIVE data recipient. ([CDS: SSA][cds-ssa])
-- The SSA contains all required claims in the SSA definition, with `iss` = `cdr-register`, `org_id` = the brand ID and `software_id` = the software product ID. It also has `legal_entity_id`, `legal_entity_name` and each optional URI that the software product has. It has a `jti` that the Register does not use again. ([CDS: SSA Definition][cds-ssa-definition])
-- The Get SSA response body is the SSA as a compact JWT with no JSON quotes, with the content type `application/json`. It has no `ETag`. ([CDS: Get SSA][cds-get-ssa]; see Decisions)
-- The SSA is signed with PS256, with a key published at Get JWKS. ([CDS: SSA][cds-ssa], [CDS: Get JWKS][cds-get-jwks])
-- The SSA expires 10 minutes after it is issued. ([CDS: SSA][cds-ssa])
-- When the path `softwareProductId` is not the caller's software product, the response is 404 with `urn:au-cds:error:cds-register:Field/InvalidSoftwareProduct`. When the path `dataRecipientBrandId` is not the caller's brand, the response is 404 with `urn:au-cds:error:cds-register:Field/InvalidBrand`. The Register checks the software product first. The `detail` is the path value. ([CDS: CDR Register Errors][cds-register-errors], [CDS Known Issues: Standardise Register API Error Codes][cds-known-register-errors])
-- The SSA `scope` claim contains the scopes registered for the software product, with a space between them. ([CDS: SSA Definition][cds-ssa-definition]; see Decisions)
-
-## Signing keys
-
-- The Register has one key set to sign access tokens (the OpenID Provider `jwks_uri`) and a different key set to sign SSAs (Get JWKS). ([CDS: Get OpenId Provider Config][cds-get-oidc])
-- Each published JWK has [the members that the CDS requires](../../pkg/authserver/design/configuration.md#auth-0007). The keys of the two key sets are [RSA keys of 2048 bits or longer](../../pkg/authserver/design/configuration.md#auth-0012), for PS256.
-- The Register can change the key of each key set. During a key change, the JWKS publishes the old and the new key. Judgement: participants cache the JWKS, so a new key must be published before the Register uses it. A JWKS can hold more than one key. ([RFC 7517: JWK Set][rfc7517-jwks])
-- A key change has two steps. First the JWKS publishes the next key, and the Register still signs with the old key. Then the Register signs with the next key, and the JWKS still publishes the old key. An SSA that the old key signed stays valid until it expires, as does [an access token](../../pkg/authserver/design/token-endpoint.md#auth-0056). (See Decisions)
-- A key change of one key set does not change the other key set.
-
-## Transport security
-
-- All CDR endpoints use [the TLS versions](../../pkg/cds/DESIGN.md#cdsl-0041) and [the TLS 1.2 cipher suites](../../pkg/cds/DESIGN.md#cdsl-0042) of the CDS HTTP library.
-- mTLS endpoints present a server certificate from the mock CDR CA. They accept only [client certificates that chain to the CDR CA bundle](../../pkg/cds/DESIGN.md#cdsl-0044). ([CDS: Certificate Trust Model][cds-cert-trust-model])
-- TLS endpoints present a certificate from a mock public CA, not from the mock CDR CA. TLS endpoints [do not request client certificates](../../pkg/cds/DESIGN.md#cdsl-0043). ([CDS: Participant Endpoints][cds-participant-endpoints], [CDS: Transaction Security][cds-transaction-security])
-- When a proxy terminates TLS, the Register accepts the client certificate only from that trusted proxy. A client cannot supply the certificate in a request header. Judgement: the ACCC mock trusts forwarded certificate headers, and a client can possibly forge them ([research note][research-accc-headers]).
-
 ## Operator interface
 
 In production, the CDR Registrar keeps the participant data and statuses on the Register ([CDS: Participant Statuses][cds-participant-statuses]). The operator interface makes these changes in the lab. The interface of the production Register is not public, so the lab defines its own interface. Real components must not depend on it.
@@ -165,7 +19,7 @@ In production, the CDR Registrar keeps the participant data and statuses on the 
 - After a create, an add or a change, the participant obeys the participant model and the status rules, the same as after a load. The Register checks the full legal entity, with its brands and software products.
 - A body that is not one JSON object ([one JSON value only](../../pkg/platform/jsonhttp/DESIGN.md#body-0002)), that has [a field that the action does not accept](../../pkg/platform/jsonhttp/DESIGN.md#body-0001), or that is larger than 1 MiB, gives 400. A body that does not obey the participant model gives 400. A body that obeys the participant model but breaks a status rule gives 409, for example an ACTIVE software product of an INACTIVE brand. The `detail` names each record and rule that fails.
 - An identifier in the body that a different record has gives 409, also when that record is REMOVED or is a record of a different kind of participant. The `detail` gives the identifier. (See Participant model.)
-- A create, an add and a change are visible on the CDR APIs immediately, as a status change is ([Status rules](#status-rules)). For example:
+- A create, an add and a change are visible on the CDR APIs immediately, as a status change is ([a status change reaches each Register API within 1 second](design/non-functional-requirements.md#reg-0001)). For example:
   - A new data holder brand is on Get Data Holder Brands Summary, and also on Get Data Holder Brands when it has a `dataHolderBrandId`. A new data holder legal entity is on Get Data Holder Statuses.
   - A new data recipient is on Get Data Recipients and Get Data Recipients Statuses, and its software products are on Get Software Products Statuses.
   - The next SSA of a software product has its changed metadata. The token endpoint uses the changed JWKS URI of a software product for the next client assertion.
@@ -265,7 +119,7 @@ Rules for the actions:
 - The confirmation names the action, its record and each other record that the action also changes, with the status before and after. For example, it names each software product that a suspension makes INACTIVE. (Judgement: a cascade changes records that the operator did not select.)
 - When the action or its cascade gives a final status (REMOVED, SURRENDERED), the confirmation says that this cannot be reversed. A revocation is an example: the data recipient can become ACTIVE again, but its software products cannot. ([CDS: Participant Statuses][cds-participant-statuses])
 - The confirmation of a reinstatement says that the software products do not change, and that the operator must activate each one. ([CDS: Status Mapping][cds-status-mapping])
-- The confirmation of a key publish names the previous key that leaves the JWKS, if there is one. The confirmation of a key activation names the key that starts to sign and the key that becomes the previous key, and says that a participant with an old copy of the JWKS cannot verify the new signatures. (Judgement: an activation cannot be reversed, and a publish deletes a key. See [Signing keys](#signing-keys).)
+- The confirmation of a key publish names the previous key that leaves the JWKS, if there is one. The confirmation of a key activation names the key that starts to sign and the key that becomes the previous key, and says that a participant with an old copy of the JWKS cannot verify the new signatures. (Judgement: an activation cannot be reversed, and a publish deletes a key. See [the two steps of a key change](design/authorisation-server.md#reg-0468).)
 - The console offers only the actions that the rules permit now for the record. The console API gives these actions (see Console API). The UI has no copy of the rules.
 - When the Register refuses an action, the console shows the `detail` of the problem in the dialog or the form of the action. A refused PEM certificate shows as the error of its field. ([WCAG 2.2, SC 3.3.1][wcag-3-3-1])
 - After an action, also after a refused action, each view shows the current state without a reload of the page. (Judgement: a refusal often means that the view is not current.)
@@ -297,7 +151,7 @@ Rules for a create, an add and a change:
 - The list of data recipients has the action "Create data recipient", and the list of data holders has "Create data holder". The detail of a participant has the actions "Change details" and "Add brand" for the legal entity, "Change brand" for each brand, "Add software product" for each data recipient brand, and "Change software product" for each software product. The console shows these actions for each record in each status. (See Decisions.) Each of these actions is a link directly after the heading of its record, and "Add software product" is at the heading "Software products" of its brand. The status actions and "Register certificate" are buttons after the details of their record and before its child records. ([Design system DESIGN.md][ui-design]) Each brand and each software product is a card that starts collapsed, with its status in its title bar. "Brands" and each "Software products" heading have "Show all" and "Hide all". After a form, the card of the record that the form changed or added is open. ([Design system DESIGN.md][ui-design])
 - A create and an add give each field of one record in the format of the load file, with the identifiers and the status, and with no child records and no client certificates. ([Operator interface](#operator-interface))
 - For each identifier of a create or an add, the form shows a new random UUID ([RFC 9562, section 5.4][rfc9562-v4]) in a field that the operator can change. The operator can keep it, or give a known identifier, for example the brand ID in the configuration of a lab service. A data holder brand gets a UUID in its `dataHolderBrandId` field, and its `interimId` field is empty. (See Decisions.)
-- The status of a create or an add is a field. Its values are the status values of the record in the [Participant model](#participant-model), and ACTIVE is selected first. The status rules apply: for example, a software product of an INACTIVE brand must be INACTIVE or REMOVED. (See Decisions.)
+- The status of a create or an add is a field. Its values are the status values of the record of the [participant records](design/participants.md#reg-0200), and ACTIVE is selected first. The status rules apply: for example, a software product of an INACTIVE brand must be INACTIVE or REMOVED. (See Decisions.)
 - A change form shows the current value of each field, and shows the identifiers of the record as text that the operator cannot change. The console sends each field of the change, as a change in the operator interface does: an optional field with no value has no value after the change. ([Operator interface](#operator-interface))
 - A change and an add send the version of the participant that the form loaded. A create has no version. A stale version gives 409, and the Register changes nothing (see the row "Action with a stale view" in Decisions).
 - A choice of one value from a fixed set (the accreditation level, the status) is a native select. A choice from a fixed set of more than one value (the industries of a data holder brand) is a group of checkboxes. A list of values that the operator writes (the redirect URIs, the scopes) is a text area with one value on each line. The endpoints of a data holder brand are a group of fields with a legend. ([WCAG 2.2, SC 1.3.1][wcag-1-3-1]; see Decisions)
@@ -439,39 +293,6 @@ An operator deploys the Register to Kubernetes from the image and the Helm chart
 
 | Question | Decision | Reason |
 |---|---|---|
-| Invalid industry error | 404 `Field/InvalidIndustry` on Brands Summary; 400 `Field/Invalid` on the other endpoints | On Brands Summary, the CDS error list and the OpenAPI specification agree. On the other endpoints they do not agree, and the ACCC clarifies 400 ([Known Issues][accc-known-issues]). |
-| Client ID in client assertions | Software product ID only | The CDS will deprecate the brand ID ([CDS: Data Recipients calling the CDR Register][cds-dr-calling-register]). |
-| SSA response body | The compact JWT with no JSON quotes, content type `application/json` | The CDS OpenAPI specification gives `application/json` with a string schema ([CDS: Get SSA][cds-get-ssa]), and does not say if the string has JSON quotes. The ACCC implementations use the raw body as the JWT: the test of the ACCC mock Register ([GetSoftwareStatementAssertion_Tests.cs][accc-mock-ssa-test]) and the ACCC mock data recipient ([SsaService.cs][accc-mock-dr-ssa]), which works with production. The body is thus not valid JSON. |
-| SSA `scope` claim | The registered scopes of the software product, with no filter, the same for each `{industry}` | Judgement: the CDS does not say how the Register derives the claim. Data holders must ignore the scopes that they do not support ([CDS: Registration Validation][cds-registration-validation]), so a filter adds nothing. The ACCC mock does the same. |
-| Sequence of the SSA path checks | Software product, then brand | Judgement: the CDS gives no sequence. The ACCC mock checks the software product first. |
-| Optional SSA claims | Included when the Register has the value | Judgement: the CDS marks `legal_entity_id`, `legal_entity_name`, `sector_identifier_uri`, `tos_uri` and `policy_uri` as optional ([CDS: SSA Definition][cds-ssa-definition]). A data holder can show the legal entity name to a consumer. |
-| 422 on Get SSA | Not used | The CDS OpenAPI specification gives 422 "SSA validation failed" ([CDS: Get SSA][cds-get-ssa]). The load refuses a software product that does not have a required SSA field, so the condition cannot occur. |
-| SSA brand and product errors | 404 `cds-register:Field/InvalidBrand` and `Field/InvalidSoftwareProduct` | The CDS error list says 404 and the OpenAPI specification says 403 "Invalid BrandId". The CDS Known Issues give 404 as the target ([Standardise Register API Error Codes][cds-known-register-errors]), which agrees more with HTTP: the resource does not exist for this caller. |
-| Revocation cascade | REVOKED gives REMOVED at once | [CDS: Status Mapping][cds-status-mapping]. |
-| Brand statuses on Get Data Holder Brands | ACTIVE, INACTIVE and REMOVED | The schema gives the brand a `status` with all three values, and `updated-since` lets a data recipient poll for changes ([CDS: Get Data Holder Brands][cds-get-dh-brands]). A data recipient that has a brand in its cache can learn that the brand is now INACTIVE or REMOVED only if the API returns it. An ACCC support article says that the API lists brands "active for consumer data sharing" ([CDR Support: Brands in the CDR ecosystem][support-brands]), which is not a specification and is not clear. The ACCC mock does not filter by status. |
-| `updated-since` comparison | `lastUpdated` at or after `updated-since` | Judgement: the CDS says only "updated since the specified date-time". With "after", a data recipient that polls with the last time that it saw can miss a change at the same time. A record that is returned again is harmless. The ACCC mock uses "after". |
-| Order of Get Data Holder Brands | Brand ID | Judgement: the CDS gives no order. Pagination needs a stable order, and the other lists use the ID order. The ACCC mock sorts by brand name. |
-| `ETag` on Get Data Holder Brands | None | The CDS OpenAPI specification gives no `If-None-Match` parameter and no `ETag` header for this API, and `updated-since` gives the incremental read. The ACCC mock adds an `ETag`. |
-| Body of the 401 response | None | The CDS OpenAPI specification gives the 401 response of the secure APIs only a `WWW-Authenticate` header, and no body schema ([CDS: Get Data Holder Brands][cds-get-dh-brands]). |
-| Sequence of checks on the secure APIs | Bearer token (401), then caller status (403), then the checks of the public APIs | Judgement: the CDS gives no sequence. A caller with no valid token then learns nothing about the API. |
-| Caller whose software product does not exist | 403 `Authorisation/AdrStatusNotActive` with the detail REMOVED | Judgement: a token outlives no software product in practice, because the Register never deletes one. The response is the same as for a REMOVED software product, which is the nearest state. |
-| Length of a data holder legal entity name | 36 characters at most | The `LegalEntityDetail` schema gives `maxLength: 36` ([CDS: Register API schemas][cds-register-schemas]), which is probably a defect in the CDS. Judgement: the Register could not return a longer name in a valid response, so the load refuses it. |
-| Sequence of request checks | Version headers first, then `{industry}`. | Judgement: the CDS does not give a sequence. The rules for `{industry}` depend on the version: deprecated versions give 404 `Field/InvalidIndustry` and current versions give 400 `Field/Invalid` ([Known Issues][accc-known-issues]). Thus the Register must know the version first. |
-| ETag format | RFC 9110 | The CDS does not give a format, so the HTTP standard applies. |
-| Cache-Control | `no-cache` | Judgement: see Caching, pagination, lists and CORS. |
-| Deprecated versions | Not served | A request for a deprecated version gives 406 on the mock. Serve current versions only until the lab is more established. |
-| Uniqueness of a client assertion `jti` | Unique across all software products, for 1 hour | Judgement: the CDS says only that the Register must reject a `jti` that it accepted before. An assertion is valid for 10 minutes at most, so a longer memory adds nothing. |
-| Signing keys storage | In the Register database. The Register creates the access token key at its first start. | Judgement: the keys must stay the same after a restart, the repository must contain no keys, and the operator must be able to start a rotation. The database is the only state that the Register keeps. The lab database is not encrypted. |
-| Steps of a key change | Two operator actions: publish the next key, then activate it | Judgement: a new key must be in the JWKS before the Register signs with it, and only the operator knows when each party has the new JWKS. Two actions need no timer, and a lab user can keep the state "new key published, old key signs" to test a JWKS cache. |
-| When the previous key leaves the JWKS | When the operator publishes the next key of a later key change | Judgement: an SSA is valid for 10 minutes and an access token for 5 minutes, so a later key change is after the last use of the previous key in practice. This needs no timer. If two key changes complete in less than 10 minutes, an SSA of the first key can fail verification. |
-| Status of a record under a parent that is not active | Not more active than the parent | Judgement: the CDS gives no rule for brands. See Status rules. |
-| Uniqueness of identifiers | Unique across all participant records | Judgement: the CDS does not say. See Participant model. |
-| Scheme of a URI field | `https` only | `URIString` permits each scheme. But all HTTP calls must use HTTPS ([CDS: Transaction Security][cds-transaction-security]), a FAPI authorisation server must refuse a redirect URI that does not use `https` ([FAPI 1.0 Advanced, section 5.2.2][fapi-as]), and a sector identifier URI must use `https` ([OIDC Core, section 8.1][oidc-pairwise]). Judgement: a data holder cannot use an endpoint or a registration with a different scheme, so the Register refuses the value when the operator gives it, not when a participant uses it. A logo, a client URI or a policy is a web page for a consumer, and one rule for each URI field is simpler. |
-| Length of a URI field | 1000 characters at most, also for the URIs of a software product | The Register schemas give `maxLength: 1000` to each logo URI and each endpoint ([CDS: Register API schemas][cds-register-schemas]). Judgement: the RegistrationProperties schema gives no limit to the other URIs of a software product. One limit for each URI field is simpler, and the URIs of the seed data are much shorter. |
-| Data recipient `lastUpdated` | The time of the last change to the data recipient, its brands or its software products | Judgement: the CDS says only "the date/time that the Legal Entity was last updated". A change to a brand or a software product is a change to the legal entity record that the API returns, and a data holder that polls the API then sees each change. |
-| Industry on Get Data Holder Statuses | Data holders with a brand in the industry, in any brand status | The CDS is not clear, and the ACCC mock filters by industry ([RegisterStatusRepository.cs][accc-mock-dh-statuses]). Judgement for the brand status: the brands of a REMOVED data holder are REMOVED, and data recipients of that industry must see that the data holder is REMOVED. |
-| Brand statuses on Get Data Holder Brands Summary | ACTIVE and INACTIVE, not REMOVED | Judgement: the CDS and the ACCC do not say, and the summary has no status field. Brands of data holders that left the CDR are not in the production list. A REMOVED brand has no endpoints to discover, and an INACTIVE brand can be only temporarily unavailable. |
-| Brand with no `dataHolderBrandId` | Needs only its public details | Judgement: see Participant model. |
 | Software products at a reinstatement | No change | The CDS cascades a data recipient status to its software products only "for any status other than active" ([CDS: Status Mapping][cds-status-mapping]). |
 | Operator interface errors | RFC 9457 problem details | Judgement: the CDS error codes are for the CDR APIs. RFC 9457 is the HTTP standard for error details. |
 | Registered client certificates | The Register keeps only the SHA-256 thumbprint. The operator interface does not check the issuer. | Judgement: the token endpoint compares the full certificate through its thumbprint, which is also the RFC 8705 `x5t#S256` value. The mTLS listener accepts only certificates from the mock CDR CA, so a second issuer check adds nothing. |
@@ -529,9 +350,6 @@ An operator deploys the Register to Kubernetes from the image and the Helm chart
 | Version of a key set | An integer that is 1 when the Register creates the key set, and that each publish and each activation increments by 1, also through the operator interface. A step that the rules refuse does not change it. | Judgement: the key sets are not event sourced, so they have no stream version. The same type as the version of a participant gives one request body for each action. A value from the key IDs and their states also changes at each step, but it is a different type, and the check of a stale view then needs its own lock. |
 | A key step that changes no key that exists | The confirmation still says that the step cannot be reversed. | Judgement: the operator interface has no step that removes a published key or activates a previous key again, so a publish with no previous key is also a step that cannot be reversed. |
 | Result of a console action | 204, then the UI gets each view again | Judgement: the same response as the operator interface. One rule for each action is simpler than a different body for each action. |
-| Status transitions of data holders and brands | A data holder legal entity: ACTIVE to REMOVED, and REMOVED is final. A brand: the software product transitions. | The CDS gives no state diagram for them ([CDS: Participant Statuses][cds-participant-statuses]). Judgement: the CDS diagrams make REMOVED final for a software product, so REMOVED has one meaning for each record. A data holder legal entity has no INACTIVE status, so its only change is to REMOVED. A REMOVED identifier is then never in use again, the same as for a software product ([CDR Support: Removed software product][support-removed-sp]). |
-| Cascade of a brand status | INACTIVE makes the ACTIVE software products INACTIVE. REMOVED makes each software product REMOVED. ACTIVE changes no software product. A REMOVED data holder makes each brand REMOVED. | Judgement: the CDS cascades only a data recipient status ([CDS: Status Mapping][cds-status-mapping]). The same cascade for a brand keeps the rule that a record is not more active than its parent, and a status change of the brand alone would break that rule. |
-| A removal in the operator interface | A change to the status REMOVED. The Register deletes no record. | Judgement: the Register never issues a REMOVED software product identifier again ([CDR Support: Removed software product][support-removed-sp]), and the events of each participant stay ([ADR 0003][adr-0003]). The same rule for each identifier is simpler. |
 | Removal of a data recipient legal entity | Its revocation or its surrender, which exist | The CDS gives a data recipient legal entity no REMOVED status ([CDS: Participant Statuses][cds-participant-statuses]). |
 | Body of a create or an add | One record in the format of the load file, with its child records | Judgement: one format for the load and the operator interface. The operator can copy a record from the seed file, and the Register checks it with the same rules. |
 | Identifiers in a create or an add | The operator gives them, with the rules of the participant model | The Register issues the identifiers in production ([CDS: Register API schemas][cds-register-schemas]). Judgement: the lab services get their identifiers in their configuration before they start, as with the load file. A GUID is the usual value. |
