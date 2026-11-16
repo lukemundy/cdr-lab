@@ -245,6 +245,7 @@ func TestAValidationErrorDoesNotShowTheValueOfAName(t *testing.T) {
 	assert.NotContains(t, message, "not-an-address")
 }
 
+// Verifies: DH-1015
 func TestTheMaskedNumberShowsOnlyTheLast4Digits(t *testing.T) {
 	tests := map[string]string{
 		"12345678":   "xxx-xxx xxxx5678",
@@ -269,6 +270,7 @@ func TestAnOpenAccountCloses(t *testing.T) {
 	assert.Equal(t, domain.OpenStatusOpen, account.OpenStatus, "Close does not change the account that it gets")
 }
 
+// Verifies: DH-1007
 func TestAClosedAccountDoesNotCloseAgain(t *testing.T) {
 	account := validAccount()
 	account.OpenStatus = domain.OpenStatusClosed

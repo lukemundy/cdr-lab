@@ -218,6 +218,7 @@ func requireCDSError(t *testing.T, rec *httptest.ResponseRecorder, status int, e
 	assert.Equal(t, []map[string]string{{"code": e.Code, "title": e.Title, "detail": detail}}, body.Errors)
 }
 
+// Verifies: DH-1031, DH-1050, DH-1051
 func TestGetCustomerGivesTheCustomerOfTheArrangementAsAPerson(t *testing.T) {
 	rec := serve(resourceRequest(t, http.MethodGet, customerPath, "full"))
 
@@ -238,6 +239,7 @@ func TestGetCustomerGivesTheCustomerOfTheArrangementAsAPerson(t *testing.T) {
 	}`, rec.Body.String())
 }
 
+// Verifies: DH-1051
 func TestGetCustomerOmitsTheFirstNameOfACustomerWhoHasNone(t *testing.T) {
 	rec := serve(resourceRequest(t, http.MethodGet, customerPath, "no-first-name"))
 
@@ -246,6 +248,7 @@ func TestGetCustomerOmitsTheFirstNameOfACustomerWhoHasNone(t *testing.T) {
 }
 
 // Each request below has no other fault, unless its name says so.
+// Verifies: DH-1020, DH-1026, DH-1027, DH-1030
 func TestARefusedTokenGets401WithNoBody(t *testing.T) {
 	cases := map[string]func(*http.Request){
 		"no Authorization header": func(r *http.Request) { r.Header.Del("Authorization") },
@@ -284,6 +287,7 @@ func TestARefusedTokenGets401WithNoBody(t *testing.T) {
 	})
 }
 
+// Verifies: DH-1024
 func TestATokenCheckComesBeforeTheOtherChecksOfTheRequest(t *testing.T) {
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, customerPath, nil)
 	req.Header.Set("Authorization", "Bearer unknown")
@@ -298,6 +302,7 @@ func TestATokenCheckComesBeforeTheOtherChecksOfTheRequest(t *testing.T) {
 	assert.Equal(t, http.StatusForbidden, rec.Code)
 }
 
+// Verifies: DH-1028
 func TestATokenWithoutTheScopeOfTheAPIGets403(t *testing.T) {
 	rec := serve(resourceRequest(t, http.MethodGet, customerPath, "bank-only"))
 
@@ -379,6 +384,7 @@ func userInfo(t *testing.T, method, token string) *httptest.ResponseRecorder {
 	return serve(req)
 }
 
+// Verifies: DH-1101, DH-1102
 func TestUserInfoGivesTheSubjectAndWithProfileTheNameOfTheCustomer(t *testing.T) {
 	for _, method := range []string{http.MethodGet, http.MethodPost} {
 		rec := userInfo(t, method, "full")
@@ -395,6 +401,7 @@ func TestUserInfoGivesTheSubjectAndWithProfileTheNameOfTheCustomer(t *testing.T)
 	}
 }
 
+// Verifies: DH-1101
 func TestUserInfoGivesOnlyTheSubjectWithoutProfile(t *testing.T) {
 	rec := userInfo(t, http.MethodGet, "no-profile")
 
@@ -402,6 +409,7 @@ func TestUserInfoGivesOnlyTheSubjectWithoutProfile(t *testing.T) {
 	assert.JSONEq(t, `{"sub": "subject-1"}`, rec.Body.String())
 }
 
+// Verifies: DH-1102
 func TestUserInfoOmitsTheGivenNameOfACustomerWhoHasNoFirstName(t *testing.T) {
 	rec := userInfo(t, http.MethodGet, "no-first-name")
 
@@ -414,6 +422,7 @@ func TestUserInfoOmitsTheGivenNameOfACustomerWhoHasNoFirstName(t *testing.T) {
 	}`, rec.Body.String())
 }
 
+// Verifies: DH-1029, DH-1105
 func TestUserInfoNeedsTheScopeOpenIDAndGives403WithNoBody(t *testing.T) {
 	rec := userInfo(t, http.MethodGet, "no-openid")
 
@@ -422,6 +431,7 @@ func TestUserInfoNeedsTheScopeOpenIDAndGives403WithNoBody(t *testing.T) {
 	assert.Empty(t, rec.Body.String())
 }
 
+// Verifies: DH-1020
 func TestUserInfoIgnoresATokenInTheBody(t *testing.T) {
 	req := httptest.NewRequestWithContext(
 		t.Context(), http.MethodPost, userInfoPath, strings.NewReader("access_token=full"),
@@ -470,6 +480,7 @@ func TestAnAPIThatIsOutOfScopeGivesNotImplemented(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1033
 func TestEachRequestOfTheDataOfAConsentIsLoggedWithItsInteractionIDAndNoCustomerData(t *testing.T) {
 	var logs bytes.Buffer
 

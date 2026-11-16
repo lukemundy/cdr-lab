@@ -44,6 +44,7 @@ func disclosureSecure() (httpapi.Secure, *disclosureRecords) {
 	return s, records
 }
 
+// Verifies: DH-1110, DH-1112
 func TestEachSuccessfulResponseOfAConsentRecordsADisclosureOfTheScopeOfTheAPI(t *testing.T) {
 	const basic = "bank:accounts.basic:read"
 
@@ -117,6 +118,7 @@ func TestEachSuccessfulResponseOfAConsentRecordsADisclosureOfTheScopeOfTheAPI(t 
 	}
 }
 
+// Verifies: DH-1115, DH-1119, DH-1120
 func TestAResponseThatDisclosesNoDataClusterRecordsNoDisclosure(t *testing.T) {
 	tests := map[string]struct {
 		request func(t *testing.T) *http.Request
@@ -170,6 +172,7 @@ func TestAResponseThatDisclosesNoDataClusterRecordsNoDisclosure(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1117, DH-1118
 func TestAResponseWhoseDisclosureTheDataHolderCannotRecordSendsNoData(t *testing.T) {
 	tests := map[string]struct {
 		target string
