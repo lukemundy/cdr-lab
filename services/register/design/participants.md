@@ -32,7 +32,7 @@ The Register checks the fields of a participant record each time that it gets on
   - terms of service URI and policy URI
   - JWKS URI, revocation URI and recipient base URI
   - scopes
-- <a id="reg-0213"></a>**REG-0213** A software product has a list of the client certificates that the Register trusts for it. ([ACCC Developer Portal: Token Endpoint][accc-token])
+- <a id="reg-0213"></a>**REG-0213** A software product has a list of the client certificates that the Register trusts for it. For example, [a client certificate issue adds the certificate to this list](certificate-management.md#reg-0610). ([ACCC Developer Portal: Token Endpoint][accc-token])
 - <a id="reg-0214"></a>**REG-0214** When a CDS Register schema gives a text field a `maxLength`, the field has that limit in characters. The Register refuses a longer value. ([CDS: Register API schemas][cds-register-schemas])
 - <a id="reg-0215"></a>**REG-0215** Each URI field of a participant is an absolute URI with the `https` scheme and a host. The Register refuses a value that is not. ([CDS: Common field types][cds-common-field-types]; [CDS: RegistrationProperties schema][cds-dcr-schemas]; [Judgement: only `https` in a URI field](#reg-0262))
   - each logo URI

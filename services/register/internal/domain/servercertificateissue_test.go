@@ -33,6 +33,7 @@ func serverSubject(o string) pkix.Name {
 	}
 }
 
+// Verifies: REG-0630
 func TestIssueServerCertificateRecordsTheIssueForTheBrandID(t *testing.T) {
 	for _, id := range []string{"dhb-1", "interim-1"} {
 		t.Run(id, func(t *testing.T) {
@@ -52,6 +53,7 @@ func TestIssueServerCertificateRecordsTheIssueForTheBrandID(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0627
 func TestIssueServerCertificateIsPermittedForAnInactiveBrand(t *testing.T) {
 	_, events := handleAndApply(
 		t,
@@ -93,6 +95,7 @@ func TestIssueServerCertificateIsRefusedForAnUnknownBrandOrABadThumbprint(t *tes
 	}
 }
 
+// Verifies: REG-0626, REG-0628
 func TestIssueServerCertificateIsRefusedForABrandThatCannotUseIt(t *testing.T) {
 	tests := map[string]struct {
 		brandID    string
@@ -149,6 +152,7 @@ func TestAServerCSRSubjectWithTheBrandNameOrTheLegalEntityNameBreaksNoRule(t *te
 	}
 }
 
+// Verifies: REG-0623
 func TestAServerCSRSubjectMustHaveTheBrandNameOrTheLegalEntityName(t *testing.T) {
 	want := []string{`subject O must be the brand name "Holder Bank" or the legal entity name "Holder Pty Ltd"`}
 
@@ -170,6 +174,7 @@ func TestAServerCSRSubjectMustHaveTheBrandNameOrTheLegalEntityName(t *testing.T)
 	}
 }
 
+// Verifies: REG-0624
 func TestABrandNameOfMoreThan64CharactersPermitsOnlyTheLegalEntityName(t *testing.T) {
 	state := serverCertificateFixture()
 	brandName := strings.Repeat("é", 65)

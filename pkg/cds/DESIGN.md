@@ -38,7 +38,7 @@ flowchart LR
 
 - The choice of the endpoints that each rule applies to, the supported versions and the CORS headers that a service exposes. The specification of each service gives them.
 - The server certificates of a service. The service gives them.
-- The revocation check of the Register. The Register checks client certificates with its own CRL ([Register DESIGN.md: Transport security][register-design-transport]).
+- The revocation check of the Register. The Register checks client certificates with its own CRL ([the Register checks with its newest CRL](../../services/register/design/certificate-revocation.md#reg-0726)).
 - The errors of the security endpoints and of the lab-only interfaces. They have their own formats.
 
 ## Versioning
@@ -197,7 +197,6 @@ These rules apply to a service that uses the CRL check of the library as its rev
 
 None.
 
-[register-design-transport]: ../../services/register/DESIGN.md#transport-security
 [adr-0022]: ../../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
 [cds-http-headers]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#http-headers
 [cds-error-codes]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-codes

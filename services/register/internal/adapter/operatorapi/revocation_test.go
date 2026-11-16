@@ -58,6 +58,7 @@ func revocationBody(t *testing.T, certificate, reason string) string {
 	return string(data)
 }
 
+// Verifies: REG-0703, REG-0731
 func TestARevocationRevokesTheFirstCertificateWithTheReason(t *testing.T) {
 	leaf, intermediate := selfSigned(t, "App"), selfSigned(t, "Intermediate")
 
@@ -79,6 +80,7 @@ func TestARevocationRevokesTheFirstCertificateWithTheReason(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0704
 func TestARevocationBodyThatIsNotValidGives400AndNamesEachFieldThatFails(t *testing.T) {
 	certificate := string(ca.EncodeCertificates(selfSigned(t, "App")))
 	csr := func() string { _, data := csrPEM(t); return string(data) }()
@@ -135,6 +137,7 @@ func TestARevocationBodyLargerThan1MiBGives400(t *testing.T) {
 	assert.Zero(t, revoker.calls)
 }
 
+// Verifies: REG-0705, REG-0706
 func TestTheResultOfARevocationGivesItsStatus(t *testing.T) {
 	body := revocationBody(t, string(ca.EncodeCertificates(selfSigned(t, "App"))), "keyCompromise")
 

@@ -98,6 +98,7 @@ func TestTheCRLListenerGivesACurrentCRLThatTheIntermediateSigned(t *testing.T) {
 	assert.Empty(t, crl.RevokedCertificateEntries)
 }
 
+// Verifies: REG-0711
 func TestEachStartSignsACRLWithAHigherNumber(t *testing.T) {
 	pool := databasetest.New(t)
 
@@ -117,7 +118,7 @@ func revokeRequest(t *testing.T, proc process, certificate []byte, reason string
 	return operate(t, map[int]http.Handler{operatorPort: handler}, "/v1/cdr-certificates/revoke", body)
 }
 
-// Verifies: REG-0003
+// Verifies: REG-0003, REG-0725
 func TestARevocationTakesEffectAtOnceAtTheRegisterAndStaysAfterARestart(t *testing.T) {
 	pool := databasetest.New(t)
 	proc := startRegister(t, pool)
@@ -155,6 +156,7 @@ func TestARevocationTakesEffectAtOnceAtTheRegisterAndStaysAfterARestart(t *testi
 	assert.Len(t, getCRL(t, restarted).RevokedCertificateEntries, 1)
 }
 
+// Verifies: REG-0705
 func TestTheRegisterRevokesOnlyACertificateOfTheIntermediate(t *testing.T) {
 	proc := startRegister(t, databasetest.New(t))
 

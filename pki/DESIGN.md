@@ -67,7 +67,7 @@ The [CA library](../pkg/ca/DESIGN.md) gives the profiles of a CDR certificate an
 
 ## Revocation
 
-The [Register DESIGN.md][register-design-crl] gives the revocation request, the CRL listener and the other times of a new CRL. The [CA library](../pkg/ca/DESIGN.md) gives the revocation reasons and the CRL format. The rules of this group apply to each revocation and each CRL.
+The [Register certificate revocation area](../services/register/design/certificate-revocation.md) gives the revocation request, the CRL listener and the other times of a new CRL. The [CA library](../pkg/ca/DESIGN.md) gives the revocation reasons and the CRL format. The rules of this group apply to each revocation and each CRL.
 
 - <a id="pki-0048"></a>**PKI-0048** The Register is the only component that revokes a CDR certificate. ([Judgement: the Register is the CDR intermediate CA (ADR 0022)](../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md))
 - <a id="pki-0049"></a>**PKI-0049** The Register is the only component that signs a CRL of the intermediate. ([Judgement: the Register is the CDR intermediate CA (ADR 0022)](../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md))
@@ -102,7 +102,7 @@ The [Register DESIGN.md][register-design-crl] gives the revocation request, the 
 
 - Kind: choice
 - Basis: Step 3.3. The [CDS: Certificate Signing Request Profile][cds-csr-profile] gives the CN and the O of a client certificate, and the O of a server certificate, from the names of the participant.
-- Reason: Only the Register knows the software products, the brands and the legal entities. The Register checks the names when it issues a certificate ([Register DESIGN.md: Operator interface][register-design]).
+- Reason: Only the Register knows the software products, the brands and the legal entities. The Register checks the names when it issues a certificate ([the CN of a client CSR is the software product name](../services/register/design/certificate-management.md#reg-0606)).
 
 ### <a id="pki-0085"></a>PKI-0085 One revocation for each certificate
 
@@ -114,7 +114,7 @@ The [Register DESIGN.md][register-design-crl] gives the revocation request, the 
 
 - Kind: choice
 - Basis: Step 3.3. Production can take up to 24 hours to publish a revocation ([CPS section 4.9][accc-cps]).
-- Reason: A lab test must see a revocation at once. The [Register DESIGN.md][register-design-crl] gives the other times of a new CRL.
+- Reason: A lab test must see a revocation at once. The Register also signs a CRL [at each start](../services/register/design/certificate-revocation.md#reg-0711).
 
 ### <a id="pki-0088"></a>PKI-0088 Revoked certificates stay on the CRL
 
@@ -218,8 +218,6 @@ The [Register DESIGN.md][register-design-crl] gives the revocation request, the 
 
 [adr-0022]: ../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
 [production-gaps]: ../docs/production-gaps.md
-[register-design]: ../services/register/DESIGN.md#operator-interface
-[register-design-crl]: ../services/register/DESIGN.md#certificate-revocation-list
 [conformance-design-subject]: ../conformance/DESIGN.md#subject-of-a-test
 [cds-csr-profile]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#certificate-signing-request-profile
 [cds-participant-endpoints]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#participant-endpoints

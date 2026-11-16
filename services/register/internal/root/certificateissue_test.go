@@ -70,6 +70,7 @@ func serverCSRPEM(t *testing.T, o, cn string, dnsNames ...string) (*rsa.PrivateK
 	return key, pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE REQUEST", Bytes: der})
 }
 
+// Verifies: REG-0618, REG-0625, REG-0630
 func TestTheOperatorGetsAServerCertificateThatATLSClientAcceptsForEachNameOfTheCSR(t *testing.T) {
 	handlers, pool := labWithPool(t)
 	names := []string{"mtls.mock-energy.example", "mock-energy", "localhost"}
@@ -169,6 +170,7 @@ func TestTheOperatorCannotGetAServerCertificateForACSRThatBreaksARuleOrForABrand
 	}
 }
 
+// Verifies: REG-0601, REG-0610, REG-0612, REG-0724
 func TestTheOperatorGetsARegisteredClientCertificateFromACSR(t *testing.T) {
 	handlers, pool := labWithPool(t)
 
