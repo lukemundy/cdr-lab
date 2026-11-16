@@ -119,6 +119,7 @@ func (f *identificationFlow) resend(flow, token string) {
 	require.Equal(f.t, http.StatusOK, resent.Code)
 }
 
+// Verifies: DH-0008
 func TestTheIdentificationOfTheConsumerAuthenticationPutsNoEmailAddressInTheSpansMetricsOrLogs(t *testing.T) {
 	spans, metrics, logs := recordTelemetry(t)
 
