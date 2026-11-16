@@ -86,6 +86,8 @@ These rules apply to each page of the authentication and of the authorisation. T
 - <a id="dh-0845"></a>**DH-0845** The data holder protects each form of the consumer pages against cross-site request forgery. A form that does not come from a page of the flow, in the browser that started the flow, gives 403, and the flow continues. ([Judgement: consumer pages with no script and no content from other hosts](#dh-0861))
 - <a id="dh-0846"></a>**DH-0846** The data holder serves the stylesheet at `/static/consumer.css` and the fonts at `/static/fonts/` on the public listener, with no authentication. ([Judgement: consumer pages with no script and no content from other hosts](#dh-0861); [the cache rule of a fixed file](../../../pkg/platform/asset/DESIGN.md#asset-0001))
 - <a id="dh-0847"></a>**DH-0847** The data holder serves the logo, the mark and the styles of the brand on the public listener, with no authentication. They contain no CDR data. A browser [checks each file again before it uses it](../../../pkg/platform/asset/DESIGN.md#asset-0001). ([Judgement: consumer pages with no script and no content from other hosts](#dh-0861))
+- <a id="dh-2090"></a>**DH-2090** The public listener serves the styles of the brand at `/brand/styles.css`, the logo at `/brand/logo.svg` and the mark at `/brand/mark.svg`. ([Judgement: the paths of the brand files](#dh-2120))
+- <a id="dh-2091"></a>**DH-2091** The stylesheet of the brand sets the custom properties of the design system under the selector `:root:root`. Thus the sequence of the stylesheets on a page has no effect. ([design system DESIGN.md: Brands][ui-brands]; [Judgement: the paths of the brand files](#dh-2120))
 - <a id="dh-0848"></a>**DH-0848** A response with an SVG file of the brand does not permit scripts, also when a browser opens its URL directly. ([MDN: CSP sandbox][mdn-csp-sandbox]; [Judgement: no script in an SVG file of the brand](#dh-0863))
 
 ## Judgements
@@ -112,7 +114,7 @@ These rules apply to each page of the authentication and of the authorisation. T
 
 - Kind: choice
 - Basis: Step 3.1. Rule 4.23(1)(g) requires instructions, and rule 4.24(d) forbids a reference to other documents in the authorisation process ([CDR Rules][cdr-rules]). The CDS also forbids other documents and services in the flow ([CDS: Common Authentication Standards][cds-cx-authentication]).
-- Reason: The text names the two methods of rule 4.25(1). A description of the consumer dashboard is the instruction that rule 4.23(1)(g) asks for, not a different document or service. The online bank site also has no link to the authorisation page ([separation from the CDR authentication](../DESIGN.md#separation-from-the-cdr-authentication)).
+- Reason: The text names the two methods of rule 4.25(1). A description of the consumer dashboard is the instruction that rule 4.23(1)(g) asks for, not a different document or service. The online bank site also has no link to the authorisation page ([the site has no link to the consumer pages](online-bank-site-sign-in.md#dh-2059)).
 
 ### <a id="dh-0854"></a>DH-0854 Closed accounts are not on the authorisation page
 
@@ -174,6 +176,12 @@ These rules apply to each page of the authentication and of the authorisation. T
 - Basis: Step 3.2. A browser runs a script in an SVG file that it opens directly ([MDN: CSP sandbox][mdn-csp-sandbox]).
 - Reason: A user brand directory can contain an SVG file with a script. The sandbox stops the script also outside the pages.
 
+### <a id="dh-2120"></a>DH-2120 The paths of the brand files
+
+- Kind: choice
+- Basis: Step 3.3. The `logoUri` of the brand on the Register needs a fixed URL on the public base URI ([the logo on the public base URI](brand.md#dh-0313)), and the CDS gives no path for the other brand files.
+- Reason: The files of the brand have one prefix, and the online bank site uses the same paths. The selector has a higher specificity than the `:root` of the tokens of the design system.
+
 [adr-0012]: ../../../docs/adr/0012-utc-for-all-times.md
 [adr-0014]: ../../../docs/adr/0014-web-uis-as-embedded-react-single-page-applications.md
 [adr-0016]: ../../../docs/adr/0016-design-system-on-shadcn-base-ui-and-dtcg-tokens.md
@@ -197,5 +205,6 @@ These rules apply to each page of the authentication and of the authorisation. T
 [support-closed-accounts]: https://cdr-support.zendesk.com/hc/en-us/articles/14519397304079
 [support-dashboards]: https://cdr-support.zendesk.com/hc/en-us/articles/6140622825231
 [support-error-scenarios]: https://cdr-support.zendesk.com/hc/en-us/articles/5729181240591
+[ui-brands]: ../../../web/packages/ui/DESIGN.md#brands
 [wcag-1-1-1]: https://www.w3.org/TR/WCAG22/#non-text-content
 [wcag-1-4-10]: https://www.w3.org/TR/WCAG22/#reflow

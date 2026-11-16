@@ -1,6 +1,6 @@
 # Mock data holder: Online bank site API
 
-This area gives the API of the online bank site. The site API is JSON over HTTP on the listener of the site, and only the site uses it. It obeys the [web UI library](../../../pkg/platform/consolehttp/DESIGN.md): [the `/api/` prefix](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0011) and [404 for a path that is not an operation](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0012). The [online bank site](../DESIGN.md#online-bank-site) gives the pages, the [session](../DESIGN.md#session) and the listener.
+This area gives the API of the online bank site. The site API is JSON over HTTP on the listener of the site, and only the site uses it. It obeys the [web UI library](../../../pkg/platform/consolehttp/DESIGN.md): [the `/api/` prefix](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0011) and [404 for a path that is not an operation](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0012). The [online bank site](../DESIGN.md#online-bank-site) gives the pages, the [sign-in and the session](online-bank-site-sign-in.md) and the listener.
 
 ## Operations
 
@@ -9,9 +9,9 @@ This area gives the API of the online bank site. The site API is JSON over HTTP 
 | <a id="dh-1700"></a>**DH-1700** | Read the brand | `GET /api/brand` | 200 with the brand name, the text of the footer, the layout and the photos of the brand | [Judgement: a list of the photos of the brand](#dh-1792) |
 | <a id="dh-1701"></a>**DH-1701** | List the current products | `GET /api/products` | 200 | [CDS: Get Products][cds-get-products] |
 | <a id="dh-1702"></a>**DH-1702** | Read a current product | `GET /api/products/{productId}` | 200 | [CDS: Get Product Detail][cds-get-product-detail] |
-| <a id="dh-1703"></a>**DH-1703** | Sign up | `POST /api/customers` | 201 with the new customer, and the session cookie | [a session at a sign-up](../DESIGN.md#decisions) |
-| <a id="dh-1704"></a>**DH-1704** | Sign in | `POST /api/session` | 204 with the session cookie | [the sign-in of the site](../DESIGN.md#sign-in-and-sign-out) |
-| <a id="dh-1705"></a>**DH-1705** | Read the customer of the session | `GET /api/session` | 200 with the `customerNumber`, the `firstName` and the `lastName` | [the session of the site](../DESIGN.md#session) |
+| <a id="dh-1703"></a>**DH-1703** | Sign up | `POST /api/customers` | 201 with the new customer, and the session cookie | [Judgement: a session after a sign-up](online-bank-site-sign-in.md#dh-2103) |
+| <a id="dh-1704"></a>**DH-1704** | Sign in | `POST /api/session` | 204 with the session cookie | [the sign-in of a customer](online-bank-site-sign-in.md#dh-2023) |
+| <a id="dh-1705"></a>**DH-1705** | Read the customer of the session | `GET /api/session` | 200 with the `customerNumber`, the `firstName` and the `lastName` | [the session on the server](online-bank-site-sign-in.md#dh-2033) |
 | <a id="dh-1706"></a>**DH-1706** | Sign out | `DELETE /api/session` | 204, and the cookie expires, also with no valid session | [Judgement: 403 for a request with no valid session](#dh-1780) |
 | <a id="dh-1707"></a>**DH-1707** | List the accounts | `GET /api/accounts` | 200 | [CDS: Get Accounts][cds-get-accounts] |
 | <a id="dh-1708"></a>**DH-1708** | Read the balance of an account | `GET /api/accounts/{accountId}/balance` | 200 | [CDS: Get Account Balance][cds-get-account-balance] |
@@ -49,14 +49,14 @@ This area gives the API of the online bank site. The site API is JSON over HTTP 
 
 ## Sign-up and sign-in
 
-- <a id="dh-1734"></a>**DH-1734** A sign-up has the fields `lastName`, `emailAddress` and, optionally, `firstName`, with the rules of the [operator interface](operator-interface.md#dh-0734). ([a session at a sign-up](../DESIGN.md#decisions))
+- <a id="dh-1734"></a>**DH-1734** A sign-up has the fields `lastName`, `emailAddress` and, optionally, `firstName`, with the rules of the [operator interface](operator-interface.md#dh-0734). ([Judgement: a session after a sign-up](online-bank-site-sign-in.md#dh-2103))
 - <a id="dh-1735"></a>**DH-1735** When the data holder refuses a value of a sign-up, the response is 400, with a [field error](../../../pkg/platform/problem/DESIGN.md#prob-0003) for each value. ([Judgement: each field error shows at its field](../../../pkg/platform/problem/DESIGN.md#prob-0009))
 - <a id="dh-1736"></a>**DH-1736** The `detail` of each field error is a text in plain language for the consumer, which names the field with its label on the page. For example, the `detail` of a last name that is too long starts with "Enter a last name". ([Judgement: a plain-language detail for each field error](#dh-1781))
 - <a id="dh-1737"></a>**DH-1737** A sign-up with an email address that a different customer of the brand has gives 409, with a field error at `/emailAddress`. ([operator interface: an email address in use](operator-interface.md#dh-0736); [Judgement: a plain-language detail for each field error](#dh-1781))
-- <a id="dh-1738"></a>**DH-1738** A sign-in has the field `identifier` only. Its value is the email address or the customer number. ([the user identifiers of a consumer](consumer-authentication.md#dh-1200); [the sign-in takes only the user identifier](../DESIGN.md#decisions))
-- <a id="dh-1739"></a>**DH-1739** A sign-in with a `password` field gives 400. ([the sign-in takes only the user identifier](../DESIGN.md#decisions))
-- <a id="dh-1740"></a>**DH-1740** A sign-in with an identifier that no customer has gives 400, with a field error at `/identifier`. The `detail` is the same for an email address and a customer number. ([one field error for an unknown user identifier](../DESIGN.md#decisions))
-- <a id="dh-1741"></a>**DH-1741** A successful sign-up and a successful sign-in give the session cookie in the response. ([a session at a sign-up](../DESIGN.md#decisions))
+- <a id="dh-1738"></a>**DH-1738** A sign-in has the field `identifier` only. Its value is the email address or the customer number. ([the user identifiers of a consumer](consumer-authentication.md#dh-1200); [Judgement: the page does not send the password](online-bank-site-sign-in.md#dh-2104))
+- <a id="dh-1739"></a>**DH-1739** A sign-in with a `password` field gives 400. ([Judgement: the page does not send the password](online-bank-site-sign-in.md#dh-2104))
+- <a id="dh-1740"></a>**DH-1740** A sign-in with an identifier that no customer has gives 400, with a field error at `/identifier`. The `detail` is the same for an email address and a customer number. ([Judgement: the refusal of an unknown user identifier](online-bank-site-sign-in.md#dh-2105))
+- <a id="dh-1741"></a>**DH-1741** A successful sign-up and a successful sign-in give the session cookie in the response. ([Judgement: a session after a sign-up](online-bank-site-sign-in.md#dh-2103))
 - <a id="dh-1742"></a>**DH-1742** A successful sign-up gives 201 with the `customerNumber`, the `firstName` and the `lastName` of the new customer, and with no `Location` header. ([Judgement: no identifier of a consumer in a path](#dh-1791))
 
 ## Session

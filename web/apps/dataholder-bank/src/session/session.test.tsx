@@ -28,6 +28,7 @@ function fieldErrors(errors: { pointer: string; detail: string }[], status = 400
   };
 }
 
+// Verifies: DH-2011, DH-2012, DH-2013, DH-2014
 test("a sign-up sends the values, starts a session and shows the new customer number with the CDR text", async () => {
   let sent: unknown;
   worker.use(
@@ -86,6 +87,7 @@ test("a sign-up sends the values, starts a session and shows the new customer nu
     .toBe("Your customer number - Example Bank online banking");
 });
 
+// Verifies: DH-2008
 test("a sign-up that the bank refuses shows each error at its field and in the error summary", async () => {
   worker.use(
     http.post("/api/customers", ({ response }) =>
@@ -110,6 +112,7 @@ test("a sign-up that the bank refuses shows each error at its field and in the e
     .toHaveAccessibleDescription("Enter a last name of 1 to 100 characters.");
 });
 
+// Verifies: DH-2010
 test("a sign-up with an email address in use shows the error at the email address", async () => {
   const inUse =
     "A customer of the bank has this email address. Sign in, or enter a different email address.";
@@ -132,6 +135,7 @@ test("a sign-up with an email address in use shows the error at the email addres
     );
 });
 
+// Verifies: DH-2017, DH-2018, DH-2053, DH-2055, DH-2056, DH-2057
 test("the sign-in page has the note of the demonstration bank, and fields that a password manager can fill", async () => {
   renderApp("/sign-in");
 
@@ -157,6 +161,7 @@ test("the sign-in page has the note of the demonstration bank, and fields that a
   await expect.element(password).toHaveAttribute("autocomplete", "current-password");
 });
 
+// Verifies: DH-2022, DH-2030, DH-2031
 test("a sign-in sends only the identifier, and then the site shows the accounts with a sign-out control", async () => {
   let sent: unknown;
   worker.use(
@@ -189,6 +194,7 @@ test("a sign-in sends only the identifier, and then the site shows the accounts 
     .toHaveAttribute("href", "/data-sharing");
 });
 
+// Verifies: DH-2021
 test("a sign-in with no password sends nothing and says that any password works", async () => {
   let sent = false;
   worker.use(
@@ -208,6 +214,7 @@ test("a sign-in with no password sends nothing and says that any password works"
   expect(sent).toBe(false);
 });
 
+// Verifies: DH-2024
 test("a sign-in with an identifier that no customer has shows the error at the identifier", async () => {
   const notSignedIn = "We could not sign you in. Check your email address or customer number.";
   worker.use(
@@ -226,6 +233,7 @@ test("a sign-in with an identifier that no customer has shows the error at the i
     .toHaveAccessibleDescription(notSignedIn);
 });
 
+// Verifies: DH-2026, DH-2027
 test("a page with the data of a customer goes to the sign-in page with no session", async () => {
   renderApp("/customer-number");
 
@@ -240,6 +248,7 @@ test("a page with the data of a customer goes to the sign-in page with no sessio
     .toHaveAttribute("href", "/sign-in");
 });
 
+// Verifies: DH-2028
 test("when the session ended, the sign-in page says that the bank signed the consumer out", async () => {
   worker.use(http.get("/api/session", ({ response }) => response(403).json(sessionEnded)));
 
@@ -250,6 +259,7 @@ test("when the session ended, the sign-in page says that the bank signed the con
     .toHaveTextContent("Example Bank signed you out. Sign in again.");
 });
 
+// Verifies: DH-2031, DH-2032
 test("a sign-out ends the session and shows the sign-in page", async () => {
   serveSession();
   let signedOut = false;
@@ -273,6 +283,7 @@ test("a sign-out ends the session and shows the sign-in page", async () => {
     .toBeVisible();
 });
 
+// Verifies: DH-2056, DH-2057
 test("the sign-in page of the site and the customer number page of the CDR authentication are different", async () => {
   const [cdrPage] = Object.values(cdrPages);
   if (!cdrPage) throw new Error("the data holder has no golden customer number page");

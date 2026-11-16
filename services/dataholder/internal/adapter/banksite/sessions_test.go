@@ -25,6 +25,7 @@ func start(t *testing.T, store *sessionStore, customerNumber string) string {
 	return place.start(customerNumber)
 }
 
+// Verifies: DH-2035
 func TestASessionIDHas256RandomBits(t *testing.T) {
 	store, _ := newTestStore(10)
 
@@ -36,6 +37,7 @@ func TestASessionIDHas256RandomBits(t *testing.T) {
 	assert.NotEqual(t, first, second)
 }
 
+// Verifies: DH-2033, DH-2044
 func TestASessionGivesItsCustomerUntilItEnds(t *testing.T) {
 	store, _ := newTestStore(10)
 	id := start(t, store, "00000001")
@@ -50,6 +52,7 @@ func TestASessionGivesItsCustomerUntilItEnds(t *testing.T) {
 	assert.False(t, ok)
 }
 
+// Verifies: DH-2038, DH-2039
 func TestASessionEnds24HoursAfterItsStartWithNoInactivityTimeout(t *testing.T) {
 	store, clock := newTestStore(10)
 	id := start(t, store, "00000001")
@@ -63,6 +66,7 @@ func TestASessionEnds24HoursAfterItsStartWithNoInactivityTimeout(t *testing.T) {
 	assert.False(t, ok)
 }
 
+// Verifies: DH-2041
 func TestAFullStoreRefusesANewSessionAndKeepsTheSessionsThatDidNotEnd(t *testing.T) {
 	store, _ := newTestStore(2)
 	first := start(t, store, "00000001")
@@ -75,6 +79,7 @@ func TestAFullStoreRefusesANewSessionAndKeepsTheSessionsThatDidNotEnd(t *testing
 	assert.True(t, ok)
 }
 
+// Verifies: DH-2041
 func TestAFullStoreRemovesTheSessionsThatEndedBeforeItRefuses(t *testing.T) {
 	store, clock := newTestStore(2)
 	start(t, store, "00000001")
@@ -109,6 +114,7 @@ func TestAReservationTakesAPlaceUntilItStartsOrIsReleased(t *testing.T) {
 	assert.ErrorIs(t, err, errNoPlace)
 }
 
+// Verifies: DH-2041
 func TestParallelReservationsDoNotGoAboveTheLimit(t *testing.T) {
 	store, _ := newTestStore(50)
 

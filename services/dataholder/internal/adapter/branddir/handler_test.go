@@ -39,6 +39,7 @@ func get(t *testing.T, mux *http.ServeMux, path string, header http.Header) *htt
 
 // The pages show a logo only in an img element, where a script cannot run. The sandbox stops a script in an SVG
 // file when a browser opens its URL directly.
+// Verifies: DH-2090
 func TestTheLogoAndTheMarkAreSVGFilesThatCannotRunAScript(t *testing.T) {
 	dir := validDir(t)
 	mux := serveBrand(t, dir)
@@ -57,6 +58,7 @@ func TestTheLogoAndTheMarkAreSVGFilesThatCannotRunAScript(t *testing.T) {
 	}
 }
 
+// Verifies: DH-2090, DH-2091
 func TestTheStylesSetTheCustomPropertiesOfTheDesignSystemForEachTokenOfTheBrand(t *testing.T) {
 	rec := get(t, serveBrand(t, validDir(t)), "/brand/styles.css", nil)
 
