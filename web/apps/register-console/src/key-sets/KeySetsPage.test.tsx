@@ -36,6 +36,7 @@ const keySet = (name: string) => page.getByRole("region", { name, exact: true })
 const key = (set: string, state: string) => keySet(set).getByRole("region", { name: state });
 
 describe("the signing keys page", () => {
+  // Verifies: REG-1042, REG-1057
   test("shows the key ID and the creation time of each key in the time zone of the browser, under its state", async () => {
     serve(keyChange);
 
@@ -135,6 +136,7 @@ describe("the signing keys page", () => {
       .toBeVisible();
   });
 
+  // Verifies: REG-1060
   test("passes the automated accessibility checks", async () => {
     serve(keyChange);
 

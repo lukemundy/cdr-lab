@@ -35,15 +35,15 @@ func dataHolderEventTypes(t *testing.T) []string {
 	return codec.EventTypes()
 }
 
-// designTableEventTypes gives the event types of the table in the Functions of the operator console.
+// designTableEventTypes gives the event types of the table of the history in the operator console specification.
 func designTableEventTypes(t *testing.T) []string {
 	t.Helper()
 
-	design, err := os.ReadFile("../../DESIGN.md")
+	design, err := os.ReadFile("../../design/operator-console.md")
 	require.NoError(t, err)
 
-	_, table, found := strings.Cut(string(design), "| Event type | Text in the history | Fields |\n")
-	require.True(t, found, "DESIGN.md has the table of event types")
+	_, table, found := strings.Cut(string(design), "| ID | Event type | Text in the history | Fields | Source |\n")
+	require.True(t, found, "the operator console specification has the table of event types")
 
 	table, _, _ = strings.Cut(table, "\n\n")
 	code := regexp.MustCompile("`([A-Za-z]+)`")
@@ -52,11 +52,11 @@ func designTableEventTypes(t *testing.T) []string {
 
 	for row := range strings.Lines(table) {
 		cells := strings.Split(row, "|")
-		if len(cells) < 2 || strings.HasPrefix(strings.TrimSpace(cells[1]), "---") {
+		if len(cells) < 3 || strings.HasPrefix(strings.TrimSpace(cells[2]), "---") {
 			continue
 		}
 
-		for _, m := range code.FindAllStringSubmatch(cells[1], -1) {
+		for _, m := range code.FindAllStringSubmatch(cells[2], -1) {
 			types = append(types, m[1])
 		}
 	}
@@ -67,12 +67,14 @@ func designTableEventTypes(t *testing.T) []string {
 }
 
 // The table can have a row before the codec has its event type, because the design comes first.
+//
+// Verifies: REG-1018
 func TestEachEventTypeOfTheCodecsHasARowInTheTableOfTheDesign(t *testing.T) {
 	table := designTableEventTypes(t)
 	require.NotEmpty(t, table)
 
 	for _, eventType := range slices.Concat(dataRecipientEventTypes(t), dataHolderEventTypes(t)) {
-		assert.Contains(t, table, eventType, "DESIGN.md has a row for the event type")
+		assert.Contains(t, table, eventType, "the operator console specification has a row for the event type")
 	}
 }
 
@@ -114,6 +116,7 @@ func historyRecipient() domain.DataRecipient {
 	}
 }
 
+// Verifies: REG-1015, REG-1143
 func TestTheHistoryOfADataRecipientGivesOnlyTheFieldsOfTheTableForEachEventType(t *testing.T) {
 	product := &app.HistorySoftwareProduct{ID: "sp-1", Name: "Budget app"}
 	brand := &app.HistoryBrand{ID: "b-1", Name: "Budget"}
@@ -239,6 +242,7 @@ func historyHolder() domain.DataHolder {
 	}
 }
 
+// Verifies: REG-1015, REG-1143
 func TestTheHistoryOfADataHolderGivesOnlyTheFieldsOfTheTableForEachEventType(t *testing.T) {
 	bank := &app.HistoryBrand{ID: "dhb-1", Name: "Holder Bank"}
 	samples := map[string]struct {
@@ -328,6 +332,7 @@ func TestTheHistoryOfADataHolderRefusesAnEventOfAnUnknownBrand(t *testing.T) {
 	assert.ErrorIs(t, err, domain.ErrNotFound)
 }
 
+// Verifies: REG-1020
 func TestTheHistoryOfACreatedDataRecipientGivesNoFields(t *testing.T) {
 	stream := recorded(t, app.DataRecipientType.Codec, domain.DataRecipientCreated{DataRecipient: historyRecipient()})
 

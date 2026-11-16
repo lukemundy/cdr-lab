@@ -128,10 +128,12 @@ func seedParticipants(t *testing.T, participants domain.Participants) *readmodel
 	return readmodel.NewQueries(pool)
 }
 
+// Verifies: REG-1106
 func TestTheDocumentClosesEachObjectSchema(t *testing.T) {
 	assert.NoError(t, loadSpec(t).CheckClosed())
 }
 
+// Verifies: REG-1116
 func TestDataRecipientsGiveOnePageWithTheCountsAndTheTotal(t *testing.T) {
 	queries := seed(t,
 		recipient("dr-1", "Alpha Pty Ltd", domain.DataRecipientActive,

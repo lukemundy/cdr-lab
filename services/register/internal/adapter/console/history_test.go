@@ -75,6 +75,7 @@ func withoutRecordedAt(t *testing.T, body string) string {
 	return string(rest)
 }
 
+// Verifies: REG-1016, REG-1142
 func TestTheHistoryOfASuspendedDataRecipientGivesTheCascadeToEachActiveSoftwareProduct(t *testing.T) {
 	store, queries := seedStore(t, domain.Participants{DataRecipients: []domain.DataRecipient{
 		recipient("dr-1", "Alpha Pty Ltd", domain.DataRecipientActive,
@@ -97,6 +98,7 @@ func TestTheHistoryOfASuspendedDataRecipientGivesTheCascadeToEachActiveSoftwareP
 	]}`, withoutRecordedAt(t, resp.body))
 }
 
+// Verifies: REG-1037
 func TestTheHistoryOfADataRecipientGivesTheThumbprintOfARegisteredClientCertificate(t *testing.T) {
 	store, queries := seedStore(t, domain.Participants{DataRecipients: []domain.DataRecipient{
 		recipient("dr-1", "Alpha Pty Ltd", domain.DataRecipientActive,
@@ -119,6 +121,7 @@ func TestTheHistoryOfADataRecipientGivesTheThumbprintOfARegisteredClientCertific
 	]}`, withoutRecordedAt(t, resp.body))
 }
 
+// Verifies: REG-1039
 func TestTheHistoryOfADataRecipientGivesTheThumbprintOfARemovedClientCertificate(t *testing.T) {
 	store, queries := seedStore(t, domain.Participants{DataRecipients: []domain.DataRecipient{
 		recipient("dr-1", "Alpha Pty Ltd", domain.DataRecipientActive,
@@ -142,6 +145,7 @@ func TestTheHistoryOfADataRecipientGivesTheThumbprintOfARemovedClientCertificate
 	]}`, withoutRecordedAt(t, resp.body))
 }
 
+// Verifies: REG-1038
 func TestTheHistoryOfADataRecipientGivesTheThumbprintOfAnIssuedClientCertificate(t *testing.T) {
 	store, queries := seedStore(t, domain.Participants{DataRecipients: []domain.DataRecipient{
 		recipient("dr-1", "Alpha Pty Ltd", domain.DataRecipientActive,
@@ -164,6 +168,7 @@ func TestTheHistoryOfADataRecipientGivesTheThumbprintOfAnIssuedClientCertificate
 	]}`, withoutRecordedAt(t, resp.body))
 }
 
+// Verifies: REG-1019
 func TestTheHistoryOfADataHolderGivesItsImport(t *testing.T) {
 	_, queries := seedStore(t, domain.Participants{DataHolders: []domain.DataHolder{
 		dataHolder("dh-1", "Alpha Ltd", domain.DataHolderActive),
@@ -176,6 +181,7 @@ func TestTheHistoryOfADataHolderGivesItsImport(t *testing.T) {
 		withoutRecordedAt(t, resp.body))
 }
 
+// Verifies: REG-1146
 func TestTheHistoryOfADataHolderGivesTheBrandOfABrandEvent(t *testing.T) {
 	store, queries := seedStore(t, domain.Participants{DataHolders: []domain.DataHolder{
 		dataHolder("dh-1", "Alpha Ltd", domain.DataHolderActive,
@@ -193,6 +199,7 @@ func TestTheHistoryOfADataHolderGivesTheBrandOfABrandEvent(t *testing.T) {
 	]}`, withoutRecordedAt(t, resp.body))
 }
 
+// Verifies: REG-1040, REG-1146
 func TestTheHistoryOfADataHolderGivesTheBrandAndTheThumbprintOfAnIssuedServerCertificate(t *testing.T) {
 	store, queries := seedStore(t, domain.Participants{DataHolders: []domain.DataHolder{
 		dataHolder("dh-1", "Alpha Ltd", domain.DataHolderActive,
@@ -215,6 +222,7 @@ func TestTheHistoryOfADataHolderGivesTheBrandAndTheThumbprintOfAnIssuedServerCer
 	]}`, withoutRecordedAt(t, resp.body))
 }
 
+// Verifies: REG-1146
 func TestTheHistoryOfADataRecipientGivesTheBrandOfABrandEvent(t *testing.T) {
 	store, queries := seedStore(t, domain.Participants{DataRecipients: []domain.DataRecipient{
 		recipient("dr-1", "Alpha Pty Ltd", domain.DataRecipientActive,
@@ -233,6 +241,7 @@ func TestTheHistoryOfADataRecipientGivesTheBrandOfABrandEvent(t *testing.T) {
 	]}`, withoutRecordedAt(t, resp.body))
 }
 
+// Verifies: REG-1115, REG-1116
 func TestAHistoryGivesOnePageAndTheTotal(t *testing.T) {
 	store, queries := seedStore(t, domain.Participants{DataRecipients: []domain.DataRecipient{
 		recipient("dr-1", "Alpha Pty Ltd", domain.DataRecipientActive,
@@ -286,6 +295,7 @@ func TestAHistoryRefusesAPageThatIsNotValid(t *testing.T) {
 	}
 }
 
+// Verifies: REG-1111
 func TestAHistoryOfAnUnknownLegalEntityGivesNotFoundWithNoIdentifier(t *testing.T) {
 	_, queries := seedStore(t, domain.Participants{
 		DataRecipients: []domain.DataRecipient{recipient("dr-1", "Alpha Pty Ltd", domain.DataRecipientActive)},
@@ -319,6 +329,7 @@ func TestAHistoryGivesAProblemWithNoErrorMessageWhenTheReadFails(t *testing.T) {
 }
 
 // The check of the response is the check of the field rule: the schema of each event type is closed.
+// Verifies: REG-1145
 func TestTheDocumentRefusesAFieldThatTheTableDoesNotGiveForTheEventType(t *testing.T) {
 	for name, entry := range map[string]string{
 		"thumbprint of a suspension": `{"streamVersion": 2, "eventType": "AccreditationSuspended",

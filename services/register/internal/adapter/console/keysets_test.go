@@ -38,6 +38,7 @@ func getKeySets(t *testing.T, keys app.KeyReader) response {
 	return serve(t, nil, keys, "/api/key-sets")
 }
 
+// Verifies: REG-1042, REG-1149
 func TestKeySetsGiveEachKeyWithItsStateAndCreationTime(t *testing.T) {
 	created := time.Date(2026, 10, 23, 1, 2, 3, 456000000, time.UTC)
 	keys := keyReader{
@@ -74,6 +75,7 @@ func TestKeySetsGiveEachKeyWithItsStateAndCreationTime(t *testing.T) {
 	]}`, resp.body)
 }
 
+// Verifies: REG-1112
 func TestKeySetsGiveTheCreationTimeInUTC(t *testing.T) {
 	perth := time.FixedZone("AWST", 8*60*60)
 	keys := keyReader{
@@ -198,6 +200,7 @@ func TestKeySetsFollowEachStepOfAKeyChange(t *testing.T) {
 	}
 }
 
+// Verifies: REG-1148
 func TestKeySetsGiveNoKeyMaterial(t *testing.T) {
 	store := keyStore(t)
 	require.NoError(t, store.PublishNextKey(t.Context(), app.SSAKeys))
@@ -284,6 +287,7 @@ func postKeyAction(t *testing.T, store *idp.Store, set app.KeySet, action app.Ke
 		"/api/key-sets/"+string(set)+"/"+string(action), fmt.Sprintf(`{"version": %d}`, version))
 }
 
+// Verifies: REG-1150, REG-1151
 func TestAKeySetGivesItsVersionAndTheOneStepThatItsStatePermits(t *testing.T) {
 	store := keyStore(t)
 	first := onlyKeyOf(t, states(t, getKeySets(t, store))[app.SSAKeys])
@@ -346,6 +350,7 @@ func TestAFullKeyChangeInTheConsoleSignsANewSSAWithTheNewKey(t *testing.T) {
 	assert.Equal(t, accessTokenKeys, jwksKeyIDs(t, store, app.AccessTokenKeys), "the other key set does not change")
 }
 
+// Verifies: REG-1140
 func TestAKeyActionWithAVersionThatIsNotCurrentChangesNothing(t *testing.T) {
 	store := keyStore(t)
 	require.Equal(t, http.StatusNoContent, postKeyAction(t, store, app.SSAKeys, app.PublishNext, 1).status)
