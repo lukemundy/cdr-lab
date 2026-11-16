@@ -39,6 +39,7 @@ func TestTheHandlerSetsThePolicy(t *testing.T) {
 	assert.Equal(t, "sandbox", rec.Header().Get("Content-Security-Policy"))
 }
 
+// Verifies: ASSET-0001
 func TestABrowserCanUseItsCopyUntilTheDataChanges(t *testing.T) {
 	handler := asset.Handler("text/plain", []byte("one"), "")
 
