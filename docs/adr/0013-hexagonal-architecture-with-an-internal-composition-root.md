@@ -1,6 +1,7 @@
 # 0013. Use a hexagonal architecture for each service, with the composition root in an internal package
 
 - Date: 2026-10-21
+- Amended by [ADR-0024](0024-write-specifications-as-identified-single-requirements-split-by-area.md): the place and the structure of the specification of a service
 
 ## Context
 

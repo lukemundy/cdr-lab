@@ -17,7 +17,7 @@ The following rules are to be followed for all work:
   - The change is merged to `main` and pushed.
   - CI passes on `main`.
   - The change is verified in the lab deployment (Docker Compose).
-  - The documentation and specifications that the change affects (`README.md`, `DESIGN.md` files, ADRs) are updated in the same change.
+  - The documentation and specifications that the change affects (`README.md`, specifications, ADRs) are updated in the same change.
 
 More than one agent can work on this repository at the same time. Do the steps below in this sequence.
 
@@ -55,7 +55,7 @@ Rules for all steps:
 Do the work for each milestone of a project in this sequence:
 
 1. Research, with no ticket.
-2. The requirements of the milestone in the `DESIGN.md` of the component, in a pull request for review.
+2. The requirements of the milestone in the specifications that own them (the component, or the `pkg/` library that implements a shared rule), in a pull request for review.
 3. The tickets of that milestone only.
 
 ## Keep the README a summary
@@ -63,9 +63,9 @@ Do the work for each milestone of a project in this sequence:
 `README.md` is a quick reference: it brings a new reader up to speed on the key points. It is not a full list of the features, endpoints, settings or files of the repository. Agents load it into each session, so each line has a cost.
 
 - Before you add to the README, ask: "Must I edit this line again at the next ticket?" If yes, the text does not belong in the README.
-- Do not add a feature, an endpoint or an API to the Status section. The `DESIGN.md` of the service gives these.
+- Do not add a feature, an endpoint or an API to the Status section. The specification of the service gives these.
 - Do not add a row to a table for each new variable, certificate, file or seed record. Refer to the source of truth: `compose.yaml`, `mise.toml`, the seed files or the code.
-- Put the detail in the document that owns it, and link to it: a `DESIGN.md` for behaviour, an ADR for a decision, the code or its configuration for the rest.
+- Put the detail in the document that owns it, and link to it: a specification for behaviour, an ADR for a decision, the code or its configuration for the rest.
 - Change the README only when the change makes a summary item incorrect, for example a new service, a new port, a new command or a new convention.
 
 ## Query lab telemetry

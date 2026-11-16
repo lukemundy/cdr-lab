@@ -48,22 +48,24 @@ cdr-lab/
 
 The repository is one Go module. Each directory in `pkg/` and `services/` is one component. A service must not import another service ([ADR 0004](docs/adr/0004-module-layout.md)). All JavaScript and TypeScript code is in one pnpm workspace in `web/`, which `go.mod` ignores ([ADR 0015](docs/adr/0015-web-toolchain-and-npm-supply-chain-controls.md)). Each service has a hexagonal architecture, and participant state is event sourced ([ADR 0013](docs/adr/0013-hexagonal-architecture-with-an-internal-composition-root.md), [ADR 0003](docs/adr/0003-event-sourcing.md)).
 
-To add a service, copy `services/register`. Then change the import paths, and add the service to `.golangci.yml` (depguard rules), `cog.toml` (scope), its `Dockerfile`, `compose.yaml` (with `<<: *lab-dns`, as each compose service has) and the layout above. A service that keeps state gets its own database ([ADR 0002](docs/adr/0002-data-store.md)): its migrations create its application role, and the lab adds the database, an owner user and a service user to `lab/postgres/init.sql`, the membership of the role to `lab/postgres/grants.sql`, and a `<service>-migrate` container to `compose.yaml` ([ADR 0020](docs/adr/0020-service-migrations-create-roles-and-the-operator-creates-users.md)).
+To add a service, copy `services/register`, except its `DESIGN.md`: write a new specification. Then change the import paths, and add the service to `.golangci.yml` (depguard rules), `cog.toml` (scope), its `Dockerfile`, `compose.yaml` (with `<<: *lab-dns`, as each compose service has) and the layout above. A service that keeps state gets its own database ([ADR 0002](docs/adr/0002-data-store.md)): its migrations create its application role, and the lab adds the database, an owner user and a service user to `lab/postgres/init.sql`, the membership of the role to `lab/postgres/grants.sql`, and a `<service>-migrate` container to `compose.yaml` ([ADR 0020](docs/adr/0020-service-migrations-create-roles-and-the-operator-creates-users.md)).
 
 ## Conventions
 
-### Requirements and decisions
+### Specifications
 
-- Each service `DESIGN.md` contains specifications and requirements only, including non-functional requirements. It does not describe the implementation.
-- Each requirement links directly to its primary source. The research notes in `docs/research/` are background. Do not cite them as a source, and do not cite through them.
-- `DESIGN.md` files and ADRs have no status field. On `main` means accepted. Anything else is a draft.
+- Each service, `pkg/` library and other component has a specification: a `DESIGN.md`, or a `design/` directory when it has more than 5,000 words. It gives requirements only, also non-functional requirements, and does not describe the implementation ([ADR 0024](docs/adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md)).
+- Each requirement is one rule, with an identifier and a link to its primary source or to a judgement in the same file. Refer to a rule with a descriptive link, never with an identifier alone.
+- A rule that a `pkg/` library implements is in the specification of that library. A service gives only its differences.
+- The research notes in `docs/research/` are background. Do not cite them as a source, and do not cite through them.
+- Specifications and ADRs have no status field. On `main` means accepted. Anything else is a draft.
 
 ### Sources for requirements
 
 Use this process to decide each requirement, and to decide when sources are not clear or do not agree:
 
 1. The CDS text and specifications as written, for the target CDS version. This is always the first source.
-2. When the CDS is not clear or says nothing: first-party ACCC guidance from official sources, for example the ACCC Developer Portal or the CDR Support Portal.
+2. When the CDS is not clear or says nothing: first-party ACCC guidance from official sources, for example the ACCC Developer Portal or the CDR Support Portal. The ACCC mock implementations are not a source.
 3. When the ACCC guidance is also not clear or says nothing: our own judgement. Balance these items, in approximately this order:
    1. The spirit and intent of the Consumer Data Right.
    2. Relevant technical standards, protocols, RFCs, frameworks and industry benchmarks.
@@ -77,7 +79,7 @@ Examples:
 - The CDS does not agree with an ACCC support article or another official ACCC document that is not a specification. Follow the CDS.
 - The CDS text does not agree with the CDS OpenAPI specification, and the ACCC has not clarified it. Use the option that agrees more with the spirit of the CDR or with industry norms.
 
-Record each decision that this process makes in the Decisions section of the `DESIGN.md`, with its reason.
+Record each choice that this process makes as a judgement next to its requirements, with its basis and its reason.
 
 ### Other conventions
 
