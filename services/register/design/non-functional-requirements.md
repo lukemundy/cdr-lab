@@ -60,7 +60,7 @@ The Register also obeys the [Telemetry library](../../../pkg/platform/telemetry/
 ### <a id="reg-0021"></a>REG-0021 A target of 200 ms, below the lowest CDS threshold
 
 - Kind: choice
-- Basis: Step 3.3. The CDS gives no response time for the Register. Its thresholds for data holder APIs are 1,000 ms or more ([CDS: Non-functional Requirements][cds-nfrs]).
+- Basis: Step 3.3. The CDS gives no response time for the Register. For data holder APIs, the lowest threshold is 1,000 ms: 95 % of the calls in each hour must respond within it ([CDS: Non-functional Requirements][cds-nfrs]).
 - Reason: A target below those thresholds shows a slow change early. A development workstation can send 50 requests each second.
 
 ### <a id="reg-0022"></a>REG-0022 A restart keeps the participants, keys, revocations and CRL number

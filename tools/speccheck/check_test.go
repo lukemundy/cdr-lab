@@ -73,6 +73,28 @@ func TestCheck(t *testing.T) {
 			},
 		},
 		{
+			fixture: "judgement-link",
+			extra: fstest.MapFS{
+				"pki/DESIGN.md": {Data: []byte("# Mock CDR PKI\n\n## Library specifications\n\nNone.\n\n## Issue\n\n" +
+					"- <a id=\"pki-0001\"></a>**PKI-0001** The CA issues. ([Judgement: one CA for the `lab`](#pki-0003))\n" +
+					"- <a id=\"pki-0002\"></a>**PKI-0002** The CA signs. ([Judgement: a CA for the lab](#pki-0003))\n" +
+					"- <a id=\"pki-0004\"></a>**PKI-0004** The CA revokes. ([Judgement: the CA issues](#pki-0001))\n\n" +
+					"## Judgements\n\n### <a id=\"pki-0003\"></a>PKI-0003 One CA for the `lab`\n\n- Kind: choice\n" +
+					"- Basis: Step 3.3. None.\n- Reason: Simple.\n\n## Withdrawn\n\nNone.\n")},
+				"docs/adr/0001-example.md": {Data: []byte("# 1. Example\n\n[Judgement: two CAs](../../pki/DESIGN.md#pki-0003)\n")},
+			},
+			wantErrors: []string{
+				"docs/adr/0001-example.md:3: the link text \"two CAs\" is not the title of judgement PKI-0003: \"One CA for the `lab`\"",
+				"pki/DESIGN.md:10: the link text \"a CA for the lab\" is not the title of judgement PKI-0003: \"One CA for the `lab`\"",
+				"pki/DESIGN.md:11: the Judgement: link goes to PKI-0001, which is not a judgement",
+			},
+			wantWarnings: []string{
+				"pki/DESIGN.md:9: requirement PKI-0001 has no test that verifies it",
+				"pki/DESIGN.md:10: requirement PKI-0002 has no test that verifies it",
+				"pki/DESIGN.md:11: requirement PKI-0004 has no test that verifies it",
+			},
+		},
+		{
 			fixture: "sub-heading",
 			wantErrors: []string{
 				"pki/DESIGN.md:11: only a judgement can have a heading below ##, in the Judgements section",

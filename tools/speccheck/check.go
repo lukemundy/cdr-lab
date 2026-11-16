@@ -12,6 +12,8 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 )
 
 const (
@@ -108,6 +110,7 @@ type checker struct {
 	specs      []*spec
 	ids        map[string]definition // identifier to its definition
 	anchors    map[string]bool       // "path#anchor" of each definition
+	titles     map[string]string     // "path#anchor" of each judgement: its title
 	verified   map[string]bool
 	bareIDRe   *regexp.Regexp
 	components map[string][]*spec
@@ -127,6 +130,7 @@ func check(fsys fs.FS, paths []string) result {
 		fsys:       fsys,
 		ids:        map[string]definition{},
 		anchors:    map[string]bool{},
+		titles:     map[string]string{},
 		verified:   map[string]bool{},
 		components: map[string][]*spec{},
 	}
@@ -366,6 +370,7 @@ func (c *checker) readStructure(s *spec) {
 
 			if c.define(s, n, m[1], m[2], judgement) {
 				judgementID, judgementLine = m[2], n
+				c.titles[s.path+"#"+m[1]] = m[3]
 			}
 
 			return
@@ -582,19 +587,21 @@ func (c *checker) checkLinkTargets(p string) {
 	}
 
 	outsideFences(lines, func(n int, line string) {
-		text := codeSpanRe.ReplaceAllString(line, "")
+		text := withoutLinksInCodeSpans(line)
 
-		targets := []string{}
+		type link struct{ text, target string }
+
+		links := []link{}
 		for _, m := range inlineLinkRe.FindAllStringSubmatch(text, -1) {
-			targets = append(targets, m[2])
+			links = append(links, link{m[1], m[2]})
 		}
 
 		if m := linkDefinitionRe.FindStringSubmatch(text); m != nil {
-			targets = append(targets, m[2])
+			links = append(links, link{"", m[2]})
 		}
 
-		for _, target := range targets {
-			file, fragment, found := strings.Cut(target, "#")
+		for _, l := range links {
+			file, fragment, found := strings.Cut(l.target, "#")
 			if !found || !idFragmentRe.MatchString(fragment) || strings.Contains(file, ":") {
 				continue
 			}
@@ -607,9 +614,52 @@ func (c *checker) checkLinkTargets(p string) {
 
 			if !c.anchors[file+"#"+fragment] {
 				c.errorf(p, n, "the link goes to %s#%s, which is not an identifier", file, fragment)
+
+				continue
+			}
+
+			if linkTitle, ok := strings.CutPrefix(l.text, "Judgement: "); ok {
+				c.checkJudgementLink(p, n, file+"#"+fragment, linkTitle)
 			}
 		}
 	})
+}
+
+// checkJudgementLink makes sure that a Judgement: link goes to a judgement and has its title as text. The case of
+// the first letter can differ, because the title starts a heading and the link text is in a sentence.
+func (c *checker) checkJudgementLink(p string, n int, target, linkTitle string) {
+	id := strings.ToUpper(target[strings.LastIndex(target, "#")+1:])
+
+	title, ok := c.titles[target]
+	if !ok {
+		c.errorf(p, n, "the Judgement: link goes to %s, which is not a judgement", id)
+
+		return
+	}
+
+	if lowerFirst(linkTitle) != lowerFirst(withoutLinksInCodeSpans(title)) {
+		c.errorf(p, n, "the link text %q is not the title of judgement %s: %q", linkTitle, id, title)
+	}
+}
+
+// withoutLinksInCodeSpans removes the brackets and parentheses from each code span, so that a code span is never a
+// link but stays in the link text that contains it.
+func withoutLinksInCodeSpans(s string) string {
+	return codeSpanRe.ReplaceAllStringFunc(s, func(span string) string {
+		return strings.Map(func(r rune) rune {
+			if strings.ContainsRune("[]()", r) {
+				return -1
+			}
+
+			return r
+		}, span)
+	})
+}
+
+func lowerFirst(s string) string {
+	r, size := utf8.DecodeRuneInString(s)
+
+	return string(unicode.ToLower(r)) + s[size:]
 }
 
 func (c *checker) checkVerifies(p string) {
