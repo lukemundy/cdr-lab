@@ -62,9 +62,9 @@ flowchart LR
 
 ## Caching
 
-- <a id="cnsl-0008"></a>**CNSL-0008** Each response of the API has `Cache-Control: no-store`. ([RFC 9111][rfc9111]; [Judgement: the cache rules of the web UI](#cnsl-0021))
-- <a id="cnsl-0009"></a>**CNSL-0009** The HTML page, and each file of the web UI that is not under the path `/assets/`, has `Cache-Control: no-cache`. For example, `/favicon.svg` has `no-cache`. ([RFC 9111][rfc9111]; [Judgement: the cache rules of the web UI](#cnsl-0021))
-- <a id="cnsl-0010"></a>**CNSL-0010** Each file under the path `/assets/` has `Cache-Control: public, max-age=31536000, immutable`. A web UI must put under this path only the files whose name contains a hash of their content. ([RFC 9111][rfc9111]; [Judgement: the cache rules of the web UI](#cnsl-0021))
+- <a id="cnsl-0008"></a>**CNSL-0008** Each response of the API has `Cache-Control: no-store`. ([RFC 9111][rfc9111]; [Judgement: no-store for the API, no-cache for the page and immutable assets](#cnsl-0021))
+- <a id="cnsl-0009"></a>**CNSL-0009** The HTML page, and each file of the web UI that is not under the path `/assets/`, has `Cache-Control: no-cache`. For example, `/favicon.svg` has `no-cache`. ([RFC 9111][rfc9111]; [Judgement: no-store for the API, no-cache for the page and immutable assets](#cnsl-0021))
+- <a id="cnsl-0010"></a>**CNSL-0010** Each file under the path `/assets/` has `Cache-Control: public, max-age=31536000, immutable`. A web UI must put under this path only the files whose name contains a hash of their content. ([RFC 9111][rfc9111]; [Judgement: no-store for the API, no-cache for the page and immutable assets](#cnsl-0021))
 
 ## Routes
 
@@ -75,7 +75,7 @@ flowchart LR
 ## Lists
 
 - <a id="cnsl-0014"></a>**CNSL-0014** A list of the API gets the page in the query parameter `page` and the page size in the query parameter `pageSize`. ([Judgement: page parameters, not the CDS pagination](#cnsl-0024))
-- <a id="cnsl-0015"></a>**CNSL-0015** The page size is 25 by default, and 100 at most. ([Judgement: the page size of a list](#cnsl-0025))
+- <a id="cnsl-0015"></a>**CNSL-0015** The page size is 25 by default, and 100 at most. ([Judgement: a page size of 25 by default and 100 at most](#cnsl-0025))
 - <a id="cnsl-0016"></a>**CNSL-0016** When `page` or `pageSize` is not an integer of 1 or more, the response is 400. A `pageSize` above 100 also gives 400. For example, `page=0` gives 400. ([Judgement: page parameters, not the CDS pagination](#cnsl-0024))
 - <a id="cnsl-0017"></a>**CNSL-0017** An empty value of `page`, `pageSize`, `sort`, `order` or a filter is the same as an absent parameter. For example, `sort=` gives the default sort. ([Judgement: an empty value is absent](#cnsl-0026))
 
@@ -99,7 +99,7 @@ flowchart LR
 - Basis: Step 3.2. A nonce or a hash in a policy is for pages that have inline scripts ([web.dev: Strict CSP][strict-csp]). Trusted Types are in all three browser engines ([MDN compatibility data][bcd-trusted-types]).
 - Reason: The UI build has no inline script, so `script-src 'self'` needs no nonce and no hash. Trusted Types stop a script that assigns an HTML string.
 
-### <a id="cnsl-0021"></a>CNSL-0021 The cache rules of the web UI
+### <a id="cnsl-0021"></a>CNSL-0021 No-store for the API, no-cache for the page and immutable assets
 
 - Kind: choice
 - Basis: Step 3.2. [RFC 9111][rfc9111] gives `no-store`, `no-cache` and `immutable`.
@@ -123,7 +123,7 @@ flowchart LR
 - Basis: Step 3.3. The [CDS pagination][cds-pagination] is for the CDR APIs.
 - Reason: The API of a web UI is not a CDR API. A page and a page size in the request are simpler for the UI.
 
-### <a id="cnsl-0025"></a>CNSL-0025 The page size of a list
+### <a id="cnsl-0025"></a>CNSL-0025 A page size of 25 by default and 100 at most
 
 - Kind: choice
 - Basis: Step 3.3. The CDS default page size is also 25 ([CDS: Pagination][cds-pagination]).
