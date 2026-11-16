@@ -69,6 +69,7 @@ func getDataHolder(t *testing.T, cfg authserver.DataHolderConfig, target string)
 	return rec
 }
 
+// Verifies: AUTH-0001, AUTH-0004, AUTH-0005
 func TestTheDataHolderConfigurationHasEachFieldThatTheCDSRequires(t *testing.T) {
 	rec := getDataHolder(t, dataHolderConfig(t), "/.well-known/openid-configuration")
 
@@ -120,6 +121,7 @@ func TestTheDataHolderEndpointURLsHaveNoDoubleSlashWhenABaseURLEndsWithASlash(t 
 	assert.Equal(t, "https://mtls.bank.example/token", configuration["token_endpoint"])
 }
 
+// Verifies: AUTH-0006
 func TestTheDataHolderJWKSHasThePublicSigningKeyOnly(t *testing.T) {
 	cfg := dataHolderConfig(t)
 	keys, err := cfg.SigningKeys(t.Context())
