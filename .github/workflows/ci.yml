@@ -621,7 +621,7 @@ jobs:
           docker push --all-tags "$DATAHOLDER_IMAGE"
           docker logout ghcr.io
 
-  # The structure of the specifications and the Verifies comments of the tests (ADR 0024).
+  # The structure of the specifications and the Verifies comments of the tests.
   spec:
     needs: changes
     if: needs.changes.outputs.spec == 'true'
