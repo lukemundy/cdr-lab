@@ -190,6 +190,7 @@ func requireTokenError(t *testing.T, r reply, code string) {
 	assert.Equal(t, "no-store", r.header.Get("Cache-Control"))
 }
 
+// Verifies: AUTH-0205, AUTH-0207
 func TestACodeOfAConsentGivesTheTokensOfTheConsent(t *testing.T) {
 	b := newBank(t)
 	a := b.authorise(hour)
@@ -211,6 +212,7 @@ func TestACodeOfAConsentGivesTheTokensOfTheConsent(t *testing.T) {
 	require.ErrorIs(t, err, authserver.ErrInvalidToken)
 }
 
+// Verifies: AUTH-0215, AUTH-0216, AUTH-0217
 func TestTheIDTokenOfAConsentHasNoPersonalInformation(t *testing.T) {
 	b := newBank(t)
 	a := b.authorise(hour)
@@ -239,6 +241,7 @@ func mapKeys(m map[string]any) []string {
 	return keys
 }
 
+// Verifies: AUTH-0206
 func TestARefreshTokenIsIssuedOnlyForASharingDuration(t *testing.T) {
 	b := newBank(t)
 
@@ -260,6 +263,7 @@ func TestAnAuthorisationCodeIsValidFor60Seconds(t *testing.T) {
 	requireTokenError(t, b.token(b.exchangeForm(a)), "invalid_grant")
 }
 
+// Verifies: AUTH-0202
 func TestACodeExchangeThatIsNotValidGivesInvalidGrant(t *testing.T) {
 	tests := map[string]func(url.Values){
 		"wrong redirect_uri":  func(f url.Values) { f.Set("redirect_uri", "https://recipient.example/other") },
@@ -277,6 +281,7 @@ func TestACodeExchangeThatIsNotValidGivesInvalidGrant(t *testing.T) {
 	}
 }
 
+// Verifies: AUTH-0202, AUTH-0203
 func TestEachLaterUseOfACodeGivesInvalidGrantAndEndsTheRefreshToken(t *testing.T) {
 	b := newBank(t)
 	a := b.authorise(hour)
@@ -287,6 +292,7 @@ func TestEachLaterUseOfACodeGivesInvalidGrantAndEndsTheRefreshToken(t *testing.T
 	requireTokenError(t, b.refresh(tokens["refresh_token"].(string)), "invalid_grant")
 }
 
+// Verifies: AUTH-0210, AUTH-0211
 func TestARefreshGivesNewTokensForTheSameArrangement(t *testing.T) {
 	b := newBank(t)
 	a := b.authorise(hour)
@@ -308,6 +314,7 @@ func TestARefreshGivesNewTokensForTheSameArrangement(t *testing.T) {
 	}
 }
 
+// Verifies: AUTH-0212
 func TestARefreshTokenThatIsNotValidGivesInvalidGrant(t *testing.T) {
 	b := newBank(t)
 	refreshToken := b.exchange(b.authorise(hour))["refresh_token"].(string)
@@ -321,6 +328,7 @@ func TestARefreshTokenThatIsNotValidGivesInvalidGrant(t *testing.T) {
 	requireTokenError(t, b.refresh(refreshToken), "invalid_grant")
 }
 
+// Verifies: AUTH-0213
 func TestARefreshAfterTheClientReplacesItsCertificateGivesATokenForTheNewCertificate(t *testing.T) {
 	b := newBank(t)
 	refreshToken := b.exchange(b.authorise(hour))["refresh_token"].(string)
@@ -357,6 +365,7 @@ func TestAClientCredentialsGrantIsNotStored(t *testing.T) {
 	assert.Empty(t, b.grants.grants)
 }
 
+// Verifies: AUTH-0219
 func TestIntrospectionOfARefreshTokenGivesTheArrangementAndTheEndOfTheSharing(t *testing.T) {
 	b := newBank(t)
 	a := b.authorise(hour)
@@ -373,6 +382,7 @@ func TestIntrospectionOfARefreshTokenGivesTheArrangementAndTheEndOfTheSharing(t 
 	assert.Equal(t, "no-store", r.header.Get("Cache-Control"))
 }
 
+// Verifies: AUTH-0220
 func TestIntrospectionOfATokenThatIsNotARefreshTokenGivesOnlyNotActive(t *testing.T) {
 	b := newBank(t)
 	tokens := b.exchange(b.authorise(hour))
@@ -388,6 +398,7 @@ func TestIntrospectionOfATokenThatIsNotARefreshTokenGivesOnlyNotActive(t *testin
 	assert.Equal(t, map[string]any{"active": false}, b.introspect(rand.Text()).body)
 }
 
+// Verifies: AUTH-0032, AUTH-0221
 func TestIntrospectionRefusesARequestThatIsNotValid(t *testing.T) {
 	b := newBank(t)
 

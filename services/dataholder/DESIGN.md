@@ -276,7 +276,7 @@ The data holder serves the data holder authorisation server of the [authorisatio
 
 ### Token endpoint
 
-- The token endpoint accepts [three grant types](../../pkg/authserver/design/token-endpoint.md#auth-0035). The rules for the `authorization_code` and `refresh_token` grants are in "Tokens of a consent".
+- The token endpoint accepts [three grant types](../../pkg/authserver/design/token-endpoint.md#auth-0035). The authorisation server library gives [the rules of the `authorization_code` and `refresh_token` grants](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0201).
 - A client credentials token has [only the scope `cdr:registration`](../../pkg/authserver/design/token-endpoint.md#auth-0038), and it [expires 5 minutes after it is issued](../../pkg/authserver/design/token-endpoint.md#auth-0043).
 - Each access token is [bound to the client certificate of the token request](../../pkg/authserver/design/token-endpoint.md#auth-0045).
 - Errors have [the format and the codes of RFC 6749, section 5.2](../../pkg/authserver/design/token-endpoint.md#auth-0048). A failed client authentication gives [401 `invalid_client`](../../pkg/authserver/design/client-authentication.md#auth-0032).
@@ -481,22 +481,8 @@ These rules apply to each page of the authentication and the consent.
 
 ## Tokens of a consent
 
-- The token endpoint accepts `grant_type=authorization_code` with `code`, `redirect_uri` and `code_verifier`. The `redirect_uri` is equal to that of the request object, and the `code_verifier` matches the `code_challenge`. ([RFC 6749, section 4.1.3][rfc6749-token-request], [RFC 7636, section 4.6][rfc7636-verify])
-- A code that is not known, is expired, is of a different client, or was used before gives 400 `invalid_grant`, as does a `redirect_uri` or a `code_verifier` that does not match. A second use of a code also revokes the tokens of the first use. ([CDS: Access Token][cds-access-token], [RFC 6749, section 4.1.2][rfc6749-code], [RFC 6749, section 5.2][rfc6749-errors])
-- A token request that the data holder refuses for a code that it knows also ends the code. Each later request with the code gives 400 `invalid_grant`, and the consumer must give consent again. (See Decisions)
-- The response has `access_token`, `token_type`, `expires_in`, `scope`, `id_token` and `cdr_arrangement_id`. It has a `refresh_token` only when the sharing duration is more than 0. ([CDS: CDR Arrangement ID][cds-arrangement-id], [CDS: Requesting Sharing Duration][cds-sharing-duration], [OpenID Connect Core, section 3.1.3.3][oidc-core-token-response])
-- The access token has the scopes of the arrangement. It is bound to the client certificate of the token request, and it expires 5 minutes after it is issued, as a client credentials token does. ([CDS: Access Token][cds-access-token], [CDS: Holder of Key Mechanism][cds-hok])
-- When the sharing duration is more than 0 and the sharing of the arrangement ends less than 5 minutes after the token is issued, the access token expires when the sharing ends, and `expires_in` shows this. ([CDR Rules][cdr-rules], rule 4.26(1)(g); see Decisions)
-- The refresh token expires at the end of the sharing of the arrangement. ([CDS: Refresh Token][cds-refresh-token]: "an exp value equal to the sharing duration authorised by the consumer")
-- The token endpoint accepts `grant_type=refresh_token` with `refresh_token`. The response has a new access token, an ID token and the `cdr_arrangement_id`. The data holder does not change the refresh token: when the response has a `refresh_token`, it is the value of the request. ([CDS: Refresh Token][cds-refresh-token]: "MUST NOT cycle refresh tokens"; [OpenID Connect Core, section 12.2][oidc-core-refresh-response])
-- A refresh token that is not known, is expired, is revoked, is of a different client, or is of an arrangement that ended gives 400 `invalid_grant`. ([RFC 6749, section 5.2][rfc6749-errors])
-- The data holder does not compare the client certificate of a refresh request with the certificate of an earlier token request. The new access token is bound to the client certificate of the refresh request. ([RFC 8705, section 7.1][rfc8705-refresh]; see Decisions)
-
-### ID token
-
-- The data holder signs the ID token with PS256. It does not encrypt it. ([CDS: Baseline ID Token requirements][cds-id-token]; [Judgement: the signing algorithms](../../pkg/authserver/design/configuration.md#auth-0013); [Judgement: no encryption of ID tokens or authorisation responses](../../pkg/authserver/design/configuration.md#auth-0017))
-- The ID token has `iss`, `sub`, `aud`, `exp`, `iat`, `auth_time`, `acr` and `nonce`. The `acr` is `urn:cds.au:cdr:2`. ([OpenID Connect Core, section 2][oidc-core-id-token], [CDS: Claims][cds-claims])
-- The ID token has no claim with personal information, and no `sharing_expires_at` or `refresh_token_expires_at`. ([CDS: Baseline ID Token requirements][cds-id-token]: "MUST NOT contain any Personal Information (PI) claims")
+- The authorisation server library gives the tokens of an arrangement: [the authorisation code grant](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0201), [the token response](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0205), [the refresh token grant](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0210) and [the ID token](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0214).
+- The data holder gives the library [the subject identifier of each authorisation](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0216). Subject identifier gives its rules.
 
 ### Subject identifier
 
@@ -506,10 +492,7 @@ These rules apply to each page of the authentication and the consent.
 
 ## Introspection
 
-- The introspection endpoint accepts `POST` with the client assertion parameters and `token`. ([CDS: Introspection endpoint][cds-introspection-endpoint], [RFC 7662, section 2.1][rfc7662-request])
-- For a refresh token of the client that is not expired, is not revoked, and is of an arrangement that did not end, the response is 200 with `active` set to `true`, `exp`, `scope` and `cdr_arrangement_id`. The `exp` is the end of the sharing of the arrangement. The response has no `username`. ([CDS: Introspection endpoint][cds-introspection-endpoint], [CDS: Requesting Sharing Duration][cds-sharing-duration])
-- For each other token, the response is 200 with only `active` set to `false`. This includes an access token, an ID token, a refresh token of a different client, and a value that the data holder does not know. ([CDS: Introspection endpoint][cds-introspection-endpoint]: introspection of access tokens and ID tokens "MUST NOT be supported"; [RFC 7662, section 2.2][rfc7662-response]; [CDR Support: Introspection Endpoint RFC vs Standards clarification][support-introspection]; see Decisions)
-- A client authentication that fails gives 401 `invalid_client`. A request with no `token` gives 400 `invalid_request`. ([RFC 7662, section 2.3][rfc7662-errors])
+- The authorisation server library gives [the rules of the introspection endpoint](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0218).
 
 ## Data of a consent
 
@@ -604,20 +587,13 @@ These rules are for the APIs on the resource base URI and for the UserInfo endpo
 
 ### Token revocation
 
-- The token revocation endpoint accepts `POST` with the client assertion parameters, `token` and an optional `token_type_hint`. The data holder finds the token with no hint, and ignores the hint. ([RFC 7009, section 2.1][rfc7009-request])
-- For a refresh token of the client, the data holder revokes the refresh token and each access token of its grant. The arrangement does not end. ([RFC 7009, section 2.1][rfc7009-request]; see Decisions)
-- For an access token of the client, the data holder revokes that access token only. A new access token from the refresh token is valid. This applies also to a client credentials token. ([CDS: Token Revocation endpoint][cds-token-revocation]: "Revocation of Refresh Tokens and Access Tokens MUST be supported"; [CDR Support: Guidance on revocation or withdrawal of consent][support-revocation-guidance])
-- For a token of a different client, the response is 400 `unauthorized_client`, and the token does not change. ([RFC 7009, section 2.1][rfc7009-request]: "the request is refused"; see Decisions)
-- For each other value, the response is 200 with no body, and nothing changes. This includes a token that is not known, that is expired or revoked, and an ID token. ([RFC 7009, section 2.2][rfc7009-response])
-- A client authentication that fails gives 401 `invalid_client`. A request with no `token` gives 400 `invalid_request`. ([RFC 7009, section 2.2.1][rfc7009-errors], [RFC 6749, section 5.2][rfc6749-errors])
+- The authorisation server library gives [the rules of the token revocation endpoint](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0222). A token revocation [does not end the arrangement](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0223).
 
 ### CDR arrangement revocation
 
-- The CDR arrangement revocation endpoint accepts `POST` with the client assertion parameters and `cdr_arrangement_id`. The data holder ignores `cdr_arrangement_jwt`. ([CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation]: "Data Holders MUST only support CDR Arrangement Form Parameter method")
-- For an arrangement of the client that did not end, the arrangement ends before the response, and the response is 204 with no body. ([CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation]; [CDR Support: Error scenarios and responses][support-error-scenarios]: the revocation "must occur synchronously")
-- For an arrangement that is not known, that is of a different client, or that ended, the response is 422 with `urn:au-cds:error:cds-all:Authorisation/InvalidArrangement`, and the `detail` is the `cdr_arrangement_id` of the request. This includes an arrangement with the sharing duration 0. ([CDS: Invalid Consent Arrangement][cds-error-422-invalid-arrangement]; [CDR Support: Error scenarios and responses][support-error-scenarios])
-- A request with no `cdr_arrangement_id`, or with an empty value, gives 400 with `urn:au-cds:error:cds-all:Field/Missing`, and the `detail` is `cdr_arrangement_id`. (See Decisions)
-- A client authentication that fails gives 401 `invalid_client`. ([RFC 6749, section 5.2][rfc6749-errors])
+- The authorisation server library gives [the rules of the CDR arrangement revocation endpoint](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0228).
+- The data holder [ends the arrangement and revokes its tokens before the response](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0229) (see End of an arrangement).
+- An arrangement with the sharing duration 0 ended at the confirmation. Its revocation thus gives [422 with `Authorisation/InvalidArrangement`](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0230).
 
 ### Withdrawal by the consumer
 
@@ -1225,18 +1201,9 @@ These requirements are for the lab. The CDS non-functional requirements for data
 | `clientName` of an arrangement | The `client_name` of the registration at the confirmation. A later change of the registration does not change it. | Rule 9.3 requires records of each consent ([CDR Rules][cdr-rules]), and the consent page showed this name to the consumer. Judgement: a record that changes with the registration is not a record of the consent, and it also stays after a `DELETE` of the registration. |
 | Instructions to withdraw | Text with no link: "Sign in to <brand name> online banking and go to Data sharing, or ask <brand name>." | Rule 4.23(1)(g) requires instructions, and rule 4.24(d) forbids a reference to other documents in the authorisation process ([CDR Rules][cdr-rules]). The CDS friction standard also forbids other documents and services in the flow ([CDS: Common Authentication Standards][cds-cx-authentication]). The text names the two methods of rule 4.25(1). Judgement: a description of the dashboard is the instruction that rule 4.23(1)(g) asks for, not a different document or service, and the site has no link to the consent page (see Separation from the CDR authentication). |
 | Time at which an arrangement starts | The confirmation of the consumer | When the software product does not exchange the code, what the data holder does "is at the discretion of the DH" ([CDR Support: Failure to obtain token within Authorisation Code expiry period][support-code-expiry]). Judgement: the arrangement then has no token and no party can use it, so a second step that removes it adds nothing. |
-| Refresh token for a sharing duration of 24 hours or less | Issued | The CDS says that a refresh token "SHOULD be provided" for a one-time collection ([CDS: Requesting Sharing Duration][cds-sharing-duration]). |
-| Token request that fails for a code that the data holder knows | The code ends, and a correct request after it is refused | The CDS requires only that a used code is refused ([CDS: Access Token][cds-access-token]). RFC 6749 recommends revocation for a second use ([section 4.1.2][rfc6749-code]), and RFC 7636 gives only the error for a `code_verifier` that does not match ([section 4.6][rfc7636-verify]). When a code is not exchanged, the response of the data holder "is at the discretion of the DH" ([CDR Support: Failure to obtain token within Authorisation Code expiry period][support-code-expiry]). Judgement: no source requires a second attempt, and this is the behaviour of the authorisation server library, which is the least complex. A request with a valid code and a `code_verifier` that does not match is also the sign of a code that a different party got. |
-| Client certificate of a refresh request | Not compared with the certificate of an earlier token request | The CDS requires only that "the client certificate and access token match" on a resource request ([CDS: Holder of Key Mechanism][cds-hok]), and FAPI 1.0 Advanced requires sender-constrained access tokens only ([section 5.2.2][fapi-advanced-server], item 5). For a client that authenticates, the client authentication binds the refresh token to the client ([RFC 8705, section 7.1][rfc8705-refresh]), and a client gets a new access token with its refresh token after it replaces its certificate ([RFC 8705, section 6.3][rfc8705-expiration]). Judgement: a sharing duration can be one year, and a consent must not end because a software product replaces its certificate. |
-| ID token in a refresh response | Present | OpenID Connect permits a refresh response with no ID token ([section 12.2][oidc-core-refresh-response]). Judgement: a software product then always gets the same members. |
 | Sector identifier when the registration has no `sector_identifier_uri` | The host of the redirect URIs, or the `software_id` when they have more than one host | OpenID Connect requires a `sector_identifier_uri` for redirect URIs with more than one host ([section 8.1][oidc-core-pairwise]), but the CDS marks the SSA claim as optional ([CDS: SSA Definition][cds-ssa-definition]). Judgement: the `software_id` gives one software product a `sub` that stays the same and that no other software product gets. |
-| Introspection of a token that is not a refresh token of the client | `{"active": false}` | The CDS forbids introspection of access tokens and ID tokens and gives no response for it ([CDS: Introspection endpoint][cds-introspection-endpoint]). RFC 7662 gives this response for a token that the client must not see ([section 2.2][rfc7662-response]), and the DSB says that RFC 7662 applies ([CDR Support: Introspection Endpoint RFC vs Standards clarification][support-introspection]). |
 | Response to a data request after the end of an arrangement | 401 with `invalid_token`. The data holder does not use `Authorisation/RevokedConsent`. | The CDS lists 403 `RevokedConsent` for a consent that is "no longer authorised", as a SHOULD ([CDS: Consent Is Revoked][cds-error-403-revoked-consent]). The CDS also requires that a revocation revokes the tokens ([CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation]), and FAPI requires the RFC 6750 errors, which give 401 `invalid_token` for a revoked token ([FAPI 1.0 Baseline, section 6.2.1][fapi-baseline-resource], [RFC 6750, section 3.1][rfc6750-errors]). The DSB gives 401 "with a corresponding oAuth error response" ([CDR Support: Error scenarios and responses][support-error-scenarios]). Judgement: the token of an ended arrangement is a revoked token, so the MUST rules apply. |
-| Access token at the end of the sharing | It expires at the end of the sharing when that is less than 5 minutes after it is issued. For the sharing duration 0, it expires 5 minutes after it is issued. | An authorisation for a period expires at the end of the period ([CDR Rules][cdr-rules], rule 4.26(1)(g)). Judgement: an expiry that the token and `expires_in` show is the simplest rule for a data recipient and for the data holder. A consent with the sharing duration 0 is "once off access" with an access token only ([CDS: Requesting Sharing Duration][cds-sharing-duration]), and its sharing ends at the confirmation, so the access token must outlive the sharing. |
 | Disclosure on a single occasion | The arrangement ends at the end of its sharing, or when the software product revokes it. The data holder does not find when the data "has been disclosed". | Rule 4.26(1)(f) expires the authorisation "after the CDR data has been disclosed" ([CDR Rules][cdr-rules]). A data holder cannot know when a data recipient has all the data that it needs. The CDS requires that the data recipient calls the revocation endpoint "after successful collection" for a sharing duration of 24 hours or less ([CDS: Requesting Sharing Duration][cds-sharing-duration]). |
-| Revocation of a refresh token | The arrangement does not end. | The token revocation endpoint is for "token clean up" ([CDS: Token Revocation endpoint][cds-token-revocation]), and the CDR arrangement revocation endpoint withdraws a consent ([CDR Support: Support for token revocation endpoints][support-token-revocation]). Judgement: the arrangement then has no token, so no data is disclosed. A software product that wants to end the consent calls the arrangement revocation endpoint, and it gets 204. |
-| Revocation of a token of a different client | 400 `unauthorized_client` | RFC 7009 says that "the request is refused" and gives no error code ([section 2.1][rfc7009-request]). The error format is that of RFC 6749 ([section 2.2.1][rfc7009-errors]). Judgement: `unauthorized_client` is the RFC 6749 code for a client that is not permitted to do the request ([section 5.2][rfc6749-errors]). |
-| No `cdr_arrangement_id` at the CDR arrangement revocation endpoint | 400 `Field/Missing` | The CDS gives 422 for an identifier that is not valid or not found ([CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation]), and no response for a request with no identifier. Judgement: the rule for a required field that is absent is the same as on the other CDS APIs of the data holder (see Errors). |
 | Method of the consumer to withdraw | Two methods: the consumer dashboard on the online bank site, and a request to the bank, after which the operator withdraws the consent with the operator interface or the operator console. Only the dashboard shows the messages of the CDS Withdrawal Standards. | Rule 4.25(1) gives the two methods ([CDR Rules][cdr-rules]), and the ACCC says that a data holder "must always have two forms of mechanisms available" ([CDR Support: Withdrawal of authorisation to disclose CDR data and notification][support-withdrawal-notification]). The CDS Withdrawal Standards are for the withdrawal process with the consumer ([CDS: Withdrawal Standards][cds-withdrawal-standards]). In the lab, the operator is the bank, and the operator interface and the operator console are not for the consumer. |
 | End of eligibility | When the last open account of a customer closes, all the arrangements of the customer end, and the data holder sends a notice for each one. | Rule 4.26(1)(c) expires the authorisations of a consumer who is not eligible ([CDR Rules][cdr-rules]). The ACCC says that a consumer who closes all accounts is not eligible ([CDR Support: Closed accounts in the banking and non-bank lenders sectors][support-closed-accounts]). This end is not one of the exceptions to the notice ([CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation]). |
 | Consent of a customer with no open account | The consumer can only cancel, also for a request with no bank scope. | Rule 4.5(1)(c) asks the data holder for an authorisation only for a request "on behalf of an eligible CDR consumer", and rule 4.26(1)(c) expires an authorisation when the consumer is not eligible ([CDR Rules][cdr-rules]). Judgement: the CX Guidelines show unavailable accounts, not a consumer who is not eligible ([CX Guidelines: Authorisation to disclose][cx-authorise]), so the page uses the same pattern as a request with a bank scope and no open account. |
@@ -1452,7 +1419,6 @@ These requirements are for the lab. The CDS non-functional requirements for data
 [cds-scopes-and-claims]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#scopes-and-claims
 [cds-authorisation-scopes]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#authorisation-scopes
 [cds-hok]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#holder-of-key-mechanism
-[cds-access-token]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#access-token
 [cds-ssa]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#software-statement-assertion-ssa
 [cds-ssa-definition]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#ssa-definition
 [cds-registration-request]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#registration-request-using-jwt
@@ -1471,10 +1437,7 @@ These requirements are for the lab. The CDS non-functional requirements for data
 [cds-authorisation-endpoint]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#authorisation-endpoint
 [cds-introspection-endpoint]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#introspection-endpoint
 [cds-sharing-duration]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#requesting-sharing-duration
-[cds-refresh-token]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#refresh-token
 [cds-arrangement-id]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-arrangement-id
-[cds-id-token]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#baseline-id-token-requirements
-[cds-claims]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#claims
 [cds-sub-claim]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#sub-claim
 [cds-loa]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#levels-of-assurance-loas
 [cds-fallback-flows]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#fallback-authentication-flows
@@ -1504,29 +1467,17 @@ These requirements are for the lab. The CDS non-functional requirements for data
 [support-concurrent-consent]: https://cdr-support.zendesk.com/hc/en-us/articles/4407560834959
 [support-code-expiry]: https://cdr-support.zendesk.com/hc/en-us/articles/360004665496
 [support-ppid]: https://cdr-support.zendesk.com/hc/en-us/articles/5505351487631
-[support-introspection]: https://cdr-support.zendesk.com/hc/en-us/articles/900004618103
 [dsb-issue-480]: https://github.com/ConsumerDataStandardsAustralia/standards-maintenance/issues/480
 [cdr-rules]: https://www.legislation.gov.au/F2020L00094/latest/text
 [cx-otp]: https://cx.dsb.gov.au/authenticate/redirect-with-one-time-password
 [cx-authorise]: https://cx.dsb.gov.au/authorise/authorisation-to-disclose
 [fapi-algorithms]: https://openid.net/specs/openid-financial-api-part-2-1_0.html#algorithm-considerations
-[fapi-advanced-server]: https://openid.net/specs/openid-financial-api-part-2-1_0.html#authorization-server
-[oidc-core-id-token]: https://openid.net/specs/openid-connect-core-1_0.html#IDToken
-[oidc-core-token-response]: https://openid.net/specs/openid-connect-core-1_0.html#TokenResponse
-[oidc-core-refresh-response]: https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokenResponse
 [oidc-discovery-validation]: https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfigurationValidation
 [oidc-core-pairwise]: https://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg
-[rfc6749-errors]: https://www.rfc-editor.org/rfc/rfc6749#section-5.2
-[rfc6749-code]: https://www.rfc-editor.org/rfc/rfc6749#section-4.1.2
 [rfc6749-authorisation-errors]: https://www.rfc-editor.org/rfc/rfc6749#section-4.1.2.1
-[rfc6749-token-request]: https://www.rfc-editor.org/rfc/rfc6749#section-4.1.3
 [rfc6750]: https://www.rfc-editor.org/rfc/rfc6750
 [rfc6750-errors]: https://www.rfc-editor.org/rfc/rfc6750#section-3.1
 [rfc5321-mailbox]: https://www.rfc-editor.org/rfc/rfc5321#section-4.1.2
-[rfc7636-verify]: https://www.rfc-editor.org/rfc/rfc7636#section-4.6
-[rfc7662-request]: https://www.rfc-editor.org/rfc/rfc7662#section-2.1
-[rfc7662-response]: https://www.rfc-editor.org/rfc/rfc7662#section-2.2
-[rfc7662-errors]: https://www.rfc-editor.org/rfc/rfc7662#section-2.3
 [rfc9457]: https://www.rfc-editor.org/rfc/rfc9457
 [rfc9110-201]: https://www.rfc-editor.org/rfc/rfc9110#name-201-created
 [rfc9110-host]: https://www.rfc-editor.org/rfc/rfc9110#section-7.2
@@ -1537,8 +1488,6 @@ These requirements are for the lab. The CDS non-functional requirements for data
 [rfc7591-response]: https://www.rfc-editor.org/rfc/rfc7591#section-3.2.1
 [rfc7591-errors]: https://www.rfc-editor.org/rfc/rfc7591#section-3.2.2
 [rfc8705-binding]: https://www.rfc-editor.org/rfc/rfc8705#section-3
-[rfc8705-expiration]: https://www.rfc-editor.org/rfc/rfc8705#section-6.3
-[rfc8705-refresh]: https://www.rfc-editor.org/rfc/rfc8705#section-7.1
 [cds-get-customer]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-common-api_get-customer
 [cds-get-accounts]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-banking-api_get-accounts
 [cds-get-account-detail]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-banking-api_get-account-detail
@@ -1575,7 +1524,6 @@ These requirements are for the lab. The CDS non-functional requirements for data
 [rfc6750-header]: https://www.rfc-editor.org/rfc/rfc6750#section-2.1
 [cds-token-revocation]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#token-revocation-endpoint
 [cds-arrangement-revocation]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-arrangement-revocation-endpoint
-[cds-error-422-invalid-arrangement]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-422-authorisation-invalid-arrangement
 [cds-error-403-revoked-consent]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-403-authorisation-revoked-consent
 [cds-get-sp-statuses]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api_get-software-products-statuses
 [cds-metadata-cache]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#metadata-cache-management
@@ -1583,11 +1531,7 @@ These requirements are for the lab. The CDS non-functional requirements for data
 [cds-self-signed-jwt]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#self-signed-jwt-client-authentication
 [cds-dh-calling-dr]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#data-holders-calling-data-recipients
 [cds-withdrawal-standards]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#withdrawal-standards
-[rfc7009-request]: https://www.rfc-editor.org/rfc/rfc7009#section-2.1
-[rfc7009-response]: https://www.rfc-editor.org/rfc/rfc7009#section-2.2
-[rfc7009-errors]: https://www.rfc-editor.org/rfc/rfc7009#section-2.2.1
 [support-revocation-guidance]: https://cdr-support.zendesk.com/hc/en-us/articles/6828747049359
-[support-token-revocation]: https://cdr-support.zendesk.com/hc/en-us/articles/900003387786
 [support-backoff]: https://cdr-support.zendesk.com/hc/en-us/articles/360004056455
 [vite-dns-rebinding]: https://github.com/vitejs/vite/security/advisories/GHSA-vg6x-rcgg-rjx6
 [adr-0003]: ../../docs/adr/0003-event-sourcing.md

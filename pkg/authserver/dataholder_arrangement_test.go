@@ -86,6 +86,7 @@ var (
 	fieldMissing = cds.Error{Code: "urn:au-cds:error:cds-all:Field/Missing", Title: "Missing Required Field"}
 )
 
+// Verifies: AUTH-0229
 func TestARevocationOfAnArrangementOfTheClientGivesNoContentAndEndsEachToken(t *testing.T) {
 	b := newBank(t)
 	a := b.authorise(hour)
@@ -118,6 +119,7 @@ func TestTheEndpointURLTheIssuerAndTheTokenEndpointAreEachAValidAudience(t *test
 	}
 }
 
+// Verifies: AUTH-0230
 func TestARevocationThatTheClientCannotMakeGivesInvalidArrangement(t *testing.T) {
 	b := newBank(t)
 	a := b.authorise(hour)
@@ -138,6 +140,7 @@ func TestARevocationThatTheClientCannotMakeGivesInvalidArrangement(t *testing.T)
 		http.StatusUnprocessableEntity, invalidArrangement, id)
 }
 
+// Verifies: AUTH-0228, AUTH-0231
 func TestARevocationWithNoArrangementIDGivesFieldMissing(t *testing.T) {
 	b := newBank(t)
 	b.authorise(hour)
@@ -153,6 +156,7 @@ func TestARevocationWithNoArrangementIDGivesFieldMissing(t *testing.T) {
 	}
 }
 
+// Verifies: AUTH-0032
 func TestARevocationWithAClientAuthenticationThatFailsGivesInvalidClient(t *testing.T) {
 	b := newBank(t)
 	a := b.authorise(hour)
@@ -191,6 +195,7 @@ func TestAClientAssertionOfARevocationIsUsedOneTime(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, b.rawPost(b.arrangementURL, form).status)
 }
 
+// Verifies: AUTH-0208
 func TestAnAccessTokenExpiresAtTheEndOfTheSharingWhenItIsLessThan5MinutesAway(t *testing.T) {
 	b := newBank(t)
 
@@ -204,6 +209,7 @@ func TestAnAccessTokenExpiresAtTheEndOfTheSharingWhenItIsLessThan5MinutesAway(t 
 	assert.InDelta(t, sharingEnds, expiry, 2)
 }
 
+// Verifies: AUTH-0207
 func TestAnAccessTokenWithoutASharingDurationHas5Minutes(t *testing.T) {
 	b := newBank(t)
 
