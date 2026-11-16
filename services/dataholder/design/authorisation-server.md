@@ -28,7 +28,7 @@ The library gives [the signing algorithm](../../../pkg/authserver/design/configu
 
 The library gives [the client authentication with `private_key_jwt`](../../../pkg/authserver/design/client-authentication.md#auth-0020) and the refusals of an assertion, for example [a `jti` that it accepted before](../../../pkg/authserver/design/client-authentication.md#auth-0030).
 
-- <a id="dh-0505"></a>**DH-0505** The client ID of a software product is the client ID that the data holder issued at its registration. ([the client ID of each client](../../../pkg/authserver/design/client-authentication.md#auth-0024); [the registration response](../DESIGN.md#registration-response))
+- <a id="dh-0505"></a>**DH-0505** The client ID of a software product is the client ID that the data holder issued at its registration. ([the client ID of each client](../../../pkg/authserver/design/client-authentication.md#auth-0024); [a new client ID for each registration](registration.md#dh-0633))
 - <a id="dh-0506"></a>**DH-0506** The JWKS URI of a client is the `jwks_uri` of its registration. For example, the data holder validates [the assertion signature](../../../pkg/authserver/design/client-authentication.md#auth-0025) with the keys at that URI. ([the JWKS URI of each client](../../../pkg/authserver/design/client-authentication.md#auth-0024))
 
 ## Authorisation request

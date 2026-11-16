@@ -40,6 +40,7 @@ func TestAJTIStaysConsumedForANewStore(t *testing.T) {
 	assert.ErrorIs(t, jtistore.New(pool).Consume(t.Context(), "jti-1"), app.ErrJTIUsed)
 }
 
+// Verifies: DH-0608
 func TestAJTIThatIsOlderThanTheRetentionCanBeConsumedAgain(t *testing.T) {
 	pool := newPool(t)
 	store := jtistore.New(pool)
