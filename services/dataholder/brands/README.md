@@ -1,6 +1,6 @@
 # Data holder brands
 
-A data holder instance gets its brand from a brand directory. [ADR 0023](../../../docs/adr/0023-give-the-brand-of-a-data-holder-as-a-strict-brand-directory.md) gives the format, and [DESIGN.md: Brand directory](../DESIGN.md#brand-directory) gives the rules.
+A data holder instance gets its brand from a brand directory. [ADR 0023](../../../docs/adr/0023-give-the-brand-of-a-data-holder-as-a-strict-brand-directory.md) gives the format, and [the brand area of the specification](../design/brand.md) gives the rules.
 
 Each subdirectory here is a preset brand. The binary contains each preset, and the name of the directory is the name of the preset.
 
@@ -18,7 +18,7 @@ The brand name of the directory must be the `brandName` of the brand on the Regi
 ## Add a brand
 
 1. Make a directory with these files, and no other files:
-   - `brand.json`: `{"brandName": "<the brand name>", "bsb": "<6 digits>", "layout": "<layout>"}`. The brand name has no control characters. The BSB is the BSB of the accounts that a consumer opens on the online bank site. The layout of the online bank site is `meadow`, `ledger`, `horizon` or `updraft` ([DESIGN.md: Presentation](../DESIGN.md#presentation)).
+   - `brand.json`: `{"brandName": "<the brand name>", "bsb": "<6 digits>", "layout": "<layout>"}`. The brand name has no control characters. The BSB is the BSB of the accounts that a consumer opens on the online bank site. The layout of the online bank site is `meadow`, `ledger`, `horizon` or `updraft` ([the layout of the brand file](../design/brand.md#dh-0335)).
    - `tokens.json`: a copy of a preset `tokens.json`, with the values of the brand. Each colour is OKLCH, in the sRGB gamut. The first font of each font token (`body`, `code` and `heading`) is a font of the data holder (the families in `web/packages/tokens/fonts.json`), and the other fonts are CSS generic families.
    - `logo.svg`: the logo, legible on the `color.brand` of the brand (the header of the pages) and on white (the pages of a data recipient). `mark.svg`: a square symbol, legible on `color.hero`. Each one is 100 KiB or less, with an `svg` root element in the SVG namespace and a `viewBox`.
    - `logo.png`: the logo of `logo.svg` for the email, legible on `color.brand` (the header of the email). It is 100 KiB or less, exactly 96 pixels high and 768 pixels wide or less, with the aspect ratio of the `viewBox` of `logo.svg` (a tolerance of 2 %). See [Make logo.png](#make-logopng).

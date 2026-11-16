@@ -88,6 +88,7 @@ func TestLoadReadsADirectoryOnDisk(t *testing.T) {
 }
 
 // The contract has the token names of the design system, so a brand directory gives each role that the UIs use.
+// Verifies: DH-0336
 func TestTheTokensOfTheContractAreTheTokensOfABrandOfTheDesignSystem(t *testing.T) {
 	designSystem, err := os.ReadFile("../../../../../web/packages/tokens/tokens/brand/lab.json")
 	require.NoError(t, err)
@@ -118,6 +119,7 @@ func tokenNames(t *testing.T, data []byte) []string {
 	return names
 }
 
+// Verifies: DH-0321, DH-0338
 func TestLoadRefusesAFileThatTheContractDoesNotNameAndAMissingFile(t *testing.T) {
 	dir := validDir(t)
 	dir["favicon.ico"] = &fstest.MapFile{Data: []byte("x")}
@@ -134,6 +136,7 @@ func TestLoadRefusesAFileThatTheContractDoesNotNameAndAMissingFile(t *testing.T)
 	assert.Contains(t, message, "mark.svg: the file is missing")
 }
 
+// Verifies: DH-0330
 func TestLoadAcceptsAnAttributionFileOf16KiBOrLess(t *testing.T) {
 	dir := validDir(t)
 	dir["ATTRIBUTION.md"] = &fstest.MapFile{Data: make([]byte, 16<<10)}
@@ -150,6 +153,7 @@ func TestLoadAcceptsAnAttributionFileOf16KiBOrLess(t *testing.T) {
 }
 
 // A Kubernetes ConfigMap volume adds ..data and a ..<timestamp> directory, and each file is a symbolic link.
+// Verifies: DH-0340
 func TestLoadIgnoresTheEntriesOfAConfigMapVolume(t *testing.T) {
 	dir := validDir(t)
 	dir["..data/brand.json"] = &fstest.MapFile{Data: []byte("x")}
@@ -264,6 +268,7 @@ func TestAFileCanBeAtItsSizeLimit(t *testing.T) {
 	require.NoError(t, err)
 }
 
+// Verifies: DH-0359
 func TestLoadNamesEachFileAndRuleThatFailsInOneError(t *testing.T) {
 	dir := validDir(t)
 	dir["brand.json"] = &fstest.MapFile{Data: []byte(`{"brandName": " "}`)}
@@ -278,6 +283,7 @@ func TestLoadNamesEachFileAndRuleThatFailsInOneError(t *testing.T) {
 	assert.Contains(t, message, "mark.svg: the svg element has no viewBox")
 }
 
+// Verifies: DH-0332
 func TestABrandNameOf200CharactersIsValid(t *testing.T) {
 	name := strings.Repeat("é", 200)
 	dir := validDir(t)
@@ -291,6 +297,7 @@ func TestABrandNameOf200CharactersIsValid(t *testing.T) {
 	assert.Equal(t, name, brand.Name)
 }
 
+// Verifies: DH-0332
 func TestTheBrandFileHasABrandNameOf1To200CharactersAndNotOnlyWhiteSpace(t *testing.T) {
 	for name, file := range map[string]string{
 		"201 characters":      `{"brandName": "` + strings.Repeat("a", 201) + `"}`,
@@ -313,6 +320,7 @@ func TestTheBrandFileHasABrandNameOf1To200CharactersAndNotOnlyWhiteSpace(t *test
 }
 
 // The bsb has the rule of a bsb of an account in the operator interface.
+// Verifies: DH-0334
 func TestTheBrandFileHasABSBOf6Digits(t *testing.T) {
 	for name, file := range map[string]string{
 		"absent":     `{"brandName": "Coastal Bank"}`,
@@ -369,6 +377,7 @@ func TestLoadRefusesAProductsFileThatIsNotAProductSet(t *testing.T) {
 	require.ErrorContains(t, err, "products.json: ")
 }
 
+// Verifies: DH-0336, DH-0338
 func TestLoadRefusesTokensThatAreNotTheTokensOfTheContract(t *testing.T) {
 	tests := map[string]struct {
 		change func(tokens map[string]map[string]any)
@@ -444,6 +453,7 @@ func TestATokenAndAGroupCanHaveADescription(t *testing.T) {
 	require.NoError(t, err)
 }
 
+// Verifies: DH-0342
 func TestEachColourIsAnOKLCHColourInTheSRGBGamut(t *testing.T) {
 	tests := map[string]struct {
 		value any
@@ -522,6 +532,7 @@ func TestTheGamutCheckAcceptsTheEdgesOfTheSRGBGamut(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0341
 func TestEachFontIsAFontOfTheDataHolderWithOnlyGenericFallbacks(t *testing.T) {
 	tests := map[string]struct {
 		value any
@@ -628,6 +639,7 @@ func TestARadiusCanBeInRemAndCanBeZero(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0345
 func TestEachSVGFileIsAWellFormedSVGWithAViewBoxAnd100KiBOrLess(t *testing.T) {
 	const ns = `xmlns="http://www.w3.org/2000/svg"`
 
@@ -696,6 +708,7 @@ func paddedSVG(size int) string {
 	return start + strings.Repeat(" ", size-len(start)-len(end)) + end
 }
 
+// Verifies: DH-0347
 func TestTheMarkIsSquare(t *testing.T) {
 	dir := validDir(t)
 	dir["mark.svg"] = &fstest.MapFile{Data: []byte(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 30"/>`)}
@@ -721,6 +734,7 @@ func TestTheDirectoryCanBeTheRootOfAnEmbeddedFileSystem(t *testing.T) {
 }
 
 // A line break in the brand name can start a new header field of an email.
+// Verifies: DH-0333
 func TestTheBrandNameHasNoControlCharacters(t *testing.T) {
 	for name, brandName := range map[string]string{
 		"line feed":       `Coastal\nBcc: x@example.com`,
@@ -763,6 +777,7 @@ func TestLoadGivesTheLogoPNG(t *testing.T) {
 }
 
 // The viewBox of testdata/valid/logo.svg is 160 by 32: an aspect ratio of 5.
+// Verifies: DH-0348, DH-0349
 func TestTheLogoPNGIsAValidPNG96PixelsHighWithTheAspectRatioOfTheSVGLogo(t *testing.T) {
 	valid := pngOf(t, 480, 96)
 
@@ -799,6 +814,7 @@ func TestTheLogoPNGIsAValidPNG96PixelsHighWithTheAspectRatioOfTheSVGLogo(t *test
 }
 
 // The tolerance of 2 % permits the rounding of the width to a whole pixel.
+// Verifies: DH-0349
 func TestTheAspectRatioOfTheLogoPNGCanDifferBy2Percent(t *testing.T) {
 	for _, width := range []int{471, 489} {
 		dir := validDir(t)
@@ -810,6 +826,7 @@ func TestTheAspectRatioOfTheLogoPNGCanDifferBy2Percent(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0348
 func TestTheLogoPNGIs100KiBOrLess(t *testing.T) {
 	dir := validDir(t)
 	dir["logo.png"] = &fstest.MapFile{Data: make([]byte, 100<<10+1)}
@@ -871,6 +888,7 @@ func declaredSize(t *testing.T, data []byte, width, height uint32) []byte {
 }
 
 // Each file declares an image that needs more memory than the test has, so a decode before the check fails the test.
+// Verifies: DH-0354
 func TestTheLogoPNGIsRefusedFromTheSizeInItsHeaderBeforeItIsDecoded(t *testing.T) {
 	logo := pngOf(t, 480, 96)
 
@@ -899,6 +917,7 @@ func TestTheLogoPNGIsRefusedFromTheSizeInItsHeaderBeforeItIsDecoded(t *testing.T
 	}
 }
 
+// Verifies: DH-0348
 func TestTheLogoPNGCanBe768PixelsWide(t *testing.T) {
 	dir := validDir(t)
 	dir["logo.svg"] = &fstest.MapFile{Data: []byte(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 1"/>`)}

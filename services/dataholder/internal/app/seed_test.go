@@ -43,6 +43,7 @@ func TestSeedImportsAllTheProductsOfAValidSet(t *testing.T) {
 	assert.Equal(t, "loan", store.products[1].ProductID)
 }
 
+// Verifies: DH-0229, DH-0230
 func TestSeedImportsNothingAndNamesEachProductAndRuleThatFails(t *testing.T) {
 	store := &fakeStore{}
 
@@ -67,6 +68,7 @@ func TestSeedImportsNothingAndNamesEachProductAndRuleThatFails(t *testing.T) {
 	assert.NotContains(t, message, `"loan"`)
 }
 
+// Verifies: DH-0212
 func TestSeedFindsADuplicateOfAProductThatIsNotValid(t *testing.T) {
 	err := app.Seed(t.Context(), &fakeStore{}, brandName, [][]byte{
 		product("card", `, "features": [{"featureType": "OTHER"}]`),
@@ -85,6 +87,7 @@ func TestSeedGivesTheErrorOfTheStore(t *testing.T) {
 	assert.ErrorIs(t, err, app.ErrNotEmpty)
 }
 
+// Verifies: DH-0217, DH-0232
 func TestSeedRefusesAProductWhoseBrandIsNotTheBrandName(t *testing.T) {
 	store := &fakeStore{}
 

@@ -82,6 +82,7 @@ func TestParseProductGivesNoEffectiveDatesWhenTheProductHasNone(t *testing.T) {
 	assert.Nil(t, p.EffectiveTo)
 }
 
+// Verifies: DH-0209
 func TestParseProductAcceptsEachProductCategory(t *testing.T) {
 	for _, category := range []string{
 		"BUSINESS_LOANS", "BUY_NOW_PAY_LATER", "CRED_AND_CHRG_CARDS", "LEASES", "MARGIN_LOANS", "OVERDRAFTS",
@@ -97,6 +98,7 @@ func TestParseProductAcceptsEachProductCategory(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0231
 func TestParseProductRefusesAFieldThatTheDataHolderDoesNotHold(t *testing.T) {
 	tests := map[string]string{
 		"field that the CDS does not have":    `"productName": "Bonus Saver"`,
@@ -127,6 +129,7 @@ func TestParseProductRefusesAValueOfTheWrongType(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0216
 func TestParseProductNamesTheRuleThatAProductBreaks(t *testing.T) {
 	const required = `"lastUpdated": "2026-08-03T01:00:00Z", "productCategory": "TERM_DEPOSITS", "name": "n",
 		"description": "d", "brand": "b"`
@@ -312,6 +315,7 @@ func TestDuplicateProductIDsGivesEachIDOneTime(t *testing.T) {
 	assert.Empty(t, domain.DuplicateProductIDs([]string{"a", "b"}))
 }
 
+// Verifies: DH-0209
 func TestParseProductCategoryAcceptsOnlyAValueOfTheCDSEnumeration(t *testing.T) {
 	category, ok := domain.ParseProductCategory("TERM_DEPOSITS")
 	assert.True(t, ok)
@@ -323,6 +327,7 @@ func TestParseProductCategoryAcceptsOnlyAValueOfTheCDSEnumeration(t *testing.T) 
 	}
 }
 
+// Verifies: DH-0218
 func TestAProductNameOf100CharactersIsValid(t *testing.T) {
 	_, err := domain.ParseProduct([]byte(`{"productId": "a", "lastUpdated": "2026-08-03T01:00:00Z",
 		"productCategory": "TERM_DEPOSITS", "name": "` + strings.Repeat("é", 100) + `", "description": "d",
