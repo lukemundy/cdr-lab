@@ -55,6 +55,10 @@ The fixed `##` headings are:
 
 Each other `##` heading in a specification is a group of requirements.
 
+The only heading below `##` is a judgement heading (`###`) in the Judgements section. A group of requirements has no sub-groups. When a group is too large, split it into two groups.
+
+Reason: the area file is the level above a group, so a reader gets the area and then the group. One meaning for each heading level keeps the check and the reader simple.
+
 ### One-file specification
 
 The file is `DESIGN.md` in the directory of the component. It has the sections of the overview too, so that a split into a `design/` directory only moves text.
@@ -412,6 +416,8 @@ flowchart LR
 5. When one area has more than 5,000 words, split it by interface, for example a web UI and its API. Do not split an area that is in the limit.
 6. Give each area the name of its CDS section, when there is one.
 
+Each `###` heading of the old specification becomes a group of requirements in its area, or its rules merge into the group above it.
+
 Text that is not a requirement goes into the overview, or it goes away:
 
 - The purpose, the scope and the actors go into the summary, the goals, the non-goals and the context diagram.
@@ -502,6 +508,7 @@ Selection of the files:
 In each specification file that the check reads, these are errors:
 
 - An identifier, an anchor or a component code that does not agree with [Identifiers](#identifiers), or an identifier that the component uses two times. The withdrawn list counts.
+- A heading below `##` that is not a judgement heading in the Judgements section. See [Templates](#templates).
 - A top-level list item in a group of requirements that is not a requirement. Each top-level list item in a group is one requirement.
 - A requirement with no source group, or a source group with no link. An observation alone is not a source.
 - A reference link with a label that the file does not define.
