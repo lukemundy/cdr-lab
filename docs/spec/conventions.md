@@ -292,6 +292,7 @@ The source group gives one or more links, separated by `; `.
 - A link to an external source names the source and its section. For example: `[CDS: Get Products][cds-get-products]`.
 - A link to a judgement has text that starts with `Judgement:`, and then the title of the judgement. For example: `[Judgement: one base URI for the public endpoints](#dh-0050)`.
 - A link to a requirement in a library specification can also be a source. For example: `[the CDS error response](../../pkg/<library>/DESIGN.md#xx-0007)`.
+- A link to an ADR can be a source when the ADR records the choice. Then the rule needs no separate judgement. For example: `[ADR 0022][adr-0022]` for the rule that only the Register revokes a CDR certificate. An ADR is never the source of a rule that the CDS or the ACCC gives. Link to that source.
 
 For example: `([CDS: Participant Endpoints][cds-participant-endpoints]; [Judgement: one base URI for the public endpoints](#dh-0050))`.
 
@@ -363,6 +364,8 @@ For example:
 - Not: "The consumer selects the accounts on the authorisation page (see DH-0120)."
 
 A link to a heading of a specification is permitted only for a link from outside the specifications, for example from a README. A heading anchor changes when the heading text changes.
+
+A specification can link to a heading of a different specification until the target specification follows ADR 0024. Then the link goes to an identifier.
 
 ## Context diagram
 
@@ -466,6 +469,7 @@ A test refers to the requirements that it verifies with a `// Verifies:` comment
   - a TypeScript `it(` or `test(` call
 - The comment gives one or more identifiers, separated by `, `. They are bare identifiers, not links.
 - An identifier in the comment is a requirement, not a judgement or a withdrawn identifier.
+- The comment can be in the tests of a different component. For example, a test of `pkg/ca` can verify a requirement of the PKI.
 
 For example, in Go:
 

@@ -87,6 +87,7 @@ func entryOf(crl *x509.RevocationList, cert *x509.Certificate) *x509.RevocationL
 	return nil
 }
 
+// Verifies: PKI-0040, PKI-0056, PKI-0058, PKI-0060, PKI-0064
 func TestTheCRLURLOfEachCDRCertificateGivesACurrentCRLOfTheIntermediate(t *testing.T) {
 	for _, variables := range [][2]string{
 		{"PKI_CLIENT_CERT", "PKI_CLIENT_KEY"},
@@ -99,6 +100,7 @@ func TestTheCRLURLOfEachCDRCertificateGivesACurrentCRLOfTheIntermediate(t *testi
 	}
 }
 
+// Verifies: PKI-0053
 func TestTheCRLListsTheRevokedFixtureWithItsReason(t *testing.T) {
 	revoked := leaf(t, labtest.RevokedClientCertificate(t))
 

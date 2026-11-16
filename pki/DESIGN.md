@@ -1,127 +1,279 @@
-# Mock CDR PKI: design
+# Mock CDR PKI
 
-This document gives the specification and the requirements for the mock CDR PKI. It does not describe the implementation.
+The mock CDR PKI gives the lab a CDR CA and a separate public CA. They have the structure and the certificate profiles of production. In production, the ACCC operates the CDR CA, and TLS endpoints use certificates from public CAs. A real component that trusts the mock CAs then needs only a change of its CA bundles and certificates to work with production. The `pki` command makes the CAs and issues the certificates of the lab at set-up. In a running lab, the Register is the CDR intermediate CA ([ADR 0022][adr-0022]).
 
-## Purpose
+## Context
 
-In production, the ACCC operates the CDR certificate authority. It issues the certificates that participants use for mTLS. TLS endpoints use certificates from public CAs. The lab cannot use either. The mock PKI gives the lab a CDR CA and a public CA with the same structure and certificate profiles as production. A real component that trusts the mock CAs then needs only a change to its CA bundles and certificates to work with production.
+```mermaid
+flowchart LR
+  labuser["Lab user<br>[Person]"]
+  pki["Mock CDR PKI<br>[System]"]
+  register["Mock CDR Register<br>[External system]"]
+  services["Lab services and tests<br>[External system]"]
 
-## Sources
+  labuser -- "Makes the CAs and issues certificates<br>pki command" --> pki
+  pki -- "Gives the intermediate certificate and key<br>Files" --> register
+  pki -- "Gives the CA bundles, certificates and keys<br>Files" --> services
+  services -- "Get the CRL of the intermediate<br>HTTP" --> register
 
-The requirements follow the process in [README: Sources for requirements][readme-sources]. Each requirement links to its source. "Judgement" marks a requirement that the sources do not state, and gives the reason. "Observed" marks a fact from a production certificate. The observations are from 2026-10-02.
+  classDef person fill:#08427b,color:#fff,stroke:#052e56
+  classDef system fill:#1168bd,color:#fff,stroke:#0b4884
+  classDef external fill:#999,color:#fff,stroke:#6b6b6b
+  class labuser person
+  class pki system
+  class register,services external
+```
 
-Primary sources:
+## Library specifications
 
-- Consumer Data Standards (CDS) 1.36.0: [Certificate Trust Model][cds-trust-model], [Certificate Signing Request Profile][cds-csr-profile], [Certificate Validation][cds-cert-validation], [Participant Endpoints][cds-participant-endpoints].
-- ACCC Developer Portal: [Certificate Management][accc-cert-mgmt], [Certificate FAQ][accc-cert-faq]. ACCC [Participant Portal User Guide][accc-portal-guide].
-- [ACCC Certificate Policy v1.04][accc-cp] (CP) and [ACCC Certification Practice Statement v2.0][accc-cps] (CPS).
+| Library | Specification |
+|---|---|
+| `pkg/ca` | None. |
 
-## Scope
-
-In scope:
+## Goals
 
 - A mock CDR CA: a root CA and one issuing intermediate CA.
 - A mock public CA for TLS endpoints.
-- Issue of CDR certificates from CSRs, and of public TLS server certificates for lab hosts. The `pki` command issues at the set-up of the lab. In a running lab, the Register issues CDR client and server certificates as the intermediate CA ([ADR 0022][adr-0022]).
-- Revocation of CDR certificates, and a CRL of the CDR intermediate. In a running lab, the Register revokes CDR certificates, and signs and serves the CRL ([ADR 0022][adr-0022]). The `pki` command does neither.
+- The issue of CDR certificates from CSRs, and of public TLS server certificates for lab hosts. The `pki` command issues at the set-up of the lab. In a running lab, the Register issues CDR client and server certificates as the intermediate CA ([ADR 0022][adr-0022]).
+- The revocation of CDR certificates, and a CRL of the CDR intermediate. In a running lab, the Register revokes CDR certificates, and signs and serves the CRL ([ADR 0022][adr-0022]). The `pki` command does neither.
 
-Out of scope for now:
+## Non-goals
 
-- OCSP. See Decisions.
-- Revocation of CA certificates and of public TLS server certificates.
-- The production dual trust chain period. See Decisions.
-- The ACCC Conformance Test Suite (CTS) trust chain.
-- The Participant Portal workflow: approval, renewal reminders and agreements.
+- OCSP ([a CRL and no OCSP](#pki-0084)).
+- The revocation of CA certificates and of public TLS server certificates.
+- A second intermediate or a second trust chain. The dual trust chain period of production ends when the certificates of the earlier chain expire, by 1 November 2026 ([ACCC: Certificate FAQ][accc-cert-faq]).
+- The trust chain of the ACCC Conformance Test Suite (CTS).
+- The workflow of the Participant Portal: approval, renewal reminders and agreements.
 
 ## CA structure
 
-- The CDR CA has a root CA and an issuing intermediate CA. The intermediate issues all participant certificates. ([ACCC: Certificate Management][accc-cert-mgmt])
-- The root key is RSA 4096. The intermediate key is RSA 4096. Signatures use SHA-256. ([CP section 6.1.5, Table 5][accc-cp]; observed: the production "CDR Intermediate CA 2025" key is RSA 4096)
-- Both CA certificates are CA certificates with key usage `keyCertSign` and `cRLSign`. The intermediate has a path length of 0. (Observed: "CDR Root CA" and "CDR Intermediate CA 2025")
-- The root is valid for 20 years. The intermediate is valid for 10 years. (CP maximums are 20 and 15 years, [CP section 6.3.2, Table 6][accc-cp]; observed: "CDR Intermediate CA 2025" is valid for 10 years)
-- The mock CA names have the OU `Consumer Data Right`, but not the ACCC name or the ACCC certificate policy OID. Judgement: the mock certificates are not from the ACCC, and they must not look as if they are.
-- The public CA is separate from the CDR CA. No certificate from one chains to the other. TLS endpoints use a certificate from a public CA, and they must not use CDR certificates. ([CDS: Participant Endpoints][cds-participant-endpoints]; observed: `api.cdr.gov.au` has a public CA certificate)
-- Relying parties trust a CDR CA bundle: the root and the intermediate. The ACCC publishes its trust chains as bundles ([ACCC: Certificate Management][accc-cert-mgmt]). Observed: the production mTLS endpoint `secure.api.cdr.gov.au` sends only its leaf certificate, so a client that trusts only the root cannot verify it.
+- <a id="pki-0001"></a>**PKI-0001** The CDR CA has one root CA and one issuing intermediate CA. ([ACCC: Certificate Management][accc-cert-mgmt])
+- <a id="pki-0002"></a>**PKI-0002** The intermediate issues each CDR certificate. ([ACCC: Certificate Management][accc-cert-mgmt])
+- <a id="pki-0003"></a>**PKI-0003** The root key and the intermediate key are RSA 4096 keys. ([CP section 6.1.5, Table 5][accc-cp]; observed on 2026-10-02: the key of "CDR Intermediate CA 2025" is RSA 4096)
+- <a id="pki-0004"></a>**PKI-0004** Each CA signs with SHA-256 with RSA. ([CP section 6.1.5, Table 5][accc-cp])
+- <a id="pki-0005"></a>**PKI-0005** The root certificate and the intermediate certificate are CA certificates with the key usages `keyCertSign` and `cRLSign`. ([Judgement: the profiles of the production certificates and CRL](#pki-0079))
+- <a id="pki-0006"></a>**PKI-0006** The intermediate certificate has a path length of 0. ([Judgement: the profiles of the production certificates and CRL](#pki-0079))
+- <a id="pki-0007"></a>**PKI-0007** The root certificate is valid for 20 years. ([CP section 6.3.2, Table 6][accc-cp])
+- <a id="pki-0008"></a>**PKI-0008** The intermediate certificate is valid for 10 years. ([CP section 6.3.2, Table 6][accc-cp]; [Judgement: the profiles of the production certificates and CRL](#pki-0079))
+- <a id="pki-0009"></a>**PKI-0009** The subject of the CDR root and of the CDR intermediate has the O `cdr-lab` and the OU `Consumer Data Right`. ([Judgement: mock CA names that are not from the ACCC](#pki-0078))
+- <a id="pki-0010"></a>**PKI-0010** The CDR CA certificates have no ACCC name and no ACCC certificate policy OID. ([Judgement: mock CA names that are not from the ACCC](#pki-0078))
+- <a id="pki-0011"></a>**PKI-0011** The public CA is separate from the CDR CA, and no certificate of one CA chains to the other. ([CDS: Participant Endpoints][cds-participant-endpoints]; observed on 2026-10-02: `api.cdr.gov.au` has a certificate from a public CA)
+- <a id="pki-0012"></a>**PKI-0012** A TLS endpoint uses a certificate from the public CA, not a CDR certificate. ([CDS: Participant Endpoints][cds-participant-endpoints])
+- <a id="pki-0013"></a>**PKI-0013** Relying parties trust the CDR CA bundle, which has the intermediate and the root. ([ACCC: Certificate Management][accc-cert-mgmt]; observed on 2026-10-02: `secure.api.cdr.gov.au` sends only its leaf certificate, so a client that trusts only the root cannot verify it)
 
 ## CSR profile
 
-The CDR CA issues a certificate only from a CSR that follows the CDS profile ([CDS: Certificate Signing Request Profile][cds-csr-profile]). If a CSR breaks a rule, the CA refuses it and names each rule that it breaks.
+The CSR profile is the [CDS: Certificate Signing Request Profile][cds-csr-profile]. These rules give what the CDR CA checks.
 
-- The key is RSA 2048. The signature algorithm is SHA-256 with RSA.
-- The CSR signature is valid with the key in the CSR (proof of possession). ([CPS section 3.2.1][accc-cps])
-- The subject has CN, O, OU and C. OU is `Consumer Data Right`. C is a two-letter country code.
-- Server certificate: the CN is the primary DNS name. The subject alternative names are DNS names only.
-- The CN and each DNS name of a server CSR are host names: only letters, digits, hyphens and dots, with no wildcard, and not an IP address. Each label has 1 to 63 characters and does not start or end with a hyphen, and the name has 253 characters or fewer. The CN has 64 characters or fewer. ([ACCC Participant Portal User Guide, section 10.6.2][accc-portal-guide], [RFC 1123, section 2.1][rfc1123-names], [RFC 1035, section 2.3.4][rfc1035-size], [RFC 5280, Appendix A][rfc5280-bounds]; see Decisions.)
-- The CDS gives the server O as the legal entity name or the brand name. The `pki` command does not check the O. The Register checks it when it issues a server certificate, because only the Register knows the brands ([Register DESIGN.md][register-design]).
-- Client certificate: the CSR has no subject alternative names. The CDS gives the client CN as the software product name, and the O as the brand name. The `pki` command does not check the names. The Register checks them when it issues a client certificate, because only the Register knows the software products ([Register DESIGN.md][register-design]).
+- <a id="pki-0014"></a>**PKI-0014** The CDR CA issues a certificate only from a CSR that obeys each rule of this group. ([CDS: Certificate Signing Request Profile][cds-csr-profile])
+- <a id="pki-0015"></a>**PKI-0015** When a CSR breaks a rule, the CA refuses the CSR and names each rule that it breaks. ([CDS: Certificate Signing Request Profile][cds-csr-profile])
+- <a id="pki-0016"></a>**PKI-0016** The key of the CSR is an RSA 2048 key. ([CDS: Certificate Signing Request Profile][cds-csr-profile])
+- <a id="pki-0017"></a>**PKI-0017** The signature algorithm of the CSR is SHA-256 with RSA. ([CDS: Certificate Signing Request Profile][cds-csr-profile])
+- <a id="pki-0018"></a>**PKI-0018** The CSR signature is valid with the key in the CSR (proof of possession). ([CPS section 3.2.1][accc-cps])
+- <a id="pki-0019"></a>**PKI-0019** The subject of the CSR has these attributes. ([CDS: Certificate Signing Request Profile][cds-csr-profile])
+  - CN
+  - O
+  - OU, with the value `Consumer Data Right`
+  - C, with a two-letter country code
+- <a id="pki-0020"></a>**PKI-0020** In a server CSR, the CN is the primary DNS name. ([CDS: Certificate Signing Request Profile][cds-csr-profile])
+- <a id="pki-0021"></a>**PKI-0021** The subject alternative names of a server CSR are DNS names only. ([CDS: Certificate Signing Request Profile][cds-csr-profile])
+- <a id="pki-0022"></a>**PKI-0022** The CN of a server CSR is a host name: only letters, digits, hyphens and dots, with no wildcard, and not an IP address. ([ACCC Participant Portal User Guide, section 10.6.2][accc-portal-guide]; [RFC 1123, section 2.1][rfc1123-names])
+- <a id="pki-0023"></a>**PKI-0023** Each DNS name of a server CSR obeys the host name rules of the CN. ([Judgement: the host name rules for each name in a server CSR](#pki-0080))
+- <a id="pki-0024"></a>**PKI-0024** Each label of a host name has 1 to 63 characters, and does not start or end with a hyphen. ([RFC 1123, section 2.1][rfc1123-names]; [RFC 1035, section 2.3.4][rfc1035-size])
+- <a id="pki-0025"></a>**PKI-0025** A host name has 253 characters or fewer. ([RFC 1035, section 2.3.4][rfc1035-size])
+- <a id="pki-0026"></a>**PKI-0026** The CN of a server CSR has 64 characters or fewer. ([RFC 5280, Appendix A][rfc5280-bounds])
+- <a id="pki-0027"></a>**PKI-0027** A host name with no dot is valid, for example `wattle-bank`. ([Judgement: the host name rules for each name in a server CSR](#pki-0080))
+- <a id="pki-0028"></a>**PKI-0028** The `pki` command does not check the O of a server CSR. ([Judgement: only the Register checks the participant names of a CSR](#pki-0081))
+- <a id="pki-0029"></a>**PKI-0029** A client CSR has no subject alternative names. ([CDS: Certificate Signing Request Profile][cds-csr-profile])
+- <a id="pki-0030"></a>**PKI-0030** The `pki` command does not check the CN and the O of a client CSR. ([Judgement: only the Register checks the participant names of a CSR](#pki-0081))
 
 ## Certificate profile
 
-CDR certificates copy the production certificate profile. (Observed: the `secure.api.cdr.gov.au` certificate from "CDR Intermediate CA 2025")
+A CDR certificate copies the profile of the production server certificate of `secure.api.cdr.gov.au`, from "CDR Intermediate CA 2025".
 
-- The subject is the subject of the CSR.
-- Valid for 13 months from issue. The [ACCC FAQ][accc-cert-faq] gives 13 months for the old trust chain, and the observed certificate from the current chain also has 13 months.
-- A certificate is never valid after its issuer expires. ([CP section 6.3.2][accc-cp])
-- Key usage `digitalSignature` (critical). Basic constraints: not a CA.
-- Extended key usage: `serverAuth` for a server certificate, `clientAuth` for a client certificate. The CP requires an extended key usage on end-entity certificates and prohibits `anyExtendedKeyUsage` ([CP section 6.1.7][accc-cp]). Judgement: one usage for each certificate type, the same as the observed server certificate.
-- A server certificate has a subject alternative name for its CN and for each DNS name in the CSR. ([CP section 10, Table 14][accc-cp]: the SAN is "always present"; observed: the SAN contains the CN)
-- A CDR certificate gives one CRL distribution point: the URL of the CRL of its issuer. ([RFC 5280, section 4.2.1.13][rfc5280-crldp]; observed: the production certificate gives the CRL URL of "CDR Intermediate CA 2025") It gives no OCSP URL and no CA issuers URL, because the PKI has no OCSP responder and relying parties load the CA bundle.
-- The serial number is random, with more than 64 bits. ([CP section 10, Table 14][accc-cp]: the serial number is unique; the [CA/Browser Forum Baseline Requirements, section 7.1][cabf-br] require 64 random bits)
-
-Public TLS server certificates for lab hosts have the same validity, key usage and extended key usage as a CDR server certificate. Their subject is the CN only, and each of their names follows the host name rule of a server CSR. Judgement: 13 months is less than the 398-day maximum of the [CA/Browser Forum Baseline Requirements, section 6.3.2][cabf-br].
+- <a id="pki-0031"></a>**PKI-0031** The subject of a CDR certificate is the subject of its CSR. ([Judgement: the profiles of the production certificates and CRL](#pki-0079))
+- <a id="pki-0032"></a>**PKI-0032** A CDR certificate is valid for 13 months from its issue. ([ACCC: Certificate FAQ][accc-cert-faq]; [Judgement: the profiles of the production certificates and CRL](#pki-0079))
+- <a id="pki-0033"></a>**PKI-0033** A certificate is never valid after its issuer expires. ([CP section 6.3.2][accc-cp])
+- <a id="pki-0034"></a>**PKI-0034** A CDR certificate has the key usage `digitalSignature` in a critical extension. ([Judgement: the profiles of the production certificates and CRL](#pki-0079))
+- <a id="pki-0035"></a>**PKI-0035** The basic constraints of a CDR certificate say that it is not a CA. ([Judgement: the profiles of the production certificates and CRL](#pki-0079))
+- <a id="pki-0036"></a>**PKI-0036** A server certificate has the extended key usage `serverAuth` only. ([CP section 6.1.7][accc-cp]; [Judgement: one extended key usage for each certificate type](#pki-0082))
+- <a id="pki-0037"></a>**PKI-0037** A client certificate has the extended key usage `clientAuth` only. ([CP section 6.1.7][accc-cp]; [Judgement: one extended key usage for each certificate type](#pki-0082))
+- <a id="pki-0038"></a>**PKI-0038** A CDR certificate never has the extended key usage `anyExtendedKeyUsage`. ([CP section 6.1.7][accc-cp])
+- <a id="pki-0039"></a>**PKI-0039** A server certificate has a subject alternative name for its CN and for each DNS name in the CSR. ([CP section 10, Table 14][accc-cp]; observed on 2026-10-02: the SAN contains the CN)
+- <a id="pki-0040"></a>**PKI-0040** A CDR certificate gives one CRL distribution point, which is the URL of the CRL of its issuer. ([RFC 5280, section 4.2.1.13][rfc5280-crldp]; observed on 2026-10-02: the production certificate gives the CRL URL of "CDR Intermediate CA 2025")
+- <a id="pki-0041"></a>**PKI-0041** In the lab, the CRL URL is on the CRL listener of the Register in the lab network: `http://register`, the port of the CRL listener in `compose.yaml`, and the path `/crl/cdr-intermediate.crl`. ([Judgement: the Register service name in the CRL URL](#pki-0091))
+- <a id="pki-0042"></a>**PKI-0042** A CDR certificate gives no OCSP URL and no CA issuers URL. ([Judgement: a CRL and no OCSP](#pki-0084))
+- <a id="pki-0043"></a>**PKI-0043** The serial number of a certificate is random, with more than 64 bits. ([CP section 10, Table 14][accc-cp]; [CA/Browser Forum Baseline Requirements, section 7.1][cabf-br])
+- <a id="pki-0044"></a>**PKI-0044** The CA does not check that the subject DN of a certificate is unique. ([CPS section 3.1][accc-cps]; [Judgement: no check of unique subject names](#pki-0092))
+- <a id="pki-0045"></a>**PKI-0045** A public TLS server certificate for a lab host has the validity, the key usage and the extended key usage of a CDR server certificate. ([CA/Browser Forum Baseline Requirements, section 6.3.2][cabf-br]; [Judgement: the CDR server profile for a public TLS server certificate](#pki-0083))
+- <a id="pki-0046"></a>**PKI-0046** The subject of a public TLS server certificate has the CN only. ([Judgement: the CDR server profile for a public TLS server certificate](#pki-0083))
+- <a id="pki-0047"></a>**PKI-0047** Each name of a public TLS server certificate obeys the host name rules of a server CSR. ([Judgement: the CDR server profile for a public TLS server certificate](#pki-0083))
 
 ## Revocation
 
-The Register is the only component that revokes a CDR certificate and signs a CRL of the intermediate, and it keeps the only list of revocations ([ADR 0022][adr-0022]). The [Register DESIGN.md][register-design-crl] gives the revocation request, the CRL listener and the times of a new CRL. The rules below apply to each revocation and each CRL.
+The [Register DESIGN.md][register-design-crl] gives the revocation request, the CRL listener and the other times of a new CRL. The rules of this group apply to each revocation and each CRL.
 
-- The lab operator can revoke a CDR certificate with one of these RFC 5280 reasons: `unspecified`, `keyCompromise`, `affiliationChanged`, `superseded`, `cessationOfOperation` or `privilegeWithdrawn`. The other reasons are for CA certificates, attribute certificates or suspension, and the CA does not support suspension ([CPS section 4.9][accc-cps]). ([RFC 5280, section 5.3.1][rfc5280-reason])
-- A certificate that is revoked cannot be revoked again.
-- When a revocation completes, the CRL lists the certificate with its reason. Judgement: production can take up to 24 hours ([CPS section 4.9][accc-cps]), but a lab test must see the change at once.
-- The revocation date of a CRL entry is the time of the revocation. ([RFC 5280, section 5.1.2.6][rfc5280-revoked]) An entry with the reason `unspecified` has no reason code extension. ([RFC 5280, section 5.3.1][rfc5280-reason]: the extension "SHOULD be absent instead of using the unspecified (0) reasonCode value")
-- The CRL is a V2 CRL in DER, signed by the CDR intermediate with SHA-256 and RSA. It has an authority key identifier and a CRL number. Each new CRL has a higher CRL number, also after a restart of the Register, and a CRL number is never used two times. ([CP section 10, Table 17][accc-cp]; [RFC 5280, section 5.2.3][rfc5280-crl-number]; observed: the production CRL of "CDR Intermediate CA 2025")
-- The next update of a CRL is 7 days after its issue. (Observed: the production CRL of "CDR Intermediate CA 2025")
-- A new CRL is issued at least once every 24 hours, also when no revocation occurred, and also at each revocation. ([CP section 4.9.7, Table 1][accc-cp]: routine CRLs "at least once every 24 hours"; [CPS section 2.3][accc-cps]) Thus the current CRL is valid for 6 days or more while the Register runs.
-- A revoked certificate stays on the CRL. Judgement: production removes it after the certificate expires ([CPS section 4.10.1][accc-cps]), but a lab certificate is valid for 13 months, and a lab reset deletes the CA and its CRL.
-- The Register serves the CRL over HTTP, with the content type `application/pkix-crl`, at the URL in each CDR certificate. ([RFC 2585, section 4.2][rfc2585-mime])
-- A lab reset deletes the CAs and the Register database, and thus each revocation and each CRL. The new intermediate has no revocations, and its CRL numbers start again. The certificates of the earlier lab do not chain to the new CA bundle, so they need no revocation. Judgement: a new intermediate has a new key and a new authority key identifier, so it is a new CRL issuer ([RFC 5280, section 5.2.3][rfc5280-crl-number]: the CRL number is "for a given CRL scope and CRL issuer").
-
-### Set-up
-
-- The `pki` command does not revoke certificates or sign CRLs, and it keeps no list of revocations. It has no `revoke` command and no `crl` command. ([ADR 0022][adr-0022])
-- The set-up issues the fixture `conformance/revoked.crt` before the lab starts, as each other fixture, and does not revoke it. Each conformance test that needs a revoked certificate revokes the fixture through the Register operator interface with the reason `keyCompromise`, and accepts a fixture that is already revoked (409). Judgement: the CDS defines no interface to revoke a certificate, so a test uses an interface that the CDR does not define to set up a state ([conformance DESIGN.md: Subject of a test][conformance-design-subject]). The lab start then has no step after the Register starts.
+- <a id="pki-0048"></a>**PKI-0048** The Register is the only component that revokes a CDR certificate. ([ADR 0022][adr-0022])
+- <a id="pki-0049"></a>**PKI-0049** The Register is the only component that signs a CRL of the intermediate. ([ADR 0022][adr-0022])
+- <a id="pki-0050"></a>**PKI-0050** The Register keeps the only list of revocations. ([ADR 0022][adr-0022])
+- <a id="pki-0051"></a>**PKI-0051** The lab operator can revoke a CDR certificate with one of these reasons. ([RFC 5280, section 5.3.1][rfc5280-reason]; [CPS section 4.9][accc-cps]: the CA does not support suspension)
+  - `unspecified`
+  - `keyCompromise`
+  - `affiliationChanged`
+  - `superseded`
+  - `cessationOfOperation`
+  - `privilegeWithdrawn`
+- <a id="pki-0052"></a>**PKI-0052** When the lab operator revokes a certificate that is revoked, the CA refuses the revocation. ([Judgement: one revocation for each certificate](#pki-0085))
+- <a id="pki-0053"></a>**PKI-0053** When a revocation completes, the CRL lists the certificate with its reason. ([Judgement: a new CRL at each revocation](#pki-0086))
+- <a id="pki-0054"></a>**PKI-0054** The revocation date of a CRL entry is the time of the revocation. ([RFC 5280, section 5.1.2.6][rfc5280-revoked])
+- <a id="pki-0055"></a>**PKI-0055** A CRL entry with the reason `unspecified` has no reason code extension. ([RFC 5280, section 5.3.1][rfc5280-reason])
+- <a id="pki-0056"></a>**PKI-0056** The CRL is a V2 CRL in DER. ([CP section 10, Table 17][accc-cp]; observed on 2026-10-02: the production CRL of "CDR Intermediate CA 2025")
+- <a id="pki-0057"></a>**PKI-0057** The CDR intermediate signs the CRL with SHA-256 with RSA. ([CP section 10, Table 17][accc-cp])
+- <a id="pki-0058"></a>**PKI-0058** The CRL has an authority key identifier and a CRL number. ([CP section 10, Table 17][accc-cp]; [RFC 5280, section 5.2.3][rfc5280-crl-number])
+- <a id="pki-0059"></a>**PKI-0059** Each new CRL has a higher CRL number than each CRL before it, also after a restart of the Register. ([RFC 5280, section 5.2.3][rfc5280-crl-number])
+- <a id="pki-0060"></a>**PKI-0060** The next update of a CRL is 7 days after its issue. ([Judgement: a CRL validity of 7 days](#pki-0087))
+- <a id="pki-0061"></a>**PKI-0061** The Register issues a new CRL at least once every 24 hours, also when no revocation occurs. ([CP section 4.9.7, Table 1][accc-cp]; [CPS section 2.3][accc-cps])
+- <a id="pki-0062"></a>**PKI-0062** The Register issues a new CRL at each revocation. ([Judgement: a new CRL at each revocation](#pki-0086))
+- <a id="pki-0063"></a>**PKI-0063** A revoked certificate stays on the CRL, also after the certificate expires. ([Judgement: revoked certificates stay on the CRL](#pki-0088))
+- <a id="pki-0064"></a>**PKI-0064** The Register serves the CRL over HTTP, with the content type `application/pkix-crl`, at the URL in each CDR certificate. ([RFC 2585, section 4.2][rfc2585-mime])
+- <a id="pki-0065"></a>**PKI-0065** A lab reset deletes the CAs and the Register database, and thus each revocation and each CRL. ([Judgement: a lab reset makes a new CRL issuer](#pki-0089))
+- <a id="pki-0066"></a>**PKI-0066** After a lab reset, the new intermediate has no revocations, and its CRL numbers start again. ([Judgement: a lab reset makes a new CRL issuer](#pki-0089))
+- <a id="pki-0067"></a>**PKI-0067** The `pki` command does not revoke certificates, sign CRLs or keep a list of revocations, and it has no `revoke` command and no `crl` command. ([ADR 0022][adr-0022])
+- <a id="pki-0068"></a>**PKI-0068** The set-up issues the fixture `conformance/revoked.crt` before the lab starts, as each other fixture, and does not revoke it. ([Judgement: each conformance test revokes the fixture](#pki-0090))
+- <a id="pki-0069"></a>**PKI-0069** When a conformance test needs a revoked certificate, the test revokes the fixture through the Register operator interface with the reason `keyCompromise`. ([Judgement: each conformance test revokes the fixture](#pki-0090))
+- <a id="pki-0070"></a>**PKI-0070** When the fixture is already revoked (409), the conformance test accepts the response. ([Judgement: each conformance test revokes the fixture](#pki-0090))
 
 ## Keys
 
-- The repository contains no private keys. The lab creates the CA keys when it is set up. (Register DESIGN.md: non-functional requirements)
-- Only the owner can read the key file of a root CA. Judgement: these keys sign the CA certificates that all lab participants trust, and no lab component reads them.
-- The deployment decides who can read the intermediate key file. In the lab, any user can read it. Judgement: the Register container reads the key as another user, the key signs only lab certificates, and the lab data has no value.
-- The Register reads the intermediate key file when it starts, so that it can issue and revoke certificates and sign CRLs in a running lab ([ADR 0022][adr-0022]). It never reads the root key.
-- Any user can read the private key of a certificate that the lab issues for its own services and tests. Judgement: lab containers read the key as another user, and the key protects only a throwaway lab identity.
+- <a id="pki-0071"></a>**PKI-0071** Secrets: the repository contains no private keys. ([Judgement: no private key in the repository](#pki-0093))
+- <a id="pki-0072"></a>**PKI-0072** The lab creates the CA keys when it is set up. ([Judgement: no private key in the repository](#pki-0093))
+- <a id="pki-0073"></a>**PKI-0073** Only the owner can read the key file of a root CA. ([Judgement: only the owner reads a root key](#pki-0094))
+- <a id="pki-0074"></a>**PKI-0074** The deployment sets who can read the intermediate key file, and in the lab any user can read it. ([Judgement: lab keys that any user can read](#pki-0095))
+- <a id="pki-0075"></a>**PKI-0075** When the Register starts, it reads the intermediate key file, so that it can issue certificates, revoke certificates and sign CRLs. ([ADR 0022][adr-0022])
+- <a id="pki-0076"></a>**PKI-0076** The Register never reads a root key. ([ADR 0022][adr-0022])
+- <a id="pki-0077"></a>**PKI-0077** Any user can read the private key of a certificate that the lab issues for its own services and tests. ([Judgement: lab keys that any user can read](#pki-0095))
 
-## Decisions
+## Judgements
 
-| Question | Decision | Reason |
-|---|---|---|
-| Copy the dual trust chain period? | No. One root and one intermediate. | Production needs both chains only until the old certificates expire, by 1 November 2026 ([ACCC: Certificate FAQ][accc-cert-faq]). The lasting requirement is that relying parties load a CA bundle, not one certificate. A second intermediate can then be added with no change to the relying parties. |
-| CRL and OCSP? | CRL only. No OCSP. | The CDS requires relying parties to check revocation "through CRL or OCSP, as given in each certificate" ([CDS: Certificate Validation][cds-cert-validation]). Production certificates give both, so a relying party that uses the CRL works in production. A CRL is a signed file. OCSP needs a responder service. |
-| CRL validity | 7 days | The same as the production CRL. The Register issues a new CRL at least once every 24 hours, so a CRL is replaced 6 days or more before its next update. |
-| Times of a new CRL | At least once every 24 hours, and at each revocation | The routine CRL frequency of the [CP section 4.9.7, Table 1][accc-cp]. Judgement: a CRL at each revocation lets a lab test see the change at once. The [Register DESIGN.md][register-design-crl] gives the other times. |
-| Revocation of the set-up fixture | By each conformance test that uses it, through the Register, not by the lab start | [ADR 0022][adr-0022]: the Register keeps the only list of revocations. Judgement: in the lab, the data holder loads the CRL at each check ([data holder DESIGN.md: Transport security][dataholder-design-transport]), so it sees the revocation at once, and the lab start needs no step after the Register starts. |
-| Host name in the CRL URL | The service name of the Register in the lab network, on the CRL listener of the Register (`http://register`, with the port of the CRL listener in `compose.yaml`, and the path `/crl/cdr-intermediate.crl`) | Judgement: all lab participants, including the conformance tests, run in the lab network. A certificate can give only one useful CRL URL, and production gives one. The Register serves the CRL ([ADR 0022][adr-0022]), so the static CRL server of the lab is not necessary. |
-| Mock CA names | `O=cdr-lab, OU=Consumer Data Right`, no ACCC name or policy OID | Judgement: see CA structure. |
-| Client certificate CN and O | Checked only by the Register, when it issues | Only the Register knows the software products and the brands. See CSR profile. |
-| Server certificate O | Checked only by the Register, when it issues | Only the Register knows the brands and the legal entities. See CSR profile. |
-| Names in a server CSR | Host names only, for the CN and for each DNS name | The Participant Portal refuses a CN that is not a host name: "A valid FQDN contains only letters (a-z, A-Z), numbers (0-9), hyphens and dots; no wildcards, IP addresses, URLs, paths, spaces, unsupported characters, or invalid DNS lengths" ([ACCC Participant Portal User Guide, section 10.6.2][accc-portal-guide]). Judgement: the portal gives no rule for the subject alternative names, and the CDS calls them "Secondary DNS Name(s)" ([CDS: Certificate Signing Request Profile][cds-csr-profile]), so the same rule applies to each name. The rule does not require a dot, so a lab host name such as `wattle-bank` is valid. |
-| Unique subject names | Not checked | The [CPS section 3.1][accc-cps] requires a unique subject DN. Judgement: a renewal in production keeps the CN, so a strict check would stop renewal in the lab. |
+### <a id="pki-0078"></a>PKI-0078 Mock CA names that are not from the ACCC
 
-[readme-sources]: ../README.md#sources-for-requirements
+- Kind: choice
+- Basis: Step 3.1. The ACCC issues the production CDR certificates under its certificate policy ([CP][accc-cp]).
+- Reason: The mock certificates are not from the ACCC. They must not look as if they are.
+
+### <a id="pki-0079"></a>PKI-0079 The profiles of the production certificates and CRL
+
+- Kind: choice
+- Basis: Step 3.2. On 2026-10-02, we observed "CDR Root CA", "CDR Intermediate CA 2025", the server certificate of `secure.api.cdr.gov.au` and the CRL of "CDR Intermediate CA 2025". The [CP section 6.3.2, Table 6][accc-cp] gives only maximums, for example 15 years for an intermediate.
+- Reason: A mock component copies the behaviour of its production equivalent ([README: Component types][readme-component-types]). A relying party that works with the mock certificates then works with the production certificates.
+
+### <a id="pki-0080"></a>PKI-0080 The host name rules for each name in a server CSR
+
+- Kind: choice
+- Basis: Step 3.2. The [ACCC Participant Portal User Guide, section 10.6.2][accc-portal-guide] gives the host name rules for the CN only. The [CDS: Certificate Signing Request Profile][cds-csr-profile] calls the subject alternative names secondary DNS names, and [RFC 1123, section 2.1][rfc1123-names] gives the syntax of a host name.
+- Reason: Each name is a DNS name, so the same rules apply to each name. The rules require no dot, so a lab host name is valid.
+
+### <a id="pki-0081"></a>PKI-0081 Only the Register checks the participant names of a CSR
+
+- Kind: choice
+- Basis: Step 3.3. The [CDS: Certificate Signing Request Profile][cds-csr-profile] gives the CN and the O of a client certificate, and the O of a server certificate, from the names of the participant.
+- Reason: Only the Register knows the software products, the brands and the legal entities. The Register checks the names when it issues a certificate ([Register DESIGN.md: Operator interface][register-design]).
+
+### <a id="pki-0082"></a>PKI-0082 One extended key usage for each certificate type
+
+- Kind: choice
+- Basis: Step 3.2. The [CP section 6.1.7][accc-cp] requires an extended key usage on an end-entity certificate. On 2026-10-02, the production server certificate of `secure.api.cdr.gov.au` had one extended key usage.
+- Reason: One usage for each certificate type is the narrowest profile that the CP permits. Production uses it.
+
+### <a id="pki-0083"></a>PKI-0083 The CDR server profile for a public TLS server certificate
+
+- Kind: choice
+- Basis: Step 3.3. The [CA/Browser Forum Baseline Requirements, section 6.3.2][cabf-br] give a maximum validity of 398 days.
+- Reason: One profile for each lab server certificate is the least complex. A validity of 13 months is less than 398 days.
+
+### <a id="pki-0084"></a>PKI-0084 A CRL and no OCSP
+
+- Kind: choice
+- Basis: Step 3.3. The [CDS: Certificate Validation][cds-cert-validation] requires a relying party to check revocation through the CRL or OCSP that each certificate gives. Production certificates give both.
+- Reason: A relying party that uses the CRL then works in production. A CRL is a signed file, but OCSP needs a responder service. Relying parties load the CA bundle, so a certificate needs no CA issuers URL.
+
+### <a id="pki-0085"></a>PKI-0085 One revocation for each certificate
+
+- Kind: choice
+- Basis: Step 3.3. The [CPS section 4.9.12][accc-cps] lets the ACCC change a reason to `keyCompromise` when it finds a key compromise.
+- Reason: The lab has no process that finds a key compromise. One revocation for each certificate is the least complex rule.
+
+### <a id="pki-0086"></a>PKI-0086 A new CRL at each revocation
+
+- Kind: choice
+- Basis: Step 3.3. Production can take up to 24 hours to publish a revocation ([CPS section 4.9][accc-cps]).
+- Reason: A lab test must see a revocation at once. The [Register DESIGN.md][register-design-crl] gives the other times of a new CRL.
+
+### <a id="pki-0087"></a>PKI-0087 A CRL validity of 7 days
+
+- Kind: choice
+- Basis: Step 3.2. On 2026-10-02, the next update of the production CRL of "CDR Intermediate CA 2025" was 7 days after its issue.
+- Reason: The CRL copies production. With a new CRL at least once every 24 hours, the current CRL is valid for 6 days or more while the Register runs.
+
+### <a id="pki-0088"></a>PKI-0088 Revoked certificates stay on the CRL
+
+- Kind: gap
+- Basis: Step 2. Production removes an entry from the CRL after the certificate expires ([CPS section 4.10.1][accc-cps]).
+- Reason: A lab certificate is valid for 13 months. A lab reset deletes the CA and its CRL.
+
+### <a id="pki-0089"></a>PKI-0089 A lab reset makes a new CRL issuer
+
+- Kind: choice
+- Basis: Step 3.2. A CRL number is unique for one CRL scope and one CRL issuer ([RFC 5280, section 5.2.3][rfc5280-crl-number]).
+- Reason: A new intermediate has a new key and a new authority key identifier, so it is a new CRL issuer. Its CRL numbers can start again. The certificates of the earlier lab do not chain to the new CA bundle, so they need no revocation.
+
+### <a id="pki-0090"></a>PKI-0090 Each conformance test revokes the fixture
+
+- Kind: choice
+- Basis: Step 3.3. The CDS defines no interface to revoke a certificate, and the Register keeps the only list of revocations ([ADR 0022][adr-0022]). A test can use an interface that the CDR does not define to set up a state ([conformance DESIGN.md: Subject of a test][conformance-design-subject]).
+- Reason: In the lab, the data holder loads the CRL at each check ([data holder DESIGN.md: Transport security][dataholder-design-transport]), so it sees the revocation at once. The lab start then has no step after the Register starts.
+
+### <a id="pki-0091"></a>PKI-0091 The Register service name in the CRL URL
+
+- Kind: choice
+- Basis: Step 3.3. A certificate can give only one useful CRL URL, and production gives one ([RFC 5280, section 4.2.1.13][rfc5280-crldp]).
+- Reason: All lab participants, also the conformance tests, run in the lab network. The Register serves the CRL ([ADR 0022][adr-0022]).
+
+### <a id="pki-0092"></a>PKI-0092 No check of unique subject names
+
+- Kind: gap
+- Basis: Step 2. The [CPS section 3.1][accc-cps] requires a unique subject DN.
+- Reason: A renewal in production keeps the CN. A strict check stops a renewal in the lab.
+
+### <a id="pki-0093"></a>PKI-0093 No private key in the repository
+
+- Kind: choice
+- Basis: Step 3.2. [CWE-321][cwe-321] lists a hard-coded cryptographic key as a weakness.
+- Reason: The repository is public, so a key in it protects nothing. The lab creates each key at set-up.
+
+### <a id="pki-0094"></a>PKI-0094 Only the owner reads a root key
+
+- Kind: choice
+- Basis: Step 3.2. [CWE-732][cwe-732] lists a permission that is too wide on a critical resource as a weakness.
+- Reason: The root keys sign the CA certificates that all lab participants trust. No lab component reads them.
+
+### <a id="pki-0095"></a>PKI-0095 Lab keys that any user can read
+
+- Kind: choice
+- Basis: Step 3.3. Lab containers read the keys as a different user ([production gaps][production-gaps]).
+- Reason: The intermediate key signs only lab certificates. The key of a lab certificate protects only a throwaway lab identity. The lab data has no value.
+
+## Withdrawn
+
+None.
+
+[readme-component-types]: ../README.md#component-types
 [adr-0022]: ../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
+[production-gaps]: ../docs/production-gaps.md
 [register-design]: ../services/register/DESIGN.md#operator-interface
 [register-design-crl]: ../services/register/DESIGN.md#certificate-revocation-list
-[readme-lab]: ../README.md#lab-deployment
 [conformance-design-subject]: ../conformance/DESIGN.md#subject-of-a-test
 [dataholder-design-transport]: ../services/dataholder/DESIGN.md#transport-security
-[cds-trust-model]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#certificate-trust-model
 [cds-csr-profile]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#certificate-signing-request-profile
 [cds-cert-validation]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#certificate-validation
 [cds-participant-endpoints]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#participant-endpoints
@@ -129,13 +281,15 @@ The Register is the only component that revokes a CDR certificate and signs a CR
 [accc-cert-faq]: https://consumerdataright.atlassian.net/wiki/spaces/DP/pages/374538246/Frequently+Asked+Questions+FAQ
 [accc-cp]: https://www.cdr.gov.au/sites/default/files/2025-08/ACCC-Certificate-Policy-v1.04-published-27-August-2025.pdf
 [accc-cps]: https://www.cdr.gov.au/sites/default/files/2025-08/ACCC-Certification-Practice-Statement-v2.0-published-27-August-2025.pdf
+[accc-portal-guide]: https://www.cdr.gov.au/sites/default/files/2026-10/Participant%20Portal%20User%20Guide_-v23-20261014_091444.pdf
 [rfc5280-crldp]: https://www.rfc-editor.org/rfc/rfc5280#section-4.2.1.13
 [rfc5280-bounds]: https://www.rfc-editor.org/rfc/rfc5280#appendix-A
-[rfc1123-names]: https://www.rfc-editor.org/rfc/rfc1123#section-2.1
-[rfc1035-size]: https://www.rfc-editor.org/rfc/rfc1035#section-2.3.4
-[accc-portal-guide]: https://www.cdr.gov.au/sites/default/files/2026-10/Participant%20Portal%20User%20Guide_-v23-20261014_091444.pdf
 [rfc5280-reason]: https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1
 [rfc5280-revoked]: https://www.rfc-editor.org/rfc/rfc5280#section-5.1.2.6
 [rfc5280-crl-number]: https://www.rfc-editor.org/rfc/rfc5280#section-5.2.3
+[rfc1123-names]: https://www.rfc-editor.org/rfc/rfc1123#section-2.1
+[rfc1035-size]: https://www.rfc-editor.org/rfc/rfc1035#section-2.3.4
 [rfc2585-mime]: https://www.rfc-editor.org/rfc/rfc2585#section-4.2
 [cabf-br]: https://cabforum.org/working-groups/server/baseline-requirements/requirements/
+[cwe-321]: https://cwe.mitre.org/data/definitions/321.html
+[cwe-732]: https://cwe.mitre.org/data/definitions/732.html

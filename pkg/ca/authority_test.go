@@ -45,6 +45,7 @@ func verify(
 	return err
 }
 
+// Verifies: PKI-0005, PKI-0007, PKI-0009
 func TestTheCDRRootIsASelfSignedCAForTwentyYears(t *testing.T) {
 	root := newLab(t).CDRRoot.Certificate
 
@@ -57,6 +58,7 @@ func TestTheCDRRootIsASelfSignedCAForTwentyYears(t *testing.T) {
 	assert.Equal(t, now.AddDate(20, 0, 0), root.NotAfter)
 }
 
+// Verifies: PKI-0005, PKI-0006, PKI-0008, PKI-0009
 func TestTheCDRIntermediateIssuesOnlyLeafCertificatesForTenYears(t *testing.T) {
 	lab := newLab(t)
 	intermediate := lab.CDRIntermediate.Certificate
@@ -70,6 +72,7 @@ func TestTheCDRIntermediateIssuesOnlyLeafCertificatesForTenYears(t *testing.T) {
 	assert.Equal(t, now.AddDate(10, 0, 0), intermediate.NotAfter)
 }
 
+// Verifies: PKI-0011
 func TestThePublicRootIsSeparateFromTheCDRChain(t *testing.T) {
 	lab := newLab(t)
 	public := lab.PublicRoot.Certificate
@@ -80,6 +83,7 @@ func TestThePublicRootIsSeparateFromTheCDRChain(t *testing.T) {
 	assert.Error(t, verify(t, lab.CDRIntermediate.Certificate, public, nil, x509.ExtKeyUsageAny))
 }
 
+// Verifies: PKI-0031, PKI-0032, PKI-0034, PKI-0035, PKI-0036, PKI-0039, PKI-0043
 func TestAServerCertificateHasTheProfileOfAProductionCDRServerCertificate(t *testing.T) {
 	lab := newLab(t)
 	r := csr(t, serverCSR())
@@ -115,6 +119,7 @@ func TestAServerCertificateHasTheProfileOfAProductionCDRServerCertificate(t *tes
 	assert.NoError(t, cert.VerifyHostname("mtls.holder.example"))
 }
 
+// Verifies: PKI-0039
 func TestAServerCertificateHasEachNameOneTime(t *testing.T) {
 	tmpl := serverCSR()
 	tmpl.DNSNames = []string{"mtls.holder.example", "api.holder.example"}
@@ -125,6 +130,7 @@ func TestAServerCertificateHasEachNameOneTime(t *testing.T) {
 	assert.Equal(t, []string{"mtls.holder.example", "api.holder.example"}, cert.DNSNames)
 }
 
+// Verifies: PKI-0037
 func TestAClientCertificateIsOnlyForClientAuthentication(t *testing.T) {
 	lab := newLab(t)
 
@@ -140,6 +146,7 @@ func TestAClientCertificateIsOnlyForClientAuthentication(t *testing.T) {
 	assert.Error(t, verify(t, cert, lab.CDRRoot.Certificate, chain, x509.ExtKeyUsageServerAuth))
 }
 
+// Verifies: PKI-0011
 func TestACDRCertificateDoesNotChainToThePublicRoot(t *testing.T) {
 	lab := newLab(t)
 
@@ -158,6 +165,7 @@ func TestACDRCertificateDoesNotChainToThePublicRoot(t *testing.T) {
 	)
 }
 
+// Verifies: PKI-0014
 func TestIssueRefusesACSRThatBreaksTheProfile(t *testing.T) {
 	tmpl := clientCSR()
 	tmpl.Subject.OrganizationalUnit = nil
@@ -167,6 +175,7 @@ func TestIssueRefusesACSRThatBreaksTheProfile(t *testing.T) {
 	assert.EqualError(t, err, `subject OU must be "Consumer Data Right"`)
 }
 
+// Verifies: PKI-0033
 func TestACertificateDoesNotExpireAfterItsIssuer(t *testing.T) {
 	lab := newLab(t)
 	late := lab.CDRIntermediate.Certificate.NotAfter.AddDate(0, -1, 0)
@@ -188,6 +197,7 @@ func TestEachCertificateHasADifferentSerialNumber(t *testing.T) {
 	assert.NotEqual(t, first.SerialNumber, second.SerialNumber)
 }
 
+// Verifies: PKI-0011, PKI-0045, PKI-0046
 func TestAPublicServerCertificateChainsOnlyToThePublicRoot(t *testing.T) {
 	lab := newLab(t)
 
@@ -211,6 +221,7 @@ func TestAPublicServerCertificateChainsOnlyToThePublicRoot(t *testing.T) {
 	)
 }
 
+// Verifies: PKI-0047
 func TestAPublicServerCertificateNeedsValidDNSNames(t *testing.T) {
 	lab := newLab(t)
 
