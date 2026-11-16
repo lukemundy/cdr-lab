@@ -68,6 +68,7 @@ func assertNoSecret(t *testing.T, span tracetest.SpanStub) {
 	}
 }
 
+// Verifies: TELE-0005
 func TestHTTPHandlerRecordsRouteNotRawPath(t *testing.T) {
 	span, _ := serve(t, "/accounts/"+secret+"?page="+secret)
 
@@ -77,6 +78,7 @@ func TestHTTPHandlerRecordsRouteNotRawPath(t *testing.T) {
 	assertNoSecret(t, span)
 }
 
+// Verifies: TELE-0006
 func TestHTTPHandlerRedactsPathWithNoRoute(t *testing.T) {
 	span, _ := serve(t, "/unknown/"+secret)
 
@@ -86,6 +88,7 @@ func TestHTTPHandlerRedactsPathWithNoRoute(t *testing.T) {
 }
 
 // otelhttp v0.72.0 does not record url.query, so the test gives the span the attribute itself.
+// Verifies: TELE-0007
 func TestTheRedactorReplacesTheQueryString(t *testing.T) {
 	spans := tracetest.NewInMemoryExporter()
 	tp := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(urlRedactor{}), sdktrace.WithSyncer(spans))

@@ -88,6 +88,7 @@ func assertNoSecret(t *testing.T, spans tracetest.SpanStubs) {
 	}
 }
 
+// Verifies: DBASE-0004
 func TestQuerySpanHasQueryTextButNoArguments(t *testing.T) {
 	const sql = "SELECT $1::text"
 
@@ -100,6 +101,7 @@ func TestQuerySpanHasQueryTextButNoArguments(t *testing.T) {
 }
 
 // PostgreSQL error messages and pgx encode errors can contain argument values.
+// Verifies: DBASE-0005
 func TestQueryErrorSpanHasSQLStateButNoArguments(t *testing.T) {
 	tests := []struct {
 		name, sql, sqlState string

@@ -474,7 +474,7 @@ Rules for a create, an add and a change:
 - The list of revocations is a `GET` in pages, with the rules of the other lists. Each revocation gives the serial number, the subject as an [RFC 4514][rfc4514] string, the thumbprint, the time of the revocation and the reason. The list is sorted by the time of the revocation, newest first, and then by the serial number. (See Decisions.)
 - The console API gives a serial number in uppercase hexadecimal, with two digits for each byte and no separators, as `openssl x509 -serial` gives it. (See Decisions.)
 - The check of a revocation and the revocation give the PEM certificate (`certificate`) and the reason (`reason`) in the JSON body, with the rules of the operator interface. The body has no version. A check makes no change. A successful check gives 200 with the subject, the serial number, the thumbprint and the end of the validity of the first certificate. A successful revocation gives 204. A value that the Register refuses gives a field error at `#/certificate` or `#/reason` (400), and a certificate that is already revoked gives 409 with no field errors, and its `detail` gives the reason of the revocation that exists. (See Decisions.)
-- The console API puts no request body and no certificate, CSR or CA bundle in telemetry. A path with a thumbprint uses its route pattern in telemetry. ([ADR 0006][adr-0006])
+- The console API puts no request body and no certificate, CSR or CA bundle in telemetry. A path with a thumbprint is in telemetry [as its route pattern](../../pkg/platform/telemetry/DESIGN.md#tele-0005). ([ADR 0006][adr-0006])
 
 The console API has these paths for the creates, the adds, the changes, the status actions of brands and data holders, and the CDR certificates. The other actions are in the OpenAPI document.
 
@@ -545,12 +545,12 @@ The CDS and the ACCC publish no non-functional requirements for the Register ([C
 - Propagation: a status change is visible on all APIs within 1 second. Data holders must react to status changes within 5 minutes ([CDS: Metadata Cache Management][cds-metadata-cache]), so the Register must not add delay.
 - Performance: on a development workstation, 95% of API calls complete within 200 ms at 50 requests each second. The CDS thresholds for data holder APIs are 1000 to 1500 ms ([CDS: Non-functional Requirements][cds-nfrs]).
 - Restart: participant data, statuses, signing keys, revocations and the CRL number stay the same after a restart.
-- Telemetry: the Register sends traces, metrics and logs with OpenTelemetry. Telemetry contains no participant contact data and no raw URLs with identifiers. It uses route patterns.
+- Telemetry: the Register [sends traces, metrics and logs with OpenTelemetry](../../pkg/platform/telemetry/DESIGN.md#tele-0001), and its spans have [route patterns and not raw URLs](../../pkg/platform/telemetry/DESIGN.md#tele-0005). Telemetry contains no participant contact data.
 - Secrets: the repository contains no private keys. Keys and certificates are created when the lab is set up. (The ACCC mock publishes its private keys in its repository, [CertificateManagement][accc-mock-certs].)
 - Portability: a real data recipient or data holder changes between the mock Register and the production Register with configuration only: base URLs, trust anchors, client certificate, signing keys and identifiers.
 - Conformance: a black-box test suite checks each requirement in this document that the CDR defines, through the APIs only ([ADR 0019][adr-0019]). The same suite can run against the ACCC mock Register. Known differences from the ACCC mock are listed in the suite as expected differences.
 - Local run: the Register runs with local Docker (Compose), with its dependencies.
-- Health: the Register serves a liveness probe (`GET /livez`) and a readiness probe (`GET /readyz`) on a plain HTTP listener that is separate from the CDR API listeners. Judgement: these are the probe paths of the [Kubernetes API server][k8s-health], and a separate listener keeps the probes out of the CDR APIs. The readiness probe also fails while the Register has no current CRL ([Certificate revocation list](#certificate-revocation-list)). A process that runs only the background jobs is ready when it can connect to the database ([ADR 0010][adr-0010]).
+- Health: the Register serves the [liveness probe](../../pkg/platform/httpserver/DESIGN.md#srv-0001) and the [readiness probe](../../pkg/platform/httpserver/DESIGN.md#srv-0002) on a plain HTTP listener that is separate from the CDR API listeners. Judgement: a separate listener keeps the probes out of the CDR APIs. The readiness probe also fails while the Register has no current CRL ([Certificate revocation list](#certificate-revocation-list)). A process that runs only the background jobs is ready when it can connect to the database ([ADR 0010][adr-0010]).
 
 ## Decisions
 
@@ -626,7 +626,6 @@ The CDS and the ACCC publish no non-functional requirements for the Register ([C
 | Response of the CRL URL with no current CRL | 503 | Judgement: the Register cannot give the CRL for a time, and the readiness probe also fails ([RFC 9110, section 15.6.4][rfc9110-503]). A relying party then has no current CRL and refuses the certificate ([Transport security](#transport-security)). |
 | Readiness with no current CRL | Not ready | Judgement: with no current CRL, each relying party refuses each CDR certificate ([Transport security](#transport-security)), so the Register cannot serve the secure APIs. |
 | TLS on the health probes and the operator interface | No, plain HTTP | Judgement: they are not CDR APIs. The probes are for the container platform, and the operator interface is lab-only. |
-| Health probe paths | `/livez` and `/readyz` | Judgement: the CDS and the ACCC say nothing. Kubernetes uses these paths ([Kubernetes API health endpoints][k8s-health]); `/healthz` is deprecated there. |
 | Console listener | A separate listener, off by default, turned on by a setting | Judgement: [ADR 0014][adr-0014] gives a listener for each console. A production Register must not get a console without an explicit setting. |
 | TLS on the console | No, plain HTTP | Judgement: the same reason as for the operator interface. The console sets no cookie. Browsers send `Sec-Fetch-Site` to `localhost` over HTTP ([Fetch Metadata][fetch-metadata]), so the cross-origin check works. |
 | Confirmation of a status change | A dialog that names the cascade, and says when a change cannot be reversed | [WCAG 2.2, SC 3.3.4][wcag-3-3-4] asks for a check or a confirmation for changes to data. Judgement: a cascade changes records that the operator did not select. |
@@ -763,7 +762,6 @@ The CDS and the ACCC publish no non-functional requirements for the Register ([C
 [cds-error-invalid-industry]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#register-error-404-field-invalid-industry
 [cds-cors]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cors
 [cds-schema-brand-summary]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api_schemas_tocSdataholderbrandsummaryv2
-[k8s-health]: https://kubernetes.io/docs/reference/using-api/health-checks/
 [rfc9110-etag]: https://www.rfc-editor.org/rfc/rfc9110#name-etag
 [rfc9110-host]: https://www.rfc-editor.org/rfc/rfc9110#section-7.2
 [rfc9111-no-cache]: https://www.rfc-editor.org/rfc/rfc9111#name-no-cache-2
