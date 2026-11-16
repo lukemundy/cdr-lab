@@ -62,7 +62,7 @@ defaultPodOptions:
 controllers:
   main:
     replicas: 1
-    # One pod at a time, because the migrations take no lock and the Register is the issuing CA.
+    # One pod at a time, because the Register is the issuing CA.
     strategy: Recreate
     initContainers:
       migrate:
