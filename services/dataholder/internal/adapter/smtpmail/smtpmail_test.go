@@ -242,6 +242,7 @@ func readAll(t *testing.T, part *multipart.Part) string {
 	return string(data)
 }
 
+// Verifies: DH-1262
 func TestAnEmailGoesToTheSMTPServerFromTheBrandNameWithItsRecipientAndSubject(t *testing.T) {
 	e := send(t, coastal, otpEmail)
 
@@ -254,6 +255,7 @@ func TestAnEmailGoesToTheSMTPServerFromTheBrandNameWithItsRecipientAndSubject(t 
 	assert.NotEmpty(t, e.header.Get("Date"))
 }
 
+// Verifies: DH-1257
 func TestTheTextPartGivesTheHeadingTheParagraphsAndTheDemonstrationNotice(t *testing.T) {
 	e := send(t, coastal, otpEmail)
 
@@ -263,6 +265,7 @@ func TestTheTextPartGivesTheHeadingTheParagraphsAndTheDemonstrationNotice(t *tes
 		domain.DemonstrationNotice("Coastal Bank")+"\r\n", e.text)
 }
 
+// Verifies: DH-1247
 func TestTheHTMLPartGivesTheSameInformationAsTheTextPart(t *testing.T) {
 	e := send(t, coastal, otpEmail)
 
@@ -275,6 +278,7 @@ func TestTheHTMLPartGivesTheSameInformationAsTheTextPart(t *testing.T) {
 	assert.Contains(t, e.html, `<html lang="en-AU">`)
 }
 
+// Verifies: DH-1248, DH-1252
 func TestTheHTMLPartShowsTheLogoOfTheBrandFromAPartOfTheEmail(t *testing.T) {
 	e := send(t, coastal, otpEmail)
 
@@ -287,6 +291,7 @@ func TestTheHTMLPartShowsTheLogoOfTheBrandFromAPartOfTheEmail(t *testing.T) {
 }
 
 // The email refers to no other document and loads no content from a different location.
+// Verifies: DH-1251, DH-1256
 func TestTheHTMLPartHasNoLinkAndNoRemoteContent(t *testing.T) {
 	e := send(t, coastal, otpEmail)
 
@@ -298,6 +303,7 @@ func TestTheHTMLPartHasNoLinkAndNoRemoteContent(t *testing.T) {
 	assert.NotContains(t, e.html, "<script")
 }
 
+// Verifies: DH-1259
 func TestEachLayoutTableOfTheHTMLPartHasThePresentationRole(t *testing.T) {
 	e := send(t, coastal, otpEmail)
 
@@ -318,6 +324,7 @@ func TestTheBrandNameAndTheContentAreEscapedInTheHTMLPart(t *testing.T) {
 	assert.NotContains(t, e.html, "<b>")
 }
 
+// Verifies: DH-1249
 func TestNoLineOfTheMessageIsLongerThan998Characters(t *testing.T) {
 	message := otpEmail
 	message.Paragraphs = []string{strings.Repeat("long ", 400)}
@@ -331,6 +338,7 @@ func TestNoLineOfTheMessageIsLongerThan998Characters(t *testing.T) {
 	assert.Contains(t, e.text, strings.Repeat("long ", 400), "the long line is a soft line break only")
 }
 
+// Verifies: DH-1245
 func TestABrandNameWithSpecialCharactersIsOneValidFromHeader(t *testing.T) {
 	for name, brandName := range map[string]string{
 		"specials":       `Wattle, "Test" Bank`,
@@ -358,6 +366,7 @@ func TestABrandNameWithSpecialCharactersIsOneValidFromHeader(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1244
 func TestTheDisplayNameOfTheSenderIsTheBrandName(t *testing.T) {
 	for _, brandName := range []string{`Wattle, "Test" Bank`, "Banque Café"} {
 		brand := coastal

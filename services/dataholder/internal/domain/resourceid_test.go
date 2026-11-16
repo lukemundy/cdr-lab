@@ -10,6 +10,7 @@ import (
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/domain"
 )
 
+// Verifies: DH-1040, DH-1042, DH-1043
 func TestAResourceIDIsAUUIDThatIsTheSameForTheSameInputOnly(t *testing.T) {
 	id := domain.ResourceID("software-1", "00000001", "internal-1")
 

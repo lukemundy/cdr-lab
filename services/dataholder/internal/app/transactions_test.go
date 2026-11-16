@@ -191,6 +191,7 @@ func consentWithTransactions(t *testing.T, transactions ...domain.Transaction) (
 	return data, arrangementID, idOfAccount1
 }
 
+// Verifies: DH-1040
 func TestTheTransactionsOfAnAccountOfTheConsentHaveTheIDsOfTheSoftwareProductAndCustomer(t *testing.T) {
 	data, arrangementID, accountID := consentWithTransactions(t, transaction("Coffee", transactionsNow))
 
@@ -205,6 +206,7 @@ func TestTheTransactionsOfAnAccountOfTheConsentHaveTheIDsOfTheSoftwareProductAnd
 	assert.Equal(t, "Coffee", got[0].Transaction.Description)
 }
 
+// Verifies: DH-1085, DH-1088, DH-1089
 func TestTheTimeLimitsOfTransactionsHaveTheirDefaultsAndTheTwoYearLimit(t *testing.T) {
 	newest := transactionsNow.Add(-time.Hour)
 	oldest := transactionsNow.AddDate(-3, 0, 0)
@@ -242,6 +244,7 @@ func TestTheTimeLimitsOfTransactionsHaveTheirDefaultsAndTheTwoYearLimit(t *testi
 	}
 }
 
+// Verifies: DH-1084
 func TestTheOtherFiltersOfTransactionsGoToTheQuery(t *testing.T) {
 	data, arrangementID, accountID := consentWithTransactions(t)
 	minAmount, maxAmount := domain.Amount(-100), domain.Amount(100)
@@ -260,6 +263,7 @@ func TestTheOtherFiltersOfTransactionsGoToTheQuery(t *testing.T) {
 	assert.Equal(t, 10, query.PageSize)
 }
 
+// Verifies: DH-1091
 func TestATransactionWithDetailIsFoundByItsIDInTheTwoYears(t *testing.T) {
 	future := transactionsNow.Add(24 * time.Hour)
 	data, arrangementID, accountID := consentWithTransactions(t,
@@ -278,6 +282,7 @@ func TestATransactionWithDetailIsFoundByItsIDInTheTwoYears(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1091
 func TestATransactionThatHasNoDetailOrIsNotInTheTwoYearsOrIsNotOfTheAccountIsNotFound(t *testing.T) {
 	data, arrangementID, accountID := consentWithTransactions(t,
 		transaction("No detail", transactionsNow),

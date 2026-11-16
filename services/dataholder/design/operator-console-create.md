@@ -65,7 +65,7 @@ This area gives the actions of the lab-only operator console and its create form
 ### <a id="dh-1518"></a>DH-1518 The customer number in the toast
 
 - Kind: choice
-- Basis: Step 3.3. The data holder creates the customer number ([the customer number](../DESIGN.md#customers-and-accounts)).
+- Basis: Step 3.3. The data holder creates the customer number ([the customer number](consumer-authentication.md#dh-1201)).
 - Reason: The lab operator did not give the customer number and needs it to find the customer again.
 
 ### <a id="dh-1519"></a>DH-1519 A new account for each customer

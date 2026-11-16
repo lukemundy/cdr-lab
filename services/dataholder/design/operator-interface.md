@@ -33,7 +33,7 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 
 - <a id="dh-0734"></a>**DH-0734** A `lastName` has 1 to 100 characters. A `firstName` has 100 characters at most. ([Judgement: the fields of a customer, an account and a transaction](#dh-0771))
 - <a id="dh-0735"></a>**DH-0735** An `emailAddress` is one address of RFC 5321. ([RFC 5321, section 4.1.2][rfc5321-mailbox])
-- <a id="dh-0736"></a>**DH-0736** When a different customer of the brand has the `emailAddress`, with no difference for upper and lower case, the response is 409. The `detail` does not contain the address. ([RFC 9110, section 15.5.10][rfc9110-409]; [the uniqueness of the email address](../DESIGN.md#customers-and-accounts))
+- <a id="dh-0736"></a>**DH-0736** When a different customer of the brand has the `emailAddress`, with no difference for upper and lower case, the response is 409. The `detail` does not contain the address. ([RFC 9110, section 15.5.10][rfc9110-409]; [the uniqueness of the email address](consumer-authentication.md#dh-1202))
 - <a id="dh-0737"></a>**DH-0737** A `displayName` and a `productName` have 1 to 100 characters. ([Judgement: the fields of a customer, an account and a transaction](#dh-0771))
 - <a id="dh-0738"></a>**DH-0738** A `productCategory` is a value of `BankingProductCategoryV2`. ([CDS: Product Categories][cds-product-categories])
 - <a id="dh-0739"></a>**DH-0739** A `bsb` has 6 digits, and an `accountNumber` has 6 to 10 digits. ([Judgement: the fields of a customer, an account and a transaction](#dh-0771))
@@ -61,7 +61,7 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
   - `extendedDescription`
 - <a id="dh-0755"></a>**DH-0755** A request for a transaction of an account of a different customer gets 404. ([RFC 9110, section 15.5.5][rfc9110-404])
 - <a id="dh-0756"></a>**DH-0756** A create of a transaction for a closed account gets 409. ([RFC 9110, section 15.5.10][rfc9110-409])
-- <a id="dh-0757"></a>**DH-0757** The `transactionId` of the operator interface is not the `transactionId` of the banking APIs. ([the resource identifiers](../DESIGN.md#resource-identifiers))
+- <a id="dh-0757"></a>**DH-0757** The `transactionId` of the operator interface is not the `transactionId` of the banking APIs. ([the resource identifiers of the banking APIs](banking-apis.md#dh-1041))
 
 ## Arrangements
 
