@@ -40,7 +40,7 @@ This area gives the authentication of a consumer with a one-time password, the O
 - <a id="dh-1230"></a>**DH-1230** After 3 incorrect OTP entries in one authorisation flow, the flow ends with the error `access_denied`. ([CDR Support: One Time Password (OTP)][support-otp]; [CDR Support: Error scenarios and responses][support-error-scenarios]; [Judgement: the limits of an OTP](#dh-1277); [Judgement: `access_denied` at the end of an authentication](#dh-1275))
 - <a id="dh-1231"></a>**DH-1231** When the data holder cannot send the OTP email, the authorisation flow ends with the error `temporarily_unavailable`. ([RFC 6749, section 4.1.2.1][rfc6749-authorisation-errors])
 - <a id="dh-1232"></a>**DH-1232** When the consumer does not complete the authorisation flow, the flow [ends 10 minutes after the authorisation request](../../../pkg/authserver/design/authorisation-request.md#auth-0103). The data holder then shows an error page. ([the end of an authorisation flow](../../../pkg/authserver/design/authorisation-request.md#auth-0103))
-- <a id="dh-1233"></a>**DH-1233** A correct OTP entry gives the level of assurance `urn:cds.au:cdr:2`. The time of that entry is the authentication time. ([CDS: Levels of Assurance][cds-loa]; [Judgement: one level of assurance](../../../pkg/authserver/design/authorisation-request.md#auth-0121))
+- <a id="dh-1233"></a>**DH-1233** A correct OTP entry gives the level of assurance `urn:cds.au:cdr:2`. The time of that entry is the authentication time. ([CDS: Levels of Assurance][cds-loa]; [Judgement: only the level of assurance urn:cds.au:cdr:2](../../../pkg/authserver/design/authorisation-request.md#auth-0121))
 
 ## OTP email
 

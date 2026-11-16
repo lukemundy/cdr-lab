@@ -7,19 +7,19 @@ This area gives the authorisation flow of the data holder authorisation server: 
 - <a id="auth-0061"></a>**AUTH-0061** A client starts an authorisation flow with `POST` to the PAR endpoint. The body is a form with the client assertion parameters and a `request` parameter, which is a signed request object. ([CDS: Pushed Authorisation endpoint][cds-par-endpoint]; [RFC 9126, section 3][rfc9126-request-object])
 - <a id="auth-0062"></a>**AUTH-0062** The authorisation server uses only the parameters in the request object. It ignores each other authorisation parameter of the form. ([FAPI 1.0 Advanced, section 5.2.2][fapi-advanced-server], item 10)
 - <a id="auth-0063"></a>**AUTH-0063** The authorisation server refuses a pushed authorisation request with a `request_uri` parameter. ([RFC 9126, section 2.1][rfc9126-request])
-- <a id="auth-0064"></a>**AUTH-0064** When the registration of the client does not have the grant type `authorization_code`, the response is 400 with `invalid_grant`. ([Judgement: the error codes of the PAR endpoint](#auth-0115))
+- <a id="auth-0064"></a>**AUTH-0064** When the registration of the client does not have the grant type `authorization_code`, the response is 400 with `invalid_grant`. ([Judgement: the PAR endpoint gives the error codes of the OpenID Provider library](#auth-0115))
 - <a id="auth-0065"></a>**AUTH-0065** A successful request gives 201 with `request_uri`, `expires_in` and `Cache-Control: no-store`. ([RFC 9126, section 2.2][rfc9126-response])
-- <a id="auth-0066"></a>**AUTH-0066** The `request_uri` expires 60 seconds after the authorisation server issues it, and `expires_in` is 60. ([CDS: Request Object Submission][cds-request-object-submission]; [Judgement: the lifetime of a request_uri](#auth-0116))
+- <a id="auth-0066"></a>**AUTH-0066** The `request_uri` expires 60 seconds after the authorisation server issues it, and `expires_in` is 60. ([CDS: Request Object Submission][cds-request-object-submission]; [Judgement: a request_uri lifetime of 60 seconds](#auth-0116))
 - <a id="auth-0067"></a>**AUTH-0067** The `request_uri` has a random part that a client cannot guess. ([RFC 9126, section 7.1][rfc9126-guessing])
 - <a id="auth-0068"></a>**AUTH-0068** An error response has the format of RFC 9126, section 2.3. A failed client authentication gets [the refusal of the client authentication](client-authentication.md#auth-0032). ([RFC 9126, section 2.3][rfc9126-errors])
-- <a id="auth-0069"></a>**AUTH-0069** Each other error gets 400 with `error` and `error_description`. ([RFC 9126, section 2.3][rfc9126-errors]; [Judgement: the error codes of the PAR endpoint](#auth-0115))
-- <a id="auth-0070"></a>**AUTH-0070** For a 400 response, the `error_description` names the claim or the rule that fails. It does not repeat a value of the request object. ([RFC 9126, section 2.3][rfc9126-errors]; [Judgement: the error codes of the PAR endpoint](#auth-0115))
+- <a id="auth-0069"></a>**AUTH-0069** Each other error gets 400 with `error` and `error_description`. ([RFC 9126, section 2.3][rfc9126-errors]; [Judgement: the PAR endpoint gives the error codes of the OpenID Provider library](#auth-0115))
+- <a id="auth-0070"></a>**AUTH-0070** For a 400 response, the `error_description` names the claim or the rule that fails. It does not repeat a value of the request object. ([RFC 9126, section 2.3][rfc9126-errors]; [Judgement: the PAR endpoint gives the error codes of the OpenID Provider library](#auth-0115))
 - <a id="auth-0071"></a>**AUTH-0071** For a 401 response, the `error_description` does not give the cause. ([RFC 9126, section 2.3][rfc9126-errors])
 
 ## Request object
 
 - <a id="auth-0072"></a>**AUTH-0072** The request object is a JWT that the client signs with the `request_object_signing_alg` of its registration. ([CDS: Request Object][cds-request-object])
-- <a id="auth-0073"></a>**AUTH-0073** The authorisation server accepts a request object that is signed with PS256 or ES256. ([FAPI 1.0 Advanced, section 8.6][fapi-algorithms]; [Judgement: the signing algorithms](configuration.md#auth-0013))
+- <a id="auth-0073"></a>**AUTH-0073** The authorisation server accepts a request object that is signed with PS256 or ES256. ([FAPI 1.0 Advanced, section 8.6][fapi-algorithms]; [Judgement: the server signs with PS256 and accepts PS256 or ES256](configuration.md#auth-0013))
 - <a id="auth-0074"></a>**AUTH-0074** The authorisation server verifies the signature of the request object with the keys at the JWKS URI of the client. ([CDS: Request Object][cds-request-object])
 - <a id="auth-0075"></a>**AUTH-0075** The `iss` and the `client_id` of the request object are the client ID of the authenticated client. ([FAPI 1.0 Advanced, section 5.2.2][fapi-advanced-server], item 15)
 - <a id="auth-0076"></a>**AUTH-0076** The `aud` of the request object is the issuer, or a list that contains the issuer. ([FAPI 1.0 Advanced, section 5.2.2][fapi-advanced-server], item 15)
@@ -38,12 +38,12 @@ This area gives the authorisation flow of the data holder authorisation server: 
 - <a id="auth-0089"></a>**AUTH-0089** When `claims.sharing_duration` is present, it is an integer of seconds that is 0 or more. The authorisation server refuses a negative value and a value that is not an integer. ([CDS: Requesting Sharing Duration][cds-sharing-duration])
 - <a id="auth-0090"></a>**AUTH-0090** For a `claims.sharing_duration` of more than one year, the authorisation server uses one year (31,536,000 seconds). ([CDS: Requesting Sharing Duration][cds-sharing-duration])
 - <a id="auth-0091"></a>**AUTH-0091** The authorisation server refuses a request object with `claims.cdr_arrangement_id`. ([CDS: Specifying an existing arrangement][cds-existing-arrangement]; [Judgement: no amendment of an arrangement](#auth-0120))
-- <a id="auth-0092"></a>**AUTH-0092** When `claims.id_token.acr` is essential and gives values, one of the values is `urn:cds.au:cdr:2`. If not, the authorisation server refuses the request. ([CDS: Levels of Assurance][cds-loa]; [CDR Support: One Time Password (OTP)][support-otp]; [Judgement: one level of assurance](#auth-0121))
+- <a id="auth-0092"></a>**AUTH-0092** When `claims.id_token.acr` is essential and gives values, one of the values is `urn:cds.au:cdr:2`. If not, the authorisation server refuses the request. ([CDS: Levels of Assurance][cds-loa]; [CDR Support: One Time Password (OTP)][support-otp]; [Judgement: only the level of assurance urn:cds.au:cdr:2](#auth-0121))
 - <a id="auth-0093"></a>**AUTH-0093** The authorisation server ignores each other member of `claims`, and each other parameter that this area does not name. ([CDS: Claims][cds-claims])
-- <a id="auth-0094"></a>**AUTH-0094** These faults give 400 with `invalid_request_object`. ([Judgement: the error codes of the PAR endpoint](#auth-0115))
+- <a id="auth-0094"></a>**AUTH-0094** These faults give 400 with `invalid_request_object`. ([Judgement: the PAR endpoint gives the error codes of the OpenID Provider library](#auth-0115))
   - a fault of the JWT: its signature, `iss`, `client_id`, `aud`, `nbf` or `exp`
   - a fault of a member of `claims`
-- <a id="auth-0095"></a>**AUTH-0095** These faults give 400 with `invalid_request`. ([Judgement: the error codes of the PAR endpoint](#auth-0115))
+- <a id="auth-0095"></a>**AUTH-0095** These faults give 400 with `invalid_request`. ([Judgement: the PAR endpoint gives the error codes of the OpenID Provider library](#auth-0115))
   - a fault of `response_type`, `response_mode`, `redirect_uri`, `nonce`, `code_challenge` or `code_challenge_method`
   - a `scope` with no `openid`
 
@@ -56,36 +56,36 @@ This area gives the authorisation flow of the data holder authorisation server: 
 - <a id="auth-0100"></a>**AUTH-0100** When the authorisation server refuses a request to the authorisation endpoint, it does not redirect the browser. ([RFC 6749, section 4.1.2.1][rfc6749-authorisation-errors]; [Judgement: no redirect for a refused authorisation request](#auth-0119))
 - <a id="auth-0101"></a>**AUTH-0101** For a refusal with no redirect, the service shows its error page with the status 400. The status is 401 for a `request_uri` of a different client and for a client ID that is not registered. ([CDR Support: Error scenarios and responses][support-error-scenarios]; [Judgement: no redirect for a refused authorisation request](#auth-0119))
 - <a id="auth-0102"></a>**AUTH-0102** An authorisation flow that ended does not continue. The authorisation server refuses a request for one of its pages [with no redirect](#auth-0100). ([Judgement: no redirect for a refused authorisation request](#auth-0119))
-- <a id="auth-0103"></a>**AUTH-0103** An authorisation flow ends 10 minutes after the authorisation request, when the consumer does not complete it. The authorisation server then refuses each request of the flow [with no redirect](#auth-0100). ([Judgement: the time limit of an authorisation flow](#auth-0122))
+- <a id="auth-0103"></a>**AUTH-0103** An authorisation flow ends 10 minutes after the authorisation request, when the consumer does not complete it. The authorisation server then refuses each request of the flow [with no redirect](#auth-0100). ([Judgement: an authorisation flow ends after 10 minutes](#auth-0122))
 
 ## Authorisation response
 
 - <a id="auth-0104"></a>**AUTH-0104** At the end of an authorisation flow, the authorisation server redirects the browser to the `redirect_uri` of the request object, with one query parameter, `response`. ([CDS: Authorization Code Flow][cds-code-flow]; [JARM, section 2.3.1][jarm-query]; [Judgement: only the jwt response mode](#auth-0117))
-- <a id="auth-0105"></a>**AUTH-0105** The `response` is a JWT that the authorisation server signs with PS256. ([JARM, section 2.1][jarm-response]; [Judgement: the signing algorithms](configuration.md#auth-0013))
-- <a id="auth-0106"></a>**AUTH-0106** The JWT has `iss` (the issuer), `aud` (the client ID) and `exp`, which is 10 minutes after the time of the response. ([JARM, section 2.1][jarm-response]; [Judgement: the lifetime of an authorisation code and of the authorisation response](#auth-0123))
+- <a id="auth-0105"></a>**AUTH-0105** The `response` is a JWT that the authorisation server signs with PS256. ([JARM, section 2.1][jarm-response]; [Judgement: the server signs with PS256 and accepts PS256 or ES256](configuration.md#auth-0013))
+- <a id="auth-0106"></a>**AUTH-0106** The JWT has `iss` (the issuer), `aud` (the client ID) and `exp`, which is 10 minutes after the time of the response. ([JARM, section 2.1][jarm-response]; [Judgement: a code lifetime of 60 seconds and a response lifetime of 10 minutes](#auth-0123))
 - <a id="auth-0107"></a>**AUTH-0107** When the consumer gives the authorisation, the JWT has `code`. For an error, it has `error` and `error_description`. It has `state` when the request object has one. ([JARM, section 2.1][jarm-response])
 - <a id="auth-0108"></a>**AUTH-0108** The authorisation response is not encrypted. ([CDS: Authorization Code Flow][cds-code-flow]; [Judgement: no encryption of ID tokens or authorisation responses](configuration.md#auth-0017))
-- <a id="auth-0109"></a>**AUTH-0109** The authorisation code is valid for 60 seconds and for one use. ([RFC 6749, section 4.1.2][rfc6749-code]; [Judgement: the lifetime of an authorisation code and of the authorisation response](#auth-0123))
+- <a id="auth-0109"></a>**AUTH-0109** The authorisation code is valid for 60 seconds and for one use. ([RFC 6749, section 4.1.2][rfc6749-code]; [Judgement: a code lifetime of 60 seconds and a response lifetime of 10 minutes](#auth-0123))
 
 ## Status of the software product
 
 The service gives the authorisation server the status of the software product of each client: ACTIVE or not ACTIVE.
 
-- <a id="auth-0110"></a>**AUTH-0110** When the software product is not ACTIVE, the PAR endpoint responds with 400 and `unauthorized_client`. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [Judgement: the error for a software product that is not ACTIVE](#auth-0124))
-- <a id="auth-0111"></a>**AUTH-0111** When the software product is not ACTIVE at a request to the authorisation endpoint or to a page of the flow, the flow ends with the error `unauthorized_client` in [the authorisation response](#auth-0104). The consumer pages do not get the request. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [CDR Support: Error scenarios and responses][support-error-scenarios]; [Judgement: the error for a software product that is not ACTIVE](#auth-0124))
-- <a id="auth-0112"></a>**AUTH-0112** When the software product is not ACTIVE, the token endpoint responds to the `authorization_code` and `refresh_token` grants with 400 and `unauthorized_client`. The refresh token does not change. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [RFC 6749, section 5.2][rfc6749-errors]; [Judgement: the error for a software product that is not ACTIVE](#auth-0124))
+- <a id="auth-0110"></a>**AUTH-0110** When the software product is not ACTIVE, the PAR endpoint responds with 400 and `unauthorized_client`. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [Judgement: unauthorized_client, not invalid_grant, for a software product that is not ACTIVE](#auth-0124))
+- <a id="auth-0111"></a>**AUTH-0111** When the software product is not ACTIVE at a request to the authorisation endpoint or to a page of the flow, the flow ends with the error `unauthorized_client` in [the authorisation response](#auth-0104). The consumer pages do not get the request. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [CDR Support: Error scenarios and responses][support-error-scenarios]; [Judgement: unauthorized_client, not invalid_grant, for a software product that is not ACTIVE](#auth-0124))
+- <a id="auth-0112"></a>**AUTH-0112** When the software product is not ACTIVE, the token endpoint responds to the `authorization_code` and `refresh_token` grants with 400 and `unauthorized_client`. The refresh token does not change. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [RFC 6749, section 5.2][rfc6749-errors]; [Judgement: unauthorized_client, not invalid_grant, for a software product that is not ACTIVE](#auth-0124))
 - <a id="auth-0113"></a>**AUTH-0113** The status of the software product does not change the `client_credentials` grant, introspection, token revocation and CDR arrangement revocation. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities])
-- <a id="auth-0114"></a>**AUTH-0114** At the PAR and token endpoints, the status check comes after the client authentication. At these endpoints and at the authorisation endpoint, other checks of the request can come before the status check. ([Judgement: the sequence of the status check](#auth-0125))
+- <a id="auth-0114"></a>**AUTH-0114** At the PAR and token endpoints, the status check comes after the client authentication. At these endpoints and at the authorisation endpoint, other checks of the request can come before the status check. ([Judgement: the status check comes after the client authentication and the request checks](#auth-0125))
 
 ## Judgements
 
-### <a id="auth-0115"></a>AUTH-0115 The error codes of the PAR endpoint
+### <a id="auth-0115"></a>AUTH-0115 The PAR endpoint gives the error codes of the OpenID Provider library
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no codes. RFC 9126 permits each code of RFC 6749, sections 5.2 and 4.1.2.1 ([RFC 9126, section 2.3][rfc9126-errors]), and OpenID Connect adds `invalid_request_object` ([OpenID Connect Core, section 3.1.2.6][oidc-core-auth-error]).
 - Reason: The codes of the underlying OpenID Provider library are the least complex. A client reads the `error_description` to find its fault.
 
-### <a id="auth-0116"></a>AUTH-0116 The lifetime of a request_uri
+### <a id="auth-0116"></a>AUTH-0116 A request_uri lifetime of 60 seconds
 
 - Kind: choice
 - Basis: Step 3.3. The CDS permits 10 to 90 seconds ([CDS: Request Object Submission][cds-request-object-submission]). The CDS example has 3600, and it is not normative.
@@ -115,31 +115,31 @@ The service gives the authorisation server the status of the software product of
 - Basis: Step 1. The CDS requires support for `cdr_arrangement_id` in a request object, for the amendment of a consent ([CDS: Specifying an existing arrangement][cds-existing-arrangement]).
 - Reason: Amendment is out of scope. A refusal before the consumer authenticates is better than a new arrangement that the client did not ask for.
 
-### <a id="auth-0121"></a>AUTH-0121 One level of assurance
+### <a id="auth-0121"></a>AUTH-0121 Only the level of assurance urn:cds.au:cdr:2
 
 - Kind: choice
 - Basis: Step 2. An OTP is one factor ([CDS: Levels of Assurance][cds-loa]). When a data holder cannot reach an essential level of assurance, "the request should be rejected" ([CDR Support: One Time Password (OTP)][support-otp]).
 - Reason: All CDR data APIs are read operations, which need `urn:cds.au:cdr:2`. Thus the authorisation server supports only that value, and refuses a request that needs a different value as essential.
 
-### <a id="auth-0122"></a>AUTH-0122 The time limit of an authorisation flow
+### <a id="auth-0122"></a>AUTH-0122 An authorisation flow ends after 10 minutes
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no limit.
 - Reason: 10 minutes gives time for two OTPs, and the limit removes flows that a consumer left. After the limit, the authorisation server cannot be sure that the browser is that of the consumer, so it does not redirect.
 
-### <a id="auth-0123"></a>AUTH-0123 The lifetime of an authorisation code and of the authorisation response
+### <a id="auth-0123"></a>AUTH-0123 A code lifetime of 60 seconds and a response lifetime of 10 minutes
 
 - Kind: choice
 - Basis: Step 3.2. The CDS gives no lifetime. RFC 6749 recommends 10 minutes at most for a code ([section 4.1.2][rfc6749-code]), and JARM recommends 10 minutes at most for the response ([section 2.1][jarm-response]).
 - Reason: A client exchanges the code at once, so 60 seconds is sufficient. The 10 minutes of the response is the value of the underlying OpenID Provider library, which is the least complex.
 
-### <a id="auth-0124"></a>AUTH-0124 The error for a software product that is not ACTIVE
+### <a id="auth-0124"></a>AUTH-0124 unauthorized_client, not invalid_grant, for a software product that is not ACTIVE
 
 - Kind: choice
 - Basis: Step 3.2. The CDS says only that the data holder does not "Facilitate Consent Authorisation" or disclose data ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]). The DSB says that the authorisation endpoint redirects with an error, and gives no code ([CDR Support: Error scenarios and responses][support-error-scenarios]). RFC 6749 gives `unauthorized_client` for a client that is not permitted to do the request ([section 4.1.2.1][rfc6749-authorisation-errors], [section 5.2][rfc6749-errors]).
 - Reason: `invalid_grant` at the token endpoint would tell the client that the authorisation ended. A software product that is not ACTIVE keeps its arrangements.
 
-### <a id="auth-0125"></a>AUTH-0125 The sequence of the status check
+### <a id="auth-0125"></a>AUTH-0125 The status check comes after the client authentication and the request checks
 
 - Kind: choice
 - Basis: Step 3.3. The CDS and the ACCC give no sequence for these endpoints. The ACCC sequence is for an access token ([CDR Support: Error scenarios and responses][support-error-scenarios]).

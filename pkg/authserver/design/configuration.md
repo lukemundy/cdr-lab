@@ -11,7 +11,7 @@ This area gives the OpenID Provider configuration of each authorisation server, 
 
 The Register authorisation server serves Get OpenId Provider Config.
 
-- <a id="auth-0003"></a>**AUTH-0003** The configuration of the Register authorisation server has each field that the OpenAPI schema of Get OpenId Provider Config marks as required, with these values. ([CDS: Get OpenId Provider Config][cds-get-oidc]; [CDS: Register Endpoints][cds-register-endpoints]; [Judgement: the signing algorithms](#auth-0013); [Judgement: the values that the Register does not use](#auth-0014))
+- <a id="auth-0003"></a>**AUTH-0003** The configuration of the Register authorisation server has each field that the OpenAPI schema of Get OpenId Provider Config marks as required, with these values. ([CDS: Get OpenId Provider Config][cds-get-oidc]; [CDS: Register Endpoints][cds-register-endpoints]; [Judgement: the server signs with PS256 and accepts PS256 or ES256](#auth-0013); [Judgement: true values in the Register fields that clients can ignore](#auth-0014))
   - `issuer`: the issuer
   - `jwks_uri`: a URL on the public listener
   - `token_endpoint`: a URL on the mTLS listener
@@ -28,7 +28,7 @@ The Register authorisation server serves Get OpenId Provider Config.
 
 ## Data holder configuration
 
-- <a id="auth-0004"></a>**AUTH-0004** The configuration of the data holder authorisation server has each field that the CDS requires as a minimum, with these values. ([CDS: OpenID Provider Configuration endpoint][cds-oidc-config]; [CDS: Scopes and Claims][cds-scopes-and-claims]; [CDS: Request Object][cds-request-object]; [Judgement: the signing algorithms](#auth-0013); [Judgement: the minimum values of acr_values_supported and claims_supported](#auth-0015); [Judgement: sharing_duration in claims_supported](#auth-0016))
+- <a id="auth-0004"></a>**AUTH-0004** The configuration of the data holder authorisation server has each field that the CDS requires as a minimum, with these values. ([CDS: OpenID Provider Configuration endpoint][cds-oidc-config]; [CDS: Scopes and Claims][cds-scopes-and-claims]; [CDS: Request Object][cds-request-object]; [Judgement: the server signs with PS256 and accepts PS256 or ES256](#auth-0013); [Judgement: only the CDS minimum values in acr_values_supported and claims_supported](#auth-0015); [Judgement: sharing_duration in claims_supported, as the CDS text says](#auth-0016))
   - `issuer`: the issuer
   - `jwks_uri` and `authorization_endpoint`: URLs on the public listener
   - `registration_endpoint`, `token_endpoint`, `userinfo_endpoint`, `introspection_endpoint`, `revocation_endpoint`, `pushed_authorization_request_endpoint` and `cdr_arrangement_revocation_endpoint`: URLs on the mTLS listener
@@ -56,32 +56,32 @@ The Register authorisation server serves Get OpenId Provider Config.
 
 ## Signing keys
 
-- <a id="auth-0009"></a>**AUTH-0009** The authorisation server signs with PS256 only. ([FAPI 1.0 Advanced, section 8.6][fapi-algorithms]; [Judgement: the signing algorithms](#auth-0013))
+- <a id="auth-0009"></a>**AUTH-0009** The authorisation server signs with PS256 only. ([FAPI 1.0 Advanced, section 8.6][fapi-algorithms]; [Judgement: the server signs with PS256 and accepts PS256 or ES256](#auth-0013))
 - <a id="auth-0010"></a>**AUTH-0010** The authorisation server signs with the first signing key that the service gives. ([Judgement: signing with the first key of the list](#auth-0019))
 - <a id="auth-0011"></a>**AUTH-0011** A signing key that the library creates is an RSA key of 2048 bits. ([FAPI 1.0 Advanced, section 8.6][fapi-algorithms])
 - <a id="auth-0012"></a>**AUTH-0012** A service must give only RSA signing keys of 2048 bits or longer. ([FAPI 1.0 Advanced, section 8.6][fapi-algorithms])
 
 ## Judgements
 
-### <a id="auth-0013"></a>AUTH-0013 The signing algorithms
+### <a id="auth-0013"></a>AUTH-0013 The server signs with PS256 and accepts PS256 or ES256
 
 - Kind: choice
 - Basis: Step 3.3. FAPI 1.0 Advanced permits PS256 and ES256 ([section 8.6][fapi-algorithms]). Data recipients must support the two ([CDR Support: Guidance on Dynamic Client Registration][support-dcr]). The CDS does not name the algorithms of the Register token endpoint, and it refers to FAPI 1.0 Advanced for the other endpoints.
 - Reason: One algorithm for the signatures of the authorisation server is the least complex. A client can sign with each algorithm that FAPI 1.0 Advanced permits.
 
-### <a id="auth-0014"></a>AUTH-0014 The values that the Register does not use
+### <a id="auth-0014"></a>AUTH-0014 True values in the Register fields that clients can ignore
 
 - Kind: choice
 - Basis: Step 3.3. The schema requires the fields, and the CDS says that clients can ignore three of them ([CDS: Get OpenId Provider Config][cds-get-oidc]).
 - Reason: The Register gives the values that are true for it. It supports no PKCE method.
 
-### <a id="auth-0015"></a>AUTH-0015 The minimum values of acr_values_supported and claims_supported
+### <a id="auth-0015"></a>AUTH-0015 Only the CDS minimum values in acr_values_supported and claims_supported
 
 - Kind: choice
 - Basis: Step 3.3. The CDS requires the two fields, and gives no full list of values ([CDS: OpenID Provider Configuration endpoint][cds-oidc-config]).
 - Reason: The minimum values that the CDS requires are the least complex.
 
-### <a id="auth-0016"></a>AUTH-0016 sharing_duration in claims_supported
+### <a id="auth-0016"></a>AUTH-0016 sharing_duration in claims_supported, as the CDS text says
 
 - Kind: conflict
 - Basis: Step 1. The CDS example of the configuration does not have the claim, but the CDS calls it a claim that the data holder must support ([CDS: Request Object][cds-request-object]).
