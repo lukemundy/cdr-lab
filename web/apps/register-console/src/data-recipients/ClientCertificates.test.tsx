@@ -137,6 +137,7 @@ describe("the client certificates of a software product", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1204, REG-1211
   test("a pasted certificate is registered with the version, with no confirmation, and the thumbprint shows", async () => {
     const requests = serveDetails(detailWith(web, retired), registered);
     serveRegistration(requests, { status: 204 });
@@ -168,6 +169,7 @@ describe("the client certificates of a software product", () => {
       .toBeVisible();
   });
 
+  // Verifies: REG-1225
   test("the text of a selected file shows in the field before the registration", async () => {
     serveDetails(detailWith(web));
     await renderDetail(`/data-recipients/${id}`);
@@ -181,6 +183,7 @@ describe("the client certificates of a software product", () => {
     await expect.element(certificateField()).toHaveValue(pemText);
   });
 
+  // Verifies: REG-1221
   test("text that is not one PEM certificate shows the detail of the 400 as the error of the field", async () => {
     const detail = "The certificate must be one PEM certificate, with no other text.";
     serveRegistration(serveDetails(detailWith(web)), { status: 400, detail });
@@ -198,6 +201,7 @@ describe("the client certificates of a software product", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1220, REG-1222
   test("a refused registration shows the detail in the dialog and the current state, also when the registration is no longer permitted", async () => {
     const detail =
       "The data recipient changed after the version in the request. The Register changed nothing.";
@@ -224,6 +228,7 @@ describe("the client certificates of a software product", () => {
     ).toBeNull();
   });
 
+  // Verifies: REG-1205, REG-1211
   test("the confirmation of a removal names the thumbprint and the software product, and the removal sends the version", async () => {
     const requests = serveDetails(registered, detailWith(web, retired));
     worker.use(

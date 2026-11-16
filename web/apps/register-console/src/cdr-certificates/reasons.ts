@@ -1,6 +1,6 @@
 import type { RevocationReason } from "../api/client";
 
-// The reasons of the operator interface in words (Register DESIGN.md, Operator console).
+// The reasons of the operator interface in words (services/register/design/operator-console-actions.md).
 export const reasonWords = {
   unspecified: "Unspecified",
   keyCompromise: "Key compromise",

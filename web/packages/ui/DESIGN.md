@@ -220,7 +220,7 @@ Rules for all components:
 | A time value that is not valid | The UI shows the value as text, with no `time` element | Judgement: the API contract gives each time as a `date-time`, so only a defect gives a different value. One raw value is better for the user than a page that stops. |
 | Pattern of the confirmation dialog | The alert dialog pattern, with the first focus on the cancel button, also when the action can be reversed | The APG gives the alert dialog for a message that needs a response, and advises the focus on the least destructive action for a step that is not easily reversible ([WAI-ARIA APG: Dialog][apg-dialog]). Judgement: the operator confirms with a deliberate key press or click. One rule for all confirmations is simpler, and a reversible action can also change other records, for example a suspension. |
 | Busy state of a confirmation | The busy confirm button, and also a status message, for example "Suspend in progress" | Judgement: a screen reader does not always announce a change to the name of the focused button. A status message is announced ([WCAG 2.2, SC 4.1.3][wcag-4-1-3]). |
-| An action that fails with no problem details | The dialog stays open, and an alert says "The action did not complete" and "Refresh the page to see the current state, then try again." | Judgement: when the request fails, for example with a network error, the UI does not know if the change occurred. The UI never sends the action again by itself ([Register DESIGN.md: Operator console][register-console]). |
+| An action that fails with no problem details | The dialog stays open, and an alert says "The action did not complete" and "Refresh the page to see the current state, then try again." | Judgement: when the request fails, for example with a network error, the UI does not know if the change occurred. The UI never sends the action again by itself ([Register: no automatic second request][register-console]). |
 | Variant of the confirm button | Danger when the action cannot be reversed, primary when it can. The UI cannot change it. | Judgement: one rule in the design system, so that each confirmation looks the same for the same type of action. |
 | Colour of the modal backdrop | A semantic role, the modal backdrop, which is a dark colour with transparency | Judgement: a dimmed page shows that the dialog is modal. The role is not text and not a control boundary, so it has no contrast minimum ([WCAG 2.2, SC 1.4.11][wcag-1-4-11]). A brand can change it. |
 | Errors and toasts | An error shows in an alert at the place of the action. Only a success shows in a toast. | Judgement: a toast closes by itself, and an error must stay until the user reads it and acts ([WCAG 2.2, SC 2.2.1][wcag-2-2-1]). |
@@ -247,7 +247,7 @@ Rules for all components:
 [dataholder-site]: ../../../services/dataholder/design/online-bank-site.md
 [readme-sources]: ../../../README.md#sources-for-requirements
 [research]: ../../../docs/research/2026-10-22-web-front-ends.md
-[register-console]: ../../../services/register/DESIGN.md#operator-console
+[register-console]: ../../../services/register/design/operator-console-actions.md#reg-1223
 [dtcg-format]: https://www.designtokens.org/TR/2025.10/format/
 [dtcg-resolver]: https://www.designtokens.org/TR/2025.10/resolver/
 [css-oklch]: https://www.w3.org/TR/css-color-4/#ok-lab

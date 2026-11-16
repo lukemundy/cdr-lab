@@ -207,6 +207,7 @@ const buttonNames = (name: string) =>
     .map((button) => button.element().textContent);
 
 describe("the status actions of a data recipient", () => {
+  // Verifies: REG-1219
   test("show only the actions that the console API gives, for the legal entity, each brand and each software product", async () => {
     serveDetails(active);
 
@@ -220,6 +221,7 @@ describe("the status actions of a data recipient", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1201, REG-1212, REG-1222
   test("a suspension names each software product that it changes, sends the version, and shows the new state", async () => {
     const bodies = serveDetails(active, suspended);
     serveSuspension(bodies, "success");
@@ -285,6 +287,7 @@ describe("the status actions of a data recipient", () => {
       .toBe(actionsOf("Console Test Pty Ltd").element());
   });
 
+  // Verifies: REG-1213
   test("a revocation says that its software products become REMOVED and that it cannot be reversed", async () => {
     serveDetails(active);
     await renderDetail(`/data-recipients/${id}`);
@@ -304,6 +307,7 @@ describe("the status actions of a data recipient", () => {
       );
   });
 
+  // Verifies: REG-1214
   test("a reinstatement says that the software products do not change", async () => {
     serveDetails(suspended);
     await renderDetail(`/data-recipients/${id}`);
@@ -320,6 +324,7 @@ describe("the status actions of a data recipient", () => {
       );
   });
 
+  // Verifies: REG-1220
   test("a refused action shows the detail in the confirmation, also when the current state no longer permits the action", async () => {
     serveSuspension(serveDetails(active, suspended), "conflict");
     await renderDetail(`/data-recipients/${id}`);
@@ -346,6 +351,7 @@ describe("the status actions of a data recipient", () => {
       .toBe(actionsOf("Console Test Pty Ltd").getByRole("button", { name: "Reinstate" }).element());
   });
 
+  // Verifies: REG-1202
   test("a software product action sends the version to the path of the software product", async () => {
     const requests = serveDetails(active);
     worker.use(
@@ -374,6 +380,7 @@ describe("the status actions of a data recipient", () => {
     ]);
   });
 
+  // Verifies: REG-1202, REG-1212
   test("a brand deactivation names each software product that it changes, sends the version to the path of the brand, and shows the new state", async () => {
     const requests = serveDetails(active, brandDeactivated);
     worker.use(
@@ -409,6 +416,7 @@ describe("the status actions of a data recipient", () => {
     expect(buttonNames("Console Test")).toEqual(["Activate", "Remove"]);
   });
 
+  // Verifies: REG-1213
   test("a brand removal says that its software products become REMOVED and that it cannot be reversed", async () => {
     serveDetails(active);
     await renderDetail(`/data-recipients/${id}`);

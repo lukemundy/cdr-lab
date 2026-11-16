@@ -154,6 +154,7 @@ afterEach(() => {
 });
 
 describe("the issue of a client certificate", () => {
+  // Verifies: REG-1229
   test("only a software product that the rules permit offers the issue", async () => {
     serveRecipient(recipientWith(web, retired));
     await renderDetail(`/data-recipients/${recipientId}`);
@@ -166,6 +167,7 @@ describe("the issue of a client certificate", () => {
     ).toBeNull();
   });
 
+  // Verifies: REG-1233, REG-1234
   test("the help text gives the subject that the Register requires and says that it needs no private key", async () => {
     serveRecipient(recipientWith(web));
     await renderDetail(`/data-recipients/${recipientId}`);
@@ -181,6 +183,7 @@ describe("the issue of a client certificate", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1206, REG-1238, REG-1239
   test("an issue sends the version and the CSR, and the result shows the chain once with a save as a file", async () => {
     const requests = serveRecipient(
       recipientWith(web),
@@ -243,6 +246,7 @@ describe("the issue of a client certificate", () => {
       .toBeVisible();
   });
 
+  // Verifies: REG-1236
   test("a refused CSR shows the detail of the 400 as the error of the field", async () => {
     const detail =
       'The CSR breaks these rules: subject CN must be the software product name "Issue Test Web".';
@@ -259,6 +263,7 @@ describe("the issue of a client certificate", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1222, REG-1237
   test("a different refusal shows in an alert in the dialog, and the views show the current state", async () => {
     const detail =
       "The participant changed after the version in the request. The Register changed nothing.";
@@ -290,6 +295,7 @@ describe("the issue of a client certificate", () => {
 });
 
 describe("the issue of a server certificate", () => {
+  // Verifies: REG-1207, REG-1229, REG-1244
   test("only a brand that the rules permit offers the issue, and the result names the server certificate", async () => {
     const requests: unknown[] = [];
     worker.use(

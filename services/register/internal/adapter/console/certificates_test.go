@@ -106,6 +106,7 @@ func TestADataRecipientDetailGivesThePermittedCertificateActionsOfEachSoftwarePr
 	assert.Equal(t, []string{"remove"}, products[1].Actions, "a REMOVED software product cannot get a certificate")
 }
 
+// Verifies: REG-1310, REG-1332
 func TestAPEMCertificateIsRegisteredWithItsThumbprintAndThenRemoved(t *testing.T) {
 	ports := seedForCertificates(t)
 	pemText, thumbprint := certificatePEM(t)

@@ -76,6 +76,7 @@ func holderBrandsOf(t *testing.T, ports console.Ports, legalEntityID string) hol
 	return body
 }
 
+// Verifies: REG-1308, REG-1321
 func TestAnAddOfADataHolderBrandAtTheCurrentVersionMakesTheBrandAndGivesItsPath(t *testing.T) {
 	ports := seedForHolderBrands(t)
 
@@ -110,6 +111,7 @@ func TestAnAddOfADataHolderBrandWithOnlyAnInterimIDNeedsOnlyThePublicDetails(t *
 		string(detail.Brands[2]))
 }
 
+// Verifies: REG-1329
 func TestAnAddOfADataHolderBrandWithAnIdentifierThatADifferentRecordHasGivesAnErrorAtThatIdentifier(t *testing.T) {
 	// A data holder, a data holder brand, an interim ID, a data recipient, a brand and a software product have these
 	// IDs.
@@ -137,6 +139,7 @@ func TestAnAddOfADataHolderBrandWithAnIdentifierThatADifferentRecordHasGivesAnEr
 	}
 }
 
+// Verifies: REG-1328
 func TestAnAddOfADataHolderBrandWithValuesThatTheParticipantModelRefusesGivesAnErrorAtEachField(t *testing.T) {
 	ports := seedForHolderBrands(t)
 
@@ -178,6 +181,7 @@ func TestAnAddOfADataHolderBrandWithValuesThatTheParticipantModelRefusesGivesAnE
 	assert.Equal(t, int64(1), holderBrandsOf(t, ports, "dh-1").Version)
 }
 
+// Verifies: REG-1329
 func TestAnActiveBrandOfARemovedDataHolderGivesAConflictAtTheStatus(t *testing.T) {
 	ports := seedForHolderBrands(t)
 
@@ -195,6 +199,7 @@ func TestAnActiveBrandOfARemovedDataHolderGivesAConflictAtTheStatus(t *testing.T
 	assert.Equal(t, int64(1), holderBrandsOf(t, ports, "dh-2").Version)
 }
 
+// Verifies: REG-1330
 func TestAnAddOrAChangeOfADataHolderBrandWithAVersionThatIsNotCurrentChangesNothing(t *testing.T) {
 	ports := seedForHolderBrands(t)
 	require.Equal(t, http.StatusNoContent, post(t, ports, changeHolderDetails, newHolderDetailsRequest).status)
@@ -240,6 +245,7 @@ func TestAnAddOrAChangeOfADataHolderBrandThatDoesNotExistGivesNotFoundWithNoIden
 	}
 }
 
+// Verifies: REG-1327
 func TestAnAddOrAChangeOfADataHolderBrandRefusesABodyThatIsNotValid(t *testing.T) {
 	ports := seedForHolderBrands(t)
 
@@ -273,6 +279,7 @@ func TestAnAddOrAChangeOfADataHolderBrandRefusesABodyThatIsNotValid(t *testing.T
 	assert.Equal(t, int64(1), holderBrandsOf(t, ports, "dh-1").Version)
 }
 
+// Verifies: REG-1309, REG-1323
 func TestAChangeOfADataHolderBrandAtTheCurrentVersionReplacesEachField(t *testing.T) {
 	ports := seedForHolderBrands(t)
 
@@ -322,6 +329,7 @@ func TestAChangeOfABrandWithOnlyAnInterimIDUsesTheInterimIDInThePath(t *testing.
 		string(holderBrandsOf(t, ports, "dh-1").Brands[1]))
 }
 
+// Verifies: REG-1328
 func TestAChangeOfADataHolderBrandWithValuesThatTheParticipantModelRefusesGivesAnErrorAtEachField(t *testing.T) {
 	ports := seedForHolderBrands(t)
 

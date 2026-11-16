@@ -96,6 +96,7 @@ func fieldErrorsOf(t *testing.T, resp response) fieldErrorsBody {
 	return body
 }
 
+// Verifies: REG-1313, REG-1337
 func TestTheCABundleIsThePEMOfEachCertificateOfTheBundle(t *testing.T) {
 	intermediate, root := selfSigned(t, "Intermediate"), selfSigned(t, "Root")
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/api/cdr-ca-bundle", nil)
@@ -113,6 +114,7 @@ func TestTheCABundleIsThePEMOfEachCertificateOfTheBundle(t *testing.T) {
 		string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: root.Raw})), body.CABundle)
 }
 
+// Verifies: REG-1315, REG-1343
 func TestACheckOfARevocationNamesTheFirstCertificateAndRevokesNothing(t *testing.T) {
 	leaf, intermediate := selfSigned(t, "App"), selfSigned(t, "Intermediate")
 	chain := string(ca.EncodeCertificates(leaf, intermediate))
@@ -132,6 +134,7 @@ func TestACheckOfARevocationNamesTheFirstCertificateAndRevokesNothing(t *testing
 	assert.False(t, authority.revoked)
 }
 
+// Verifies: REG-1316, REG-1344
 func TestARevocationRevokesTheFirstCertificateWithTheReason(t *testing.T) {
 	leaf, intermediate := selfSigned(t, "App"), selfSigned(t, "Intermediate")
 	authority := &fakeCA{}
@@ -146,6 +149,7 @@ func TestARevocationRevokesTheFirstCertificateWithTheReason(t *testing.T) {
 	assert.Equal(t, ca.PrivilegeWithdrawn, authority.reason)
 }
 
+// Verifies: REG-1342
 func TestARevocationAndItsCheckRefuseABodyThatIsNotACertificateAndAReason(t *testing.T) {
 	cert, _ := certificatePEM(t)
 
@@ -173,6 +177,7 @@ func TestARevocationAndItsCheckRefuseABodyThatIsNotACertificateAndAReason(t *tes
 	}
 }
 
+// Verifies: REG-1345
 func TestARevocationAndItsCheckGiveAFieldErrorForEachValueThatIsNotValid(t *testing.T) {
 	for _, path := range []string{checkRevocation, revoke} {
 		t.Run(path, func(t *testing.T) {
@@ -202,6 +207,7 @@ func TestARevocationAndItsCheckGiveAFieldErrorForEachValueThatIsNotValid(t *test
 	}
 }
 
+// Verifies: REG-1345, REG-1346
 func TestARevocationAndItsCheckGiveTheRefusalOfTheCA(t *testing.T) {
 	cert, _ := certificatePEM(t)
 
@@ -239,6 +245,7 @@ func TestARevocationAndItsCheckGiveTheRefusalOfTheCA(t *testing.T) {
 	}
 }
 
+// Verifies: REG-1314, REG-1338, REG-1339, REG-1341
 func TestTheRevocationsAreAPageWithTheTotal(t *testing.T) {
 	at := time.Date(2026, 10, 27, 1, 2, 3, 0, time.FixedZone("AWST", 8*60*60))
 	authority := &fakeCA{total: 30, revocations: []app.Revocation{{

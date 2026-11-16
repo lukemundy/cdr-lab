@@ -40,6 +40,7 @@ func legalEntityOf(t *testing.T, ports console.Ports) legalEntityDetails {
 	return detail
 }
 
+// Verifies: REG-1301, REG-1322, REG-1323
 func TestAChangeOfTheDetailsAtTheCurrentVersionReplacesEachField(t *testing.T) {
 	ports := seedForActions(t)
 
@@ -71,6 +72,7 @@ type fieldProblem struct {
 	} `json:"errors"`
 }
 
+// Verifies: REG-1328
 func TestAChangeWithValuesThatTheParticipantModelRefusesGivesAnErrorAtEachField(t *testing.T) {
 	ports := seedForActions(t)
 
@@ -95,6 +97,7 @@ func TestAChangeWithValuesThatTheParticipantModelRefusesGivesAnErrorAtEachField(
 	assert.Equal(t, int64(1), legalEntityOf(t, ports).Version)
 }
 
+// Verifies: REG-1330
 func TestAChangeWithAVersionThatIsNotCurrentChangesNothingAndHasNoFieldErrors(t *testing.T) {
 	ports := seedForActions(t)
 	require.Equal(t, http.StatusNoContent, post(t, ports, changeDetails, newDetailsRequest).status)
@@ -120,6 +123,7 @@ func TestAChangeOfADataRecipientThatDoesNotExistGivesNotFoundWithNoIdentifier(t 
 	assert.NotContains(t, resp.body, "unknown")
 }
 
+// Verifies: REG-1327
 func TestAChangeRefusesABodyThatIsNotValid(t *testing.T) {
 	ports := seedForActions(t)
 
@@ -156,6 +160,7 @@ func (o erringOperator) ExecuteDataHolderAt(context.Context, string, int64, doma
 	return o.err
 }
 
+// Verifies: REG-1331
 func TestAChangeGivesTheErrorsOfOtherRecordsInTheDetail(t *testing.T) {
 	_, err := domain.HandleDataRecipient(
 		domain.ApplyDataRecipient(domain.DataRecipientState{}, domain.DataRecipientImported{
@@ -218,6 +223,7 @@ func firstBrandOf(t *testing.T, ports console.Ports) map[string]any {
 	return detail.Brands[0]
 }
 
+// Verifies: REG-1303
 func TestAChangeOfABrandAtTheCurrentVersionReplacesEachFieldOfTheBrand(t *testing.T) {
 	ports := seedForActions(t)
 
@@ -235,6 +241,7 @@ func TestAChangeOfABrandAtTheCurrentVersionReplacesEachFieldOfTheBrand(t *testin
 	assert.Contains(t, history.body, `"eventType":"DataRecipientBrandDetailsChanged"`)
 }
 
+// Verifies: REG-1305, REG-1324
 func TestAChangeOfASoftwareProductReplacesEachFieldAndRemovesEachOptionalFieldThatIsNotInTheBody(t *testing.T) {
 	ports := seedWithOptionalURIs(t)
 
@@ -298,6 +305,7 @@ func TestAChangeOfABrandWithValuesThatTheParticipantModelRefusesGivesAnErrorAtEa
 	assert.Equal(t, "#/logoUri", body.Errors[1].Pointer)
 }
 
+// Verifies: REG-1330
 func TestAChangeOfABrandOrASoftwareProductWithAStaleVersionChangesNothing(t *testing.T) {
 	for _, c := range []struct{ target, fields string }{
 		{changeBrand, newBrandFields},
@@ -331,6 +339,7 @@ func TestAChangeOfABrandOrASoftwareProductThatDoesNotExistGivesNotFoundWithNoIde
 	}
 }
 
+// Verifies: REG-1327
 func TestAChangeOfABrandOrASoftwareProductRefusesAFieldThatTheChangeDoesNotAccept(t *testing.T) {
 	ports := seedForActions(t)
 
@@ -375,6 +384,7 @@ func holderDetailsOf(t *testing.T, ports console.Ports) holderDetails {
 	return detail
 }
 
+// Verifies: REG-1307
 func TestAChangeOfTheDetailsOfADataHolderAtTheCurrentVersionReplacesEachField(t *testing.T) {
 	ports := seedForCreates(t)
 
@@ -390,6 +400,7 @@ func TestAChangeOfTheDetailsOfADataHolderAtTheCurrentVersionReplacesEachField(t 
 	assert.Contains(t, history.body, `"eventType":"DataHolderDetailsChanged"`)
 }
 
+// Verifies: REG-1328
 func TestAChangeOfADataHolderWithValuesThatTheParticipantModelRefusesGivesAnErrorAtEachField(t *testing.T) {
 	ports := seedForCreates(t)
 
@@ -409,6 +420,7 @@ func TestAChangeOfADataHolderWithValuesThatTheParticipantModelRefusesGivesAnErro
 	assert.Equal(t, int64(1), holderDetailsOf(t, ports).Version)
 }
 
+// Verifies: REG-1330
 func TestAChangeOfADataHolderWithAVersionThatIsNotCurrentChangesNothingAndHasNoFieldErrors(t *testing.T) {
 	ports := seedForCreates(t)
 	require.Equal(t, http.StatusNoContent, post(t, ports, changeHolderDetails, newHolderDetailsRequest).status)
@@ -439,6 +451,7 @@ func TestAChangeOfADataHolderThatDoesNotExistGivesNotFoundWithNoIdentifier(t *te
 	}
 }
 
+// Verifies: REG-1327
 func TestAChangeOfADataHolderRefusesABodyThatIsNotValid(t *testing.T) {
 	ports := seedForCreates(t)
 

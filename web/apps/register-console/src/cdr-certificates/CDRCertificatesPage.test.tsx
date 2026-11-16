@@ -131,6 +131,7 @@ afterEach(() => {
 });
 
 describe("the CDR certificates page", () => {
+  // Verifies: REG-1230, REG-1231
   test("the side navigation marks the section, and the page shows the CA bundle and the revocations", async () => {
     serve();
 
@@ -151,6 +152,7 @@ describe("the CDR certificates page", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1208, REG-1247, REG-1248
   test("Save as file saves the CA bundle as cdr-ca-bundle.pem with the text of the Register", async () => {
     serve();
     const saves = captureSaves();
@@ -173,6 +175,7 @@ describe("the CDR certificates page", () => {
 });
 
 describe("the revocation of a CDR certificate", () => {
+  // Verifies: REG-1250, REG-1251
   test("the dialog has a certificate field, a file input and a reason with no selected value", async () => {
     serve();
     renderApp("/cdr-certificates");
@@ -198,6 +201,7 @@ describe("the revocation of a CDR certificate", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1209, REG-1253, REG-1256
   test("Continue checks the request, the confirmation names the certificate, and Revoke revokes it", async () => {
     const requests = serve();
     serveCheck(requests, "success");
@@ -262,6 +266,7 @@ describe("the revocation of a CDR certificate", () => {
     expect(requests.revocations).toEqual([]);
   });
 
+  // Verifies: REG-1254
   test("the field errors of a refused check show at their fields and in the error summary", async () => {
     const requests = serve();
     serveCheck(requests, "field errors");
@@ -296,6 +301,7 @@ describe("the revocation of a CDR certificate", () => {
     await expect.element(reasonField()).toHaveFocus();
   });
 
+  // Verifies: REG-1255
   test("a certificate that is already revoked shows the detail in the error summary, with no field error", async () => {
     const requests = serve();
     serveCheck(requests, "revoked");
@@ -313,6 +319,7 @@ describe("the revocation of a CDR certificate", () => {
     expect(confirmation().query()).toBeNull();
   });
 
+  // Verifies: REG-1220
   test("a revocation that the Register refuses after the check shows the problem in the confirmation", async () => {
     const requests = serve();
     serveCheck(requests, "success");

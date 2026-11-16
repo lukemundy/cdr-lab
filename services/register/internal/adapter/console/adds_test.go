@@ -41,6 +41,7 @@ func versionOf(t *testing.T, ports console.Ports) int64 {
 	return detailOf(t, ports, "dr-1").Version
 }
 
+// Verifies: REG-1302, REG-1326
 func TestAnAddOfABrandAtTheCurrentVersionMakesABrandWithNoSoftwareProductsAndGivesItsPath(t *testing.T) {
 	ports := seedForCreates(t)
 
@@ -70,6 +71,7 @@ func TestAnAddOfABrandAtTheCurrentVersionMakesABrandWithNoSoftwareProductsAndGiv
 	assert.Contains(t, history.body, `"eventType":"DataRecipientBrandAdded"`)
 }
 
+// Verifies: REG-1304, REG-1326
 func TestAnAddOfASoftwareProductAtTheCurrentVersionMakesItWithNoClientCertificatesAndGivesItsPath(t *testing.T) {
 	ports := seedForCreates(t)
 
@@ -97,6 +99,7 @@ func TestAnAddOfASoftwareProductAtTheCurrentVersionMakesItWithNoClientCertificat
 	assert.Contains(t, history.body, `"eventType":"SoftwareProductAdded"`)
 }
 
+// Verifies: REG-1321
 func TestAnAddGivesTheLocationOfAnIdentifierWithCharactersOfAPath(t *testing.T) {
 	ports := seedForCreates(t)
 
@@ -109,6 +112,7 @@ func TestAnAddGivesTheLocationOfAnIdentifierWithCharactersOfAPath(t *testing.T) 
 	assert.Equal(t, "/api/data-recipients/dr-1/software-products/sp%2Fnew%3Fx", product.header.Get("Location"))
 }
 
+// Verifies: REG-1329
 func TestAnAddWithAnIdentifierThatADifferentRecordHasGivesAnErrorAtTheIdentifier(t *testing.T) {
 	// A data recipient, a data holder, a brand and a software product have these IDs.
 	for _, id := range []string{"dr-1", "dh-1", "dr-1-b1", "sp-1"} {
@@ -135,6 +139,7 @@ func TestAnAddWithAnIdentifierThatADifferentRecordHasGivesAnErrorAtTheIdentifier
 	}
 }
 
+// Verifies: REG-1328, REG-1329
 func TestAnAddWithValuesThatTheParticipantModelRefusesGivesAnErrorAtEachField(t *testing.T) {
 	ports := seedForCreates(t)
 
@@ -170,6 +175,7 @@ func TestAnAddWithValuesThatTheParticipantModelRefusesGivesAnErrorAtEachField(t 
 	assert.Equal(t, int64(1), versionOf(t, ports))
 }
 
+// Verifies: REG-1329
 func TestAnActiveSoftwareProductOfAnInactiveBrandGivesAConflictAtTheStatus(t *testing.T) {
 	dr := recipient("dr-1", "Alpha Pty Ltd", domain.DataRecipientActive, []domain.SoftwareProduct{
 		product("sp-1", domain.Inactive),
@@ -191,6 +197,7 @@ func TestAnActiveSoftwareProductOfAnInactiveBrandGivesAConflictAtTheStatus(t *te
 	assert.Equal(t, int64(1), versionOf(t, ports))
 }
 
+// Verifies: REG-1330
 func TestAnAddWithAVersionThatIsNotCurrentChangesNothingAndHasNoFieldErrors(t *testing.T) {
 	ports := seedForCreates(t)
 	require.Equal(t, http.StatusNoContent, post(t, ports, changeDetails, newDetailsRequest).status)
@@ -237,6 +244,7 @@ func TestAnAddToARecordThatDoesNotExistGivesNotFoundWithNoIdentifier(t *testing.
 	}
 }
 
+// Verifies: REG-1327
 func TestAnAddRefusesABodyThatIsNotValid(t *testing.T) {
 	ports := seedForCreates(t)
 

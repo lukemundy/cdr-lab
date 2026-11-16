@@ -52,6 +52,7 @@ func dataRecipientCount(t *testing.T, ports console.Ports) int {
 	return len(recipients)
 }
 
+// Verifies: REG-1300, REG-1320, REG-1321, REG-1325
 func TestACreateMakesADataRecipientWithNoBrandsAndGivesItsPath(t *testing.T) {
 	ports := seedForCreates(t)
 
@@ -75,6 +76,7 @@ func TestACreateMakesADataRecipientWithNoBrandsAndGivesItsPath(t *testing.T) {
 	assert.Equal(t, 2, dataRecipientCount(t, ports))
 }
 
+// Verifies: REG-1321
 func TestACreateGivesTheLocationOfAnIdentifierWithCharactersOfAPath(t *testing.T) {
 	resp := post(t, seedForCreates(t), createDataRecipient, newRecipientRequest("dr/new?x"))
 
@@ -82,6 +84,7 @@ func TestACreateGivesTheLocationOfAnIdentifierWithCharactersOfAPath(t *testing.T
 	assert.Equal(t, "/api/data-recipients/dr%2Fnew%3Fx", resp.header.Get("Location"))
 }
 
+// Verifies: REG-1329
 func TestACreateWithALegalEntityIDThatADifferentRecordHasGivesAnErrorAtTheLegalEntityID(t *testing.T) {
 	// A data recipient, a data holder, a brand and a software product have these IDs.
 	for _, id := range []string{"dr-1", "dh-1", "dr-1-b1", "sp-1"} {
@@ -122,6 +125,7 @@ func TestACreateWithALogoURIThatIsNotAURIGivesAnErrorAtTheLogoURI(t *testing.T) 
 	assert.Equal(t, 1, dataRecipientCount(t, ports))
 }
 
+// Verifies: REG-1328, REG-1329
 func TestACreateWithValuesThatTheParticipantModelRefusesGivesAnErrorAtEachField(t *testing.T) {
 	ports := seedForCreates(t)
 
@@ -158,6 +162,7 @@ func TestACreateWithNoLegalEntityIDGivesAnErrorAtTheLegalEntityID(t *testing.T) 
 	assert.Equal(t, "legalEntityId is required", body.Errors[0].Detail)
 }
 
+// Verifies: REG-1327
 func TestACreateRefusesABodyThatIsNotValid(t *testing.T) {
 	ports := seedForCreates(t)
 
@@ -201,6 +206,7 @@ func dataHolderCount(t *testing.T, ports console.Ports) int {
 	return total
 }
 
+// Verifies: REG-1306, REG-1320, REG-1321, REG-1325
 func TestACreateMakesADataHolderWithNoBrandsAndGivesItsPath(t *testing.T) {
 	for _, status := range []string{"ACTIVE", "REMOVED"} {
 		ports := seedForCreates(t)
@@ -224,6 +230,7 @@ func TestACreateMakesADataHolderWithNoBrandsAndGivesItsPath(t *testing.T) {
 	}
 }
 
+// Verifies: REG-1329
 func TestACreateOfADataHolderWithALegalEntityIDThatADifferentRecordHasGivesAnErrorAtTheLegalEntityID(t *testing.T) {
 	// A data holder, a data recipient, a brand and a software product have these IDs.
 	for _, id := range []string{"dh-1", "dr-1", "dr-1-b1", "sp-1"} {
@@ -245,6 +252,7 @@ func TestACreateOfADataHolderWithALegalEntityIDThatADifferentRecordHasGivesAnErr
 	}
 }
 
+// Verifies: REG-1328, REG-1329
 func TestACreateOfADataHolderWithValuesThatTheParticipantModelRefusesGivesAnErrorAtEachField(t *testing.T) {
 	ports := seedForCreates(t)
 
@@ -266,6 +274,7 @@ func TestACreateOfADataHolderWithValuesThatTheParticipantModelRefusesGivesAnErro
 	assert.Equal(t, 1, dataHolderCount(t, ports))
 }
 
+// Verifies: REG-1327
 func TestACreateOfADataHolderRefusesABodyThatIsNotValid(t *testing.T) {
 	ports := seedForCreates(t)
 
