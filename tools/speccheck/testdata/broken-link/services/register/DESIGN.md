@@ -1,3 +1,9 @@
-# Mock CDR Register: design
+# Mock CDR Register
 
-This file has the old structure.
+## Library specifications
+
+None.
+
+## Withdrawn
+
+None.

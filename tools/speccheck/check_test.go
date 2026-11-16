@@ -52,8 +52,24 @@ func TestCheck(t *testing.T) {
 				"pki/DESIGN.md:20: the text refers to PKI-0005 with no link",
 				"pki/DESIGN.md:26: judgement PKI-0006 must have the items Kind, Basis and Reason in their formats",
 				"pki/DESIGN.md:34: withdrawn entry PKI-0007 does not match the format",
-				"services/register/DESIGN.md:5: the file has identifiers but no Withdrawn section",
+				"services/register/DESIGN.md:1: the file has no Library specifications section",
+				"services/register/DESIGN.md:1: the file has no Withdrawn section",
 				"tools/example/DESIGN.md:1: component tools/example has no code in docs/spec/conventions.md",
+			},
+			wantWarnings: []string{
+				"services/register/DESIGN.md:5: requirement REG-0001 has no test that verifies it",
+			},
+		},
+		{
+			fixture: "no-withdrawn",
+			extra: fstest.MapFS{
+				"pki/DESIGN.md": {Data: []byte("# Mock CDR PKI\n\n## Library specifications\n\nNone.\n")},
+				"services/register/design/README.md": {Data: []byte(
+					"# Mock CDR Register\n\n## Library specifications\n\nNone.\n")},
+			},
+			wantErrors: []string{
+				"pki/DESIGN.md:1: the file has no Withdrawn section",
+				"services/register/design/README.md:1: the file has no Withdrawn section",
 			},
 		},
 		{

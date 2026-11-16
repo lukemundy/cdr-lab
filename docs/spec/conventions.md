@@ -1,67 +1,30 @@
 # Specification conventions
 
-This file gives the detailed rules for how to write a specification. [ADR 0024][adr-0024] gives the structure and the reasons. This file does not repeat the ADR. It gives only the detail that the ADR leaves to it.
+This file gives the detailed rules to write a specification. [ADR 0024][adr-0024] gives the structure and the reasons. These rules can change without a new ADR, if they obey ADR 0024.
 
-These rules can change without a new ADR, if they obey ADR 0024.
-
-The [glossary](glossary.md) gives one term for each concept. Use only those terms.
+Use only the terms of the [glossary](glossary.md).
 
 ## Writing style
 
-Write all text in [ASD-STE100 Simplified Technical English][ste100]. These rules are the most important:
+Write all text in [ASD-STE100 Simplified Technical English][ste100]:
 
-- Write one idea in each sentence.
-
-  Not: "The data holder refuses the request and logs the error, unless the client is ACTIVE, in which case it continues."
-  Use: "When the software product is not ACTIVE, the data holder refuses the request. The data holder logs the refusal."
-
-- Start a sentence with a concrete subject and its verb.
-
-  Not: "For each request, a check of the token is made."
-  Use: "The data holder checks the token of each request."
-
-- Use the active voice and the present tense.
-
-  Not: "The token will be refused."
-  Use: "The data holder refuses the token."
-
-- Use one "of" in a phrase at most.
-
-  Not: "the end of the validity of the certificate of the client"
-  Use: "the expiry time of the client certificate"
-
-- Use a list, not a sentence with many "or" alternatives.
-
-  Not: "The reason is unspecified, keyCompromise, superseded or cessationOfOperation."
-  Use: "The reason is one of these:", then a list.
-
-- Give an example after each abstract rule. Start it with "For example".
-- Keep a sentence short: 20 words or fewer for an instruction, 25 words or fewer for a description.
-- Use inclusive language, for example allowlist and blocklist, primary and replica.
+- One idea in each sentence. Not: "The data holder refuses the request and logs the error." Use: "The data holder refuses the request. It logs the refusal."
+- A concrete subject and its verb, in the active voice and the present tense. Not: "The token will be refused." Use: "The data holder refuses the token."
+- One "of" in a phrase at most: "the expiry time of the client certificate".
+- A list, not a sentence with many "or" alternatives.
+- An example after each abstract rule, which starts with "For example".
+- 20 words or fewer for an instruction, 25 words or fewer for a description.
+- Inclusive language, for example allowlist and blocklist, primary and replica.
 
 ## Templates
 
-Each template shows the headings in their sequence. A heading in angle brackets is a name that you choose. Each other heading is fixed, and the check finds it by its text.
+A heading in angle brackets is a name that you choose. The other headings are fixed, and the check finds them by their text: `Context`, `Areas`, `Library specifications`, `Goals`, `Non-goals`, `Judgements` and `Withdrawn`. Each other `##` heading is a group of requirements.
 
-The fixed `##` headings are:
-
-- `Context`
-- `Areas`
-- `Library specifications`
-- `Goals`
-- `Non-goals`
-- `Judgements`
-- `Withdrawn`
-
-Each other `##` heading in a specification is a group of requirements.
-
-The only heading below `##` is a judgement heading (`###`) in the Judgements section. A group of requirements has no sub-groups. When a group is too large, split it into two groups.
-
-Reason: the area file is the level above a group, so a reader gets the area and then the group. One meaning for each heading level keeps the check and the reader simple.
+The only heading below `##` is a judgement heading (`###`) in the Judgements section. A group has no sub-groups. Split a group that is too large into two groups.
 
 ### One-file specification
 
-The file is `DESIGN.md` in the directory of the component. It has the sections of the overview too, so that a split into a `design/` directory only moves text.
+The file is `DESIGN.md` in the directory of the component. It has the sections of an overview too, so that a split into a `design/` directory only moves text.
 
 ~~~markdown
 # <Component name>
@@ -70,7 +33,7 @@ The file is `DESIGN.md` in the directory of the component. It has the sections o
 
 ## Context
 
-<The context diagram. See "Context diagram".>
+<The context diagram.>
 
 ## Library specifications
 
@@ -79,8 +42,6 @@ The file is `DESIGN.md` in the directory of the component. It has the sections o
 | `pkg/<library>` | [<descriptive name>](<relative path>/DESIGN.md) |
 
 ## Goals
-
-- <What the component does for its users.>
 
 ## Non-goals
 
@@ -107,88 +68,29 @@ The file is `DESIGN.md` in the directory of the component. It has the sections o
 <Link definitions>
 ~~~
 
-When the component imports no `pkg/` library, the Library specifications section has the line `None.` in place of the table. When no identifier is withdrawn, the Withdrawn section has the line `None.`. When a library has no specification, its Specification cell is `None.`.
+A section with no content has the line `None.`: the Library specifications section of a component that imports no `pkg/` library, the Withdrawn section, and the Specification cell of a library with no specification.
 
 ### Overview of a `design/` directory
 
-The file is `design/README.md`. It has no requirements and no judgements.
-
-~~~markdown
-# <Component name>
-
-<Summary: what the component is and does, in one short paragraph.>
-
-## Context
-
-<The context diagram.>
-
-## Areas
-
-| Area | File | Summary |
-|---|---|---|
-| <Area name> | [<file>.md](<file>.md) | <One sentence.> |
-
-## Library specifications
-
-<As in the one-file specification.>
-
-## Goals
-
-## Non-goals
-
-## Withdrawn
-
-<The withdrawn list of the full specification.>
-
-<Link definitions>
-~~~
-
-The Areas table is the full list of the area files. Each `.md` file in the directory, except `README.md`, has one row.
+The file is `design/README.md`. It has the sections of the one-file specification from Context to Non-goals, and Withdrawn, but no requirements or judgements. After Context, an Areas table (`Area`, `File`, `Summary`) has one row for each other `.md` file.
 
 ### Area file
 
-The file is `design/<area>.md`. The file name is the area name in lower-kebab-case, for example `authorisation.md`.
-
-~~~markdown
-# <Component name>: <Area name>
-
-<Summary: what this area covers, in one short paragraph.>
-
-## <Group of requirements>
-
-- <a id="xx-0010"></a>**XX-0010** <Requirement.> (<Source group>)
-
-## Judgements
-
-<The judgements of the requirements in this file.>
-
-<Link definitions>
-~~~
-
-An area file has no Withdrawn section. The withdrawn list is in `README.md`.
+The file is `design/<area>.md`, with the area name in lower-kebab-case. It has a `# <Component name>: <Area name>` title, a one-paragraph summary, its groups of requirements and its Judgements section. It has no Withdrawn section: the withdrawn list is in `README.md`.
 
 ### Link definitions
 
-A link to an external source is a reference link. Its definition is at the end of the file. The label names the source, in lower-kebab-case.
-
-For example: `[CDS: Get Products][cds-get-products]`, with the definition `[cds-get-products]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-banking-api_get-products`.
+A link to an external source is a reference link, with its definition at the end of the file. The label names the source in lower-kebab-case. For example: `[CDS: Get Products][cds-get-products]`.
 
 A link to a requirement, a judgement or a different file in the repository is an inline link with a relative path.
 
 ## Identifiers
 
-### Format
-
-An identifier is a component code, a hyphen and a number of 4 digits. For example: `DH-0042`.
-
-- Pattern of the identifier: `^[A-Z]{2,5}-[0-9]{4}$`.
-- The anchor of the identifier is the identifier in lower case. For example: `dh-0042`.
-
-Reason for the lower case: GitHub changes each `id` attribute to lower case, and adds the prefix `user-content-`. A link with a lower-case fragment then always agrees with the anchor.
+An identifier is a component code, a hyphen and 4 digits, for example `DH-0042` (pattern `^[A-Z]{2,5}-[0-9]{4}$`). Its anchor is the identifier in lower case, for example `dh-0042`, because GitHub changes each `id` attribute to lower case.
 
 ### Component codes
 
-This table is the registry of the codes. A new specification adds its code to this table in the same change.
+This table is the registry of the codes. A new specification adds its code in the same change.
 
 | Component | Code |
 |---|---|
@@ -210,33 +112,19 @@ This table is the registry of the codes. A new specification adds its code to th
 | `pkg/platform/problem` | `PROB` |
 | `pkg/platform/jsonhttp` | `BODY` |
 
-A code has 2 to 5 capital letters. A code is not the name of a standard, and it is not an existing code with one letter changed. For example, `CDS` is the name of a standard, and `CON` is too near to `CONF`.
+A code has 2 to 5 capital letters. It is not the name of a standard (`CDS`), and it is not near to an existing code (`CON` and `CONF`).
 
 ### Numbers
 
-- Each component has its own numbers. They start at `0001`.
-- Requirements and judgements of a component use the same numbers.
-- The next number is the highest number that the component used, plus 1. The withdrawn list counts.
-- A gap in the numbers has no meaning.
-
-For example: the highest number in the Register specification and its withdrawn list is `REG-0120`. The next requirement is `REG-0121`.
-
-Two pull requests can use the same number. The second pull request to merge rebases and gives its new identifiers the next free numbers.
+Each component has its own numbers from `0001`, for its requirements and its judgements. The next number is the highest used number plus 1, also in the withdrawn list. A gap has no meaning. When two pull requests use the same number, the second to merge takes the next free numbers.
 
 ### A rule that changes or moves
 
-- A rule that changes its text, but not its intent, keeps its identifier.
-- A rule that splits into two rules keeps its identifier for one of them. The other rule gets a new identifier.
-- A rule that moves to a different area of the same component keeps its identifier ([ADR 0024: Identifiers][adr-0024-identifiers]).
-- A rule that moves to a different component gets the next number of that component. The old identifier goes into the withdrawn list.
-
-A change that moves or removes a rule also updates each link and each `// Verifies:` comment that uses the old identifier.
+A rule keeps its identifier when its text changes but not its intent, and when it moves to a different area ([ADR 0024: Identifiers][adr-0024-identifiers]). When a rule splits, one part keeps the identifier. A rule that moves to a different component gets a number of that component, and its old identifier goes into the withdrawn list. The change also updates each link and `// Verifies:` comment to the old identifier.
 
 ### Withdrawn list
 
-Each entry is one list item in the Withdrawn section. It keeps the anchor of the identifier, so that an old link still goes to the entry.
-
-An entry has one of these two forms:
+Each entry is one list item in the Withdrawn section, in the sequence of the numbers. It keeps the anchor, so that an old link still goes to the entry:
 
 ```markdown
 - <a id="reg-0031"></a>**REG-0031** Moved to [the revocation reasons of a CDR certificate](../../pki/DESIGN.md#pki-0044).
@@ -245,22 +133,11 @@ An entry has one of these two forms:
 
 Pattern: `^- <a id="(?<anchor>[a-z]{2,5}-[0-9]{4})"></a>\*\*(?<id>[A-Z]{2,5}-[0-9]{4})\*\* (Moved to \[.+\]\(.+#[a-z]{2,5}-[0-9]{4}\)|Removed)\.$`
 
-The entries are in the sequence of their numbers.
-
 ## Requirements
 
 ### List item
 
-A requirement is one list item, on one line. Do not wrap the line.
-
-The item has these parts, in this sequence:
-
-1. The anchor: `<a id="dh-0042"></a>`
-2. The identifier in bold: `**DH-0042**`
-3. The rule: one or more sentences, with the condition first and the response last. It ends with a full stop.
-4. The source group, in parentheses.
-
-For example:
+A requirement is one list item on one line: the anchor, the identifier in bold, the rule (condition first, response last, full stop) and the source group in parentheses.
 
 ```markdown
 - <a id="dh-0042"></a>**DH-0042** When a request has no `x-v` header, the data holder responds with 400 and the error code `urn:au-cds:error:cds-all:Header/Missing`. ([CDS: Versioning][cds-versioning])
@@ -268,28 +145,11 @@ For example:
 
 Pattern: `^- <a id="(?<anchor>[a-z]{2,5}-[0-9]{4})"></a>\*\*(?<id>[A-Z]{2,5}-[0-9]{4})\*\* (?<rule>.+\.) \((?<sources>.+)\)$`
 
-The anchor is the identifier in lower case.
-
-A requirement can have a nested list, when the rule gives a set of values. The nested items are part of the rule, and they have no identifier. The source group then comes at the end of the first line.
-
-For example:
-
-```markdown
-- <a id="pki-0021"></a>**PKI-0021** The lab operator can revoke a CDR certificate with one of these reasons. ([RFC 5280, section 5.3.1][rfc5280-reason])
-  - `unspecified`
-  - `keyCompromise`
-  - `superseded`
-```
+When the rule gives a set of values, it can have a nested list. The nested items have no identifier, and the source group is at the end of the first line.
 
 ### Table row
 
-A table is good for a set of rules that have the same shape. Each row is one requirement.
-
-- The first column is `ID`. Its cell has the anchor and the identifier in bold.
-- The last column is `Source`. Its cell has the source group, with no parentheses.
-- The other columns are yours to choose.
-
-For example:
+Each table in a group of requirements is a requirement table, for rules that have the same shape. Each row is one requirement. The first column is `ID`, with the anchor and the identifier in bold. The last column is `Source`, with the source group and no parentheses.
 
 ```markdown
 | ID | Request | Software product INACTIVE | Source |
@@ -297,50 +157,33 @@ For example:
 | <a id="dh-0210"></a>**DH-0210** | PAR endpoint | 400 `unauthorized_client` | [CDS: Data Holder Responsibilities][cds-dh-responsibilities] |
 ```
 
-Each table in a group of requirements is a requirement table.
-
-Pattern of the `ID` cell: `^<a id="(?<anchor>[a-z]{2,5}-[0-9]{4})"></a>\*\*(?<id>[A-Z]{2,5}-[0-9]{4})\*\*$`
-
 ### Source group
 
-The source group gives one or more links, separated by `; `.
+The source group gives one or more links, separated by `; `. A link is one of these:
 
-- A link to an external source names the source and its section. For example: `[CDS: Get Products][cds-get-products]`.
-- A link to a judgement has text that starts with `Judgement:`, and then the title of the judgement. For example: `[Judgement: one base URI for the public endpoints](#dh-0050)`.
-- A link to a requirement in a library specification can also be a source. For example: `[the CDS error response](../../pkg/<library>/DESIGN.md#xx-0007)`.
-- When an ADR records the choice of a rule, the ADR is the judgement of the rule. The link to the ADR then has text that starts with `Judgement:`, and the rule needs no judgement in the specification. For example: `[Judgement: the Register is the CDR intermediate CA (ADR 0022)](../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md)`. An ADR is never the judgement of a rule that the CDS or the ACCC gives. Link to that source.
+- An external source, with its name and section. For example: `[CDS: Get Products][cds-get-products]`.
+- A judgement in the same file, with the text `Judgement:` and its title. For example: `[Judgement: one base URI for the public endpoints](#dh-0050)`.
+- A requirement in a library specification.
+- An ADR that records the choice of the rule. The text starts with `Judgement:`, and the rule then needs no judgement in the specification. An ADR is never the judgement of a rule that the CDS or the ACCC gives.
 
-For example: `([CDS: Participant Endpoints][cds-participant-endpoints]; [Judgement: one base URI for the public endpoints](#dh-0050))`.
-
-An observation of a production system can be in the source group, after a link. For example: `([CP section 6.3.2][accc-cp]; observed on 2026-10-02: the intermediate is valid for 10 years)`. An observation is never the only source. When a rule has no source other than an observation, it links to a judgement. The judgement records the observation in its Basis.
+An observation of a production system can follow a link, for example `observed on 2026-10-02: the intermediate is valid for 10 years`. It is never the only source: a judgement then records it in its Basis.
 
 ### Non-functional requirements
 
-A non-functional requirement has the same form as a different requirement. Its rule starts with its quality attribute and a colon. The rest of the rule gives a condition and a response that a test can measure, with a number and a unit.
+A non-functional requirement starts its rule with a quality attribute and a colon, for example `Performance:`. Its response has a number and a unit that a test can measure. Use an existing attribute when one agrees.
 
-For example:
-
-```markdown
-- <a id="dh-0300"></a>**DH-0300** Performance: on a development workstation at 50 requests each second, 95 % of API calls complete within 200 ms. ([Judgement: a response time target for the lab](#dh-0301))
-```
-
-The quality attributes are, for example: Performance, Restart, Telemetry, Secrets, Least privilege, Portability, Conformance, Local run and Health. Use the attribute that the existing requirements use, when one agrees.
-
-- A non-functional requirement of one area is in that area.
-- A non-functional requirement of all the component is in a one-file specification, in a group with the name `Non-functional requirements`. In a `design/` directory, it is in the area file `non-functional-requirements.md`.
+A non-functional requirement of one area is in that area. One of all the component is in the group or the area file `Non-functional requirements`.
 
 ## Judgements
 
-Judgements are in the Judgements section of the file that has their requirements. Each judgement has an `###` heading and three list items, in this sequence:
+A judgement is in the Judgements section of the file that has its requirements. It has an `###` heading and three items, in this sequence:
 
 - `Kind:` one of these words:
   - `choice`: a choice that the sources do not make
   - `conflict`: a conflict between two sources, and the source that we follow
   - `gap`: a source requirement that the component does not meet
-- `Basis:` the step of the [sources process][readme-sources], and then the links to the sources that the judgement uses. The step is one of `Step 1`, `Step 2`, `Step 3.1`, `Step 3.2` and `Step 3.3`.
+- `Basis:` the step of the [sources process][readme-sources] (`Step 1`, `Step 2`, `Step 3.1`, `Step 3.2` or `Step 3.3`), and then the links to the sources that the judgement uses.
 - `Reason:` three sentences or fewer.
-
-For example:
 
 ```markdown
 ### <a id="dh-0050"></a>DH-0050 One base URI for the public endpoints
@@ -350,62 +193,36 @@ For example:
 - Reason: One base URI for all public endpoints is the least complex. A client then needs one setting.
 ```
 
-Patterns:
+Heading pattern: `^### <a id="(?<anchor>[a-z]{2,5}-[0-9]{4})"></a>(?<id>[A-Z]{2,5}-[0-9]{4}) (?<title>.+)$`
 
-- Heading: `^### <a id="(?<anchor>[a-z]{2,5}-[0-9]{4})"></a>(?<id>[A-Z]{2,5}-[0-9]{4}) (?<title>.+)$`
-- Kind: `^- Kind: (choice|conflict|gap)$`
-- Basis: `^- Basis: Step (1|2|3\.1|3\.2|3\.3)\. .+$`
-- Reason: `^- Reason: .+$`
-
-The title is a short noun phrase that names the choice, with no full stop. The link text to the judgement uses the same title.
-
-A choice with no alternative is not a judgement. Do not write one for it.
+The title is a short noun phrase with no full stop. The link text to the judgement uses the same title. A choice with no alternative is not a judgement.
 
 ## Links
 
-A link to a requirement or a judgement has descriptive text and the lower-case anchor.
+A link to a requirement or a judgement has text that tells the reader what the rule says, and the lower-case anchor. It is an inline link with a relative path: `(#dh-0042)`, `(authorisation.md#dh-0042)` or `(../../pki/DESIGN.md#pki-0044)`.
 
-| Target | Form |
-|---|---|
-| The same file | `[<descriptive text>](#dh-0042)` |
-| A different file of the same component | `[<descriptive text>](authorisation.md#dh-0042)` |
-| A different component | `[<descriptive text>](../../pki/DESIGN.md#pki-0044)` |
+- Use: `The consumer selects the accounts ([only open accounts are offered](#dh-0120)).`
+- Not: `([DH-0120](#dh-0120))` or `(see DH-0120)`.
 
-The descriptive text tells the reader what the rule says. It is not the identifier.
-
-For example:
-
-- Use: `The consumer selects the accounts on the authorisation page ([only open accounts are offered](#dh-0120)).`
-- Not: `The consumer selects the accounts on the authorisation page ([DH-0120](#dh-0120)).`
-- Not: `The consumer selects the accounts on the authorisation page (see DH-0120).`
-
-A link to a heading of a specification is permitted only for a link from outside the specifications, for example from a README. A heading anchor changes when the heading text changes.
-
-A specification can link to a heading of a different specification until the target specification follows ADR 0024. Then the link goes to an identifier.
+A heading anchor changes with its heading text. Thus a specification links to a rule by its identifier, never by a heading. A link to the glossary, or to a fixed heading of an overview, for example `README.md#non-goals`, is permitted.
 
 ## Context diagram
 
-The context diagram is a C4 level 1 diagram ([C4 model: System context diagram][c4-context]) in a Mermaid flowchart. GitHub renders it, and an agent reads it as text. The Mermaid C4 syntax is experimental, so do not use it.
+The context diagram is a C4 level 1 diagram ([C4 model: System context diagram][c4-context]) in a Mermaid `flowchart LR`. Do not use the Mermaid C4 syntax: it is experimental.
 
-- The diagram is `flowchart LR`.
-- It has one node for the component, one node for each type of user, and one node for each external system.
-- The label of a node is the name, a line break and the type in brackets. The type is one of these: `[Person]`, `[System]`, `[External system]`.
+- One node for the component, each type of user and each external system, with the label `<name><br>[<type>]`. The type is `Person`, `System` or `External system`.
 - The label of each arrow gives the purpose and the protocol.
-- The diagram has no internal parts of the component, for example its database.
+- No internal parts of the component, for example its database.
 - Three class definitions give the C4 colours.
-
-For example:
 
 ~~~markdown
 ```mermaid
 flowchart LR
   consumer["Consumer<br>[Person]"]
-  recipient["Data recipient software product<br>[External system]"]
   dataholder["Mock data holder<br>[System]"]
   register["Mock CDR Register<br>[External system]"]
 
   consumer -- "Gives an authorisation<br>HTTPS" --> dataholder
-  recipient -- "Registers and gets CDR data<br>HTTPS, mTLS" --> dataholder
   dataholder -- "Gets the software product statuses<br>HTTPS" --> register
 
   classDef person fill:#08427b,color:#fff,stroke:#052e56
@@ -413,152 +230,73 @@ flowchart LR
   classDef external fill:#999,color:#fff,stroke:#6b6b6b
   class consumer person
   class dataholder system
-  class recipient,register external
+  class register external
 ```
 ~~~
 
 ## How to choose an area
 
-[ADR 0024: Structure][adr-0024-structure] gives the rule for an area. These steps apply it:
+These steps apply the rule of [ADR 0024: Structure][adr-0024-structure]:
 
 1. Make a list of the interfaces of the component. For example: an API, a web UI, an operator interface.
 2. Make a list of the capabilities that have their own section in the primary source. For example: authorisation, from the CDS Authorisation Standards.
 3. Put each group of requirements into one item of the two lists.
-4. Merge a small group into a related area. For example, Introspection goes into the area of the tokens.
-5. When one area has more than 5,000 words, split it by interface, for example a web UI and its API. Do not split an area that is in the limit.
+4. Merge a small group into a related area. For example, introspection goes into the area of the tokens.
+5. When an area has more than 5,000 words, split it by interface, for example a web UI and its API.
 6. Give each area the name of its CDS section, when there is one.
 
-Each `###` heading of the old specification becomes a group of requirements in its area, or its rules merge into the group above it.
-
-Text that is not a requirement goes into the overview, or it goes away:
-
-- The purpose, the scope and the actors go into the summary, the goals, the non-goals and the context diagram.
-- A list of sources goes away. Each requirement links to its source.
-- A Decisions table becomes judgements in the area of their rules. A row with no alternative, or with a reason that a requirement repeats, goes away.
-- An open question becomes a judgement or a ticket.
-
-### Worked example: the data holder
-
-The table maps each `##` heading of the one-file data holder specification to its place in [`services/dataholder/design/`](../../services/dataholder/design/README.md). The judgements from the Decisions rows go to the area of their rules.
-
-| Old heading | Place |
-|---|---|
-| Purpose | Overview: summary |
-| Sources | Goes away |
-| Scope | Overview: goals and non-goals |
-| Actors | Overview: context diagram |
-| Brand | `brand.md` |
-| Product reference data | `product-reference-data.md`, with Get Products, Get Product Detail, Get Status and Get Outages from APIs, and the product load from Lab-only features |
-| Customers and accounts | `banking-apis.md`. The rules for user identifiers go to `consumer-authentication.md`. |
-| APIs | Split: each row of the endpoint table goes to the area of its API. Versioning, headers, errors and CORS go to `api-standards.md`. |
-| Authorisation server | `authorisation-server.md` |
-| Client registration | `registration.md`. The glossary term is "registration". |
-| Registration management | `registration.md` |
-| Authorisation request | `authorisation-server.md` |
-| Consumer authentication | `consumer-authentication.md` |
-| Consent | `authorisation.md` |
-| Tokens of a consent | `authorisation-server.md`. The tokens and introspection are too small for an area (step 4). |
-| Introspection | `authorisation-server.md` |
-| Data of a consent | `banking-apis.md` |
-| The end of a consent | `end-of-an-arrangement.md`. It has its own CDS sections, and with `authorisation.md` it can be more than 5,000 words. |
-| Register statuses | `registration.md`, because a status changes what a registration can do |
-| Transport security | `api-standards.md` |
-| Operator interface | `operator-interface.md` |
-| Operator console | Split by interface: `operator-console.md` (the web UI) and `operator-console-api.md` (the console API) |
-| Online bank site | Split by interface and capability: `online-bank-site.md` (the pages), `online-bank-site-sign-in.md`, `online-bank-site-accounts.md`, `consumer-dashboard.md` (its own CDS section) and `online-bank-site-api.md` |
-| Lab-only features | No area. Each rule goes to the area that it changes. For example, the product load goes to `product-reference-data.md`, and the four preset brands go to `deployment.md`. |
-| Deployment from published artifacts | `deployment.md` |
-| Non-functional requirements | `non-functional-requirements.md` |
-| Decisions | Judgements in the area of their rules |
-| Open questions | Judgements or tickets |
-
-The result is 19 area files. Some rules of the APIs, the authorisation server and the tokens are in `pkg/` library specifications, because a `pkg/` library implements them ([ADR 0024: Shared rules][adr-0024-shared]).
+For an example of the result, see the [data holder areas](../../services/dataholder/design/README.md#areas). `consumer-dashboard.md` is an area because it has its own CDS section (step 2). `operator-console.md` and `operator-console-api.md` are one capability split by interface (step 5).
 
 ## Verifies comments
 
-A test refers to the requirements that it verifies with a `// Verifies:` comment. The comment is the same in Go and TypeScript.
-
-- The comment is on its own line, directly above one of these:
-  - a Go test function: `func TestX(t *testing.T)`
-  - a `t.Run` call
-  - a case of a table test
-  - a TypeScript `it(` or `test(` call
-- The comment gives one or more identifiers, separated by `, `. They are bare identifiers, not links.
-- An identifier in the comment is a requirement, not a judgement or a withdrawn identifier.
-- The comment can be in the tests of a different component. For example, a test of the `pki` command can verify a requirement of `pkg/ca`.
-
-For example, in Go:
+A `// Verifies:` comment in a Go or TypeScript test gives the requirements that the test verifies, separated by `, `, with no links. It is on its own line, directly above a test function, a `t.Run` call, a table test case, or an `it(` or `test(` call. It can be in the tests of a different component.
 
 ```go
 // Verifies: DH-0042, DH-0043
 func TestMissingVersionHeader(t *testing.T) {
 ```
 
-For example, in TypeScript:
-
-```ts
-// Verifies: UI-0012
-it("shows the masked account number", () => {
-```
-
 Pattern: `^\s*// Verifies: [A-Z]{2,5}-[0-9]{4}(, [A-Z]{2,5}-[0-9]{4})*$`
 
 ## The specification check
 
-`mise run lint:spec` checks the rules of this file that a tool can check ([ADR 0024: Checks][adr-0024-checks]). `mise run lint` and CI run it. It gives each error and each warning with the file and the line.
+`mise run lint:spec` checks the rules of this file that a tool can check ([ADR 0024: Checks][adr-0024-checks]). CI runs it.
 
-Selection of the files:
+A specification file is `<component>/DESIGN.md`, or a `.md` file in `<component>/design/`, outside a `testdata` directory. The component code comes from the [Component codes](#component-codes) table, with rows in the form `` | `<component>` | `<CODE>` | ``.
 
-- A specification file is `<component>/DESIGN.md`, or a `.md` file in `<component>/design/`.
-- The check reads each file in a `design/` directory.
-- The check reads a `DESIGN.md` only when it has the heading `## Withdrawn`. A `DESIGN.md` with an identifier anchor but no `## Withdrawn` heading is an error.
-- The check does not read a file in a `testdata` directory.
-- The component code comes from the table in [Component codes](#component-codes). Each row of the table has the form `` | `<component>` | `<CODE>` | ``.
+In each specification file, these are errors:
 
-In each specification file that the check reads, these are errors:
+- An identifier, a requirement, a judgement, a withdrawn entry or a heading that does not agree with its format in this file. An identifier that the component uses two times.
+- A top-level list item in a group of requirements that is not a requirement.
+- A requirement with no source link, or a reference link label with no definition.
+- A bare identifier or a link whose text is only the identifier, outside code spans and fenced code blocks.
+- More than 5,000 words, as `wc -w` counts them.
+- An overview (`DESIGN.md` or `design/README.md`) with no Library specifications section or no Withdrawn section.
+- A Library specifications table that does not agree with the direct `pkg/` imports of the component, without its tests. A sub-package counts as its library.
 
-- An identifier, an anchor or a component code that does not agree with [Identifiers](#identifiers), or an identifier that the component uses two times. The withdrawn list counts.
-- A heading below `##` that is not a judgement heading in the Judgements section. See [Templates](#templates).
-- A top-level list item in a group of requirements that is not a requirement. Each top-level list item in a group is one requirement.
-- A requirement with no source group, or a source group with no link. An observation alone is not a source.
-- A reference link with a label that the file does not define.
-- A judgement with items that do not agree with [Judgements](#judgements), or a withdrawn entry that does not agree with [Withdrawn list](#withdrawn-list).
-- An identifier in text with no link, or a link whose text is only the identifier. The check finds only the codes of the registry, and it does not read code spans or fenced code blocks.
-- More than 5,000 words. The count is the number of words that whitespace separates in the full file, as `wc -w` counts them.
-- A Library specifications table that does not agree with the `pkg/` imports of the component. The check compares the Library column with the direct imports of the `.go` files in the component directory. Files with a build tag count. `_test.go` files do not count, because a test helper does not make the rules of its library apply. A library is `pkg/<name>` or `pkg/platform/<name>`. An import of a sub-package counts as its library, for example `pkg/cds/revocation` as `pkg/cds`. A web package has no Go imports, so its table is `None.`. The check does not read the Specification cell.
+In all Markdown files except this file, a link with an identifier anchor as its fragment must go to an identifier that exists.
 
-In all Markdown files of the repository, except this file, a link with a fragment in the form of an identifier anchor must go to an identifier that exists. This includes the links in ADRs and READMEs.
-
-In each test file (`_test.go`, `.test.ts`, `.test.tsx`, `.spec.ts`, `.spec.tsx`), a line that starts with `// Verifies` must agree with [Verifies comments](#verifies-comments), and each identifier in it must be a requirement that exists.
-
-A requirement that no `// Verifies:` comment refers to gives a warning, not an error.
+In each test file (`_test.go`, `.test.ts`, `.test.tsx`, `.spec.ts`, `.spec.tsx`), a `// Verifies` line must agree with [Verifies comments](#verifies-comments), and each identifier must be a requirement that exists. A requirement that no `// Verifies:` comment refers to gives a warning.
 
 ## Words and patterns to avoid
 
-| Avoid | Reason | Use |
-|---|---|---|
-| "(See Decisions)" or "see Decisions" | It has no link and does not name the judgement. | A link to the judgement in the source group. |
-| An identifier in text with no link, for example "DH-0042 says" | A reader cannot understand an identifier. | A descriptive link. A bare identifier is only for a `// Verifies:` comment. |
-| A link whose text is only the identifier, for example `[DH-0042](#dh-0042)` | The reader does not know what the rule says. | Descriptive link text. |
-| "Open question", "TBD", "TODO", "to be decided", or a question in a requirement | A specification has no open questions. | A judgement, or a ticket. |
-| "Decision" for a judgement | It is confused with an architecture decision. | "Judgement". |
-| "Judgement:" and a reason in the text of a requirement | The reason has one place. | A judgement, and a link to it. |
-| "will", "shall", "should", "may" in a requirement | A requirement is in the present tense. | "The data holder refuses …". In a library or a design system, "must" states what a user of it must do. |
-| A word that describes a change in time, for example "currently", "now", "for now", "no longer", "previously", "the new behaviour" or "the old rule" | A specification has no history. "New" and "old" in a domain sense are permitted, for example "a new CRL". | The rule as it is. Git keeps the history. |
-| "e.g.", "i.e.", "etc.", "and/or", "via" | These are not STE100. | "for example", "that is", the full list, a list, "through". |
-| "fast", "large", "as appropriate", "if possible", "user-friendly" | A test cannot measure them. | A number and a unit, or a fixed condition. |
-| Copied text of a source, or a quote longer than one phrase | A specification does not copy a source. | A link to the source, and only what the component selects, limits or adds. |
-| A name of a package, a type, a function or a database table | A specification has no implementation detail. | The behaviour that a test or a reviewer can check. |
-| An observation as the only source | An observation is not a source document. | A judgement that records the observation. |
-| An ACCC mock implementation as a source or a reason | It is not a source. | The CDS, ACCC guidance or a judgement. |
-| A test plan, for example "a test checks that …" | A specification has no test plans. | The rule only. The test refers to it with `// Verifies:`. |
-| A requirement on more than one line | The check reads one line for each requirement. | One line. |
+| Avoid | Use |
+|---|---|
+| "(See Decisions)", "Decision" for a judgement, or a reason in the text of a requirement | A link to the judgement. |
+| "Open question", "TBD", "TODO", or a question in a requirement | A judgement, or a ticket. |
+| "will", "shall", "should", "may" in a requirement | The present tense. A library or a design system uses "must" for what its user must do. |
+| A word of change in time: "currently", "now", "no longer", "the old rule" | The rule as it is. "A new CRL" in a domain sense is permitted. |
+| "e.g.", "i.e.", "etc.", "and/or", "via" | "for example", "that is", the full list, a list, "through". |
+| "fast", "large", "if possible" | A number and a unit, or a fixed condition. |
+| Copied source text, or a quote longer than one phrase | A link, and only what the component selects, limits or adds. |
+| A name of a package, a type, a function or a database table | The behaviour that a test or a reviewer can check. |
+| An ACCC mock implementation as a source or a reason | The CDS, ACCC guidance or a judgement. |
+| A test plan, for example "a test checks that …" | The rule only. The test refers to it with `// Verifies:`. |
 
 [adr-0024]: ../adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md
 [adr-0024-identifiers]: ../adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md#identifiers
 [adr-0024-structure]: ../adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md#structure
 [adr-0024-checks]: ../adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md#checks
-[adr-0024-shared]: ../adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md#shared-rules
 [readme-sources]: ../../README.md#sources-for-requirements
 [ste100]: https://www.asd-ste100.org/
 [c4-context]: https://c4model.com/diagrams/system-context
