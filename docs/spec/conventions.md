@@ -198,6 +198,7 @@ This table is the registry of the codes. A new specification adds its code to th
 | `conformance` | `CONF` |
 | `web/packages/ui` | `UI` |
 | `pkg/cds` | `CDSL` |
+| `pkg/ca` | `CA` |
 
 A code has 2 to 5 capital letters. A code is not the name of a standard, and it is not an existing code with one letter changed. For example, `CDS` is the name of a standard, and `CON` is too near to `CONF`.
 
@@ -476,7 +477,7 @@ A test refers to the requirements that it verifies with a `// Verifies:` comment
   - a TypeScript `it(` or `test(` call
 - The comment gives one or more identifiers, separated by `, `. They are bare identifiers, not links.
 - An identifier in the comment is a requirement, not a judgement or a withdrawn identifier.
-- The comment can be in the tests of a different component. For example, a test of `pkg/ca` can verify a requirement of the PKI.
+- The comment can be in the tests of a different component. For example, a test of the `pki` command can verify a requirement of `pkg/ca`.
 
 For example, in Go:
 

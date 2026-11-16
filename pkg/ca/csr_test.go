@@ -33,7 +33,7 @@ func TestACSRThatFollowsTheCDSProfileIsValid(t *testing.T) {
 	assert.NoError(t, ca.ValidateCSR(csr(t, clientCSR()), ca.Client))
 }
 
-// Verifies: PKI-0027
+// Verifies: CA-0023
 func TestASingleLabelServerNameIsValid(t *testing.T) {
 	tmpl := serverCSR()
 	tmpl.Subject.CommonName = "register"
@@ -52,7 +52,7 @@ func longHostName(n int) string {
 	return strings.TrimSuffix(name, ".")
 }
 
-// Verifies: PKI-0025, PKI-0026
+// Verifies: CA-0021, CA-0022
 func TestAServerNameAtEachLengthLimitIsValid(t *testing.T) {
 	tmpl := serverCSR()
 	tmpl.Subject.CommonName = longHostName(64)
@@ -61,7 +61,7 @@ func TestAServerNameAtEachLengthLimitIsValid(t *testing.T) {
 	assert.NoError(t, ca.ValidateCSR(csr(t, tmpl), ca.Server))
 }
 
-// Verifies: PKI-0017, PKI-0019, PKI-0021, PKI-0022, PKI-0023, PKI-0025, PKI-0026, PKI-0029
+// Verifies: CA-0013, CA-0015, CA-0017, CA-0018, CA-0019, CA-0021, CA-0022, CA-0024
 func TestACSRThatBreaksTheCDSProfileIsRefused(t *testing.T) {
 	tests := map[string]struct {
 		kind    ca.Kind
@@ -157,7 +157,7 @@ func TestACSRThatBreaksTheCDSProfileIsRefused(t *testing.T) {
 	}
 }
 
-// Verifies: PKI-0016
+// Verifies: CA-0012
 func TestACSRWithAKeyThatIsNotRSA2048IsRefused(t *testing.T) {
 	rsa3072, err := rsa.GenerateKey(rand.Reader, 3072)
 	require.NoError(t, err)
@@ -176,7 +176,7 @@ func TestACSRWithAKeyThatIsNotRSA2048IsRefused(t *testing.T) {
 	)
 }
 
-// Verifies: PKI-0018
+// Verifies: CA-0014
 func TestACSRWithASignatureThatIsNotValidIsRefused(t *testing.T) {
 	r := csr(t, clientCSR())
 	r.Signature[0] ^= 0xff
@@ -184,7 +184,7 @@ func TestACSRWithASignatureThatIsNotValidIsRefused(t *testing.T) {
 	assert.ErrorContains(t, ca.ValidateCSR(r, ca.Client), "the CSR signature is not valid")
 }
 
-// Verifies: PKI-0015
+// Verifies: CA-0011
 func TestACSRNamesEachRuleThatItBreaks(t *testing.T) {
 	tmpl := clientCSR()
 	tmpl.Subject.CommonName = ""
