@@ -292,7 +292,7 @@ The source group gives one or more links, separated by `; `.
 - A link to an external source names the source and its section. For example: `[CDS: Get Products][cds-get-products]`.
 - A link to a judgement has text that starts with `Judgement:`, and then the title of the judgement. For example: `[Judgement: one base URI for the public endpoints](#dh-0050)`.
 - A link to a requirement in a library specification can also be a source. For example: `[the CDS error response](../../pkg/<library>/DESIGN.md#xx-0007)`.
-- A link to an ADR can be a source when the ADR records the choice. Then the rule needs no separate judgement. For example: `[ADR 0022][adr-0022]` for the rule that only the Register revokes a CDR certificate. An ADR is never the source of a rule that the CDS or the ACCC gives. Link to that source.
+- When an ADR records the choice of a rule, the ADR is the judgement of the rule. The link to the ADR then has text that starts with `Judgement:`, and the rule needs no judgement in the specification. For example: `[Judgement: the Register is the CDR intermediate CA (ADR 0022)](../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md)`. An ADR is never the judgement of a rule that the CDS or the ACCC gives. Link to that source.
 
 For example: `([CDS: Participant Endpoints][cds-participant-endpoints]; [Judgement: one base URI for the public endpoints](#dh-0050))`.
 
@@ -527,7 +527,7 @@ A requirement that no `// Verifies:` comment refers to gives a warning, not an e
 | "Decision" for a judgement | It is confused with an architecture decision. | "Judgement". |
 | "Judgement:" and a reason in the text of a requirement | The reason has one place. | A judgement, and a link to it. |
 | "will", "shall", "should", "may" in a requirement | A requirement is in the present tense. | "The data holder refuses …". In a library or a design system, "must" states what a user of it must do. |
-| "currently", "now", "for now", "new", "old", "no longer", "previously" | A specification has no history. | The rule as it is. Git keeps the history. |
+| A word that describes a change in time, for example "currently", "now", "for now", "no longer", "previously", "the new behaviour" or "the old rule" | A specification has no history. "New" and "old" in a domain sense are permitted, for example "a new CRL". | The rule as it is. Git keeps the history. |
 | "e.g.", "i.e.", "etc.", "and/or", "via" | These are not STE100. | "for example", "that is", the full list, a list, "through". |
 | "fast", "large", "as appropriate", "if possible", "user-friendly" | A test cannot measure them. | A number and a unit, or a fixed condition. |
 | Copied text of a source, or a quote longer than one phrase | A specification does not copy a source. | A link to the source, and only what the component selects, limits or adds. |

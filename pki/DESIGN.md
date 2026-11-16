@@ -113,9 +113,9 @@ A CDR certificate copies the profile of the production server certificate of `se
 
 The [Register DESIGN.md][register-design-crl] gives the revocation request, the CRL listener and the other times of a new CRL. The rules of this group apply to each revocation and each CRL.
 
-- <a id="pki-0048"></a>**PKI-0048** The Register is the only component that revokes a CDR certificate. ([ADR 0022][adr-0022])
-- <a id="pki-0049"></a>**PKI-0049** The Register is the only component that signs a CRL of the intermediate. ([ADR 0022][adr-0022])
-- <a id="pki-0050"></a>**PKI-0050** The Register keeps the only list of revocations. ([ADR 0022][adr-0022])
+- <a id="pki-0048"></a>**PKI-0048** The Register is the only component that revokes a CDR certificate. ([Judgement: the Register is the CDR intermediate CA (ADR 0022)](../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md))
+- <a id="pki-0049"></a>**PKI-0049** The Register is the only component that signs a CRL of the intermediate. ([Judgement: the Register is the CDR intermediate CA (ADR 0022)](../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md))
+- <a id="pki-0050"></a>**PKI-0050** The Register keeps the only list of revocations. ([Judgement: the Register is the CDR intermediate CA (ADR 0022)](../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md))
 - <a id="pki-0051"></a>**PKI-0051** The lab operator can revoke a CDR certificate with one of these reasons. ([RFC 5280, section 5.3.1][rfc5280-reason]; [CPS section 4.9][accc-cps]: the CA does not support suspension)
   - `unspecified`
   - `keyCompromise`
@@ -138,7 +138,7 @@ The [Register DESIGN.md][register-design-crl] gives the revocation request, the 
 - <a id="pki-0064"></a>**PKI-0064** The Register serves the CRL over HTTP, with the content type `application/pkix-crl`, at the URL in each CDR certificate. ([RFC 2585, section 4.2][rfc2585-mime])
 - <a id="pki-0065"></a>**PKI-0065** A lab reset deletes the CAs and the Register database, and thus each revocation and each CRL. ([Judgement: a lab reset makes a new CRL issuer](#pki-0089))
 - <a id="pki-0066"></a>**PKI-0066** After a lab reset, the new intermediate has no revocations, and its CRL numbers start again. ([Judgement: a lab reset makes a new CRL issuer](#pki-0089))
-- <a id="pki-0067"></a>**PKI-0067** The `pki` command does not revoke certificates, sign CRLs or keep a list of revocations, and it has no `revoke` command and no `crl` command. ([ADR 0022][adr-0022])
+- <a id="pki-0067"></a>**PKI-0067** The `pki` command does not revoke certificates, sign CRLs or keep a list of revocations, and it has no `revoke` command and no `crl` command. ([Judgement: the Register is the CDR intermediate CA (ADR 0022)](../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md))
 - <a id="pki-0068"></a>**PKI-0068** The set-up issues the fixture `conformance/revoked.crt` before the lab starts, as each other fixture, and does not revoke it. ([Judgement: each conformance test revokes the fixture](#pki-0090))
 - <a id="pki-0069"></a>**PKI-0069** When a conformance test needs a revoked certificate, the test revokes the fixture through the Register operator interface with the reason `keyCompromise`. ([Judgement: each conformance test revokes the fixture](#pki-0090))
 - <a id="pki-0070"></a>**PKI-0070** When the fixture is already revoked (409), the conformance test accepts the response. ([Judgement: each conformance test revokes the fixture](#pki-0090))
@@ -149,8 +149,8 @@ The [Register DESIGN.md][register-design-crl] gives the revocation request, the 
 - <a id="pki-0072"></a>**PKI-0072** The lab creates the CA keys when it is set up. ([Judgement: no private key in the repository](#pki-0093))
 - <a id="pki-0073"></a>**PKI-0073** Only the owner can read the key file of a root CA. ([Judgement: only the owner reads a root key](#pki-0094))
 - <a id="pki-0074"></a>**PKI-0074** The deployment sets who can read the intermediate key file, and in the lab any user can read it. ([Judgement: lab keys that any user can read](#pki-0095))
-- <a id="pki-0075"></a>**PKI-0075** When the Register starts, it reads the intermediate key file, so that it can issue certificates, revoke certificates and sign CRLs. ([ADR 0022][adr-0022])
-- <a id="pki-0076"></a>**PKI-0076** The Register never reads a root key. ([ADR 0022][adr-0022])
+- <a id="pki-0075"></a>**PKI-0075** When the Register starts, it reads the intermediate key file, so that it can issue certificates, revoke certificates and sign CRLs. ([Judgement: the Register is the CDR intermediate CA (ADR 0022)](../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md))
+- <a id="pki-0076"></a>**PKI-0076** The Register never reads a root key. ([Judgement: the Register is the CDR intermediate CA (ADR 0022)](../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md))
 - <a id="pki-0077"></a>**PKI-0077** Any user can read the private key of a certificate that the lab issues for its own services and tests. ([Judgement: lab keys that any user can read](#pki-0095))
 
 ## Judgements
