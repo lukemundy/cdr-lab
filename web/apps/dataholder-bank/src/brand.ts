@@ -3,8 +3,8 @@ import { useEffect } from "react";
 
 import { getBrand } from "./api/client";
 
-// The pages say "Bank" until the data holder gives the brand name, and when it cannot (services/dataholder/DESIGN.md,
-// Online bank site).
+// The pages say "Bank" until the data holder gives the brand name, and when it cannot
+// (services/dataholder/design/online-bank-site.md, Presentation).
 const fallbackName = "Bank";
 const noPhotos: readonly string[] = [];
 

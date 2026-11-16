@@ -30,6 +30,7 @@ func (f fixedOverview) Overview(_ context.Context, at time.Time, newest int) (ap
 	return f.overview, f.err
 }
 
+// Verifies: DH-1661
 func TestTheOverviewGivesTheCountsAndTheChanges(t *testing.T) {
 	at := time.Date(2026, 11, 3, 6, 41, 7, 0, time.UTC)
 

@@ -80,6 +80,7 @@ func decodeExample(t *testing.T, file string) exampleValues {
 	return v
 }
 
+// Verifies: DH-1356, DH-1357, DH-1358
 func TestEachExampleAgreesWithItsBrandInThePresetBanksSeed(t *testing.T) {
 	seed := presetBanksSeed(t)
 

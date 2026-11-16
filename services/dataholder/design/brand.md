@@ -10,7 +10,7 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 - <a id="dh-0303"></a>**DH-0303** The instance gets its base URIs from its configuration. ([Judgement: the brand of an instance from its configuration](#dh-0370))
 - <a id="dh-0304"></a>**DH-0304** The brand name is the `brandName` of the brand on the Register. ([CDS: Register API schemas][cds-register-schemas])
 - <a id="dh-0305"></a>**DH-0305** The brand directory gives the brand name. The data holder has no other setting for the brand name. ([Judgement: one source of the brand name](#dh-0371))
-- <a id="dh-0306"></a>**DH-0306** The consumer pages, the operator console and the OTP email show the brand name. ([the brand on the consumer pages](authorisation.md#dh-0836); [the brand in the console](../DESIGN.md#presentation); [the OTP email](../DESIGN.md#the-otp-email))
+- <a id="dh-0306"></a>**DH-0306** The consumer pages, the operator console and the OTP email show the brand name. ([the brand on the consumer pages](authorisation.md#dh-0836); [the brand in the console](operator-console.md#dh-1466); [the brand name as the sender name of the OTP email](consumer-authentication.md#dh-1244))
 - <a id="dh-0307"></a>**DH-0307** The brand ID is the `dataHolderBrandId` of the brand on the Register. The configuration gives it. ([CDS: Register API schemas][cds-register-schemas])
 - <a id="dh-0308"></a>**DH-0308** When the data holder calls a software product, the client ID of the brand is its brand ID. ([CDS: Data Holders calling Data Recipients][cds-dh-calling-dr])
 - <a id="dh-0309"></a>**DH-0309** The brand has a record on the Register. Its `publicBaseUri` and its `productBaseUri` are the base URIs of the instance. ([CDS: Participant Endpoints][cds-participant-endpoints]; [CDS: Register API schemas][cds-register-schemas])
@@ -44,10 +44,10 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 | <a id="dh-0322"></a>**DH-0322** | `brand.json` | Yes | The fields of [the brand file](#dh-0331) | [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 | <a id="dh-0323"></a>**DH-0323** | `tokens.json` | Yes | The values of the brand for the semantic colour roles, the body font, the heading font and the radius of the design system. They are in the token format of the design system, with literal values only. | [design system DESIGN.md: Brands][ui-brands]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 | <a id="dh-0324"></a>**DH-0324** | `logo.svg` | Yes | The logo, legible on the brand colour of the header of the pages and on white | [design system DESIGN.md: Consumer pages][ui-consumer-pages] |
-| <a id="dh-0325"></a>**DH-0325** | `logo.png` | Yes | The logo of `logo.svg` as a PNG image for the email, legible on the brand colour of the header of the email | [the OTP email](../DESIGN.md#the-otp-email); [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
+| <a id="dh-0325"></a>**DH-0325** | `logo.png` | Yes | The logo of `logo.svg` as a PNG image for the email, legible on the brand colour of the header of the email | [the logo in the OTP email](consumer-authentication.md#dh-1251); [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 | <a id="dh-0326"></a>**DH-0326** | `mark.svg` | Yes | A square symbol of the brand, for small sizes | [design system DESIGN.md: Brands][ui-brands] |
 | <a id="dh-0327"></a>**DH-0327** | `products.json` | Yes | The product catalogue of the brand, in the format of [a load file](product-reference-data.md#dh-0234) | [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
-| <a id="dh-0328"></a>**DH-0328** | `hero.webp` | No | The hero photo of the landing page of the online bank site, with the aspect ratio of the layout | [the presentation of the online bank site](../DESIGN.md#presentation-1); [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
+| <a id="dh-0328"></a>**DH-0328** | `hero.webp` | No | The hero photo of the landing page of the online bank site, with the aspect ratio of the layout | [the hero photo on the landing page](online-bank-site.md#dh-1841); [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 | <a id="dh-0329"></a>**DH-0329** | `category-<anchor>.webp` | No | The photo of a CDS product category on the online bank site, with the anchor of the category. For example, `category-term-deposits.webp`. | [CDS: Product Categories][cds-product-categories]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 | <a id="dh-0330"></a>**DH-0330** | `ATTRIBUTION.md` | No | The source, the author and the licence of each photo, 16 KiB or less. The data holder does not read or serve it. | [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 
@@ -58,7 +58,7 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 - <a id="dh-0332"></a>**DH-0332** The `brandName` has 1 to 200 characters, and it is not only white space. ([CDS: Register API schemas][cds-register-schemas])
 - <a id="dh-0333"></a>**DH-0333** The `brandName` has no control character. For example, the data holder refuses a brand name with a line break. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 - <a id="dh-0334"></a>**DH-0334** The `bsb` has 6 digits, and it obeys the rule of a `bsb` in the operator interface. ([the rule of a BSB](operator-interface.md#dh-0739); [Judgement: the BSB of the brand for an account that the consumer opens](online-bank-site-accounts.md#dh-2304))
-- <a id="dh-0335"></a>**DH-0335** The `layout` is one of these values. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023]; [the layouts of the online bank site](../DESIGN.md#presentation-1))
+- <a id="dh-0335"></a>**DH-0335** The `layout` is one of these values. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023]; [the layouts of the online bank site](online-bank-site.md#dh-1834))
   - `meadow`
   - `ledger`
   - `horizon`
@@ -100,9 +100,9 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 - <a id="dh-0360"></a>**DH-0360** In the lab, the compose service, the host name, the database and the certificate directory of an instance have the name of its preset brand. For example, the instance of `wattle-bank` has the host name `wattle-bank`. ([Judgement: the names of the preset brands](#dh-0379))
 - <a id="dh-0361"></a>**DH-0361** The brand names, the product names, the email addresses and the host names of each preset brand and of the lab configuration do not contain "Mock", "Example" or a similar word. ([Judgement: realistic names in the lab](#dh-0380))
 - <a id="dh-0362"></a>**DH-0362** An invented domain uses the top-level domain `.test`. For example, `wattlebank.test`. ([RFC 6761, section 6.2][rfc6761-test]; [Judgement: `.test` for an invented domain](#dh-0381))
-- <a id="dh-0363"></a>**DH-0363** By default, the lab runs one preset brand: the default preset brand. ([The four preset brands in the lab](../DESIGN.md#the-four-preset-brands-in-the-lab))
+- <a id="dh-0363"></a>**DH-0363** By default, the lab runs one preset brand: the default preset brand. ([Judgement: one preset brand by default](deployment.md#dh-1360))
 - <a id="dh-0364"></a>**DH-0364** On the Register of the lab, the default preset brand has its own legal entity, with one brand. ([Judgement: realistic names in the lab](#dh-0380))
-- <a id="dh-0365"></a>**DH-0365** The lab can also run the four preset brands at the same time. Each is its own instance of the same data holder image, with its own issuer. The instances differ only in their configuration. ([CDS: Multi-Brand Support][cds-multi-brand]; [The four preset brands in the lab](../DESIGN.md#the-four-preset-brands-in-the-lab))
+- <a id="dh-0365"></a>**DH-0365** The lab can also run the four preset brands at the same time. Each is its own instance of the same data holder image, with its own issuer. The instances differ only in their configuration. ([CDS: Multi-Brand Support][cds-multi-brand]; [the compose profile of the other preset brands](deployment.md#dh-1303))
 
 ## Judgements
 

@@ -92,6 +92,7 @@ afterEach(() => {
 });
 
 describe("the customer page", () => {
+  // Verifies: DH-1416, DH-1417, DH-1418
   test("shows the customer, each account with its balances, and each arrangement", async () => {
     const requests = serve(detail);
 
@@ -143,6 +144,7 @@ describe("the customer page", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: DH-1424
   test("an arrangement that ended shows the time and the reason of its end, the method of a withdrawal, and the status of its notice", async () => {
     serve(detail);
 
@@ -157,6 +159,7 @@ describe("the customer page", () => {
     expect(valueOf(mobile, "Notice status")).toBe("FAILED");
   });
 
+  // Verifies: DH-1425
   test("an arrangement with no accounts shows None, because a consent with no bank scope has no accounts", async () => {
     serve(detail);
 
@@ -166,6 +169,7 @@ describe("the customer page", () => {
     expect(valueOf("Recipient Mobile", "Accounts")).toBe("None");
   });
 
+  // Verifies: DH-1426
   test("an arrangement with a notice shows each attempt of the notice with its time and its result", async () => {
     serve(detail);
 
@@ -189,6 +193,7 @@ describe("the customer page", () => {
     ).not.toContain("Notice attempts");
   });
 
+  // Verifies: DH-1478
   test("the copy buttons of the BSB and the account number copy the digits only", async () => {
     const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue();
     serve(detail);
@@ -253,6 +258,7 @@ describe("the customer page", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: DH-1423
   test("a row of the list links to the detail, and the navigation item stays current", async () => {
     serve(detail);
     worker.use(
@@ -293,6 +299,7 @@ describe("the customer page", () => {
     );
   });
 
+  // Verifies: DH-1427
   test("an arrangement links to the registration of its client only while the registration exists", async () => {
     serve(detail);
     worker.use(

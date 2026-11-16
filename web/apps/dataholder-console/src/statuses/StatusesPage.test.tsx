@@ -22,6 +22,7 @@ const rowOf = (id: string) => table().getByRole("row").filter({ hasText: id });
 const registrationFilter = () => page.getByRole("combobox", { name: "Registration" });
 
 describe("the Register statuses page", () => {
+  // Verifies: DH-1436, DH-1437, DH-1438
   test("shows each software product with its name, its status, and the time of the last response of the Register", async () => {
     serve({
       data: [
@@ -107,6 +108,7 @@ describe("the Register statuses page", () => {
     expect(router.history.length).toBe(historyLength + 3);
   });
 
+  // Verifies: DH-1439
   test("says when the data holder has not got the statuses", async () => {
     serve({ data: [] });
 

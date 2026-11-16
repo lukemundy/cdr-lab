@@ -61,6 +61,7 @@ func budgetConsent() app.Consent {
 	}
 }
 
+// Verifies: DH-1766, DH-1767
 func TestTheConsentsGiveEachArrangementWithItsDataRecipientAccountsAndDisclosures(t *testing.T) {
 	resp := signedInConsents(t, &consents{list: []app.Consent{budgetConsent()}})
 
@@ -86,6 +87,7 @@ func TestTheConsentsGiveEachArrangementWithItsDataRecipientAccountsAndDisclosure
 	}]}`, resp.body)
 }
 
+// Verifies: DH-1766
 func TestAnEndedConsentHasTheTimeOfItsEnd(t *testing.T) {
 	withdrawn := budgetConsent()
 	withdrawn.Arrangement.ArrangementID = "arrangement-2"
@@ -112,6 +114,7 @@ func TestACustomerWithNoConsentHasAnEmptyList(t *testing.T) {
 	assert.JSONEq(t, `{"consents": []}`, resp.body)
 }
 
+// Verifies: DH-1743
 func TestTheConsentsNeedASession(t *testing.T) {
 	s := newSiteWith(t, banksite.Ports{
 		Customers: newCustomers(), Consents: &consents{list: []app.Consent{budgetConsent()}},
@@ -130,6 +133,7 @@ func TestAFailureOfTheConsentsIsAServerError(t *testing.T) {
 	assert.NotContains(t, resp.body, "no database")
 }
 
+// Verifies: DH-1744
 func TestTheConsentsOfACustomerThatTheDataHolderNoLongerHasEndTheSession(t *testing.T) {
 	const gone = "00000002"
 

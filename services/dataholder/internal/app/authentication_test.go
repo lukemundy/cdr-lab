@@ -61,6 +61,7 @@ func newAuthSetup() *authSetup {
 	return s
 }
 
+// Verifies: DH-1205, DH-1220, DH-1222
 func TestAnOTPGoesToTheEmailAddressOfTheCustomerAndIsThenAccepted(t *testing.T) {
 	s := newAuthSetup()
 
@@ -76,6 +77,7 @@ func TestAnOTPGoesToTheEmailAddressOfTheCustomerAndIsThenAccepted(t *testing.T) 
 	assert.Equal(t, knownCustomer, auth.CustomerNumber())
 }
 
+// Verifies: DH-1203
 func TestTheEmailAddressInADifferentCaseGetsTheOTPAndACorrectEntryAuthenticatesTheCustomer(t *testing.T) {
 	s := newAuthSetup()
 
@@ -90,6 +92,7 @@ func TestTheEmailAddressInADifferentCaseGetsTheOTPAndACorrectEntryAuthenticatesT
 	assert.Equal(t, knownCustomer, auth.CustomerNumber())
 }
 
+// Verifies: DH-1223
 func TestAnEmailAddressThatNoCustomerHasGetsNoEmailAndNoError(t *testing.T) {
 	s := newAuthSetup()
 
@@ -103,6 +106,7 @@ func TestAnEmailAddressThatNoCustomerHasGetsNoEmailAndNoError(t *testing.T) {
 	assert.Empty(t, auth.CustomerNumber())
 }
 
+// Verifies: DH-1225
 func TestAnOTPIsRefusedAfter5Minutes(t *testing.T) {
 	s := newAuthSetup()
 	auth, err := s.authenticator.SendOTP(t.Context(), domain.Authentication{}, knownCustomer, "Budget App")
@@ -114,6 +118,7 @@ func TestAnOTPIsRefusedAfter5Minutes(t *testing.T) {
 	assert.Equal(t, domain.OTPIncorrect, result)
 }
 
+// Verifies: DH-1223
 func TestACustomerNumberThatDoesNotExistGetsNoEmailAndNoError(t *testing.T) {
 	s := newAuthSetup()
 
@@ -126,6 +131,7 @@ func TestACustomerNumberThatDoesNotExistGetsNoEmailAndNoError(t *testing.T) {
 	assert.Equal(t, domain.OTPIncorrect, result)
 }
 
+// Verifies: DH-1223, DH-1229
 func TestACustomerNumberThatDoesNotExistHasTheSameLimitOfOTPs(t *testing.T) {
 	s := newAuthSetup()
 	auth := domain.Authentication{}
@@ -141,6 +147,7 @@ func TestACustomerNumberThatDoesNotExistHasTheSameLimitOfOTPs(t *testing.T) {
 	require.ErrorIs(t, err, domain.ErrTooManyOTPs)
 }
 
+// Verifies: DH-1229
 func TestAFourthOTPIsNotSent(t *testing.T) {
 	s := newAuthSetup()
 	auth := domain.Authentication{}
@@ -192,6 +199,7 @@ func (f failingCustomers) Customer(context.Context, string) (app.CustomerRecord,
 	return app.CustomerRecord{}, f.err
 }
 
+// Verifies: DH-1264, DH-1266
 func TestACustomerWithAFixedOTPGetsItByEmailAndIsAuthenticatedWithIt(t *testing.T) {
 	s := newAuthSetup()
 	fixed, err := domain.ParseFixedOTPs("alex@example.com:111111")

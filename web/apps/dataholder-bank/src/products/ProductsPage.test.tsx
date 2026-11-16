@@ -3,6 +3,7 @@ import { page } from "vitest/browser";
 
 import { product, renderApp, serveProducts } from "../test/app";
 
+// Verifies: DH-1812, DH-1814
 test("the product list shows the name and the description of each product in the group of its category", async () => {
   serveProducts([
     product("loan", {
@@ -46,6 +47,7 @@ test("the product list says when the bank has no products", async () => {
   await expect.element(page.getByText("The bank has no products now.")).toBeVisible();
 });
 
+// Verifies: DH-1814
 test("each product links to its detail", async () => {
   serveProducts([product("everyday")]);
 

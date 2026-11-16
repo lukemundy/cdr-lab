@@ -127,10 +127,12 @@ func get(t *testing.T, ports banksite.Ports, target string) response {
 	return response{status: resp.StatusCode, header: resp.Header, body: string(body)}
 }
 
+// Verifies: DH-1715
 func TestTheDocumentClosesEachObjectSchema(t *testing.T) {
 	assert.NoError(t, loadSpec(t).CheckClosed())
 }
 
+// Verifies: DH-1724
 func TestTheBrandGivesTheBrandNameTheTextOfTheFooterTheLayoutAndThePhotos(t *testing.T) {
 	ports := banksite.Ports{
 		BrandName: "Wattle Bank", BrandLayout: "meadow", BrandPhotos: []string{"category-overdrafts.webp", "hero.webp"},
@@ -156,6 +158,7 @@ func TestABrandWithNoPhotosGivesAnEmptyList(t *testing.T) {
 	assert.Contains(t, resp.body, `"photos":[]`)
 }
 
+// Verifies: DH-1726, DH-1730
 func TestTheProductsAreEachCurrentProductAtTheTimeOfTheRequestOnOnePage(t *testing.T) {
 	reader := &products{list: []domain.Product{saver()}}
 
@@ -176,6 +179,7 @@ func TestNoCurrentProductGivesAnEmptyList(t *testing.T) {
 	assert.JSONEq(t, `{"products": []}`, resp.body)
 }
 
+// Verifies: DH-1727
 func TestTheDetailGivesTheCurrentProductWithTheID(t *testing.T) {
 	reader := &products{list: []domain.Product{saver()}}
 
@@ -193,6 +197,7 @@ func TestTheDetailGivesTheCurrentProductWithTheID(t *testing.T) {
 	assert.JSONEq(t, string(want), resp.body)
 }
 
+// Verifies: DH-1727
 func TestTheDetailOfAProductThatIsNotCurrentIsNotFound(t *testing.T) {
 	resp := get(t, banksite.Ports{Products: &products{list: []domain.Product{saver()}}}, "/api/products/ended-saver")
 
@@ -211,7 +216,9 @@ func TestAFailureOfTheStoreIsAServerError(t *testing.T) {
 	}
 }
 
-// The CSP of the site permits styles and images from the same origin only (DESIGN.md: Listener and security).
+// The CSP of the site permits styles and images from the same origin only.
+//
+// Verifies: DH-2071, DH-2074
 func TestTheSiteServesTheBrandFilesWithTheResponseHeadersOfTheSite(t *testing.T) {
 	ports := banksite.Ports{BrandFiles: func(routes *httproute.Routes) {
 		routes.Handle("GET /brand/styles.css", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
@@ -226,6 +233,7 @@ func TestTheSiteServesTheBrandFilesWithTheResponseHeadersOfTheSite(t *testing.T)
 	assert.True(t, strings.HasPrefix(resp.header.Get("Content-Security-Policy"), "default-src 'self';"))
 }
 
+// Verifies: DH-2069
 func TestTheSiteHasNoHSTSAndThePagesOfTheProductsSetNoCookie(t *testing.T) {
 	for _, target := range []string{"/", "/products", "/api/brand", "/api/products"} {
 		t.Run(target, func(t *testing.T) {
@@ -239,6 +247,7 @@ func TestTheSiteHasNoHSTSAndThePagesOfTheProductsSetNoCookie(t *testing.T) {
 }
 
 // The UI gives a label for each value of the document, so each list must be the list of the data holder and the CDS.
+// Verifies: DH-1731
 func TestEachEnumerationOfTheDocumentHasTheValuesOfTheDataHolderAndTheCDS(t *testing.T) {
 	document, err := openapi3.NewLoader().LoadFromFile("openapi.yaml")
 	require.NoError(t, err)

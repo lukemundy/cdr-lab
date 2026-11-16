@@ -5,6 +5,7 @@ import { formatPeriod } from "./period";
 const hour = 3600;
 const day = 24 * hour;
 
+// Verifies: DH-1915
 test("a sharing duration of 24 hours or less is one occasion, as on the consent page", () => {
   expect(formatPeriod(0)).toBe("One occasion");
   expect(formatPeriod(day)).toBe("One occasion");

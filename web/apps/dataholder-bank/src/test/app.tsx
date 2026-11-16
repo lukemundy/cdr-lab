@@ -11,13 +11,14 @@ import { createOpenApiHttp } from "openapi-msw";
 import { afterEach, beforeAll, beforeEach, expect } from "vitest";
 import { page } from "vitest/browser";
 
-import type {
-  Account,
-  Brand,
-  Consent,
-  ProductDetail,
-  SessionCustomer,
-  Transaction,
+import {
+  type Account,
+  type Brand,
+  type Consent,
+  type ProductDetail,
+  type SessionCustomer,
+  sessionEndedType,
+  type Transaction,
 } from "../api/client";
 import type { paths } from "../api/schema.gen";
 import { createAppRouter } from "../router";
@@ -48,7 +49,7 @@ const noSession = {
 };
 
 export const sessionEnded = {
-  type: "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#session" as const,
+  type: sessionEndedType,
   title: "The session ended" as const,
   status: 403,
   detail: "The bank signed you out. Sign in again.",
@@ -67,7 +68,7 @@ export const worker = setupWorker(
   http.get("/api/session", ({ response }) => response(403).json(noSession)),
 );
 
-// DESIGN.md (Online bank site): each page is usable at 320 CSS px with no horizontal scroll.
+// services/dataholder/design/online-bank-site.md (Accessibility): each page is usable at 320 CSS px with no horizontal scroll.
 export const narrowWidth = 320;
 
 // No worker.stop() after the file: in Firefox, it also stops the mocks of the next test file.

@@ -244,7 +244,7 @@ Rules for all components:
 [adr-0016]: ../../../docs/adr/0016-design-system-on-shadcn-base-ui-and-dtcg-tokens.md
 [tokens-package]: ../tokens/
 [fonts-list]: ../tokens/fonts.json
-[dataholder-site]: ../../../services/dataholder/DESIGN.md#online-bank-site
+[dataholder-site]: ../../../services/dataholder/design/online-bank-site.md
 [readme-sources]: ../../../README.md#sources-for-requirements
 [research]: ../../../docs/research/2026-10-22-web-front-ends.md
 [register-console]: ../../../services/register/DESIGN.md#operator-console

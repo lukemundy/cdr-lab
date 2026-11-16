@@ -11,7 +11,8 @@ import { signIn } from "../api/client";
 import { useBrand, usePageTitle } from "../brand";
 import { isSessionEnded, sessionKey, useSession } from "./session";
 
-// The page requires a password, but the site does not send it (services/dataholder/DESIGN.md, Sign-in and sign-out).
+// The page requires a password, but the site does not send it (services/dataholder/design/online-bank-site-sign-in.md,
+// DH-2021 and DH-2022).
 const noPassword: FormRefusal = {
   problem: { title: "Enter a password", detail: "Enter a password. Any password works." },
   fieldErrors: [{ pointer: "#/password", detail: "Enter a password. Any password works." }],
@@ -42,8 +43,8 @@ export function SignInPage() {
       {isSessionEnded(session.error) && (
         <output className="block font-semibold">{name} signed you out. Sign in again.</output>
       )}
-      {/* A note that looks different from the lock note of the CDR pages (DESIGN.md, Separation from the CDR
-          authentication). */}
+      {/* A note that looks different from the lock note of the CDR pages (design/online-bank-site-sign-in.md,
+          DH-2054). */}
       <div className="rounded-md border-2 border-border-strong p-4">
         <p className="m-0">
           This is {name} online banking. This is a demonstration bank: any password works here, and

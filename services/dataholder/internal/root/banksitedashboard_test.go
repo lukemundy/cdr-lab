@@ -75,8 +75,9 @@ func (l siteLab) getAccounts(t *testing.T, token string, cert *x509.Certificate)
 	return rec.Code
 }
 
-// DESIGN.md: Tests of the consumer dashboard. A refresh of a revoked grant gives invalid_grant: pkg/authserver,
+// A refresh of a revoked grant gives invalid_grant: pkg/authserver,
 // TestARevocationOfAnArrangementOfTheClientGivesNoContentAndEndsEachToken.
+// Verifies: DH-1919, DH-1930
 func TestTheDashboardShowsTheDisclosuresOfAConsentAndAWithdrawalOnTheDashboardStopsItsTokens(t *testing.T) {
 	lab := newSiteLab(t)
 	lab.consent(t, "arrangement-1", "account-1")

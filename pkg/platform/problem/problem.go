@@ -14,21 +14,28 @@ const (
 	fieldErrorsType   = "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002"
 	fieldErrorsTitle  = "Values in the request are not valid"
 	fieldErrorsDetail = "One or more values in the request are not valid."
+	sessionEndedType  = "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0010"
+	sessionEndedTitle = "The session ended"
 )
 
 // Write uses the type about:blank, so that the title is the HTTP status phrase.
 func Write(w http.ResponseWriter, status int, detail string) {
-	WriteTyped(w, "about:blank", http.StatusText(status), status, detail)
+	writeTyped(w, "about:blank", http.StatusText(status), status, detail)
 }
 
-// WriteTyped is for a problem that a client must tell apart from other problems with the same status.
-func WriteTyped(w http.ResponseWriter, typeURI, title string, status int, detail string) {
+func writeTyped(w http.ResponseWriter, typeURI, title string, status int, detail string) {
 	write(w, status, struct {
 		Type   string `json:"type"`
 		Title  string `json:"title"`
 		Status int    `json:"status"`
 		Detail string `json:"detail"`
 	}{Type: typeURI, Title: title, Status: status, Detail: detail})
+}
+
+// WriteSessionEnded is for a request with a session cookie whose session ended, so that a UI can tell it apart from a
+// request with no session.
+func WriteSessionEnded(w http.ResponseWriter, status int, detail string) {
+	writeTyped(w, sessionEndedType, sessionEndedTitle, status, detail)
 }
 
 // WriteUnexpected does not log or show the message of err, because database errors can contain query arguments.

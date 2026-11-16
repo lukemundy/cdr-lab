@@ -4,12 +4,12 @@ This area gives the customers and accounts of the brand, and the APIs that give 
 
 ## Customers and accounts
 
-The [operator interface](operator-interface.md) gives the fields of a request that creates customer data. [Consumer authentication](../DESIGN.md#customers-and-accounts) gives the user identifiers of a customer.
+The [operator interface](operator-interface.md) gives the fields of a request that creates customer data. [Consumer authentication](consumer-authentication.md) gives the user identifiers of a customer.
 
 - <a id="dh-1000"></a>**DH-1000** The data holder holds only the customer, account and transaction data that the authentication, the authorisation and the banking APIs need. For example, it holds no address and no phone number of a customer. ([Judgement: the fields of a customer, an account and a transaction](operator-interface.md#dh-0771))
 - <a id="dh-1001"></a>**DH-1001** A customer is a person. ([CDS: Get Customer][cds-get-customer]; [Judgement: only persons with their own accounts](#dh-1150))
 - <a id="dh-1002"></a>**DH-1002** A customer has a customer number, a last name, an optional first name, an email address, the time of its creation and the time of its last change. ([Judgement: the fields of a customer, an account and a transaction](operator-interface.md#dh-0771))
-- <a id="dh-1003"></a>**DH-1003** The lab operator [creates a customer with the operator interface](operator-interface.md#dh-0720), or the consumer creates one with a [sign-up on the online bank site](../DESIGN.md#sign-up). Both use the same rules. ([Judgement: the fields of a customer, an account and a transaction](operator-interface.md#dh-0771))
+- <a id="dh-1003"></a>**DH-1003** The lab operator [creates a customer with the operator interface](operator-interface.md#dh-0720), or the consumer creates one with a [sign-up on the online bank site](online-bank-site-sign-in.md#dh-2002). Both use the same rules. ([Judgement: the fields of a customer, an account and a transaction](operator-interface.md#dh-0771))
 - <a id="dh-1004"></a>**DH-1004** An account has one customer, who is its only owner. ([CDS: BankingAccountV3][cds-schema-account]; [Judgement: only persons with their own accounts](#dh-1150))
 - <a id="dh-1005"></a>**DH-1005** An account has these fields. ([CDS: Product Categories][cds-product-categories]; [CDS: BankingAccountV3][cds-schema-account]; [Judgement: the fields of a customer, an account and a transaction](operator-interface.md#dh-0771))
   - a display name
@@ -21,7 +21,7 @@ The [operator interface](operator-interface.md) gives the fields of a request th
   - the time of its creation
   - a status, open or closed
   - the time of its close, when it is closed
-- <a id="dh-1006"></a>**DH-1006** An account is open when the lab operator creates it, or when the consumer opens it on the online bank site. ([the opening of an account](../DESIGN.md#opening-of-an-account); [Judgement: only the close of an account changes the customer data](operator-interface.md#dh-0772))
+- <a id="dh-1006"></a>**DH-1006** An account is open when the lab operator creates it, or when the consumer opens it on the online bank site. ([the open of an account on the site](online-bank-site-accounts.md#dh-2210); [Judgement: only the close of an account changes the customer data](operator-interface.md#dh-0772))
 - <a id="dh-1007"></a>**DH-1007** The lab operator, or the consumer on the online bank site, can close an open account. A closed account cannot open again. ([Judgement: only the close of an account changes the customer data](operator-interface.md#dh-0772); [Judgement: a closed account stays in its arrangements](#dh-1160))
 - <a id="dh-1008"></a>**DH-1008** A customer is eligible while the customer has an open account. When the customer has no open account, [the arrangements of the customer end](end-of-an-arrangement.md#dh-0918). ([CDR Rules][cdr-rules], rule 1.10B(1)(b))
 - <a id="dh-1009"></a>**DH-1009** Each account can be accessed online. ([CDR Rules][cdr-rules], Schedule 3, clause 2.1)
@@ -127,7 +127,7 @@ The rules of this group are for the APIs on the resource base URI and for the Us
 - <a id="dh-1118"></a>**DH-1118** When the data holder cannot write the record, the response is 500 with no CDR data. ([CDR Rules][cdr-rules], rule 9.3(1)(d); [Judgement: the record before the response](#dh-1172))
 - <a id="dh-1119"></a>**DH-1119** A response that is not 2xx gives no record. ([CDR Rules][cdr-rules], rule 9.3(1)(d))
 - <a id="dh-1120"></a>**DH-1120** A response to `HEAD` gives no record, because it has no body. ([RFC 9110, section 9.3.2][rfc9110-head])
-- <a id="dh-1121"></a>**DH-1121** The [consumer dashboard](../DESIGN.md#consumer-dashboard) shows a disclosure at the next read after the response. ([CDR Rules][cdr-rules], rule 7.9(1))
+- <a id="dh-1121"></a>**DH-1121** The [consumer dashboard](consumer-dashboard.md#dh-1919) shows a disclosure at the next read after the response. ([CDR Rules][cdr-rules], rule 7.9(1))
 - <a id="dh-1122"></a>**DH-1122** The data holder does not remove a record of a disclosure. ([CDR Rules][cdr-rules], rule 9.3(5); [Judgement: no removal of the records of disclosures](#dh-1175))
 
 ## Judgements

@@ -97,6 +97,7 @@ const (
 	endsCurrent   = `{"ends": ["arrangement-current"]}`
 )
 
+// Verifies: DH-1643, DH-1645
 func TestEachOpenAccountHasACloseThatEndsNoArrangementWhileAnotherAccountIsOpenAndACreateOfATransaction(
 	t *testing.T,
 ) {
@@ -118,6 +119,7 @@ func TestEachOpenAccountHasACloseThatEndsNoArrangementWhileAnotherAccountIsOpenA
 	}
 }
 
+// Verifies: DH-1644
 func TestACloseClosesTheAccountAndThenTheLastOpenAccountGivesEachArrangementThatItEnds(t *testing.T) {
 	r := twoAccountsAndAnArrangement(t)
 
@@ -134,6 +136,7 @@ func TestACloseClosesTheAccountAndThenTheLastOpenAccountGivesEachArrangementThat
 	assert.Equal(t, "arrangement-current", detail.Accounts[1].Actions[0].Ends[0].ArrangementID)
 }
 
+// Verifies: DH-1650
 func TestTheCloseOfTheLastOpenAccountEndsEachArrangementThatItsConfirmationNamed(t *testing.T) {
 	r := twoAccountsAndAnArrangement(t)
 	require.Equal(t, http.StatusNoContent, post(t, r.ports, closeEveryday, endsNothing).status)
@@ -148,6 +151,7 @@ func TestTheCloseOfTheLastOpenAccountEndsEachArrangementThatItsConfirmationNamed
 }
 
 // Two tabs show the detail with two open accounts. Each close ends no arrangement in the confirmation.
+// Verifies: DH-1651
 func TestACloseThatADifferentCloseMadeTheLastIsAConflictAndChangesNothing(t *testing.T) {
 	r := twoAccountsAndAnArrangement(t)
 	require.Equal(t, http.StatusNoContent, post(t, r.ports, closeSaver, endsNothing).status)
@@ -173,6 +177,7 @@ func TestACloseThatIsNotTheLastWithArrangementsInTheRequestIsAConflict(t *testin
 	assert.Equal(t, "OPEN", detailOf(t, r).Accounts[0].OpenStatus)
 }
 
+// Verifies: DH-1648
 func TestTheCloseOfAClosedAccountIsAConflictAndChangesNothing(t *testing.T) {
 	r := twoAccountsAndAnArrangement(t)
 	require.Equal(t, http.StatusNoContent, post(t, r.ports, closeEveryday, endsNothing).status)
@@ -188,6 +193,7 @@ func TestTheCloseOfAClosedAccountIsAConflictAndChangesNothing(t *testing.T) {
 	assert.JSONEq(t, before, get(t, r.ports, "/api/customers/00000001").body)
 }
 
+// Verifies: DH-1620
 func TestACloseWithABodyThatIsNotValidIsABadRequestAndChangesNothing(t *testing.T) {
 	r := twoAccountsAndAnArrangement(t)
 
@@ -205,6 +211,7 @@ func TestACloseWithABodyThatIsNotValidIsABadRequestAndChangesNothing(t *testing.
 	assert.Equal(t, "OPEN", detailOf(t, r).Accounts[0].OpenStatus)
 }
 
+// Verifies: DH-1622
 func TestTheCloseOfAnUnknownCustomerOrAccountIsNotFoundWithNoIdentifierInTheDetail(t *testing.T) {
 	r := twoAccountsAndAnArrangement(t)
 
@@ -222,6 +229,7 @@ func TestTheCloseOfAnUnknownCustomerOrAccountIsNotFoundWithNoIdentifierInTheDeta
 
 const withdrawCurrent = "/api/customers/00000001/arrangements/arrangement-current/withdraw"
 
+// Verifies: DH-1646
 func TestEachArrangementThatDidNotEndHasAWithdrawThatEndsOnlyThatArrangement(t *testing.T) {
 	detail := detailOf(t, twoAccountsAndAnArrangement(t))
 
@@ -254,6 +262,7 @@ func TestAWithdrawalEndsTheArrangementWithTheAlternativeMethodAndANotice(t *test
 }
 
 // Two tabs show the same arrangement as current.
+// Verifies: DH-1648
 func TestTheWithdrawalOfAnArrangementThatEndedIsAConflictAndChangesNothing(t *testing.T) {
 	r := twoAccountsAndAnArrangement(t)
 	require.Equal(t, http.StatusNoContent, post(t, r.ports, withdrawCurrent, "").status)
@@ -274,6 +283,7 @@ func TestTheWithdrawalOfAnArrangementThatEndedIsAConflictAndChangesNothing(t *te
 	assert.JSONEq(t, before, get(t, r.ports, "/api/customers/00000001").body)
 }
 
+// Verifies: DH-1622
 func TestTheWithdrawalOfAnUnknownCustomerOrArrangementIsNotFoundWithNoIdentifierInTheDetail(t *testing.T) {
 	r := twoAccountsAndAnArrangement(t)
 	addCustomer(t, r.customers, "00000002", "Sam", "Example")

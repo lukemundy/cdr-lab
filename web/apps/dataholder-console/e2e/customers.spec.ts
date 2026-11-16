@@ -11,8 +11,7 @@ import {
 // The brandName of the Wattle Bank brand in services/register/seed/example.json, which compose.yaml gives.
 const brandName = "Wattle Bank";
 
-// The shell shows the brand: the header on the brand colour and the side navigation on the hero colour
-// (services/dataholder/DESIGN.md, Operator console).
+// Verifies: DH-1466, DH-1468, DH-1470, DH-1472, DH-1485
 test("the console gives the brand in the shell and the tab", async ({ page }) => {
   await page.goto("/");
 
@@ -44,6 +43,7 @@ test("the console gives the brand in the shell and the tab", async ({ page }) =>
   await expectNoAxeViolations(page);
 });
 
+// Verifies: DH-1415
 test("the operator finds a customer by a part of each field, with no difference for case", async ({
   page,
 }) => {
@@ -86,6 +86,7 @@ test("the operator finds a customer by a part of each field, with no difference 
   ).toBeVisible();
 });
 
+// Verifies: DH-1473
 test("the search, the sort and the page of the list stay the same after a reload and in a link", async ({
   page,
   browser,
@@ -176,6 +177,7 @@ test("the operator sorts the customers by the number of open accounts, in both d
   await expect.poll(rows).toEqual(numbers.toReversed());
 });
 
+// Verifies: DH-1479
 test("the list of customers passes the automated accessibility checks", async ({ page }) => {
   const name = uniqueName();
   await createCustomer({

@@ -68,6 +68,7 @@ describe("a frequency", () => {
   });
 });
 
+// Verifies: DH-1833
 test("a date shows in Australian English with no time", () => {
   expect(formatDate("2027-03-01T00:00:00+08:00")).toBe("1 March 2027");
 });
@@ -136,6 +137,7 @@ describe("an additionalValue", () => {
     expect(additionalValue(kind, type, value)).toEqual(want);
   });
 
+  // Verifies: DH-1823
   test("a value that is not in the format of its type shows as it is", () => {
     expect(additionalValue("feature", "FREE_TXNS", "unlimited")).toEqual({
       term: "Number",

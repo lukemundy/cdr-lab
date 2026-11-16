@@ -6,7 +6,7 @@ info:
   version: "1"
   description: >-
     The same-origin API of the operator console of the mock data holder. It has no version in its path,
-    because the UI and the API ship together (services/dataholder/DESIGN.md, Console API).
+    because the UI and the API ship together (services/dataholder/design/operator-console-api.md).
 paths:
   /api/brand:
     get:

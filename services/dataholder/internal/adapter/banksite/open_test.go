@@ -80,6 +80,7 @@ func signedInOpen(t *testing.T, o *opener, body string) response {
 	})
 }
 
+// Verifies: DH-1761
 func TestAnOpenGivesTheNewAccountWithTheFieldsOfAnAccountOfTheList(t *testing.T) {
 	o := &opener{opened: opened()}
 
@@ -105,6 +106,7 @@ func TestAFailureOfTheReadAfterAnOpenIsAServerError(t *testing.T) {
 	assert.NotContains(t, resp.body, "no database")
 }
 
+// Verifies: DH-1743
 func TestAnOpenNeedsASession(t *testing.T) {
 	o := &opener{opened: opened(), reader: &accounts{}}
 	s := newSiteWith(t, banksite.Ports{Customers: newCustomers(), Opener: o, Accounts: o.reader})
@@ -124,7 +126,7 @@ func TestAnOpenGivesTheCreditLimitAndTheLoanAmountOfTheRequestToTheOpener(t *tes
 	assert.Equal(t, domain.OpeningInput{CreditLimit: new("5000.00"), LoanAmount: new("1.00")}, o.input)
 }
 
-// Verifies: PROB-0002
+// Verifies: PROB-0002, DH-1759, DH-1760
 func TestAnOpenThatTheDataHolderRefusesGivesAFieldErrorInPlainLanguage(t *testing.T) {
 	tests := map[string]struct {
 		err     error
@@ -163,6 +165,7 @@ func TestAnOpenThatTheDataHolderRefusesGivesAFieldErrorInPlainLanguage(t *testin
 	}
 }
 
+// Verifies: DH-1719
 func TestAnOpenWithABodyThatIsNotValidGives400AndOpensNoAccount(t *testing.T) {
 	for name, body := range map[string]string{
 		"not JSON":      `productId=saver`,
@@ -188,6 +191,7 @@ func TestAFailureOfAnOpenIsAServerError(t *testing.T) {
 	assert.NotContains(t, resp.body, "no database")
 }
 
+// Verifies: DH-1744
 func TestAnOpenForACustomerThatTheDataHolderNoLongerHasEndsTheSession(t *testing.T) {
 	const gone = "00000002"
 
@@ -210,7 +214,7 @@ func TestAnOpenForACustomerThatTheDataHolderNoLongerHasEndsTheSession(t *testing
 }
 
 // The UI gives the field of an open from these categories, so the document must give the rule of the data holder.
-// Verifies: DH-2213, DH-2214
+// Verifies: DH-1732, DH-2213, DH-2214
 func TestTheDocumentGivesTheCategoriesOfACreditLimitAndOfALoanAmount(t *testing.T) {
 	document, err := openapi3.NewLoader().LoadFromFile("openapi.yaml")
 	require.NoError(t, err)
