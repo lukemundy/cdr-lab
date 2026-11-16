@@ -103,7 +103,7 @@ The file is `DESIGN.md` in the directory of the component. It has the sections o
 <Link definitions>
 ~~~
 
-When the component imports no `pkg/` library, the Library specifications section has the line `None.` in place of the table. When no identifier is withdrawn, the Withdrawn section has the line `None.`.
+When the component imports no `pkg/` library, the Library specifications section has the line `None.` in place of the table. When no identifier is withdrawn, the Withdrawn section has the line `None.`. When a library has no specification, its Specification cell is `None.`.
 
 ### Overview of a `design/` directory
 
@@ -282,6 +282,8 @@ For example:
 ```
 
 Each table in a group of requirements is a requirement table.
+
+Pattern of the `ID` cell: `^<a id="(?<anchor>[a-z]{2,5}-[0-9]{4})"></a>\*\*(?<id>[A-Z]{2,5}-[0-9]{4})\*\*$`
 
 ### Source group
 
@@ -481,6 +483,35 @@ it("shows the masked account number", () => {
 
 Pattern: `^\s*// Verifies: [A-Z]{2,5}-[0-9]{4}(, [A-Z]{2,5}-[0-9]{4})*$`
 
+## The specification check
+
+`mise run lint:spec` checks the rules of this file that a tool can check ([ADR 0024: Checks][adr-0024-checks]). `mise run lint` and CI run it. It gives each error and each warning with the file and the line.
+
+Selection of the files:
+
+- A specification file is `<component>/DESIGN.md`, or a `.md` file in `<component>/design/`.
+- The check reads each file in a `design/` directory.
+- The check reads a `DESIGN.md` only when it has the heading `## Withdrawn`. A `DESIGN.md` with an identifier anchor but no `## Withdrawn` heading is an error.
+- The check does not read a file in a `testdata` directory.
+- The component code comes from the table in [Component codes](#component-codes). Each row of the table has the form `` | `<component>` | `<CODE>` | ``.
+
+In each specification file that the check reads, these are errors:
+
+- An identifier, an anchor or a component code that does not agree with [Identifiers](#identifiers), or an identifier that the component uses two times. The withdrawn list counts.
+- A top-level list item in a group of requirements that is not a requirement. Each top-level list item in a group is one requirement.
+- A requirement with no source group, or a source group with no link. An observation alone is not a source.
+- A reference link with a label that the file does not define.
+- A judgement with items that do not agree with [Judgements](#judgements), or a withdrawn entry that does not agree with [Withdrawn list](#withdrawn-list).
+- An identifier in text with no link, or a link whose text is only the identifier. The check finds only the codes of the registry, and it does not read code spans or fenced code blocks.
+- More than 5,000 words. The count is the number of words that whitespace separates in the full file, as `wc -w` counts them.
+- A Library specifications table that does not agree with the `pkg/` imports of the component. The check compares the Library column with the direct imports of the `.go` files in the component directory. Files with a build tag count. `_test.go` files do not count, because a test helper does not make the rules of its library apply. A library is `pkg/<name>` or `pkg/platform/<name>`. An import of a sub-package counts as its library, for example `pkg/cds/revocation` as `pkg/cds`. A web package has no Go imports, so its table is `None.`. The check does not read the Specification cell.
+
+In all Markdown files of the repository, except this file, a link with a fragment in the form of an identifier anchor must go to an identifier that exists. This includes the links in ADRs and READMEs.
+
+In each test file (`_test.go`, `.test.ts`, `.test.tsx`, `.spec.ts`, `.spec.tsx`), a line that starts with `// Verifies` must agree with [Verifies comments](#verifies-comments), and each identifier in it must be a requirement that exists.
+
+A requirement that no `// Verifies:` comment refers to gives a warning, not an error.
+
 ## Words and patterns to avoid
 
 | Avoid | Reason | Use |
@@ -505,6 +536,7 @@ Pattern: `^\s*// Verifies: [A-Z]{2,5}-[0-9]{4}(, [A-Z]{2,5}-[0-9]{4})*$`
 [adr-0024]: ../adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md
 [adr-0024-identifiers]: ../adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md#identifiers
 [adr-0024-structure]: ../adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md#structure
+[adr-0024-checks]: ../adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md#checks
 [adr-0024-shared]: ../adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md#shared-rules
 [readme-sources]: ../../README.md#sources-for-requirements
 [ste100]: https://www.asd-ste100.org/

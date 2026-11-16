@@ -44,6 +44,7 @@ cdr-lab/
 ├── pkg/                 # shared libraries, one directory each
 ├── pki/                 # mock CDR PKI: creates the lab CAs and issues certificates
 ├── services/            # one directory and one binary for each service
+├── tools/               # repository tools that are not components of the lab
 └── web/                 # the pnpm workspace: web UIs in apps/, shared packages in packages/
 ```
 
@@ -102,7 +103,7 @@ mise run hooks       # install the git hooks (one time, after you clone)
 mise run tidy        # go mod tidy (CI fails if this changes files)
 mise run fmt         # format the code
 mise run generate    # generate the committed files, for example the console API types (CI fails if this changes files)
-mise run lint        # golangci-lint (linters, formatting, architecture rules); tsc, oxlint and oxfmt for web/; Go and Node image versions; helm lint and kubeconform for charts/
+mise run lint        # golangci-lint (linters, formatting, architecture rules); tsc, oxlint and oxfmt for web/; Go and Node image versions; helm lint and kubeconform for charts/; the specification check (ADR 0024)
 mise run test        # all tests except the conformance tests (needs the lab PostgreSQL; web tests run in Chromium)
 mise run audit       # OSV-Scanner on go.mod and web/pnpm-lock.yaml
 mise run build       # all service binaries into bin/, and the web workspace (build:go, build:web)
@@ -112,7 +113,7 @@ mise run test:lab-web # browser tests of the web UIs against the running lab dep
 mise run openid-conformance # the OpenID FAPI 1.0 Advanced test plan against the data holder in the running lab
 ```
 
-`build`, `fmt`, `lint` and `test` run a `:go` and a `:web` task, for example `mise run test:web`. `lint` also runs `lint:versions` and `lint:chart`. The web tasks install the workspace from the lock file first. CI runs each job only when its inputs change (`.github/workflows/ci.yml`).
+`build`, `fmt`, `lint` and `test` run a `:go` and a `:web` task, for example `mise run test:web`. `lint` also runs `lint:versions`, `lint:chart` and `lint:spec`. `lint:spec` checks the structure of the specifications and the `// Verifies:` comments of the tests ([conventions](docs/spec/conventions.md#the-specification-check)). The web tasks install the workspace from the lock file first. CI runs each job only when its inputs change (`.github/workflows/ci.yml`).
 
 ## Lab deployment
 

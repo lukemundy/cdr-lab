@@ -59,7 +59,7 @@ run = "pnpm run fmt"
 
 [tasks.lint]
 description = "Lint all code"
-depends = ["lint:go", "lint:web", "lint:versions", "lint:chart"]
+depends = ["lint:go", "lint:web", "lint:versions", "lint:chart", "lint:spec"]
 
 [tasks."chart:deps"]
 description = "Get the chart dependencies of each Chart.lock"
@@ -85,6 +85,11 @@ done
 [tasks."lint:go"]
 description = "Run golangci-lint"
 run = "golangci-lint run ./..."
+
+# The rules are in ADR 0024 and docs/spec/conventions.md.
+[tasks."lint:spec"]
+description = "Check the structure of the specifications that follow ADR 0024, and the Verifies comments of the tests"
+run = "go run ./tools/speccheck"
 
 [tasks."lint:versions"]
 description = "Check that the Go and Node images have the versions of mise.toml"
