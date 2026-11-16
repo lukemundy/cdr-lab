@@ -1,6 +1,6 @@
 # Data holder chart
 
-A Helm chart that runs one brand of the mock data holder on Kubernetes, on the [bjw-s common library chart](https://github.com/bjw-s-labs/helm-charts/tree/main/charts/library/common). One image and one chart serve all brands: a second brand is a second release with different values. The requirements are in the [data holder DESIGN.md](../../services/dataholder/DESIGN.md#deployment-from-published-artifacts).
+A Helm chart that runs one brand of the mock data holder on Kubernetes, on the [bjw-s common library chart](https://github.com/bjw-s-labs/helm-charts/tree/main/charts/library/common). One image and one chart serve all brands: a second brand is a second release with different values. The requirements are in the [data holder deployment specification](../../services/dataholder/design/deployment.md).
 
 CI publishes the chart from `main` when a chart changes, as `oci://ghcr.io/lukemundy/cdr-lab/charts/dataholder`, version `0.0.0-g<short commit>`. Pin the exact version: a version range does not include prerelease versions.
 

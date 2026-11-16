@@ -15,6 +15,7 @@ var otpStart = time.Date(2026, 10, 10, 9, 0, 0, 0, time.UTC)
 
 const otpCustomer = "00000001"
 
+// Verifies: DH-1224
 func TestAnOTPHas6DecimalDigits(t *testing.T) {
 	tests := map[string]struct {
 		random uint64
@@ -42,6 +43,7 @@ func issued(t *testing.T, otp string, at time.Time) domain.Authentication {
 	return auth
 }
 
+// Verifies: DH-1225
 func TestTheCorrectOTPIsAcceptedBeforeItsExpiry(t *testing.T) {
 	tests := map[string]time.Duration{"at once": 0, "one second before the expiry": 5*time.Minute - time.Second}
 	for name, after := range tests {
@@ -78,6 +80,7 @@ func TestAnOTPIsRefused(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1222
 func TestOnlyACorrectEntryGivesTheCustomerOfTheOTP(t *testing.T) {
 	auth := issued(t, "123456", otpStart)
 	assert.Empty(t, auth.CustomerNumber(), "before an entry")
@@ -101,6 +104,7 @@ func TestAnAuthenticationWithNoCustomerGivesNoCustomerNumber(t *testing.T) {
 	assert.Empty(t, auth.CustomerNumber())
 }
 
+// Verifies: DH-1226
 func TestAnOTPIsAcceptedOneTimeOnly(t *testing.T) {
 	auth := issued(t, "123456", otpStart)
 
@@ -111,6 +115,7 @@ func TestAnOTPIsAcceptedOneTimeOnly(t *testing.T) {
 	assert.Equal(t, domain.OTPIncorrect, second)
 }
 
+// Verifies: DH-1228
 func TestANewOTPMakesThePreviousOTPNotValid(t *testing.T) {
 	auth := issued(t, "111111", otpStart)
 
@@ -124,6 +129,7 @@ func TestANewOTPMakesThePreviousOTPNotValid(t *testing.T) {
 	assert.Equal(t, domain.OTPCorrect, current)
 }
 
+// Verifies: DH-1225, DH-1228
 func TestANewOTPIsValidFor5MinutesFromItsOwnIssue(t *testing.T) {
 	auth := issued(t, "111111", otpStart)
 	auth, err := auth.Issue(domain.IssuedOTP{CustomerNumber: otpCustomer, Value: "222222"}, otpStart.Add(4*time.Minute))
@@ -134,6 +140,7 @@ func TestANewOTPIsValidFor5MinutesFromItsOwnIssue(t *testing.T) {
 	assert.Equal(t, domain.OTPCorrect, result)
 }
 
+// Verifies: DH-1230
 func TestTheThirdIncorrectEntryEndsTheAuthentication(t *testing.T) {
 	auth := issued(t, "123456", otpStart)
 
@@ -148,6 +155,7 @@ func TestTheThirdIncorrectEntryEndsTheAuthentication(t *testing.T) {
 	assert.Equal(t, domain.OTPAttemptsUsed, afterTheEnd, "the correct OTP is not accepted after the end")
 }
 
+// Verifies: DH-1230
 func TestIncorrectEntriesAreCountedAcrossTheOTPsOfOneFlow(t *testing.T) {
 	auth := issued(t, "111111", otpStart)
 	auth, _ = auth.Verify("000001", otpStart)
@@ -161,6 +169,7 @@ func TestIncorrectEntriesAreCountedAcrossTheOTPsOfOneFlow(t *testing.T) {
 	assert.Equal(t, domain.OTPAttemptsUsed, result)
 }
 
+// Verifies: DH-1229
 func TestAnAuthenticationIssues3OTPsAtMost(t *testing.T) {
 	auth := issued(t, "111111", otpStart)
 
@@ -185,6 +194,7 @@ func TestAnAuthenticationWithNoOTPAcceptsNothing(t *testing.T) {
 	assert.Equal(t, domain.OTPIncorrect, result)
 }
 
+// Verifies: DH-1223
 func TestAnAuthenticationOfACustomerThatDoesNotExistAcceptsNothing(t *testing.T) {
 	auth, err := domain.Authentication{}.IssueNone(otpStart)
 	require.NoError(t, err)
@@ -197,6 +207,7 @@ func TestAnAuthenticationOfACustomerThatDoesNotExistAcceptsNothing(t *testing.T)
 	assert.True(t, auth.CanIssue())
 }
 
+// Verifies: DH-1240, DH-1241, DH-1242
 func TestTheOTPEmailGivesTheOTPTheRecipientTheTimeThePurposeAndThePasswordStatement(t *testing.T) {
 	email := domain.OTPEmail("042137", "Budget App")
 
@@ -212,6 +223,7 @@ func TestTheOTPEmailGivesTheOTPTheRecipientTheTimeThePurposeAndThePasswordStatem
 }
 
 // A device can show the subject on a locked screen.
+// Verifies: DH-1243
 func TestTheSubjectOfTheOTPEmailDoesNotHaveTheOTP(t *testing.T) {
 	assert.NotContains(t, domain.OTPEmail("042137", "Budget App").Subject, "042137")
 }

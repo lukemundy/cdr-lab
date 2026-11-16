@@ -71,7 +71,7 @@ The authorisation server library gives the authorisation response: [the redirect
 
 ## Presentation of the consumer pages
 
-These rules apply to each page of the authentication and of the authorisation. The [consumer authentication](../DESIGN.md#consumer-authentication) gives the content of the authentication pages.
+These rules apply to each page of the authentication and of the authorisation. The [consumer authentication](consumer-authentication.md) gives the content of the authentication pages.
 
 - <a id="dh-0835"></a>**DH-0835** Each consumer page shows the logo and the name of the brand, and uses the colours of the brand. The text alternative of the logo is the brand name. ([WCAG 2.2, SC 1.1.1][wcag-1-1-1]; [Judgement: the brand on the consumer pages](#dh-0859))
 - <a id="dh-0836"></a>**DH-0836** Each consumer page names the data holder with its brand name. For example, a page that refuses a request says "<brand name> cannot continue" or "<brand name> cannot use this form". ([Judgement: the brand on the consumer pages](#dh-0859))

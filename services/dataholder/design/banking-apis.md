@@ -4,7 +4,7 @@ This area gives the customers and accounts of the brand, and the APIs that give 
 
 ## Customers and accounts
 
-The [operator interface](operator-interface.md) gives the fields of a request that creates customer data. [Consumer authentication](../DESIGN.md#customers-and-accounts) gives the user identifiers of a customer.
+The [operator interface](operator-interface.md) gives the fields of a request that creates customer data. [Consumer authentication](consumer-authentication.md) gives the user identifiers of a customer.
 
 - <a id="dh-1000"></a>**DH-1000** The data holder holds only the customer, account and transaction data that the authentication, the authorisation and the banking APIs need. For example, it holds no address and no phone number of a customer. ([Judgement: the fields of a customer, an account and a transaction](operator-interface.md#dh-0771))
 - <a id="dh-1001"></a>**DH-1001** A customer is a person. ([CDS: Get Customer][cds-get-customer]; [Judgement: only persons with their own accounts](#dh-1150))
