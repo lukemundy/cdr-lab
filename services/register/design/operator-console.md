@@ -24,6 +24,9 @@ This area gives the lab-only operator console of the Register: its views, the hi
 - <a id="reg-1011"></a>**REG-1011** The detail of a data holder gives each brand, with its brand ID, its interim ID or both, its name, brand group, logo URI, status, industries, endpoints and JWKS endpoint. ([the endpoints of a data holder brand](participants.md#reg-0207); [the identifiers of a data holder brand](participants.md#reg-0208))
 - <a id="reg-1012"></a>**REG-1012** The detail of a data holder brand does not show its server certificates. The history shows each issue of a server certificate with its thumbprint. ([the event of a server certificate issue](certificate-management.md#reg-0630); [Judgement: no server certificates in the detail of a data holder brand](#reg-1080))
 - <a id="reg-1013"></a>**REG-1013** The detail of a participant links to its history. ([Judgement: the detail and the history on two pages](#reg-1091))
+- <a id="reg-1412"></a>**REG-1412** The status actions and "Register certificate" are buttons after the details of their record and before its child records. For example, the buttons of a brand are before its software products. ([design system DESIGN.md: Components][ui-components])
+- <a id="reg-1413"></a>**REG-1413** Each brand and each software product is a card that starts collapsed. The title bar of the card shows the status of its record. ([design system DESIGN.md: Components][ui-components])
+- <a id="reg-1414"></a>**REG-1414** The heading "Brands" and each heading "Software products" have "Show all" and "Hide all". ([design system DESIGN.md: Components][ui-components])
 
 ## History
 

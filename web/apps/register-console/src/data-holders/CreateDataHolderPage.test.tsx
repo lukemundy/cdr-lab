@@ -65,6 +65,7 @@ async function fillRequiredFields() {
 }
 
 describe("the create of a data holder", () => {
+  // Verifies: REG-1407, REG-1417, REG-1419
   test("opens from the list, with a new UUID and the status ACTIVE", async () => {
     serveCreate();
     const router = renderApp("/data-holders");
@@ -87,6 +88,7 @@ describe("the create of a data holder", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1430, REG-1434, REG-1445
   test("sends each field with no white space and no version, then shows the detail with a toast", async () => {
     const bodies = serveCreate({ status: 201 });
     const router = renderApp("/create/data-holder");
@@ -114,6 +116,7 @@ describe("the create of a data holder", () => {
       .toBe(page.getByRole("heading", { level: 1 }).element());
   });
 
+  // Verifies: REG-1436, REG-1441
   test("shows a legal entity ID in use at its field, and keeps the values", async () => {
     const bodies = serveCreate({ status: 409, body: refusal });
     renderApp("/create/data-holder");
@@ -135,6 +138,7 @@ describe("the create of a data holder", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1448, REG-1449
   test("Cancel goes back to the list and sends nothing", async () => {
     const bodies = serveCreate();
     const router = renderApp("/create/data-holder");

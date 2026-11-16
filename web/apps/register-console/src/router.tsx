@@ -116,7 +116,7 @@ const dataRecipientRoute = createRoute({
   component: DataRecipientPage,
 });
 
-// Register DESIGN.md, Operator console: the URL of a form is never the URL of a record.
+// The URL of a form is never the URL of a record (services/register/design/operator-console-forms.md, REG-1405).
 const changeDataRecipientDetailsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/data-recipients/$legalEntityId/change",

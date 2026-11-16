@@ -75,6 +75,7 @@ const level = () => page.getByRole("combobox", { name: "Accreditation level" });
 const save = () => page.getByRole("button", { name: /^Save changes/ });
 
 describe("the change of the details of a data recipient", () => {
+  // Verifies: REG-1421, REG-1422
   test("opens from the detail, and shows the current values and the legal entity ID as text", async () => {
     serve();
     const router = renderApp(`/data-recipients/${id}`);
@@ -96,6 +97,7 @@ describe("the change of the details of a data recipient", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1430, REG-1433, REG-1434, REG-1445
   test("sends each field with the loaded version and no white space, then shows the detail with a toast", async () => {
     const bodies = serve({ status: 204 });
     const router = renderApp(`/data-recipients/${id}/change`);
@@ -125,6 +127,7 @@ describe("the change of the details of a data recipient", () => {
       .toBe(page.getByRole("heading", { level: 1 }).element());
   });
 
+  // Verifies: REG-1436, REG-1439, REG-1440, REG-1441
   test("shows each refused value at its field and in the error summary, and keeps the values and the version", async () => {
     // The Register gives a new version after the refusal, for example after a change in a different tab.
     const bodies = serve(
@@ -159,6 +162,7 @@ describe("the change of the details of a data recipient", () => {
     expect(bodies[1]).toMatchObject({ version: 7, accreditationNumber: "" });
   });
 
+  // Verifies: REG-1438
   test("shows a stale version in the error summary, and changes no field", async () => {
     serve({ status: 409, body: conflict });
     renderApp(`/data-recipients/${id}/change`);
@@ -182,6 +186,7 @@ describe("the change of the details of a data recipient", () => {
       .toBeVisible();
   });
 
+  // Verifies: REG-1448, REG-1449
   test("Cancel goes back to the detail and sends nothing", async () => {
     const bodies = serve({ status: 204 });
     const router = renderApp(`/data-recipients/${id}/change`);

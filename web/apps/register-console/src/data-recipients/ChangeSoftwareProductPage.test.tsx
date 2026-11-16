@@ -79,6 +79,7 @@ const save = () => page.getByRole("button", { name: /^Save changes/ });
 const formURL = `/data-recipients/${id}/software-products/${productId}/change`;
 
 describe("the change of a software product", () => {
+  // Verifies: REG-1421, REG-1425
   test("opens from the detail, and shows the current values, with one value of a list on each line", async () => {
     serveDetail();
     const router = await renderDetail(`/data-recipients/${id}`);
@@ -107,6 +108,7 @@ describe("the change of a software product", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1430, REG-1431, REG-1432
   test("sends each list with no white space and no empty line, and no optional field that has no value", async () => {
     serveDetail();
     const bodies = serveChange({ status: 204 });
@@ -150,6 +152,7 @@ describe("the change of a software product", () => {
     }
   });
 
+  // Verifies: REG-1437, REG-1440
   test("shows the error of a list at the field of the list and in the error summary", async () => {
     serveDetail();
     serveChange({
@@ -178,6 +181,7 @@ describe("the change of a software product", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1438
   test("shows a stale version in the error summary", async () => {
     serveDetail();
     const detail =

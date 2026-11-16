@@ -78,6 +78,7 @@ const industries = () => page.getByRole("group", { name: "Industries" });
 const save = () => page.getByRole("button", { name: /^Save changes/ });
 
 describe("the change of a data holder brand", () => {
+  // Verifies: REG-1421, REG-1422
   test("opens from the detail, and shows the current values and the identifiers as text", async () => {
     serve();
     const router = renderApp(`/data-holders/${id}`);
@@ -117,6 +118,7 @@ describe("the change of a data holder brand", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1432, REG-1433, REG-1434
   test("sends each field with the loaded version, and an optional field with no value as no field", async () => {
     const requests = serve();
     const router = renderApp(`/data-holders/${id}/brands/${brandId}/change`);
@@ -175,6 +177,7 @@ describe("the change of a data holder brand", () => {
     });
   });
 
+  // Verifies: REG-1436, REG-1437
   test("shows a refused endpoint at its field and a refused industry at the group", async () => {
     serve({
       status: 400,
@@ -214,6 +217,7 @@ describe("the change of a data holder brand", () => {
     await expect.element(page.getByRole("form")).not.toBeInTheDocument();
   });
 
+  // Verifies: REG-1448, REG-1449
   test("Cancel goes back to the detail and sends nothing", async () => {
     const requests = serve();
     const router = renderApp(`/data-holders/${id}/brands/${brandId}/change`);

@@ -50,6 +50,7 @@ const add = () => page.getByRole("button", { name: /^Add brand/ });
 const formURL = `/data-recipients/${id}/add-brand`;
 
 describe("the add of a data recipient brand", () => {
+  // Verifies: REG-1417, REG-1419
   test("opens from the detail, with a new UUID and the status ACTIVE", async () => {
     serve();
     const router = renderApp(`/data-recipients/${id}`);
@@ -67,6 +68,7 @@ describe("the add of a data recipient brand", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1430, REG-1434, REG-1445
   test("sends the version that it loaded and each field with no white space, then shows the detail with a toast", async () => {
     const bodies = serve();
     const router = renderApp(formURL);
@@ -95,6 +97,7 @@ describe("the add of a data recipient brand", () => {
       .toBe(page.getByRole("heading", { level: 1 }).element());
   });
 
+  // Verifies: REG-1436, REG-1441
   test("shows a brand ID in use at its field, and keeps the values", async () => {
     const notUnique = "dataRecipientBrandId is not unique: a different record has it";
     serve({
@@ -124,6 +127,7 @@ describe("the add of a data recipient brand", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1438
   test("shows a stale version in the error summary", async () => {
     const detail =
       "The data recipient changed after the version in the request. The Register changed nothing.";
@@ -135,6 +139,7 @@ describe("the add of a data recipient brand", () => {
     await expect.element(page.getByRole("alert").getByText(detail)).toBeVisible();
   });
 
+  // Verifies: REG-1448, REG-1449
   test("Cancel goes back to the detail and sends nothing", async () => {
     const bodies = serve();
     const router = renderApp(formURL);

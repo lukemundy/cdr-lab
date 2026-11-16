@@ -53,6 +53,7 @@ const add = () => page.getByRole("button", { name: /^Add brand/ });
 const formURL = `/data-holders/${id}/add-brand`;
 
 describe("the add of a data holder brand", () => {
+  // Verifies: REG-1417, REG-1418, REG-1419
   test("opens from the detail, with a new UUID as the brand ID, no interim ID and the status ACTIVE", async () => {
     serve();
     const router = renderApp(`/data-holders/${id}`);
@@ -84,6 +85,7 @@ describe("the add of a data holder brand", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: REG-1430, REG-1432, REG-1434
   test("sends the version, each field with no white space and no optional field with no value, then shows the detail", async () => {
     const bodies = serve();
     const router = renderApp(formURL);
@@ -156,6 +158,7 @@ describe("the add of a data holder brand", () => {
       ]);
   });
 
+  // Verifies: REG-1436, REG-1437, REG-1441
   test("shows a refused endpoint at its field and a refused industry at the group, and keeps the values", async () => {
     serve({
       status: 400,
@@ -196,6 +199,7 @@ describe("the add of a data holder brand", () => {
       .toBe(industries().getByRole("checkbox", { name: "Banking" }).element());
   });
 
+  // Verifies: REG-1436
   test("shows an interim ID in use at its field", async () => {
     const notUnique = "interimId is not unique: a different record has it";
     serve({
@@ -219,6 +223,7 @@ describe("the add of a data holder brand", () => {
     await expect.element(field("Interim ID (optional)")).toHaveValue("interim-1");
   });
 
+  // Verifies: REG-1448, REG-1449
   test("Cancel goes back to the detail and sends nothing", async () => {
     const bodies = serve();
     const router = renderApp(formURL);
