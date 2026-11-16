@@ -131,7 +131,7 @@ The [Register certificate revocation area](../services/register/design/certifica
 ### <a id="pki-0090"></a>PKI-0090 Each conformance test revokes the fixture
 
 - Kind: choice
-- Basis: Step 3.3. The CDS defines no interface to revoke a certificate, and the Register keeps the only list of revocations ([ADR 0022][adr-0022]). A test can use an interface that the CDR does not define to set up a state ([conformance DESIGN.md: Subject of a test][conformance-design-subject]).
+- Basis: Step 3.3. The CDS defines no interface to revoke a certificate, and the Register keeps the only list of revocations ([ADR 0022][adr-0022]). A test can use an interface that the CDR does not define to set up a state ([a conformance test can set up a state through an interface that the CDR does not define](../conformance/DESIGN.md#conf-0002)).
 - Reason: In the lab, [the data holder loads the CRL at each check](../services/dataholder/design/api-standards.md#dh-0468), so it sees the revocation at once. The lab start then has no step after the Register starts.
 
 ### <a id="pki-0091"></a>PKI-0091 The Register service name in the CRL URL
@@ -218,7 +218,6 @@ The [Register certificate revocation area](../services/register/design/certifica
 
 [adr-0022]: ../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
 [production-gaps]: ../docs/production-gaps.md
-[conformance-design-subject]: ../conformance/DESIGN.md#subject-of-a-test
 [cds-csr-profile]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#certificate-signing-request-profile
 [cds-participant-endpoints]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#participant-endpoints
 [accc-cert-mgmt]: https://consumerdataright.atlassian.net/wiki/spaces/DP/pages/360415310/Certificate+Management

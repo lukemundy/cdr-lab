@@ -203,7 +203,7 @@ The first table gives the CDR APIs of the data holder. The second table gives th
 
 - Kind: choice
 - Basis: Step 3.3. The [default maximum CRL age](../../../pkg/cds/DESIGN.md#cdsl-0068) delays a revocation by up to 1 minute.
-- Reason: A conformance test revokes a certificate and then checks the refusal at once, because the suite does not wait ([conformance DESIGN.md][conformance-design]). The CRL server of the lab is in the lab network, so a load at each check costs little.
+- Reason: A conformance test revokes a certificate and then checks the refusal at once, because the suite does not wait ([a fixed wait in a conformance test is 2 seconds or less](../../../conformance/DESIGN.md#conf-0025)). The CRL server of the lab is in the lab network, so a load at each check costs little.
 
 ### <a id="dh-0497"></a>DH-0497 The TLS findings of the OpenID conformance suite
 
@@ -265,4 +265,3 @@ The first table gives the CDR APIs of the data holder. The second table gives th
 [support-fapi-headers]: https://cdr-support.zendesk.com/hc/en-us/articles/4410664891919
 [cds-pagination]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#pagination
 [cds-error-codes]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-codes
-[conformance-design]: ../../../conformance/DESIGN.md
