@@ -124,6 +124,7 @@ const balanceFields = `
 	"availableBalance": "299.50",
 	"creditLimit": "1500.00"`
 
+// Verifies: DH-1070, DH-1073
 func TestGetAccountBalanceGivesTheBalanceOfTheAccount(t *testing.T) {
 	rec, _ := serveBalances(t, balanceRequest(t, balancePath, "bank-only"))
 
@@ -136,6 +137,7 @@ func TestGetAccountBalanceGivesTheBalanceOfTheAccount(t *testing.T) {
 	}`, rec.Body.String())
 }
 
+// Verifies: DH-1071
 func TestGetBulkBalancesGivesTheBalancesWithTheFiltersOfGetAccounts(t *testing.T) {
 	rec, balances := serveBalances(
 		t, bulkBalancesRequest(t, balancesPath+"?open-status=CLOSED&page-size=10", "bank-only"),
@@ -156,6 +158,7 @@ func TestGetBulkBalancesGivesTheBalancesWithTheFiltersOfGetAccounts(t *testing.T
 	requireCDSError(t, rec, http.StatusBadRequest, cds.FieldInvalid, "is-owned")
 }
 
+// Verifies: DH-1072
 func TestGetBalancesForSpecificAccountsGivesTheBalancesOfTheAccountsInTheBody(t *testing.T) {
 	rec, balances := serveBalances(t, specificBalancesRequest(
 		t, balancesPath+"?page-size=10", `{"data": {"accountIds": ["`+accountID+`"]}, "meta": {}}`,

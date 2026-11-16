@@ -104,6 +104,7 @@ func detailRequest(t *testing.T, id, token string) *http.Request {
 	return req
 }
 
+// Verifies: DH-1060, DH-1062
 func TestGetAccountsGivesTheAccountsOfTheArrangementWithTheIDsOfTheSoftwareProduct(t *testing.T) {
 	accounts := &arrangementAccounts{}
 	s := consentSecure()
@@ -149,6 +150,7 @@ func TestGetAccountsGivesTheAccountsOfTheArrangementWithTheIDsOfTheSoftwareProdu
 	}`, rec.Body.String())
 }
 
+// Verifies: DH-1061
 func TestGetAccountsGivesEachFilterToTheQuery(t *testing.T) {
 	owned, notOwned := true, false
 
@@ -205,6 +207,7 @@ func TestGetAccountsRefusesAFilterThatIsNotValid(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1032
 func TestGetAccountsIsPaginated(t *testing.T) {
 	rec := serve(accountsRequest(t, accountsPath+"?page=2&page-size=1&open-status=ALL", "bank-only"))
 
@@ -233,6 +236,7 @@ func TestGetAccountsIsPaginated(t *testing.T) {
 	)
 }
 
+// Verifies: DH-1064
 func TestGetAccountDetailGivesTheAccountWithItsNumbers(t *testing.T) {
 	rec := serve(detailRequest(t, accountID, "account-detail"))
 

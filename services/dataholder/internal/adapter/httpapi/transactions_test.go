@@ -114,6 +114,7 @@ const transactionFields = `
 	"amount": "-1200.00",
 	"reference": "October"`
 
+// Verifies: DH-1080, DH-1081
 func TestGetTransactionsGivesTheTransactionsWithTheIDsOfTheSoftwareProduct(t *testing.T) {
 	rec := serve(transactionsRequest(t, transactionsPath, "transactions"))
 
@@ -176,6 +177,7 @@ func TestGetTransactionsRefusesAFilterThatIsNotValid(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1091
 func TestGetTransactionDetailGivesTheTransactionWithItsExtendedData(t *testing.T) {
 	rec := serve(transactionDetailRequest(t, transactionsPath+"/"+transactionID))
 

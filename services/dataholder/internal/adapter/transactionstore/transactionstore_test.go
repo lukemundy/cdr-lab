@@ -123,6 +123,7 @@ func TestTheTransactionsOfAnAccountAreInTheSequenceOfTheirCreation(t *testing.T)
 	assert.Equal(t, []string{"b", "a"}, ids(got))
 }
 
+// Verifies: DH-1083
 func TestFindTransactionsGivesTheEffectiveTimeInDescendingOrderAndThenTheLastCreatedFirst(t *testing.T) {
 	store, _ := newStore(t)
 	pending := posted("pending", -100, now)
@@ -147,6 +148,7 @@ func TestFindTransactionsGivesTheEffectiveTimeInDescendingOrderAndThenTheLastCre
 	assert.Equal(t, []string{"pending", "same-2", "same-1", "old"}, ids(got))
 }
 
+// Verifies: DH-1086, DH-1087
 func TestFindTransactionsMatchesEachFilter(t *testing.T) {
 	store, _ := newStore(t)
 	withReference := posted("reference", 2_500, now.Add(-2*time.Hour))
