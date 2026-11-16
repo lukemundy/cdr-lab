@@ -196,6 +196,7 @@ func TestTheStatusIntervalIsADurationOfMoreThanZeroAndAtMost4Minutes(t *testing.
 	}
 }
 
+// Verifies: DH-1267
 func TestFixedOTPsAreOptional(t *testing.T) {
 	setOnly(t, apiMode)
 
@@ -207,6 +208,7 @@ func TestFixedOTPsAreOptional(t *testing.T) {
 	assert.Empty(t, cfg.api.fixedOTPs)
 }
 
+// Verifies: DH-1268
 func TestFixedOTPsLoadAndAnEntryThatIsNotValidStopsTheStart(t *testing.T) {
 	setOnly(t, apiMode)
 
@@ -238,6 +240,7 @@ func TestTheAPIsLoadTheConsoleSettings(t *testing.T) {
 	assert.ErrorContains(t, err, "CONSOLE_ALLOWED_HOSTS")
 }
 
+// Verifies: DH-1487
 func TestTheWorkersNeedNoConsoleSettingAndNoBrandSetting(t *testing.T) {
 	setOnly(t, workerMode)
 	t.Setenv("CONSOLE_ENABLED", "true")
@@ -365,6 +368,7 @@ func TestADirectoryThatBreaksTheContractStopsTheStartAndTheErrorNamesTheFileAndT
 }
 
 // The brand directory is the only source of the display name of the sender.
+// Verifies: DH-1246
 func TestTheSenderAddressIsAnAddressOnly(t *testing.T) {
 	for _, from := range []string{
 		"Wattle Bank <no-reply@bank.example>",

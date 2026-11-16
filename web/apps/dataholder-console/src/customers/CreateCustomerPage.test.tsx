@@ -73,6 +73,7 @@ describe("the create of a customer", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // Verifies: DH-1453, DH-1455
   test("sends each field with no white space, then shows the detail with a toast", async () => {
     const bodies = serveCreate({ status: 201 });
     const router = renderApp("/create/customer");
@@ -95,6 +96,7 @@ describe("the create of a customer", () => {
       .toBe(page.getByRole("heading", { level: 1 }).element());
   });
 
+  // Verifies: DH-1453
   test("sends no first name when it has no value", async () => {
     const bodies = serveCreate({ status: 201 });
     renderApp("/create/customer");
@@ -108,6 +110,7 @@ describe("the create of a customer", () => {
     expect(bodies).toEqual([{ lastName: "Sample", emailAddress: "sam@mail.test" }]);
   });
 
+  // Verifies: DH-1453
   test("shows each refused value at its field and in the summary, and keeps the values", async () => {
     const bodies = serveCreate({ status: 400, body: refusal });
     renderApp("/create/customer");
@@ -135,6 +138,7 @@ describe("the create of a customer", () => {
     await expect.poll(() => document.activeElement).toBe(field("Email address").element());
   });
 
+  // Verifies: DH-1453
   test("Cancel goes back to the list and sends nothing", async () => {
     const bodies = serveCreate();
     const router = renderApp("/create/customer");

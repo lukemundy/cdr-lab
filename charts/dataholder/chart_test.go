@@ -26,6 +26,7 @@ func initContainer(t *testing.T, objects []charttest.Object, name string) chartt
 	return charttest.Container{}
 }
 
+// Verifies: DH-1342
 func TestEachRequiredValueFailsTheRenderWithItsName(t *testing.T) {
 	for _, value := range []string{
 		"image.tag", "brand.id", "publicBaseURL", "secureBaseURL", "register.publicBaseURL", "register.statusInterval",
@@ -40,6 +41,7 @@ func TestEachRequiredValueFailsTheRenderWithItsName(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1345, DH-1346
 func TestTheValuesGiveExactlyOneBrand(t *testing.T) {
 	for name, set := range map[string][]string{
 		"no brand":   {"brand.preset=null"},
@@ -66,6 +68,7 @@ func TestAPresetBrandNeedsNoFiles(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1347
 func TestABrandConfigMapIsOneDirectory(t *testing.T) {
 	objects := charttest.MustRender(t, "brand.preset=null", brandConfigMap)
 
@@ -97,6 +100,7 @@ func TestABrandConfigMapIsOneDirectory(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1348, DH-1349
 func TestTheMigrationsRunBeforeTheProductLoad(t *testing.T) {
 	spec := charttest.Pod(t, charttest.MustRender(t))
 
@@ -128,6 +132,7 @@ func TestOnlyTheMigrationsGetTheOwnerCredentials(t *testing.T) {
 	assert.Equal(t, []string{"serve"}, charttest.Main(t, objects).Args)
 }
 
+// Verifies: DH-1350
 func TestOnePodRunsAtATime(t *testing.T) {
 	deployment := charttest.Only(t, charttest.MustRender(t), "Deployment")
 
@@ -183,12 +188,14 @@ func TestTheDataHolderGetsItsConfiguration(t *testing.T) {
 	assert.NotContains(t, env, "SSL_CERT_FILE", "without a public root, the data holder uses the system roots")
 }
 
+// Verifies: DH-1351
 func TestTheRegisterJWKSURLIsTheCDSPathOnTheRegisterBaseURL(t *testing.T) {
 	env := charttest.Main(t, charttest.MustRender(t, "register.publicBaseURL=https://register.test/base/")).Vars()
 
 	assert.Equal(t, "https://register.test/base/cdr-register/v1/jwks", env["REGISTER_JWKS_URL"])
 }
 
+// Verifies: DH-1353
 func TestTheChartHasNoFixedOTPs(t *testing.T) {
 	spec := charttest.Pod(t, charttest.MustRender(t, "console.enabled=true", "console.allowedHosts={localhost:8084}",
 		"bankSite.enabled=true", "bankSite.allowedHosts={localhost:8085}"))
@@ -219,6 +226,7 @@ func TestEachSecretIsMountedReadOnly(t *testing.T) {
 	assert.NotEmpty(t, main.Vars()["SSL_CERT_FILE"])
 }
 
+// Verifies: DH-1354
 func TestTheLabFeaturesAreOffByDefault(t *testing.T) {
 	objects := charttest.MustRender(t)
 	main := charttest.Main(t, objects)

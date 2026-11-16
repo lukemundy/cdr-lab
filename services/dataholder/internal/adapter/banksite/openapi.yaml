@@ -6,8 +6,8 @@ info:
   version: "1"
   description: >-
     The same-origin API of the online bank site of the mock data holder. It has no version in its path, because the
-    UI and the API ship together (services/dataholder/DESIGN.md, Site API). The fields of a product, an account, a
-    balance and a transaction have the names and the values of the CDS schemas.
+    UI and the API ship together (services/dataholder/design/online-bank-site-api.md). The fields of a product, an
+    account, a balance and a transaction have the names and the values of the CDS schemas.
 paths:
   /api/brand:
     get:
@@ -978,7 +978,7 @@ components:
       properties:
         type:
           type: string
-          enum: ["https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#session"]
+          enum: ["https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0010"]
         title:
           type: string
           enum: [The session ended]

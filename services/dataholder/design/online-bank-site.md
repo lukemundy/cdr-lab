@@ -6,9 +6,9 @@ This area gives the lab-only online bank site of the brand: its pages and their 
 
 - <a id="dh-1800"></a>**DH-1800** The online bank site is a lab-only feature. A real component does not depend on it, and it is not the web site of a production data holder. ([Judgement: web UIs as single-page applications that the service embeds (ADR 0014)][adr-0014]; [mock and real components][readme-component-types])
 - <a id="dh-1801"></a>**DH-1801** The data holder embeds and serves the site as a React single-page application. ([Judgement: web UIs as single-page applications that the service embeds (ADR 0014)][adr-0014])
-- <a id="dh-1802"></a>**DH-1802** A hand-written OpenAPI document gives the contract of the [site API](../DESIGN.md#site-api). ([Judgement: API contracts in OpenAPI (ADR 0017)][adr-0017])
-- <a id="dh-1803"></a>**DH-1803** The site is not part of the authorisation flow. The authentication and authorisation pages stay on the public listener. ([the separation from the CDR authentication](../DESIGN.md#separation-from-the-cdr-authentication))
-- <a id="dh-1804"></a>**DH-1804** The site does not change the authentication and authorisation pages. ([the separation from the CDR authentication](../DESIGN.md#separation-from-the-cdr-authentication); [the brand on the consumer pages](authorisation.md#dh-0836))
+- <a id="dh-1802"></a>**DH-1802** A hand-written OpenAPI document gives the contract of the [site API](online-bank-site-api.md#dh-1701). ([Judgement: API contracts in OpenAPI (ADR 0017)][adr-0017])
+- <a id="dh-1803"></a>**DH-1803** The site is not part of the authorisation flow. The authentication and authorisation pages stay on the public listener. ([the site and the consumer pages on different origins](online-bank-site-sign-in.md#dh-2058))
+- <a id="dh-1804"></a>**DH-1804** The site does not change the authentication and authorisation pages. ([the consumer pages are the same with a session of the site](online-bank-site-sign-in.md#dh-2061); [the brand on the consumer pages](authorisation.md#dh-0836))
 
 ## Landing page
 
@@ -21,7 +21,7 @@ This area gives the lab-only online bank site of the brand: its pages and their 
 
 ## Products
 
-- <a id="dh-1811"></a>**DH-1811** The product list shows each current product of the brand. It shows no future product, and no product whose `effectiveTo` is in the past. ([CDS: Get Products][cds-get-products]; [a current product](product-reference-data.md#dh-0219); [Judgement: the products that the site shows](../DESIGN.md#decisions))
+- <a id="dh-1811"></a>**DH-1811** The product list shows each current product of the brand. It shows no future product, and no product whose `effectiveTo` is in the past. ([CDS: Get Products][cds-get-products]; [a current product](product-reference-data.md#dh-0219); [Judgement: only current products on the site](online-bank-site-api.md#dh-1786))
 - <a id="dh-1812"></a>**DH-1812** The product list puts the products in groups by `productCategory`, in the order of the categories in the CDS. Only a category with a current product has a group. ([CDS: Product Categories][cds-product-categories])
 - <a id="dh-1813"></a>**DH-1813** In a group, the products are in the order of their names. ([Judgement: the order of the products in a group](#dh-1884))
 - <a id="dh-1814"></a>**DH-1814** For each product, the product list shows its name and its description, and links to the detail of the product. ([CDS: BankingProductV6][cds-schema-product]; [Judgement: the name and the description in the product list](#dh-1885))
@@ -33,9 +33,9 @@ This area gives the lab-only online bank site of the brand: its pages and their 
   - each fee and each feature
   - each field of a rate, a fee or a feature that has a value
 - <a id="dh-1816"></a>**DH-1816** When `isTailored` is true, the detail of the product says that the rates and the fees can be different for the consumer. ([CDS: BankingProductDetailV7][cds-schema-product-detail])
-- <a id="dh-1817"></a>**DH-1817** When a product is not current, or does not exist, its detail is the "not found" page of the site. ([Judgement: the products that the site shows](../DESIGN.md#decisions))
-- <a id="dh-1818"></a>**DH-1818** The site shows the same products and the same values as Get Products and Get Product Detail of the brand at the same time. ([the products of the site API](../DESIGN.md#site-api); [Judgement: the source of the products of the site](../DESIGN.md#decisions))
-- <a id="dh-1819"></a>**DH-1819** The site shows a label in plain language for each value of a CDS enumeration. The label gives the meaning that the CDS gives for the value. For example, the site shows a label for `TRANS_AND_SAVINGS_ACCOUNTS` and for `MONTHLY_ACCOUNT_FEE`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [CDS: Product Categories][cds-product-categories]; [design system: Content][ui-content]; [Judgement: the labels of the CDS enumerations](../DESIGN.md#decisions))
+- <a id="dh-1817"></a>**DH-1817** When a product is not current, or does not exist, its detail is the "not found" page of the site. ([Judgement: only current products on the site](online-bank-site-api.md#dh-1786))
+- <a id="dh-1818"></a>**DH-1818** The site shows the same products and the same values as Get Products and Get Product Detail of the brand at the same time. ([the products of the site API](online-bank-site-api.md#dh-1729); [Judgement: one source of the products](online-bank-site-api.md#dh-1785))
+- <a id="dh-1819"></a>**DH-1819** The site shows a label in plain language for each value of a CDS enumeration. The label gives the meaning that the CDS gives for the value. For example, the site shows a label for `TRANS_AND_SAVINGS_ACCOUNTS` and for `MONTHLY_ACCOUNT_FEE`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [CDS: Product Categories][cds-product-categories]; [design system: Content][ui-content]; [Judgement: the CDS enumerations in the OpenAPI document](online-bank-site-api.md#dh-1787))
 - <a id="dh-1820"></a>**DH-1820** The site shows each RateString as a percentage. For example, `0.0125` shows as "1.25%". ([CDS: Common Field Types][cds-common-field-types]; [design system: Content][ui-content])
 - <a id="dh-1821"></a>**DH-1821** The site shows each AmountString as an amount. ([CDS: Common Field Types][cds-common-field-types]; [design system: Content][ui-content])
 - <a id="dh-1822"></a>**DH-1822** The site shows each ISO 8601 duration in words. For example, `P1M` shows as "each month" for an `applicationFrequency`, and `P55D` shows as "55 days". ([CDS: Common Field Types][cds-common-field-types]; [design system: Content][ui-content])
@@ -49,7 +49,7 @@ This area gives the lab-only online bank site of the brand: its pages and their 
 - <a id="dh-1827"></a>**DH-1827** Headings use the heading font of the brand. The other text uses the body font. ([design system: Brands][ui-brands])
 - <a id="dh-1828"></a>**DH-1828** Each page shows the logo of the brand on the brand colour, with the brand name as its text alternative. ([WCAG 2.2, SC 1.1.1][wcag-1-1-1])
 - <a id="dh-1829"></a>**DH-1829** Each page has a link to the product list. ([design system: Brands][ui-brands])
-- <a id="dh-1830"></a>**DH-1830** The pages of the site have no "Secure" label, no hero with the data recipient and no step indicator. ([Judgement: a site that does not look like the consumer pages](#dh-1890); [the separation from the CDR authentication](../DESIGN.md#separation-from-the-cdr-authentication))
+- <a id="dh-1830"></a>**DH-1830** The pages of the site have no "Secure" label, no hero with the data recipient and no step indicator. ([Judgement: a site that does not look like the consumer pages](#dh-1890); [Judgement: the separation of the sign-in from the CDR authentication](online-bank-site-sign-in.md#dh-2111))
 - <a id="dh-1831"></a>**DH-1831** The title of each page is the name of the page, then "<brand name> online banking". For example, "Data sharing - <brand name> online banking". ([Judgement: a site that does not look like the consumer pages](#dh-1890))
 - <a id="dh-1832"></a>**DH-1832** Until the site API gives the brand, and when it fails, the pages say "Bank" in place of the brand name. ([Judgement: "Bank" before the brand name is known](#dh-1893))
 - <a id="dh-1833"></a>**DH-1833** The site shows dates and amounts with the rules of the design system: Australian English and the locale `en-AU`. ([design system: Content][ui-content])

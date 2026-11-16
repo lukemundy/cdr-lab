@@ -9,6 +9,7 @@ import (
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/domain"
 )
 
+// Verifies: DH-1264, DH-1265
 func TestAFixedOTPReplacesTheRandomOTPOfItsEmailAddressOnly(t *testing.T) {
 	fixed, err := domain.ParseFixedOTPs("alex@example.com:111111,sam@example.com:024680")
 	require.NoError(t, err)
@@ -19,6 +20,7 @@ func TestAFixedOTPReplacesTheRandomOTPOfItsEmailAddressOnly(t *testing.T) {
 	assert.Equal(t, "000042", fixed.NewOTP("kim@example.com", 42))
 }
 
+// Verifies: DH-1267
 func TestNoFixedOTPsGivesTheRandomOTP(t *testing.T) {
 	fixed, err := domain.ParseFixedOTPs("")
 	require.NoError(t, err)
@@ -27,6 +29,7 @@ func TestNoFixedOTPsGivesTheRandomOTP(t *testing.T) {
 	assert.Equal(t, "000042", domain.FixedOTPs{}.NewOTP("alex@example.com", 42))
 }
 
+// Verifies: DH-1268
 func TestFixedOTPsThatAreNotValidGiveTheEntryNumberAndNoValue(t *testing.T) {
 	tests := map[string]struct {
 		text string

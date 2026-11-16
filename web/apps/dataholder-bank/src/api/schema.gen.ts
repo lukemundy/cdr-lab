@@ -490,7 +490,7 @@ export interface components {
         /** @description RFC 9457 problem details for a session cookie with no valid session. */
         SessionEndedProblem: {
             /** @enum {string} */
-            type: "https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#session";
+            type: "https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0010";
             /** @enum {string} */
             title: "The session ended";
             status: number;
@@ -951,7 +951,7 @@ export const openStatusValues: ReadonlyArray<FlattenedDeepRequired<components>["
 export const transactionTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["TransactionType"]> = ["DIRECT_DEBIT", "FEE", "INTEREST_CHARGED", "INTEREST_PAID", "OTHER", "PAYMENT", "TRANSFER_INCOMING", "TRANSFER_OUTGOING"];
 export const transactionStatusValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["TransactionStatus"]> = ["PENDING", "POSTED"];
 export const problemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["Problem"]["type"]> = ["about:blank"];
-export const sessionEndedProblemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["SessionEndedProblem"]["type"]> = ["https://github.com/lukemundy/cdr-lab/blob/main/services/dataholder/DESIGN.md#session"];
+export const sessionEndedProblemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["SessionEndedProblem"]["type"]> = ["https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0010"];
 export const sessionEndedProblemTitleValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["SessionEndedProblem"]["title"]> = ["The session ended"];
 export const fieldErrorsProblemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FieldErrorsProblem"]["type"]> = ["https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0002"];
 export const fieldErrorsProblemTitleValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FieldErrorsProblem"]["title"]> = ["Values in the request are not valid"];

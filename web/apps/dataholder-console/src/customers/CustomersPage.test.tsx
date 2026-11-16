@@ -22,6 +22,7 @@ const searchbox = () =>
   page.getByRole("searchbox", { name: "Search by customer number, name or email" });
 
 describe("the customers page", () => {
+  // Verifies: DH-1413
   test("shows each customer of the page, with the counts and the total", async () => {
     serve({
       data: [
@@ -73,6 +74,7 @@ describe("the customers page", () => {
     expect(requests).toEqual(["?pageSize=25"]);
   });
 
+  // Verifies: DH-1473, DH-1474
   test("a search, a sort and a page change the URL, and a search adds no history entry", async () => {
     const requests = serve({ data: [customer("12345678")], totalRecords: 60 });
     const router = renderApp("/customers?page=2");
@@ -144,6 +146,7 @@ describe("the customers page", () => {
       .toBeVisible();
   });
 
+  // Verifies: DH-1479
   test("passes the automated accessibility checks", async () => {
     serve({ data: [customer("12345678"), customer("87654321")], totalRecords: 2 });
 

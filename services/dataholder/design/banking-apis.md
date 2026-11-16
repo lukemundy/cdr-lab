@@ -4,12 +4,12 @@ This area gives the customers and accounts of the brand, and the APIs that give 
 
 ## Customers and accounts
 
-The [operator interface](operator-interface.md) gives the fields of a request that creates customer data. [Consumer authentication](../DESIGN.md#customers-and-accounts) gives the user identifiers of a customer.
+The [operator interface](operator-interface.md) gives the fields of a request that creates customer data. [Consumer authentication](consumer-authentication.md) gives the user identifiers of a customer.
 
 - <a id="dh-1000"></a>**DH-1000** The data holder holds only the customer, account and transaction data that the authentication, the authorisation and the banking APIs need. For example, it holds no address and no phone number of a customer. ([Judgement: the fields of a customer, an account and a transaction](operator-interface.md#dh-0771))
 - <a id="dh-1001"></a>**DH-1001** A customer is a person. ([CDS: Get Customer][cds-get-customer]; [Judgement: only persons with their own accounts](#dh-1150))
 - <a id="dh-1002"></a>**DH-1002** A customer has a customer number, a last name, an optional first name, an email address, the time of its creation and the time of its last change. ([Judgement: the fields of a customer, an account and a transaction](operator-interface.md#dh-0771))
-- <a id="dh-1003"></a>**DH-1003** The lab operator [creates a customer with the operator interface](operator-interface.md#dh-0720), or the consumer creates one with a [sign-up on the online bank site](../DESIGN.md#sign-up). Both use the same rules. ([Judgement: the fields of a customer, an account and a transaction](operator-interface.md#dh-0771))
+- <a id="dh-1003"></a>**DH-1003** The lab operator [creates a customer with the operator interface](operator-interface.md#dh-0720), or the consumer creates one with a [sign-up on the online bank site](online-bank-site-sign-in.md#dh-2002). Both use the same rules. ([Judgement: the fields of a customer, an account and a transaction](operator-interface.md#dh-0771))
 - <a id="dh-1004"></a>**DH-1004** An account has one customer, who is its only owner. ([CDS: BankingAccountV3][cds-schema-account]; [Judgement: only persons with their own accounts](#dh-1150))
 - <a id="dh-1005"></a>**DH-1005** An account has these fields. ([CDS: Product Categories][cds-product-categories]; [CDS: BankingAccountV3][cds-schema-account]; [Judgement: the fields of a customer, an account and a transaction](operator-interface.md#dh-0771))
   - a display name

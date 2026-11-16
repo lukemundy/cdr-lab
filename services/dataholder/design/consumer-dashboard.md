@@ -5,7 +5,7 @@ This area gives the consumer dashboard on the online bank site, where a consumer
 ## Dashboard page
 
 - <a id="dh-1900"></a>**DH-1900** The consumer dashboard is the page "Data sharing" of the online bank site. On it, the consumer sees each authorisation that they gave to the brand, and withdraws an authorisation. ([CDR Rules][cdr-rules], rule 1.15(1))
-- <a id="dh-1901"></a>**DH-1901** The dashboard needs a session. ([the sign-in of the site](../DESIGN.md#sign-in-and-sign-out))
+- <a id="dh-1901"></a>**DH-1901** The dashboard needs a session. ([the sign-in page for a page that needs a session](online-bank-site-sign-in.md#dh-2027))
 - <a id="dh-1902"></a>**DH-1902** The title of the dashboard is "Data sharing - <brand name> online banking". ([the title of each page of the site](online-bank-site.md#dh-1831))
 - <a id="dh-1903"></a>**DH-1903** The dashboard shows each arrangement of the customer of the session. ([CDR Rules][cdr-rules], rule 1.15(3))
 - <a id="dh-1904"></a>**DH-1904** The dashboard shows the current arrangements first. Then it shows the ended arrangements in a group of their own. ([CDR Rules][cdr-rules], rule 1.15(3)(d) and (e); [CDR Support: Dashboards][support-dashboards]; [Judgement: ended authorisations on the dashboard](#dh-1950))
@@ -43,13 +43,13 @@ This area gives the consumer dashboard on the online bank site, where a consumer
 - <a id="dh-1929"></a>**DH-1929** The dialog shows these two messages of the CDS. The brand name of the data recipient is in place of the name of the data recipient. ([CDS: Withdrawal Standards][cds-withdrawal-standards]; [CDR Rules][cdr-rules], rule 1.15(1)(d); [the withdrawal messages only on the dashboard](end-of-an-arrangement.md#dh-0914); [Judgement: the suggested text of the CDS messages](#dh-1952))
   - "You should check with <data recipient brand name> before you stop sharing to understand the consequences."
   - "CDR data is either deleted or de-identified when it is no longer required."
-- <a id="dh-1930"></a>**DH-1930** When the consumer confirms, the data holder withdraws the arrangement for the customer of the session, with the method `CONSUMER_DASHBOARD`. ([the method of each withdrawal](end-of-an-arrangement.md#dh-0917); [the same effects as a withdrawal by the operator](end-of-an-arrangement.md#dh-0916); [Judgement: the withdrawal on the site](../DESIGN.md#decisions))
+- <a id="dh-1930"></a>**DH-1930** When the consumer confirms, the data holder withdraws the arrangement for the customer of the session, with the method `CONSUMER_DASHBOARD`. ([the method of each withdrawal](end-of-an-arrangement.md#dh-0917); [the same effects as a withdrawal by the operator](end-of-an-arrangement.md#dh-0916); [Judgement: the withdrawal of the operator](online-bank-site-api.md#dh-1798))
 - <a id="dh-1931"></a>**DH-1931** After a withdrawal, the dialog closes, and a status message names the software product. ([WCAG 2.2, SC 4.1.3][wcag-4-1-3]; [CX Guidelines: Withdrawal][cx-withdrawal])
 - <a id="dh-1932"></a>**DH-1932** After a withdrawal, the site shows the dashboard with the focus on its heading. The arrangement is in the group of the ended arrangements. ([CDR Rules][cdr-rules], rule 4.27; [WCAG 2.2, SC 4.1.3][wcag-4-1-3])
-- <a id="dh-1933"></a>**DH-1933** When the arrangement ended between the read and the confirmation, the dialog says that the sharing changed. The site then shows the current state. ([the response to a withdrawal of an ended arrangement](../DESIGN.md#site-api))
+- <a id="dh-1933"></a>**DH-1933** When the arrangement ended between the read and the confirmation, the dialog says that the sharing changed. The site then shows the current state. ([the response to a withdrawal of an ended arrangement](online-bank-site-api.md#dh-1770))
 - <a id="dh-1934"></a>**DH-1934** When a withdrawal fails for a different reason, the dialog stays open and shows the error. ([WCAG 2.2, SC 3.3.1][wcag-3-3-1])
 - <a id="dh-1935"></a>**DH-1935** The site never sends a withdrawal again by itself. ([RFC 9110, section 9.2.2][rfc9110-idempotent])
-- <a id="dh-1936"></a>**DH-1936** After a withdrawal, the data holder sends no email and no CDR receipt to the consumer. ([Judgement: no notice email to the consumer](../DESIGN.md#decisions))
+- <a id="dh-1936"></a>**DH-1936** After a withdrawal, the data holder sends no email and no CDR receipt to the consumer. ([Judgement: no email other than the OTP email](consumer-authentication.md#dh-1287))
 
 ## Telemetry
 

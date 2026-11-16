@@ -10,6 +10,7 @@ function serveNoCustomers() {
   );
 }
 
+// Verifies: DH-1466, DH-1472
 test("the header gives the logo of the brand and the label, and the tab title gives the brand name", async () => {
   serveNoCustomers();
 
@@ -23,6 +24,7 @@ test("the header gives the logo of the brand and the label, and the tab title gi
   await expect.poll(() => document.title).toBe("Example Bank");
 });
 
+// Verifies: DH-1467
 test("the header says Data holder when the data holder gives no brand name", async () => {
   serveNoCustomers();
   worker.use(http.untyped.get("/api/brand", () => Response.error()));

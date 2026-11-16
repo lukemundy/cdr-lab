@@ -30,6 +30,7 @@ func customerOfSession() *customers {
 	return newCustomers(domain.Customer{CustomerNumber: signedIn, LastName: "Quoll"})
 }
 
+// Verifies: DH-1764
 func TestACloseClosesTheAccountOfTheCustomerOfTheSessionWithTheArrangementsOfTheConfirmation(t *testing.T) {
 	store := customerOfSession()
 
@@ -42,6 +43,7 @@ func TestACloseClosesTheAccountOfTheCustomerOfTheSessionWithTheArrangementsOfThe
 	}}, store.closes)
 }
 
+// Verifies: DH-1764
 func TestACloseThatEndsNoArrangementSendsAnEmptyList(t *testing.T) {
 	store := customerOfSession()
 
@@ -52,6 +54,7 @@ func TestACloseThatEndsNoArrangementSendsAnEmptyList(t *testing.T) {
 	assert.Equal(t, []string{}, store.closes[0].ends)
 }
 
+// Verifies: DH-1719
 func TestACloseWithABodyThatIsNotValidGives400AndClosesNothing(t *testing.T) {
 	for name, body := range map[string]string{
 		"no body":       "",
@@ -73,6 +76,7 @@ func TestACloseWithABodyThatIsNotValidGives400AndClosesNothing(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1753, DH-1765
 func TestARefusedCloseGivesTheStatusOfTheRefusalAndNoIdentifier(t *testing.T) {
 	tests := map[string]struct {
 		err    error
@@ -102,6 +106,7 @@ func TestARefusedCloseGivesTheStatusOfTheRefusalAndNoIdentifier(t *testing.T) {
 	}
 }
 
+// Verifies: DH-1765
 func TestACloseThatEndsDifferentArrangementsSaysThatTheAccountsChanged(t *testing.T) {
 	store := customerOfSession()
 	store.closeErr = app.ErrEndsChanged
@@ -113,6 +118,7 @@ func TestACloseThatEndsDifferentArrangementsSaysThatTheAccountsChanged(t *testin
 	assert.Contains(t, resp.body, "We closed nothing")
 }
 
+// Verifies: DH-1743
 func TestACloseNeedsASession(t *testing.T) {
 	store := customerOfSession()
 	s := newSiteWith(t, banksite.Ports{Customers: store, Accounts: &accounts{}})
@@ -123,6 +129,7 @@ func TestACloseNeedsASession(t *testing.T) {
 	assert.Empty(t, store.closes)
 }
 
+// Verifies: DH-1744
 func TestACloseForACustomerThatTheDataHolderNoLongerHasEndsTheSession(t *testing.T) {
 	store := customerOfSession()
 	store.closeErr = app.ErrCustomerNotFound

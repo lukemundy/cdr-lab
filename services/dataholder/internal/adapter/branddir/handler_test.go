@@ -39,6 +39,7 @@ func get(t *testing.T, mux *http.ServeMux, path string, header http.Header) *htt
 
 // The pages show a logo only in an img element, where a script cannot run. The sandbox stops a script in an SVG
 // file when a browser opens its URL directly.
+// Verifies: DH-2090
 func TestTheLogoAndTheMarkAreSVGFilesThatCannotRunAScript(t *testing.T) {
 	dir := validDir(t)
 	mux := serveBrand(t, dir)
@@ -57,6 +58,7 @@ func TestTheLogoAndTheMarkAreSVGFilesThatCannotRunAScript(t *testing.T) {
 	}
 }
 
+// Verifies: DH-2090, DH-2091
 func TestTheStylesSetTheCustomPropertiesOfTheDesignSystemForEachTokenOfTheBrand(t *testing.T) {
 	rec := get(t, serveBrand(t, validDir(t)), "/brand/styles.css", nil)
 
@@ -108,6 +110,7 @@ func serveConsoleBrand(t *testing.T, dir fstest.MapFS) *http.ServeMux {
 	return mux
 }
 
+// Verifies: DH-1485
 func TestTheConsoleGetsTheLogoAndTheMarkAsSVGFilesThatCannotRunAScript(t *testing.T) {
 	dir := validDir(t)
 	mux := serveConsoleBrand(t, dir)
@@ -127,6 +130,7 @@ func TestTheConsoleGetsTheLogoAndTheMarkAsSVGFilesThatCannotRunAScript(t *testin
 
 // The content of the console stays in the lab brand, so the stylesheet sets only the roles of the console shell, the
 // link and the primary action (web/packages/ui/DESIGN.md, Brands).
+// Verifies: DH-1486
 func TestTheConsoleStylesSetOnlyTheRolesThatTheConsoleUses(t *testing.T) {
 	rec := get(t, serveConsoleBrand(t, validDir(t)), "/brand/console.css", nil)
 

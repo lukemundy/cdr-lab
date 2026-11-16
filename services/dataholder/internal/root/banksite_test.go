@@ -22,6 +22,7 @@ import (
 
 var testBankSite = consolehttp.Config{Enabled: true, AllowedHosts: []string{"example.com"}}
 
+// Verifies: DH-2064
 func TestWithoutTheSettingTheDataHolderOpensNoBankSiteListener(t *testing.T) {
 	listeners, err := bankSiteListeners(consolehttp.Config{}, tls.Certificate{}, ui, banksite.Ports{})
 
@@ -29,6 +30,7 @@ func TestWithoutTheSettingTheDataHolderOpensNoBankSiteListener(t *testing.T) {
 	assert.Empty(t, listeners)
 }
 
+// Verifies: DH-2063, DH-2064, DH-2066
 func TestWithTheSettingTheBankSitePortGivesTheHTMLPageWithTheTLSOfThePublicListener(t *testing.T) {
 	cert := tls.Certificate{Certificate: [][]byte{[]byte("public certificate")}}
 
@@ -60,12 +62,14 @@ func TestTheBankSitePortRefusesAHostThatIsNotAllowed(t *testing.T) {
 	assert.Equal(t, http.StatusForbidden, rec.Code)
 }
 
+// Verifies: DH-2064
 func TestTheAPIProcessOpensNoBankSiteListenerWithoutTheSetting(t *testing.T) {
 	lab := newOperatorLab(t)
 
 	assert.NotContains(t, lab.handlers, bankSitePort)
 }
 
+// Verifies: DH-2064, DH-2065
 func TestTheAPIsLoadTheBankSiteSettings(t *testing.T) {
 	setOnly(t, apiMode)
 	t.Setenv("BANK_SITE_ENABLED", "true")
@@ -93,6 +97,7 @@ func TestTheAPIsLoadTheBankSiteSettings(t *testing.T) {
 	assert.ErrorContains(t, err, "BANK_SITE_ALLOWED_HOSTS")
 }
 
+// Verifies: DH-2076
 func TestTheWorkersNeedNoBankSiteSetting(t *testing.T) {
 	setOnly(t, workerMode)
 	t.Setenv("BANK_SITE_ENABLED", "true")
@@ -103,7 +108,9 @@ func TestTheWorkersNeedNoBankSiteSetting(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// The site and Get Products read the same store at the same time (DESIGN.md: Site API).
+// The site and Get Products read the same store at the same time.
+//
+// Verifies: DH-1728, DH-1729
 func TestTheBankSiteGivesTheProductsOfGetProductsAndGetProductDetailForEachPresetBrand(t *testing.T) {
 	now := time.Date(2026, 11, 2, 0, 0, 0, 0, time.UTC)
 	clock := func() time.Time { return now }

@@ -52,6 +52,7 @@ func signedInWithdraw(t *testing.T, consents *withdrawer, arrangementID string) 
 	})
 }
 
+// Verifies: DH-1769
 func TestAWithdrawalOnTheSiteWithdrawsTheConsentOfTheCustomerOfTheSessionWithTheDashboardMethod(t *testing.T) {
 	consents := &withdrawer{}
 
@@ -64,6 +65,7 @@ func TestAWithdrawalOnTheSiteWithdrawsTheConsentOfTheCustomerOfTheSessionWithThe
 	}}, consents.calls)
 }
 
+// Verifies: DH-1771
 func TestARefusedWithdrawalOnTheSiteGivesTheStatusOfTheRefusalAndNoIdentifier(t *testing.T) {
 	tests := map[string]struct {
 		err    error
@@ -85,6 +87,7 @@ func TestARefusedWithdrawalOnTheSiteGivesTheStatusOfTheRefusalAndNoIdentifier(t 
 	}
 }
 
+// Verifies: DH-1770
 func TestAWithdrawalOfAConsentThatEndedSaysThatTheConsentChanged(t *testing.T) {
 	resp := signedInWithdraw(t, &withdrawer{err: domain.ErrArrangementEnded}, "arrangement-1")
 
@@ -93,6 +96,7 @@ func TestAWithdrawalOfAConsentThatEndedSaysThatTheConsentChanged(t *testing.T) {
 	assert.Contains(t, resp.body, "We changed nothing.")
 }
 
+// Verifies: DH-1743
 func TestAWithdrawalNeedsASession(t *testing.T) {
 	consents := &withdrawer{}
 	s := withdrawSite(t, consents)
@@ -103,6 +107,7 @@ func TestAWithdrawalNeedsASession(t *testing.T) {
 	assert.Empty(t, consents.calls)
 }
 
+// Verifies: DH-1744
 func TestAWithdrawalForACustomerThatTheDataHolderNoLongerHasEndsTheSession(t *testing.T) {
 	resp := signedInWithdraw(t, &withdrawer{err: app.ErrCustomerNotFound}, "arrangement-1")
 

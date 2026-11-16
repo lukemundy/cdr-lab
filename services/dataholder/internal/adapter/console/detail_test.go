@@ -223,6 +223,7 @@ func TestAnArrangementWithANoticeGivesEachAttemptOfTheNotice(t *testing.T) {
 	assert.Empty(t, attemptsOf["arrangement-revoked"], "an end with no notice has no attempts")
 }
 
+// Verifies: DH-1639
 func TestAnArrangementLinksToTheRegistrationOfItsClientOnlyWhileTheRegistrationExists(t *testing.T) {
 	r := newRecords(t)
 	addCustomer(t, r.customers, "00000001", "", "Example")
@@ -259,6 +260,7 @@ func TestAnArrangementLinksToTheRegistrationOfItsClientOnlyWhileTheRegistrationE
 	assert.False(t, registered(), "the new registration of the software product has a different client ID")
 }
 
+// Verifies: DH-1640
 func TestAnArrangementAtTheEndOfItsSharingHasEnded(t *testing.T) {
 	r := newRecords(t)
 	addCustomer(t, r.customers, "00000001", "", "Example")
@@ -285,6 +287,7 @@ func TestAnArrangementAtTheEndOfItsSharingHasEnded(t *testing.T) {
 	assert.Empty(t, detail.Arrangements[0].EndedAt, "only an event before the end of the sharing has a time")
 }
 
+// Verifies: DH-1622
 func TestAnUnknownCustomerOrAccountIsNotFoundWithNoIdentifierInTheDetail(t *testing.T) {
 	r := newRecords(t)
 	addCustomer(t, r.customers, "00000001", "Alex", "Example")
@@ -302,6 +305,7 @@ func TestAnUnknownCustomerOrAccountIsNotFoundWithNoIdentifierInTheDetail(t *test
 	}
 }
 
+// Verifies: DH-1625, DH-1627
 func TestTheTransactionsOfAnAccountAreNewestFirstInPages(t *testing.T) {
 	r := newRecords(t)
 	addCustomer(t, r.customers, "00000001", "Alex", "Example")
