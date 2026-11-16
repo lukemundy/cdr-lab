@@ -252,6 +252,7 @@ func TestTheWorkersNeedNoConsoleSettingAndNoBrandSetting(t *testing.T) {
 	require.NoError(t, err)
 }
 
+// Verifies: DH-0467
 func TestTheCRLMaximumAgeIsOptionalAndIsADurationOfZeroOrMore(t *testing.T) {
 	for value, want := range map[string]time.Duration{"": revocation.DefaultMaxAge, "0s": 0, "30s": 30 * time.Second} {
 		t.Run(value, func(t *testing.T) {

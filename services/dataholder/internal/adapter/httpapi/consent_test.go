@@ -312,6 +312,7 @@ func TestATokenWithoutTheScopeOfTheAPIGets403(t *testing.T) {
 	)
 }
 
+// Verifies: DH-0434, DH-0435
 func TestAResourceRequestNeedsAnAuthDateThatIsAnHTTPDate(t *testing.T) {
 	req := resourceRequest(t, http.MethodGet, customerPath, "full")
 	req.Header.Del("x-fapi-auth-date")
@@ -327,6 +328,7 @@ func TestAResourceRequestNeedsAnAuthDateThatIsAnHTTPDate(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0436, DH-0437
 func TestAResourceRequestAcceptsOnlyAnIPAddressAsTheCustomerIPAddress(t *testing.T) {
 	req := resourceRequest(t, http.MethodGet, customerPath, "full")
 
@@ -339,6 +341,7 @@ func TestAResourceRequestAcceptsOnlyAnIPAddressAsTheCustomerIPAddress(t *testing
 	requireCDSError(t, serve(req), http.StatusBadRequest, cds.HeaderInvalid, "x-fapi-customer-ip-address")
 }
 
+// Verifies: DH-0438
 func TestAResourceRequestAcceptsAnyClientHeaders(t *testing.T) {
 	req := resourceRequest(t, http.MethodGet, customerPath, "full")
 	req.Header.Set("x-cds-client-headers", "not base64 {")
@@ -442,6 +445,7 @@ func TestUserInfoDoesNotUseTheVersionAndAuthDateHeaders(t *testing.T) {
 	assert.Empty(t, rec.Header().Get("x-v"))
 }
 
+// Verifies: DH-0428, DH-0429
 func TestAnAPIThatIsOutOfScopeGivesNotImplemented(t *testing.T) {
 	for _, target := range []string{
 		"GET /cds-au/v1/common/customer/detail",

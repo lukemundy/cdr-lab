@@ -49,6 +49,7 @@ func sendTo(
 	return rec
 }
 
+// Verifies: DH-0455
 func TestAnUnknownPathGivesResourceNotFound(t *testing.T) {
 	for _, path := range []string{"/", "/cds-au/v1/banking/accounts"} {
 		t.Run(path, func(t *testing.T) {
@@ -81,6 +82,7 @@ func TestEachResponseHasAnInteractionID(t *testing.T) {
 	})
 }
 
+// Verifies: DH-0456, DH-0457
 func TestEachResponseAllowsAnyOriginAndExposesTheCDSHeaders(t *testing.T) {
 	rec := send(t, http.MethodGet, "/", http.Header{"Origin": {"https://app.example"}})
 
@@ -212,6 +214,7 @@ func TestAnotherMethodOnADiscoveryPathGivesResourceNotFound(t *testing.T) {
 	assert.Contains(t, rec.Body.String(), "urn:au-cds:error:cds-all:Resource/NotFound")
 }
 
+// Verifies: DH-0459
 func TestThePagesOfAConsumerDoNotPermitCrossOriginRequests(t *testing.T) {
 	page := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusOK) })
 	handler := httpapi.AllowAnyOrigin(page, "/authorize")
@@ -235,6 +238,7 @@ func TestThePagesOfAConsumerDoNotPermitCrossOriginRequests(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0459
 func TestAPreflightRequestToAPageOfAConsumerGetsNoCORSHeaders(t *testing.T) {
 	reached := false
 	page := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {

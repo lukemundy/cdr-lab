@@ -19,151 +19,6 @@ The data holder holds only the customer, account and transaction data that the a
 - The pages for the consumer show an account number only as a masked number: the BSB and the account number in their usual format, with each digit except the last 4 as the letter `x`, for example `xxx-xxx xxxx5678`. ([CDS: Common Field Types][cds-common-field-types]: MaskedAccountString)
 - All customer and account data is invented. It does not copy the data of a real person. Judgement: the lab must hold no personal information.
 
-## APIs
-
-### Endpoints
-
-| API | Method and path | Version | Base URI | Transport | Auth |
-|---|---|---|---|---|---|
-| [Get Products][cds-get-products] | `GET /cds-au/v1/banking/products` | 5 | Product | TLS | none |
-| [Get Product Detail][cds-get-product-detail] | `GET /cds-au/v1/banking/products/{productId}` | 7 | Product | TLS | none |
-| [Get Status][cds-get-status] | `GET /cds-au/v1/discovery/status` | 1 | Public | TLS | none |
-| [Get Outages][cds-get-outages] | `GET /cds-au/v1/discovery/outages` | 1 | Public | TLS | none |
-| [Get Customer][cds-get-customer] | `GET /cds-au/v1/common/customer` | 1 | Resource | mTLS | Bearer, `common:customer.basic:read`, holder of key |
-| [Get Accounts][cds-get-accounts] | `GET /cds-au/v1/banking/accounts` | 3 | Resource | mTLS | Bearer, `bank:accounts.basic:read`, holder of key |
-| [Get Account Detail][cds-get-account-detail] | `GET /cds-au/v1/banking/accounts/{accountId}` | 5 | Resource | mTLS | Bearer, `bank:accounts.detail:read`, holder of key |
-| [Get Account Balance][cds-get-account-balance] | `GET /cds-au/v1/banking/accounts/{accountId}/balance` | 1 | Resource | mTLS | Bearer, `bank:accounts.basic:read`, holder of key |
-| [Get Bulk Balances][cds-get-bulk-balances] | `GET /cds-au/v1/banking/accounts/balances` | 2 | Resource | mTLS | Bearer, `bank:accounts.basic:read`, holder of key |
-| [Get Balances For Specific Accounts][cds-get-balances-specific] | `POST /cds-au/v1/banking/accounts/balances` | 1 | Resource | mTLS | Bearer, `bank:accounts.basic:read`, holder of key |
-| [Get Transactions For Account][cds-get-transactions] | `GET /cds-au/v1/banking/accounts/{accountId}/transactions` | 2 | Resource | mTLS | Bearer, `bank:transactions:read`, holder of key |
-| [Get Transaction Detail][cds-get-transaction-detail] | `GET /cds-au/v1/banking/accounts/{accountId}/transactions/{transactionId}` | 3 | Resource | mTLS | Bearer, `bank:transactions:read`, holder of key |
-
-The security endpoints have no fixed path, except the OpenID Provider configuration. A client gets the URL of each one from the OpenID Provider configuration. ([CDS: Participant Endpoints][cds-participant-endpoints]; see Decisions)
-
-| Endpoint | Method and URL | Transport | Auth |
-|---|---|---|---|
-| [OpenID Provider configuration][cds-oidc-config] | `GET <issuer>/.well-known/openid-configuration` | TLS | none |
-| [JWKS][cds-jwks-endpoint] | `GET`, `jwks_uri` | TLS | none |
-| [Token][cds-token-endpoint] | `POST`, `token_endpoint` | mTLS | `private_key_jwt` |
-| [PAR][cds-par-endpoint] | `POST`, `pushed_authorization_request_endpoint` | mTLS | `private_key_jwt` |
-| [Authorisation][cds-authorisation-endpoint] | `GET`, `authorization_endpoint` | TLS | none. The consumer authenticates in the flow. |
-| [Introspection][cds-introspection-endpoint] | `POST`, `introspection_endpoint` | mTLS | `private_key_jwt` |
-| [Token revocation][cds-token-revocation] | `POST`, `revocation_endpoint` | mTLS | `private_key_jwt` |
-| [CDR arrangement revocation][cds-arrangement-revocation] | `POST`, `cdr_arrangement_revocation_endpoint` | mTLS | `private_key_jwt` |
-| [UserInfo][cds-userinfo-endpoint] | `GET` or `POST`, `userinfo_endpoint` | mTLS | Bearer, holder of key |
-| [Register a client][cds-dcr-endpoints] | `POST`, `registration_endpoint` | mTLS | none. The request is a signed JWT with an SSA. |
-| [Read, update or delete a registration][cds-dcr-endpoints] | `GET`, `PUT` or `DELETE`, `registration_endpoint` and `/{ClientId}` | mTLS | Bearer, `cdr:registration`, holder of key |
-
-- Request and response bodies obey the CDS 1.36.0 OpenAPI specifications ([`cds_banking.json`][cds-openapi-banking], [`cds_common.json`][cds-openapi-common] and [`cds_dcr.json`][cds-openapi-dcr] at v1.36.0), except where a requirement below says otherwise.
-- The path of each API follows the CDS URI structure, after the base URI that the brand has on the Register. ([CDS: URI Structure][cds-uri-structure], [CDR Support: Product Base URI][support-product-base-uri])
-- The product base URI and the public base URI are the same. ([CDS: Participant Endpoints][cds-participant-endpoints]: the product base URI "MAY be the same as the publicBaseUri"; see Decisions)
-- The resource base URI is the base URL of the mTLS listener, and the `resourceBaseUri` of the brand on the Register. ([CDS: Participant Endpoints][cds-participant-endpoints])
-- A request on the resource base URI to a CDS banking API that is out of scope, or to Get Customer Detail, gives 404 with `urn:au-cds:error:cds-all:Resource/NotImplemented`, with or without a token. ([CDS: Resource Not Implemented][cds-error-404-not-implemented]: the code "SHOULD be supported for unimplemented APIs"; see Decisions)
-
-### Versioning and headers
-
-- The security endpoints have no version. They do not use `x-v` and `x-min-v`, and the rules for these two headers below do not apply to them. ([CDS: DCR APIs][cds-dcr-apis])
-- Each API in the first table of Endpoints uses [the CDS version negotiation](../../pkg/cds/DESIGN.md#cdsl-0001), with the version of the table as its lowest and highest version.
-- Each response of the public listener and the mTLS listener has [the `x-fapi-interaction-id` of the request, or a new UUID](../../pkg/cds/DESIGN.md#cdsl-0010).
-- The APIs on the resource base URI require `x-fapi-auth-date`, as an HTTP-date. If it is missing, the response is 400 with `urn:au-cds:error:cds-all:Header/Missing`. If it is not an HTTP-date, the response is 400 with `urn:au-cds:error:cds-all:Header/Invalid`. In both cases, the `detail` is the name of the header. ([CDS: HTTP Headers][cds-http-headers]: "Required for all resource calls"; [CDR Support: Format for x-fapi-auth-date][support-auth-date]; see Decisions)
-- The data holder accepts `x-fapi-customer-ip-address` with an IPv4 or IPv6 address. A different value gives 400 with `urn:au-cds:error:cds-all:Header/Invalid`. ([FAPI 1.0 Baseline, section 6.2.1][fapi-baseline-resource]: the server "shall not reject requests" with a valid address; [CDS: Invalid Header][cds-error-400-header-invalid])
-- The data holder does not validate `x-cds-client-headers`. ([CDR Support: DH requirement for x-cds-client-headers][support-client-headers]: "A request should not be rejected based on the syntax of this header")
-- Each response of an API on the resource base URI has a `Date` header. ([FAPI 1.0 Baseline, section 6.2.1][fapi-baseline-resource])
-
-### Errors
-
-- The security endpoints and the operator interface have their own error formats (see Authorisation server, Authorisation request, Consumer authentication, Client registration, Registration management and Operator interface). The rules below are for all other requests.
-- Error responses use [the CDS error format](../../pkg/cds/DESIGN.md#cdsl-0012).
-- A query parameter with a value that is not valid gives 400 with `urn:au-cds:error:cds-all:Field/Invalid`, and the `detail` is the name of the parameter. This includes an `effective` or a `product-category` that is not in its enumeration, and [a `page` that is not a positive integer](../../pkg/cds/DESIGN.md#cdsl-0020). ([CDS: Invalid Field][cds-error-400-field-invalid])
-- An `updated-since`, `oldest-time` or `newest-time` that is not an RFC 3339 date-time with an offset gives 400 with `urn:au-cds:error:cds-all:Field/InvalidDateTime`. ([CDS: Invalid Date][cds-error-400-invalid-date-time], [CDS: Common Field Types][cds-common-field-types]: times "MUST be offset relative to UTC")
-- A `page-size` that is not valid, and a page out of range, give [the errors of CDS pagination](../../pkg/cds/DESIGN.md#cdsl-0021).
-- A query parameter with an empty value is the same as a parameter that is absent. For `page` and `page-size`, [the CDS HTTP library gives this rule](../../pkg/cds/DESIGN.md#cdsl-0022). (See Decisions)
-- A `productId` that the brand does not have gives 404 with `urn:au-cds:error:cds-all:Resource/Invalid`, and the `detail` is the `productId`. ([CDS: Invalid Resource][cds-error-404-resource-invalid])
-- An `accountId` in the path that the software product cannot get with the token gives 404 with `urn:au-cds:error:cds-banking:Authorisation/InvalidBankingAccount`, and the `detail` is the `accountId`. This includes an `accountId` that does not exist, an `accountId` of a different customer or software product, and an `accountId` of an account that is not in the arrangement. ([CDS: Invalid Banking Account][cds-error-404-invalid-banking-account]; see Decisions)
-- An `accountId` in a request body that the software product cannot get with the token gives 422 with `urn:au-cds:error:cds-banking:Authorisation/InvalidBankingAccount`. The response has one error for each such `accountId`, with the `accountId` as the `detail`, and no data. ([CDS: Invalid Banking Account][cds-error-422-invalid-banking-account]; [CDR Support: Error scenarios and responses][support-error-scenarios]: no partial response)
-- A `transactionId` in the path that is not a transaction of the account, or a transaction with no detail, gives 404 with `urn:au-cds:error:cds-all:Resource/Invalid`, and the `detail` is the `transactionId`. ([CDS: Invalid Resource][cds-error-404-resource-invalid]; [CDR Support: Error scenarios and responses][support-error-scenarios])
-- A request body that is not a JSON object with the structure of its schema gives 400 with `urn:au-cds:error:cds-all:Field/Invalid`. A required field that is absent gives 400 with `urn:au-cds:error:cds-all:Field/Missing`. The `detail` is the name of the field, or `data` when the body is not JSON. The data holder ignores a field that the schema does not give. ([CDS: Missing Required Field][cds-error-400-field-missing], [CDS: Invalid Field][cds-error-400-field-invalid]; see Decisions)
-- A request body of more than 64 KiB gives 413 with `urn:au-cds:error:cds-all:GeneralError/Expected`. (See Decisions)
-- A `POST` request with a `Content-Type` that is not `application/json` gives 415 with `urn:au-cds:error:cds-all:GeneralError/Expected`. ([CDS: HTTP Headers][cds-http-headers]; [CDS: HTTP Response Codes][cds-http-response-codes]; see Decisions)
-- An unknown path gives 404 with `urn:au-cds:error:cds-all:Resource/NotFound`. ([CDS: Resource Not Found][cds-error-404-not-found])
-- An unexpected server error gives [500 with no cause in the `detail`](../../pkg/cds/DESIGN.md#cdsl-0015).
-
-### CORS
-
-- The TLS endpoints use [the CORS rules](../../pkg/cds/DESIGN.md#cdsl-0037), also for [a preflight request](../../pkg/cds/DESIGN.md#cdsl-0039), except the authorisation endpoint and the pages of its flow. This includes the OpenID Provider configuration and the JWKS, which the CDS says do "not require CORS". ([CDS: CORS][cds-cors], [CDS: OpenID Provider Configuration endpoint][cds-oidc-config]; see Decisions)
-- The mTLS endpoints do not permit cross-origin requests. Judgement: they are authenticated endpoints, and a web page in a browser has no CDR client certificate.
-- The authorisation endpoint and the pages of its flow do not permit cross-origin requests. Judgement: they are pages for a consumer and not an API, and a different web site must not read them. ([CDS: OpenID Provider Configuration endpoint][cds-oidc-config]: the authorisation endpoint does "not require CORS")
-- The CORS rules of the TLS endpoints [expose the headers](../../pkg/cds/DESIGN.md#cdsl-0038) `x-v`, `Retry-After` and `x-fapi-interaction-id`, so that a web page can read these headers. ([CDR Support: CORS support][support-cors])
-
-## Authorisation server
-
-The data holder serves the data holder authorisation server of the [authorisation server library](../../pkg/authserver/design/README.md). This section gives only the choices of the data holder.
-
-### OpenID Provider configuration and JWKS
-
-- The issuer is an `https` URL with no query and no fragment. ([OpenID Connect Discovery, section 4.3][oidc-discovery-validation]; see Decisions)
-- The OpenID Provider configuration is [below the issuer](../../pkg/authserver/design/configuration.md#auth-0001), and it has [the fields and values of the data holder configuration](../../pkg/authserver/design/configuration.md#auth-0004).
-- The supported scopes are `openid`, `profile`, `cdr:registration`, `common:customer.basic:read`, `bank:accounts.basic:read`, `bank:accounts.detail:read` and `bank:transactions:read`. ([CDS: Scopes and Claims][cds-scopes-and-claims], [CDS: Authorisation Scopes][cds-authorisation-scopes]; see Decisions)
-- The JWKS has [the public key of each signing key](../../pkg/authserver/design/configuration.md#auth-0006). The data holder gives [each key a different key ID](../../pkg/authserver/design/configuration.md#auth-0008).
-- The `jwksEndpoint` of the brand on the Register is the `jwks_uri` of the configuration. Judgement: the CDS permits two URLs, and one key set is the least complex.
-
-### Signing keys
-
-- The data holder signs [with PS256 only](../../pkg/authserver/design/configuration.md#auth-0009), and its keys are [RSA keys of 2048 bits or longer](../../pkg/authserver/design/configuration.md#auth-0012).
-- The data holder creates its signing key when it has none. (See Decisions)
-
-### Client authentication
-
-- A software product authenticates with [`private_key_jwt`](../../pkg/authserver/design/client-authentication.md#auth-0020). Its client ID is the client ID that the data holder issued at the registration.
-- The data holder gives the `jwks_uri` of the registration to [validate the assertion signature](../../pkg/authserver/design/client-authentication.md#auth-0025).
-- The data holder refuses an assertion that breaks a rule of the library, for example [a `jti` that it accepted before](../../pkg/authserver/design/client-authentication.md#auth-0030) or [an `exp` more than 10 minutes ahead](../../pkg/authserver/design/client-authentication.md#auth-0031).
-
-### Token endpoint
-
-- The token endpoint accepts [three grant types](../../pkg/authserver/design/token-endpoint.md#auth-0035). The authorisation server library gives [the rules of the `authorization_code` and `refresh_token` grants](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0201).
-- A client credentials token has [only the scope `cdr:registration`](../../pkg/authserver/design/token-endpoint.md#auth-0038), and it [expires 5 minutes after it is issued](../../pkg/authserver/design/token-endpoint.md#auth-0043).
-- Each access token is [bound to the client certificate of the token request](../../pkg/authserver/design/token-endpoint.md#auth-0045).
-- Errors have [the format and the codes of RFC 6749, section 5.2](../../pkg/authserver/design/token-endpoint.md#auth-0048). A failed client authentication gives [401 `invalid_client`](../../pkg/authserver/design/client-authentication.md#auth-0032).
-- The data holder [does not compare the client certificate with the Register data](../../pkg/authserver/design/token-endpoint.md#auth-0054).
-
-## Authorisation request
-
-### Pushed authorisation request
-
-The data holder serves the authorisation flow of the [authorisation server library](../../pkg/authserver/design/authorisation-request.md). This section gives only the choices of the data holder. The data holder gives the library the registration of each client: its `grant_types`, `scope`, `redirect_uris`, `request_object_signing_alg` and `jwks_uri`.
-
-- A software product starts an authorisation with [a pushed authorisation request](../../pkg/authserver/design/authorisation-request.md#auth-0061). The data holder uses [only the parameters in the request object](../../pkg/authserver/design/authorisation-request.md#auth-0062).
-- A successful request gives [201 with a `request_uri`](../../pkg/authserver/design/authorisation-request.md#auth-0065), which [expires 60 seconds after the data holder issues it](../../pkg/authserver/design/authorisation-request.md#auth-0066).
-- Errors have [the format of RFC 9126, section 2.3](../../pkg/authserver/design/authorisation-request.md#auth-0068). The [`error_description` of a 400 response names the rule that fails](../../pkg/authserver/design/authorisation-request.md#auth-0070).
-
-### Request object
-
-- The software product signs the request object with [the `request_object_signing_alg` of the registration](../../pkg/authserver/design/authorisation-request.md#auth-0072). The request object has [the claims and the parameters that the library requires](../../pkg/authserver/design/authorisation-request.md#auth-0075), for example [the `response_mode` `jwt`](../../pkg/authserver/design/authorisation-request.md#auth-0082) and [a `code_challenge` with `S256`](../../pkg/authserver/design/authorisation-request.md#auth-0088).
-- Each scope is [in the `scope` of the registration](../../pkg/authserver/design/authorisation-request.md#auth-0085), and it is [not `cdr:registration`](../../pkg/authserver/design/authorisation-request.md#auth-0086).
-- The data holder gets the sharing duration from [`claims.sharing_duration`](../../pkg/authserver/design/authorisation-request.md#auth-0089), with [one year at most](../../pkg/authserver/design/authorisation-request.md#auth-0090).
-- The data holder refuses [`claims.cdr_arrangement_id`](../../pkg/authserver/design/authorisation-request.md#auth-0091) and [an essential `acr` that it cannot reach](../../pkg/authserver/design/authorisation-request.md#auth-0092).
-- A fault gives [`invalid_request_object`](../../pkg/authserver/design/authorisation-request.md#auth-0094) or [`invalid_request`](../../pkg/authserver/design/authorisation-request.md#auth-0095).
-
-### Authorisation endpoint
-
-- The software product sends the browser of the consumer to the authorisation endpoint with [`client_id` and `request_uri`](../../pkg/authserver/design/authorisation-request.md#auth-0096). The data holder accepts [a `request_uri` one time only](../../pkg/authserver/design/authorisation-request.md#auth-0098).
-- When the data holder refuses a request to the authorisation endpoint, it [does not redirect the browser](../../pkg/authserver/design/authorisation-request.md#auth-0100). It shows an error page with [the status that the library gives](../../pkg/authserver/design/authorisation-request.md#auth-0101). The page does not say which rule failed.
-- [A flow that ended does not continue](../../pkg/authserver/design/authorisation-request.md#auth-0102).
-
-## Tokens of a consent
-
-- The authorisation server library gives the tokens of an arrangement: [the authorisation code grant](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0201), [the token response](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0205), [the refresh token grant](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0210) and [the ID token](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0214).
-- The data holder gives the library [the subject identifier of each authorisation](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0216). Subject identifier gives its rules.
-
-### Subject identifier
-
-- The `sub` is a pairwise identifier: a random RFC 4122 version 4 UUID that the data holder creates and keeps for each pair of customer and sector identifier. ([CDS: Sub Claim][cds-sub-claim], [OpenID Connect Core, section 8.1][oidc-core-pairwise])
-- The sector identifier is the host of the `sector_identifier_uri` of the registration. When the registration has none, it is the host of the `redirect_uris`. When the `redirect_uris` then have more than one host, it is the `software_id`. ([OpenID Connect Core, section 8.1][oidc-core-pairwise]; see Decisions)
-- The `sub` of a customer is the same in each arrangement with the same sector identifier, also after the software product registers again. ([CDR Support: ID Permanence and PPID][support-ppid])
-
-## Introspection
-
-- The authorisation server library gives [the rules of the introspection endpoint](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0218).
 
 ## Data of a consent
 
@@ -236,22 +91,6 @@ These rules are for the APIs on the resource base URI and for the UserInfo endpo
 - A response that is not 2xx gives no record. A response to `HEAD` gives no record, because it has no body. ([RFC 9110, section 9.3.2][rfc9110-head])
 - The consumer dashboard shows a disclosure at the next read after the response. ([CDR Rules][cdr-rules], rule 7.9(1): "as soon as practicable")
 - A disclosure is not an event. The data holder does not remove a record. (See Decisions)
-
-### Token revocation
-
-- The authorisation server library gives [the rules of the token revocation endpoint](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0222). A token revocation [does not end the arrangement](../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0223).
-
-
-
-
-## Transport security
-
-- All CDR endpoints use [the TLS versions](../../pkg/cds/DESIGN.md#cdsl-0041) and [the TLS 1.2 cipher suites](../../pkg/cds/DESIGN.md#cdsl-0042) of the CDS HTTP library.
-- The TLS endpoints present a certificate from a mock public CA, not from the mock CDR CA. They [do not request client certificates](../../pkg/cds/DESIGN.md#cdsl-0043). ([CDS: Participant Endpoints][cds-participant-endpoints], [CDS: Transaction Security][cds-transaction-security])
-- The mTLS endpoints are on a listener that is separate from the TLS endpoints. They present a server certificate from the mock CDR CA, and they accept only [client certificates that chain to the CDR CA bundle](../../pkg/cds/DESIGN.md#cdsl-0044). ([CDS: Certificate Trust Model][cds-cert-trust-model])
-- The data holder checks the revocation status of each client certificate with [the CRL check of the CDS HTTP library](../../pkg/cds/DESIGN.md#cdsl-0048), and [refuses the certificate when the check fails](../../pkg/cds/DESIGN.md#cdsl-0047).
-- The [maximum CRL age](../../pkg/cds/DESIGN.md#cdsl-0052) is a setting of the data holder. The setting is optional, and [its default is 1 minute](../../pkg/cds/DESIGN.md#cdsl-0053). (See Decisions)
-- The data holder gets the base URL of the mTLS listener, its certificate and key, and the CA bundle for client certificates from its configuration.
 
 ## Operator console
 
@@ -623,30 +462,10 @@ The site API has [the `/api/` prefix](../../pkg/platform/consolehttp/DESIGN.md#c
 
 | Question | Decision | Reason |
 |---|---|---|
-| Deprecated versions | Not served | A request for a deprecated version gives 406 on the mock. Data holders can retire version 4 of Get Products and version 6 of Get Product Detail from 10 August 2026 ([CDS: Get Products][cds-get-products], [CDS: Get Product Detail][cds-get-product-detail]). |
-| Product base URI | The same as the public base URI | The CDS permits it ([CDS: Participant Endpoints][cds-participant-endpoints]). Judgement: one base URI for all public endpoints is the least complex. |
-| Query parameter with an empty value | The same as an absent parameter | Judgement: the CDS does not specify it. Each parameter of Get Products is optional, and a client that builds a query from a form can send a name with no value. For `page` and `page-size`, the CDS HTTP library gives the same rule. The mock Register does the same for `updated-since`. |
-| Sequence of request checks | Version headers first, then the path and query parameters. | Judgement: the CDS does not give a sequence. |
-| Issuer and hosts | The issuer is the `infosecBaseUri`, on the TLS listener. The mTLS endpoints are on a second listener. | OpenID Connect Discovery requires that the `issuer` is the URL prefix of the configuration ([section 4.3][oidc-discovery-validation]), and the configuration endpoint is a TLS endpoint ([CDS: OpenID Provider Configuration endpoint][cds-oidc-config]). The CDS example has an issuer on the mTLS host, which does not obey that rule and is not normative. |
-| Paths of the security endpoints | Not specified. A client gets each URL from the configuration. | The CDS gives a path only for the configuration ([CDS: Participant Endpoints][cds-participant-endpoints]). The DCR OpenAPI specification has the server URL `https://mtls.dh.example.com/cds-au/v1`, and the security profile examples use `/register`. A client that reads the configuration works with each. |
-| Supported scopes | `openid`, `profile`, `cdr:registration`, and the scopes of the banking and common APIs that are in the plan for this data holder | The CDS requires `openid` and `profile` ([CDS: Scopes and Claims][cds-scopes-and-claims]). Judgement: a scope with no API gives a consent that discloses nothing. Add a scope with the first API that needs it. |
-| Signing key storage | In the data holder database. The data holder creates the key when it has none. | Judgement: the key must stay the same after a restart, and the repository must contain no keys. The mock Register does the same. The lab database is not encrypted. |
-| TLS probes of the OpenID conformance suite | The failures of the conditions `DisallowInsecureCipher` and `CheckForBCP195InsecureFAPICiphers` are accepted | The suite probes TLS 1.2 on the resource endpoint with no client certificate. The mTLS listener ends that handshake with the alert `handshake_failure`, as it must for a client with no certificate ([CDS: Transaction Security][cds-transaction-security]), and the suite reports the closed connection as a failure. A handshake with a cipher suite that the CDS does not permit also gets `handshake_failure`. |
-| CORS on the OpenID Provider configuration and the JWKS | `Access-Control-Allow-Origin: *` | The CDS says that these endpoints do "not require CORS" ([CDS: OpenID Provider Configuration endpoint][cds-oidc-config]), which does not forbid the header. Judgement: one behaviour for all TLS endpoints is the least complex. |
-| Maximum CRL age in the lab | The lab sets 0: the data holder loads the CRL at each check. | Judgement: a conformance test revokes a certificate and then checks the refusal at once, because the suite does not wait ([conformance DESIGN.md][conformance-design]). The CRL server of the lab is in the lab network, so a load at each check costs little. |
 | Kinds of customer | Persons only, each with their own accounts | Judgement: one consumer with their own accounts proves the consent flow. Organisations, joint accounts, secondary users and nominated representatives add rules for profiles, approvals and notifications ([CDS: Authorisation Standards][cds-authorisation-standards]), and they do not change the protocol. |
 | Identifier of an account | A random UUID that the data holder creates. The operator interface gives it as `accountId`. | The consent page needs a value for each account that the consumer can select, and an arrangement must record the selection. Judgement: with an identifier that has no meaning, a form and an arrangement contain no account number. It is not the `accountId` of the banking APIs, which follows the ID permanence rules (see Resource identifiers). The operator gets the identifier, so that a lab user can find the accounts of an arrangement. |
-| Versions of the APIs of a consent | Only the versions of the CDS 1.36.0 OpenAPI specification | Data holders must implement these versions by 9 November 2026, and they can retire the earlier versions from 7 December 2026 ([CDS: Future Dated Obligations][cds-future-dated]). Judgement: the lab has no data recipient that needs the earlier versions, and the earlier versions are only on pages that the CDS calls obsolete. |
-| APIs of a consent that are out of scope | 404 `Resource/NotImplemented` | The CDS says that the code "SHOULD be supported for unimplemented APIs" ([CDS: Resource Not Implemented][cds-error-404-not-implemented]). Judgement: payees, direct debits, scheduled payments and instalment plans add data types and no new behaviour. Get Customer Detail needs addresses and phone numbers, and the lab needs no more personal data. |
-| `x-fapi-auth-date` that is missing | 400 `Header/Missing` | The CDS text says that the header is "Required for all resource calls" ([CDS: HTTP Headers][cds-http-headers]). The OpenAPI specification marks it as not required, and a DSB article says that its use is "at the discretion of the DH" but that data holders "must validate that the mandatory headers are provided" ([CDR Support: FAPI header obligations for Data Holders][support-fapi-headers]). The CDS text is the first source. |
-| Account that is not in the arrangement | The same response as an account that does not exist: `InvalidBankingAccount` | The CDS permits `InvalidBankingAccount` or `UnavailableBankingAccount` ([CDS: Invalid Banking Account][cds-error-404-invalid-banking-account]). For this token, the account is never available. Judgement: one response for the two conditions does not show which accounts exist. |
 | Token checks before the other checks | A refused token gives 401 or 403, also when the request has other faults | The DSB says that errors of OAuth, OIDC and FAPI take precedence over CDS error codes ([CDR Support: Error scenarios and responses][support-error-scenarios]). |
-| Token for an API that is out of scope | No token check: the response is 404 `Resource/NotImplemented` for each request | An API that the data holder does not implement has no scope to check. Judgement: the response tells a caller with no token only that the API is not implemented, and a token check first adds code with no benefit. |
 | Body of the token errors | No body for 401. For 403 on the resource base URI, the CDS error `Authorisation/InvalidConsent`. | RFC 6750 gives the `WWW-Authenticate` values ([section 3.1][rfc6750-errors]). The CDS says that a 403 for a scope that is not correct has an error payload ([CDS: HTTP Response Codes][cds-http-response-codes]), and `InvalidConsent` is for a consent that "is not sufficient" ([CDS: Invalid Consent][cds-error-403-invalid-consent]). The same responses as registration management for 401. |
-| Response for a `POST` with a content type that is not JSON | 415 with `GeneralError/Expected` | The CDS gives 415 ([CDS: HTTP Response Codes][cds-http-response-codes]) and no error code for it. `GeneralError/Expected` is the CDS code for an expected error with no more specific code ([CDS: Error Codes][cds-error-codes]). |
-| Size of a request body on the resource base URI | 64 KiB at most. A larger body gives 413 with `GeneralError/Expected`. | The CDS gives no limit. Judgement: 1000 `accountId` values are approximately 40 KB, and the other request bodies of the data holder have the same limit. 413 is the HTTP status for this condition ([RFC 9110, section 15.5.14][rfc9110-413]), and the CDS has no error code for it, as for 415. |
-| `detail` of a request body that is not JSON | `data` | The CDS `detail` of a body error is the name of the field ([CDS: Invalid Field][cds-error-400-field-invalid]). Judgement: a body that is not JSON has no field, and `data` is the top-level field of each request schema. |
-| Fields of a request body that the schema does not give | Ignored | The request schemas do not forbid other properties, and `meta` is an open object ([CDS: Get Balances For Specific Accounts][cds-get-balances-specific]). A refusal would refuse a request that the schema accepts. |
 | Accounts of Get Balances For Specific Accounts | One balance for each different `accountId`, in the sequence of Get Accounts. An empty list gives an empty list. | The schema permits an empty `accountIds` and gives no rule for a duplicate or for the sequence ([CDS: Get Balances For Specific Accounts][cds-get-balances-specific]). Judgement: one record for each account keeps `totalRecords` correct, and one sequence for the three balance APIs gives stable pages. |
 | Resource identifiers | For an account and for a transaction, a SHA-256 hash with no key of the `software_id`, the customer number and the identifier of the account or the transaction in the data holder. | The CDS forbids an identifier with meaning and an identifier that is the same for two software products ([CDS: ID Permanence][cds-id-permanence]), and it names a hash for a `transactionId` ([CDS: BankingTransactionV2][cds-schema-transaction]: "through hashing if necessary"). The DSB suggests an identifier for the subject, or for the subject and the client ([CDR Support: ID Permanence and PPID][support-ppid]). Judgement: a stored value for each resource and software product grows with the two, and each consent or read of a page must write it. One method for the two types is one rule to keep correct. The identifier of an account or a transaction in the data holder is a random UUID that no data recipient gets, so a party without it cannot predict or reverse the hash, and a key adds nothing. The two internal identifiers are different random UUIDs, so an account and a transaction do not get the same identifier. A data holder whose internal identifiers a party can guess must use a keyed hash. A new registration keeps the `software_id`, so the identifiers stay the same. The input of the hash must not change. |
 | Balances | The data holder calculates them from the transactions and the credit limit | The CDS gives no rule. The balance "should be the same as the balance presented through the mobile application" ([CDS: Data Latency][cds-data-latency]). Judgement: balances that agree with the transactions let a data recipient test both, and the operator does not have to keep two values the same. |
@@ -661,7 +480,6 @@ The site API has [the `/api/` prefix](../../pkg/platform/consolehttp/DESIGN.md#c
 | Fields of a person | `lastName`, `firstName`, an empty `middleNames` and `lastUpdateTime` | `lastName` and `middleNames` are required ([CDS: CommonPerson][cds-schema-person]). Judgement: the lab needs no more personal data. Occupation is optional. |
 | UserInfo endpoint | Supported, with plain JSON | The CDS says "Data Holders MUST support a UserInfo endpoint" ([CDS: UserInfo endpoint][cds-userinfo-endpoint]). Its list of configuration fields says that `userinfo_endpoint` is necessary "only if OIDC Hybrid Flow is supported" ([CDS: OpenID Provider Configuration endpoint][cds-oidc-config]). The first rule is a direct requirement, and the hybrid flow is retired. OpenID Connect permits plain JSON when the registration does not ask for a signed response ([section 5.3.2][oidc-core-userinfo-response]). |
 | Format of a masked number | `xxx-xxx` for the BSB, a space, and the account number with only its last 4 digits | The CDS requires the number "as the full account number would normally be represented for display (including formatting) but with all digits except the last four replaced with a lower case x", and gives the example `xxx-xxx xxxxx1234` ([CDS: Common Field Types][cds-common-field-types]). |
-| Sector identifier when the registration has no `sector_identifier_uri` | The host of the redirect URIs, or the `software_id` when they have more than one host | OpenID Connect requires a `sector_identifier_uri` for redirect URIs with more than one host ([section 8.1][oidc-core-pairwise]), but the CDS marks the SSA claim as optional ([CDS: SSA Definition][cds-ssa-definition]). Judgement: the `software_id` gives one software product a `sub` that stays the same and that no other software product gets. |
 | Response to a data request after the end of an arrangement | 401 with `invalid_token`. The data holder does not use `Authorisation/RevokedConsent`. | The CDS lists 403 `RevokedConsent` for a consent that is "no longer authorised", as a SHOULD ([CDS: Consent Is Revoked][cds-error-403-revoked-consent]). The CDS also requires that a revocation revokes the tokens ([CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation]), and FAPI requires the RFC 6750 errors, which give 401 `invalid_token` for a revoked token ([FAPI 1.0 Baseline, section 6.2.1][fapi-baseline-resource], [RFC 6750, section 3.1][rfc6750-errors]). The DSB gives 401 "with a corresponding oAuth error response" ([CDR Support: Error scenarios and responses][support-error-scenarios]). Judgement: the token of an ended arrangement is a revoked token, so the MUST rules apply. |
 | Search of the customers in the console | A part of the customer number, the name or the email address | Judgement: a consumer who asks the staff for their records gives one of these values ([CDR Rules][cdr-rules], rule 9.5). The query string then has personal data, and [the telemetry library removes the query string from each span](../../pkg/platform/telemetry/DESIGN.md#tele-0007). |
 | Account numbers in the console | In full | Judgement: the operator is the staff of the bank, and the operator interface gives the account number in full. The pages for the consumer mask it, because a different person can see the screen of a consumer. |

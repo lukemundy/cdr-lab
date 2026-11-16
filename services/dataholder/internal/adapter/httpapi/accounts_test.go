@@ -257,6 +257,7 @@ func TestGetAccountDetailGivesTheAccountWithItsNumbers(t *testing.T) {
 	}`, rec.Body.String())
 }
 
+// Verifies: DH-0445
 func TestGetAccountDetailOfAnAccountThatTheTokenDoesNotGiveIsAnInvalidBankingAccount(t *testing.T) {
 	rec := serve(detailRequest(t, "internal-1", "account-detail"))
 

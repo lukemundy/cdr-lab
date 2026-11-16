@@ -161,6 +161,7 @@ func TestAStoreErrorOfAConfirmationHasItsOperation(t *testing.T) {
 	require.ErrorContains(t, err, "create the arrangement")
 }
 
+// Verifies: DH-0509
 func TestTheSubjectOfACustomerIsTheSameForEachConsentWithOneSectorIdentifier(t *testing.T) {
 	consents, _ := newConsents(t)
 
@@ -174,6 +175,7 @@ func TestTheSubjectOfACustomerIsTheSameForEachConsentWithOneSectorIdentifier(t *
 	assert.NotEqual(t, first.Arrangement.ArrangementID, second.Arrangement.ArrangementID)
 }
 
+// Verifies: DH-0509
 func TestTheSubjectIsDifferentForADifferentCustomerOrSectorIdentifier(t *testing.T) {
 	tests := map[string]func(*domain.ConsentRequest){
 		"customer":          func(r *domain.ConsentRequest) { r.CustomerNumber = "00000002" },
