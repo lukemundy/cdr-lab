@@ -7,7 +7,7 @@ This area gives the sign-up, the sign-in, the sign-out and the session of the on
 - <a id="dh-2000"></a>**DH-2000** The sign-up page asks for the first name, the last name and the email address, and for nothing else. The first name is optional. ([Judgement: the sign-up is a create of a customer of the operator](#dh-2100))
 - <a id="dh-2001"></a>**DH-2001** The sign-up page asks for no password and no identity document. The data holder makes no identity check at a sign-up. ([Judgement: the sign-up is a create of a customer of the operator](#dh-2100))
 - <a id="dh-2002"></a>**DH-2002** A sign-up creates the customer with the rules of [a create of a customer in the operator interface](operator-interface.md#dh-0720), for each value. For example, [the rule of a `lastName`](operator-interface.md#dh-0734) applies. ([Judgement: the sign-up is a create of a customer of the operator](#dh-2100))
-- <a id="dh-2003"></a>**DH-2003** A sign-up gives the new customer a customer number with the rules of the customer numbers. ([the customer number](../DESIGN.md#customers-and-accounts); [Judgement: the sign-up is a create of a customer of the operator](#dh-2100))
+- <a id="dh-2003"></a>**DH-2003** A sign-up gives the new customer a customer number with the rules of the customer numbers. ([the customer number](consumer-authentication.md#dh-1201); [Judgement: the sign-up is a create of a customer of the operator](#dh-2100))
 - <a id="dh-2004"></a>**DH-2004** The operator interface and the operator console show a customer of a sign-up in the same way as a customer of the operator. The data holder keeps no record of the channel of a sign-up. ([Judgement: the sign-up is a create of a customer of the operator](#dh-2100))
 - <a id="dh-2005"></a>**DH-2005** The sign-up page says that the data holder is a demonstration, and that the consumer must give only invented details. ([Judgement: no rule for the domain of the email address](#dh-2102))
 - <a id="dh-2006"></a>**DH-2006** The sign-up page gives an example email address on the reserved domain `.test`. For example, `name@example.test`. ([RFC 6761, section 6.2][rfc6761-test]; [Judgement: no rule for the domain of the email address](#dh-2102))
@@ -18,19 +18,19 @@ This area gives the sign-up, the sign-in, the sign-out and the session of the on
 - <a id="dh-2011"></a>**DH-2011** A successful sign-up starts a session for the new customer. ([Judgement: a session after a sign-up](#dh-2103))
 - <a id="dh-2012"></a>**DH-2012** After a successful sign-up, the site shows the new customer number on a page of its own, with a copy button. ([Judgement: a session after a sign-up](#dh-2103))
 - <a id="dh-2013"></a>**DH-2013** The customer number page says that the consumer signs in to the site with this number or with the email address. ([CDS: User Identifiers][cds-user-identifiers])
-- <a id="dh-2014"></a>**DH-2014** The customer number page says that an app that gets the data of the consumer under the Consumer Data Right asks for the email address or this number. It also says that the app then asks for a one-time password that the brand sends to the email address. ([CDS: User Identifiers][cds-user-identifiers]; [the consumer authentication](../DESIGN.md#consumer-authentication))
+- <a id="dh-2014"></a>**DH-2014** The customer number page says that an app that gets the data of the consumer under the Consumer Data Right asks for the email address or this number. It also says that the app then asks for a one-time password that the brand sends to the email address. ([CDS: User Identifiers][cds-user-identifiers]; [the OTP by email](consumer-authentication.md#dh-1220))
 - <a id="dh-2015"></a>**DH-2015** A new customer of a sign-up has no account. The data holder opens no account at a sign-up. For example, the consumer then [opens an account on the site](../DESIGN.md#opening-of-an-account), or the operator opens one. ([Judgement: no account at a sign-up](#dh-2101))
 
 ## Sign-in and sign-out
 
-- <a id="dh-2016"></a>**DH-2016** The sign-in page asks for the email address or the customer number in one field, and for a password. ([the user identifiers](../DESIGN.md#customers-and-accounts); [WCAG 2.2, SC 3.3.8][wcag-3-3-8])
+- <a id="dh-2016"></a>**DH-2016** The sign-in page asks for the email address or the customer number in one field, and for a password. ([the user identifiers](consumer-authentication.md#dh-1200); [WCAG 2.2, SC 3.3.8][wcag-3-3-8])
 - <a id="dh-2017"></a>**DH-2017** The identifier field of the sign-in page has `autocomplete="username"`. ([WCAG 2.2, SC 1.3.5][wcag-1-3-5])
 - <a id="dh-2018"></a>**DH-2018** The password field of the sign-in page has `type="password"` and `autocomplete="current-password"`. ([WCAG 2.2, SC 1.3.5][wcag-1-3-5])
 - <a id="dh-2019"></a>**DH-2019** The consumer can paste into each field of the sign-in page, and a password manager can fill each field. ([WCAG 2.2, SC 3.3.8][wcag-3-3-8])
 - <a id="dh-2020"></a>**DH-2020** The sign-in page accepts any password. ([Judgement: the page does not send the password](#dh-2104))
 - <a id="dh-2021"></a>**DH-2021** When the password field is empty, the sign-in page refuses the sign-in and says that any password works. It sends no request. ([Judgement: the page does not send the password](#dh-2104))
 - <a id="dh-2022"></a>**DH-2022** The sign-in page does not send the password to the data holder. It sends only the user identifier. ([Judgement: the page does not send the password](#dh-2104))
-- <a id="dh-2023"></a>**DH-2023** When the user identifier is the email address or the customer number of a customer, the data holder starts a session for that customer. ([the user identifiers](../DESIGN.md#customers-and-accounts))
+- <a id="dh-2023"></a>**DH-2023** When the user identifier is the email address or the customer number of a customer, the data holder starts a session for that customer. ([the user identifiers](consumer-authentication.md#dh-1200))
 - <a id="dh-2024"></a>**DH-2024** When no customer has the user identifier, the data holder refuses the sign-in. The page says "We could not sign you in. Check your email address or customer number". ([Judgement: the refusal of an unknown user identifier](#dh-2105))
 - <a id="dh-2025"></a>**DH-2025** The refusal of an unknown user identifier is the same for an email address and a customer number. Thus the sign-in shows which email addresses and customer numbers exist. ([Judgement: the refusal of an unknown user identifier](#dh-2105))
 - <a id="dh-2026"></a>**DH-2026** Each page that shows the data of a customer needs a session. For example, the accounts page needs a session. ([Judgement: one session cookie for a consumer UI with a sign-in (ADR 0014)][adr-0014])
@@ -140,7 +140,7 @@ The site is a web UI. The [web UI library specification](../../../pkg/platform/c
 ### <a id="dh-2105"></a>DH-2105 The refusal of an unknown user identifier
 
 - Kind: choice
-- Basis: Step 3.3. The CDR authentication hides which user identifiers exist ([CDS: One-Time Password Credential Requirements][cds-otp]; [the consumer authentication](../DESIGN.md#consumer-authentication)), and the CDS gives no rule for the site.
+- Basis: Step 3.3. The CDR authentication hides which user identifiers exist ([CDS: One-Time Password Credential Requirements][cds-otp]; [no email for an unknown user identifier](consumer-authentication.md#dh-1223)), and the CDS gives no rule for the site.
 - Reason: With any password, each sign-in with the user identifier only shows which email addresses and customer numbers exist, so a refusal that hides them protects nothing. The site is lab-only and its data is invented. A text in plain language helps the consumer more.
 
 ### <a id="dh-2106"></a>DH-2106 Sessions in the memory of the process
@@ -189,7 +189,7 @@ The site is a web UI. The [web UI library specification](../../../pkg/platform/c
 
 - Kind: choice
 - Basis: Step 3.3. The site is lab-only, and the CDS gives the rules of the public listener ([CDS: CORS][cds-cors]).
-- Reason: On the public listener, the site needs exceptions to the CORS rule and to the not-found rule of the CDR APIs. A lab-only function then goes into the listener of the CDR endpoints. The port of the site is in [the ports of an instance](../DESIGN.md#the-four-preset-brands-in-the-lab).
+- Reason: On the public listener, the site needs exceptions to the CORS rule and to the not-found rule of the CDR APIs. A lab-only function then goes into the listener of the CDR endpoints. The port of the site is in [the port block of an instance](deployment.md#dh-1310).
 
 ### <a id="dh-2114"></a>DH-2114 The names of the site settings
 
