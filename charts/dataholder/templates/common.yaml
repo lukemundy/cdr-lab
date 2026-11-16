@@ -73,7 +73,7 @@ defaultPodOptions:
 controllers:
   main:
     replicas: 1
-    # One pod at a time, because the migrations take no lock and the sessions are in the memory of the process.
+    # One pod at a time, because the sessions are in the memory of the process.
     strategy: Recreate
     initContainers:
       migrate:

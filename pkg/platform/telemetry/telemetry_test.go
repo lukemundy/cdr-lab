@@ -53,6 +53,7 @@ func TestSetupWritesLogsToStdoutAsText(t *testing.T) {
 	assert.Contains(t, stdout.String(), "server.port=8080")
 }
 
+// Verifies: TELE-0002
 func TestSetupWithNoExportConfiguredDropsTelemetryWithoutErrors(t *testing.T) {
 	clearExportEnv(t)
 

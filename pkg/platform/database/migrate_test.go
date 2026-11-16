@@ -86,6 +86,7 @@ func TestMigrateFailsWithNoMigrations(t *testing.T) {
 	assert.ErrorIs(t, database.Migrate(t.Context(), pool, fstest.MapFS{}), goose.ErrNoMigrations)
 }
 
+// Verifies: DBASE-0002
 func TestMigrateOnStart(t *testing.T) {
 	tests := []struct {
 		value   string

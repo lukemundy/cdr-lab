@@ -28,6 +28,7 @@ func notReady(context.Context) error { return errors.New("database unavailable a
 
 func ready(context.Context) error { return nil }
 
+// Verifies: SRV-0001
 func TestLivenessDoesNotDependOnReadiness(t *testing.T) {
 	rec := probe(t, notReady, "/livez")
 
@@ -35,6 +36,7 @@ func TestLivenessDoesNotDependOnReadiness(t *testing.T) {
 	assert.Equal(t, "ok", rec.Body.String())
 }
 
+// Verifies: SRV-0002
 func TestReadinessIsOKWhenTheCheckPasses(t *testing.T) {
 	rec := probe(t, ready, "/readyz")
 
@@ -42,6 +44,7 @@ func TestReadinessIsOKWhenTheCheckPasses(t *testing.T) {
 	assert.Equal(t, "ok", rec.Body.String())
 }
 
+// Verifies: SRV-0002
 func TestReadinessIsUnavailableWhenTheCheckFails(t *testing.T) {
 	rec := probe(t, notReady, "/readyz")
 
