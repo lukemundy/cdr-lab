@@ -61,6 +61,7 @@ func (l *lab) craftedToken(
 	return token
 }
 
+// Verifies: AUTH-0055
 func TestAnIssuedTokenIsVerifiedWithTheCertificateThatItIsBoundTo(t *testing.T) {
 	l := newLab(t)
 
@@ -160,6 +161,7 @@ func TestASigningKeyFailureIsNotAnInvalidToken(t *testing.T) {
 	assert.NotErrorIs(t, err, authserver.ErrInvalidToken)
 }
 
+// Verifies: AUTH-0010, AUTH-0056
 func TestDuringAKeyChangeTheFirstKeySignsAndATokenOfEachKeyIsValid(t *testing.T) {
 	l := newLab(t)
 	next, err := rsa.GenerateKey(rand.Reader, 2048)

@@ -13,6 +13,7 @@ import (
 	"github.com/lukemundy/cdr-lab/pkg/authserver"
 )
 
+// Verifies: AUTH-0011
 func TestANewSigningKeyIsAnRSAKeyOf2048BitsWithItsOwnID(t *testing.T) {
 	first, err := authserver.NewSigningKey()
 	require.NoError(t, err)
