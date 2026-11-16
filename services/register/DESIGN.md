@@ -1,51 +1,6 @@
 # Mock CDR Register: design
 
-This document gives the specification and the requirements for the mock CDR Register. It does not describe the implementation.
-
-## Purpose
-
-The mock Register implements the CDR Register as the CDS specifies it. Data holders and data recipients in this lab use it the same way they use the production Register that the ACCC operates. A "real" component must be able to change from the mock Register to the production Register with a configuration change only.
-
-## Sources
-
-Target: Consumer Data Standards (CDS) 1.36.0. CDS links go to the 1.36.0 archive URL. While 1.36.0 is the current version, that URL redirects to the live site.
-
-The requirements follow the process in [README: Sources for requirements][readme-sources]. Each requirement links to its source. "Judgement" marks a requirement that the CDS and the ACCC do not state, and gives the reason.
-
-Background research, with the full detail and more sources, is in [`docs/research/`](../../docs/research/README.md).
-
-## Scope
-
-In scope:
-
-- The public (TLS) Register APIs.
-- The secure (mTLS) Register APIs.
-- The Register authorisation server: OpenID Provider configuration, token endpoint, access token signing keys.
-- The Register JWKS and Software Statement Assertion (SSA) signing.
-- Participant data and status rules.
-- The operator interface, and the lab-only features to load participant data.
-- The mock CDR intermediate CA in a running lab: the issue of CDR client and server certificates from CSRs, the CDR CA bundle, the revocation of CDR certificates and the CRL ([ADR 0022][adr-0022]).
-- The operator console: a web UI for the lab operator.
-- The load of a participant seed file by the Helm chart of the Register, and an example seed file for the four preset banks of the data holder (see Deployment from published artifacts). The deployment itself is out of scope.
-
-Out of scope for now:
-
-- Register calls to data holders: Get Metrics and Metadata Update. The ACCC has not implemented the Metadata Update trigger ([standards-maintenance #537][dsb-537]). Add Get Metrics when a mock data holder exists.
-- Deprecated endpoint versions. The mock serves only the current version of each endpoint (see Decisions).
-- The Participant Portal, accreditation workflow and CDR Rules processes.
-- Automatic archiving of dormant entries ([CDS: Archiving][cds-archiving]).
-- The set-up of the mock CDR PKI: the CAs, and the certificates of the lab services and tests. The PKI has its own design ([PKI DESIGN.md][pki-design]). The [CA library specification](../../pkg/ca/DESIGN.md) gives the profiles of the certificates that the Register issues. "Transport security" below gives what the Register needs from the PKI.
-
-## Actors
-
-| Actor | Uses |
-|---|---|
-| Data recipient software product | Token endpoint, Get Data Holder Brands, Get SSA, Get OpenId Provider Config, Get Data Holder Statuses, Get Data Holder Brands Summary |
-| Data holder brand | Get JWKS, Get Data Recipients, Get Data Recipients Statuses, Get Software Products Statuses, Get Data Holder Brands Summary |
-| Public client | Get Data Holder Brands Summary |
-| Lab operator | Operator interface, operator console, lab-only features |
-
-Source: [CDS: Register APIs][cds-register-apis].
+The [overview of the specification](design/README.md) gives the summary, the context, the areas, the goals and the non-goals. Each area file in `design/` gives the rules of its area.
 
 ## Participant model
 
@@ -214,7 +169,7 @@ In a running lab, the Register is the only component that revokes a certificate 
 - `GET /crl/cdr-intermediate.crl` gives 200 with the current CRL in DER and the content type `application/pkix-crl` ([RFC 2585, section 4.2][rfc2585-mime]). `HEAD` gives the same headers with no body ([RFC 9110, section 9.1][rfc9110-methods]). Another method gives 405 with an `Allow` header ([RFC 9110, section 15.5.6][rfc9110-405]). Another path gives 404.
 - The URL of the CRL is a setting of the Register. The setting is required, and has no default. Each certificate that the Register issues gives this URL as its CRL distribution point ([the CRL distribution point of a CDR certificate](../../pkg/ca/DESIGN.md#ca-0034)). The lab set-up gives the same URL in the certificates that it issues.
 - A revocation through the operator interface takes effect at the Register at once: the next TLS handshake with the certificate fails. Other relying parties see it [within the maximum CRL age of 1 minute](../../pkg/cds/DESIGN.md#cdsl-0058). (See Decisions.)
-- The readiness probe fails while the Register has no current CRL. ([Non-functional requirements](#non-functional-requirements))
+- The readiness probe fails while the Register has no current CRL. ([the readiness probe fails with no current CRL](design/non-functional-requirements.md#reg-0009))
 - Tests: Register tests with a controlled clock check the schedule of the CRL signatures and the CRL numbers across a restart, with no wait. The conformance suite checks the CRL at its URL, and a revocation through the operator interface. ([ADR 0019][adr-0019])
 
 ## Operator interface
@@ -498,7 +453,7 @@ The `{brandId}` of a data holder brand is its `dataHolderBrandId`, or its `inter
 - Telemetry: the console API has the same server telemetry as the other listeners. The UI sends no telemetry. ([ADR 0014][adr-0014], [ADR 0006][adr-0006])
 - Performance: on a development workstation, a list of 1,000 data recipients or data holders shows within 1 second, and the first page of a history of 1,000 events shows within 1 second. Judgement: the seed data is small, and this limit finds a page that loads all records at once.
 - Tests: tests in the Register check the listener headers, the cross-origin refusal, the refusal of a `Host` that is not in the allowlist, and the console API. The conformance suite does not test the console. A small number of browser tests check the main operator journeys against the lab. ([ADR 0019][adr-0019])
-- Browser tests of the CDR certificates: the operator issues a client certificate from a CSR file, saves the chain, and then revokes the certificate from the saved file through the confirmation, and the list of revocations shows it. The operator issues a server certificate for a data holder brand and saves the chain, and the history of the data holder shows the issue. The operator saves the CDR CA bundle. Each test makes its own participants, so that it runs in a lab with no conformance data, and the repository has no private key for its CSRs ([Non-functional requirements](#non-functional-requirements-1)). (See Decisions.)
+- Browser tests of the CDR certificates: the operator issues a client certificate from a CSR file, saves the chain, and then revokes the certificate from the saved file through the confirmation, and the list of revocations shows it. The operator issues a server certificate for a data holder brand and saves the chain, and the history of the data holder shows the issue. The operator saves the CDR CA bundle. Each test makes its own participants, so that it runs in a lab with no conformance data, and the repository has no private key for its CSRs ([no private key in the repository](design/non-functional-requirements.md#reg-0004)). (See Decisions.)
 
 ## Lab-only features
 
@@ -528,20 +483,6 @@ An operator deploys the Register to Kubernetes from the image and the Helm chart
 - Each endpoint of a brand in the example seed is on an invented host of that brand on the top-level domain `.test`, and the `websiteUri` is the same as in the lab seed. A deployment changes the endpoints to the hosts of the deployment. ([RFC 6761, section 6.2][rfc6761-test]; see Participant model and Decisions)
 - The example seed loads into a Register that has no participants with no error.
 - A Register that the chart deploys with the example seed has the four preset brands at start-up, with their endpoints. Get Data Holder Brands Summary gives the four brands with their public base URIs ([CDS: Get Data Holder Brands Summary][cds-get-dh-brands-summary]).
-
-## Non-functional requirements
-
-The CDS and the ACCC publish no non-functional requirements for the Register ([CDS: Non-functional Requirements][cds-nfrs] apply to data holders). These requirements are for the lab.
-
-- Propagation: a status change is visible on all APIs within 1 second. Data holders must react to status changes within 5 minutes ([CDS: Metadata Cache Management][cds-metadata-cache]), so the Register must not add delay.
-- Performance: on a development workstation, 95% of API calls complete within 200 ms at 50 requests each second. The CDS thresholds for data holder APIs are 1000 to 1500 ms ([CDS: Non-functional Requirements][cds-nfrs]).
-- Restart: participant data, statuses, signing keys, revocations and the CRL number stay the same after a restart.
-- Telemetry: the Register [sends traces, metrics and logs with OpenTelemetry](../../pkg/platform/telemetry/DESIGN.md#tele-0001), and its spans have [route patterns and not raw URLs](../../pkg/platform/telemetry/DESIGN.md#tele-0005). Telemetry contains no participant contact data.
-- Secrets: the repository contains no private keys. Keys and certificates are created when the lab is set up. (The ACCC mock publishes its private keys in its repository, [CertificateManagement][accc-mock-certs].)
-- Portability: a real data recipient or data holder changes between the mock Register and the production Register with configuration only: base URLs, trust anchors, client certificate, signing keys and identifiers.
-- Conformance: a black-box test suite checks each requirement in this document that the CDR defines, through the APIs only ([ADR 0019][adr-0019]). The same suite can run against the ACCC mock Register. Known differences from the ACCC mock are listed in the suite as expected differences.
-- Local run: the Register runs with local Docker (Compose), with its dependencies.
-- Health: the Register serves the [liveness probe](../../pkg/platform/httpserver/DESIGN.md#srv-0001) and the [readiness probe](../../pkg/platform/httpserver/DESIGN.md#srv-0002) on a plain HTTP listener that is separate from the CDR API listeners. Judgement: a separate listener keeps the probes out of the CDR APIs. The readiness probe also fails while the Register has no current CRL ([Certificate revocation list](#certificate-revocation-list)). A process that runs only the background jobs is ready when it can connect to the database ([ADR 0010][adr-0010]).
 
 ## Decisions
 
@@ -696,7 +637,7 @@ The CDS and the ACCC publish no non-functional requirements for the Register ([C
 | Revocations in the console | A list in pages, newest first, with the serial number, the subject, the thumbprint, the time and the reason | The view shows the result of each action, and a toast is never the only place ([WCAG 2.2, SC 4.1.3][wcag-4-1-3]; the rules for the actions). The CRL gives the revocations only in DER. Judgement: the subject and the thumbprint let the operator compare a revocation with its confirmation and with the registered thumbprints of a software product, whose registration the operator removes with its own action. The Register gets the certificate in each revocation request, so it can keep these values. |
 | Format of a serial number in the console | Uppercase hexadecimal, with two digits for each byte and no separators | Judgement: the CDS and the ACCC give no format. The operator compares the serial number in the confirmation and in the list with the output of `openssl x509 -serial`, which has this format. The Register keeps its own format in the database: the console API changes only the format of its responses. |
 | Server certificates in the detail of a data holder brand | Not shown. The history shows each issue with its thumbprint. | Judgement: the Register does not register a server certificate, and no API of the Register uses it (see the row "Record of a server certificate issue"). The event is the only record. |
-| Browser tests of the CDR certificates | One journey for a client certificate issue, its save and its revocation from the saved file. One journey for a server certificate issue. One for the save of the CA bundle. Each test makes its own participants and its own CSR key, and keeps no key in the repository. | [ADR 0019][adr-0019]: browser tests check the main journeys. Judgement: a revocation needs the chain of an issue, so one journey proves the sequence. The lab of the browser tests in CI has no conformance data. The repository contains no private keys ([Non-functional requirements](#non-functional-requirements-1)). Each issue gives a new serial number, so the test runs again in the same lab. |
+| Browser tests of the CDR certificates | One journey for a client certificate issue, its save and its revocation from the saved file. One journey for a server certificate issue. One for the save of the CA bundle. Each test makes its own participants and its own CSR key, and keeps no key in the repository. | [ADR 0019][adr-0019]: browser tests check the main journeys. Judgement: a revocation needs the chain of an issue, so one journey proves the sequence. The lab of the browser tests in CI has no conformance data. The repository contains no private keys ([no private key in the repository](design/non-functional-requirements.md#reg-0004)). Each issue gives a new serial number, so the test runs again in the same lab. |
 | Source of the seed file in the chart | The name of an existing ConfigMap that the operator makes | Judgement: the data holder chart gets its brand directory the same way ([data holder: the brand directory as a ConfigMap][dataholder-brand-configmap]). With the file in the values, a change of the values after the first load has no effect, which a reader of the values does not expect. A list in a later values file replaces the full list ([Helm: values files][helm-values]), so a deployment copies the full file to change one host. A seed preset in the chart makes the Register chart depend on the presets of the data holder. |
 | Seed in the chart by default | Off | Judgement: the Register start does not need a file (see Lab-only features), and a deployment with no lab data stays possible. The data holder chart always loads its products, because each brand has a product catalogue. A Register has no default set of participants. |
 | Load of the seed file by the chart | A lab-only feature in the chart | Judgement: the Register is a mock, so its chart can run a lab-only feature, as the data holder chart does for its products. With no load, an operator makes each brand by hand in the operator console. |

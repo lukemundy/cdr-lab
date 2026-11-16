@@ -105,6 +105,7 @@ func TestEachModeHasOnlyItsServersAndItsWorkers(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0009, REG-0010
 func TestAProcessWithTheAPIsIsReadyOnlyWithACurrentCRL(t *testing.T) {
 	setLabSettings(t)
 

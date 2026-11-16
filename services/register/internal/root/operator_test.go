@@ -686,6 +686,7 @@ func TestTheOperatorCannotChangeAKeySetThatDoesNotExist(t *testing.T) {
 	refused(t, handlers, "/v1/key-sets/other/activate-next", http.StatusNotFound, "The key set does not exist")
 }
 
+// Verifies: REG-0008
 func TestHealthProbesReturnOK(t *testing.T) {
 	handlers := lab(t)
 

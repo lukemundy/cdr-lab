@@ -120,6 +120,7 @@ func TestTheCASignsACRLThatIsValidForSevenDays(t *testing.T) {
 	assert.Empty(t, list.RevokedCertificateEntries)
 }
 
+// Verifies: REG-0003
 func TestTheCRLNumbersIncreaseAcrossARestart(t *testing.T) {
 	store, c := &caStore{}, &clock{now: issueTime}
 
@@ -221,6 +222,7 @@ func TestARevocationSignsANewCRLThatListsTheCertificateWithItsReason(t *testing.
 	}}, store.state.Revoked)
 }
 
+// Verifies: REG-0003
 func TestTheCRLKeepsEachRevocationAcrossARestart(t *testing.T) {
 	store, c := &caStore{}, &clock{now: issueTime}
 	first, second := issuedClient(t), issuedClient(t)

@@ -78,7 +78,7 @@ Add a term to this table only when the code uses it.
 - Payloads are JSON (`jsonb`), with the event type and a schema version in the envelope. All payloads are schema version 1 now.
 - The metadata contains the W3C trace context of the append, so that an event links to the trace that caused it.
 - The global position is an identity column. It has gaps, because "PostgreSQL sequence objects cannot be used to obtain gapless sequences" ([PostgreSQL: Sequence Manipulation Functions](https://www.postgresql.org/docs/18/functions-sequence.html)). It is also not in commit order: a transaction that gets a lower position can commit after one that gets a higher position.
-- Projections run in the append transaction. A read model is then correct as soon as the append commits, which meets the propagation requirement ([Register DESIGN.md: Non-functional requirements](../../services/register/DESIGN.md#non-functional-requirements)). It also avoids the commit-order problem above, because no reader follows the global position.
+- Projections run in the append transaction. A read model is then correct as soon as the append commits, which meets the propagation requirement ([a status change at once on each Register API](../../services/register/design/non-functional-requirements.md#reg-0001)). It also avoids the commit-order problem above, because no reader follows the global position.
 
 ## Consequences
 

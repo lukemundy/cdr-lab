@@ -117,6 +117,7 @@ func revokeRequest(t *testing.T, proc process, certificate []byte, reason string
 	return operate(t, map[int]http.Handler{operatorPort: handler}, "/v1/cdr-certificates/revoke", body)
 }
 
+// Verifies: REG-0003
 func TestARevocationTakesEffectAtOnceAtTheRegisterAndStaysAfterARestart(t *testing.T) {
 	pool := databasetest.New(t)
 	proc := startRegister(t, pool)
