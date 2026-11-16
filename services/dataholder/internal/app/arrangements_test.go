@@ -108,6 +108,7 @@ func arrangementState(t *testing.T, store *memoryStore) domain.ArrangementState 
 	return state
 }
 
+// Verifies: DH-0902, DH-0908
 func TestARevocationByTheDataRecipientEndsTheArrangementAndRevokesItsGrant(t *testing.T) {
 	now := consentTime.Add(time.Minute)
 	arrangements, grants, store := newArrangements(t, now)
@@ -163,6 +164,7 @@ func TestAnArrangementDoesNotEndWhenItsGrantIsNotRevoked(t *testing.T) {
 	assert.True(t, arrangementState(t, store).EndedAt.IsZero(), "a new request can end it")
 }
 
+// Verifies: DH-0903, DH-0908, DH-0917
 func TestAWithdrawalByTheConsumerEndsTheArrangementWithTheMethodOfTheAdapterAndRevokesItsGrant(t *testing.T) {
 	for _, method := range []domain.WithdrawalMethod{
 		domain.WithdrawalMethodConsumerDashboard, domain.WithdrawalMethodAlternative,
@@ -303,6 +305,7 @@ func stateOf(t *testing.T, store *memoryStore, id string) domain.ArrangementStat
 	return state
 }
 
+// Verifies: DH-0904, DH-0918, DH-0921
 func TestTheEndForACustomerWhoIsNotEligibleEndsEachArrangementThatDidNotEndAtTheTimeOfTheClose(t *testing.T) {
 	closedAt := consentTime.Add(10 * time.Minute)
 	// The time of the request does not change the time of the end, so that a later attempt records the close.

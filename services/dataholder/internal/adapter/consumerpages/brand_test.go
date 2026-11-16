@@ -39,7 +39,7 @@ func eachPage(t *testing.T, bank string) map[string]page {
 	return pages
 }
 
-// services/dataholder/DESIGN.md (Presentation of the consumer pages).
+// Verifies: DH-0835, DH-0837, DH-0841
 func TestEachPageShowsTheLogoAndTheNameOfTheBankAndTheFooter(t *testing.T) {
 	for name, p := range eachPage(t, bankName) {
 		t.Run(name, func(t *testing.T) {

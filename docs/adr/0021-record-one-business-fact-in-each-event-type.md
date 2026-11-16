@@ -6,7 +6,7 @@
 
 [ADR 0003](0003-event-sourcing.md) defines an event as "a fact that occurred, with a past-tense name". It does not say when two facts share one event type and when they get separate event types. This ADR amends ADR 0003 with that rule.
 
-Facts of the same kind can have different rules and different data. For example, an arrangement ends for one of several causes ([data holder DESIGN.md: End of an arrangement](../../services/dataholder/DESIGN.md#end-of-an-arrangement)). The data holder sends a notice to the data recipient for some causes only, and only a withdrawal by the consumer has a withdrawal method.
+Facts of the same kind can have different rules and different data. For example, an arrangement ends for one of several causes ([data holder specification: End of an arrangement](../../services/dataholder/design/end-of-an-arrangement.md)). The data holder sends a notice to the data recipient for some causes only, and only a withdrawal by the consumer has a withdrawal method.
 
 There are three options for facts of the same kind:
 
