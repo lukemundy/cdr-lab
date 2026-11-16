@@ -69,6 +69,17 @@ linters:
             - "!$test"
           allow:
             - $gostd
+        # Repository tools are not components of the lab. They do not use the code of a service, and no code uses them.
+        tools-do-not-import-services:
+          files:
+            - "**/tools/**"
+          deny:
+            - pkg: github.com/lukemundy/cdr-lab/services
+              desc: a repository tool does not use the code of a service
+        nothing-imports-tools:
+          deny:
+            - pkg: github.com/lukemundy/cdr-lab/tools
+              desc: repository tools are not libraries; shared code goes in pkg/
         # Add these two rules for each service.
         dataholder-adapters-only-in-root:
           files:
