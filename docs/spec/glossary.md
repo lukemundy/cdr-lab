@@ -361,6 +361,12 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 - Not the same as: [authentication](#authentication). The data holder keeps them separate.
 - Do not use: login, log in.
 
+### Web UI
+
+- Lab term: a lab-only browser UI and its API on one listener, with one origin ([web UI library DESIGN.md][consolehttp-design]). The web UIs are the operator consoles, with their console APIs, and the online bank site, with its API.
+- Not the same as: [operator console](#operator-console) and [online bank site](#online-bank-site), which are each one web UI.
+- Not the same as: [consumer pages](#consumer-pages), which are on the public listener.
+
 ## Data
 
 ### CDR data
@@ -375,6 +381,7 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 [adr-0024]: ../adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md
 [brands-readme]: ../../services/dataholder/brands/README.md
 [conformance-design]: ../../conformance/DESIGN.md
+[consolehttp-design]: ../../pkg/platform/consolehttp/DESIGN.md
 [pki-design]: ../../pki/DESIGN.md
 [readme-component-types]: ../../README.md#component-types
 [readme-data]: ../../README.md#data

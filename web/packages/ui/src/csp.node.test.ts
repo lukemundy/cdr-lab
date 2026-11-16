@@ -7,7 +7,7 @@ import { chromium, firefox, type Browser, type BrowserType, type Page } from "pl
 import { build, preview, type PreviewServer } from "vite";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
-// DESIGN.md, Components: each component works under this CSP, which is the CSP of the Register console.
+// DESIGN.md, Components: each component works under this CSP, which is the CSP of each web UI (pkg/platform/consolehttp/DESIGN.md).
 const csp = [
   "default-src 'self'",
   "script-src 'self'",
