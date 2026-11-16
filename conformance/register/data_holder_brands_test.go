@@ -134,6 +134,7 @@ func requireSecureCDSError(t *testing.T, r secureReply, status int, code, title 
 	requireCDSError(t, response{Response: &http.Response{StatusCode: r.status}, body: r.body}, status, code, title)
 }
 
+// Verifies: REG-0300, REG-0333
 func TestADataRecipientGetsTheDataHolderBrandsOfEachIndustryWithTheirEndpoints(t *testing.T) {
 	cert := activeTokenClient(t)
 	token := accessToken(t, idpTestActiveProduct, cert)
@@ -174,6 +175,7 @@ func TestADataRecipientGetsTheDataHolderBrandsOfEachIndustryWithTheirEndpoints(t
 	}
 }
 
+// Verifies: REG-0316
 func TestGetDataHolderBrandsRefusesAnIndustryThatIsNotValid(t *testing.T) {
 	cert := activeTokenClient(t)
 
@@ -187,6 +189,7 @@ func TestGetDataHolderBrandsRefusesAnIndustryThatIsNotValid(t *testing.T) {
 	requireSecureCDSError(t, r, http.StatusBadRequest, "urn:au-cds:error:cds-all:Field/Invalid", "Invalid Field")
 }
 
+// Verifies: REG-0330, REG-0332
 func TestGetDataHolderBrandsPagesFollowTheCDSPaginationRules(t *testing.T) {
 	cert := activeTokenClient(t)
 	token := accessToken(t, idpTestActiveProduct, cert)
@@ -241,6 +244,7 @@ func TestGetDataHolderBrandsDefaultsToTheFirstPageOf25(t *testing.T) {
 	assert.Equal(t, 1, page.Meta.TotalPages)
 }
 
+// Verifies: REG-0331
 func TestGetDataHolderBrandsUpdatedSinceGivesOnlyTheBrandsWithALaterOrEqualUpdate(t *testing.T) {
 	cert := activeTokenClient(t)
 	token := accessToken(t, idpTestActiveProduct, cert)
@@ -315,6 +319,7 @@ func TestGetDataHolderBrandsAcceptsTheMaximumPageSize(t *testing.T) {
 	assert.Len(t, page.Data, seedRegisteredBrands)
 }
 
+// Verifies: REG-0313
 func TestGetDataHolderBrandsServesOnlyVersion3(t *testing.T) {
 	cert := activeTokenClient(t)
 	token := accessToken(t, idpTestActiveProduct, cert)
@@ -339,6 +344,7 @@ func TestGetDataHolderBrandsServesOnlyVersion3(t *testing.T) {
 	)
 }
 
+// Verifies: REG-0320, REG-0321
 func TestGetDataHolderBrandsRefusesARequestWithoutAValidToken(t *testing.T) {
 	cert := activeTokenClient(t)
 	token := accessToken(t, idpTestActiveProduct, cert)
@@ -369,6 +375,7 @@ func TestGetDataHolderBrandsRefusesARequestWithoutAValidToken(t *testing.T) {
 	}
 }
 
+// Verifies: REG-0323
 func TestGetDataHolderBrandsRefusesACallerThatIsNotActive(t *testing.T) {
 	cert := tokenClient(t, statusTestRecipient, statusTestProduct, "PKI_STATUS_CLIENT_CERT", "PKI_STATUS_CLIENT_KEY")
 	token := accessToken(t, statusTestProduct, cert)
