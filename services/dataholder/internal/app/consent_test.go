@@ -50,7 +50,8 @@ func newConsents(t *testing.T) (app.Consents, *memoryStore) {
 
 			return id
 		},
-		Now: func() time.Time { return consentTime },
+		Now:                 func() time.Time { return consentTime },
+		AccessTokenLifetime: 5 * time.Minute,
 	}, store
 }
 
@@ -117,6 +118,19 @@ func TestAConfirmationCreatesAnArrangementWithANewIdentifier(t *testing.T) {
 		ConfirmedAt:            consentTime,
 		SharingDurationSeconds: 7_776_000,
 	}}, state)
+}
+
+// Verifies: DH-0834, DH-0911
+func TestTheSharingOfAConfirmationWithNoSharingDurationEndsWhenItsAccessTokenExpires(t *testing.T) {
+	consents, store := newConsents(t)
+	request := consentRequest()
+	request.SharingDuration = 0
+
+	confirmation, err := consents.Confirm(t.Context(), request, []string{"account-2"})
+
+	require.NoError(t, err)
+	assert.Equal(t, consentTime.Add(5*time.Minute), confirmation.Arrangement.SharingEndsAt())
+	assert.Equal(t, confirmation.Arrangement, arrangementState(t, store).Arrangement)
 }
 
 func TestAConfirmationThatBreaksARuleCreatesNoArrangement(t *testing.T) {

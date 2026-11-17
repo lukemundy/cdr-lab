@@ -78,6 +78,9 @@ type Arrangement struct {
 	AccountIDs             []string  `json:"accountIds"`
 	ConfirmedAt            time.Time `json:"confirmedAt"`
 	SharingDurationSeconds int64     `json:"sharingDurationSeconds"`
+	// OnceOffSharingSeconds is the access token lifetime when SharingDurationSeconds is 0, because the sharing of a
+	// once-off arrangement ends when its only access token expires.
+	OnceOffSharingSeconds int64 `json:"onceOffSharingSeconds,omitempty"`
 }
 
 // NewArrangement gives ErrConsumerNotEligible when accounts has no open account, ErrNoAccountSelected, and
@@ -88,6 +91,7 @@ func NewArrangement(
 	accounts []Account,
 	selected []string,
 	confirmedAt time.Time,
+	accessTokenLifetime time.Duration,
 ) (Arrangement, error) {
 	if len(OpenAccounts(accounts)) == 0 {
 		return Arrangement{}, ErrConsumerNotEligible
@@ -106,6 +110,10 @@ func NewArrangement(
 		AccountIDs:             []string{},
 		ConfirmedAt:            confirmedAt.UTC(),
 		SharingDurationSeconds: int64(request.SharingDuration / time.Second),
+	}
+
+	if arrangement.SharingDurationSeconds == 0 {
+		arrangement.OnceOffSharingSeconds = int64(accessTokenLifetime / time.Second)
 	}
 
 	if !NeedsAccounts(request.Scopes) {
@@ -130,7 +138,7 @@ func NewArrangement(
 }
 
 func (a Arrangement) SharingEndsAt() time.Time {
-	return a.ConfirmedAt.Add(time.Duration(a.SharingDurationSeconds) * time.Second)
+	return a.ConfirmedAt.Add(time.Duration(a.SharingDurationSeconds+a.OnceOffSharingSeconds) * time.Second)
 }
 
 type ArrangementState struct {

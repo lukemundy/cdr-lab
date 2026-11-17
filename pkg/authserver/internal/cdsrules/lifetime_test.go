@@ -27,7 +27,9 @@ func TestAnAccessTokenOfAConsentHasNoLifetimeAfterTheEndOfTheSharing(t *testing.
 		"sharing ends in 2 minutes":           {grant(time.Hour, 2*time.Minute), 120},
 		"sharing ends in 1.5 seconds":         {grant(time.Hour, 1500*time.Millisecond), 1},
 		"sharing ended":                       {grant(time.Hour, -time.Minute), 0},
-		"no sharing duration":                 {grant(0, 0), 300},
+		"no sharing duration, 5 minutes away": {grant(0, 5*time.Minute), 300},
+		"no sharing duration, 2 minutes away": {grant(0, 2*time.Minute), 120},
+		"no sharing duration, ended":          {grant(0, -time.Minute), 0},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {

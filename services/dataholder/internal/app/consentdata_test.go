@@ -2,6 +2,7 @@ package app_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -23,6 +24,24 @@ func TestTheCustomerOfAnArrangementIsTheCustomerWhoGaveConsent(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Equal(t, own, got)
+}
+
+// Verifies: DH-1021
+func TestOnlyACurrentArrangementGivesData(t *testing.T) {
+	arrangements, _, store := newArrangements(t, consentTime.Add(time.Minute))
+	consentDataAt := func(now time.Time) app.ConsentData {
+		return app.ConsentData{Arrangements: store, Now: func() time.Time { return now }}
+	}
+
+	require.NoError(t,
+		consentDataAt(consentTime.Add(time.Hour-time.Second)).RequireCurrent(t.Context(), "arrangement-1"))
+	require.ErrorIs(t, consentDataAt(consentTime.Add(time.Hour)).RequireCurrent(t.Context(), "arrangement-1"),
+		app.ErrArrangementEnded, "the end of the sharing")
+	require.ErrorIs(t, consentDataAt(consentTime).RequireCurrent(t.Context(), "unknown"), app.ErrArrangementNotFound)
+
+	require.NoError(t, arrangements.RevokeByDataRecipient(t.Context(), "client-1", "arrangement-1"))
+	require.ErrorIs(t, consentDataAt(consentTime.Add(time.Minute)).RequireCurrent(t.Context(), "arrangement-1"),
+		app.ErrArrangementEnded, "an event that ends the arrangement")
 }
 
 func TestAnArrangementThatDoesNotExistHasNoCustomer(t *testing.T) {

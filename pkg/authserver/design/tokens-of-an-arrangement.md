@@ -20,7 +20,7 @@ This area gives the tokens of a CDR arrangement at the data holder authorisation
 - <a id="auth-0205"></a>**AUTH-0205** A response to the authorisation code grant or the refresh token grant also has `id_token` and `cdr_arrangement_id`, in addition to the members of [a successful token response](token-endpoint.md#auth-0046). ([CDS: CDR Arrangement ID][cds-arrangement-id]; [OpenID Connect Core, section 3.1.3.3][oidc-core-token-response])
 - <a id="auth-0206"></a>**AUTH-0206** The response has a `refresh_token` only when the sharing duration is more than 0. ([CDS: Requesting Sharing Duration][cds-sharing-duration]: a refresh token "SHOULD be provided" for a one-time collection)
 - <a id="auth-0207"></a>**AUTH-0207** The access token has the scopes that the consumer approved. It expires 5 minutes after it is issued, as a client credentials token does. ([CDS: Access Token][cds-access-token]; [Judgement: an access token lifetime of 5 minutes](token-endpoint.md#auth-0059))
-- <a id="auth-0208"></a>**AUTH-0208** When the sharing duration is more than 0 and the sharing ends less than 5 minutes after the token is issued, the access token expires when the sharing ends. The `expires_in` shows this expiry. ([CDR Rules, rule 4.26(1)(g)][cdr-rules]; [Judgement: the access token expires at the end of the sharing](#auth-0233))
+- <a id="auth-0208"></a>**AUTH-0208** When the sharing ends less than 5 minutes after the token is issued, the access token expires when the sharing ends. The `expires_in` shows this expiry. This rule applies also to the sharing duration 0, for which a service must give the end of the sharing. ([CDR Rules, rule 4.26(1)(f) and (g)][cdr-rules]; [Judgement: the access token expires at the end of the sharing](#auth-0233))
 - <a id="auth-0209"></a>**AUTH-0209** The refresh token expires at the end of the sharing of the arrangement. ([CDS: Refresh Token][cds-refresh-token]: "an exp value equal to the sharing duration authorised by the consumer")
 
 ## Refresh token grant
@@ -75,8 +75,8 @@ This area gives the tokens of a CDR arrangement at the data holder authorisation
 ### <a id="auth-0233"></a>AUTH-0233 The access token expires at the end of the sharing
 
 - Kind: choice
-- Basis: Step 3.3. An authorisation for a period expires at the end of the period ([CDR Rules, rule 4.26(1)(g)][cdr-rules]). A sharing duration of 0 gives an access token only ([CDS: Requesting Sharing Duration][cds-sharing-duration]).
-- Reason: An expiry that the token and `expires_in` show is the simplest rule for a data recipient and for the server. With the sharing duration 0, the sharing ends at the confirmation, so the access token keeps its 5 minutes.
+- Basis: Step 3.3. An authorisation for a period expires at the end of the period, and an authorisation for a single occasion expires after the disclosure ([CDR Rules, rule 4.26(1)(f) and (g)][cdr-rules]). A sharing duration of 0 gives an access token only ([CDS: Requesting Sharing Duration][cds-sharing-duration]).
+- Reason: An expiry that the token and `expires_in` show is the simplest rule for a data recipient and for the server. The service gives the end of the sharing also for the sharing duration 0, so that no access token stays valid after its arrangement ends. For example, a data holder gives the confirmation plus 5 minutes.
 
 ### <a id="auth-0234"></a>AUTH-0234 An ID token in a refresh response
 

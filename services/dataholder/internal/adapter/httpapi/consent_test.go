@@ -20,6 +20,7 @@ import (
 	"github.com/lukemundy/cdr-lab/pkg/authserver"
 	"github.com/lukemundy/cdr-lab/pkg/cds"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/httpapi"
+	"github.com/lukemundy/cdr-lab/services/dataholder/internal/app"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/domain"
 )
 
@@ -61,6 +62,13 @@ func (a arrangementCustomers) Customer(_ context.Context, arrangementID string) 
 	}
 
 	return customer, nil
+}
+
+// currentArrangements gives the error of each arrangement in it, and no error for each other arrangement.
+type currentArrangements map[string]error
+
+func (c currentArrangements) RequireCurrent(_ context.Context, arrangementID string) error {
+	return c[arrangementID]
 }
 
 // clientStatuses gives the status of each client, and an error for a client that it does not have.
@@ -163,6 +171,22 @@ func consentSecure() httpapi.Secure {
 				Subject:       "subject-3",
 				ArrangementID: "arrangement-3",
 			},
+			"ended": {
+				ClientID:      "client-1",
+				Scopes:        []string{"openid", "profile", "common:customer.basic:read"},
+				Subject:       "subject-1",
+				ArrangementID: "arrangement-ended",
+			},
+			"arrangement-failure": {
+				ClientID:      "client-1",
+				Scopes:        []string{"openid", "profile", "common:customer.basic:read"},
+				Subject:       "subject-1",
+				ArrangementID: "arrangement-failure",
+			},
+		},
+		Arrangements: currentArrangements{
+			"arrangement-ended":   app.ErrArrangementEnded,
+			"arrangement-failure": errors.New("database failure"),
 		},
 		Customers: arrangementCustomers{
 			"arrangement-1": {
@@ -285,6 +309,23 @@ func TestARefusedTokenGets401WithNoBody(t *testing.T) {
 			assert.Empty(t, rec.Body.String(), target)
 		}
 	})
+}
+
+// Verifies: DH-1021, DH-1027
+func TestAValidTokenOfAnArrangementThatEndedGetsInvalidToken(t *testing.T) {
+	for _, target := range []string{customerPath, userInfoPath} {
+		rec := serve(resourceRequest(t, http.MethodGet, target, "ended"))
+
+		assert.Equal(t, http.StatusUnauthorized, rec.Code, target)
+		assert.Equal(t, `Bearer error="invalid_token"`, rec.Header().Get("WWW-Authenticate"), target)
+		assert.Empty(t, rec.Body.String(), target)
+	}
+}
+
+func TestATokenWhoseArrangementTheDataHolderCannotReadGets500(t *testing.T) {
+	rec := serve(resourceRequest(t, http.MethodGet, customerPath, "arrangement-failure"))
+
+	assert.Equal(t, http.StatusInternalServerError, rec.Code, rec.Body.String())
 }
 
 // Verifies: DH-1024

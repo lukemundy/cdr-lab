@@ -68,7 +68,7 @@ The authorisation server library gives the authorisation response: [the redirect
 - <a id="dh-0831"></a>**DH-0831** The `cdr_arrangement_id` is a random RFC 4122 UUID. It does not identify the consumer. ([CDS: CDR Arrangement ID][cds-arrangement-id])
 - <a id="dh-0832"></a>**DH-0832** Each confirmation creates a new arrangement. A consumer can have more than one arrangement with one software product. ([CDR Support: Concurrent consent and arrangement ID requirements][support-concurrent-consent])
 - <a id="dh-0833"></a>**DH-0833** An arrangement starts at the confirmation. When the software product does not exchange the authorisation code, the arrangement stays, with no token. ([CDR Support: Failure to obtain token within Authorisation Code expiry period][support-code-expiry]; [Judgement: the start of an arrangement at the confirmation](#dh-0858))
-- <a id="dh-0834"></a>**DH-0834** The sharing of an arrangement ends at the time of the confirmation plus the sharing duration. An arrangement can [end before that time](end-of-an-arrangement.md#dh-0900). ([CDS: Requesting Sharing Duration][cds-sharing-duration])
+- <a id="dh-0834"></a>**DH-0834** The sharing of an arrangement ends at the time of the confirmation plus the sharing duration. With the sharing duration 0, it ends at the confirmation plus the [lifetime of an access token](../../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0207). For example, 5 minutes after the confirmation. An arrangement can [end before that time](end-of-an-arrangement.md#dh-0900). ([CDS: Requesting Sharing Duration][cds-sharing-duration]; [Judgement: an arrangement with the sharing duration 0 ends when its access token expires](end-of-an-arrangement.md#dh-2619))
 
 ## Presentation of the consumer pages
 

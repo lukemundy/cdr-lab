@@ -99,11 +99,18 @@ func (b *bank) authorise(sharingDuration int) authorisation {
 
 	b.pages.next = func(in authserver.Interaction) authserver.Outcome {
 		now := time.Now().Truncate(time.Second)
+
+		sharing := in.SharingDuration
+		if sharing == 0 {
+			// The sharing of a once-off arrangement ends when its access token expires, as at the data holder.
+			sharing = authserver.AccessTokenLifetime
+		}
+
 		a.consent = authserver.Consent{
 			ArrangementID:   rand.Text(),
 			Subject:         "0e0d7ac1-2a0f-4f4c-9c0c-6f2f6c7d3b11",
 			AuthenticatedAt: now.Add(-time.Minute),
-			SharingEndsAt:   now.Add(in.SharingDuration),
+			SharingEndsAt:   now.Add(sharing),
 		}
 
 		return authserver.Approve(a.consent)

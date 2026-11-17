@@ -169,7 +169,8 @@ func newAccountData(t *testing.T, now time.Time) accountData {
 	httpapi.RegisterSecure(consent, httpapi.Secure{
 		ResourceBaseURL: "https://mtls.bank.test", RegistrationPath: "/register", UserInfoPath: "/userinfo",
 		ConsentTokens: arrangementToken{arrangementID: "arrangement-1"}, ClientStatuses: activeClients{},
-		Customers: consentData, Accounts: consentData, Balances: consentData, Transactions: consentData,
+		Arrangements: consentData,
+		Customers:    consentData, Accounts: consentData, Balances: consentData, Transactions: consentData,
 		Disclosures: app.Disclosures{Store: disclosurestore.New(pool), Now: clock},
 	})
 

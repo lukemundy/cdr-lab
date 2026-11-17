@@ -49,7 +49,8 @@ type Consent struct {
 	// Subject is the final sub of the consumer for the software product: the authorisation server does not change it.
 	Subject         string
 	AuthenticatedAt time.Time
-	// SharingEndsAt is the expiry of the refresh token, when the Interaction has a SharingDuration.
+	// SharingEndsAt is the expiry of the refresh token, when the Interaction has a SharingDuration. No access token
+	// expires after it. For an Interaction with no SharingDuration, it is AccessTokenLifetime after the consent.
 	SharingEndsAt time.Time
 }
 

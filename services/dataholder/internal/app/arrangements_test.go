@@ -36,9 +36,20 @@ func (m *memoryGrants) RevokeArrangement(_ context.Context, arrangementID string
 func newArrangements(t *testing.T, now time.Time) (app.Arrangements, *memoryGrants, *memoryStore) {
 	t.Helper()
 
+	return arrangementsWithSharing(t, time.Hour, now)
+}
+
+// arrangementsWithSharing gives the arrangement arrangement-1 of client-1, with the sharing duration.
+func arrangementsWithSharing(
+	t *testing.T,
+	sharingDuration time.Duration,
+	now time.Time,
+) (app.Arrangements, *memoryGrants, *memoryStore) {
+	t.Helper()
+
 	consents, store := newConsents(t)
 	request := consentRequest()
-	request.SharingDuration = time.Hour
+	request.SharingDuration = sharingDuration
 	_, err := consents.Confirm(t.Context(), request, []string{"account-1"})
 	require.NoError(t, err)
 
@@ -142,6 +153,32 @@ func TestARevocationThatTheDataRecipientCannotMakeGivesInvalidArrangementAndChan
 			assert.True(t, arrangementState(t, store).EndedAt.IsZero())
 		})
 	}
+}
+
+// Verifies: DH-0902, DH-0908, DH-0911
+func TestAnArrangementWithNoSharingDurationCanBeRevokedUntilItsAccessTokenExpires(t *testing.T) {
+	now := consentTime.Add(5*time.Minute - time.Second)
+	arrangements, grants, store := arrangementsWithSharing(t, 0, now)
+
+	require.NoError(t, arrangements.RevokeByDataRecipient(t.Context(), "client-1", "arrangement-1"))
+
+	assert.Equal(t, []string{"arrangement-1"}, grants.revoked)
+	assert.Equal(t, now, arrangementState(t, store).EndedAt)
+
+	late, _, _ := arrangementsWithSharing(t, 0, consentTime.Add(5*time.Minute))
+	require.ErrorIs(t, late.RevokeByDataRecipient(t.Context(), "client-1", "arrangement-1"), app.ErrInvalidArrangement)
+}
+
+// Verifies: DH-0903, DH-0911
+func TestTheConsumerCanWithdrawAnArrangementWithNoSharingDurationUntilItsAccessTokenExpires(t *testing.T) {
+	arrangements, grants, _ := arrangementsWithSharing(t, 0, consentTime.Add(time.Minute))
+
+	_, err := arrangements.WithdrawByConsumer(
+		t.Context(), consentCustomer, "arrangement-1", domain.WithdrawalMethodConsumerDashboard,
+	)
+
+	require.NoError(t, err)
+	assert.Equal(t, []string{"arrangement-1"}, grants.revoked)
 }
 
 func TestASecondRevocationGivesInvalidArrangement(t *testing.T) {

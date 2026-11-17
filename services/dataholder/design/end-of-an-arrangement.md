@@ -25,7 +25,7 @@ This area gives the end of a CDR arrangement: CDR arrangement revocation, withdr
 
 The authorisation server library gives [the CDR arrangement revocation endpoint](../../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0228). At a revocation, the data holder [ends the arrangement and revokes its tokens before the response](../../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0229).
 
-- <a id="dh-0911"></a>**DH-0911** An arrangement with the sharing duration 0 ends at the confirmation. Thus a revocation of it gives [422 with `Authorisation/InvalidArrangement`](../../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0230). ([CDS: Requesting Sharing Duration][cds-sharing-duration]; [CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation])
+- <a id="dh-0911"></a>**DH-0911** An arrangement with the sharing duration 0 is current until the [end of its sharing](authorisation.md#dh-0834). Until then, each event of the [end table](#dh-0900) ends it and [revokes its access token](#dh-0908). For example, a revocation 1 minute after the confirmation gives 204. ([CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation]; [CDR Rules][cdr-rules], rule 4.26(1)(f); [Judgement: an arrangement with the sharing duration 0 ends when its access token expires](#dh-2619))
 
 ## Withdrawal by the consumer
 
@@ -80,6 +80,12 @@ The authorisation server library gives [the CDR arrangement revocation endpoint]
 - Kind: conflict
 - Basis: Step 1. Rule 4.26(1)(f) expires the authorisation after the CDR data has been disclosed ([CDR Rules][cdr-rules]). The CDS requires that the data recipient calls the revocation endpoint after a successful collection, for a sharing duration of 24 hours or less ([CDS: Requesting Sharing Duration][cds-sharing-duration]).
 - Reason: A data holder cannot know when a data recipient has all the data that it needs. The CDS rule gives the data holder a signal, and the end of the sharing is the limit.
+
+### <a id="dh-2619"></a>DH-2619 An arrangement with the sharing duration 0 ends when its access token expires
+
+- Kind: choice
+- Basis: Step 3.1. Rule 4.26(1)(f) ends an authorisation for a disclosure on a single occasion after the disclosure ([CDR Rules][cdr-rules]). The CDS gives only an access token for the sharing duration 0 ([CDS: Requesting Sharing Duration][cds-sharing-duration]). A revocation of the arrangement must revoke its tokens ([CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation]).
+- Reason: The data holder cannot find when the data recipient has all the data, and the data recipient collects data only with its access token. An arrangement that ends at the confirmation keeps a valid token that no revocation can stop. When the arrangement and its token end at the same time, each end stops the token.
 
 ### <a id="dh-0951"></a>DH-0951 The withdrawal messages only on the consumer dashboard
 

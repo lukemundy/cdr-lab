@@ -221,6 +221,7 @@ func secure(r httpapi.Registrar, v tokens, regs registrations) httpapi.Secure {
 		Tokens:           v,
 		Registrations:    regs,
 		ConsentTokens:    consentTokens{},
+		Arrangements:     currentArrangements{},
 		Customers:        arrangementCustomers{},
 	}
 }

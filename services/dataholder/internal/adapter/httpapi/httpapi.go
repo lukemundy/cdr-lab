@@ -36,6 +36,7 @@ type Secure struct {
 	Tokens           TokenVerifier
 	Registrations    app.RegistrationReader
 	ConsentTokens    ConsentTokenVerifier
+	Arrangements     ArrangementChecker
 	Customers        CustomerReader
 	Accounts         AccountReader
 	Transactions     TransactionReader

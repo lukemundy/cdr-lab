@@ -101,19 +101,40 @@ func TestASoftwareProductEndsAConsent(t *testing.T) {
 	})
 }
 
-func TestARevocationOfAnArrangementThatTheClientDoesNotHaveGivesInvalidArrangement(t *testing.T) {
+func TestARevocationOfAnArrangementThatDoesNotExistGivesInvalidArrangement(t *testing.T) {
+	client := registered(t, allScopesProduct)
+	unknown := rand.Text()
+
+	requireInvalidArrangement(t, client.revokeArrangementID(t, unknown), unknown)
+}
+
+// A once-off arrangement is current until its access token expires, so the software product can revoke it, and the
+// revocation stops its access token.
+//
+// Verifies: DH-0911, AUTH-0208
+func TestASoftwareProductEndsAOnceOffArrangement(t *testing.T) {
 	client := registered(t, allScopesProduct)
 	customer := newEligibleAccount(t)
 
-	t.Run("arrangement that does not exist", func(t *testing.T) {
-		unknown := rand.Text()
+	tokens := customer.consents(client, noAccountScope, 0).tokens(t)
+	accessToken := accessTokenOf(t, tokens)
+	arrangementID := arrangementIDOf(t, tokens)
 
-		requireInvalidArrangement(t, client.revokeArrangementID(t, unknown), unknown)
+	t.Run("the access token expires in 5 minutes at most", func(t *testing.T) {
+		require.IsType(t, float64(0), tokens["expires_in"], tokens)
+		assert.LessOrEqual(t, tokens["expires_in"], float64(300))
+		assert.Equal(t, http.StatusOK, userInfo(t, client, client.cert, http.MethodGet, accessToken).StatusCode)
 	})
 
-	t.Run("arrangement with the sharing duration 0", func(t *testing.T) {
-		arrangementID := arrangementIDOf(t, customer.consents(client, noAccountScope, 0).tokens(t))
+	t.Run("a revocation gives 204 and the access token stops", func(t *testing.T) {
+		r := client.revokeArrangementID(t, arrangementID)
 
+		require.Equal(t, http.StatusNoContent, r.Status, r.Body)
+		requireRefusedToken(t, userInfo(t, client, client.cert, http.MethodGet, accessToken),
+			`Bearer error="invalid_token"`)
+	})
+
+	t.Run("a second revocation gives InvalidArrangement", func(t *testing.T) {
 		requireInvalidArrangement(t, client.revokeArrangementID(t, arrangementID), arrangementID)
 	})
 }

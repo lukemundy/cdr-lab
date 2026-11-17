@@ -78,9 +78,10 @@ func RefreshTokenForSharingDuration(_ context.Context, _ *goidc.Client, grant *g
 	return true
 }
 
-// AccessTokenLifetime gives no seconds after the end of the sharing of a consent (CDR Rules, rule 4.26(1)(g)).
+// AccessTokenLifetime gives no seconds after the end of the sharing of a consent (CDR Rules, rule 4.26(1)(f) and (g)),
+// also for a consent with no sharing duration.
 func AccessTokenLifetime(grant *goidc.Grant, lifetimeSeconds int, now time.Time) int {
-	if storedSeconds(grant.Store[SharingDurationClaim]) <= 0 {
+	if _, consent := grant.Store[sharingEndsAtKey]; !consent {
 		return lifetimeSeconds
 	}
 

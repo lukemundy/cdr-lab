@@ -32,8 +32,12 @@ const (
 // RegistrationScope is the scope of an access token for registration management.
 const RegistrationScope = cdsrules.RegistrationScope
 
+// AccessTokenLifetime is also the sharing of a once-off arrangement, so that the data recipient can collect the data
+// with its only access token.
+const AccessTokenLifetime = 5 * time.Minute
+
 const (
-	dataHolderTokenLifetimeSeconds = 300
+	dataHolderTokenLifetimeSeconds = int(AccessTokenLifetime / time.Second)
 	// A JTIStore must keep a JWT ID for longer than this lifetime.
 	dataHolderAssertionLifetimeSeconds = 600
 	// The CDS permits 10 to 90 seconds.

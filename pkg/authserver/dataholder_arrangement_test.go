@@ -23,7 +23,7 @@ type arrangementGrants struct{ grants *grantStore }
 
 func (a arrangementGrants) RevokeArrangement(ctx context.Context, clientID, arrangementID string) error {
 	grant, err := a.grants.find(func(g authserver.Grant) bool { return g.ArrangementID == arrangementID })
-	if err != nil || grant.ClientID != clientID || !grant.RevokedAt.IsZero() || grant.SharingDuration == 0 {
+	if err != nil || grant.ClientID != clientID || !grant.RevokedAt.IsZero() {
 		return authserver.ErrInvalidArrangement
 	}
 
@@ -213,6 +213,21 @@ func TestAnAccessTokenExpiresAtTheEndOfTheSharingWhenItIsLessThan5MinutesAway(t 
 func TestAnAccessTokenWithoutASharingDurationHas5Minutes(t *testing.T) {
 	b := newBank(t)
 
-	assert.EqualValues(t, 300, b.exchange(b.authorise(noSharing))["expires_in"])
+	assert.InDelta(t, 300, b.exchange(b.authorise(noSharing))["expires_in"], 3, "at most the end of the sharing")
 	assert.EqualValues(t, 300, b.token(b.form(b.assertion())).body["expires_in"])
+	assert.Equal(t, 5*time.Minute, authserver.AccessTokenLifetime)
+}
+
+// Verifies: AUTH-0208
+func TestAnAccessTokenWithoutASharingDurationExpiresAtTheEndOfTheSharingOfTheService(t *testing.T) {
+	b := newBank(t)
+	a := b.authorise(noSharing)
+	grant := b.grants.only(t)
+	grant.SharingEndsAt = time.Now().Add(time.Minute)
+	require.NoError(t, b.grants.SaveGrant(t.Context(), grant))
+
+	tokens := b.exchange(a)
+
+	require.IsType(t, float64(0), tokens["expires_in"])
+	assert.InDelta(t, 60, tokens["expires_in"], 3)
 }

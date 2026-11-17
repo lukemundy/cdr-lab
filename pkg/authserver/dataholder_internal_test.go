@@ -92,7 +92,7 @@ func TestVerifyAccessTokenRefusesATokenAfterItsExpiry(t *testing.T) {
 	require.NoError(t, err)
 	token, err := jwt.Signed(signer).Claims(map[string]any{
 		"iss": "https://id.bank.example", "client_id": "client-1", "jti": "token-1", "scope": RegistrationScope,
-		"exp": issued.Add(dataHolderTokenLifetimeSeconds * time.Second).Unix(),
+		"exp": issued.Add(AccessTokenLifetime).Unix(),
 		"cnf": map[string]string{"x5t#S256": thumbprint(cert)},
 	}).Serialize()
 	require.NoError(t, err)

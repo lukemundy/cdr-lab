@@ -12,6 +12,8 @@ import (
 
 var confirmedAt = time.Date(2026, 10, 11, 9, 30, 0, 0, time.UTC)
 
+const accessTokenLifetime = 5 * time.Minute
+
 func ownAccounts() []domain.Account {
 	return []domain.Account{
 		{AccountID: "account-1", OpenStatus: domain.OpenStatusOpen},
@@ -37,7 +39,9 @@ func consentRequest(scopes ...string) domain.ConsentRequest {
 func TestAnArrangementRecordsTheConsent(t *testing.T) {
 	request := consentRequest("openid", "bank:accounts.basic:read")
 
-	got, err := domain.NewArrangement("arrangement-1", request, ownAccounts(), []string{"account-2"}, confirmedAt)
+	got, err := domain.NewArrangement(
+		"arrangement-1", request, ownAccounts(), []string{"account-2"}, confirmedAt, accessTokenLifetime,
+	)
 
 	require.NoError(t, err)
 	assert.Equal(t, domain.Arrangement{
@@ -62,6 +66,7 @@ func TestAnArrangementHasItsTimesInUTC(t *testing.T) {
 
 	got, err := domain.NewArrangement(
 		"arrangement-1", consentRequest("openid", "profile"), ownAccounts(), nil, confirmedAt.In(perth),
+		accessTokenLifetime,
 	)
 
 	require.NoError(t, err)
@@ -72,7 +77,7 @@ func TestAnArrangementHasItsTimesInUTC(t *testing.T) {
 func TestAnArrangementHasEachSelectedAccountOneTime(t *testing.T) {
 	got, err := domain.NewArrangement(
 		"arrangement-1", consentRequest("openid", "bank:transactions:read"), ownAccounts(),
-		[]string{"account-2", "account-1", "account-2"}, confirmedAt,
+		[]string{"account-2", "account-1", "account-2"}, confirmedAt, accessTokenLifetime,
 	)
 
 	require.NoError(t, err)
@@ -83,6 +88,7 @@ func TestAnArrangementHasEachSelectedAccountOneTime(t *testing.T) {
 func TestAnArrangementWithABankScopeNeedsAnAccount(t *testing.T) {
 	_, err := domain.NewArrangement(
 		"arrangement-1", consentRequest("openid", "bank:accounts.basic:read"), ownAccounts(), nil, confirmedAt,
+		accessTokenLifetime,
 	)
 
 	assert.ErrorIs(t, err, domain.ErrNoAccountSelected)
@@ -92,7 +98,7 @@ func TestAnArrangementWithABankScopeNeedsAnAccount(t *testing.T) {
 func TestAnArrangementRefusesAnAccountThatTheCustomerDoesNotHave(t *testing.T) {
 	_, err := domain.NewArrangement(
 		"arrangement-1", consentRequest("openid", "bank:accounts.basic:read"), ownAccounts(),
-		[]string{"account-1", "account-of-a-different-customer"}, confirmedAt,
+		[]string{"account-1", "account-of-a-different-customer"}, confirmedAt, accessTokenLifetime,
 	)
 
 	assert.ErrorIs(t, err, domain.ErrAccountNotOfCustomer)
@@ -101,7 +107,9 @@ func TestAnArrangementRefusesAnAccountThatTheCustomerDoesNotHave(t *testing.T) {
 // Verifies: DH-0826
 func TestACustomerWithNoOpenAccountCannotGiveAConsent(t *testing.T) {
 	for _, scopes := range [][]string{{"openid", "profile"}, {"openid", "bank:accounts.basic:read"}} {
-		_, err := domain.NewArrangement("arrangement-1", consentRequest(scopes...), nil, nil, confirmedAt)
+		_, err := domain.NewArrangement(
+			"arrangement-1", consentRequest(scopes...), nil, nil, confirmedAt, accessTokenLifetime,
+		)
 
 		assert.ErrorIs(t, err, domain.ErrConsumerNotEligible, scopes)
 	}
@@ -111,6 +119,7 @@ func TestACustomerWithNoOpenAccountCannotGiveAConsent(t *testing.T) {
 func TestAnArrangementWithNoBankScopeHasNoAccounts(t *testing.T) {
 	got, err := domain.NewArrangement(
 		"arrangement-1", consentRequest("openid", "profile"), ownAccounts(), []string{"account-1"}, confirmedAt,
+		accessTokenLifetime,
 	)
 
 	require.NoError(t, err)
@@ -139,7 +148,9 @@ func createdState(t *testing.T, sharingDuration time.Duration) domain.Arrangemen
 
 	request := consentRequest("openid", "profile")
 	request.SharingDuration = sharingDuration
-	arrangement, err := domain.NewArrangement("arrangement-1", request, ownAccounts(), nil, confirmedAt)
+	arrangement, err := domain.NewArrangement(
+		"arrangement-1", request, ownAccounts(), nil, confirmedAt, accessTokenLifetime,
+	)
 	require.NoError(t, err)
 
 	return domain.ApplyArrangement(domain.ArrangementState{}, domain.ArrangementCreated{Arrangement: arrangement})
@@ -172,7 +183,29 @@ func TestAnArrangementEndsAtTheEndOfItsSharing(t *testing.T) {
 
 	assert.False(t, state.Ended(confirmedAt.Add(time.Hour-time.Second)))
 	assert.True(t, state.Ended(confirmedAt.Add(time.Hour)))
-	assert.True(t, createdState(t, 0).Ended(confirmedAt), "a sharing duration of 0 ends at once")
+}
+
+// Verifies: DH-0834, DH-0911
+func TestTheSharingOfAnArrangementWithNoSharingDurationEndsWhenItsAccessTokenExpires(t *testing.T) {
+	state := createdState(t, 0)
+
+	assert.Equal(t, confirmedAt.Add(accessTokenLifetime), state.Arrangement.SharingEndsAt())
+	assert.False(t, state.Ended(confirmedAt), "the arrangement is current until its access token expires")
+	assert.False(t, state.Ended(confirmedAt.Add(accessTokenLifetime-time.Second)))
+	assert.True(t, state.Ended(confirmedAt.Add(accessTokenLifetime)))
+	assert.Equal(t, confirmedAt.Add(time.Hour), createdState(t, time.Hour).Arrangement.SharingEndsAt(),
+		"the access token lifetime does not change a sharing duration")
+}
+
+// Verifies: DH-0911
+func TestAnArrangementWithNoSharingDurationCanEndBeforeItsAccessTokenExpires(t *testing.T) {
+	state := createdState(t, 0)
+	endedAt := confirmedAt.Add(time.Minute)
+
+	events, err := domain.HandleArrangement(state, end(endedAt))
+
+	require.NoError(t, err)
+	assert.Equal(t, endedAt, domain.ApplyArrangement(state, events[0]).EndsAt())
 }
 
 func TestAnArrangementEndsAtItsEndOrElseAtTheEndOfItsSharing(t *testing.T) {
