@@ -179,8 +179,10 @@ func executeCreate[R any](create func(R) creation) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// A pointer is nil after the JSON null, which decodes into a struct with no error.
 		var request *R
-		if jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxChangeBodyBytes), &request) != nil || request == nil {
-			problem.Write(w, http.StatusBadRequest, badCreateBody)
+
+		err := jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxChangeBodyBytes), &request)
+		if err != nil || request == nil {
+			problem.WriteBodyRefusal(w, err, badCreateBody)
 			return
 		}
 
@@ -191,8 +193,8 @@ func executeCreate[R any](create func(R) creation) http.Handler {
 func executeAdd[R changeRequest](notFound string, add func(*http.Request, R, int64) creation) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var request R
-		if jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxChangeBodyBytes), &request) != nil {
-			problem.Write(w, http.StatusBadRequest, badAddBody)
+		if err := jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxChangeBodyBytes), &request); err != nil {
+			problem.WriteBodyRefusal(w, err, badAddBody)
 			return
 		}
 

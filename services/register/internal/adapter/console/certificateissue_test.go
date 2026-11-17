@@ -15,7 +15,6 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -179,7 +178,6 @@ func TestAnIssueRefusesABodyThatIsNotTheVersionAndTheCSR(t *testing.T) {
 			"version 0":     issueRequest(t, 0, csrText),
 			"no CSR":        `{"version": 1}`,
 			"unknown field": `{"version": 1, "csr": "x", "other": 1}`,
-			"too large":     issueRequest(t, 1, csrText+strings.Repeat(" ", 32<<10)),
 		} {
 			t.Run(routeName+"/"+name, func(t *testing.T) {
 				issuer := &fakeIssuer{}

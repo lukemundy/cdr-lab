@@ -117,8 +117,8 @@ func executeChange[C changeRequest, Command any](
 ) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var request C
-		if jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxChangeBodyBytes), &request) != nil {
-			problem.Write(w, http.StatusBadRequest, badChangeBody)
+		if err := jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxChangeBodyBytes), &request); err != nil {
+			problem.WriteBodyRefusal(w, err, badChangeBody)
 			return
 		}
 

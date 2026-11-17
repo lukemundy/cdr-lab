@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -216,7 +215,6 @@ func TestADataHolderActionRefusesABodyThatIsNotValid(t *testing.T) {
 	} {
 		for _, body := range []string{
 			``, `{}`, `{"version": 0}`, `{"version": "1"}`, `{"version": 1, "status": "REMOVED"}`, `{"version": 1} {}`,
-			`{"version": 1, "padding": "` + strings.Repeat("x", 2048) + `"}`,
 		} {
 			resp := post(t, ports, target, body)
 

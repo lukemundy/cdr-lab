@@ -116,7 +116,7 @@ func TestEachDataHolderChangeExecutesItsCommand(t *testing.T) {
 	}
 }
 
-// Verifies: REG-0852, REG-0853, REG-0854
+// Verifies: REG-0852, REG-0853
 func TestABodyThatIsNotOneRecordOfTheActionIsABadRequest(t *testing.T) {
 	tests := map[string]struct{ method, path, body, wantDetail string }{
 		"not JSON": {http.MethodPost, "/v1/data-holders", "{", "The request body is not valid JSON"},
@@ -127,10 +127,6 @@ func TestABodyThatIsNotOneRecordOfTheActionIsABadRequest(t *testing.T) {
 			http.MethodPut, "/v1/data-holders/dh-1",
 			`{"legalEntityName": "Holder", "logoUri": "https://holder.example/logo.png", "status": "REMOVED"}`,
 			`unknown field "status"`,
-		},
-		"too large": {
-			http.MethodPost, "/v1/data-holders",
-			`{"legalEntityName": "` + strings.Repeat("a", 1<<20) + `"}`, "larger than 1 MiB",
 		},
 	}
 	for name, tt := range tests {
@@ -144,6 +140,18 @@ func TestABodyThatIsNotOneRecordOfTheActionIsABadRequest(t *testing.T) {
 			assert.Nil(t, operator.dataHolderCommand)
 		})
 	}
+}
+
+// Verifies: REG-0854
+func TestADataHolderBodyLargerThan1MiBGives413(t *testing.T) {
+	operator := &fakeOperator{}
+	body := `{"legalEntityName": "` + strings.Repeat("a", 1<<20) + `"}`
+
+	rec := serveMethodBody(t, operator, http.MethodPost, "/v1/data-holders", []byte(body))
+
+	p := requireProblem(t, rec, http.StatusRequestEntityTooLarge)
+	assert.Equal(t, "The request body is larger than 1 MiB.", p.Detail)
+	assert.Nil(t, operator.dataHolderCommand)
 }
 
 // Verifies: REG-0810, REG-0855, REG-0858, REG-0861

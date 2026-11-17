@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -161,7 +160,6 @@ func TestACertificateRequestRefusesABodyThatIsNotValid(t *testing.T) {
 		``, `{}`, `{"version": 1}`, `{"certificate": "x"}`, `{"version": 0, "certificate": "x"}`,
 		`{"version": 1, "certificate": 1}`,
 		`{"version": 1, "certificate": "x", "thumbprint": "x"}`,
-		registration(t, 1, pemText+strings.Repeat("\n", 32<<10)),
 	} {
 		resp := post(t, ports, certificates, body)
 

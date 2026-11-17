@@ -127,13 +127,14 @@ func TestARevocationBodyThatIsNotValidGives400AndNamesEachFieldThatFails(t *test
 	}
 }
 
-func TestARevocationBodyLargerThan1MiBGives400(t *testing.T) {
+// Verifies: REG-0854
+func TestARevocationBodyLargerThan1MiBGives413(t *testing.T) {
 	revoker := &fakeRevoker{}
 
 	rec := revoke(t, revoker, authorised(), revocationBody(t, strings.Repeat("x", 1<<20), "superseded"))
 
-	p := requireProblem(t, rec, http.StatusBadRequest)
-	assert.Contains(t, p.Detail, "1 MiB")
+	p := requireProblem(t, rec, http.StatusRequestEntityTooLarge)
+	assert.Equal(t, "The request body is larger than 1 MiB.", p.Detail)
 	assert.Zero(t, revoker.calls)
 }
 

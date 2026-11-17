@@ -2,7 +2,6 @@ package operatorapi
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -120,21 +119,11 @@ const maxBodyBytes = 1 << 20
 // decodeBody writes the problem when the body is not one JSON object with only the fields of v.
 func decodeBody(w http.ResponseWriter, r *http.Request, v any) bool {
 	err := jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxBodyBytes), v)
-
-	var tooLarge *http.MaxBytesError
-
-	switch {
-	case err == nil:
+	if err == nil {
 		return true
-	case errors.As(err, &tooLarge):
-		problem.Write(w, http.StatusBadRequest, "The request body is larger than 1 MiB.")
-	default:
-		problem.Write(
-			w,
-			http.StatusBadRequest,
-			fmt.Sprintf("The request body is not valid JSON for the action: %s.", err),
-		)
 	}
+
+	problem.WriteBodyRefusal(w, err, fmt.Sprintf("The request body is not valid JSON for the action: %s.", err))
 
 	return false
 }

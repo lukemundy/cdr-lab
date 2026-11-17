@@ -146,9 +146,9 @@ const (
 
 func registerCertificate(operator Operator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		thumbprint, ok := certificateThumbprint(http.MaxBytesReader(w, r.Body, maxCertificateBytes))
-		if !ok {
-			problem.Write(w, http.StatusBadRequest, "The request body must be one PEM certificate.")
+		thumbprint, err := certificateThumbprint(http.MaxBytesReader(w, r.Body, maxCertificateBytes))
+		if err != nil {
+			problem.WriteBodyRefusal(w, err, "The request body must be one PEM certificate.")
 			return
 		}
 
@@ -174,7 +174,7 @@ func issueCertificate(issue issueFunc, recordID, participant string) http.Handle
 		}
 
 		if err != nil {
-			problem.Write(w, http.StatusBadRequest, "The request body must be one PEM CSR.")
+			problem.WriteBodyRefusal(w, err, "The request body must be one PEM CSR.")
 			return
 		}
 
@@ -195,15 +195,13 @@ func writeCertificateChain(w http.ResponseWriter, body []byte) {
 	_, _ = w.Write(body)
 }
 
-func certificateThumbprint(body io.Reader) (string, bool) {
+func certificateThumbprint(body io.Reader) (string, error) {
 	data, err := io.ReadAll(body)
 	if err != nil {
-		return "", false
+		return "", err
 	}
 
-	thumbprint, err := domain.ClientCertificateThumbprint(data)
-
-	return thumbprint, err == nil
+	return domain.ClientCertificateThumbprint(data)
 }
 
 func execute(operator Operator, command func(*http.Request) domain.DataRecipientCommand) http.Handler {

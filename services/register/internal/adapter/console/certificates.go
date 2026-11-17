@@ -35,9 +35,9 @@ func registerCertificateActions(routes *httproute.Routes, operator Operator) {
 
 func registerCertificate(operator Operator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		version, certificate, ok := decodeRegistration(http.MaxBytesReader(w, r.Body, maxRegistrationBodyBytes))
-		if !ok {
-			problem.Write(w, http.StatusBadRequest, badRegistrationBody)
+		version, certificate, err := decodeRegistration(http.MaxBytesReader(w, r.Body, maxRegistrationBodyBytes))
+		if err != nil {
+			problem.WriteBodyRefusal(w, err, badRegistrationBody)
 			return
 		}
 
@@ -56,16 +56,19 @@ func registerCertificate(operator Operator) http.Handler {
 	})
 }
 
-func decodeRegistration(body io.Reader) (version int64, certificate string, ok bool) {
+func decodeRegistration(body io.Reader) (version int64, certificate string, err error) {
 	var request struct {
 		Version     *int64  `json:"version"`
 		Certificate *string `json:"certificate"`
 	}
 
-	if jsonhttp.Decode(body, &request) != nil || request.Version == nil || *request.Version < 1 ||
-		request.Certificate == nil {
-		return 0, "", false
+	if err := jsonhttp.Decode(body, &request); err != nil {
+		return 0, "", err
 	}
 
-	return *request.Version, *request.Certificate, true
+	if request.Version == nil || *request.Version < 1 || request.Certificate == nil {
+		return 0, "", errFieldsNotValid
+	}
+
+	return *request.Version, *request.Certificate, nil
 }

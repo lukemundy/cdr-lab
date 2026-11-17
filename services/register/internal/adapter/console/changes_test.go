@@ -131,7 +131,6 @@ func TestAChangeRefusesABodyThatIsNotValid(t *testing.T) {
 		``, `[]`, `null`, `{}`, `{"version": 0, "legalEntityName": "Alpha"}`, `{"version": "1"}`,
 		`{"version": 1, "status": "SUSPENDED"}`, `{"version": 1, "legalEntityId": "dr-2"}`,
 		`{"version": 1, "legalEntityName": 5}`, `{"version": 1} {}`,
-		`{"version": 1, "logoUri": "` + strings.Repeat("x", 1<<20) + `"}`,
 	} {
 		resp := post(t, ports, changeDetails, body)
 

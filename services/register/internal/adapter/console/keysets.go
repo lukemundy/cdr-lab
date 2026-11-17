@@ -115,13 +115,13 @@ func changeKey(changer KeyChanger, action app.KeyAction) http.Handler {
 			return
 		}
 
-		version, ok := decodeVersion(http.MaxBytesReader(w, r.Body, maxActionBodyBytes))
-		if !ok {
-			problem.Write(w, http.StatusBadRequest, badKeySetBody)
+		version, err := decodeVersion(http.MaxBytesReader(w, r.Body, maxActionBodyBytes))
+		if err != nil {
+			problem.WriteBodyRefusal(w, err, badKeySetBody)
 			return
 		}
 
-		err := changer.ChangeKeyAt(r.Context(), set, action, version)
+		err = changer.ChangeKeyAt(r.Context(), set, action, version)
 
 		switch {
 		case err == nil:
