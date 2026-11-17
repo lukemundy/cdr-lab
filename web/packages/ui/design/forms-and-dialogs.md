@@ -45,7 +45,7 @@ This area gives the dialogs, the form fields, the forms, the alerts and the toas
 - <a id="ui-0322"></a>**UI-0322** The UI gives the fields of a form and its request. ([Judgement: one design system (ADR 0016)][adr-0016])
 - <a id="ui-0323"></a>**UI-0323** While the request of a form runs, the submit button is busy, a status message says so, and a second submit sends nothing. ([WCAG 2.2, SC 4.1.3][wcag-4-1-3])
 - <a id="ui-0324"></a>**UI-0324** After a refusal, the form keeps each value, and shows each field error at its field. ([WCAG 2.2, SC 3.3.1][wcag-3-3-1])
-- <a id="ui-0325"></a>**UI-0325** A form does not check the values. The server checks them. ([the field errors of a problem][prob-field-errors])
+- <a id="ui-0325"></a>**UI-0325** A form does not check the values. The server checks them. The exception is a check that the specification of the UI gives with a judgement. ([the field errors of a problem][prob-field-errors]; [Judgement: a form checks a value only when the specification of its UI gives the check](#ui-0396))
 - <a id="ui-0326"></a>**UI-0326** The label of an optional field ends with "(optional)". A required field has no mark. ([GOV.UK Design System: Question pages][govuk-question-pages]; [Judgement: only optional fields have a mark](#ui-0358))
 - <a id="ui-0327"></a>**UI-0327** After a refusal, the form shows the error summary at its top. The error summary is the alert of the form. ([GOV.UK Design System: Error summary][govuk-error-summary]; [Judgement: an error summary at the top of a form that gets the focus](#ui-0355))
 - <a id="ui-0328"></a>**UI-0328** The error summary has the heading "There is a problem". ([GOV.UK Design System: Error summary][govuk-error-summary])
@@ -151,6 +151,12 @@ This area gives the dialogs, the form fields, the forms, the alerts and the toas
 - Kind: choice
 - Basis: Step 3.2. The [GOV.UK Design System: Question pages][govuk-question-pages] marks the optional fields only.
 - Reason: Most fields of the records are required, so the optional fields are the exception to mark.
+
+### <a id="ui-0396"></a>UI-0396 A form checks a value only when the specification of its UI gives the check
+
+- Kind: choice
+- Basis: Step 3.3. The server gives each field error of a refusal ([the field errors of a problem][prob-field-errors]), and no source requires a check in the browser.
+- Reason: The server keeps the only copy of the value rules, so a UI and its API cannot disagree. Some values never get to the server as the user typed them, for example a value that the UI does not send, or a format that the UI converts before it sends the value. A UI then checks the value in the browser, and its own specification gives the check with a judgement, so that each exception is a decision.
 
 [adr-0012]: ../../../../docs/adr/0012-utc-for-all-times.md
 [adr-0016]: ../../../../docs/adr/0016-design-system-on-shadcn-base-ui-and-dtcg-tokens.md
