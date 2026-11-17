@@ -88,7 +88,10 @@ func (p *problems) required(r record, field, value string) {
 // maxLength counts characters, not bytes, as in the CDS Register schemas.
 func (p *problems) requiredText(r record, field, value string, maxLength int) {
 	p.required(r, field, value)
+	p.optionalText(r, field, value, maxLength)
+}
 
+func (p *problems) optionalText(r record, field, value string, maxLength int) {
 	if utf8.RuneCountInString(value) > maxLength {
 		p.add(r, field, "%s is longer than %d characters", field, maxLength)
 	}
