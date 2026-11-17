@@ -1,4 +1,6 @@
+import { DescriptionItem, DescriptionList } from "@cdr-lab/ui/description-list";
 import { ConsumerCard } from "@cdr-lab/ui/consumer-page";
+import { Link as TextLink } from "@cdr-lab/ui/link";
 import { ErrorState, LoadingState } from "@cdr-lab/ui/states";
 import { Link } from "@tanstack/react-router";
 
@@ -8,7 +10,7 @@ import { categoryLabels } from "../products/categories";
 import { formatAmount } from "../products/format";
 import { SignedIn, useSessionEndedBy } from "../session/session";
 import { PageHeading } from "../status";
-import { Term, Terms } from "../terms";
+
 import { useAccounts } from "./useAccounts";
 
 export function AccountsPage() {
@@ -37,6 +39,9 @@ function Accounts() {
           </p>
           <p>
             You cannot share your data under the Consumer Data Right until you have an open account.
+          </p>
+          <p>
+            <TextLink render={<Link to="/products" />}>Open an account</TextLink>
           </p>
         </>
       )}
@@ -73,12 +78,16 @@ function AccountGroup({ heading, accounts }: { heading: string; accounts: Accoun
 
 export function AccountTerms({ account }: { account: Account }) {
   return (
-    <Terms>
-      <Term term="Product">{account.productName}</Term>
-      <Term term="Type">{categoryLabels[account.productCategory]}</Term>
-      <Term term="Account number">{account.maskedNumber}</Term>
-      <Term term="Balance">{formatAmount(account.balance.currentBalance)}</Term>
-      <Term term="Available">{formatAmount(account.balance.availableBalance)}</Term>
-    </Terms>
+    <DescriptionList>
+      <DescriptionItem term="Product">{account.productName}</DescriptionItem>
+      <DescriptionItem term="Type">{categoryLabels[account.productCategory]}</DescriptionItem>
+      <DescriptionItem term="Account number">{account.maskedNumber}</DescriptionItem>
+      <DescriptionItem term="Balance">
+        {formatAmount(account.balance.currentBalance)}
+      </DescriptionItem>
+      <DescriptionItem term="Available">
+        {formatAmount(account.balance.availableBalance)}
+      </DescriptionItem>
+    </DescriptionList>
   );
 }

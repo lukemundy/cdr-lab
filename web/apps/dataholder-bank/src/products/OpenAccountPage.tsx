@@ -16,7 +16,7 @@ import {
 } from "../api/client";
 import { useBrand, usePageTitle } from "../brand";
 import { NotFoundPage } from "../NotFoundPage";
-import { SignedIn, sessionKey } from "../session/session";
+import { recordSessionEnded, SignedIn, sessionKey } from "../session/session";
 import { categoryLabels } from "./categories";
 import { amountStringOf, openValueOf, type OpenValue } from "./opening";
 
@@ -70,8 +70,10 @@ function Confirmation({ product }: { product: ProductDetail }) {
       opened = await openAccount(body);
     } catch (error) {
       // The session ended, so the site reads it again and goes to the sign-in page.
-      if (error instanceof ProblemError && error.status === forbidden)
+      if (error instanceof ProblemError && error.status === forbidden) {
+        recordSessionEnded(queryClient, error);
         await queryClient.invalidateQueries({ queryKey: sessionKey });
+      }
       return refusalOf(error);
     }
     await queryClient.invalidateQueries({ queryKey: ["accounts"] });

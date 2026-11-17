@@ -91,7 +91,8 @@ This area gives the console API of the operator console. The console API is JSON
 - <a id="dh-1657"></a>**DH-1657** A value with no valid format also gives a field error. For example, a `creditLimit` that is not an AmountString, or a time that is not an RFC 3339 date-time, gives a field error. ([operator interface: the format of an amount](operator-interface.md#dh-0741); [CDS: Common Field Types][cds-common-field-types])
 - <a id="dh-1658"></a>**DH-1658** The `detail` of each field error is the `detail` that the operator interface gives for that rule. ([operator interface: a body that is not valid](operator-interface.md#dh-0730))
 - <a id="dh-1659"></a>**DH-1659** The field error of a rule of two fields is at the field that is absent. For example, a `POSTED` transaction with no `postingDateTime` has its field error at `postingDateTime`. ([Judgement: a field error at the absent field of a rule of two fields](#dh-1691))
-- <a id="dh-1660"></a>**DH-1660** A create of an account with the `bsb` and the `accountNumber` of a different account gives 409, with one field error at `accountNumber`. The data holder changes nothing. ([operator interface: a unique BSB and account number](operator-interface.md#dh-0740); [Judgement: a BSB and account number in use give a field error at `accountNumber`](#dh-1692))
+- <a id="dh-1660"></a>**DH-1660** A create of an account with the `bsb` and the `accountNumber` of a different account gives 409, with one field error at `accountNumber`. The data holder changes nothing. ([operator interface: a unique BSB and account number](operator-interface.md#dh-0740); [Judgement: a value that a different record has gives a field error at that value](#dh-1692))
+- <a id="dh-2621"></a>**DH-2621** A create of a customer with the `emailAddress` of a different customer gives 409, with one field error at `emailAddress`. The data holder changes nothing. ([operator interface: a unique email address](operator-interface.md#dh-0736); [Judgement: a value that a different record has gives a field error at that value](#dh-1692))
 
 ## Overview
 
@@ -179,11 +180,11 @@ This area gives the console API of the operator console. The console API is JSON
 - Basis: Step 3.2. A UI shows an input error at the field that has the error ([WCAG 2.2, SC 3.3.1][wcag-3-3-1]).
 - Reason: The status and the sign of the amount are usually correct. The operator corrects the rule with a value in the field that is absent, so the error shows at that field. The fields are the `postingDateTime` of a `POSTED` transaction, the `executionDateTime` of a `PENDING` transaction, and `extendedData.payee` or `extendedData.payer` for the sign of the amount.
 
-### <a id="dh-1692"></a>DH-1692 A BSB and account number in use give a field error at `accountNumber`
+### <a id="dh-1692"></a>DH-1692 A value that a different record has gives a field error at that value
 
 - Kind: choice
-- Basis: Step 3.3. The operator interface gives this 409 with no field error ([operator interface: a unique BSB and account number](operator-interface.md#dh-0740)).
-- Reason: The accounts of a brand usually have the same few BSBs, so the operator corrects the pair with a different account number. The Register console API also gives an identifier that a different record has as 409 with a field error.
+- Basis: Step 3.3. The operator interface gives these 409 responses with no field error ([operator interface: a unique email address](operator-interface.md#dh-0736); [operator interface: a unique BSB and account number](operator-interface.md#dh-0740)).
+- Reason: A field error shows the operator the value to correct. The accounts of a brand usually have the same few BSBs, so the error of a BSB and account number pair is at `accountNumber`. The Register console API also gives an identifier that a different record has as 409 with a field error.
 
 ### <a id="dh-1693"></a>DH-1693 One read for the overview
 

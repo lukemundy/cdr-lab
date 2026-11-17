@@ -1,6 +1,6 @@
 import { ProblemError } from "@cdr-lab/console/problem";
 import { LoadingState } from "@cdr-lab/ui/states";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { type QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Navigate } from "@tanstack/react-router";
 import { type ReactNode, useEffect } from "react";
 
@@ -22,6 +22,28 @@ export function isSessionEnded(error: unknown): boolean {
   );
 }
 
+// The session-ended response expires the cookie, so a later read of the session cannot tell the sign-in page
+// why the session ended.
+const sessionEndedKey = ["session-ended"];
+
+export function recordSessionEnded(queryClient: QueryClient, error: unknown) {
+  if (isSessionEnded(error)) queryClient.setQueryData(sessionEndedKey, true);
+}
+
+export function clearSessionEnded(queryClient: QueryClient) {
+  queryClient.setQueryData(sessionEndedKey, false);
+}
+
+export function useSessionEndedRecord(): boolean {
+  const record = useQuery({
+    queryKey: sessionEndedKey,
+    queryFn: () => false,
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
+  return record.data ?? false;
+}
+
 // A page with the data of a customer needs a session. With no valid session, the site goes to the sign-in page.
 export function SignedIn({ children }: { children: (customer: SessionCustomer) => ReactNode }) {
   const session = useSession();
@@ -38,10 +60,13 @@ const forbidden = 403;
 export function useSessionEndedBy(...errors: unknown[]): boolean {
   const queryClient = useQueryClient();
   const ended = errors.some((error) => error instanceof ProblemError && error.status === forbidden);
+  const endedError = errors.find(isSessionEnded);
 
   useEffect(() => {
-    if (ended) void queryClient.invalidateQueries({ queryKey: sessionKey });
-  }, [ended, queryClient]);
+    if (!ended) return;
+    recordSessionEnded(queryClient, endedError);
+    void queryClient.invalidateQueries({ queryKey: sessionKey });
+  }, [ended, endedError, queryClient]);
 
   return ended;
 }

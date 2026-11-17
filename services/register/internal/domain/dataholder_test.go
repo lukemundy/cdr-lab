@@ -1,6 +1,7 @@
 package domain_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -128,6 +129,16 @@ func TestImportDataHolderRejectsInvalidFields(t *testing.T) {
 			func(dh *domain.DataHolder) { dh.LegalEntityName = strings.Repeat("n", 37) },
 			`data holder "dh-1": legalEntityName is longer than 36 characters`,
 		},
+		// Verifies: REG-0214
+		"brand name too long": {
+			func(dh *domain.DataHolder) { dh.Brands[0].BrandName = strings.Repeat("é", domain.MaxNameLength+1) },
+			fmt.Sprintf(`data holder brand "dhb-1": brandName is longer than %d characters`, domain.MaxNameLength),
+		},
+		// Verifies: REG-0214
+		"brand group too long": {
+			func(dh *domain.DataHolder) { dh.Brands[0].BrandGroup = strings.Repeat("g", domain.MaxNameLength+1) },
+			fmt.Sprintf(`data holder brand "dhb-1": brandGroup is longer than %d characters`, domain.MaxNameLength),
+		},
 		// Verifies: REG-0219
 		"interim ID too long": {
 			func(dh *domain.DataHolder) { dh.Brands[0].InterimID = strings.Repeat("i", 37) },
@@ -159,6 +170,17 @@ func TestImportDataHolderRejectsInvalidFields(t *testing.T) {
 			assert.EqualError(t, err, tt.wantErr)
 		})
 	}
+}
+
+// Verifies: REG-0214
+func TestImportDataHolderAcceptsBrandTextAtTheMaximumLength(t *testing.T) {
+	dh := validDataHolder()
+	dh.Brands[0].BrandName = strings.Repeat("é", domain.MaxNameLength)
+	dh.Brands[0].BrandGroup = strings.Repeat("g", domain.MaxNameLength)
+
+	_, err := importDataHolder(dh)
+
+	require.NoError(t, err)
 }
 
 func TestTheIndustriesOfADataHolderAreTheIndustriesOfItsBrandsInAllStatuses(t *testing.T) {

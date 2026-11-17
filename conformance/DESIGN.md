@@ -79,6 +79,7 @@ flowchart LR
 - <a id="conf-0020"></a>**CONF-0020** Each test package has its own participants in the seed files and its own listen ports. ([Judgement: the test packages run at the same time](#conf-0043))
 - <a id="conf-0021"></a>**CONF-0021** `go test` runs the test packages at the same time, not one after the other. ([Judgement: the test packages run at the same time](#conf-0043))
 - <a id="conf-0022"></a>**CONF-0022** A test that changes a state uses data that no other test uses. For example, the test has its own participant, customer or account number. ([Judgement: each test changes only its own data](#conf-0044))
+- <a id="conf-0056"></a>**CONF-0056** Tests can share a change that is idempotent and that gives the same end state in each sequence of the tests. For example, each test that needs a revoked client certificate revokes the same fixture with the same reason, and accepts that it is already revoked. ([Judgement: tests share only an idempotent change](#conf-0057))
 - <a id="conf-0023"></a>**CONF-0023** All customer, account and transaction data in the tests is invented. ([Judgement: invented data only](#conf-0045))
 - <a id="conf-0024"></a>**CONF-0024** Telemetry: the rule for CDR data and personal information in telemetry applies also to the mock data of the tests. ([no CDR data or personal information in telemetry](../pkg/platform/telemetry/DESIGN.md#tele-0004))
 
@@ -86,7 +87,8 @@ flowchart LR
 
 - <a id="conf-0025"></a>**CONF-0025** Performance: a fixed wait in a test is 2 seconds or less. ([Judgement: no long waits in the suite](#conf-0046))
 - <a id="conf-0026"></a>**CONF-0026** A poll stops as soon as its condition is true. ([Judgement: no long waits in the suite](#conf-0046))
-- <a id="conf-0027"></a>**CONF-0027** The limit of a poll is the time that the requirement or the lab configuration gives. For example, the limit is the status interval of the data holder in `compose.yaml`. ([Judgement: no long waits in the suite](#conf-0046))
+- <a id="conf-0027"></a>**CONF-0027** The limit of a poll is the time that the requirement or the lab configuration gives, plus 2 seconds. For example, the limit of a status poll is the status interval of the data holder in `compose.yaml`, plus 2 seconds. ([Judgement: no long waits in the suite](#conf-0046); [Judgement: a margin of 2 seconds, and 15 seconds when no time is given](#conf-0053))
+- <a id="conf-0052"></a>**CONF-0052** When no requirement and no lab configuration gives a time, the limit of a poll is 15 seconds. For example, the limit of a poll for an email in the mail sink is 15 seconds. ([Judgement: a margin of 2 seconds, and 15 seconds when no time is given](#conf-0053))
 - <a id="conf-0028"></a>**CONF-0028** The suite does not check a time rule with a longer period. A Go test that controls the time proves it in-process, in the service or in its library in `pkg/`. For example, the suite does not check the life of an authorisation code or the 10 minutes of an authorisation flow. ([Judgement: no long waits in the suite](#conf-0046))
 
 ## Exceptions
@@ -100,6 +102,7 @@ Each row is an exception to the subject of a test or to the check of each CDS re
 | <a id="conf-0031"></a>**CONF-0031** | The data holder test of the stylesheets and the font of the authentication page | The test checks that the stylesheets of the page, and one font that they refer to, load from the origin of the page. The CDR does not define the styles of the page. | [Judgement: the test checks that the authentication page styles load from its origin](#conf-0049) |
 | <a id="conf-0032"></a>**CONF-0032** | The Register tests of Get SSA | The test does not check a response with the status 200 against the specification. | [Judgement: no schema check of the SSA body](#conf-0050) |
 | <a id="conf-0033"></a>**CONF-0033** | The Register test of an unknown path | The test does not check the response against the specification. | [Judgement: no schema check of an unknown path](#conf-0051) |
+| <a id="conf-0054"></a>**CONF-0054** | The data holder tests of the banking APIs, Get Customer and the management of a registration | The test does not check a response against the specification when the operation does not give its status. For example, a 401 from Get Accounts has no check. | [Judgement: no schema check of a status that the operation does not give](#conf-0055) |
 
 ## Judgements
 
@@ -211,6 +214,24 @@ Each row is an exception to the subject of a test or to the check of each CDS re
 - Basis: Step 3.3. The specification has no such path ([an unknown path gets 404](../services/register/design/register-apis.md#reg-0318)).
 - Reason: The specification has no schema to validate the response against. The test checks the status and the error code only.
 
+### <a id="conf-0053"></a>CONF-0053 A margin of 2 seconds, and 15 seconds when no time is given
+
+- Kind: choice
+- Basis: Step 3.3. A poll ends only after the request of the test and the change in the component ([a poll stops as soon as its condition is true](#conf-0026)).
+- Reason: The margin of 2 seconds covers the request and the change after the configured time. No CDR time rule is under test in a poll with no given time, so its limit permits a stop of the lab of up to 15 seconds on a loaded CI node.
+
+### <a id="conf-0055"></a>CONF-0055 No schema check of a status that the operation does not give
+
+- Kind: choice
+- Basis: Step 3.3. A CDS operation does not give each status that the CDS permits. For example, the banking specification gives no 401 or 403 ([CDS: Banking APIs][cds-banking-apis]).
+- Reason: The specification has no schema for that status. The test checks the status and the error code only.
+
+### <a id="conf-0057"></a>CONF-0057 Tests share only an idempotent change
+
+- Kind: choice
+- Basis: Step 3.3. `go test` gives no fixed sequence for the tests of a package, and a fixture certificate costs a change to the PKI set-up and the seed files.
+- Reason: An idempotent change with one end state gives the same result in each sequence of the tests. One fixture for each test that needs it is then not necessary.
+
 ## Withdrawn
 
 None.
@@ -219,6 +240,7 @@ None.
 [adr-0019]: ../docs/adr/0019-limit-the-conformance-suite-to-cdr-conformance.md
 [adr-0022]: ../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
 [agents]: ../AGENTS.md
+[cds-banking-apis]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#banking-apis
 [cds-register-schemas]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api-schemas
 [dataholder-design]: ../services/dataholder/design/README.md
 [readme]: ../README.md

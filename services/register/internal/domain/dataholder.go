@@ -188,7 +188,8 @@ func (dh DataHolder) validate() error {
 			p.id(brand, "interimId", b.InterimID)
 		}
 
-		p.required(brand, "brandName", b.BrandName)
+		p.requiredText(brand, "brandName", b.BrandName, MaxNameLength)
+		p.optionalText(brand, "brandGroup", b.BrandGroup, MaxNameLength)
 		p.requiredURI(brand, "logoUri", b.LogoURI)
 		p.requiredURI(brand, "endpointDetail.publicBaseUri", b.EndpointDetail.PublicBaseURI)
 		p.optionalURI(brand, "endpointDetail.productBaseUri", b.EndpointDetail.ProductBaseURI)

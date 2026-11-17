@@ -3,6 +3,7 @@ import { page, userEvent } from "vitest/browser";
 
 import {
   customer,
+  endSession,
   http,
   renderApp,
   serveAccounts,
@@ -257,6 +258,44 @@ test("when the session ended, the sign-in page says that the bank signed the con
   await expect
     .element(page.getByRole("status").filter({ hasText: "signed you out" }))
     .toHaveTextContent("Example Bank signed you out. Sign in again.");
+});
+
+// Verifies: DH-2028
+test("after a new sign-in and a sign-out, the sign-in page does not say again that the bank signed the consumer out", async () => {
+  serveAccounts([]);
+  worker.use(
+    http.get("/api/accounts", ({ response }) => {
+      endSession();
+      return response(403).json(sessionEnded);
+    }),
+    http.post("/api/session", ({ response }) => {
+      serveAccounts([]);
+      return response(204).empty();
+    }),
+    http.delete("/api/session", ({ response }) => {
+      endSession();
+      return response(204).empty();
+    }),
+  );
+
+  renderApp("/accounts");
+  await expect
+    .element(page.getByRole("status").filter({ hasText: "signed you out" }))
+    .toBeVisible();
+  await userEvent.fill(page.getByLabelText("Email address or customer number"), "00047291");
+  await userEvent.fill(page.getByLabelText("Password"), "any");
+  await userEvent.click(page.getByRole("button", { name: "Sign in" }));
+  await expect
+    .element(page.getByRole("heading", { level: 1, name: "Your accounts" }))
+    .toBeVisible();
+  await userEvent.click(page.getByRole("button", { name: "Sign out" }));
+
+  await expect
+    .element(page.getByRole("heading", { level: 1, name: "Sign in to online banking" }))
+    .toBeVisible();
+  await expect
+    .element(page.getByText("Example Bank signed you out.", { exact: false }))
+    .not.toBeInTheDocument();
 });
 
 // Verifies: DH-2031, DH-2032

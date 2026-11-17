@@ -21,7 +21,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lukemundy/cdr-lab/conformance/internal/labtest"
-	"github.com/lukemundy/cdr-lab/pkg/openapi"
 )
 
 // These participants of services/register/seed/example.json have https://conformance:8444/jwks as their JWKS URI.
@@ -98,7 +97,7 @@ func (r registrant) post(t *testing.T, contentType, body string) registrationRep
 
 	spec, err := dcrSpec()
 	require.NoError(t, err)
-	require.NoError(t, validateAtSpecPath(spec, resp, specRegistrationPath))
+	require.NoError(t, validateAtSpecPath(spec.ValidateResponse, resp, specRegistrationPath))
 
 	data, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
@@ -108,7 +107,7 @@ func (r registrant) post(t *testing.T, contentType, body string) registrationRep
 }
 
 // validateAtSpecPath is necessary because a data holder can have its registration endpoint at a different path.
-func validateAtSpecPath(spec *openapi.Spec, resp *http.Response, specPath string) error {
+func validateAtSpecPath(validate func(*http.Response) error, resp *http.Response, specPath string) error {
 	original := resp.Request
 	atSpecPath := original.Clone(original.Context())
 	atSpecPath.URL.Path = specPath
@@ -116,7 +115,7 @@ func validateAtSpecPath(spec *openapi.Spec, resp *http.Response, specPath string
 
 	defer func() { resp.Request = original }()
 
-	return spec.ValidateResponse(resp)
+	return validate(resp)
 }
 
 func (r registrant) register(t *testing.T, claims map[string]any) registrationReply {

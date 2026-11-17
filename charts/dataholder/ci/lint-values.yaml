@@ -1,4 +1,5 @@
 # An overlay of test-values.yaml that turns on each optional part, for mise run lint:chart. It is not for a deployment.
+crlMaxAge: 30s
 brand:
   preset: ""
   configMap: bank-brand

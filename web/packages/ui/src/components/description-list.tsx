@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 
 export function DescriptionList({ children }: { children: ReactNode }) {
-  return <dl className="flex flex-col text-sm">{children}</dl>;
+  // A container, so that each value goes below its term when the list is narrow, for example in a consumer card.
+  return <dl className="@container flex flex-col text-sm">{children}</dl>;
 }
 
 export type DescriptionItemProps = {
@@ -38,7 +39,7 @@ function Muted({ children }: { children: string }) {
 export function DescriptionItem(props: DescriptionItemProps) {
   return (
     // HTML permits a div around each term and its value, which gives one row of the grid.
-    <div className="grid grid-cols-[12rem_minmax(0,1fr)] gap-4 border-b border-border py-2 last:border-b-0">
+    <div className="grid grid-cols-1 gap-1 border-b @md:grid-cols-[12rem_minmax(0,1fr)] @md:gap-4 border-border py-2 last:border-b-0">
       <dt className="font-medium text-fg-muted">{props.term}</dt>
       <dd className="min-w-0 text-fg wrap-break-word">
         <Value {...props} />

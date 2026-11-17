@@ -4,6 +4,7 @@ import { page } from "vitest/browser";
 
 import {
   account,
+  endSession,
   http,
   narrowWidth,
   presets,
@@ -106,14 +107,13 @@ test("a refusal of the open shows the error of the bank", async () => {
     .toBeVisible();
 });
 
-test("an open after the end of the session goes to the sign-in page", async () => {
+// Verifies: DH-2028
+test("an open after the end of the session goes to the sign-in page, which says so", async () => {
   serveSession();
   serveProducts([saver]);
   worker.use(
     http.post("/api/accounts", ({ response }) => {
-      worker.use(
-        http.get("/api/session", ({ response: session }) => session(403).json(sessionEnded)),
-      );
+      endSession();
       return response(403).json(sessionEnded);
     }),
   );
@@ -122,8 +122,8 @@ test("an open after the end of the session goes to the sign-in page", async () =
   await page.getByRole("button", { name: "Open account" }).click();
 
   await expect
-    .element(page.getByRole("heading", { level: 1, name: "Sign in to online banking" }))
-    .toBeVisible();
+    .element(page.getByRole("status").filter({ hasText: "signed you out" }))
+    .toHaveTextContent("Example Bank signed you out. Sign in again.");
 });
 
 // Verifies: DH-2216

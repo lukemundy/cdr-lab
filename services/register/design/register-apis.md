@@ -99,7 +99,7 @@ The secure APIs are Get Data Holder Brands and [Get SSA](software-statement-asse
 - <a id="reg-0348"></a>**REG-0348** An mTLS endpoint accepts only [client certificates that chain to the CDR CA bundle](../../../pkg/cds/DESIGN.md#cdsl-0044). The operator interface gives [the same CDR CA bundle](certificate-management.md#reg-0617). The Register also does [a revocation check of each client certificate](certificate-revocation.md#reg-0726). ([CDS: Certificate Trust Model][cds-cert-trust-model])
 - <a id="reg-0349"></a>**REG-0349** A TLS endpoint presents a certificate from a mock public CA, not from the mock CDR CA. ([CDS: Participant Endpoints][cds-participant-endpoints]; [CDS: Transaction Security][cds-transaction-security])
 - <a id="reg-0350"></a>**REG-0350** A TLS endpoint [does not request a client certificate](../../../pkg/cds/DESIGN.md#cdsl-0043). ([CDS: Transaction Security][cds-transaction-security])
-- <a id="reg-0351"></a>**REG-0351** When a proxy terminates TLS, the Register accepts the client certificate only from that trusted proxy. A client cannot give the certificate in a request header. ([RFC 8705, section 3][rfc8705-binding]; [Judgement: the client certificate only from a trusted proxy](#reg-0386))
+- <a id="reg-0351"></a>**REG-0351** The Register reads the client certificate only from its own TLS connection, never from a request header. For example, the Register ignores a header that gives a certificate. ([RFC 8705, section 3][rfc8705-binding]; [Judgement: the client certificate only from the TLS connection](#reg-0386))
 
 ## Judgements
 
@@ -193,11 +193,11 @@ The secure APIs are Get Data Holder Brands and [Get SSA](software-statement-asse
 - Basis: Step 3.2. The CDS requires that CORS protections are disabled for these APIs ([CDS: CORS][cds-cors]). A browser hides each response header that the server does not expose ([Fetch: CORS protocol][fetch-cors]).
 - Reason: A web page needs the version, the `ETag` and the interaction ID of a response.
 
-### <a id="reg-0386"></a>REG-0386 The client certificate only from a trusted proxy
+### <a id="reg-0386"></a>REG-0386 The client certificate only from the TLS connection
 
 - Kind: choice
 - Basis: Step 3.2. An access token is bound to the client certificate of the TLS connection ([RFC 8705, section 3][rfc8705-binding]). A request header is not authenticated.
-- Reason: A client can forge a header that gives a certificate. Only the proxy that terminated the TLS connection knows the certificate of the client.
+- Reason: A client can forge a header that gives a certificate. The lab has no proxy that terminates TLS, so the Register terminates each mTLS connection itself.
 
 [accc-brands-summary]: https://consumerdataright.atlassian.net/wiki/spaces/DP/pages/29851982
 [accc-known-issues]: https://consumerdataright.atlassian.net/wiki/spaces/DP/pages/29950003

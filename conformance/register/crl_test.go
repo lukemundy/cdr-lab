@@ -69,8 +69,11 @@ func currentCRL(t *testing.T, cert *x509.Certificate) *x509.RevocationList {
 
 	crl, err := x509.ParseRevocationList(der)
 	require.NoError(t, err, "the CRL is DER")
-	require.NoError(t, crl.CheckSignatureFrom(intermediate(t)))
+	issuer := intermediate(t)
+	require.NoError(t, crl.CheckSignatureFrom(issuer))
 	assert.Positive(t, crl.Number.Sign(), "the CRL has a CRL number")
+	assert.NotEmpty(t, crl.AuthorityKeyId, "the CRL has an authority key identifier")
+	assert.Equal(t, issuer.SubjectKeyId, crl.AuthorityKeyId, "the authority key identifier is the key of the issuer")
 	assert.Equal(t, 7*24*time.Hour, crl.NextUpdate.Sub(crl.ThisUpdate))
 	assert.True(t, time.Now().Before(crl.NextUpdate), "the CRL is current")
 

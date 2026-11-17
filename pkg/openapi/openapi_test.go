@@ -253,3 +253,23 @@ func TestValidateResponseRejectsAPropertyThatAClosedSchemaDoesNotName(t *testing
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "extra")
 }
+
+func TestValidateDocumentedResponseAcceptsAnUndocumentedStatus(t *testing.T) {
+	resp := get(t, "/statuses", fakeResponse{status: http.StatusUnauthorized, body: `{"error":"invalid_token"}`})
+	defer func() { _ = resp.Body.Close() }()
+
+	require.NoError(t, load(t, "").ValidateDocumentedResponse(resp))
+}
+
+func TestValidateDocumentedResponseNamesTheInvalidFieldOfADocumentedStatus(t *testing.T) {
+	fake := validResponse()
+	fake.body = `{"data":[{"legalEntityId":"a","status":"DELETED"}]}`
+
+	resp := get(t, "/statuses", fake)
+	defer func() { _ = resp.Body.Close() }()
+
+	err := load(t, "").ValidateDocumentedResponse(resp)
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "/data/0/status")
+}

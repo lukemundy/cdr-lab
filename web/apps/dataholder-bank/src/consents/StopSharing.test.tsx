@@ -5,11 +5,14 @@ import { page, userEvent } from "vitest/browser";
 import type { Consent } from "../api/client";
 import {
   consent,
+  endSession,
   http,
   narrowWidth,
+  noSession,
   presets,
   renderApp,
   serveConsents,
+  sessionEnded,
   showPreset,
   worker,
 } from "../test/app";
@@ -160,6 +163,27 @@ test("a withdrawal that fails keeps the dialog open with the error, and the site
     .element(dialog().getByText("The data holder could not complete the request."))
     .toBeVisible();
   expect(requests).toEqual(["arrangement-1"]);
+});
+
+// Verifies: DH-2028
+test("a withdrawal after the end of the session goes to the sign-in page, which says so", async () => {
+  serveWithdrawals([consent("arrangement-1")], () => {
+    endSession();
+    worker.use(http.get("/api/consents", ({ response }) => response(403).json(noSession)));
+    return Response.json(sessionEnded, { status: 403 });
+  });
+
+  renderApp("/data-sharing");
+  await userEvent.click(stopSharing());
+  await userEvent.click(dialog().getByRole("button", { name: "Stop sharing" }));
+  await expect
+    .element(dialog().getByText("The bank signed you out.", { exact: false }))
+    .toBeVisible();
+  await userEvent.click(dialog().getByRole("button", { name: "Cancel" }));
+
+  await expect
+    .element(page.getByRole("status").filter({ hasText: "signed you out" }))
+    .toHaveTextContent("Example Bank signed you out. Sign in again.");
 });
 
 describe.each(presets)("with the preset $name", (preset) => {

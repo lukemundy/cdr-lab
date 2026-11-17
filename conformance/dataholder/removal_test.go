@@ -31,7 +31,7 @@ func TestTheRemovalOfASoftwareProductEndsItsConsentsAndItsRegistrationWithNoNoti
 
 	require.Eventually(t, func() bool {
 		return arrangementOf(t, customer, arrangementID).EndReason == "SOFTWARE_PRODUCT_REMOVED"
-	}, waitForStatus, time.Second, "the data holder ends the arrangement within the interval")
+	}, waitForStatus(t), time.Second, "the data holder ends the arrangement within the interval")
 
 	t.Run("the arrangement ends with no notice", func(t *testing.T) {
 		got := arrangementOf(t, customer, arrangementID)

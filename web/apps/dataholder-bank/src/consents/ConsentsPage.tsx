@@ -1,3 +1,4 @@
+import { DescriptionItem, DescriptionList } from "@cdr-lab/ui/description-list";
 import { ConsumerCard } from "@cdr-lab/ui/consumer-page";
 import { ErrorState, LoadingState } from "@cdr-lab/ui/states";
 import type { ReactNode } from "react";
@@ -7,7 +8,7 @@ import { usePageTitle } from "../brand";
 import { formatDate } from "../products/format";
 import { SignedIn, useSessionEndedBy } from "../session/session";
 import { PageHeading } from "../status";
-import { Term, Terms } from "../terms";
+
 import { formatPeriod } from "./period";
 import { StopSharing } from "./StopSharing";
 import { useConsents } from "./useConsents";
@@ -63,17 +64,21 @@ export function ConsentCard({ consent, actions }: { consent: Consent; actions?: 
   return (
     <article aria-label={consent.clientName} className="flex flex-col gap-3">
       <h3>{consent.clientName}</h3>
-      <Terms>
-        <Term term="Data recipient">{consent.brandName}</Term>
-        {consent.legalEntityName && <Term term="Legal entity">{consent.legalEntityName}</Term>}
-        <Term term="Consent given">{formatDate(consent.confirmedAt)}</Term>
-        <Term term="Period">{formatPeriod(consent.sharingDurationSeconds)}</Term>
-        {consent.endedAt ? (
-          <Term term="Ended">{formatDate(consent.endedAt)}</Term>
-        ) : (
-          <Term term="Sharing ends">{formatDate(consent.sharingEndsAt)}</Term>
+      <DescriptionList>
+        <DescriptionItem term="Data recipient">{consent.brandName}</DescriptionItem>
+        {consent.legalEntityName && (
+          <DescriptionItem term="Legal entity">{consent.legalEntityName}</DescriptionItem>
         )}
-      </Terms>
+        <DescriptionItem term="Consent given">{formatDate(consent.confirmedAt)}</DescriptionItem>
+        <DescriptionItem term="Period">
+          {formatPeriod(consent.sharingDurationSeconds)}
+        </DescriptionItem>
+        {consent.endedAt ? (
+          <DescriptionItem term="Ended">{formatDate(consent.endedAt)}</DescriptionItem>
+        ) : (
+          <DescriptionItem term="Sharing ends">{formatDate(consent.sharingEndsAt)}</DescriptionItem>
+        )}
+      </DescriptionList>
       {consent.accounts.length > 0 && (
         <>
           <h4>Accounts</h4>
@@ -116,10 +121,14 @@ function ClusterDisclosures({ cluster }: { cluster: DataCluster }) {
       <p className="m-0 font-semibold">{cluster.name}</p>
       <p className="m-0">{cluster.permissions.join(", ")}</p>
       {cluster.firstDisclosedAt && cluster.lastDisclosedAt ? (
-        <Terms>
-          <Term term="First shared">{formatDate(cluster.firstDisclosedAt)}</Term>
-          <Term term="Last shared">{formatDate(cluster.lastDisclosedAt)}</Term>
-        </Terms>
+        <DescriptionList>
+          <DescriptionItem term="First shared">
+            {formatDate(cluster.firstDisclosedAt)}
+          </DescriptionItem>
+          <DescriptionItem term="Last shared">
+            {formatDate(cluster.lastDisclosedAt)}
+          </DescriptionItem>
+        </DescriptionList>
       ) : (
         <p className="m-0">No data shared</p>
       )}

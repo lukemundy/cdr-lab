@@ -8,6 +8,7 @@ import { useState } from "react";
 import { closeAccount, type Account, type AccountAction } from "../api/client";
 import { useBrand } from "../brand";
 import { formatAmount } from "../products/format";
+import { recordSessionEnded } from "../session/session";
 
 // The confirmation as it was when it opened, so that a refused close does not change the list under the consumer.
 type Confirmation = { account: Account; action: AccountAction; lastOpen: boolean };
@@ -54,6 +55,7 @@ export function CloseAccount({ account, openAccounts }: CloseAccountProps) {
       );
     } catch (error) {
       if (!(error instanceof ProblemError)) throw error;
+      recordSessionEnded(queryClient, error);
       await queryClient.invalidateQueries({ queryKey: ["accounts"] });
       return error.problem;
     }

@@ -5,11 +5,14 @@ import { page, userEvent } from "vitest/browser";
 import type { Account } from "../api/client";
 import {
   account,
+  endSession,
   http,
   narrowWidth,
+  noSession,
   presets,
   renderApp,
   serveAccounts,
+  sessionEnded,
   showPreset,
   worker,
 } from "../test/app";
@@ -176,6 +179,23 @@ test("a close that fails keeps the dialog open with the error, and the site does
     .element(dialog().getByText("The data holder could not complete the request."))
     .toBeVisible();
   expect(requests).toHaveLength(1);
+});
+
+// Verifies: DH-2028
+test("a close after the end of the session goes to the sign-in page, which says so", async () => {
+  serveCloses([lastAccount()], () => {
+    endSession();
+    worker.use(http.get("/api/accounts", ({ response }) => response(403).json(noSession)));
+    return Response.json(sessionEnded, { status: 403 });
+  });
+
+  renderApp("/accounts/account-1");
+  await userEvent.click(page.getByRole("button", { name: "Close account" }));
+  await userEvent.click(dialog().getByRole("button", { name: "Close account" }));
+
+  await expect
+    .element(page.getByRole("status").filter({ hasText: "signed you out" }))
+    .toHaveTextContent("Example Bank signed you out. Sign in again.");
 });
 
 describe.each(presets)("with the preset $name", (preset) => {

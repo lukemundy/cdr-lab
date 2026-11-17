@@ -34,6 +34,7 @@ Telemetry must not contain sensitive data. A telemetry backend has different acc
 ### Sensitive data
 
 - CDR data and personally identifiable information must never appear in logs, metrics or traces. This includes mocked data.
+- The IP address of the client is the only exception. HTTP server spans have the address of the client and of the network peer (`client.address`, `network.peer.address`), which the OpenTelemetry HTTP conventions give. An IP address can be personal information, but it is necessary to diagnose and investigate a security incident.
 - If you must record an identifier (for example an email address), record a keyed HMAC-SHA256 of it.
 - URL paths and query strings can contain sensitive data (for example account IDs). Thus record route patterns and not raw URLs. `pkg/platform/telemetry` replaces `url.path` on each span with `http.route`, or with `REDACTED` when no route matches.
 - Database spans contain the SQL text with placeholders, but no query arguments. `pkg/platform/database` removes the messages of query errors from spans ([ADR 0002](0002-data-store.md)).
@@ -46,5 +47,6 @@ Telemetry must not contain sensitive data. A telemetry backend has different acc
 - Database queries that run with no parent span make no spans.
 - A service with no OTLP configuration sends nothing, and gives no error. To find this condition, look for the log line at startup.
 - Redaction makes spans less useful for diagnosis: a span shows the route and the SQLSTATE, not the URL or the error message. The caller of a query still gets the full error, and must not log it as it is.
+- The telemetry backend holds one kind of personal information: the IP address of each client. Its access controls and retention then apply to personal information.
 - A service that records the HMAC of an identifier needs a secret key, and the same key gives the same value in each service that must correlate the identifier.
 - A change of telemetry backend needs a change to the `OTEL_*` configuration only.

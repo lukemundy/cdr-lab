@@ -9,7 +9,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 
 import { signUp } from "../api/client";
 import { useBrand, usePageTitle } from "../brand";
-import { sessionKey } from "./session";
+import { clearSessionEnded, sessionKey } from "./session";
 
 export function SignUpPage() {
   usePageTitle("Sign up");
@@ -27,6 +27,7 @@ export function SignUpPage() {
       });
       // A sign-up starts a session, so the customer of the session is the new customer.
       queryClient.setQueryData(sessionKey, customer);
+      clearSessionEnded(queryClient);
     } catch (error) {
       return refusalOf(error);
     }

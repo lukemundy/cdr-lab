@@ -71,6 +71,7 @@ func TestACustomerWithNoFirstNameIsCreated(t *testing.T) {
 	assert.Equal(t, http.StatusOK, get(t, r.ports, "/api/customers/00047291").status)
 }
 
+// Verifies: DH-2621
 func TestACustomerWithTheEmailAddressOfADifferentCustomerGivesAConflictAtTheEmailAddress(t *testing.T) {
 	r := newRecords(t).withCreates()
 	addCustomer(t, r.customers, "00000001", "Alex", "Example")

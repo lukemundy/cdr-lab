@@ -188,6 +188,16 @@ func TestTheDataHolderGetsItsConfiguration(t *testing.T) {
 	assert.NotContains(t, env, "SSL_CERT_FILE", "without a public root, the data holder uses the system roots")
 }
 
+// Verifies: DH-0467
+func TestTheCRLMaximumAgeIsOptional(t *testing.T) {
+	assert.NotContains(t, charttest.Main(t, charttest.MustRender(t)).Vars(), "CRL_MAX_AGE",
+		"without a value, the data holder uses its default")
+
+	env := charttest.Main(t, charttest.MustRender(t, "crlMaxAge=30s")).Vars()
+
+	assert.Equal(t, "30s", env["CRL_MAX_AGE"])
+}
+
 // Verifies: DH-1351
 func TestTheRegisterJWKSURLIsTheCDSPathOnTheRegisterBaseURL(t *testing.T) {
 	env := charttest.Main(t, charttest.MustRender(t, "register.publicBaseURL=https://register.test/base/")).Vars()

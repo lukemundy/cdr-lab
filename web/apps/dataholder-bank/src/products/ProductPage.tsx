@@ -1,3 +1,4 @@
+import { DescriptionItem, DescriptionList } from "@cdr-lab/ui/description-list";
 import { ProblemError } from "@cdr-lab/console/problem";
 import { ConsumerButton, ConsumerCard } from "@cdr-lab/ui/consumer-page";
 import { ErrorState, LoadingState } from "@cdr-lab/ui/states";
@@ -9,7 +10,7 @@ import { getProduct, problemOf, type ProductDetail } from "../api/client";
 import type { components } from "../api/schema.gen";
 import { usePageTitle } from "../brand";
 import { NotFoundPage } from "../NotFoundPage";
-import { Term, Terms } from "../terms";
+
 import { BrandPhoto } from "../photo";
 import { categoryLabels, categoryPhoto } from "./categories";
 import { additionalValue, formatAmount, formatDate, formatFrequency, formatRate } from "./format";
@@ -82,14 +83,18 @@ function Detail({ product }: { product: ProductDetail }) {
         </p>
       )}
       {(product.effectiveFrom || product.effectiveTo) && (
-        <Terms>
+        <DescriptionList>
           {product.effectiveFrom && (
-            <Term term="Available from">{formatDate(product.effectiveFrom)}</Term>
+            <DescriptionItem term="Available from">
+              {formatDate(product.effectiveFrom)}
+            </DescriptionItem>
           )}
           {product.effectiveTo && (
-            <Term term="Available until">{formatDate(product.effectiveTo)}</Term>
+            <DescriptionItem term="Available until">
+              {formatDate(product.effectiveTo)}
+            </DescriptionItem>
           )}
-        </Terms>
+        </DescriptionList>
       )}
       {(depositRates.length > 0 || lendingRates.length > 0) && (
         <Group heading="Interest rates">
@@ -126,15 +131,21 @@ function Detail({ product }: { product: ProductDetail }) {
 function DepositRateItem({ rate }: { rate: Schemas["DepositRate"] }) {
   return (
     <Item heading={depositRateLabels[rate.depositRateType]}>
-      <Term term="Rate">{formatRate(rate.rate)}</Term>
-      <Term term="Interest is paid">{applicationLabels[rate.applicationType]}</Term>
+      <DescriptionItem term="Rate">{formatRate(rate.rate)}</DescriptionItem>
+      <DescriptionItem term="Interest is paid">
+        {applicationLabels[rate.applicationType]}
+      </DescriptionItem>
       {rate.applicationFrequency && (
-        <Term term="How often">{formatFrequency(rate.applicationFrequency)}</Term>
+        <DescriptionItem term="How often">
+          {formatFrequency(rate.applicationFrequency)}
+        </DescriptionItem>
       )}
       {rate.additionalValue && (
         <Extra {...additionalValue("depositRate", rate.depositRateType, rate.additionalValue)} />
       )}
-      {rate.additionalInfo && <Term term="More information">{rate.additionalInfo}</Term>}
+      {rate.additionalInfo && (
+        <DescriptionItem term="More information">{rate.additionalInfo}</DescriptionItem>
+      )}
     </Item>
   );
 }
@@ -142,18 +153,26 @@ function DepositRateItem({ rate }: { rate: Schemas["DepositRate"] }) {
 function LendingRateItem({ rate }: { rate: Schemas["LendingRate"] }) {
   return (
     <Item heading={lendingRateLabels[rate.lendingRateType]}>
-      <Term term="Rate">{formatRate(rate.rate)}</Term>
-      {rate.comparisonRate && <Term term="Comparison rate">{formatRate(rate.comparisonRate)}</Term>}
-      <Term term="Interest is charged">{applicationLabels[rate.applicationType]}</Term>
-      {rate.applicationFrequency && (
-        <Term term="How often">{formatFrequency(rate.applicationFrequency)}</Term>
+      <DescriptionItem term="Rate">{formatRate(rate.rate)}</DescriptionItem>
+      {rate.comparisonRate && (
+        <DescriptionItem term="Comparison rate">{formatRate(rate.comparisonRate)}</DescriptionItem>
       )}
-      <Term term="Repayments">{repaymentLabels[rate.repaymentType]}</Term>
-      <Term term="Loan purpose">{loanPurposeLabels[rate.loanPurpose]}</Term>
+      <DescriptionItem term="Interest is charged">
+        {applicationLabels[rate.applicationType]}
+      </DescriptionItem>
+      {rate.applicationFrequency && (
+        <DescriptionItem term="How often">
+          {formatFrequency(rate.applicationFrequency)}
+        </DescriptionItem>
+      )}
+      <DescriptionItem term="Repayments">{repaymentLabels[rate.repaymentType]}</DescriptionItem>
+      <DescriptionItem term="Loan purpose">{loanPurposeLabels[rate.loanPurpose]}</DescriptionItem>
       {rate.additionalValue && (
         <Extra {...additionalValue("lendingRate", rate.lendingRateType, rate.additionalValue)} />
       )}
-      {rate.additionalInfo && <Term term="More information">{rate.additionalInfo}</Term>}
+      {rate.additionalInfo && (
+        <DescriptionItem term="More information">{rate.additionalInfo}</DescriptionItem>
+      )}
     </Item>
   );
 }
@@ -161,24 +180,28 @@ function LendingRateItem({ rate }: { rate: Schemas["LendingRate"] }) {
 function FeeItem({ fee }: { fee: Schemas["Fee"] }) {
   return (
     <Item heading={fee.name}>
-      <Term term="Type">{feeLabels[fee.feeType]}</Term>
-      <Term term="Worked out as">{feeMethodLabels[fee.feeMethodUType]}</Term>
-      {fee.fixedAmount && <Term term="Amount">{formatAmount(fee.fixedAmount.amount)}</Term>}
+      <DescriptionItem term="Type">{feeLabels[fee.feeType]}</DescriptionItem>
+      <DescriptionItem term="Worked out as">{feeMethodLabels[fee.feeMethodUType]}</DescriptionItem>
+      {fee.fixedAmount && (
+        <DescriptionItem term="Amount">{formatAmount(fee.fixedAmount.amount)}</DescriptionItem>
+      )}
       {fee.rateBased && (
-        <Term term="Rate">
+        <DescriptionItem term="Rate">
           {formatRate(fee.rateBased.rate)} of {feeRateLabels[fee.rateBased.rateType]}
-        </Term>
+        </DescriptionItem>
       )}
       {fee.variable?.feeMinimum && (
-        <Term term="Minimum">{formatAmount(fee.variable.feeMinimum)}</Term>
+        <DescriptionItem term="Minimum">{formatAmount(fee.variable.feeMinimum)}</DescriptionItem>
       )}
       {fee.variable?.feeMaximum && (
-        <Term term="Maximum">{formatAmount(fee.variable.feeMaximum)}</Term>
+        <DescriptionItem term="Maximum">{formatAmount(fee.variable.feeMaximum)}</DescriptionItem>
       )}
       {fee.additionalValue && (
         <Extra {...additionalValue("fee", fee.feeType, fee.additionalValue)} />
       )}
-      {fee.additionalInfo && <Term term="More information">{fee.additionalInfo}</Term>}
+      {fee.additionalInfo && (
+        <DescriptionItem term="More information">{fee.additionalInfo}</DescriptionItem>
+      )}
     </Item>
   );
 }
@@ -189,7 +212,9 @@ function FeatureItem({ feature }: { feature: Schemas["Feature"] }) {
       {feature.additionalValue && (
         <Extra {...additionalValue("feature", feature.featureType, feature.additionalValue)} />
       )}
-      {feature.additionalInfo && <Term term="More information">{feature.additionalInfo}</Term>}
+      {feature.additionalInfo && (
+        <DescriptionItem term="More information">{feature.additionalInfo}</DescriptionItem>
+      )}
     </Item>
   );
 }
@@ -207,11 +232,11 @@ function Item({ heading, children }: { heading: string; children: ReactNode }) {
   return (
     <li>
       <h3>{heading}</h3>
-      <Terms>{children}</Terms>
+      <DescriptionList>{children}</DescriptionList>
     </li>
   );
 }
 
 function Extra({ term, text }: { term: string; text: string }) {
-  return <Term term={term}>{text}</Term>;
+  return <DescriptionItem term={term}>{text}</DescriptionItem>;
 }

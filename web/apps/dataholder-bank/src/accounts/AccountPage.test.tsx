@@ -10,6 +10,7 @@ import {
   renderApp,
   serveAccounts,
   showPreset,
+  termsOf,
   transaction,
 } from "../test/app";
 
@@ -53,11 +54,8 @@ test("the page of an account shows its fields, its balance and its transactions"
     .element(page.getByRole("heading", { level: 1, name: "Low Rate Card" }))
     .toBeVisible();
   await expect.poll(() => document.title).toBe("Low Rate Card - Example Bank online banking");
-  await expect.element(page.getByText("Credit limit:$1,000.00")).toBeVisible();
-  const details = [...(document.querySelector("main dl")?.children ?? [])].map(
-    (r) => r.textContent,
-  );
-  expect(details).toEqual([
+  await expect.element(page.getByRole("definition").filter({ hasText: "$1,000.00" })).toBeVisible();
+  expect(termsOf(document.querySelector(".account-summary") ?? document)).toEqual([
     "Product:Low Rate Card",
     "Type:Credit and charge cards",
     "Account number:xxx-xxx xxxx5678",
@@ -74,12 +72,17 @@ test("the page of an account shows its fields, its balance and its transactions"
     ["29 October 2026", "Refund", "Pending", "+$12.00"],
   ]);
 
-  expect(page.getByText("Reference:Card 1234").query()).not.toBeVisible();
+  expect(page.getByText("Card 1234").query()).not.toBeVisible();
   await userEvent.click(page.getByText("Details of Corner Cafe"));
-  await expect.element(page.getByText("Type:Payment")).toBeVisible();
-  await expect.element(page.getByText("Reference:Card 1234")).toBeVisible();
-  await expect.element(page.getByText("Merchant:Corner Cafe Pty Ltd")).toBeVisible();
-  await expect.element(page.getByText("Merchant category code:5814")).toBeVisible();
+  await expect.element(page.getByText("Card 1234")).toBeVisible();
+  expect(termsOf(document.querySelector("main li[data-transaction] details") ?? document)).toEqual(
+    expect.arrayContaining([
+      "Type:Payment",
+      "Reference:Card 1234",
+      "Merchant:Corner Cafe Pty Ltd",
+      "Merchant category code:5814",
+    ]),
+  );
 });
 
 // Verifies: DH-2205
@@ -89,15 +92,28 @@ test("the transactions have pages", async () => {
   );
   serveAccounts([card], { "account-1": many });
 
-  renderApp("/accounts/account-1");
+  const router = renderApp("/accounts/account-1");
 
   await expect.element(page.getByText("Purchase 1", { exact: true })).toBeVisible();
-  await expect.element(page.getByText("Page 1 of 2")).toBeVisible();
-  await userEvent.click(page.getByRole("link", { name: "Next page" }));
+  const pagination = page.getByRole("navigation", { name: "Pagination" });
+  await expect
+    .element(pagination.getByRole("status").filter({ hasText: "Page" }))
+    .toHaveTextContent("Page 1 of 2");
+  await expect
+    .element(pagination.getByRole("status").filter({ hasText: "records" }))
+    .toHaveTextContent("27 records");
+  await expect.element(pagination.getByRole("button", { name: "Previous page" })).toBeDisabled();
+  await userEvent.click(pagination.getByRole("button", { name: "Next page" }));
   await expect.element(page.getByText("Purchase 26")).toBeVisible();
-  await expect.element(page.getByText("Page 2 of 2")).toBeVisible();
-  expect(page.getByRole("link", { name: "Next page" }).query()).toBeNull();
-  await expect.element(page.getByRole("link", { name: "Previous page" })).toBeVisible();
+  await expect.element(pagination.getByText("Page 2 of 2")).toBeVisible();
+  expect(router.state.location.search).toEqual({ page: 2 });
+  // A consumer UI has controls of 44 by 44 CSS px or more (web/packages/ui/design/layout.md, UI-0093).
+  for (const button of pagination.getByRole("button").elements()) {
+    expect(button.getBoundingClientRect().height).toBeGreaterThanOrEqual(44);
+    expect(button.getBoundingClientRect().width).toBeGreaterThanOrEqual(44);
+  }
+  await expect.element(pagination.getByRole("button", { name: "Next page" })).toBeDisabled();
+  await expect.element(pagination.getByRole("button", { name: "Previous page" })).toBeEnabled();
 });
 
 test("an account with no transactions says so", async () => {
@@ -108,7 +124,7 @@ test("an account with no transactions says so", async () => {
   await expect
     .element(page.getByText("This account has no transactions in the last 90 days."))
     .toBeVisible();
-  expect(page.getByRole("navigation", { name: "Pages of transactions" }).query()).toBeNull();
+  expect(page.getByRole("navigation", { name: "Pagination" }).query()).toBeNull();
 });
 
 // Verifies: DH-2209

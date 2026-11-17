@@ -4,6 +4,7 @@ import { page } from "vitest/browser";
 
 import {
   account,
+  endSession,
   http,
   narrowWidth,
   presets,
@@ -14,10 +15,10 @@ import {
   sessionEnded,
   showPreset,
   worker,
+  termsOf,
 } from "../test/app";
 
-const terms = (within: Element) =>
-  [...within.querySelectorAll("dl > div")].map((row) => row.textContent ?? "");
+const terms = termsOf;
 
 const noSharing =
   "You cannot share your data under the Consumer Data Right until you have an open account.";
@@ -82,6 +83,9 @@ test("a customer with no account sees that they cannot share data", async () => 
 
   await expect.element(page.getByText("You have no account with us yet.")).toBeVisible();
   await expect.element(page.getByText(noSharing)).toBeVisible();
+  await expect
+    .element(page.getByRole("main").getByRole("link", { name: "Open an account" }))
+    .toHaveAttribute("href", "/products");
   expect(page.getByRole("region", { name: "Closed accounts" }).query()).toBeNull();
 });
 
@@ -93,6 +97,9 @@ test("a customer with only closed accounts sees that they cannot share data", as
 
   await expect.element(page.getByText("You have no open account.")).toBeVisible();
   await expect.element(page.getByText(noSharing)).toBeVisible();
+  await expect
+    .element(page.getByRole("main").getByRole("link", { name: "Open an account" }))
+    .toHaveAttribute("href", "/products");
   await expect
     .element(
       page
@@ -133,11 +140,12 @@ test("with no session, the accounts page goes to the sign-in page", async () => 
     .toBeVisible();
 });
 
+// Verifies: DH-2028
 test("when the session ends, the accounts page goes to the sign-in page, which says so", async () => {
   serveAccounts([]);
   worker.use(
     http.get("/api/accounts", ({ response }) => {
-      worker.use(http.get("/api/session", ({ response: ended }) => ended(403).json(sessionEnded)));
+      endSession();
       return response(403).json(sessionEnded);
     }),
   );

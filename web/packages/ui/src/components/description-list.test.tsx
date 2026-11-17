@@ -105,3 +105,36 @@ test("a long thumbprint and a long URI wrap, and the page has no horizontal scro
   );
   await expectNoAxeViolations(container);
 });
+
+// Verifies: UI-0086
+test("in a narrow container, each value is below its term, and the list has no horizontal scroll", () => {
+  const container = render(
+    <div style={{ width: "280px" }}>
+      <DescriptionList>
+        <DescriptionItem term="Account number">xxx-xxx xxxx5678</DescriptionItem>
+      </DescriptionList>
+    </div>,
+  );
+
+  const term = container.querySelector("dt")!.getBoundingClientRect();
+  const value = container.querySelector("dd")!.getBoundingClientRect();
+  expect(value.top).toBeGreaterThanOrEqual(term.bottom);
+  expect(value.left).toBe(term.left);
+  const list = container.querySelector("dl")!;
+  expect(list.scrollWidth).toBeLessThanOrEqual(280);
+});
+
+test("in a wide container, each value is next to its term", () => {
+  const container = render(
+    <div style={{ width: "800px" }}>
+      <DescriptionList>
+        <DescriptionItem term="Account number">xxx-xxx xxxx5678</DescriptionItem>
+      </DescriptionList>
+    </div>,
+  );
+
+  const term = container.querySelector("dt")!.getBoundingClientRect();
+  const value = container.querySelector("dd")!.getBoundingClientRect();
+  expect(value.top).toBe(term.top);
+  expect(value.left).toBeGreaterThan(term.right);
+});

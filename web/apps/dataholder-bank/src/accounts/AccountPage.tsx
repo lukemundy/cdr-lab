@@ -1,8 +1,10 @@
+import { DescriptionItem, DescriptionList } from "@cdr-lab/ui/description-list";
 import { ProblemError } from "@cdr-lab/console/problem";
-import { ConsumerButton, ConsumerCard } from "@cdr-lab/ui/consumer-page";
+import { ConsumerCard } from "@cdr-lab/ui/consumer-page";
+import { Pagination } from "@cdr-lab/ui/pagination";
 import { ErrorState, LoadingState } from "@cdr-lab/ui/states";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { getRouteApi, Link } from "@tanstack/react-router";
+import { getRouteApi } from "@tanstack/react-router";
 
 import {
   getBalance,
@@ -18,7 +20,7 @@ import { categoryLabels } from "../products/categories";
 import { formatAmount, formatDate } from "../products/format";
 import { SignedIn, useSessionEndedBy } from "../session/session";
 import { PageHeading } from "../status";
-import { Term, Terms } from "../terms";
+
 import { CloseAccount } from "./CloseAccount";
 import { effectiveTime, formatDay, formatSignedAmount } from "./format";
 import { openStatusLabels, transactionStatusLabels, transactionTypeLabels } from "./labels";
@@ -75,16 +77,18 @@ function Detail({
       <PageHeading>{account.displayName}</PageHeading>
       <div className="account-card account-summary" data-status={account.openStatus}>
         <img className="account-mark" src="/brand/mark.svg" alt="" />
-        <Terms>
-          <Term term="Product">{account.productName}</Term>
-          <Term term="Type">{categoryLabels[account.productCategory]}</Term>
-          <Term term="Account number">{account.maskedNumber}</Term>
-          <Term term="Balance">{formatAmount(balance.currentBalance)}</Term>
-          <Term term="Available">{formatAmount(balance.availableBalance)}</Term>
-          <Term term="Credit limit">{formatAmount(balance.creditLimit)}</Term>
-          <Term term="Status">{openStatusLabels[account.openStatus]}</Term>
-          <Term term="Opened">{formatDay(account.creationDate)}</Term>
-        </Terms>
+        <DescriptionList>
+          <DescriptionItem term="Product">{account.productName}</DescriptionItem>
+          <DescriptionItem term="Type">{categoryLabels[account.productCategory]}</DescriptionItem>
+          <DescriptionItem term="Account number">{account.maskedNumber}</DescriptionItem>
+          <DescriptionItem term="Balance">{formatAmount(balance.currentBalance)}</DescriptionItem>
+          <DescriptionItem term="Available">
+            {formatAmount(balance.availableBalance)}
+          </DescriptionItem>
+          <DescriptionItem term="Credit limit">{formatAmount(balance.creditLimit)}</DescriptionItem>
+          <DescriptionItem term="Status">{openStatusLabels[account.openStatus]}</DescriptionItem>
+          <DescriptionItem term="Opened">{formatDay(account.creationDate)}</DescriptionItem>
+        </DescriptionList>
       </div>
       <CloseAccount account={account} openAccounts={openAccounts} />
       <Transactions accountId={account.accountId} />
@@ -94,6 +98,7 @@ function Detail({
 
 function Transactions({ accountId }: { accountId: string }) {
   const { page = 1 } = route.useSearch();
+  const navigate = route.useNavigate();
   const list = useQuery({
     queryKey: ["accounts", accountId, "transactions", page],
     queryFn: ({ signal }) => listTransactions(accountId, page, signal),
@@ -118,7 +123,12 @@ function Transactions({ accountId }: { accountId: string }) {
               <TransactionItem key={transaction.transactionId} transaction={transaction} />
             ))}
           </ul>
-          <Pages page={page} pageCount={list.data.totalPages} accountId={accountId} />
+          <Pagination
+            page={page}
+            pageCount={list.data.totalPages}
+            rowCount={list.data.totalRecords}
+            onPageChange={(to) => void navigate({ search: { page: to } })}
+          />
         </>
       )}
     </section>
@@ -151,9 +161,9 @@ function TransactionItem({ transaction }: { transaction: Transaction }) {
         <summary className="inline-flex min-h-control cursor-pointer items-center text-link underline underline-offset-2">
           Details<span className="sr-only"> of {transaction.description}</span>
         </summary>
-        <Terms>
+        <DescriptionList>
           <OtherFields transaction={transaction} />
-        </Terms>
+        </DescriptionList>
       </details>
     </li>
   );
@@ -163,57 +173,30 @@ function TransactionItem({ transaction }: { transaction: Transaction }) {
 function OtherFields({ transaction: t }: { transaction: Transaction }) {
   return (
     <>
-      <Term term="Type">{transactionTypeLabels[t.type]}</Term>
-      <Term term="Status">{transactionStatusLabels[t.status]}</Term>
-      {t.postingDateTime && <Term term="Posted">{formatDate(t.postingDateTime)}</Term>}
-      {t.valueDateTime && <Term term="Value date">{formatDate(t.valueDateTime)}</Term>}
-      {t.executionDateTime && <Term term="Made">{formatDate(t.executionDateTime)}</Term>}
-      {t.reference && <Term term="Reference">{t.reference}</Term>}
-      {t.merchantName && <Term term="Merchant">{t.merchantName}</Term>}
+      <DescriptionItem term="Type">{transactionTypeLabels[t.type]}</DescriptionItem>
+      <DescriptionItem term="Status">{transactionStatusLabels[t.status]}</DescriptionItem>
+      {t.postingDateTime && (
+        <DescriptionItem term="Posted">{formatDate(t.postingDateTime)}</DescriptionItem>
+      )}
+      {t.valueDateTime && (
+        <DescriptionItem term="Value date">{formatDate(t.valueDateTime)}</DescriptionItem>
+      )}
+      {t.executionDateTime && (
+        <DescriptionItem term="Made">{formatDate(t.executionDateTime)}</DescriptionItem>
+      )}
+      {t.reference && <DescriptionItem term="Reference">{t.reference}</DescriptionItem>}
+      {t.merchantName && <DescriptionItem term="Merchant">{t.merchantName}</DescriptionItem>}
       {t.merchantCategoryCode && (
-        <Term term="Merchant category code">{t.merchantCategoryCode}</Term>
+        <DescriptionItem term="Merchant category code">{t.merchantCategoryCode}</DescriptionItem>
       )}
-      {t.billerCode && <Term term="Biller code">{t.billerCode}</Term>}
-      {t.billerName && <Term term="Biller">{t.billerName}</Term>}
+      {t.billerCode && <DescriptionItem term="Biller code">{t.billerCode}</DescriptionItem>}
+      {t.billerName && <DescriptionItem term="Biller">{t.billerName}</DescriptionItem>}
       {t.crn && (
-        <Term term="Customer reference number">
+        <DescriptionItem term="Customer reference number">
           <span className="break-all">{t.crn}</span>
-        </Term>
+        </DescriptionItem>
       )}
-      {t.apcaNumber && <Term term="APCA number">{t.apcaNumber}</Term>}
+      {t.apcaNumber && <DescriptionItem term="APCA number">{t.apcaNumber}</DescriptionItem>}
     </>
-  );
-}
-
-function Pages({
-  page,
-  pageCount,
-  accountId,
-}: {
-  page: number;
-  pageCount: number;
-  accountId: string;
-}) {
-  if (pageCount <= 1) return null;
-
-  const link = (to: number, label: string) => (
-    <ConsumerButton
-      variant="secondary"
-      render={(props) => (
-        <Link {...props} to="/accounts/$accountId" params={{ accountId }} search={{ page: to }} />
-      )}
-    >
-      {label}
-    </ConsumerButton>
-  );
-
-  return (
-    <nav aria-label="Pages of transactions" className="flex flex-wrap items-center gap-3 pt-4">
-      {page > 1 && link(page - 1, "Previous page")}
-      <span className="tabular-nums">
-        Page {page} of {pageCount}
-      </span>
-      {page < pageCount && link(page + 1, "Next page")}
-    </nav>
   );
 }

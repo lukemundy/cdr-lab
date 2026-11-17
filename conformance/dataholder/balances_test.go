@@ -67,7 +67,7 @@ func getBulkBalances(t *testing.T, client registeredClient, query, token string)
 	return page
 }
 
-// postBalances validates a response of 200 against the pinned CDS banking OpenAPI specification.
+// postBalances validates each response with a status that the pinned CDS banking OpenAPI specification documents.
 func postBalances(t *testing.T, client registeredClient, query, contentType, body, token string) response {
 	t.Helper()
 
@@ -77,13 +77,11 @@ func postBalances(t *testing.T, client registeredClient, query, contentType, bod
 	resp := secureRequest(t, client.cert, http.MethodPost,
 		secureBaseURI(t)+bankingAccountsPath+"/balances"+query, header, strings.NewReader(body))
 
-	if resp.StatusCode == http.StatusOK {
-		spec, err := LoadBankingSpec()
-		require.NoError(t, err)
+	spec, err := LoadBankingSpec()
+	require.NoError(t, err)
 
-		resp.Body = io.NopCloser(bytes.NewReader(resp.body))
-		require.NoError(t, spec.ValidateResponse(resp.Response))
-	}
+	resp.Body = io.NopCloser(bytes.NewReader(resp.body))
+	require.NoError(t, spec.ValidateDocumentedResponse(resp.Response))
 
 	return resp
 }

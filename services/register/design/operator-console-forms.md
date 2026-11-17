@@ -106,7 +106,7 @@ This area gives the forms of the operator console that create, add and change pa
 ### <a id="reg-1485"></a>REG-1485 A form shows a new random UUID for each identifier
 
 - Kind: choice
-- Basis: Step 3.3. The Register issues GUIDs in production ([the Register issues each identifier as a GUID](participants.md#reg-0220)), and the lab operator gives the identifiers in the lab ([Judgement: the lab operator gives the identifiers](operator-interface.md#reg-0889)).
+- Basis: Step 3.3. The Register accepts an identifier in each format ([an identifier in each format](participants.md#reg-0220)), and the lab operator gives the identifiers ([Judgement: the lab operator gives the identifiers](operator-interface.md#reg-0889)).
 - Reason: A UUID is the usual value, so the lab operator types nothing. A lab service gets its identifiers in its configuration, so the lab operator must be able to give a known value. A brand with a `dataHolderBrandId` is the usual brand.
 
 ### <a id="reg-1486"></a>REG-1486 ACTIVE selected first

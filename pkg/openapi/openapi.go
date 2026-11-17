@@ -116,6 +116,16 @@ func (s *Spec) CheckClosed() error {
 // ValidateResponse returns an error that names each invalid field, and
 // replaces resp.Body so that the caller can read it again.
 func (s *Spec) ValidateResponse(resp *http.Response) error {
+	return s.validate(resp, true)
+}
+
+// ValidateDocumentedResponse gives no error for a status that the operation does not document. A CDS operation does
+// not document each status, for example 401 from a resource API.
+func (s *Spec) ValidateDocumentedResponse(resp *http.Response) error {
+	return s.validate(resp, false)
+}
+
+func (s *Spec) validate(resp *http.Response, refuseUndocumentedStatus bool) error {
 	req := resp.Request
 
 	route, pathParams, err := s.router.FindRoute(req)
@@ -142,7 +152,7 @@ func (s *Spec) ValidateResponse(resp *http.Response) error {
 		Header: resp.Header,
 		Body:   io.NopCloser(bytes.NewReader(body)),
 		Options: &openapi3filter.Options{
-			IncludeResponseStatus: true,
+			IncludeResponseStatus: refuseUndocumentedStatus,
 			MultiError:            true,
 		},
 	}
