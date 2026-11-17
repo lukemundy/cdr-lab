@@ -633,6 +633,22 @@ func TestAnUnknownPathIsNotFound(t *testing.T) {
 	}
 }
 
+// Verifies: REG-1495
+func TestAnotherMethodOnAListPathIsNotAllowed(t *testing.T) {
+	for name, l := range lists {
+		t.Run(name, func(t *testing.T) {
+			rec := send(t, newReader(), http.MethodPost, l.path, http.Header{"X-V": {l.version}})
+
+			e := requireError(
+				t, rec, http.StatusMethodNotAllowed,
+				"urn:au-cds:error:cds-all:GeneralError/Expected", "Expected Error Encountered",
+			)
+			assert.Equal(t, "The endpoint does not support the method POST.", e.Detail)
+			assert.Equal(t, "GET, HEAD", rec.Header().Get("Allow"))
+		})
+	}
+}
+
 func TestAReadErrorIsAnUnexpectedErrorThatDoesNotShowTheCause(t *testing.T) {
 	reader := &fakeReader{err: errors.New("connection to 10.0.0.1 failed")}
 

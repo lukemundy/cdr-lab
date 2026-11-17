@@ -589,6 +589,21 @@ func TestTheProductAPIsRefuseAnAcceptHeaderThatPermitsNoJSONInUTF8(t *testing.T)
 	}
 }
 
+// Verifies: DH-2617, CDSL-0080, CDSL-0081
+func TestAnotherMethodOnAProductAPIIsNotAllowed(t *testing.T) {
+	for name, api := range productAPIs(t) {
+		t.Run(name, func(t *testing.T) {
+			resp := send(t, http.MethodPost, productBaseURI(t)+api.path, xv(api.version))
+
+			requireCDSError(
+				t, resp, http.StatusMethodNotAllowed,
+				"urn:au-cds:error:cds-all:GeneralError/Expected", "Expected Error Encountered",
+			)
+			assert.Equal(t, "GET, HEAD", resp.Header.Get("Allow"))
+		})
+	}
+}
+
 func TestTheVersionOfAProductRequestIsCheckedBeforeItsParameters(t *testing.T) {
 	resp := banking(t, productsPath+"?page=0", http.Header{})
 

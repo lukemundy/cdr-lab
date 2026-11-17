@@ -352,6 +352,34 @@ func TestAnUnknownPathIsNotFound(t *testing.T) {
 	requireCDSError(t, resp, http.StatusNotFound, "urn:au-cds:error:cds-all:Resource/NotFound", "Resource Not Found")
 }
 
+// Verifies: REG-1495, CDSL-0080, CDSL-0081
+func TestAnotherMethodOnAListIsNotAllowed(t *testing.T) {
+	for name, e := range listEndpoints {
+		t.Run(name, func(t *testing.T) {
+			req, err := http.NewRequestWithContext(
+				t.Context(), http.MethodPost, labtest.Env(t, "REGISTER_PUBLIC_URL")+e.path, nil,
+			)
+			require.NoError(t, err)
+
+			req.Header = xv(e.version)
+
+			resp, err := labtest.Client(t).Do(req)
+			require.NoError(t, err)
+
+			defer func() { _ = resp.Body.Close() }()
+
+			body, err := io.ReadAll(resp.Body)
+			require.NoError(t, err)
+
+			requireCDSError(
+				t, response{Response: resp, body: body}, http.StatusMethodNotAllowed,
+				"urn:au-cds:error:cds-all:GeneralError/Expected", "Expected Error Encountered",
+			)
+			assert.Equal(t, "GET, HEAD", resp.Header.Get("Allow"))
+		})
+	}
+}
+
 // Verifies: REG-0314
 func TestPublicResponsesGiveTheInteractionID(t *testing.T) {
 	for name, header := range map[string]http.Header{"success": v3(), "error": {}} {

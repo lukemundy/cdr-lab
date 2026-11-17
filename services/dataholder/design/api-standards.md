@@ -74,7 +74,8 @@ The first table gives the CDR APIs of the data holder. The second table gives th
 - <a id="dh-0452"></a>**DH-0452** The data holder ignores a field of a request body that the schema does not give. ([CDS: Get Balances For Specific Accounts][cds-get-balances-specific]; [Judgement: no refusal of a field that the schema does not give](#dh-0490))
 - <a id="dh-0453"></a>**DH-0453** When a request body is more than 64 KiB, the response is 413 with `urn:au-cds:error:cds-all:GeneralError/Expected`. ([RFC 9110, section 15.5.14][rfc9110-413]; [Judgement: a request body of 64 KiB at most](#dh-0491); [Judgement: GeneralError/Expected for 413 and 415](#dh-0492))
 - <a id="dh-0454"></a>**DH-0454** When a `POST` request has a `Content-Type` that is not `application/json`, the response is 415 with `urn:au-cds:error:cds-all:GeneralError/Expected`. ([CDS: HTTP Headers][cds-http-headers]; [CDS: HTTP Response Codes][cds-http-response-codes]; [Judgement: GeneralError/Expected for 413 and 415](#dh-0492))
-- <a id="dh-0455"></a>**DH-0455** When the path of a request is not known, the response is 404 with `urn:au-cds:error:cds-all:Resource/NotFound`. ([CDS: Resource Not Found][cds-error-404-not-found])
+- <a id="dh-0455"></a>**DH-0455** When the path of a request is not known, the response is [404 with `urn:au-cds:error:cds-all:Resource/NotFound`](../../../pkg/cds/DESIGN.md#cdsl-0082). ([CDS: Resource Not Found][cds-error-404-not-found])
+- <a id="dh-2617"></a>**DH-2617** On the public listener and the mTLS listener, a method that the path does not support gives [405 with an `Allow` header](../../../pkg/cds/DESIGN.md#cdsl-0080). This rule also applies to the security endpoints. For example, `POST /cds-au/v1/banking/products` and `GET` on the registration endpoint get 405. ([CDS: HTTP Response Codes][cds-http-response-codes])
 
 ## CORS
 

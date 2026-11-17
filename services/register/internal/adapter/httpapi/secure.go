@@ -47,7 +47,7 @@ func RegisterSecure(mux *http.ServeMux, readers SecureReaders, tokens TokenVerif
 			softwareStatementAssertion(ssa),
 		)
 
-	mux.HandleFunc("/", notFound)
+	cds.RegisterFallback(mux, notFoundDetail)
 }
 
 type ctxKeyCaller struct{}

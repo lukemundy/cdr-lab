@@ -515,3 +515,22 @@ func TestAnUnknownPathOnTheSecureAPIsIsNotFound(t *testing.T) {
 
 	requireSecureError(t, rec, http.StatusNotFound, "urn:au-cds:error:cds-all:Resource/NotFound", "Resource Not Found")
 }
+
+// Verifies: REG-1495
+func TestAnotherMethodOnASecureAPIPathIsNotAllowed(t *testing.T) {
+	mux := http.NewServeMux()
+	lab := newSecureLab()
+	httpapi.RegisterSecure(mux, lab.reader, lab.verifier, lab.ssa, secureBaseURL)
+
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodPost, brandsPath, nil))
+
+	requireSecureError(
+		t,
+		rec,
+		http.StatusMethodNotAllowed,
+		"urn:au-cds:error:cds-all:GeneralError/Expected",
+		"Expected Error Encountered",
+	)
+	assert.Equal(t, "GET, HEAD", rec.Header().Get("Allow"))
+}

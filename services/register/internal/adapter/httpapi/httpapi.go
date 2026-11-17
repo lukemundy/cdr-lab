@@ -51,7 +51,7 @@ func Register(mux *http.ServeMux, readers Readers, ssaKeys KeySource, baseURL st
 	routes.With(cds.Versioned(4, 4), recipientIndustry).
 		Handle("GET /cdr-register/v1/{industry}/data-recipients", list(baseURL, readers.DataRecipients, dataRecipient))
 
-	mux.HandleFunc("/", notFound)
+	cds.RegisterFallback(mux, notFoundDetail)
 }
 
 func jwks(keys KeySource) http.Handler {
@@ -66,9 +66,7 @@ func jwks(keys KeySource) http.Handler {
 	})
 }
 
-func notFound(w http.ResponseWriter, _ *http.Request) {
-	cds.WriteError(w, http.StatusNotFound, cds.ResourceNotFound, "The URL is not a CDR Register API endpoint.")
-}
+const notFoundDetail = "The URL is not a CDR Register API endpoint."
 
 func dataHolderStatuses(baseURL string, statuses app.StatusReader) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

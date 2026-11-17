@@ -1,6 +1,6 @@
 # CDS HTTP library
 
-The CDS HTTP library gives the HTTP rules of the Consumer Data Standards that the CDR APIs of each lab service share. These rules are the version negotiation, the check of the `Accept` header, the interaction ID, the CDS error format, pagination, the response envelope, CORS, the TLS and mTLS profile, and a revocation check of client certificates with the CRL. A service chooses the endpoints that each rule applies to. The specification of the service gives that choice.
+The CDS HTTP library gives the HTTP rules of the Consumer Data Standards that the CDR APIs of each lab service share. These rules are the version negotiation, the check of the `Accept` header, the interaction ID, the CDS error format, the responses for an unknown path or method, pagination, the response envelope, CORS, the TLS and mTLS profile, and a revocation check of client certificates with the CRL. A service chooses the endpoints that each rule applies to. The specification of the service gives that choice.
 
 ## Context
 
@@ -76,6 +76,14 @@ These rules apply to each versioned endpoint.
 - <a id="cdsl-0014"></a>**CDSL-0014** An error has no `meta` object. ([CDS: Error Codes][cds-error-codes]; [Judgement: no meta object in an error](#cdsl-0062))
 - <a id="cdsl-0015"></a>**CDSL-0015** When an unexpected server error occurs, the response is 500 with `urn:au-cds:error:cds-all:GeneralError/Unexpected`. ([CDS: Unexpected Error][cds-error-5xx-unexpected])
 - <a id="cdsl-0016"></a>**CDSL-0016** The `detail` of an unexpected error does not show its cause. ([CDS: Unexpected Error][cds-error-5xx-unexpected])
+
+## Unknown paths and methods
+
+These rules apply to each listener of a service that uses them. They also apply to each other endpoint of that listener.
+
+- <a id="cdsl-0080"></a>**CDSL-0080** When the path of a request supports a different method, the response is 405 with `urn:au-cds:error:cds-all:GeneralError/Expected`. For example, `POST` to a path that supports only `GET`. ([CDS: HTTP Response Codes][cds-http-response-codes]; [Judgement: GeneralError/Expected for a method that the path does not support](#cdsl-0083))
+- <a id="cdsl-0081"></a>**CDSL-0081** A 405 response has an `Allow` header with each method that the path supports. A path that supports `GET` also supports `HEAD`. For example, `Allow: GET, HEAD`. ([RFC 9110, section 15.5.6][rfc9110-405]; [RFC 9110, section 9.3.2][rfc9110-head])
+- <a id="cdsl-0082"></a>**CDSL-0082** When no method of the listener supports the path of a request, the response is 404 with `urn:au-cds:error:cds-all:Resource/NotFound`, and the `detail` that the service gives. ([CDS: Resource Not Found][cds-error-404-not-found])
 
 ## Pagination
 
@@ -223,6 +231,12 @@ These rules apply to a service that uses the CRL check of the library as its rev
 - Basis: Step 3.3. The CDS gives 406 for an `Accept` header and for a version, but no sequence of the checks ([CDS: HTTP Response Codes][cds-http-response-codes]).
 - Reason: No version of the endpoint can give a response that the `Accept` header permits. The client must change the `Accept` header first, also when it changes its versions.
 
+### <a id="cdsl-0083"></a>CDSL-0083 GeneralError/Expected for a method that the path does not support
+
+- Kind: choice
+- Basis: Step 3.3. The CDS requires 405 for a method that the resource does not support ([CDS: HTTP Response Codes][cds-http-response-codes]), but its error list gives no code for 405. `GeneralError/Expected` is the CDS code for an expected error that no specific code covers ([CDS: Expected Error][cds-error-4xx-expected]).
+- Reason: The client gets the CDS error format for each error of a CDS API. `Resource/NotFound` is not correct, because the path exists.
+
 ## Withdrawn
 
 None.
@@ -232,6 +246,8 @@ None.
 [cds-request-headers]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#request-headers
 [cds-http-response-codes]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#http-response-codes
 [cds-error-400-header-invalid]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-400-header-invalid
+[cds-error-404-not-found]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-404-resource-not-found
+[cds-error-4xx-expected]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-4xx-expected-error
 [cds-error-codes]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-codes
 [cds-error-400-header-missing]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-400-header-missing
 [cds-error-400-invalid-version]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-400-header-invalid-version
@@ -257,6 +273,8 @@ None.
 [bcp195]: https://www.rfc-editor.org/rfc/rfc9325#section-4.2
 [rfc9110-accept]: https://www.rfc-editor.org/rfc/rfc9110#section-12.5.1
 [rfc9110-quality]: https://www.rfc-editor.org/rfc/rfc9110#section-12.4.2
+[rfc9110-405]: https://www.rfc-editor.org/rfc/rfc9110#section-15.5.6
+[rfc9110-head]: https://www.rfc-editor.org/rfc/rfc9110#section-9.3.2
 [rfc4122]: https://www.rfc-editor.org/rfc/rfc4122
 [rfc5280-crldp]: https://www.rfc-editor.org/rfc/rfc5280#section-4.2.1.13
 [rfc5280-next-update]: https://www.rfc-editor.org/rfc/rfc5280#section-5.1.2.5
