@@ -19,13 +19,13 @@ export function Pagination({ page, pageCount, rowCount, onPageChange }: Paginati
   return (
     <nav
       aria-label="Pagination"
-      className="flex items-center justify-between gap-4 pt-4 text-sm text-fg-muted"
+      className="flex flex-wrap items-center justify-between gap-4 pt-4 text-sm text-fg-muted"
     >
       {/* A status message, so that a screen reader announces the result of a new search or filter. */}
       <output className="tabular-nums">
         {numberFormat.format(rowCount)} {plural.select(rowCount) === "one" ? "record" : "records"}
       </output>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Button variant="secondary" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
           <ChevronLeft aria-hidden="true" />
           Previous<span className="sr-only"> page</span>

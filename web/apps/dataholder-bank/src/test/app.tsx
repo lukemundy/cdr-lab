@@ -89,6 +89,13 @@ afterEach(() => {
   for (const link of document.head.querySelectorAll("link[data-brand]")) link.remove();
 });
 
+// Each term of the description lists in within, with its value, as "term:value".
+export function termsOf(within: ParentNode): string[] {
+  return [...within.querySelectorAll("dl > div")].map(
+    (row) => `${row.querySelector("dt")?.textContent}:${row.querySelector("dd")?.textContent}`,
+  );
+}
+
 export function renderApp(url: string) {
   const router = createAppRouter(createMemoryHistory({ initialEntries: [url] }));
   render(<ConsoleApp router={router} queryClient={createQueryClient()} />);

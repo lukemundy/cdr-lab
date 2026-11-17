@@ -15,10 +15,10 @@ import {
   sessionEnded,
   showPreset,
   worker,
+  termsOf,
 } from "../test/app";
 
-const terms = (within: Element) =>
-  [...within.querySelectorAll("dl > div")].map((row) => row.textContent ?? "");
+const terms = termsOf;
 
 const noSharing =
   "You cannot share your data under the Consumer Data Right until you have an open account.";

@@ -14,10 +14,10 @@ import {
   sessionEnded,
   showPreset,
   worker,
+  termsOf,
 } from "../test/app";
 
-const terms = (within: Element) =>
-  [...within.querySelectorAll("dl > div")].map((row) => row.textContent ?? "");
+const terms = termsOf;
 
 // CDS: Dashboard Standards, Data recipient handling details, with the brand name of the data recipient.
 const handling = (brandName: string) =>

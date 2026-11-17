@@ -12,10 +12,10 @@ import {
   serveProducts,
   showPreset,
   worker,
+  termsOf,
 } from "../test/app";
 
-const terms = () =>
-  [...document.querySelectorAll("main dl > div")].map((row) => row.textContent ?? "");
+const terms = () => termsOf(document.querySelector("main") ?? document);
 
 // Verifies: DH-1815, DH-1819
 test("the detail shows each field of a deposit product in plain language", async () => {

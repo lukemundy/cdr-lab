@@ -104,3 +104,20 @@ test("each button is 24 by 24 CSS px or more", () => {
   expectTargetSize(page.getByRole("button", { name: "Previous page" }).element());
   expectTargetSize(page.getByRole("button", { name: "Next page" }).element());
 });
+
+// Verifies: UI-0086
+test("in a narrow container, the pagination wraps and has no horizontal scroll", () => {
+  const container = render(
+    <div style={{ width: "280px" }}>
+      <Pagination page={2} pageCount={40} rowCount={1000} onPageChange={() => undefined} />
+    </div>,
+  );
+
+  const navigation = container.querySelector("nav")!;
+  expect(navigation.scrollWidth).toBeLessThanOrEqual(280);
+  for (const child of navigation.querySelectorAll("*")) {
+    expect(child.getBoundingClientRect().right).toBeLessThanOrEqual(
+      navigation.getBoundingClientRect().right + 0.5,
+    );
+  }
+});
