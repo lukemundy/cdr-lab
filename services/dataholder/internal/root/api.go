@@ -231,6 +231,10 @@ func (a arrangementRevoker) RevokeArrangement(ctx context.Context, clientID, arr
 	return err
 }
 
+func (a arrangementRevoker) RefreshTokenRevoked(ctx context.Context, clientID, arrangementID string) error {
+	return a.arrangements.EndOneTimeCollection(ctx, clientID, arrangementID)
+}
+
 func randomUint64() uint64 {
 	var random [8]byte
 

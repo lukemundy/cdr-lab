@@ -41,6 +41,8 @@ type bank struct {
 	cfg        authserver.DataHolderConfig
 	grants     *grantStore
 	revoked    *revokedTokenStore
+	// revokedRefresh has the refresh token revocations that the service got.
+	revokedRefresh *refreshRevocations
 	// secure is the handler of the mTLS listener.
 	secure           http.Handler
 	tokenURL         string
@@ -115,7 +117,8 @@ func newBank(t *testing.T) *bank {
 	b.grants = &grantStore{grants: map[string]authserver.Grant{}}
 	cfg.Grants = b.grants
 	b.revoked = cfg.RevokedTokens.(*revokedTokenStore)
-	cfg.Arrangements = arrangementGrants{b.grants}
+	b.revokedRefresh = &refreshRevocations{}
+	cfg.Arrangements = arrangementGrants{grants: b.grants, revokedRefresh: b.revokedRefresh}
 	b.statuses = &clientStatuses{}
 	cfg.ClientStatuses = b.statuses
 	b.cfg = cfg

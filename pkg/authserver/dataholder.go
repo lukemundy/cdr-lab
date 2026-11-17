@@ -176,7 +176,7 @@ func NewDataHolder(cfg DataHolderConfig) (*DataHolder, error) {
 		provider.WithTokenHandler(cdsrules.RecordArrangement),
 		provider.WithIDTokenClaims(cdsrules.IDTokenClaims),
 		provider.WithTokenIntrospection(cdsrules.IntrospectingClient),
-		provider.WithTokenRevocation(revokingClient),
+		provider.WithTokenRevocation(allowRevocation),
 		provider.WithAuthSessionLifetime(dataHolderFlowLifetimeSeconds),
 		provider.WithErrorRenderer(refusedPage(cfg.Pages)),
 		provider.WithTokenOptions(func(_ context.Context, grant *goidc.Grant, _ *goidc.Client) goidc.TokenOptions {

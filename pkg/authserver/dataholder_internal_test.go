@@ -52,6 +52,8 @@ func (noArrangements) RevokeArrangement(context.Context, string, string) error {
 	return ErrInvalidArrangement
 }
 
+func (noArrangements) RefreshTokenRevoked(context.Context, string, string) error { return nil }
+
 type noRevokedTokens struct{}
 
 func (noRevokedTokens) RevokeToken(context.Context, string, time.Time) error { return nil }

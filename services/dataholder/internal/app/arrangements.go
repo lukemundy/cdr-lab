@@ -50,6 +50,30 @@ func (a Arrangements) RevokeByDataRecipient(ctx context.Context, clientID, arran
 	return err
 }
 
+// EndOneTimeCollection ends, as a revocation by the data recipient, a current arrangement of the client for a
+// disclosure on one occasion, because the client revoked its refresh token after the collection. It changes nothing
+// for each other arrangement.
+func (a Arrangements) EndOneTimeCollection(ctx context.Context, clientID, arrangementID string) error {
+	now := a.Now()
+
+	state, err := a.load(ctx, arrangementID)
+	if err != nil {
+		return err
+	}
+
+	sharing := time.Duration(state.Arrangement.SharingDurationSeconds) * time.Second
+	if !state.Created || state.Arrangement.ClientID != clientID || state.Ended(now) || !domain.IsOneOccasion(sharing) {
+		return nil
+	}
+
+	_, err = a.end(ctx, state, domain.EndArrangement{EndedAt: now, Reason: domain.EndReasonRevokedByDataRecipient})
+	if errors.Is(err, domain.ErrArrangementEnded) {
+		return nil
+	}
+
+	return err
+}
+
 // WithdrawByConsumer gives ErrCustomerNotFound, domain.ErrArrangementNotFound for an arrangement that the customer
 // does not have, and domain.ErrArrangementEnded.
 func (a Arrangements) WithdrawByConsumer(

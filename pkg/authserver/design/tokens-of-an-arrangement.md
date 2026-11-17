@@ -51,7 +51,7 @@ This area gives the tokens of a CDR arrangement at the data holder authorisation
 ## Token revocation
 
 - <a id="auth-0222"></a>**AUTH-0222** The token revocation endpoint accepts `POST` with the client assertion parameters, `token` and an optional `token_type_hint`. The server finds the token without the hint, and ignores the hint. ([RFC 7009, section 2.1][rfc7009-request])
-- <a id="auth-0223"></a>**AUTH-0223** For a refresh token of the client, the server revokes the refresh token and each access token of its grant. The arrangement does not end. ([RFC 7009, section 2.1][rfc7009-request]; [Judgement: no end of the arrangement at a token revocation](#auth-0237))
+- <a id="auth-0223"></a>**AUTH-0223** For an active refresh token of the client, the server first gives the service the arrangement. The service decides if the arrangement ends, for example a data holder ends a one-time collection. Then the server revokes the refresh token and each access token of its grant. When the service gives an error, the response is 500 and the token does not change, so that a new request gives the arrangement again. ([RFC 7009, section 2.1][rfc7009-request]; [CDS: Requesting Sharing Duration][cds-sharing-duration]; [Judgement: the service decides if a refresh token revocation ends the arrangement](#auth-0237))
 - <a id="auth-0224"></a>**AUTH-0224** For an access token of the client, the server revokes only that access token. A new access token from the refresh token is valid. This rule applies also to a client credentials token. ([CDS: Token Revocation endpoint][cds-token-revocation]: "Revocation of Refresh Tokens and Access Tokens MUST be supported"; [CDR Support: Guidance on revocation or withdrawal of consent][support-revocation-guidance])
 - <a id="auth-0225"></a>**AUTH-0225** For a token of a different client, the response is 400 with `unauthorized_client`, and the token does not change. ([RFC 7009, section 2.1][rfc7009-request]: "the request is refused"; [Judgement: unauthorized_client for a token of a different client](#auth-0238))
 - <a id="auth-0226"></a>**AUTH-0226** For each other value, the response is 200 with no body, and nothing changes. For example, a token that is not known, an expired or revoked token, and an ID token. ([RFC 7009, section 2.2][rfc7009-response])
@@ -96,11 +96,11 @@ This area gives the tokens of a CDR arrangement at the data holder authorisation
 - Basis: Step 2. The CDS forbids introspection of access tokens and ID tokens, and gives no response for it ([CDS: Introspection endpoint][cds-introspection-endpoint]). The DSB says that RFC 7662 applies ([CDR Support: Introspection Endpoint RFC vs Standards clarification][support-introspection]), and RFC 7662 gives this response for a token that the client must not see ([section 2.2][rfc7662-response]).
 - Reason: The response follows the DSB clarification. It does not tell a client which tokens exist.
 
-### <a id="auth-0237"></a>AUTH-0237 No end of the arrangement at a token revocation
+### <a id="auth-0237"></a>AUTH-0237 The service decides if a refresh token revocation ends the arrangement
 
 - Kind: choice
-- Basis: Step 2. The token revocation endpoint is for "token clean up" ([CDS: Token Revocation endpoint][cds-token-revocation]). The CDR arrangement revocation endpoint withdraws an authorisation ([CDR Support: Support for token revocation endpoints][support-token-revocation]).
-- Reason: The arrangement then has no token, so the data holder discloses no data. A software product that wants to end the arrangement calls the CDR arrangement revocation endpoint.
+- Basis: Step 2. The token revocation endpoint is for "token clean up" ([CDS: Token Revocation endpoint][cds-token-revocation]). The CDR arrangement revocation endpoint withdraws an authorisation ([CDR Support: Support for token revocation endpoints][support-token-revocation]). For a one-time collection, the data recipient calls the token revocation endpoint after the collection ([CDS: Requesting Sharing Duration][cds-sharing-duration]).
+- Reason: The service owns the rules for the end of its arrangements, for example the end of a disclosure on one occasion. The server ends no arrangement itself, so a token revocation can keep a longer arrangement. The service gets only an active refresh token of the client, so a second revocation changes nothing.
 
 ### <a id="auth-0238"></a>AUTH-0238 unauthorized_client for a token of a different client
 

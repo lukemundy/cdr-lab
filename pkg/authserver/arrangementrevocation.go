@@ -14,6 +14,9 @@ var ErrInvalidArrangement = errors.New("the arrangement does not exist, is of a 
 type ArrangementRevoker interface {
 	// RevokeArrangement ends the arrangement and revokes its tokens before it returns, or gives ErrInvalidArrangement.
 	RevokeArrangement(ctx context.Context, clientID, arrangementID string) error
+	// RefreshTokenRevoked tells the service that the client revoked the active refresh token of the arrangement at the
+	// token revocation endpoint. The service decides if the arrangement ends.
+	RefreshTokenRevoked(ctx context.Context, clientID, arrangementID string) error
 }
 
 const (
@@ -56,7 +59,7 @@ func (d *DataHolder) arrangementRevocation(w http.ResponseWriter, r *http.Reques
 // authentication, so the assertion goes to its revocation endpoint, with the request URI of this endpoint as a valid
 // audience.
 func (d *DataHolder) authenticate(r *http.Request) (string, *recorder) {
-	var clientID string
+	revoking := &revokingClient{}
 
 	form := url.Values{"token": {placeholderToken}}
 
@@ -66,12 +69,12 @@ func (d *DataHolder) authenticate(r *http.Request) (string, *recorder) {
 		}
 	}
 
-	auth := r.Clone(context.WithValue(r.Context(), revokingClientKey{}, &clientID))
+	auth := r.Clone(context.WithValue(r.Context(), revokingClientKey{}, revoking))
 	auth.URL.Path = dataHolderRevocationPath
 	auth.Form, auth.PostForm = form, form
 
 	rec := &recorder{header: http.Header{}, status: http.StatusOK}
 	d.provider.ServeHTTP(rec, auth)
 
-	return clientID, rec
+	return revoking.id, rec
 }

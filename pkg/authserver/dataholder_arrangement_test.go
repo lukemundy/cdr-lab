@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -18,8 +19,36 @@ import (
 	"github.com/lukemundy/cdr-lab/pkg/cds"
 )
 
-// arrangementGrants ends an arrangement as the data holder does: it revokes the grant of the arrangement.
-type arrangementGrants struct{ grants *grantStore }
+// arrangementGrants ends an arrangement as the data holder does: it revokes the grant of the arrangement. It records
+// each revoked refresh token in revokedRefresh, when it has one.
+type arrangementGrants struct {
+	grants         *grantStore
+	revokedRefresh *refreshRevocations
+}
+
+// refreshRevocations records the client ID and the arrangement ID of each refresh token revocation, or gives err.
+type refreshRevocations struct {
+	mu    sync.Mutex
+	calls [][2]string
+	err   error
+}
+
+func (a arrangementGrants) RefreshTokenRevoked(_ context.Context, clientID, arrangementID string) error {
+	if a.revokedRefresh == nil {
+		return nil
+	}
+
+	a.revokedRefresh.mu.Lock()
+	defer a.revokedRefresh.mu.Unlock()
+
+	if a.revokedRefresh.err != nil {
+		return a.revokedRefresh.err
+	}
+
+	a.revokedRefresh.calls = append(a.revokedRefresh.calls, [2]string{clientID, arrangementID})
+
+	return nil
+}
 
 func (a arrangementGrants) RevokeArrangement(ctx context.Context, clientID, arrangementID string) error {
 	grant, err := a.grants.find(func(g authserver.Grant) bool { return g.ArrangementID == arrangementID })

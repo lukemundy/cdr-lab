@@ -8,8 +8,8 @@ This area gives the end of a CDR arrangement: CDR arrangement revocation, withdr
 
 | ID | Event | Time of the end | Notice to the data recipient | Source |
 |---|---|---|---|---|
-| <a id="dh-0901"></a>**DH-0901** | The [sharing of the arrangement ends](authorisation.md#dh-0834) | The end of the sharing | No | [CDR Rules][cdr-rules], rule 4.26(1)(d) and (e) |
-| <a id="dh-0902"></a>**DH-0902** | The software product [revokes the arrangement](../../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0229) | The time of the request | No | [CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation] |
+| <a id="dh-0901"></a>**DH-0901** | The [sharing of the arrangement ends](authorisation.md#dh-0834) | The end of the sharing | No | [CDR Rules][cdr-rules], rule 4.26(1)(g), and rule 4.26(1)(e) for the limit of 12 months |
+| <a id="dh-0902"></a>**DH-0902** | The software product [revokes the arrangement](../../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0229), or [revokes the refresh token of a disclosure on one occasion](#dh-0910) | The time of the request | No | [CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation]; [CDR Rules][cdr-rules], rule 4.26(1)(d) |
 | <a id="dh-0903"></a>**DH-0903** | The consumer [withdraws the authorisation](#dh-0912) on the consumer dashboard, or the operator withdraws it for the consumer | The time of the request | Yes | [CDR Rules][cdr-rules], rule 4.26(1)(a) and (b), rule 4.26A |
 | <a id="dh-0904"></a>**DH-0904** | The customer has [no open account](#dh-0918) | The close of the last open account | Yes | [CDR Rules][cdr-rules], rule 4.26(1)(c), rule 4.26A; [CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation] |
 | <a id="dh-2618"></a>**DH-2618** | The software product [deletes its registration](registration.md#dh-0676) | The time of the request | No | [CDR Support: Guidance on Dynamic Client Registration][support-dcr] |
@@ -19,7 +19,7 @@ This area gives the end of a CDR arrangement: CDR arrangement revocation, withdr
 - <a id="dh-0907"></a>**DH-0907** An arrangement that ended does not start again. ([CDR Rules][cdr-rules], rule 4.26(1))
 - <a id="dh-0908"></a>**DH-0908** When an arrangement ends, the data holder revokes its refresh token and its access tokens at the same time. ([CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation])
 - <a id="dh-0909"></a>**DH-0909** When an arrangement ends before the end of its sharing, the data holder records the time and the event of the end. ([CDR Rules][cdr-rules], rule 9.3(1))
-- <a id="dh-0910"></a>**DH-0910** An arrangement for a disclosure on one occasion ends at the end of its sharing, or when the software product revokes it. The data holder does not find when the data has been disclosed. ([CDR Rules][cdr-rules], rule 4.26(1)(f); [CDS: Requesting Sharing Duration][cds-sharing-duration]; [Judgement: a disclosure on one occasion ends with its sharing, or at a revocation](#dh-0950))
+- <a id="dh-0910"></a>**DH-0910** When the software product revokes the refresh token of a current arrangement for a [disclosure on one occasion](authorisation.md#dh-0811) at the [token revocation endpoint](../../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0223), the arrangement ends. The end is a [revocation by the software product](#dh-0902). For an arrangement with a sharing duration of more than 24 hours, a token revocation does not end the arrangement. For example, a revocation of the refresh token of an arrangement of 1 hour ends it. ([CDR Rules][cdr-rules], rule 4.26(1)(f); [CDS: Requesting Sharing Duration][cds-sharing-duration]; [Judgement: a disclosure on one occasion ends at the revocation of its refresh token](#dh-0950))
 
 ## CDR arrangement revocation
 
@@ -75,11 +75,11 @@ The authorisation server library gives [the CDR arrangement revocation endpoint]
 
 ## Judgements
 
-### <a id="dh-0950"></a>DH-0950 A disclosure on one occasion ends with its sharing, or at a revocation
+### <a id="dh-0950"></a>DH-0950 A disclosure on one occasion ends at the revocation of its refresh token
 
-- Kind: conflict
-- Basis: Step 1. Rule 4.26(1)(f) expires the authorisation after the CDR data has been disclosed ([CDR Rules][cdr-rules]). The CDS requires that the data recipient calls the revocation endpoint after a successful collection, for a sharing duration of 24 hours or less ([CDS: Requesting Sharing Duration][cds-sharing-duration]).
-- Reason: A data holder cannot know when a data recipient has all the data that it needs. The CDS rule gives the data holder a signal, and the end of the sharing is the limit.
+- Kind: choice
+- Basis: Step 3.1. Rule 4.26(1)(f) expires an authorisation for a disclosure on a single occasion "after the CDR data has been disclosed" ([CDR Rules][cdr-rules]). The CDS says: "If a Refresh Token is issued for one-time collection the Data Recipient Software Product **MUST** call the Data Holder’s revocation endpoint after successful collection of the CDR data" ([CDS: Requesting Sharing Duration][cds-sharing-duration]). That endpoint is the Token Revocation endpoint ([CDS: Token Revocation endpoint][cds-token-revocation]). The CDS gives the data holder no rule for the call.
+- Reason: A data holder cannot find when a data recipient has all the data that it needs, and the call says that the collection is complete. Without an end, the consumer dashboard shows a current arrangement with no token for up to 24 hours. The end of the sharing stays the limit when the data recipient does not call.
 
 ### <a id="dh-2619"></a>DH-2619 An arrangement with the sharing duration 0 ends when its access token expires
 
@@ -152,6 +152,7 @@ The authorisation server library gives [the CDR arrangement revocation endpoint]
 [cds-dh-responsibilities]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#data-holder-responsibilities
 [cds-self-signed-jwt]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#self-signed-jwt-client-authentication
 [cds-sharing-duration]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#requesting-sharing-duration
+[cds-token-revocation]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#token-revocation-endpoint
 [cds-withdrawal-standards]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#withdrawal-standards
 [support-backoff]: https://cdr-support.zendesk.com/hc/en-us/articles/360004056455
 [support-closed-accounts]: https://cdr-support.zendesk.com/hc/en-us/articles/14519397304079

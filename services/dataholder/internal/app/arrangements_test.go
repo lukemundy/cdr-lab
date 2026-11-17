@@ -181,6 +181,48 @@ func TestTheConsumerCanWithdrawAnArrangementWithNoSharingDurationUntilItsAccessT
 	assert.Equal(t, []string{"arrangement-1"}, grants.revoked)
 }
 
+// Verifies: DH-0910
+func TestARevokedRefreshTokenOfAOneTimeCollectionEndsItsArrangementAsARevocationByTheDataRecipient(t *testing.T) {
+	for name, sharing := range map[string]time.Duration{"1 hour": time.Hour, "24 hours": 24 * time.Hour} {
+		t.Run(name, func(t *testing.T) {
+			now := consentTime.Add(time.Minute)
+			arrangements, grants, store := arrangementsWithSharing(t, sharing, now)
+
+			require.NoError(t, arrangements.EndOneTimeCollection(t.Context(), "client-1", "arrangement-1"))
+
+			assert.Equal(t, []string{"arrangement-1"}, grants.revoked)
+
+			state := arrangementState(t, store)
+			assert.Equal(t, now, state.EndedAt)
+			assert.Equal(t, domain.EndReasonRevokedByDataRecipient, state.EndReason)
+		})
+	}
+}
+
+// Verifies: DH-0910
+func TestARevokedRefreshTokenEndsNoOtherArrangement(t *testing.T) {
+	tests := map[string]struct {
+		sharing                 time.Duration
+		clientID, arrangementID string
+		after                   time.Duration
+	}{
+		"sharing of more than 24 hours":     {24*time.Hour + time.Second, "client-1", "arrangement-1", time.Minute},
+		"arrangement of a different client": {time.Hour, "client-2", "arrangement-1", time.Minute},
+		"arrangement that does not exist":   {time.Hour, "client-1", "arrangement-9", time.Minute},
+		"arrangement whose sharing ended":   {time.Hour, "client-1", "arrangement-1", time.Hour},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			arrangements, grants, store := arrangementsWithSharing(t, tc.sharing, consentTime.Add(tc.after))
+
+			require.NoError(t, arrangements.EndOneTimeCollection(t.Context(), tc.clientID, tc.arrangementID))
+
+			assert.Empty(t, grants.revoked)
+			assert.True(t, arrangementState(t, store).EndedAt.IsZero())
+		})
+	}
+}
+
 func TestASecondRevocationGivesInvalidArrangement(t *testing.T) {
 	arrangements, _, _ := newArrangements(t, consentTime.Add(time.Minute))
 	require.NoError(t, arrangements.RevokeByDataRecipient(t.Context(), "client-1", "arrangement-1"))
