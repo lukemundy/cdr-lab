@@ -157,6 +157,36 @@ func (a Arrangements) RemoveSoftwareProduct(ctx context.Context, softwareID stri
 	return nil
 }
 
+// EndForDeletedRegistration ends each arrangement of the client as a revocation by the data recipient, because the
+// software product asked for the deletion.
+func (a Arrangements) EndForDeletedRegistration(
+	ctx context.Context,
+	softwareID, clientID string,
+	deletedAt time.Time,
+) error {
+	states, err := a.Reader.ArrangementsOfSoftwareProduct(ctx, softwareID)
+	if err != nil {
+		return fmt.Errorf("read the arrangements: %w", err)
+	}
+
+	for _, state := range states {
+		if state.Arrangement.ClientID != clientID || state.Ended(deletedAt) {
+			continue
+		}
+
+		_, err := a.end(
+			ctx,
+			state,
+			domain.EndArrangement{EndedAt: deletedAt, Reason: domain.EndReasonRevokedByDataRecipient},
+		)
+		if err != nil && !errors.Is(err, domain.ErrArrangementEnded) {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // OfCustomer gives ErrCustomerNotFound.
 func (a Arrangements) OfCustomer(ctx context.Context, customerNumber string) ([]domain.ArrangementState, error) {
 	if _, err := a.Customers.Customer(ctx, customerNumber); err != nil {

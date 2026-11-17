@@ -1,6 +1,6 @@
 # Mock data holder: End of an arrangement
 
-This area gives the end of a CDR arrangement: CDR arrangement revocation, withdrawal by the consumer, the end of the sharing period, the end of eligibility, and the notice to the data recipient.
+This area gives the end of a CDR arrangement: CDR arrangement revocation, withdrawal by the consumer, the end of the sharing period, the end of eligibility, the deletion of a registration, and the notice to the data recipient.
 
 ## End of an arrangement
 
@@ -12,6 +12,7 @@ This area gives the end of a CDR arrangement: CDR arrangement revocation, withdr
 | <a id="dh-0902"></a>**DH-0902** | The software product [revokes the arrangement](../../../pkg/authserver/design/tokens-of-an-arrangement.md#auth-0229) | The time of the request | No | [CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation] |
 | <a id="dh-0903"></a>**DH-0903** | The consumer [withdraws the authorisation](#dh-0912) on the consumer dashboard, or the operator withdraws it for the consumer | The time of the request | Yes | [CDR Rules][cdr-rules], rule 4.26(1)(a) and (b), rule 4.26A |
 | <a id="dh-0904"></a>**DH-0904** | The customer has [no open account](#dh-0918) | The close of the last open account | Yes | [CDR Rules][cdr-rules], rule 4.26(1)(c), rule 4.26A; [CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation] |
+| <a id="dh-2618"></a>**DH-2618** | The software product [deletes its registration](registration.md#dh-0676) | The time of the request | No | [CDR Support: Guidance on Dynamic Client Registration][support-dcr] |
 | <a id="dh-0905"></a>**DH-0905** | The software product becomes REMOVED on the Register ([the reaction to the status REMOVED](registration.md#dh-0690)) | The time at which the data holder gets the status | No | [CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation]; [CDS: Data Holder Responsibilities][cds-dh-responsibilities] |
 
 - <a id="dh-0906"></a>**DH-0906** The sharing duration of an arrangement is one year at most. Thus the sharing of an arrangement always ends before the limit of 12 months of rule 4.26(1)(e). ([CDS: Requesting Sharing Duration][cds-sharing-duration]; [CDR Rules][cdr-rules], rule 4.26(1)(e))
@@ -148,6 +149,7 @@ The authorisation server library gives [the CDR arrangement revocation endpoint]
 [cds-withdrawal-standards]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#withdrawal-standards
 [support-backoff]: https://cdr-support.zendesk.com/hc/en-us/articles/360004056455
 [support-closed-accounts]: https://cdr-support.zendesk.com/hc/en-us/articles/14519397304079
+[support-dcr]: https://cdr-support.zendesk.com/hc/en-us/articles/6828251436431
 [support-egress]: https://cdr-support.zendesk.com/hc/en-us/articles/4403543156751
 [support-revocation-guidance]: https://cdr-support.zendesk.com/hc/en-us/articles/6828747049359
 [support-withdrawal-method]: https://cdr-support.zendesk.com/hc/en-us/articles/4411292647823

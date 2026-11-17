@@ -12,6 +12,8 @@ import (
 
 	"github.com/lukemundy/cdr-lab/pkg/platform/database/databasetest"
 	"github.com/lukemundy/cdr-lab/pkg/platform/jobs"
+	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/arrangementstore"
+	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/grantstore"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/jtistore"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/registrationstore"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/statusstore"
@@ -76,15 +78,20 @@ func startedRegistrar(t *testing.T, pool *pgxpool.Pool) app.Registrar {
 	inserter, err := jobs.NewInsertOnlyClient(pool)
 	require.NoError(t, err)
 
+	events := newEventStore(pool, inserter)
+
 	return app.Registrar{
 		Issuer:        testIssuer,
 		JWTs:          verifiedJWTs{now: now},
 		JTIs:          jtistore.New(pool),
-		Store:         newEventStore(pool, inserter),
+		Store:         events,
 		Registrations: registrationstore.NewQueries(pool),
 		Statuses:      statusstore.New(pool, nil),
-		Now:           func() time.Time { return now },
-		NewID:         uuid.NewString,
+		Arrangements: app.Arrangements{
+			Store: events, Grants: grantstore.New(pool), Reader: arrangementstore.NewQueries(pool), Now: time.Now,
+		},
+		Now:   func() time.Time { return now },
+		NewID: uuid.NewString,
 	}
 }
 

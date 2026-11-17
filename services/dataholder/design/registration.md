@@ -120,9 +120,8 @@ The data holder gives these refusals:
 - <a id="dh-0673"></a>**DH-0673** A `DELETE` deletes the registration and gives 204. ([CDS: DCR APIs][cds-dcr-apis]; [Judgement: support for the deletion of a registration](#dh-0712))
 - <a id="dh-0674"></a>**DH-0674** After a `DELETE`, client authentication with the client ID of the registration fails. ([CDS: DCR APIs][cds-dcr-apis])
 - <a id="dh-0675"></a>**DH-0675** After a `DELETE`, the software product can register again. It then gets a new client ID. ([Judgement: support for the deletion of a registration](#dh-0712))
-- <a id="dh-0676"></a>**DH-0676** When a software product deletes its registration, the arrangements of the client do not end. ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]; [Judgement: a deleted registration keeps its arrangements](#dh-0713))
-- <a id="dh-0677"></a>**DH-0677** After a `DELETE`, the data holder accepts no token of the client. ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]; [Judgement: a deleted registration keeps its arrangements](#dh-0713))
-- <a id="dh-0678"></a>**DH-0678** The lab operator can [withdraw an arrangement](operator-interface.md#dh-0727) of a deleted registration. ([Judgement: a deleted registration keeps its arrangements](#dh-0713))
+- <a id="dh-0676"></a>**DH-0676** When a software product deletes its registration, each arrangement of the client that did not end, ends at the time of the request. The end is a [revocation by the data recipient](end-of-an-arrangement.md#dh-0902), with no notice to the data recipient. ([CDR Support: Guidance on Dynamic Client Registration][support-dcr]; [Judgement: a deletion ends the arrangements of the client as a revocation](#dh-0713))
+- <a id="dh-0677"></a>**DH-0677** After a `DELETE`, the data holder accepts no token of the client. ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints])
 
 ## Participant statuses
 
@@ -237,11 +236,11 @@ The authorisation server library gives the reaction at [the PAR endpoint](../../
 - Basis: Step 3.3. The CDS marks `DELETE` of a registration as optional ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]).
 - Reason: A lab user and the conformance suite can then register a software product again with no reset of the lab.
 
-### <a id="dh-0713"></a>DH-0713 A deleted registration keeps its arrangements
+### <a id="dh-0713"></a>DH-0713 A deletion ends the arrangements of the client as a revocation
 
 - Kind: choice
-- Basis: Step 3.3. The CDS gives no rule for the arrangements of a registration that the software product deletes ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]).
-- Reason: A deletion is an act of the software product, not a withdrawal by the consumer or a REMOVED status, so the arrangements stay. With no registration, no token of the client can be accepted. The lab operator can end an arrangement, and the [notice goes to the `recipient_base_uri` at the confirmation](end-of-an-arrangement.md#dh-0926).
+- Basis: Step 2. The CDS gives no rule for the arrangements of a registration that the software product deletes ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]). ACCC guidance says: "After an ADR registration deletion request there should be no active consents for that ADR" ([CDR Support: Guidance on Dynamic Client Registration][support-dcr]).
+- Reason: The software product asks for the deletion, so the end has the reason and the effects of a revocation by the data recipient. The data holder sends no notice, because the data recipient made the request. The end at the time of the request agrees with a revocation at the CDR arrangement revocation endpoint.
 
 ### <a id="dh-0714"></a>DH-0714 Only the statuses of software products
 

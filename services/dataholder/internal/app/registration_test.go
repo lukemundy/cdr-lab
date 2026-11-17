@@ -145,12 +145,33 @@ func newRegistrar(j *jwts) app.Registrar {
 		Store:         store,
 		Registrations: storeReader{store: store},
 		Statuses:      softwareStatuses{},
+		Arrangements:  &clientArrangements{},
 		Now:           func() time.Time { return registrationTime },
 		NewID: func() string {
 			ids++
 			return fmt.Sprintf("client-%d", ids)
 		},
 	}
+}
+
+// clientArrangements records each end of the arrangements of a deleted registration, or fails with err.
+type clientArrangements struct {
+	ends []string
+	err  error
+}
+
+func (c *clientArrangements) EndForDeletedRegistration(
+	_ context.Context,
+	softwareID, clientID string,
+	deletedAt time.Time,
+) error {
+	if c.err != nil {
+		return c.err
+	}
+
+	c.ends = append(c.ends, softwareID+"/"+clientID+" at "+deletedAt.Format(time.RFC3339))
+
+	return nil
 }
 
 // storeReader finds a registration in the streams of a memoryStore, as the read model does for a real store.
@@ -490,6 +511,30 @@ func TestADeletionRemovesTheRegistrationAndANewRegistrationGetsANewClientID(t *t
 	again, err := registrar.Register(t.Context(), requestJWT)
 	require.NoError(t, err)
 	assert.Equal(t, "client-2", again.ClientID)
+}
+
+// Verifies: DH-0676
+func TestADeletionEndsTheArrangementsOfTheClientAtTheTimeOfTheRequest(t *testing.T) {
+	registrar := registeredClient(t, validJWTs())
+	arrangements := &clientArrangements{}
+	registrar.Arrangements = arrangements
+
+	require.NoError(t, registrar.Delete(t.Context(), "client-1"))
+
+	assert.Equal(t, []string{"software-1/client-1 at " + registrationTime.Format(time.RFC3339)}, arrangements.ends)
+}
+
+func TestADeletionThatCannotEndTheArrangementsKeepsTheRegistration(t *testing.T) {
+	registrar := registeredClient(t, validJWTs())
+	arrangements := &clientArrangements{err: errors.New("database failure")}
+	registrar.Arrangements = arrangements
+
+	err := registrar.Delete(t.Context(), "client-1")
+
+	require.ErrorIs(t, err, arrangements.err)
+
+	_, err = registrar.Registrations.Registration(t.Context(), "client-1")
+	assert.NoError(t, err, "a new DELETE can end the arrangements")
 }
 
 func TestAnUpdateOrADeletionOfAClientIDWithNoRegistrationIsNotFound(t *testing.T) {

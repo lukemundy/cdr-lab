@@ -98,6 +98,11 @@ type RegistrationRecords interface {
 	RegistrationRecord(ctx context.Context, clientID string, at time.Time) (RegistrationRecord, error)
 }
 
+type RegistrationArrangements interface {
+	// EndForDeletedRegistration ends each arrangement of the client that did not end, and is safe to repeat.
+	EndForDeletedRegistration(ctx context.Context, softwareID, clientID string, deletedAt time.Time) error
+}
+
 type JTIStore interface {
 	// Consume gives ErrJTIUsed when the JWT ID was consumed before.
 	Consume(ctx context.Context, jti string) error
@@ -117,6 +122,7 @@ type Registrar struct {
 	// Registrations gives the software product of a client ID, which is the stream of its registration.
 	Registrations RegistrationReader
 	Statuses      StatusReader
+	Arrangements  RegistrationArrangements
 	Now           func() time.Time
 	NewID         func() string
 }
@@ -197,11 +203,16 @@ func (r Registrar) Update(ctx context.Context, clientID, requestJWT string) (dom
 	return replacement, nil
 }
 
-// Delete gives ErrRegistrationNotFound when no registration has the client ID.
+// Delete gives ErrRegistrationNotFound when no registration has the client ID. It ends the arrangements before it
+// deletes the registration, so that a new request can end the arrangements after a failure.
 func (r Registrar) Delete(ctx context.Context, clientID string) error {
 	existing, err := r.Registrations.Registration(ctx, clientID)
 	if err != nil {
 		return err
+	}
+
+	if err := r.Arrangements.EndForDeletedRegistration(ctx, existing.SoftwareID, clientID, r.Now()); err != nil {
+		return fmt.Errorf("end the arrangements of the registration: %w", err)
 	}
 
 	return r.execute(ctx, existing.SoftwareID, domain.DeleteClient{ClientID: clientID})
