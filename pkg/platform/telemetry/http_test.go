@@ -68,7 +68,7 @@ func assertNoSecret(t *testing.T, span tracetest.SpanStub) {
 	}
 }
 
-// Verifies: TELE-0005
+// Verifies: TELE-0005, TELE-0007
 func TestHTTPHandlerRecordsRouteNotRawPath(t *testing.T) {
 	span, _ := serve(t, "/accounts/"+secret+"?page="+secret)
 

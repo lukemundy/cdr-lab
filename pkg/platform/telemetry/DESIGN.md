@@ -48,7 +48,7 @@ flowchart LR
 - <a id="tele-0004"></a>**TELE-0004** A service must not put CDR data or personal information in a span, a metric or a log, also when the data is mocked. ([Judgement: OpenTelemetry for traces, metrics and logs (ADR 0006)](../../../docs/adr/0006-telemetry.md))
 - <a id="tele-0005"></a>**TELE-0005** The URL path of each HTTP server span is the route pattern of the request. For example, a request to `/api/customers/1234` has the path `/api/customers/{customerNumber}`. ([Judgement: OpenTelemetry for traces, metrics and logs (ADR 0006)](../../../docs/adr/0006-telemetry.md))
 - <a id="tele-0006"></a>**TELE-0006** When no route matches the request, the URL path of the span is `REDACTED`. ([Judgement: OpenTelemetry for traces, metrics and logs (ADR 0006)](../../../docs/adr/0006-telemetry.md))
-- <a id="tele-0007"></a>**TELE-0007** The query string of each HTTP server span is `REDACTED`. For example, a search with `?q=jane@example.com` has the query string `REDACTED`. ([Judgement: OpenTelemetry for traces, metrics and logs (ADR 0006)](../../../docs/adr/0006-telemetry.md))
+- <a id="tele-0007"></a>**TELE-0007** An HTTP server span has no query string, or `REDACTED` when an instrumentation records the query string. For example, a search with `?q=jane@example.com` gives no `jane@example.com` in the span. ([Judgement: OpenTelemetry for traces, metrics and logs (ADR 0006)](../../../docs/adr/0006-telemetry.md))
 
 ## Judgements
 
