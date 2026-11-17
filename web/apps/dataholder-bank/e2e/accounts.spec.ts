@@ -3,7 +3,7 @@ import { randomInt, randomUUID } from "node:crypto";
 
 import { expect, test, type Page } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
+import { definitionOf, expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
 import { requiredEnv } from "@cdr-lab/console/e2e/dataholder-lab";
 
 import { loanProductCategoryValues, revolvingProductCategoryValues } from "../src/api/schema.gen";
@@ -93,7 +93,7 @@ test("a new customer opens an account of a deposit product, and the customer clo
   await expect(page.getByRole("status").filter({ hasText: "account is open" })).toHaveText(
     `Your ${deposit.name} account is open.`,
   );
-  await expect(page.getByText(`Product:${deposit.name}`)).toBeVisible();
+  await expect(definitionOf(page, "Product")).toHaveText(deposit.name);
   await expectNoAxeViolations(page);
 
   const brand = await fetch(new URL("/api/brand", requiredEnv("BANK_SITE_URL")));
@@ -129,7 +129,7 @@ test("a new customer opens an account of a deposit product, and the customer clo
   await expectNoAxeViolations(page);
 
   await page.goto(accountUrl);
-  await expect(page.getByText("Status:Closed")).toBeVisible();
+  await expect(definitionOf(page, "Status")).toHaveText("Closed");
   await expect(page.getByRole("button", { name: "Close account" })).toHaveCount(0);
 });
 
@@ -151,18 +151,18 @@ test("a new customer opens revolving credit with a credit limit and a loan that 
   await expectNoAxeViolations(page);
   await page.getByRole("button", { name: "Open account" }).click();
   await expect(page.getByRole("heading", { level: 1, name: revolving.name })).toBeFocused();
-  await expect(page.getByText("Balance:$0.00")).toBeVisible();
-  await expect(page.getByText("Available:$5,000.00")).toBeVisible();
-  await expect(page.getByText("Credit limit:$5,000.00")).toBeVisible();
+  await expect(definitionOf(page, "Balance")).toHaveText("$0.00");
+  await expect(definitionOf(page, "Available")).toHaveText("$5,000.00");
+  await expect(definitionOf(page, "Credit limit")).toHaveText("$5,000.00");
 
   await page.goto(`/products/${loan.productId}`);
   await page.getByRole("link", { name: "Open an account" }).click();
   await page.getByLabel("Loan amount").fill("20,000.50");
   await page.getByRole("button", { name: "Open account" }).click();
   await expect(page.getByRole("heading", { level: 1, name: loan.name })).toBeFocused();
-  await expect(page.getByText("Balance:-$20,000.50")).toBeVisible();
-  await expect(page.getByText("Available:$0.00")).toBeVisible();
-  await expect(page.getByText("Credit limit:$0.00")).toBeVisible();
+  await expect(definitionOf(page, "Balance")).toHaveText("-$20,000.50");
+  await expect(definitionOf(page, "Available")).toHaveText("$0.00");
+  await expect(definitionOf(page, "Credit limit")).toHaveText("$0.00");
   await expect(page.getByText("Loan drawdown", { exact: true })).toBeVisible();
   await expectNoAxeViolations(page);
 });

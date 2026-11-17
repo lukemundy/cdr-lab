@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
+import { definitionOf, expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
 import {
   closeAccount,
   createAccount,
@@ -13,8 +13,7 @@ import {
 // counts while it runs.
 
 async function countOf(page: Page, term: string): Promise<number> {
-  const value = page.locator("dt", { hasText: new RegExp(`^${term}$`) }).locator("+ dd");
-  return Number(await value.textContent());
+  return Number(await definitionOf(page, term).textContent());
 }
 
 async function counts(page: Page) {

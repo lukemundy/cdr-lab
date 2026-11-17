@@ -1,5 +1,5 @@
 import { AxeBuilder } from "@axe-core/playwright";
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 // The same tags as the component tests of the design system.
 const axeTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
@@ -26,4 +26,11 @@ async function waitForAnimations(page: Page) {
       .filter((animation) => animation.effect?.getTiming().iterations !== Infinity);
     await Promise.allSettled(finite.map((animation) => animation.finished));
   });
+}
+
+// The value of the term in a description list (dl) in within.
+export function definitionOf(within: Page | Locator, term: string): Locator {
+  return within
+    .locator("dt", { hasText: new RegExp(`^${term}$`) })
+    .locator("xpath=following-sibling::dd[1]");
 }

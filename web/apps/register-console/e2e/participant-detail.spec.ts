@@ -1,16 +1,11 @@
-import { expect, test, type Locator } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
+import { definitionOf as definition, expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
 import { showAllBrands } from "./lab";
 
 // The seed file of the lab (services/register/seed/example.json).
 const recipient = { name: "Mock Budgeting Pty Ltd", id: "c7b88455-4a14-479e-b53e-fbc4000716b3" };
 const holder = { name: "Mock Holdings Ltd", id: "a81975c6-1ac9-4fe4-88fc-68f50efd27cb" };
-
-const definition = (region: Locator, term: string) =>
-  region
-    .locator("dt", { hasText: new RegExp(`^${term}$`) })
-    .locator("xpath=following-sibling::dd[1]");
 
 test("the operator opens a data recipient of the seed file from the list", async ({ page }) => {
   const origins = new Set<string>();

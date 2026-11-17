@@ -2,7 +2,7 @@ import { randomInt, randomUUID } from "node:crypto";
 
 import { expect, test } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
+import { definitionOf, expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
 import {
   createAccount,
   createTransaction,
@@ -78,10 +78,10 @@ test("a consumer signs up, signs out, signs in with any password, and sees the a
 
   await page.reload();
   const open = page.getByRole("region", { name: "Open accounts" });
-  await expect(
-    open.getByText(`Account number:xxx-xxx xxxx${accountNumber.slice(-4)}`),
-  ).toBeVisible();
-  await expect(open.getByText("Balance:-$4.50")).toBeVisible();
+  await expect(definitionOf(open, "Account number")).toHaveText(
+    `xxx-xxx xxxx${accountNumber.slice(-4)}`,
+  );
+  await expect(definitionOf(open, "Balance")).toHaveText("-$4.50");
   await open.getByRole("link", { name: "Everyday" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Everyday" })).toBeVisible();
   await expect(page.getByRole("listitem").filter({ hasText: "Corner Cafe" })).toContainText(
