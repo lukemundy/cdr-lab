@@ -1,4 +1,5 @@
 import { ConsumerCard } from "@cdr-lab/ui/consumer-page";
+import { Link as TextLink } from "@cdr-lab/ui/link";
 import { ErrorState, LoadingState } from "@cdr-lab/ui/states";
 import { Link } from "@tanstack/react-router";
 
@@ -37,6 +38,9 @@ function Accounts() {
           </p>
           <p>
             You cannot share your data under the Consumer Data Right until you have an open account.
+          </p>
+          <p>
+            <TextLink render={<Link to="/products" />}>Open an account</TextLink>
           </p>
         </>
       )}

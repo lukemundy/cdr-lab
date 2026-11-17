@@ -83,6 +83,9 @@ test("a customer with no account sees that they cannot share data", async () => 
 
   await expect.element(page.getByText("You have no account with us yet.")).toBeVisible();
   await expect.element(page.getByText(noSharing)).toBeVisible();
+  await expect
+    .element(page.getByRole("main").getByRole("link", { name: "Open an account" }))
+    .toHaveAttribute("href", "/products");
   expect(page.getByRole("region", { name: "Closed accounts" }).query()).toBeNull();
 });
 
@@ -94,6 +97,9 @@ test("a customer with only closed accounts sees that they cannot share data", as
 
   await expect.element(page.getByText("You have no open account.")).toBeVisible();
   await expect.element(page.getByText(noSharing)).toBeVisible();
+  await expect
+    .element(page.getByRole("main").getByRole("link", { name: "Open an account" }))
+    .toHaveAttribute("href", "/products");
   await expect
     .element(
       page
