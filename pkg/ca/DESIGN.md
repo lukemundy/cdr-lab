@@ -88,6 +88,7 @@ A CDR certificate copies the profile of the production server certificate of `se
 - <a id="ca-0034"></a>**CA-0034** A CDR certificate gives one CRL distribution point, which is the URL of the CRL of its issuer. ([RFC 5280, section 4.2.1.13][rfc5280-crldp]; observed on 2026-10-02: the production certificate gives the CRL URL of "CDR Intermediate CA 2025")
 - <a id="ca-0035"></a>**CA-0035** A CDR certificate gives no OCSP URL and no CA issuers URL. ([Judgement: a CRL and no OCSP](#ca-0053))
 - <a id="ca-0036"></a>**CA-0036** The serial number of a certificate is random, with more than 64 bits. ([CP section 10, Table 14][accc-cp]; [CA/Browser Forum Baseline Requirements, section 7.1][cabf-br])
+- <a id="ca-0056"></a>**CA-0056** A CDR certificate has a subject key identifier, which is the SHA-1 hash of its subject public key. ([CP section 10, Table 14][accc-cp]; [RFC 5280, section 4.2.1.2][rfc5280-ski])
 - <a id="ca-0037"></a>**CA-0037** The CA does not check that the subject DN of a certificate is unique. ([CPS section 3.1][accc-cps]; [Judgement: no check of unique subject names](#ca-0055))
 - <a id="ca-0038"></a>**CA-0038** A public TLS server certificate for a lab host has the validity, the key usage and the extended key usage of a CDR server certificate. ([CA/Browser Forum Baseline Requirements, section 6.3.2][cabf-br]; [Judgement: the CDR server profile for a public TLS server certificate](#ca-0052))
 - <a id="ca-0039"></a>**CA-0039** The subject of a public TLS server certificate has the CN only. ([Judgement: the CDR server profile for a public TLS server certificate](#ca-0052))
@@ -174,6 +175,7 @@ None.
 [accc-cps]: https://www.cdr.gov.au/sites/default/files/2025-08/ACCC-Certification-Practice-Statement-v2.0-published-27-August-2025.pdf
 [accc-portal-guide]: https://www.cdr.gov.au/sites/default/files/2026-10/Participant%20Portal%20User%20Guide_-v23-20261014_091444.pdf
 [rfc5280-crldp]: https://www.rfc-editor.org/rfc/rfc5280#section-4.2.1.13
+[rfc5280-ski]: https://www.rfc-editor.org/rfc/rfc5280#section-4.2.1.2
 [rfc5280-bounds]: https://www.rfc-editor.org/rfc/rfc5280#appendix-A
 [rfc5280-reason]: https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1
 [rfc5280-revoked]: https://www.rfc-editor.org/rfc/rfc5280#section-5.1.2.6

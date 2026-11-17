@@ -1,7 +1,10 @@
 package ca_test
 
 import (
+	"crypto/sha1" //nolint:gosec // RFC 5280 gives SHA-1 for the subject key identifier, not for security.
 	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/asn1"
 	"testing"
 	"time"
 
@@ -231,4 +234,33 @@ func TestAPublicServerCertificateNeedsValidDNSNames(t *testing.T) {
 	require.ErrorContains(t, err, `DNS name "not a name" is not a host name`)
 	_, err = lab.PublicRoot.IssuePublicServer(&key(3).PublicKey, []string{"localhost", "127.0.0.1"}, now)
 	assert.EqualError(t, err, `DNS name "127.0.0.1" is an IP address, not a host name`)
+}
+
+// Verifies: CA-0056
+func TestEachCDRCertificateHasTheSubjectKeyIdentifierOfItsKey(t *testing.T) {
+	lab := newLab(t)
+
+	for name, tc := range map[string]struct {
+		csr  *x509.CertificateRequest
+		kind ca.Kind
+	}{
+		"client": {clientCSR(), ca.Client},
+		"server": {serverCSR(), ca.Server},
+	} {
+		t.Run(name, func(t *testing.T) {
+			cert, err := lab.CDRIntermediate.Issue(csr(t, tc.csr), tc.kind, now)
+			require.NoError(t, err)
+
+			var spki struct {
+				Algorithm pkix.AlgorithmIdentifier
+				PublicKey asn1.BitString
+			}
+
+			_, err = asn1.Unmarshal(cert.RawSubjectPublicKeyInfo, &spki)
+			require.NoError(t, err)
+
+			want := sha1.Sum(spki.PublicKey.Bytes) //nolint:gosec // see the import
+			assert.Equal(t, want[:], cert.SubjectKeyId)
+		})
+	}
 }

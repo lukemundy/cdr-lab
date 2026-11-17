@@ -3,9 +3,12 @@ package ca
 import (
 	"crypto"
 	"crypto/rand"
+	"crypto/sha1" //nolint:gosec // RFC 5280 gives SHA-1 for the subject key identifier, not for security.
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/asn1"
 	"errors"
+	"fmt"
 	"math/big"
 	"slices"
 	"time"
@@ -111,7 +114,36 @@ func (a Authority) Issue(csr *x509.CertificateRequest, kind Kind, now time.Time)
 		names = append([]string{csr.Subject.CommonName}, csr.DNSNames...)
 	}
 
-	return a.issue(a.leaf(csr.Subject, kind, names, now), csr.PublicKey)
+	tmpl := a.leaf(csr.Subject, kind, names, now)
+
+	ski, err := subjectKeyID(csr.PublicKey)
+	if err != nil {
+		return nil, err
+	}
+
+	tmpl.SubjectKeyId = ski
+
+	return a.issue(tmpl, csr.PublicKey)
+}
+
+// subjectKeyID gives the SHA-1 hash of the subject public key (RFC 5280, section 4.2.1.2, method 1).
+func subjectKeyID(pub crypto.PublicKey) ([]byte, error) {
+	der, err := x509.MarshalPKIXPublicKey(pub)
+	if err != nil {
+		return nil, fmt.Errorf("marshal the public key: %w", err)
+	}
+
+	var spki struct {
+		Algorithm pkix.AlgorithmIdentifier
+		PublicKey asn1.BitString
+	}
+	if _, err := asn1.Unmarshal(der, &spki); err != nil {
+		return nil, fmt.Errorf("read the public key: %w", err)
+	}
+
+	sum := sha1.Sum(spki.PublicKey.Bytes) //nolint:gosec // see the import
+
+	return sum[:], nil
 }
 
 // IssuePublicServer gives a TLS server certificate for lab hosts, with the first name as the subject CN.
