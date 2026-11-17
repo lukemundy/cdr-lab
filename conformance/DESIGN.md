@@ -101,6 +101,7 @@ Each row is an exception to the subject of a test or to the check of each CDS re
 | <a id="conf-0031"></a>**CONF-0031** | The data holder test of the stylesheets and the font of the authentication page | The test checks that the stylesheets of the page, and one font that they refer to, load from the origin of the page. The CDR does not define the styles of the page. | [Judgement: the test checks that the authentication page styles load from its origin](#conf-0049) |
 | <a id="conf-0032"></a>**CONF-0032** | The Register tests of Get SSA | The test does not check a response with the status 200 against the specification. | [Judgement: no schema check of the SSA body](#conf-0050) |
 | <a id="conf-0033"></a>**CONF-0033** | The Register test of an unknown path | The test does not check the response against the specification. | [Judgement: no schema check of an unknown path](#conf-0051) |
+| <a id="conf-0054"></a>**CONF-0054** | The data holder tests of the banking APIs, Get Customer and the management of a registration | The test does not check a response against the specification when the operation does not give its status. For example, a 401 from Get Accounts has no check. | [Judgement: no schema check of a status that the operation does not give](#conf-0055) |
 
 ## Judgements
 
@@ -218,6 +219,12 @@ Each row is an exception to the subject of a test or to the check of each CDS re
 - Basis: Step 3.3. A poll ends only after the request of the test and the change in the component ([a poll stops as soon as its condition is true](#conf-0026)).
 - Reason: The margin of 2 seconds covers the request and the change after the configured time. No CDR time rule is under test in a poll with no given time, so its limit permits a stop of the lab of up to 15 seconds on a loaded CI node.
 
+### <a id="conf-0055"></a>CONF-0055 No schema check of a status that the operation does not give
+
+- Kind: choice
+- Basis: Step 3.3. A CDS operation does not give each status that the CDS permits. For example, the banking specification gives no 401 or 403 ([CDS: Banking APIs][cds-banking-apis]).
+- Reason: The specification has no schema for that status. The test checks the status and the error code only.
+
 ## Withdrawn
 
 None.
@@ -226,6 +233,7 @@ None.
 [adr-0019]: ../docs/adr/0019-limit-the-conformance-suite-to-cdr-conformance.md
 [adr-0022]: ../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
 [agents]: ../AGENTS.md
+[cds-banking-apis]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#banking-apis
 [cds-register-schemas]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api-schemas
 [dataholder-design]: ../services/dataholder/design/README.md
 [readme]: ../README.md
