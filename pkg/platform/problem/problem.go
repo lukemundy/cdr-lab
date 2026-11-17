@@ -3,9 +3,11 @@ package problem
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -30,6 +32,28 @@ func writeTyped(w http.ResponseWriter, typeURI, title string, status int, detail
 		Status int    `json:"status"`
 		Detail string `json:"detail"`
 	}{Type: typeURI, Title: title, Status: status, Detail: detail})
+}
+
+// WriteBodyRefusal writes 413 when err comes from a body that is larger than its limit, and 400 with detail for each
+// other err, also nil.
+func WriteBodyRefusal(w http.ResponseWriter, err error, detail string) {
+	if tooLarge, ok := errors.AsType[*http.MaxBytesError](err); ok {
+		Write(w, http.StatusRequestEntityTooLarge, "The request body is larger than "+formatSize(tooLarge.Limit)+".")
+		return
+	}
+
+	Write(w, http.StatusBadRequest, detail)
+}
+
+func formatSize(limit int64) string {
+	switch {
+	case limit%(1<<20) == 0:
+		return strconv.FormatInt(limit>>20, 10) + " MiB"
+	case limit%(1<<10) == 0:
+		return strconv.FormatInt(limit>>10, 10) + " KiB"
+	default:
+		return strconv.FormatInt(limit, 10) + " bytes"
+	}
 }
 
 // WriteSessionEnded is for a request with a session cookie whose session ended, so that a UI can tell it apart from a
