@@ -40,8 +40,8 @@ x-dataholder-environment: &dataholder-environment
   CRL_MAX_AGE: 0s
   REGISTER_JWKS_URL: https://register:8081/cdr-register/v1/jwks
   REGISTER_PUBLIC_BASE_URL: https://register:8081
-  # Short, so that the conformance tests see a status change quickly.
-  REGISTER_STATUS_INTERVAL: 5s
+  # Short, so that the conformance tests see a status change quickly. The conformance tests get the same value.
+  REGISTER_STATUS_INTERVAL: &dataholder-status-interval 5s
   OPERATOR_TOKEN: lab-operator-token
   # The mail sink keeps each email, and delivers none.
   SMTP_ADDRESS: mail:1025
@@ -417,6 +417,7 @@ services:
       DATAHOLDER_PROBE_URL: http://wattle-bank:8080
       DATAHOLDER_OPERATOR_URL: http://wattle-bank:8082
       DATAHOLDER_OPERATOR_TOKEN: lab-operator-token
+      DATAHOLDER_STATUS_INTERVAL: *dataholder-status-interval
       MAIL_SINK_URL: http://mail:8025
       # The Wattle Bank brand of services/register/seed/example.json.
       DATAHOLDER_BRAND_ID: d7385786-d8b1-4d4b-bb80-b21616df1a4d

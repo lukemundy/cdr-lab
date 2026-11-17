@@ -86,7 +86,8 @@ flowchart LR
 
 - <a id="conf-0025"></a>**CONF-0025** Performance: a fixed wait in a test is 2 seconds or less. ([Judgement: no long waits in the suite](#conf-0046))
 - <a id="conf-0026"></a>**CONF-0026** A poll stops as soon as its condition is true. ([Judgement: no long waits in the suite](#conf-0046))
-- <a id="conf-0027"></a>**CONF-0027** The limit of a poll is the time that the requirement or the lab configuration gives. For example, the limit is the status interval of the data holder in `compose.yaml`. ([Judgement: no long waits in the suite](#conf-0046))
+- <a id="conf-0027"></a>**CONF-0027** The limit of a poll is the time that the requirement or the lab configuration gives, plus 2 seconds. For example, the limit of a status poll is the status interval of the data holder in `compose.yaml`, plus 2 seconds. ([Judgement: no long waits in the suite](#conf-0046); [Judgement: a margin of 2 seconds, and 15 seconds when no time is given](#conf-0053))
+- <a id="conf-0052"></a>**CONF-0052** When no requirement and no lab configuration gives a time, the limit of a poll is 15 seconds. For example, the limit of a poll for an email in the mail sink is 15 seconds. ([Judgement: a margin of 2 seconds, and 15 seconds when no time is given](#conf-0053))
 - <a id="conf-0028"></a>**CONF-0028** The suite does not check a time rule with a longer period. A Go test that controls the time proves it in-process, in the service or in its library in `pkg/`. For example, the suite does not check the life of an authorisation code or the 10 minutes of an authorisation flow. ([Judgement: no long waits in the suite](#conf-0046))
 
 ## Exceptions
@@ -210,6 +211,12 @@ Each row is an exception to the subject of a test or to the check of each CDS re
 - Kind: choice
 - Basis: Step 3.3. The specification has no such path ([an unknown path gets 404](../services/register/design/register-apis.md#reg-0318)).
 - Reason: The specification has no schema to validate the response against. The test checks the status and the error code only.
+
+### <a id="conf-0053"></a>CONF-0053 A margin of 2 seconds, and 15 seconds when no time is given
+
+- Kind: choice
+- Basis: Step 3.3. A poll ends only after the request of the test and the change in the component ([a poll stops as soon as its condition is true](#conf-0026)).
+- Reason: The margin of 2 seconds covers the request and the change after the configured time. No CDR time rule is under test in a poll with no given time, so its limit permits a stop of the lab of up to 15 seconds on a loaded CI node.
 
 ## Withdrawn
 

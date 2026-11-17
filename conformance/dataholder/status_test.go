@@ -13,10 +13,18 @@ import (
 	"github.com/lukemundy/cdr-lab/conformance/internal/labtest"
 )
 
-const (
-	inactiveProduct = "2d4f6b8a-0c1e-4a3b-9d5f-7b9c1d3e5f70"
-	waitForStatus   = 30 * time.Second
-)
+const inactiveProduct = "2d4f6b8a-0c1e-4a3b-9d5f-7b9c1d3e5f70"
+
+// waitForStatus is the status interval of the data holder in the lab configuration, plus 2 s for the request to the
+// Register and the change.
+func waitForStatus(t *testing.T) time.Duration {
+	t.Helper()
+
+	interval, err := time.ParseDuration(labtest.Env(t, "DATAHOLDER_STATUS_INTERVAL"))
+	require.NoError(t, err, "DATAHOLDER_STATUS_INTERVAL is not a duration")
+
+	return interval + 2*time.Second
+}
 
 func changeStatus(t *testing.T, productID, action string) {
 	t.Helper()
@@ -45,7 +53,7 @@ func TestASoftwareProductThatIsNotActiveGetsNoConsentAndNoDataUntilItIsActiveAga
 	changeStatus(t, inactiveProduct, "deactivate")
 
 	require.Eventually(t, func() bool { return customerStatus(t, client, accessToken) == http.StatusForbidden },
-		waitForStatus, time.Second, "the data holder refuses the software product within the interval")
+		waitForStatus(t), time.Second, "the data holder refuses the software product within the interval")
 
 	t.Run("the resource APIs give 403 AdrStatusNotActive with the status", func(t *testing.T) {
 		resp := getCustomer(t, client.cert, resourceHeader(accessToken))
@@ -102,7 +110,7 @@ func TestASoftwareProductThatIsNotActiveGetsNoConsentAndNoDataUntilItIsActiveAga
 
 	t.Run("an ACTIVE software product reads the data of its consent again with no new consent", func(t *testing.T) {
 		require.Eventually(t, func() bool { return customerStatus(t, client, accessToken) == http.StatusOK },
-			waitForStatus, time.Second)
+			waitForStatus(t), time.Second)
 
 		refreshed := client.refresh(t, refreshToken)
 		require.Equal(t, http.StatusOK, refreshed.Status, refreshed.Body)
