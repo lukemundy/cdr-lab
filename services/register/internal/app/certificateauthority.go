@@ -211,9 +211,11 @@ func (a CertificateAuthority) sign(lastNumber int64, revoked []Revocation) (CRL,
 		entries = append(entries, ca.Revocation{Serial: r.Serial, Time: r.Time, Reason: r.Reason})
 	}
 
-	number := lastNumber + 1
+	// A number from the time is higher than each number of an earlier lab, which has the same issuer DN.
+	thisUpdate := a.time()
+	number := max(lastNumber+1, thisUpdate.Unix())
 
-	der, err := a.authority.CRL(entries, big.NewInt(number), a.time())
+	der, err := a.authority.CRL(entries, big.NewInt(number), thisUpdate)
 	if err != nil {
 		return CRL{}, err
 	}

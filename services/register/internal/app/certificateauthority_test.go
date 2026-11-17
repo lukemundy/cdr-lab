@@ -112,8 +112,8 @@ func TestTheCASignsACRLThatIsValidForSevenDays(t *testing.T) {
 	list := parsedCRL(t, crl)
 	second := issueTime.Truncate(time.Second)
 
-	assert.Equal(t, int64(1), crl.Number)
-	assert.Equal(t, big.NewInt(1), list.Number)
+	assert.Equal(t, issueTime.Unix(), crl.Number)
+	assert.Equal(t, big.NewInt(issueTime.Unix()), list.Number)
 	assert.Equal(t, second, crl.ThisUpdate)
 	assert.Equal(t, second.AddDate(0, 0, 7), crl.NextUpdate)
 	assert.Equal(t, crl.NextUpdate, list.NextUpdate.UTC())
@@ -124,7 +124,7 @@ func TestTheCASignsACRLThatIsValidForSevenDays(t *testing.T) {
 func TestTheCRLNumbersIncreaseAcrossARestart(t *testing.T) {
 	store, c := &caStore{}, &clock{now: issueTime}
 
-	for want := int64(1); want <= 3; want++ {
+	for want := issueTime.Unix(); want < issueTime.Unix()+3; want++ {
 		// Each start of the Register makes a new CA on the same store, and signs a CRL.
 		require.NoError(t, newCA(store, c).SignCRL(t.Context()))
 
@@ -152,10 +152,12 @@ func TestARenewalSignsANewCRLNoLaterThan24HoursAfterTheCurrentOne(t *testing.T) 
 		return crl.Number
 	}
 
-	assert.Equal(t, int64(1), renewAt(time.Hour), "a CRL of 1 hour is not renewed")
-	assert.Equal(t, int64(1), renewAt(app.CRLRenewalAge-time.Second))
-	assert.Equal(t, int64(2), renewAt(app.CRLRenewalAge), "also with no revocation")
-	assert.Equal(t, int64(2), renewAt(app.CRLRenewalAge+time.Minute), "the new CRL is not renewed at once")
+	renewed := issueTime.Add(app.CRLRenewalAge).Unix()
+
+	assert.Equal(t, issueTime.Unix(), renewAt(time.Hour), "a CRL of 1 hour is not renewed")
+	assert.Equal(t, issueTime.Unix(), renewAt(app.CRLRenewalAge-time.Second))
+	assert.Equal(t, renewed, renewAt(app.CRLRenewalAge), "also with no revocation")
+	assert.Equal(t, renewed, renewAt(app.CRLRenewalAge+time.Minute), "the new CRL is not renewed at once")
 	assert.Less(t, app.CRLRenewalAge, 24*time.Hour)
 }
 
@@ -173,7 +175,7 @@ func TestARenewalAfterAStopOfMoreThanSevenDaysSignsANewCRL(t *testing.T) {
 
 	crl, err := authority.CurrentCRL(t.Context())
 	require.NoError(t, err)
-	assert.Equal(t, int64(2), crl.Number)
+	assert.Equal(t, c.now.Unix(), crl.Number)
 }
 
 func TestARenewalOfACAWithNoCRLSignsOne(t *testing.T) {
@@ -183,7 +185,7 @@ func TestARenewalOfACAWithNoCRLSignsOne(t *testing.T) {
 
 	crl, err := newCA(store, c).CurrentCRL(t.Context())
 	require.NoError(t, err)
-	assert.Equal(t, int64(1), crl.Number)
+	assert.Equal(t, issueTime.Unix(), crl.Number)
 }
 
 func TestTheCAHasNoCurrentCRLBeforeItsFirstSignature(t *testing.T) {
@@ -208,7 +210,7 @@ func TestARevocationSignsANewCRLThatListsTheCertificateWithItsReason(t *testing.
 	list := parsedCRL(t, crl)
 	second := issueTime.Add(time.Hour).Truncate(time.Second)
 
-	assert.Equal(t, int64(2), crl.Number)
+	assert.Equal(t, second.Unix(), crl.Number)
 	assert.Equal(t, second, crl.ThisUpdate)
 	require.Len(t, list.RevokedCertificateEntries, 1)
 	assert.Equal(t, cert.SerialNumber, list.RevokedCertificateEntries[0].SerialNumber)
@@ -240,7 +242,7 @@ func TestTheCRLKeepsEachRevocationAcrossARestart(t *testing.T) {
 	require.Len(t, entries, 2)
 	assert.Equal(t, first.SerialNumber, entries[0].SerialNumber)
 	assert.Equal(t, second.SerialNumber, entries[1].SerialNumber)
-	assert.Equal(t, int64(3), crl.Number)
+	assert.Equal(t, issueTime.Unix()+2, crl.Number, "the third CRL in the same second")
 }
 
 // Verifies: REG-0706
@@ -411,4 +413,31 @@ func TestTheRevocationsAreThoseOfTheStore(t *testing.T) {
 	assert.Equal(t, 2, total)
 	require.Len(t, page, 1)
 	assert.Equal(t, second.SerialNumber, page[0].Serial)
+}
+
+// Verifies: PKI-0066
+func TestTheFirstCRLOfANewLabHasAHigherNumberThanEachCRLOfAnEarlierLab(t *testing.T) {
+	earlier, c := &caStore{}, &clock{now: issueTime}
+	for range 3 {
+		require.NoError(t, newCA(earlier, c).SignCRL(t.Context()))
+	}
+
+	last, err := newCA(earlier, c).CurrentCRL(t.Context())
+	require.NoError(t, err)
+
+	// A reset gives the new Register an empty store.
+	reset := &caStore{}
+	c.now = issueTime.Add(time.Minute)
+	require.NoError(t, newCA(reset, c).SignCRL(t.Context()))
+
+	first, err := newCA(reset, c).CurrentCRL(t.Context())
+	require.NoError(t, err)
+
+	assert.Greater(t, first.Number, last.Number)
+	assert.Equal(
+		t,
+		issueTime.Add(time.Minute).Unix(),
+		first.Number,
+		"the number of a new CRL is the time of its signature",
+	)
 }

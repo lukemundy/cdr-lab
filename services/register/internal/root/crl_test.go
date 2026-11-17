@@ -92,7 +92,7 @@ func getCRL(t *testing.T, proc process) *x509.RevocationList {
 func TestTheCRLListenerGivesACurrentCRLThatTheIntermediateSigned(t *testing.T) {
 	crl := getCRL(t, startRegister(t, databasetest.New(t)))
 
-	assert.Equal(t, big.NewInt(1), crl.Number)
+	assert.Equal(t, big.NewInt(crl.ThisUpdate.Unix()), crl.Number, "the number is the time of the signature")
 	assert.WithinDuration(t, time.Now(), crl.ThisUpdate, time.Minute)
 	assert.Equal(t, 7*24*time.Hour, crl.NextUpdate.Sub(crl.ThisUpdate))
 	assert.Empty(t, crl.RevokedCertificateEntries)
@@ -102,8 +102,13 @@ func TestTheCRLListenerGivesACurrentCRLThatTheIntermediateSigned(t *testing.T) {
 func TestEachStartSignsACRLWithAHigherNumber(t *testing.T) {
 	pool := databasetest.New(t)
 
-	for want := int64(1); want <= 3; want++ {
-		assert.Equal(t, big.NewInt(want), getCRL(t, startRegister(t, pool)).Number)
+	previous := big.NewInt(0)
+
+	for range 3 {
+		number := getCRL(t, startRegister(t, pool)).Number
+		assert.Equal(t, 1, number.Cmp(previous), "%v is not higher than %v", number, previous)
+
+		previous = number
 	}
 }
 
@@ -134,6 +139,7 @@ func TestARevocationTakesEffectAtOnceAtTheRegisterAndStaysAfterARestart(t *testi
 	}
 	require.NoError(t, handshake(proc))
 
+	before := getCRL(t, proc).Number
 	chain := ca.EncodeCertificates(cert, intermediateAuthority(t).Certificate)
 	status, p := revokeRequest(t, proc, chain, "affiliationChanged")
 	require.Equal(t, http.StatusNoContent, status, p.Detail)
@@ -141,7 +147,7 @@ func TestARevocationTakesEffectAtOnceAtTheRegisterAndStaysAfterARestart(t *testi
 	require.Error(t, handshake(proc), "the next handshake fails")
 
 	crl := getCRL(t, proc)
-	assert.Equal(t, big.NewInt(2), crl.Number)
+	assert.Equal(t, 1, crl.Number.Cmp(before), "the revocation signs a new CRL")
 	require.Len(t, crl.RevokedCertificateEntries, 1)
 	assert.Equal(t, cert.SerialNumber, crl.RevokedCertificateEntries[0].SerialNumber)
 	assert.Equal(t, int(ca.AffiliationChanged), crl.RevokedCertificateEntries[0].ReasonCode)
@@ -149,7 +155,7 @@ func TestARevocationTakesEffectAtOnceAtTheRegisterAndStaysAfterARestart(t *testi
 	status, p = revokeRequest(t, proc, ca.EncodeCertificates(cert), "keyCompromise")
 	assert.Equal(t, http.StatusConflict, status)
 	assert.Contains(t, p.Detail, "affiliationChanged")
-	assert.Equal(t, big.NewInt(2), getCRL(t, proc).Number, "a refused revocation signs no CRL")
+	assert.Equal(t, crl.Number, getCRL(t, proc).Number, "a refused revocation signs no CRL")
 
 	restarted := startRegister(t, pool)
 	require.Error(t, handshake(restarted))

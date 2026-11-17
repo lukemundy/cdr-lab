@@ -79,8 +79,8 @@ The [Register certificate revocation area](../services/register/design/certifica
 - <a id="pki-0062"></a>**PKI-0062** The Register issues a new CRL at each revocation. ([Judgement: a new CRL at each revocation](#pki-0086))
 - <a id="pki-0063"></a>**PKI-0063** A revoked certificate stays on the CRL, also after the certificate expires. ([Judgement: revoked certificates stay on the CRL](#pki-0088))
 - <a id="pki-0064"></a>**PKI-0064** The Register serves the CRL over HTTP, with the content type `application/pkix-crl`, at the URL in each CDR certificate. ([RFC 2585, section 4.2][rfc2585-mime])
-- <a id="pki-0065"></a>**PKI-0065** A lab reset deletes the CAs and the Register database, and thus each revocation and each CRL. ([Judgement: a lab reset makes a new CRL issuer](#pki-0089))
-- <a id="pki-0066"></a>**PKI-0066** After a lab reset, the new intermediate has no revocations, and its CRL numbers start again. ([Judgement: a lab reset makes a new CRL issuer](#pki-0089))
+- <a id="pki-0065"></a>**PKI-0065** A lab reset deletes the CAs and the Register database, and thus each revocation and each CRL. ([Judgement: CRL numbers from the time across lab resets](#pki-0089))
+- <a id="pki-0066"></a>**PKI-0066** After a lab reset, the new intermediate has no revocations. Its first CRL has a higher CRL number than each CRL of an earlier lab: the number of a new CRL is the time of its signature in seconds since the Unix epoch, or the number of the previous CRL plus 1 when that is higher. ([Judgement: CRL numbers from the time across lab resets](#pki-0089))
 - <a id="pki-0067"></a>**PKI-0067** The `pki` command does not revoke certificates, sign CRLs or keep a list of revocations, and it has no `revoke` command and no `crl` command. ([Judgement: the Register is the CDR intermediate CA (ADR 0022)](../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md))
 - <a id="pki-0068"></a>**PKI-0068** The set-up issues the fixture `conformance/revoked.crt` before the lab starts, as each other fixture, and does not revoke it. ([Judgement: each conformance test revokes the fixture](#pki-0090))
 - <a id="pki-0069"></a>**PKI-0069** When a conformance test needs a revoked certificate, the test revokes the fixture through the Register operator interface with the reason `keyCompromise`. ([Judgement: each conformance test revokes the fixture](#pki-0090))
@@ -122,11 +122,11 @@ The [Register certificate revocation area](../services/register/design/certifica
 - Basis: Step 2. Production removes an entry from the CRL after the certificate expires ([CPS section 4.10.1][accc-cps]).
 - Reason: A lab certificate is valid for 13 months. A lab reset deletes the CA and its CRL.
 
-### <a id="pki-0089"></a>PKI-0089 A lab reset makes a new CRL issuer
+### <a id="pki-0089"></a>PKI-0089 CRL numbers from the time across lab resets
 
 - Kind: choice
-- Basis: Step 3.2. A CRL number is unique for one CRL scope and one CRL issuer ([RFC 5280, section 5.2.3][rfc5280-crl-number]).
-- Reason: A new intermediate has a new key and a new authority key identifier, so it is a new CRL issuer. Its CRL numbers can start again. The certificates of the earlier lab do not chain to the new CA bundle, so they need no revocation.
+- Basis: Step 3.2. The CRL number is a monotonically increasing sequence number for one CRL scope and one CRL issuer ([RFC 5280, section 5.2.3][rfc5280-crl-number]), and a CRL number is never repeated ([CP section 10, Table 17][accc-cp]). The intermediate of each lab has the same DN.
+- Reason: A relying party can keep CRLs by issuer DN, so the numbers must increase across resets. A lab keeps no state across a reset, and the time increases with no state. The certificates of the earlier lab do not chain to the new CA bundle, so they need no revocation.
 
 ### <a id="pki-0090"></a>PKI-0090 Each conformance test revokes the fixture
 
