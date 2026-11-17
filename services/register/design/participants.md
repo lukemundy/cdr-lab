@@ -47,7 +47,7 @@ The Register checks the fields of a participant record each time that it gets on
 ## Identifiers
 
 - <a id="reg-0219"></a>**REG-0219** Each identifier of a participant record is a string of 36 characters or fewer. ([CDS: Register API schemas][cds-register-schemas])
-- <a id="reg-0220"></a>**REG-0220** The Register issues each identifier as a GUID. ([CDS: Register API schemas][cds-register-schemas]; [Judgement: GUIDs for identifiers](#reg-0264))
+- <a id="reg-0220"></a>**REG-0220** The Register accepts an identifier in each format, in the limit of 36 characters. It does not issue identifiers. For example, the load accepts the identifier `dhb-1`. ([CDS: Register API schemas][cds-register-schemas]; [Judgement: identifiers from the operator in each format](#reg-0264))
 - <a id="reg-0221"></a>**REG-0221** Each identifier is unique across all participant records, not only across the records of one kind. For example, no software product has the identifier of a data holder brand. ([Judgement: each identifier is unique across all participant records](#reg-0265))
 
 ## Status transitions
@@ -111,17 +111,17 @@ The Register checks the fields of a participant record each time that it gets on
 - Basis: Step 3.3. The Register schemas give `maxLength: 1000` to each logo URI and each endpoint ([CDS: Register API schemas][cds-register-schemas]). The RegistrationProperties schema gives no limit to the other URIs of a software product ([CDS: RegistrationProperties schema][cds-dcr-schemas]).
 - Reason: One limit for each URI field is simpler. The URIs of the seed data are much shorter.
 
-### <a id="reg-0264"></a>REG-0264 GUIDs for identifiers
+### <a id="reg-0264"></a>REG-0264 Identifiers from the operator in each format
 
 - Kind: choice
-- Basis: Step 3.3. The CDS gives a string of 36 characters or fewer, and no format ([CDS: Register API schemas][cds-register-schemas]).
-- Reason: A GUID is unique with no coordination. It has 36 characters, so it is in the limit.
+- Basis: Step 3.3. The CDS gives a string of 36 characters or fewer, and no format ([CDS: Register API schemas][cds-register-schemas]). The lab operator gives each identifier ([Judgement: the lab operator gives the identifiers](operator-interface.md#reg-0889)).
+- Reason: A lab service gets its identifiers in its configuration, so the operator must give known values. A check of the format adds no value to the lab, and a short value is easier to read in a test. A GUID is the usual value.
 
 ### <a id="reg-0265"></a>REG-0265 Each identifier is unique across all participant records
 
 - Kind: choice
 - Basis: Step 3.3. The CDS does not say if an identifier is unique across the kinds of records ([CDS: Register API schemas][cds-register-schemas]).
-- Reason: GUIDs are unique in all cases, so the rule costs nothing. It prevents a mix-up between records.
+- Reason: The operator gives each identifier, so two records of different kinds can get the same value by mistake. The rule prevents a mix-up between records.
 
 ### <a id="reg-0266"></a>REG-0266 A data holder legal entity changes only from ACTIVE to REMOVED
 
