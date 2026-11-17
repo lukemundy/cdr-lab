@@ -33,7 +33,12 @@ const registerJWKSPath = "/cdr-register/v1/jwks"
 // The SSA body is a JWT with no JSON quotes, so the 200 response cannot be
 // validated against the string schema of the OpenAPI specification.
 var validatedSSAStatuses = []int{
-	http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound, http.StatusNotAcceptable,
+	http.StatusBadRequest,
+	http.StatusUnauthorized,
+	http.StatusForbidden,
+	http.StatusNotFound,
+	http.StatusNotAcceptable,
+	http.StatusUnprocessableEntity,
 }
 
 func ssaPath(industry, brand, product string) string {

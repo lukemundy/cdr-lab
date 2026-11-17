@@ -83,8 +83,8 @@ func (c registeredClient) readRegistration(
 	return c.manageRegistration(t, http.MethodGet, cert, clientID, token, "")
 }
 
-// manageRegistration sends requestJWT as the body when it is not empty, and validates a 200 response against the
-// pinned specification.
+// manageRegistration sends requestJWT as the body when it is not empty, and validates each response with a status that
+// the pinned specification documents.
 func (c registeredClient) manageRegistration(
 	t *testing.T,
 	method string,
@@ -117,11 +117,9 @@ func (c registeredClient) manageRegistration(
 
 	defer func() { _ = resp.Body.Close() }()
 
-	if resp.StatusCode == http.StatusOK {
-		spec, err := dcrSpec()
-		require.NoError(t, err)
-		require.NoError(t, validateAtSpecPath(spec, resp, specRegistrationPath+"/"+clientID))
-	}
+	spec, err := dcrSpec()
+	require.NoError(t, err)
+	require.NoError(t, validateAtSpecPath(spec.ValidateDocumentedResponse, resp, specRegistrationPath+"/"+clientID))
 
 	body, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)

@@ -86,19 +86,17 @@ func secureRequest(
 	return response{Response: resp, body: data}
 }
 
-// getCustomer validates a response of 200 against the pinned CDS common OpenAPI specification.
+// getCustomer validates each response with a status that the pinned CDS common OpenAPI specification documents.
 func getCustomer(t *testing.T, cert tls.Certificate, header http.Header) response {
 	t.Helper()
 
 	resp := secureRequest(t, cert, http.MethodGet, customerURL(t), header, nil)
 
-	if resp.StatusCode == http.StatusOK {
-		spec, err := LoadCommonSpec()
-		require.NoError(t, err)
+	spec, err := LoadCommonSpec()
+	require.NoError(t, err)
 
-		resp.Body = io.NopCloser(bytes.NewReader(resp.body))
-		require.NoError(t, spec.ValidateResponse(resp.Response))
-	}
+	resp.Body = io.NopCloser(bytes.NewReader(resp.body))
+	require.NoError(t, spec.ValidateDocumentedResponse(resp.Response))
 
 	return resp
 }

@@ -35,7 +35,7 @@ type accountPage struct {
 	Meta  map[string]int    `json:"meta"`
 }
 
-// bankingResource validates a response of 200 against the pinned CDS banking OpenAPI specification.
+// bankingResource validates each response with a status that the pinned CDS banking OpenAPI specification documents.
 func bankingResource(t *testing.T, cert tls.Certificate, path, version, token string) response {
 	t.Helper()
 
@@ -44,13 +44,11 @@ func bankingResource(t *testing.T, cert tls.Certificate, path, version, token st
 
 	resp := secureRequest(t, cert, http.MethodGet, secureBaseURI(t)+path, header, nil)
 
-	if resp.StatusCode == http.StatusOK {
-		spec, err := LoadBankingSpec()
-		require.NoError(t, err)
+	spec, err := LoadBankingSpec()
+	require.NoError(t, err)
 
-		resp.Body = io.NopCloser(bytes.NewReader(resp.body))
-		require.NoError(t, spec.ValidateResponse(resp.Response))
-	}
+	resp.Body = io.NopCloser(bytes.NewReader(resp.body))
+	require.NoError(t, spec.ValidateDocumentedResponse(resp.Response))
 
 	return resp
 }

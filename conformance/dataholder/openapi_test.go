@@ -81,3 +81,28 @@ func TestThePinnedDCRSpecificationRefusesARegistrationWithAFieldThatIsNotValid(t
 	require.ErrorContains(t, err, "grant_types")
 	require.ErrorContains(t, err, "client_name")
 }
+
+func TestThePinnedBankingSpecificationRefusesAnErrorListWithAFieldThatIsNotValid(t *testing.T) {
+	spec, err := LoadBankingSpec()
+	require.NoError(t, err)
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("x-fapi-interaction-id", "6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = io.WriteString(w, `{"errors": [{"code": "urn:au-cds:error:cds-all:Field/Invalid", "title": 400}]}`)
+	}))
+	t.Cleanup(srv.Close)
+
+	req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, srv.URL+"/cds-au/v1/banking/accounts", nil)
+	require.NoError(t, err)
+	resp, err := srv.Client().Do(req)
+	require.NoError(t, err)
+
+	t.Cleanup(func() { _ = resp.Body.Close() })
+
+	err = spec.ValidateDocumentedResponse(resp)
+
+	require.ErrorContains(t, err, "title")
+	require.ErrorContains(t, err, "detail")
+}
