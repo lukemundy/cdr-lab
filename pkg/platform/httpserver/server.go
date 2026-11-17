@@ -26,12 +26,7 @@ func ListenAndServe(ctx context.Context, listeners []Listener) error {
 
 	serveErr := make(chan error, len(listeners))
 	for _, l := range listeners {
-		srv := &http.Server{
-			Addr:              ":" + strconv.Itoa(l.Port),
-			Handler:           l.Handler,
-			ReadHeaderTimeout: 5 * time.Second,
-			TLSConfig:         l.TLSConfig,
-		}
+		srv := newServer(l)
 
 		servers = append(servers, srv)
 
@@ -65,4 +60,16 @@ func ListenAndServe(ctx context.Context, listeners []Listener) error {
 	}
 
 	return err
+}
+
+func newServer(l Listener) *http.Server {
+	return &http.Server{
+		Addr:              ":" + strconv.Itoa(l.Port),
+		Handler:           l.Handler,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      60 * time.Second,
+		IdleTimeout:       120 * time.Second,
+		TLSConfig:         l.TLSConfig,
+	}
 }
