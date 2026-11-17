@@ -72,7 +72,8 @@ flowchart LR
 - <a id="cdsl-0018"></a>**CDSL-0018** When a request to a paginated endpoint has no `page-size`, the page size is 25. ([CDS: Pagination][cds-pagination])
 - <a id="cdsl-0019"></a>**CDSL-0019** The maximum page size is 1000. ([CDS: Pagination][cds-pagination])
 - <a id="cdsl-0020"></a>**CDSL-0020** When `page` is not a positive integer, the response is 400 with `urn:au-cds:error:cds-all:Field/Invalid`, and the `detail` is `page`. ([CDS: Invalid Field][cds-error-400-field-invalid])
-- <a id="cdsl-0021"></a>**CDSL-0021** When `page-size` is not a positive integer or is more than 1000, the response is 400 with `urn:au-cds:error:cds-all:Field/InvalidPageSize`. ([CDS: Invalid Page Size][cds-error-400-invalid-page-size]; [CDS: Pagination][cds-pagination])
+- <a id="cdsl-0021"></a>**CDSL-0021** When `page-size` is not a positive integer, the response is 400 with `urn:au-cds:error:cds-all:Field/Invalid`, and the `detail` is `page-size`. For example, `abc`, `0` and `-1`. ([CDS: Invalid Field][cds-error-400-field-invalid])
+- <a id="cdsl-0070"></a>**CDSL-0070** When `page-size` is more than 1000, the response is 400 with `urn:au-cds:error:cds-all:Field/InvalidPageSize`, and the `detail` is `page-size`. ([CDS: Invalid Page Size][cds-error-400-invalid-page-size]; [CDS: Pagination][cds-pagination])
 - <a id="cdsl-0022"></a>**CDSL-0022** A `page` or a `page-size` with an empty value is the same as an absent parameter. ([Judgement: an empty page parameter is absent](#cdsl-0063))
 - <a id="cdsl-0023"></a>**CDSL-0023** When the requested page is after the last page, the response is 422 with `urn:au-cds:error:cds-all:Field/InvalidPage`, and the `detail` is the number of pages. ([CDS: Invalid Page][cds-error-422-invalid-page]; [Judgement: 422 for a page out of range, as the CDS says](#cdsl-0064))
 - <a id="cdsl-0024"></a>**CDSL-0024** Page 1 of an empty list is in range. ([CDS: Pagination][cds-pagination])
@@ -178,13 +179,13 @@ These rules apply to a service that uses the CRL check of the library as its rev
 ### <a id="cdsl-0067"></a>CDSL-0067 Refuse a certificate with a revocation status that is not known
 
 - Kind: choice
-- Basis: Step 3.1. The CDS requires the check ([CDS: Certificate Validation][cds-cert-validation]), and does not say what to do when the check cannot be done.
+- Basis: Step 2. The CDS requires the check ([CDS: Certificate Validation][cds-cert-validation]), and does not say what to do when the check cannot be done. When revocation information cannot be got, the relying party must "either reject use of the certificate, or make an informed decision to accept the risk" ([ACCC CP, section 4.9.6][accc-cp]).
 - Reason: To accept the certificate lets a revoked client connect when the CRL server is down. The status is not known only when no CRL can be used ([the last CRL after a failed load](#cdsl-0055)).
 
 ### <a id="cdsl-0068"></a>CDSL-0068 A maximum CRL age of 1 minute
 
 - Kind: choice
-- Basis: Step 3.3. The CDS gives no time ([CDS: Certificate Validation][cds-cert-validation]).
+- Basis: Step 2. The CDS gives no time ([CDS: Certificate Validation][cds-cert-validation]). The relying party decides how frequently it gets new revocation data ([ACCC CP, section 4.9.6][accc-cp]).
 - Reason: A revocation must take effect quickly. A burst of connections must cause one load.
 
 ### <a id="cdsl-0069"></a>CDSL-0069 The last CRL stays in use after a failed load
@@ -214,6 +215,7 @@ None.
 [cds-transaction-security]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#transaction-security
 [cds-ciphers]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#ciphers
 [cds-cert-trust-model]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#certificate-trust-model
+[accc-cp]: https://www.cdr.gov.au/sites/default/files/2025-08/ACCC-Certificate-Policy-v1.04-published-27-August-2025.pdf
 [cds-cert-validation]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#certificate-validation
 [support-error-scenarios]: https://cdr-support.zendesk.com/hc/en-us/articles/5729181240591
 [support-version-values]: https://cdr-support.zendesk.com/hc/en-us/articles/900004807083

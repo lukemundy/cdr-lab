@@ -396,7 +396,8 @@ func TestGetProductsRefusesAParameterThatIsNotValid(t *testing.T) {
 		"page zero":                {"page=0", 400, invalid, "Invalid Field", "page"},
 		"page not a number":        {"page=one", 400, invalid, "Invalid Field", "page"},
 		"updated-since not a date": {"updated-since=yesterday", 400, invalidDate, "Invalid Date", "updated-since"},
-		"page-size zero":           {"page-size=0", 400, invalidPageSize, "Invalid Page Size", "page-size"},
+		"page-size zero":           {"page-size=0", 400, invalid, "Invalid Field", "page-size"},
+		"page-size not a number":   {"page-size=abc", 400, invalid, "Invalid Field", "page-size"},
 		"page-size above 1000":     {"page-size=1001", 400, invalidPageSize, "Invalid Page Size", "page-size"},
 		"page out of range": {
 			"page=1000&page-size=1",
