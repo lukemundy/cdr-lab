@@ -77,9 +77,8 @@ func (b Brand) Photos() []string {
 	return slices.Sorted(maps.Keys(b.photos))
 }
 
-// ProductCheck validates the products of the catalogue for the brand name. Its error names each product and rule that
-// fails.
-type ProductCheck func(brandName string, products [][]byte) error
+// ProductCheck validates the products of the catalogue. Its error names each product and rule that fails.
+type ProductCheck func(products [][]byte) error
 
 // Load validates each file of the directory at the root of dir, and gives one error that names each file and rule that
 // fails.
@@ -136,8 +135,8 @@ func Load(dir fs.FS, checkProducts ProductCheck) (Brand, error) {
 
 	if data, found := files[productsFile]; found {
 		products, err := ReadProducts(bytes.NewReader(data))
-		if err == nil && b.Name != "" {
-			err = checkProducts(b.Name, products)
+		if err == nil {
+			err = checkProducts(products)
 		}
 
 		errs = appendFileError(errs, productsFile, err)

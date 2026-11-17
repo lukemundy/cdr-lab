@@ -25,6 +25,7 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 
 - <a id="dh-0729"></a>**DH-0729** The request bodies and the response bodies are JSON. ([Judgement: an operator interface for the customer data of the lab](#dh-0770))
 - <a id="dh-0730"></a>**DH-0730** When a request body is not valid, the response is 400, and the `detail` names each field and rule that fails. For example, a body with [a field that the table does not give](../../../pkg/platform/jsonhttp/DESIGN.md#body-0001) is not valid. ([RFC 9457, section 3.1.4][rfc9457-detail])
+- <a id="dh-2615"></a>**DH-2615** When a request body is larger than 64 KiB, the response is 413. ([the status of a body that is larger than its limit](../../../pkg/platform/problem/DESIGN.md#prob-0012); [Judgement: a body limit for each operation, with 413](operator-console-api.md#dh-1681))
 - <a id="dh-0731"></a>**DH-0731** The `detail` of an error response does not repeat a value of the request. ([RFC 9457, section 3.1.4][rfc9457-detail])
 - <a id="dh-0732"></a>**DH-0732** A request for a customer that does not exist gets 404. ([RFC 9110, section 15.5.5][rfc9110-404])
 - <a id="dh-0733"></a>**DH-0733** An error response is a [problem details](../../../docs/spec/glossary.md#problem-details) body with [the type `about:blank`](../../../pkg/platform/problem/DESIGN.md#prob-0001). ([RFC 9457][rfc9457])

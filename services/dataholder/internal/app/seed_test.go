@@ -2,6 +2,7 @@ package app_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -24,8 +25,6 @@ func (s *fakeStore) ImportProducts(_ context.Context, products []domain.Product)
 	return s.err
 }
 
-const brandName = "Mock Bank"
-
 func product(id, extra string) []byte {
 	return []byte(`{"productId": "` + id + `", "lastUpdated": "2026-08-03T01:00:00Z",
 		"productCategory": "TRANS_AND_SAVINGS_ACCOUNTS", "name": "n", "description": "d", "brand": "Mock Bank"` +
@@ -35,7 +34,7 @@ func product(id, extra string) []byte {
 func TestSeedImportsAllTheProductsOfAValidSet(t *testing.T) {
 	store := &fakeStore{}
 
-	err := app.Seed(t.Context(), store, brandName, [][]byte{product("saver", ""), product("loan", "")})
+	err := app.Seed(t.Context(), store, [][]byte{product("saver", ""), product("loan", "")})
 
 	require.NoError(t, err)
 	require.Len(t, store.products, 2)
@@ -47,7 +46,7 @@ func TestSeedImportsAllTheProductsOfAValidSet(t *testing.T) {
 func TestSeedImportsNothingAndNamesEachProductAndRuleThatFails(t *testing.T) {
 	store := &fakeStore{}
 
-	err := app.Seed(t.Context(), store, brandName, [][]byte{
+	err := app.Seed(t.Context(), store, [][]byte{
 		product("saver", ""),
 		product("card", `, "features": [{"featureType": "OTHER"}, {"featureType": "FREE_COFFEE"}]`),
 		product("", `, "interestRate": "0.05"`),
@@ -70,7 +69,7 @@ func TestSeedImportsNothingAndNamesEachProductAndRuleThatFails(t *testing.T) {
 
 // Verifies: DH-0212
 func TestSeedFindsADuplicateOfAProductThatIsNotValid(t *testing.T) {
-	err := app.Seed(t.Context(), &fakeStore{}, brandName, [][]byte{
+	err := app.Seed(t.Context(), &fakeStore{}, [][]byte{
 		product("card", `, "features": [{"featureType": "OTHER"}]`),
 		product("card", ""),
 	})
@@ -82,24 +81,25 @@ func TestSeedFindsADuplicateOfAProductThatIsNotValid(t *testing.T) {
 func TestSeedGivesTheErrorOfTheStore(t *testing.T) {
 	store := &fakeStore{err: app.ErrNotEmpty}
 
-	err := app.Seed(t.Context(), store, brandName, [][]byte{product("saver", "")})
+	err := app.Seed(t.Context(), store, [][]byte{product("saver", "")})
 
 	assert.ErrorIs(t, err, app.ErrNotEmpty)
 }
 
-// Verifies: DH-0217, DH-0232
-func TestSeedRefusesAProductWhoseBrandIsNotTheBrandName(t *testing.T) {
+// Verifies: DH-0217
+func TestSeedLoadsAProductWithASubBrandLabel(t *testing.T) {
 	store := &fakeStore{}
+	subBrand := strings.Replace(string(product("business", "")), `"Mock Bank"`, `"Mock Bank Business"`, 1)
 
-	err := app.Seed(t.Context(), store, "Coastal Bank", [][]byte{product("saver", "")})
+	err := app.Seed(t.Context(), store, [][]byte{product("saver", ""), []byte(subBrand)})
 
-	require.Error(t, err)
-	assert.Zero(t, store.calls, "the store gets no products")
-	assert.Contains(t, err.Error(), `product 1 ("saver"): brand "Mock Bank" is not the brand name "Coastal Bank"`)
+	require.NoError(t, err)
+	require.Len(t, store.products, 2)
+	assert.Equal(t, "Mock Bank Business", store.products[1].Brand)
 }
 
 func TestCheckProductsGivesTheProductsOfAValidSet(t *testing.T) {
-	products, err := app.CheckProducts(brandName, [][]byte{product("saver", ""), product("loan", "")})
+	products, err := app.CheckProducts([][]byte{product("saver", ""), product("loan", "")})
 
 	require.NoError(t, err)
 	require.Len(t, products, 2)

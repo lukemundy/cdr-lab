@@ -33,7 +33,7 @@ This area gives the products of the brand, their load, and the public APIs Get P
   - A fee has the object that its `feeMethodUType` names.
   - When a feature or a fee has the type `OTHER`, it has an `additionalInfo`.
   - When a deposit rate or a lending rate has the application type `PERIODIC`, it has an `applicationFrequency`.
-- <a id="dh-0217"></a>**DH-0217** The `brand` of a product is the brand name. ([CDR Support: Brands in the CDR ecosystem][support-brands]; [the brand name](brand.md#dh-0304))
+- <a id="dh-0217"></a>**DH-0217** The `brand` of a product is a label that is not empty: [the brand name](brand.md#dh-0304) or the label of a sub-brand. For example, `Wattle Bank Business`. ([CDS: BankingProductV6][cds-schema-product]; [CDR Support: Brands in the CDR ecosystem][support-brands]; [Judgement: any label that is not empty as the brand of a product](#dh-2614))
 - <a id="dh-0218"></a>**DH-0218** A product `name` has 100 characters or fewer. For example, the load refuses a name of 101 characters. ([CDS: BankingProductV6][cds-schema-product]; [Judgement: a product name of 100 characters at most](#dh-0263))
 - <a id="dh-0219"></a>**DH-0219** A product is current when the time of the request is at or after its `effectiveFrom` and before its `effectiveTo`. A date that is absent has no limit. ([CDS: Get Products][cds-get-products]; [Judgement: an effective period that includes its start and not its end](#dh-0264))
 - <a id="dh-0220"></a>**DH-0220** A product is future when its `effectiveFrom` is after the time of the request. ([CDS: Get Products][cds-get-products]; [Judgement: an effective period that includes its start and not its end](#dh-0264))
@@ -56,7 +56,6 @@ This area gives the products of the brand, their load, and the public APIs Get P
 - <a id="dh-0229"></a>**DH-0229** The load validates the full set against the product fields and the product validity rules of this area. When one product is not valid, the load changes nothing. ([the product fields](#dh-0200); [the product validity rules](#dh-0212))
 - <a id="dh-0230"></a>**DH-0230** When a product is not valid, the error of the load names each product and each rule that fails. For example, the error names the second product and its empty `name`. ([the product validity rules](#dh-0212))
 - <a id="dh-0231"></a>**DH-0231** The load refuses a product with a field that the data holder does not hold. For example, the load refuses a product with `brandGroup`. ([the optional fields that a product can have](#dh-0201); [Judgement: only the effective dates, features, fees and rates as optional fields](#dh-0260))
-- <a id="dh-0232"></a>**DH-0232** The load refuses a product whose `brand` is not the brand name. ([the brand of a product](#dh-0217))
 - <a id="dh-0233"></a>**DH-0233** The load does not compare an `additionalValue` with the rule of its type. ([CDS: Product & Account Components][cds-product-components]; [Judgement: no check of an `additionalValue` in the load](#dh-0269))
 - <a id="dh-0234"></a>**DH-0234** A load file uses the field names of the CDS product schemas. For example, a product in the file has `productCategory`. ([CDS: BankingProductDetailV7][cds-schema-product-detail]; [Judgement: the CDS field names in a load file](#dh-0270))
 - <a id="dh-0235"></a>**DH-0235** The lab loads the product catalogue of the default preset brand. ([the default preset brand](brand.md#dh-0346); [Judgement: realistic products in the lab](#dh-0271))
@@ -188,6 +187,12 @@ This area gives the products of the brand, their load, and the public APIs Get P
 - Kind: choice
 - Basis: Step 3.3. The CDS gives the statuses and the outages that a data holder reports ([CDS: Get Status][cds-get-status], [CDS: Get Outages][cds-get-outages]).
 - Reason: The mock has no monitor of its own endpoints and no planned outages, and a data holder that responds is functional. An operator function to set a status or an outage can come when a client needs to test it.
+
+### <a id="dh-2614"></a>DH-2614 Any label that is not empty as the brand of a product
+
+- Kind: choice
+- Basis: Step 2. The CDS `brand` field is a label of the brand for the product, which a client can use as a filter ([CDS: BankingProductV6][cds-schema-product]). The ACCC says that the field is for the sub-brands of a brand, for example retail and business ([CDR Support: Brands in the CDR ecosystem][support-brands]).
+- Reason: The data holder does not know the other brands on the Register, so it cannot find a label that is a separate brand. The author of the catalogue knows the sub-brands. The other option is to accept only the brand name, and that refuses each sub-brand.
 
 [cds-get-products]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-banking-api_get-products
 [cds-get-product-detail]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-banking-api_get-product-detail

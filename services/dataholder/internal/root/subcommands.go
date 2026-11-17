@@ -56,7 +56,7 @@ func seed(ctx context.Context, pool *pgxpool.Pool, args []string) error {
 		return err
 	}
 
-	err = app.Seed(ctx, productstore.New(pool), brand.Name, products)
+	err = app.Seed(ctx, productstore.New(pool), products)
 	if errors.Is(err, app.ErrNotEmpty) && *ifEmpty {
 		slog.InfoContext(ctx, "products not loaded: the data holder already has products")
 		return nil

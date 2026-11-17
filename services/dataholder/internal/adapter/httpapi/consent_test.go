@@ -423,12 +423,11 @@ func TestUserInfoOmitsTheGivenNameOfACustomerWhoHasNoFirstName(t *testing.T) {
 }
 
 // Verifies: DH-1029, DH-1105
-func TestUserInfoNeedsTheScopeOpenIDAndGives403WithNoBody(t *testing.T) {
+func TestUserInfoNeedsTheScopeOpenIDAndGives403WithTheCDSError(t *testing.T) {
 	rec := userInfo(t, http.MethodGet, "no-openid")
 
-	assert.Equal(t, http.StatusForbidden, rec.Code)
+	requireCDSError(t, rec, http.StatusForbidden, cds.InvalidConsent, "The consent does not have the scope openid.")
 	assert.Equal(t, `Bearer error="insufficient_scope", scope="openid"`, rec.Header().Get("WWW-Authenticate"))
-	assert.Empty(t, rec.Body.String())
 }
 
 // Verifies: DH-1020

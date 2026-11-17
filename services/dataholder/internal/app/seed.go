@@ -16,8 +16,8 @@ type ProductStore interface {
 }
 
 // Seed loads a full set of products of the brand into a store that has none, or makes no changes.
-func Seed(ctx context.Context, store ProductStore, brandName string, details [][]byte) error {
-	products, err := CheckProducts(brandName, details)
+func Seed(ctx context.Context, store ProductStore, details [][]byte) error {
+	products, err := CheckProducts(details)
 	if err != nil {
 		return err
 	}
@@ -26,7 +26,7 @@ func Seed(ctx context.Context, store ProductStore, brandName string, details [][
 }
 
 // CheckProducts gives the products of a full set of the brand, or an error that names each product and rule that fails.
-func CheckProducts(brandName string, details [][]byte) ([]domain.Product, error) {
+func CheckProducts(details [][]byte) ([]domain.Product, error) {
 	var errs []error
 
 	products := make([]domain.Product, 0, len(details))
@@ -42,13 +42,6 @@ func CheckProducts(brandName string, details [][]byte) ([]domain.Product, error)
 		product, err := domain.ParseProduct(detail)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("%s:\n%w", productName(i, detail), err))
-			continue
-		}
-
-		if product.Brand != brandName {
-			err := fmt.Errorf("%s: brand %q is not the brand name %q", productName(i, detail), product.Brand, brandName)
-			errs = append(errs, err)
-
 			continue
 		}
 

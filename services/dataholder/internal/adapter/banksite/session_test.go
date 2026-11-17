@@ -540,13 +540,7 @@ func TestAFullStoreRefusesASignInAndASignUpWith503AndCreatesNoCustomer(t *testin
 
 // Verifies: DH-2042, DH-2043
 func TestAFullStoreAcceptsASignInThatEndsAValidSessionOfTheRequest(t *testing.T) {
-	store := newCustomers(quoll)
-	s := newSite(t, store)
-
-	var last *http.Cookie
-	for range 10_000 {
-		last = sessionCookie(t, s.signIn(quoll.CustomerNumber))
-	}
+	s, last := fullSite(t, newCustomers(quoll))
 
 	again := s.signIn(quoll.CustomerNumber, last)
 
@@ -554,13 +548,72 @@ func TestAFullStoreAcceptsASignInThatEndsAValidSessionOfTheRequest(t *testing.T)
 	assert.Equal(t, http.StatusForbidden, s.readSession(last).status)
 	assert.Equal(t, http.StatusOK, s.readSession(sessionCookie(t, again)).status)
 	assert.Equal(t, http.StatusServiceUnavailable, s.signIn(quoll.CustomerNumber).status)
+}
+
+// Verifies: DH-2042, DH-2043
+func TestAFullStoreAcceptsASignUpThatEndsAValidSessionOfTheRequest(t *testing.T) {
+	store := newCustomers(quoll)
+	s, last := fullSite(t, store)
 
 	signUp := s.do(request{
-		method: http.MethodPost, target: "/api/customers", cookies: []*http.Cookie{sessionCookie(t, again)},
+		method: http.MethodPost, target: "/api/customers", cookies: []*http.Cookie{last},
 		body: `{"lastName": "Numbat", "emailAddress": "numbat@mail.test"}`,
 	})
-	assert.Equal(t, http.StatusServiceUnavailable, signUp.status)
-	assert.Equal(t, 1, store.count())
+
+	require.Equal(t, http.StatusCreated, signUp.status, signUp.body)
+	assert.Equal(t, 2, store.count())
+	assert.Equal(t, http.StatusForbidden, s.readSession(last).status)
+	assert.Equal(t, http.StatusOK, s.readSession(sessionCookie(t, signUp)).status)
+}
+
+// Verifies: DH-2037, DH-2042, DH-2043
+func TestAFullStoreKeepsTheValidSessionOfAFailedSignInOrSignUp(t *testing.T) {
+	signUp := `{"lastName": "Quoll", "emailAddress": "` + quoll.EmailAddress + `"}`
+
+	for name, tt := range map[string]struct {
+		r         request
+		createErr error
+	}{
+		"unknown identifier": {
+			r: request{method: http.MethodPost, target: "/api/session", body: `{"identifier": "99999999"}`},
+		},
+		"email in use": {
+			r:         request{method: http.MethodPost, target: "/api/customers", body: signUp},
+			createErr: app.ErrEmailAddressUsed,
+		},
+		"sign-in body not valid": {r: request{method: http.MethodPost, target: "/api/session", body: `null`}},
+		"sign-up body not valid": {
+			r: request{method: http.MethodPost, target: "/api/customers", body: `{"lastName": 1}`},
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			store := newCustomers(quoll)
+			s, last := fullSite(t, store)
+			store.createErr = tt.createErr
+			r := tt.r
+
+			r.cookies = []*http.Cookie{last}
+			resp := s.do(r)
+
+			assert.Contains(t, []int{http.StatusBadRequest, http.StatusConflict}, resp.status, resp.body)
+			assert.Equal(t, http.StatusOK, s.readSession(last).status)
+			assert.Equal(t, 1, store.count())
+		})
+	}
+}
+
+// fullSite gives a site whose session store is full, with 10,000 sessions of quoll, and the cookie of the last session.
+func fullSite(t *testing.T, store *customers) (*site, *http.Cookie) {
+	t.Helper()
+
+	s := newSite(t, store)
+
+	var last *http.Cookie
+	for range 10_000 {
+		last = sessionCookie(t, s.signIn(quoll.CustomerNumber))
+	}
+
+	return s, last
 }
 
 func TestASignUpThatFailsGives500AndNoSession(t *testing.T) {

@@ -38,13 +38,13 @@ const (
 
 func closeAccount(accounts AccountCloser) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ends, ok := decodeEnds(http.MaxBytesReader(w, r.Body, maxActionBodyBytes))
-		if !ok {
-			problem.Write(w, http.StatusBadRequest, badCloseBody)
+		ends, err := decodeEnds(http.MaxBytesReader(w, r.Body, maxActionBodyBytes))
+		if err != nil {
+			problem.WriteBodyRefusal(w, err, badCloseBody)
 			return
 		}
 
-		_, err := accounts.CloseAccountThatEnds(
+		_, err = accounts.CloseAccountThatEnds(
 			r.Context(), r.PathValue("customerNumber"), r.PathValue("accountId"), ends,
 		)
 
@@ -61,16 +61,22 @@ func closeAccount(accounts AccountCloser) http.Handler {
 	})
 }
 
-func decodeEnds(body io.Reader) ([]string, bool) {
+var errNoEnds = errors.New("the body has no ends")
+
+func decodeEnds(body io.Reader) ([]string, error) {
 	var request struct {
 		Ends *[]string `json:"ends"`
 	}
 
-	if jsonhttp.Decode(body, &request) != nil || request.Ends == nil {
-		return nil, false
+	if err := jsonhttp.Decode(body, &request); err != nil {
+		return nil, err
 	}
 
-	return *request.Ends, true
+	if request.Ends == nil {
+		return nil, errNoEnds
+	}
+
+	return *request.Ends, nil
 }
 
 // A withdrawal has no body, because it ends only the arrangement of the path.

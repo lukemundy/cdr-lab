@@ -17,8 +17,10 @@ func createTransaction(creator Creator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// A pointer is nil after the JSON null, which decodes into a struct with no error.
 		var request *domain.TransactionInput
-		if jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxCreateBodyBytes), &request) != nil || request == nil {
-			problem.Write(w, http.StatusBadRequest, badTransactionBody)
+
+		err := jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxCreateBodyBytes), &request)
+		if err != nil || request == nil {
+			problem.WriteBodyRefusal(w, err, badTransactionBody)
 			return
 		}
 

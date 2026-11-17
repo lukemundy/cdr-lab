@@ -293,13 +293,13 @@ func closeAccount(customers Customers, s sessions) http.Handler {
 			return
 		}
 
-		ends, ok := decodeEnds(http.MaxBytesReader(w, r.Body, maxCloseBodyBytes))
-		if !ok {
-			problem.Write(w, http.StatusBadRequest, badCloseBody)
+		ends, err := decodeEnds(http.MaxBytesReader(w, r.Body, maxCloseBodyBytes))
+		if err != nil {
+			problem.WriteBodyRefusal(w, err, badCloseBody)
 			return
 		}
 
-		_, err := customers.CloseAccountThatEnds(r.Context(), customerNumber, r.PathValue("accountId"), ends)
+		_, err = customers.CloseAccountThatEnds(r.Context(), customerNumber, r.PathValue("accountId"), ends)
 
 		switch {
 		case err == nil:
@@ -314,16 +314,22 @@ func closeAccount(customers Customers, s sessions) http.Handler {
 	})
 }
 
-func decodeEnds(body io.Reader) ([]string, bool) {
+var errNoEnds = errors.New("the body has no ends")
+
+func decodeEnds(body io.Reader) ([]string, error) {
 	var request *struct {
 		Ends *[]string `json:"ends"`
 	}
 
-	if jsonhttp.Decode(body, &request) != nil || request == nil || request.Ends == nil {
-		return nil, false
+	if err := jsonhttp.Decode(body, &request); err != nil {
+		return nil, err
 	}
 
-	return *request.Ends, true
+	if request == nil || request.Ends == nil {
+		return nil, errNoEnds
+	}
+
+	return *request.Ends, nil
 }
 
 const badOpenBody = "The request body must be a JSON object with productId, and optionally creditLimit or " +
@@ -346,8 +352,10 @@ func openAccount(opener AccountOpener, reader AccountReader, s sessions, now fun
 		}
 
 		var request *openRequest
-		if jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxBodyBytes), &request) != nil || request == nil {
-			problem.Write(w, http.StatusBadRequest, badOpenBody)
+
+		err := jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxBodyBytes), &request)
+		if err != nil || request == nil {
+			problem.WriteBodyRefusal(w, err, badOpenBody)
 
 			return
 		}

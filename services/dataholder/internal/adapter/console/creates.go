@@ -42,8 +42,10 @@ func createCustomer(creator Creator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// A pointer is nil after the JSON null, which decodes into a struct with no error.
 		var request *customerCreate
-		if jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxCreateBodyBytes), &request) != nil || request == nil {
-			problem.Write(w, http.StatusBadRequest, badCustomerBody)
+
+		err := jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxCreateBodyBytes), &request)
+		if err != nil || request == nil {
+			problem.WriteBodyRefusal(w, err, badCustomerBody)
 			return
 		}
 
@@ -63,8 +65,10 @@ func createCustomer(creator Creator) http.Handler {
 func createAccount(creator Creator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var request *domain.AccountInput
-		if jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxCreateBodyBytes), &request) != nil || request == nil {
-			problem.Write(w, http.StatusBadRequest, badAccountBody)
+
+		err := jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxCreateBodyBytes), &request)
+		if err != nil || request == nil {
+			problem.WriteBodyRefusal(w, err, badAccountBody)
 			return
 		}
 

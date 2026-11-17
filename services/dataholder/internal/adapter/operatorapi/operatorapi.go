@@ -155,7 +155,7 @@ func decode(w http.ResponseWriter, r *http.Request, into any) bool {
 		detail += " " + err.Error() + "."
 	}
 
-	problem.Write(w, http.StatusBadRequest, detail)
+	problem.WriteBodyRefusal(w, err, detail)
 
 	return false
 }

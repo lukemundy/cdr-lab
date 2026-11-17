@@ -53,9 +53,9 @@ The rules of this group are for the APIs on the resource base URI and for the Us
 | <a id="dh-1026"></a>**DH-1026** | The request has no bearer token | 401 with `WWW-Authenticate: Bearer` | [RFC 6750, section 3.1][rfc6750-errors] |
 | <a id="dh-1027"></a>**DH-1027** | The token is not known, is expired, is revoked, is of an arrangement that ended, is not bound to the client certificate, or is a client credentials token | 401 with `WWW-Authenticate: Bearer error="invalid_token"` | [RFC 6750, section 3.1][rfc6750-errors]; [Judgement: invalid_token after the end of an arrangement](#dh-1156) |
 | <a id="dh-1028"></a>**DH-1028** | On the resource base URI, the token does not have the scope of the API | 403 with `WWW-Authenticate: Bearer error="insufficient_scope"` and the scope of the API. The body has the CDS error `urn:au-cds:error:cds-all:Authorisation/InvalidConsent`. | [RFC 6750, section 3.1][rfc6750-errors]; [CDS: HTTP Response Codes][cds-http-response-codes]; [CDS: Invalid Consent][cds-error-403-invalid-consent] |
-| <a id="dh-1029"></a>**DH-1029** | On the UserInfo endpoint, the token does not have the scope `openid` | 403 with `WWW-Authenticate: Bearer error="insufficient_scope"` and the scope `openid`, with no body | [RFC 6750, section 3.1][rfc6750-errors]; [Judgement: no body for a refused token](#dh-1155) |
+| <a id="dh-1029"></a>**DH-1029** | On the UserInfo endpoint, the token does not have the scope `openid` | 403 with `WWW-Authenticate: Bearer error="insufficient_scope"` and the scope `openid`. The body has the CDS error `urn:au-cds:error:cds-all:Authorisation/InvalidConsent`. | [RFC 6750, section 3.1][rfc6750-errors]; [CDS: HTTP Response Codes][cds-http-response-codes]; [CDS: Invalid Consent][cds-error-403-invalid-consent] |
 
-- <a id="dh-1030"></a>**DH-1030** A 401 response for a refused token has no body. ([RFC 6750, section 3.1][rfc6750-errors]; [Judgement: no body for a refused token](#dh-1155))
+- <a id="dh-1030"></a>**DH-1030** A 401 response for a refused token has no body. ([RFC 6750, section 3.1][rfc6750-errors]; [Judgement: no body for a 401 for a refused token](#dh-1155))
 - <a id="dh-1031"></a>**DH-1031** Each successful response on the resource base URI has [the response envelope](../../../pkg/cds/DESIGN.md#cdsl-0034), with [a `links.self`](../../../pkg/cds/DESIGN.md#cdsl-0035). ([CDS: Get Accounts][cds-get-accounts])
 - <a id="dh-1032"></a>**DH-1032** A list on the resource base URI uses [the CDS pagination rules](../../../pkg/cds/DESIGN.md#cdsl-0017). For example, Get Accounts. ([CDS: Get Accounts][cds-get-accounts])
 - <a id="dh-1033"></a>**DH-1033** The data holder logs the `x-fapi-interaction-id` of each request on the resource base URI and on the UserInfo endpoint. ([FAPI 1.0 Baseline, section 6.2.1][fapi-baseline-resource]; [the values that telemetry does not contain](non-functional-requirements.md#dh-0008))
@@ -162,10 +162,10 @@ The rules of this group are for the APIs on the resource base URI and for the Us
 - Basis: Step 3.1. The CDR protects the data of real consumers, and the lab has no real consumers.
 - Reason: The lab must hold no personal information. Invented data has no privacy risk.
 
-### <a id="dh-1155"></a>DH-1155 No body for a refused token
+### <a id="dh-1155"></a>DH-1155 No body for a 401 for a refused token
 
 - Kind: choice
-- Basis: Step 3.2. RFC 6750 gives the `WWW-Authenticate` values and no body ([RFC 6750, section 3.1][rfc6750-errors]). The CDS requires an error body only for a 403 for a scope that is not correct ([CDS: HTTP Response Codes][cds-http-response-codes]).
+- Basis: Step 3.2. RFC 6750 gives the `WWW-Authenticate` values and no body ([RFC 6750, section 3.1][rfc6750-errors]). The CDS gives no error code for a 401 ([CDS: HTTP Response Codes][cds-http-response-codes]).
 - Reason: The header gives the client all the information. Registration management has the same 401 responses.
 
 ### <a id="dh-1156"></a>DH-1156 invalid_token after the end of an arrangement

@@ -63,7 +63,7 @@ func registerConsentData(routes *httproute.Routes, s Secure) {
 	logged := routes.With(logInteraction)
 
 	userInfo := logged.With(
-		consentToken(s.ConsentTokens, s.ClientStatuses, scopeOpenID, userInfoRefusals),
+		consentToken(s.ConsentTokens, s.ClientStatuses, scopeOpenID, userInfoNotActive),
 		recordDisclosure(s.Disclosures, userInfoScope),
 	)
 	userInfo.Handle("GET "+s.UserInfoPath, userInfoClaims(s.Customers))
@@ -71,7 +71,7 @@ func registerConsentData(routes *httproute.Routes, s Secure) {
 
 	resource := func(scope string, minV, maxV int) *httproute.Routes {
 		return logged.With(
-			consentToken(s.ConsentTokens, s.ClientStatuses, scope, resourceRefusals),
+			consentToken(s.ConsentTokens, s.ClientStatuses, scope, writeNotActive),
 			recordDisclosure(s.Disclosures, func(authserver.ConsentToken) string { return scope }),
 			cds.Versioned(minV, maxV),
 			resourceHeaders,
@@ -113,25 +113,16 @@ func consentTokenOf(r *http.Request) authserver.ConsentToken {
 	return token
 }
 
-// consentRefusals are the refusals that are different on the UserInfo endpoint and on the resource base URI.
-type consentRefusals struct {
-	notActive         func(w http.ResponseWriter, status domain.SoftwareProductStatus)
-	insufficientScope func(w http.ResponseWriter, scope string)
-}
+// notActiveRefusal is different on the UserInfo endpoint and on the resource base URI.
+type notActiveRefusal func(w http.ResponseWriter, status domain.SoftwareProductStatus)
 
-var (
-	userInfoRefusals = consentRefusals{
-		notActive:         func(w http.ResponseWriter, _ domain.SoftwareProductStatus) { invalidToken(w) },
-		insufficientScope: func(w http.ResponseWriter, _ string) { w.WriteHeader(http.StatusForbidden) },
-	}
-	resourceRefusals = consentRefusals{notActive: writeNotActive, insufficientScope: writeInvalidConsent}
-)
+func userInfoNotActive(w http.ResponseWriter, _ domain.SoftwareProductStatus) { invalidToken(w) }
 
 func consentToken(
 	tokens ConsentTokenVerifier,
 	statuses ClientStatusReader,
 	scope string,
-	refusals consentRefusals,
+	notActive notActiveRefusal,
 ) httproute.Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -159,13 +150,13 @@ func consentToken(
 			}
 
 			if status != domain.SoftwareProductActive {
-				refusals.notActive(w, status)
+				notActive(w, status)
 				return
 			}
 
 			if !slices.Contains(token.Scopes, scope) {
 				w.Header().Set("WWW-Authenticate", `Bearer error="insufficient_scope", scope="`+scope+`"`)
-				refusals.insufficientScope(w, scope)
+				writeInvalidConsent(w, scope)
 
 				return
 			}

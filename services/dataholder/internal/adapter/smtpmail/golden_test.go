@@ -33,7 +33,7 @@ func TestTheOTPEmailOfEachPresetBrandIsTheGoldenFile(t *testing.T) {
 			dir, err := brands.Preset(name)
 			require.NoError(t, err)
 
-			preset, err := branddir.Load(dir, func(string, [][]byte) error { return nil })
+			preset, err := branddir.Load(dir, func([][]byte) error { return nil })
 			require.NoError(t, err)
 
 			colours := smtpmail.RoleColours(preset.Colours)
