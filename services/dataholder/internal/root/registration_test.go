@@ -14,6 +14,7 @@ import (
 	"github.com/lukemundy/cdr-lab/pkg/platform/jobs"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/jtistore"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/registrationstore"
+	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/statusstore"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/app"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/domain"
 )
@@ -79,6 +80,7 @@ func startedRegistrar(t *testing.T, pool *pgxpool.Pool) app.Registrar {
 		JTIs:          jtistore.New(pool),
 		Store:         newEventStore(pool, inserter),
 		Registrations: registrationstore.NewQueries(pool),
+		Statuses:      statusstore.New(pool, nil),
 		Now:           func() time.Time { return now },
 		NewID:         uuid.NewString,
 	}

@@ -109,6 +109,7 @@ func apiListeners(ctx context.Context, pool *pgxpool.Pool, cfg apiConfig, parts 
 		JTIs:          jtis,
 		Store:         parts.events,
 		Registrations: parts.registrations,
+		Statuses:      parts.statuses,
 		Now:           time.Now,
 		NewID:         uuid.NewString,
 	}

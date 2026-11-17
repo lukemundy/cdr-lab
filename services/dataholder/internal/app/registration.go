@@ -114,6 +114,7 @@ type Registrar struct {
 	Store  eventsourcing.Store
 	// Registrations gives the software product of a client ID, which is the stream of its registration.
 	Registrations RegistrationReader
+	Statuses      StatusReader
 	Now           func() time.Time
 	NewID         func() string
 }
@@ -236,6 +237,10 @@ func (r Registrar) verifiedRegistration(
 	if err != nil {
 		return domain.Registration{}, "", err
 	}
+
+	if err := r.refuseRemoved(ctx, ssa.SoftwareID); err != nil {
+		return domain.Registration{}, "", err
+	}
 	// The SSA is verified first, so that the data holder connects only to a JWKS URI that the Register signed.
 	request, err := r.JWTs.VerifyRequest(ctx, requestJWT, ssa.JWKSURI)
 	switch {
@@ -256,6 +261,20 @@ func (r Registrar) verifiedRegistration(
 	registration, err = domain.NewRegistration(ssa, request, r.Issuer, now)
 
 	return registration, request.ID, err
+}
+
+// refuseRemoved permits a software product with no status, because only REMOVED is final.
+func (r Registrar) refuseRemoved(ctx context.Context, softwareID string) error {
+	status, _, err := r.Statuses.Status(ctx, softwareID)
+	if err != nil {
+		return fmt.Errorf("read the status of the software product: %w", err)
+	}
+
+	if status == domain.SoftwareProductRemoved {
+		return refused(domain.UnapprovedSoftwareStatement, "the software product is REMOVED")
+	}
+
+	return nil
 }
 
 func (r Registrar) consume(ctx context.Context, jti string) error {

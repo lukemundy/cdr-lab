@@ -24,6 +24,8 @@ func TestTheRemovalOfASoftwareProductEndsItsConsentsAndItsRegistrationWithNoNoti
 	require.IsType(t, "", tokens["refresh_token"], tokens)
 	refreshToken := tokens["refresh_token"].(string)
 	arrangementID := arrangementIDOf(t, tokens)
+	// The Register gives an SSA only to an ACTIVE software product, so the SSA of the new registration comes first.
+	again := newRegistrant(t, removedProduct)
 
 	changeStatus(t, removedProduct, "remove")
 
@@ -51,5 +53,9 @@ func TestTheRemovalOfASoftwareProductEndsItsConsentsAndItsRegistrationWithNoNoti
 		requireTokenError(t, client.requestToken(t, client.assertion(t, tokenEndpoint(t, client))),
 			http.StatusUnauthorized, "invalid_client")
 		requireTokenError(t, client.refresh(t, refreshToken), http.StatusUnauthorized, "invalid_client")
+	})
+
+	t.Run("a new registration with an SSA that is not expired is refused", func(t *testing.T) {
+		requireRegistrationError(t, again.register(t, again.claims()), "unapproved_software_statement")
 	})
 }

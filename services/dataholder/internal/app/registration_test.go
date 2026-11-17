@@ -140,6 +140,7 @@ func newRegistrar(j *jwts) app.Registrar {
 		JTIs:          jtis{},
 		Store:         store,
 		Registrations: storeReader{store: store},
+		Statuses:      softwareStatuses{},
 		Now:           func() time.Time { return registrationTime },
 		NewID: func() string {
 			ids++
@@ -217,6 +218,49 @@ func TestASecondRegistrationOfTheSameSoftwareProductIsRefused(t *testing.T) {
 	_, err = registrar.Register(t.Context(), requestJWT)
 
 	requireRegistrationError(t, err, domain.InvalidSoftwareStatement, "software_id")
+}
+
+// Verifies: DH-0693, DH-0655
+func TestARegistrationOfARemovedSoftwareProductIsRefused(t *testing.T) {
+	j := validJWTs()
+	registrar := newRegistrar(j)
+	registrar.Statuses = softwareStatuses{"software-1": domain.SoftwareProductRemoved}
+
+	_, err := registrar.Register(t.Context(), requestJWT)
+
+	requireRegistrationError(t, err, domain.UnapprovedSoftwareStatement, "REMOVED")
+	assert.Empty(t, j.keysFrom, "the data holder does not get the keys of a REMOVED software product")
+}
+
+// Verifies: DH-0621
+func TestASoftwareProductThatIsNotRemovedCanRegister(t *testing.T) {
+	tests := map[string]softwareStatuses{
+		"ACTIVE":    {"software-1": domain.SoftwareProductActive},
+		"INACTIVE":  {"software-1": domain.SoftwareProductInactive},
+		"no status": {},
+	}
+	for name, statuses := range tests {
+		t.Run(name, func(t *testing.T) {
+			registrar := newRegistrar(validJWTs())
+			registrar.Statuses = statuses
+
+			_, err := registrar.Register(t.Context(), requestJWT)
+
+			assert.NoError(t, err)
+		})
+	}
+}
+
+func TestAFailureToReadTheStatusIsNotARegistrationError(t *testing.T) {
+	j := validJWTs()
+	j.ssa.SoftwareID, j.request.Issuer = "software-failure", "software-failure"
+
+	_, err := newRegistrar(j).Register(t.Context(), requestJWT)
+
+	require.Error(t, err)
+
+	var registrationErr domain.RegistrationError
+	assert.NotErrorAs(t, err, &registrationErr)
 }
 
 // Verifies: DH-0608
