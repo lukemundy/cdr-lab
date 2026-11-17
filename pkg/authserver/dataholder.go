@@ -53,6 +53,8 @@ type DataHolderClient struct {
 	RedirectURIs []string
 	// RequestObjectSigningAlg is the only algorithm that the client signs a request object with.
 	RequestObjectSigningAlg string
+	// TokenEndpointAuthSigningAlg is the only algorithm that the client signs a client assertion with.
+	TokenEndpointAuthSigningAlg string
 }
 
 type DataHolderClientStore interface {
@@ -389,6 +391,11 @@ func (r registeredClients) Client(ctx context.Context, id string) (*goidc.Client
 		ResponseTypes:    []goidc.ResponseType{goidc.ResponseTypeCode},
 		JARSigAlg:        goidc.SignatureAlgorithm(c.RequestObjectSigningAlg),
 		TokenAuthnMethod: goidc.AuthnMethodPrivateKeyJWT,
+		// The library reads a separate algorithm for each endpoint. The CDR arrangement revocation endpoint
+		// authenticates the client at the token revocation endpoint.
+		TokenAuthnSigAlg:              goidc.SignatureAlgorithm(c.TokenEndpointAuthSigningAlg),
+		TokenIntrospectionAuthnSigAlg: goidc.SignatureAlgorithm(c.TokenEndpointAuthSigningAlg),
+		TokenRevocationAuthnSigAlg:    goidc.SignatureAlgorithm(c.TokenEndpointAuthSigningAlg),
 	}, nil
 }
 

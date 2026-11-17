@@ -103,6 +103,7 @@ func TestASoftwareProductUpdatesAndDeletesItsRegistrationAndRegistersAgain(t *te
 	claims := labtest.RegistrationClaims(lifecycleProduct, r.issuer, newSSA)
 	claims["grant_types"] = []string{"client_credentials", "authorization_code"}
 	claims["request_object_signing_alg"] = "ES256"
+	claims["token_endpoint_auth_signing_alg"] = "ES256"
 	updated := manage(http.MethodPut, signedRegistration(t, claims))
 	require.Equal(t, http.StatusOK, updated.status, string(updated.body))
 
@@ -118,6 +119,18 @@ func TestASoftwareProductUpdatesAndDeletesItsRegistrationAndRegistersAgain(t *te
 		assert.Equal(t, "no-store", updated.header.Get("Cache-Control"))
 
 		assert.Equal(t, registration, registrationOf(t, manage(http.MethodGet, "")), "GET gives the same values")
+	})
+
+	t.Run("after an update, the client authenticates only with the algorithm of the update", func(t *testing.T) {
+		endpoint := tokenEndpoint(t, client)
+		es256 := client.assertion(t, endpoint)
+		es256.Alg, es256.Key, es256.KID = jose.ES256, recipientKeys(t).EC, "ec"
+
+		r := client.requestToken(t, es256)
+		assert.Equal(t, http.StatusOK, r.Status, r.Body)
+
+		ps256 := client.requestToken(t, client.assertion(t, endpoint))
+		requireTokenError(t, ps256, http.StatusUnauthorized, "invalid_client")
 	})
 
 	require.False(t, t.Failed())

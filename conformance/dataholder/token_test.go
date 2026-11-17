@@ -183,7 +183,7 @@ func TestASoftwareProductWithNoRegistrationScopeGetsNoToken(t *testing.T) {
 	requireTokenError(t, r, http.StatusBadRequest, "invalid_scope")
 }
 
-func TestTheTokenEndpointAcceptsItsThreeAudiencesAndTwoAlgorithms(t *testing.T) {
+func TestTheTokenEndpointAcceptsItsThreeAudiencesAndOnlyTheRegisteredAlgorithm(t *testing.T) {
 	client := registered(t, registrationTestProduct)
 	endpoint := tokenEndpoint(t, client)
 	keys := recipientKeys(t)
@@ -198,13 +198,12 @@ func TestTheTokenEndpointAcceptsItsThreeAudiencesAndTwoAlgorithms(t *testing.T) 
 		}
 	})
 
-	t.Run("ES256", func(t *testing.T) {
+	// The client registered PS256. The registration management test accepts ES256 for a client that registered it.
+	t.Run("ES256 is refused", func(t *testing.T) {
 		a := client.assertion(t, endpoint)
 		a.Alg, a.Key, a.KID = jose.ES256, keys.EC, "ec"
 
-		r := client.requestToken(t, a)
-
-		assert.Equal(t, http.StatusOK, r.Status, r.Body)
+		requireTokenError(t, client.requestToken(t, a), http.StatusUnauthorized, "invalid_client")
 	})
 }
 

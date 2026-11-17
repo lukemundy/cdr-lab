@@ -35,11 +35,12 @@ The library gives [the client authentication with `private_key_jwt`](../../../pk
 
 The library gives the pushed authorisation request, the request object and the authorisation endpoint.
 
-- <a id="dh-0507"></a>**DH-0507** The authorisation request of a client uses these values of its registration. ([the grant types of the registration](../../../pkg/authserver/design/authorisation-request.md#auth-0064); [the signing algorithm of the request object](../../../pkg/authserver/design/authorisation-request.md#auth-0072); [the redirect URI of the request](../../../pkg/authserver/design/authorisation-request.md#auth-0083); [the scope of the registration](../../../pkg/authserver/design/authorisation-request.md#auth-0085))
+- <a id="dh-0507"></a>**DH-0507** The authorisation server uses these values of the registration of a client. ([the grant types of the registration](../../../pkg/authserver/design/authorisation-request.md#auth-0064); [the signing algorithm of the request object](../../../pkg/authserver/design/authorisation-request.md#auth-0072); [the redirect URI of the request](../../../pkg/authserver/design/authorisation-request.md#auth-0083); [the scope of the registration](../../../pkg/authserver/design/authorisation-request.md#auth-0085); [the signing algorithm of the client assertion](../../../pkg/authserver/design/client-authentication.md#auth-0240))
   - `grant_types`
   - `scope`
   - `redirect_uris`
   - `request_object_signing_alg`
+  - `token_endpoint_auth_signing_alg`
   - `jwks_uri`
 - <a id="dh-0508"></a>**DH-0508** When the data holder refuses a request to the authorisation endpoint, [its error page](../../../pkg/authserver/design/authorisation-request.md#auth-0101) does not say which rule failed. ([RFC 6749, section 4.1.2.1][rfc6749-authorisation-errors]; [Judgement: no cause on the error page of the authorisation endpoint](#dh-0534))
 

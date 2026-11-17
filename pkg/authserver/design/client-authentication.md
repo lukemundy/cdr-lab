@@ -11,6 +11,7 @@ This area gives the client authentication of each endpoint that authenticates a 
 - <a id="auth-0024"></a>**AUTH-0024** A service must give the client ID and the JWKS URI of each client. ([CDS: Client Authentication][cds-client-auth])
 - <a id="auth-0025"></a>**AUTH-0025** The authorisation server validates the assertion signature with the keys at the JWKS URI of the client. ([CDS: Client Authentication][cds-client-auth]; [CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
 - <a id="auth-0026"></a>**AUTH-0026** The authorisation server accepts an assertion that is signed with PS256 or ES256. ([FAPI 1.0 Advanced, section 8.6][fapi-algorithms]; [Judgement: the server signs with PS256 and accepts PS256 or ES256](configuration.md#auth-0013))
+- <a id="auth-0240"></a>**AUTH-0240** When a service gives the registered `token_endpoint_auth_signing_alg` of a client, the authorisation server refuses an assertion of that client with a different algorithm. For example, a client that registered PS256 cannot authenticate with ES256. ([OpenID Connect Dynamic Client Registration 1.0, section 2][oidc-dcr-metadata])
 - <a id="auth-0027"></a>**AUTH-0027** The authorisation server accepts one of these values as the `aud` of the assertion. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
   - the issuer
   - the URL of the token endpoint
@@ -37,3 +38,4 @@ This area gives the client authentication of each endpoint that authenticates a 
 [cds-client-auth]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#client-authentication
 [fapi-algorithms]: https://openid.net/specs/openid-financial-api-part-2-1_0.html#algorithm-considerations
 [rfc6749-errors]: https://www.rfc-editor.org/rfc/rfc6749#section-5.2
+[oidc-dcr-metadata]: https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata

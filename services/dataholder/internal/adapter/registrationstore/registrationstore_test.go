@@ -33,16 +33,17 @@ func newPool(t *testing.T) *pgxpool.Pool {
 
 func registration(clientID, softwareID string) domain.Registration {
 	return domain.Registration{
-		ClientID:                clientID,
-		ClientIDIssuedAt:        1791547200,
-		ClientName:              "Recipient Web",
-		RedirectURIs:            []string{"https://recipient.example/cb"},
-		JWKSURI:                 "https://recipient.example/jwks",
-		GrantTypes:              []domain.GrantType{domain.GrantClientCredentials, domain.GrantAuthorizationCode},
-		ResponseTypes:           []string{"code"},
-		RequestObjectSigningAlg: domain.ES256,
-		SoftwareID:              softwareID,
-		Scope:                   "openid bank:accounts.basic:read cdr:registration",
+		ClientID:                    clientID,
+		ClientIDIssuedAt:            1791547200,
+		ClientName:                  "Recipient Web",
+		RedirectURIs:                []string{"https://recipient.example/cb"},
+		JWKSURI:                     "https://recipient.example/jwks",
+		GrantTypes:                  []domain.GrantType{domain.GrantClientCredentials, domain.GrantAuthorizationCode},
+		ResponseTypes:               []string{"code"},
+		RequestObjectSigningAlg:     domain.ES256,
+		TokenEndpointAuthSigningAlg: domain.ES256,
+		SoftwareID:                  softwareID,
+		Scope:                       "openid bank:accounts.basic:read cdr:registration",
 	}
 }
 
@@ -95,12 +96,13 @@ func TestARegistrationIsAClientOfTheAuthorisationServer(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Equal(t, authserver.DataHolderClient{
-		ID:                      "client-1",
-		JWKSURI:                 "https://recipient.example/jwks",
-		Scopes:                  []string{"openid", "bank:accounts.basic:read", "cdr:registration"},
-		GrantTypes:              []string{"client_credentials", "authorization_code"},
-		RedirectURIs:            []string{"https://recipient.example/cb"},
-		RequestObjectSigningAlg: "ES256",
+		ID:                          "client-1",
+		JWKSURI:                     "https://recipient.example/jwks",
+		Scopes:                      []string{"openid", "bank:accounts.basic:read", "cdr:registration"},
+		GrantTypes:                  []string{"client_credentials", "authorization_code"},
+		RedirectURIs:                []string{"https://recipient.example/cb"},
+		RequestObjectSigningAlg:     "ES256",
+		TokenEndpointAuthSigningAlg: "ES256",
 	}, client)
 
 	_, err = clients.Client(t.Context(), "client-2")
