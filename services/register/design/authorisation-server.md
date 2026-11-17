@@ -14,7 +14,7 @@ This area gives the choices of the Register for its authorisation server: the Op
 
 The library gives [the fields and values of the Register configuration](../../../pkg/authserver/design/configuration.md#auth-0003), [only the client credentials grant](../../../pkg/authserver/design/token-endpoint.md#auth-0034) with [`private_key_jwt` client authentication](../../../pkg/authserver/design/client-authentication.md#auth-0020), and an access token that is [bound to the client certificate](../../../pkg/authserver/design/token-endpoint.md#auth-0045), [expires 5 minutes after it is issued](../../../pkg/authserver/design/token-endpoint.md#auth-0043) and has [no refresh token](../../../pkg/authserver/design/token-endpoint.md#auth-0042).
 
-- <a id="reg-0453"></a>**REG-0453** The client ID of a software product is its software product ID. The Register refuses a client assertion with a data recipient brand ID as its client ID. ([CDS: Data Recipients calling the CDR Register][cds-dr-calling-register]; [Judgement: the software product ID as the client ID](#reg-0480))
+- <a id="reg-0453"></a>**REG-0453** The client ID of a software product is its software product ID. The Register refuses a client assertion with a data recipient brand ID as its client ID. ([CDS: Data Recipients calling the CDR Register][cds-dr-calling-register]; [Judgement: only the software product ID as the client ID, not the brand ID](#reg-0480))
 - <a id="reg-0454"></a>**REG-0454** The Register gives the JWKS URI of the software product to [validate the client assertion signature](../../../pkg/authserver/design/client-authentication.md#auth-0025). ([CDS: Data Recipients calling the CDR Register][cds-dr-calling-register])
 - <a id="reg-0455"></a>**REG-0455** The Register keeps the `jti` of each client assertion that it accepted for 1 hour, across all software products. In that time, it [refuses the same `jti` again](../../../pkg/authserver/design/client-authentication.md#auth-0030). ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt]; [Judgement: the Register keeps a `jti` for 1 hour](#reg-0481))
 - <a id="reg-0456"></a>**REG-0456** The Register gives [the registered client certificates](participants.md#reg-0213) of the software product as the [certificates of the client](../../../pkg/authserver/design/token-endpoint.md#auth-0051). ([ACCC Developer Portal: Token Endpoint][accc-token])
@@ -36,11 +36,11 @@ The library gives [the format and the codes of RFC 6749, section 5.2](../../../p
 
 ## Judgements
 
-### <a id="reg-0480"></a>REG-0480 The software product ID as the client ID
+### <a id="reg-0480"></a>REG-0480 Only the software product ID as the client ID, not the brand ID
 
-- Kind: choice
-- Basis: Step 3.3. The CDS permits the software product ID or the brand ID as the client ID. It says that the brand ID is deprecated ([CDS: Data Recipients calling the CDR Register][cds-dr-calling-register]).
-- Reason: One client ID for each software product is the least complex. The CDS gives the software product ID as the identifier that stays.
+- Kind: gap
+- Basis: Step 1. The CDS requires that `client_id`, `iss` and `sub` are the Data Recipient Brand ID or the Software Product ID, and that the Register supports both. It also says that the brand ID "will be deprecated in the future and is currently retained for backwards compatibility" ([CDS: Data Recipients calling the CDR Register][cds-dr-calling-register]). The Register does not meet the requirement to support the brand ID ([production gaps](../../../docs/production-gaps.md#register)).
+- Reason: Support for the brand ID needs a rule for a brand with more than one software product: which JWKS and which client certificates apply. The CDS gives no such rule, and the brand ID is the identifier that the CDS will deprecate.
 
 ### <a id="reg-0481"></a>REG-0481 The Register keeps a `jti` for 1 hour
 
