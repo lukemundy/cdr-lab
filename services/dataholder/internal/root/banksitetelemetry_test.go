@@ -177,10 +177,19 @@ func TestTheBankSitePutsNoCustomerDataSessionIDOrPasswordInTheSpansMetricsOrLogs
 	}
 	consentAPI := http.NewServeMux()
 	httpapi.RegisterSecure(consentAPI, httpapi.Secure{
-		ResourceBaseURL: "https://mtls.bank.test", RegistrationPath: "/register", UserInfoPath: "/userinfo",
-		ConsentTokens: arrangementToken{arrangementID: "arrangement-wombat"}, ClientStatuses: activeClients{},
-		Customers: consentData, Accounts: consentData, Balances: consentData, Transactions: consentData,
-		Disclosures: app.Disclosures{Store: disclosurestore.New(pool), Now: time.Now},
+		ResourceBaseURL:  "https://mtls.bank.test",
+		RegistrationPath: "/register",
+		UserInfoPath:     "/userinfo",
+		ConsentTokens: arrangementToken{
+			arrangementID: "arrangement-wombat",
+		},
+		ClientStatuses: activeClients{},
+		Arrangements:   consentData,
+		Customers:      consentData,
+		Accounts:       consentData,
+		Balances:       consentData,
+		Transactions:   consentData,
+		Disclosures:    app.Disclosures{Store: disclosurestore.New(pool), Now: time.Now},
 	})
 
 	getAccounts := httptest.NewRequestWithContext(

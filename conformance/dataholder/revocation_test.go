@@ -127,6 +127,28 @@ func TestASoftwareProductRevokesItsTokens(t *testing.T) {
 			`Bearer error="invalid_token"`,
 		)
 	})
+
+	// Verifies: AUTH-0223, DH-0910
+	t.Run("the consent of more than 24 hours does not end", func(t *testing.T) {
+		assert.Nil(t, arrangementOf(t, customer, arrangementIDOf(t, tokens)).EndedAt)
+	})
+}
+
+// Verifies: DH-0910, AUTH-0223
+func TestARevokedRefreshTokenOfAOneTimeCollectionEndsItsConsent(t *testing.T) {
+	client := registered(t, allScopesProduct)
+	customer := newEligibleAccount(t)
+	tokens := customer.consents(client, noAccountScope, oneHour).tokens(t)
+	require.IsType(t, "", tokens["refresh_token"], tokens)
+	arrangementID := arrangementIDOf(t, tokens)
+
+	requireRevocationOK(t, client.revokeToken(t, tokens["refresh_token"].(string)))
+
+	ended := arrangementOf(t, customer, arrangementID)
+	assert.NotNil(t, ended.EndedAt)
+	assert.Equal(t, "REVOKED_BY_DATA_RECIPIENT", ended.EndReason)
+	assert.Empty(t, ended.NoticeStatus, "the consent has no notice")
+	requireInvalidArrangement(t, client.revokeArrangementID(t, arrangementID), arrangementID)
 }
 
 func TestARevokedClientCredentialsTokenIsRefusedByRegistrationManagement(t *testing.T) {

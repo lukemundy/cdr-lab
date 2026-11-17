@@ -11,6 +11,7 @@ This area gives the client authentication of each endpoint that authenticates a 
 - <a id="auth-0024"></a>**AUTH-0024** A service must give the client ID and the JWKS URI of each client. ([CDS: Client Authentication][cds-client-auth])
 - <a id="auth-0025"></a>**AUTH-0025** The authorisation server validates the assertion signature with the keys at the JWKS URI of the client. ([CDS: Client Authentication][cds-client-auth]; [CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
 - <a id="auth-0026"></a>**AUTH-0026** The authorisation server accepts an assertion that is signed with PS256 or ES256. ([FAPI 1.0 Advanced, section 8.6][fapi-algorithms]; [Judgement: the server signs with PS256 and accepts PS256 or ES256](configuration.md#auth-0013))
+- <a id="auth-0240"></a>**AUTH-0240** When a service gives the registered `token_endpoint_auth_signing_alg` of a client, the authorisation server refuses an assertion of that client with a different algorithm. For example, a client that registered PS256 cannot authenticate with ES256. ([OpenID Connect Dynamic Client Registration 1.0, section 2][oidc-dcr-metadata])
 - <a id="auth-0027"></a>**AUTH-0027** The authorisation server accepts one of these values as the `aud` of the assertion. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
   - the issuer
   - the URL of the token endpoint
@@ -22,7 +23,7 @@ This area gives the client authentication of each endpoint that authenticates a 
 
 ## Refusal
 
-- <a id="auth-0032"></a>**AUTH-0032** When the client authentication fails, the response is 401 with `invalid_client`, also when the client does not exist. ([RFC 6749, section 5.2][rfc6749-errors])
+- <a id="auth-0032"></a>**AUTH-0032** When the client authentication fails, the response is 401 with `invalid_client`, also when the client does not exist. ([RFC 6749, section 5.2][rfc6749-errors]; [Judgement: 401 for invalid_client, not the 400 of the ACCC guidance](#auth-0241))
 
 ## Judgements
 
@@ -32,8 +33,16 @@ This area gives the client authentication of each endpoint that authenticates a 
 - Basis: Step 3.3. The CDS requires that an assertion is used one time, and gives no lifetime ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt]).
 - Reason: A short limit keeps the window for a stolen assertion small. The data holder uses the same limit for a registration request JWT.
 
+### <a id="auth-0241"></a>AUTH-0241 401 for invalid_client, not the 400 of the ACCC guidance
+
+- Kind: conflict
+- Basis: Step 2. ACCC guidance says: "When client authentication occurs against the token endpoint and the sub claim on the client assertion is missing or does not match the client, then the most appropriate response is to return 400: invalid_client in the body." ([CDR Support: Error scenarios and responses][support-error-scenarios]). RFC 6749 permits 401: "The authorization server MAY return an HTTP 401 (Unauthorized) status code to indicate which HTTP authentication schemes are supported" ([RFC 6749, section 5.2][rfc6749-errors]).
+- Reason: The ACCC text says "most appropriate", so it is not a requirement. The authorisation server library gives 401 for each `invalid_client`, and one status code for each failure of the client authentication is the least complex. A client that follows RFC 6749 accepts the two status codes.
+
 [cds-private-key-jwt]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#private-key-jwt-client-authentication
 [cds-dr-calling-register]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#data-recipients-calling-the-cdr-register
 [cds-client-auth]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#client-authentication
 [fapi-algorithms]: https://openid.net/specs/openid-financial-api-part-2-1_0.html#algorithm-considerations
 [rfc6749-errors]: https://www.rfc-editor.org/rfc/rfc6749#section-5.2
+[support-error-scenarios]: https://cdr-support.zendesk.com/hc/en-us/articles/5729181240591
+[oidc-dcr-metadata]: https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata

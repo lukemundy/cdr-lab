@@ -37,9 +37,10 @@ const (
 type RegistrationErrorCode string
 
 const (
-	InvalidRedirectURI       RegistrationErrorCode = "invalid_redirect_uri"
-	InvalidClientMetadata    RegistrationErrorCode = "invalid_client_metadata"
-	InvalidSoftwareStatement RegistrationErrorCode = "invalid_software_statement"
+	InvalidRedirectURI          RegistrationErrorCode = "invalid_redirect_uri"
+	InvalidClientMetadata       RegistrationErrorCode = "invalid_client_metadata"
+	InvalidSoftwareStatement    RegistrationErrorCode = "invalid_software_statement"
+	UnapprovedSoftwareStatement RegistrationErrorCode = "unapproved_software_statement"
 )
 
 // RegistrationError goes to the software product, so its description names a claim or a rule and never a value.

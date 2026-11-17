@@ -1,4 +1,4 @@
-// Package jtistore keeps the IDs of the JWTs that the data holder accepted, so that it accepts each JWT one time.
+// Package jtistore keeps the IDs of the JWTs and SSAs that the data holder accepted, so that it accepts each one time.
 package jtistore
 
 import (
@@ -35,6 +35,29 @@ func (s *Store) Consume(ctx context.Context, jti string) error {
 	}
 
 	tag, err := s.pool.Exec(ctx, "INSERT INTO consumed_jtis (jti) VALUES ($1) ON CONFLICT DO NOTHING", jti)
+	if err != nil {
+		return err
+	}
+
+	if tag.RowsAffected() == 0 {
+		return app.ErrJTIUsed
+	}
+
+	return nil
+}
+
+// ConsumeSSA keeps the JWT ID until the SSA expires, because the data holder refuses an expired SSA.
+func (s *Store) ConsumeSSA(ctx context.Context, jti string, expiresAt time.Time) error {
+	if _, err := s.pool.Exec(ctx, "DELETE FROM consumed_ssa_jtis WHERE expires_at <= now()"); err != nil {
+		return err
+	}
+
+	tag, err := s.pool.Exec(
+		ctx,
+		"INSERT INTO consumed_ssa_jtis (jti, expires_at) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+		jti,
+		expiresAt,
+	)
 	if err != nil {
 		return err
 	}

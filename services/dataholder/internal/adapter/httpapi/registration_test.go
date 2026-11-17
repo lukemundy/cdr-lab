@@ -172,13 +172,32 @@ func TestARegistrationRequestThatIsTooLargeIsRefused(t *testing.T) {
 	assert.Empty(t, r.requestJWT)
 }
 
-func TestOtherMethodsAndPathsOfTheRegistrationEndpointAreNotFound(t *testing.T) {
+// Verifies: DH-2617
+func TestOtherMethodsOfTheRegistrationEndpointAreNotAllowed(t *testing.T) {
+	mux := http.NewServeMux()
+	httpapi.RegisterSecure(mux, secure(&registrar{}, tokens{}, registrations{}))
+
+	for _, target := range []struct{ method, path, allow string }{
+		{http.MethodGet, registrationPath, "POST"},
+		{http.MethodPost, registrationPath + "/client-1", "GET, HEAD, PUT, DELETE"},
+	} {
+		t.Run(target.method+" "+target.path, func(t *testing.T) {
+			rec := httptest.NewRecorder()
+			mux.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), target.method, target.path, nil))
+
+			assert.Equal(t, http.StatusMethodNotAllowed, rec.Code)
+			assert.Equal(t, target.allow, rec.Header().Get("Allow"))
+			assert.Contains(t, rec.Body.String(), "urn:au-cds:error:cds-all:GeneralError/Expected")
+		})
+	}
+}
+
+// Verifies: DH-0455
+func TestOtherPathsOfTheRegistrationEndpointAreNotFound(t *testing.T) {
 	mux := http.NewServeMux()
 	httpapi.RegisterSecure(mux, secure(&registrar{}, tokens{}, registrations{}))
 
 	for _, target := range []struct{ method, path string }{
-		{http.MethodGet, registrationPath},
-		{http.MethodPost, registrationPath + "/client-1"},
 		{http.MethodGet, registrationPath + "/client-1/other"},
 		{http.MethodPost, "/token"},
 	} {
@@ -202,6 +221,7 @@ func secure(r httpapi.Registrar, v tokens, regs registrations) httpapi.Secure {
 		Tokens:           v,
 		Registrations:    regs,
 		ConsentTokens:    consentTokens{},
+		Arrangements:     currentArrangements{},
 		Customers:        arrangementCustomers{},
 	}
 }

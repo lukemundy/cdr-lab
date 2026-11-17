@@ -207,11 +207,39 @@ func TestTheDiscoveryAPIsRefuseARequestWithNoSupportedVersion(t *testing.T) {
 	}
 }
 
-func TestAnotherMethodOnADiscoveryPathGivesResourceNotFound(t *testing.T) {
-	rec := send(t, http.MethodPost, "/cds-au/v1/discovery/status", xv("1"))
+// Verifies: DH-2616
+func TestAPublicAPIRefusesAnAcceptHeaderThatPermitsNoJSON(t *testing.T) {
+	for _, path := range append([]string{"/cds-au/v1/banking/products"}, discoveryPaths...) {
+		t.Run(path, func(t *testing.T) {
+			rec := send(t, http.MethodGet, path, http.Header{"X-V": {"1"}, "Accept": {"application/xml"}})
 
-	assert.Equal(t, http.StatusNotFound, rec.Code)
-	assert.Contains(t, rec.Body.String(), "urn:au-cds:error:cds-all:Resource/NotFound")
+			assert.Equal(t, http.StatusNotAcceptable, rec.Code)
+			assert.JSONEq(t, `{"errors": [{
+				"code": "urn:au-cds:error:cds-all:Header/Invalid",
+				"title": "Invalid Header",
+				"detail": "Accept"
+			}]}`, rec.Body.String())
+		})
+	}
+}
+
+// Verifies: DH-2617
+func TestAnotherMethodOnAPublicAPIPathIsNotAllowed(t *testing.T) {
+	paths := append([]string{"/cds-au/v1/banking/products", "/cds-au/v1/banking/products/p1"}, discoveryPaths...)
+	for _, path := range paths {
+		t.Run(path, func(t *testing.T) {
+			rec := send(t, http.MethodPost, path, xv("1"))
+
+			assert.Equal(t, http.StatusMethodNotAllowed, rec.Code)
+			assert.Equal(t, "GET, HEAD", rec.Header().Get("Allow"))
+			assert.Equal(t, "*", rec.Header().Get("Access-Control-Allow-Origin"))
+			assert.JSONEq(t, `{"errors": [{
+				"code": "urn:au-cds:error:cds-all:GeneralError/Expected",
+				"title": "Expected Error Encountered",
+				"detail": "The endpoint does not support the method POST."
+			}]}`, rec.Body.String())
+		})
+	}
 }
 
 // Verifies: DH-0459

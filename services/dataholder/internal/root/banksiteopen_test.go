@@ -122,7 +122,7 @@ func newOpenedAccount(t *testing.T, now time.Time, product domain.Product, body 
 	consent := http.NewServeMux()
 	httpapi.RegisterSecure(consent, httpapi.Secure{
 		ResourceBaseURL: "https://mtls.bank.test", RegistrationPath: "/register", UserInfoPath: "/userinfo",
-		ConsentTokens: detailToken{}, ClientStatuses: activeClients{},
+		ConsentTokens: detailToken{}, ClientStatuses: activeClients{}, Arrangements: consentData,
 		Customers: consentData, Accounts: consentData, Balances: consentData, Transactions: consentData,
 		Disclosures: app.Disclosures{Store: disclosurestore.New(pool), Now: clock},
 	})

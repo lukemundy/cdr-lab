@@ -37,7 +37,9 @@ Each error response uses [the CDS error format](../../../pkg/cds/DESIGN.md#cdsl-
 | <a id="reg-0315"></a>**REG-0315** | An invalid `{industry}` on Get Data Holder Brands Summary | 404 | `urn:au-cds:error:cds-register:Field/InvalidIndustry` | [CDS: Invalid Industry][cds-error-invalid-industry]; [CDS: Get Data Holder Brands Summary][cds-get-dh-brands-summary]; [Judgement: 404 on the summary and 400 on the other APIs, as the ACCC says](#reg-0370) |
 | <a id="reg-0316"></a>**REG-0316** | An invalid `{industry}` on each other API, also an industry that the API does not accept, for example `banking` on a data recipient API | 400 | `urn:au-cds:error:cds-all:Field/Invalid` | [CDS: Invalid Field][cds-error-400-field-invalid]; [ACCC Developer Portal: Known Issues][accc-known-issues]; [Judgement: 404 on the summary and 400 on the other APIs, as the ACCC says](#reg-0370) |
 | <a id="reg-0317"></a>**REG-0317** | An `updated-since` that is not an RFC 3339 date-time | 400 | `urn:au-cds:error:cds-all:Field/InvalidDateTime` | [CDS: Error Codes][cds-error-codes] |
-| <a id="reg-0318"></a>**REG-0318** | An unknown path | 404 | `urn:au-cds:error:cds-all:Resource/NotFound` | [CDS: Error Codes][cds-error-codes] |
+| <a id="reg-1494"></a>**REG-1494** | An `Accept` header that [permits no JSON response in UTF-8](../../../pkg/cds/DESIGN.md#cdsl-0071), for example `application/xml` | 406 | `urn:au-cds:error:cds-all:Header/Invalid` | [CDS: Request Headers][cds-request-headers] |
+| <a id="reg-0318"></a>**REG-0318** | An unknown path | 404 | `urn:au-cds:error:cds-all:Resource/NotFound` | [CDS: Error Codes][cds-error-codes]; [the 404 for a path with no method](../../../pkg/cds/DESIGN.md#cdsl-0082) |
+| <a id="reg-1495"></a>**REG-1495** | A method that the path does not support, on the public or the secure APIs, for example `POST` on Get Data Recipients. The response has [an `Allow` header](../../../pkg/cds/DESIGN.md#cdsl-0081) | 405 | `urn:au-cds:error:cds-all:GeneralError/Expected` | [CDS: HTTP Response Codes][cds-http-response-codes]; [405 for a method that the path does not support](../../../pkg/cds/DESIGN.md#cdsl-0080) |
 
 - <a id="reg-0319"></a>**REG-0319** The Register ignores an empty `updated-since`. For example, `updated-since=` gives the same response as no `updated-since`. ([CDS: Error Codes][cds-error-codes])
 
@@ -215,6 +217,8 @@ The secure APIs are Get Data Holder Brands and [Get SSA](software-statement-asse
 [cds-openapi]: https://github.com/ConsumerDataStandardsAustralia/standards/blob/v1.36.0/docs/includes/swagger/cds_register.json
 [cds-participant-endpoints]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#participant-endpoints
 [cds-participant-statuses]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#participant-statuses
+[cds-request-headers]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#request-headers
+[cds-http-response-codes]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#http-response-codes
 [cds-register-apis]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#register-apis
 [cds-register-schemas]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api-schemas
 [cds-schema-brand-summary]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api_schemas_tocSdataholderbrandsummaryv2

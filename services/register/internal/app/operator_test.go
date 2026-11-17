@@ -33,7 +33,7 @@ func seededWithProduct(t *testing.T) *memoryStore {
 					JWKSURI:                    "https://recipient.example/jwks",
 					RevocationURI:              "https://recipient.example/revoke",
 					RecipientBaseURI:           "https://cdr.recipient.example",
-					Scopes:                     []string{"openid"},
+					Scopes:                     []string{"openid", "profile"},
 				},
 			},
 		},

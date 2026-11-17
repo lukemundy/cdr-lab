@@ -103,7 +103,7 @@ test("the operator deactivates a brand, and the confirmation and the CDR APIs sh
       jwksUri: "https://brand-status-test.example/jwks",
       revocationUri: "https://brand-status-test.example/revoke",
       recipientBaseUri: "https://cdr.brand-status-test.example",
-      scopes: ["openid"],
+      scopes: ["openid", "profile"],
       status: "ACTIVE",
     },
   );

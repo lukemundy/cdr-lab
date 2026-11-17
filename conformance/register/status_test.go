@@ -255,6 +255,19 @@ func TestListsGiveVersionErrors(t *testing.T) {
 	}
 }
 
+// Verifies: REG-1494, CDSL-0071
+func TestAListRefusesAnAcceptHeaderThatPermitsNoJSON(t *testing.T) {
+	for name, e := range listEndpoints {
+		t.Run(name, func(t *testing.T) {
+			resp := call(t, e.path, http.Header{"X-V": {e.version}, "Accept": {"application/xml"}})
+
+			requireCDSError(
+				t, resp, http.StatusNotAcceptable, "urn:au-cds:error:cds-all:Header/Invalid", "Invalid Header",
+			)
+		})
+	}
+}
+
 // Verifies: REG-0326
 func TestListsHaveAnETagThatIfNoneMatchUses(t *testing.T) {
 	for name, e := range listEndpoints {
@@ -337,6 +350,34 @@ func TestAnUnknownPathIsNotFound(t *testing.T) {
 	resp := call(t, "/unknown", v3())
 
 	requireCDSError(t, resp, http.StatusNotFound, "urn:au-cds:error:cds-all:Resource/NotFound", "Resource Not Found")
+}
+
+// Verifies: REG-1495, CDSL-0080, CDSL-0081
+func TestAnotherMethodOnAListIsNotAllowed(t *testing.T) {
+	for name, e := range listEndpoints {
+		t.Run(name, func(t *testing.T) {
+			req, err := http.NewRequestWithContext(
+				t.Context(), http.MethodPost, labtest.Env(t, "REGISTER_PUBLIC_URL")+e.path, nil,
+			)
+			require.NoError(t, err)
+
+			req.Header = xv(e.version)
+
+			resp, err := labtest.Client(t).Do(req)
+			require.NoError(t, err)
+
+			defer func() { _ = resp.Body.Close() }()
+
+			body, err := io.ReadAll(resp.Body)
+			require.NoError(t, err)
+
+			requireCDSError(
+				t, response{Response: resp, body: body}, http.StatusMethodNotAllowed,
+				"urn:au-cds:error:cds-all:GeneralError/Expected", "Expected Error Encountered",
+			)
+			assert.Equal(t, "GET, HEAD", resp.Header.Get("Allow"))
+		})
+	}
 }
 
 // Verifies: REG-0314

@@ -50,7 +50,7 @@ func validDataRecipient() domain.DataRecipient {
 				JWKSURI:                    "https://recipient.example/jwks",
 				RevocationURI:              "https://recipient.example/revoke",
 				RecipientBaseURI:           "https://cdr.recipient.example",
-				Scopes:                     []string{"openid", "bank:accounts.basic:read"},
+				Scopes:                     []string{"openid", "profile", "bank:accounts.basic:read"},
 			}},
 		}},
 	}

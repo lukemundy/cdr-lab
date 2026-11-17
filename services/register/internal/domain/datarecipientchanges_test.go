@@ -352,7 +352,7 @@ func TestChangeSoftwareProductDetailsReplacesTheMetadataAndKeepsTheStatusAndCert
 		JWKSURI:                    "https://recipient.example/jwks2",
 		RevocationURI:              "https://recipient.example/revoke2",
 		RecipientBaseURI:           "https://cdr2.recipient.example",
-		Scopes:                     []string{"openid"},
+		Scopes:                     []string{"openid", "profile"},
 	}
 
 	state, events := handleAndApplyDataRecipient(

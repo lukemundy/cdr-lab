@@ -163,7 +163,7 @@ func TestAnAddWithValuesThatTheParticipantModelRefusesGivesAnErrorAtEachField(t 
 		"softwareProductName": "Gamma App", "softwareProductDescription": "An app",
 		"logoUri": "https://gamma.example/app.png", "clientUri": "https://gamma.example", "redirectUris": [],
 		"jwksUri": "https://gamma.example/jwks", "revocationUri": "https://gamma.example/revoke",
-		"recipientBaseUri": "https://cdr.gamma.example", "scopes": ["openid"], "status": "ACTIVE"}`)
+		"recipientBaseUri": "https://cdr.gamma.example", "scopes": ["openid", "profile"], "status": "ACTIVE"}`)
 
 	require.Equal(t, http.StatusBadRequest, product.status, product.body)
 
@@ -173,6 +173,35 @@ func TestAnAddWithValuesThatTheParticipantModelRefusesGivesAnErrorAtEachField(t 
 	assert.Equal(t, "#/redirectUris", body.Errors[0].Pointer)
 	assert.Equal(t, "redirectUris is required", body.Errors[0].Detail)
 	assert.Equal(t, int64(1), versionOf(t, ports))
+}
+
+// Verifies: REG-1496, REG-1497
+func TestAnAddOfASoftwareProductWithScopesThatTheSSANeedsGivesAnErrorAtTheScopes(t *testing.T) {
+	ports := seedForCreates(t)
+
+	tests := map[string]struct{ scopes, detail string }{
+		"no profile":     {`["openid", "bank:accounts.basic:read"]`, "scopes does not contain openid and profile"},
+		"an empty value": {`["openid", "profile", ""]`, "scopes has an empty value"},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			product := post(t, ports, addSoftwareProduct, `{"version": 1, "softwareProductId": "sp-new",
+				"softwareProductName": "Gamma App", "softwareProductDescription": "An app",
+				"logoUri": "https://gamma.example/app.png", "clientUri": "https://gamma.example",
+				"redirectUris": ["https://gamma.example/callback"],
+				"jwksUri": "https://gamma.example/jwks", "revocationUri": "https://gamma.example/revoke",
+				"recipientBaseUri": "https://cdr.gamma.example", "scopes": `+tt.scopes+`, "status": "ACTIVE"}`)
+
+			require.Equal(t, http.StatusBadRequest, product.status, product.body)
+
+			var body fieldProblem
+			require.NoError(t, json.Unmarshal([]byte(product.body), &body))
+			require.Len(t, body.Errors, 1)
+			assert.Equal(t, "#/scopes", body.Errors[0].Pointer)
+			assert.Equal(t, tt.detail, body.Errors[0].Detail)
+			assert.Equal(t, int64(1), versionOf(t, ports))
+		})
+	}
 }
 
 // Verifies: REG-1329

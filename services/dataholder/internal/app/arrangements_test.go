@@ -36,9 +36,20 @@ func (m *memoryGrants) RevokeArrangement(_ context.Context, arrangementID string
 func newArrangements(t *testing.T, now time.Time) (app.Arrangements, *memoryGrants, *memoryStore) {
 	t.Helper()
 
+	return arrangementsWithSharing(t, time.Hour, now)
+}
+
+// arrangementsWithSharing gives the arrangement arrangement-1 of client-1, with the sharing duration.
+func arrangementsWithSharing(
+	t *testing.T,
+	sharingDuration time.Duration,
+	now time.Time,
+) (app.Arrangements, *memoryGrants, *memoryStore) {
+	t.Helper()
+
 	consents, store := newConsents(t)
 	request := consentRequest()
-	request.SharingDuration = time.Hour
+	request.SharingDuration = sharingDuration
 	_, err := consents.Confirm(t.Context(), request, []string{"account-1"})
 	require.NoError(t, err)
 
@@ -138,6 +149,74 @@ func TestARevocationThatTheDataRecipientCannotMakeGivesInvalidArrangementAndChan
 			err := arrangements.RevokeByDataRecipient(t.Context(), tc.clientID, tc.arrangementID)
 
 			require.ErrorIs(t, err, app.ErrInvalidArrangement)
+			assert.Empty(t, grants.revoked)
+			assert.True(t, arrangementState(t, store).EndedAt.IsZero())
+		})
+	}
+}
+
+// Verifies: DH-0902, DH-0908, DH-0911
+func TestAnArrangementWithNoSharingDurationCanBeRevokedUntilItsAccessTokenExpires(t *testing.T) {
+	now := consentTime.Add(5*time.Minute - time.Second)
+	arrangements, grants, store := arrangementsWithSharing(t, 0, now)
+
+	require.NoError(t, arrangements.RevokeByDataRecipient(t.Context(), "client-1", "arrangement-1"))
+
+	assert.Equal(t, []string{"arrangement-1"}, grants.revoked)
+	assert.Equal(t, now, arrangementState(t, store).EndedAt)
+
+	late, _, _ := arrangementsWithSharing(t, 0, consentTime.Add(5*time.Minute))
+	require.ErrorIs(t, late.RevokeByDataRecipient(t.Context(), "client-1", "arrangement-1"), app.ErrInvalidArrangement)
+}
+
+// Verifies: DH-0903, DH-0911
+func TestTheConsumerCanWithdrawAnArrangementWithNoSharingDurationUntilItsAccessTokenExpires(t *testing.T) {
+	arrangements, grants, _ := arrangementsWithSharing(t, 0, consentTime.Add(time.Minute))
+
+	_, err := arrangements.WithdrawByConsumer(
+		t.Context(), consentCustomer, "arrangement-1", domain.WithdrawalMethodConsumerDashboard,
+	)
+
+	require.NoError(t, err)
+	assert.Equal(t, []string{"arrangement-1"}, grants.revoked)
+}
+
+// Verifies: DH-0910
+func TestARevokedRefreshTokenOfAOneTimeCollectionEndsItsArrangementAsARevocationByTheDataRecipient(t *testing.T) {
+	for name, sharing := range map[string]time.Duration{"1 hour": time.Hour, "24 hours": 24 * time.Hour} {
+		t.Run(name, func(t *testing.T) {
+			now := consentTime.Add(time.Minute)
+			arrangements, grants, store := arrangementsWithSharing(t, sharing, now)
+
+			require.NoError(t, arrangements.EndOneTimeCollection(t.Context(), "client-1", "arrangement-1"))
+
+			assert.Equal(t, []string{"arrangement-1"}, grants.revoked)
+
+			state := arrangementState(t, store)
+			assert.Equal(t, now, state.EndedAt)
+			assert.Equal(t, domain.EndReasonRevokedByDataRecipient, state.EndReason)
+		})
+	}
+}
+
+// Verifies: DH-0910
+func TestARevokedRefreshTokenEndsNoOtherArrangement(t *testing.T) {
+	tests := map[string]struct {
+		sharing                 time.Duration
+		clientID, arrangementID string
+		after                   time.Duration
+	}{
+		"sharing of more than 24 hours":     {24*time.Hour + time.Second, "client-1", "arrangement-1", time.Minute},
+		"arrangement of a different client": {time.Hour, "client-2", "arrangement-1", time.Minute},
+		"arrangement that does not exist":   {time.Hour, "client-1", "arrangement-9", time.Minute},
+		"arrangement whose sharing ended":   {time.Hour, "client-1", "arrangement-1", time.Hour},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			arrangements, grants, store := arrangementsWithSharing(t, tc.sharing, consentTime.Add(tc.after))
+
+			require.NoError(t, arrangements.EndOneTimeCollection(t.Context(), tc.clientID, tc.arrangementID))
+
 			assert.Empty(t, grants.revoked)
 			assert.True(t, arrangementState(t, store).EndedAt.IsZero())
 		})
@@ -413,4 +492,54 @@ func TestTheRemovalOfASoftwareProductWithNoRegistrationEndsItsArrangements(t *te
 	require.NoError(t, arrangements.RemoveSoftwareProduct(t.Context(), "software-1", removedAt))
 
 	assert.Equal(t, domain.EndReasonSoftwareProductRemoved, stateOf(t, store, "arrangement-1").EndReason)
+}
+
+// Verifies: DH-0676, DH-2618
+func TestTheEndForADeletedRegistrationEndsEachCurrentArrangementOfTheClientAsARevocation(t *testing.T) {
+	deletedAt := consentTime.Add(10 * time.Minute)
+	arrangements, grants, store := newArrangements(t, deletedAt)
+	ofSoftwareProduct := func(id, clientID string) {
+		require.NoError(t, app.ArrangementType.Execute(t.Context(), store, id, domain.CreateArrangement{
+			Arrangement: domain.Arrangement{
+				ArrangementID: id, CustomerNumber: consentCustomer, ClientID: clientID, SoftwareID: "software-1",
+				Scopes: []string{"openid", "profile"}, AccountIDs: []string{},
+				ConfirmedAt: consentTime, SharingDurationSeconds: int64(time.Hour / time.Second),
+			},
+		}))
+	}
+	ofSoftwareProduct("arrangement-2", "client-1")
+	ofSoftwareProduct("arrangement-3", "client-0")
+	require.NoError(t, app.ArrangementType.Execute(t.Context(), store, "arrangement-2", domain.EndArrangement{
+		EndedAt: consentTime.Add(time.Minute), Reason: domain.EndReasonWithdrawnByConsumer,
+	}))
+
+	require.NoError(t, arrangements.EndForDeletedRegistration(t.Context(), "software-1", "client-1", deletedAt))
+
+	assert.Equal(t, []string{"arrangement-1"}, grants.revoked)
+
+	ended := stateOf(t, store, "arrangement-1")
+	assert.Equal(t, domain.EndReasonRevokedByDataRecipient, ended.EndReason)
+	assert.Equal(t, deletedAt, ended.EndedAt, "the end has the time of the request")
+	assert.Equal(t, domain.EndReasonWithdrawnByConsumer, stateOf(t, store, "arrangement-2").EndReason)
+	assert.True(t, stateOf(t, store, "arrangement-3").EndedAt.IsZero(), "a different client")
+}
+
+func TestTheEndForADeletedRegistrationIsSafeToRepeat(t *testing.T) {
+	deletedAt := consentTime.Add(10 * time.Minute)
+	arrangements, grants, _ := newArrangements(t, deletedAt)
+	require.NoError(t, arrangements.EndForDeletedRegistration(t.Context(), "software-1", "client-1", deletedAt))
+
+	require.NoError(t, arrangements.EndForDeletedRegistration(t.Context(), "software-1", "client-1", deletedAt))
+
+	assert.Equal(t, []string{"arrangement-1"}, grants.revoked)
+}
+
+func TestTheEndForADeletedRegistrationGivesTheErrorOfAnEnd(t *testing.T) {
+	deletedAt := consentTime.Add(time.Minute)
+	arrangements, grants, _ := newArrangements(t, deletedAt)
+	grants.err = errors.New("database failure")
+
+	err := arrangements.EndForDeletedRegistration(t.Context(), "software-1", "client-1", deletedAt)
+
+	require.ErrorIs(t, err, grants.err)
 }

@@ -28,6 +28,8 @@ const (
 	// noAccountScope needs no account selection, so a consent with it needs no account.
 	noAccountScope = "openid profile"
 	ninetyDays     = 7_776_000
+	// oneHour is a sharing duration of a one-time collection, which has a refresh token.
+	oneHour = 3600
 )
 
 func introspectionEndpoint(t *testing.T, client registeredClient) string {

@@ -24,7 +24,7 @@ func Register(mux *http.ServeMux, baseURL string, reader app.ProductReader, now 
 	routes.With(cds.Versioned(1, 1)).Handle("GET /cds-au/v1/discovery/status", status(baseURL, now))
 	routes.With(cds.Versioned(1, 1)).Handle("GET /cds-au/v1/discovery/outages", outages(baseURL))
 
-	mux.HandleFunc("/", notFound)
+	cds.RegisterFallback(mux, notFoundDetail)
 }
 
 type Secure struct {
@@ -36,6 +36,7 @@ type Secure struct {
 	Tokens           TokenVerifier
 	Registrations    app.RegistrationReader
 	ConsentTokens    ConsentTokenVerifier
+	Arrangements     ArrangementChecker
 	Customers        CustomerReader
 	Accounts         AccountReader
 	Transactions     TransactionReader
@@ -56,12 +57,10 @@ func RegisterSecure(mux *http.ServeMux, s Secure) {
 
 	registerConsentData(routes, s)
 
-	mux.HandleFunc("/", notFound)
+	cds.RegisterFallback(mux, notFoundDetail)
 }
 
-func notFound(w http.ResponseWriter, _ *http.Request) {
-	cds.WriteError(w, http.StatusNotFound, cds.ResourceNotFound, "The URL is not a data holder API endpoint.")
-}
+const notFoundDetail = "The URL is not a data holder API endpoint."
 
 // AllowAnyOrigin does not apply to pagesPath and the paths below it, which serve pages to a consumer and not an API.
 func AllowAnyOrigin(next http.Handler, pagesPath string) http.Handler {

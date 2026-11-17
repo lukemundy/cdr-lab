@@ -2,6 +2,7 @@ package jtistore_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/assert"
@@ -60,4 +61,36 @@ func TestTheAuthorisationServerAndTheRegistrationUseOneStore(t *testing.T) {
 
 	require.ErrorIs(t, err, authserver.ErrJTIUsed)
 	assert.NoError(t, jtistore.AuthServer{Store: store}.Consume(t.Context(), "jti-2"))
+}
+
+// Verifies: DH-0620
+func TestAnSSAJTIIsConsumedOneTimeUntilTheSSAExpires(t *testing.T) {
+	store := jtistore.New(newPool(t))
+	expiresAt := time.Now().Add(10 * time.Minute)
+
+	require.NoError(t, store.ConsumeSSA(t.Context(), "ssa-1", expiresAt))
+	require.NoError(t, store.ConsumeSSA(t.Context(), "ssa-2", expiresAt))
+
+	assert.ErrorIs(t, store.ConsumeSSA(t.Context(), "ssa-1", expiresAt), app.ErrJTIUsed)
+}
+
+func TestAnSSAJTIIsKeptLongerThanTheRetentionOfARequestJTI(t *testing.T) {
+	store := jtistore.New(newPool(t))
+	require.NoError(t, store.ConsumeSSA(t.Context(), "ssa-1", time.Now().Add(2*time.Hour)))
+
+	assert.ErrorIs(t, store.ConsumeSSA(t.Context(), "ssa-1", time.Now().Add(2*time.Hour)), app.ErrJTIUsed)
+}
+
+func TestAnSSAJTIOfAnExpiredSSACanBeConsumedAgain(t *testing.T) {
+	store := jtistore.New(newPool(t))
+	require.NoError(t, store.ConsumeSSA(t.Context(), "ssa-1", time.Now().Add(-time.Second)))
+
+	assert.NoError(t, store.ConsumeSSA(t.Context(), "ssa-1", time.Now().Add(10*time.Minute)))
+}
+
+func TestTheJTIsOfSSAsAndOfOtherJWTsAreSeparate(t *testing.T) {
+	store := jtistore.New(newPool(t))
+	require.NoError(t, store.Consume(t.Context(), "jti-1"))
+
+	assert.NoError(t, store.ConsumeSSA(t.Context(), "jti-1", time.Now().Add(10*time.Minute)))
 }

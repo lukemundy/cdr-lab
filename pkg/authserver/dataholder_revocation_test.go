@@ -133,6 +133,45 @@ func TestARevokedClientCredentialsTokenIsRefused(t *testing.T) {
 }
 
 // Verifies: AUTH-0223
+func TestTheServiceGetsTheArrangementOfARevokedRefreshToken(t *testing.T) {
+	b := newBank(t)
+	a := b.authorise(hour)
+	tokens := b.exchange(a)
+	refreshToken := tokens["refresh_token"].(string)
+
+	requireRevoked(t, b.revoke(registeredClientID, refreshToken))
+
+	assert.Equal(t, [][2]string{{registeredClientID, a.consent.ArrangementID}}, b.revokedRefresh.calls)
+
+	t.Run("not for a second revocation, an access token or a token of a different client", func(t *testing.T) {
+		requireRevoked(t, b.revoke(registeredClientID, refreshToken))
+
+		other := b.exchange(b.authorise(hour))
+		requireRevoked(t, b.revoke(registeredClientID, other["access_token"].(string)))
+		requireTokenError(t, b.revoke(secondClientID, other["refresh_token"].(string)), "unauthorized_client")
+
+		assert.Len(t, b.revokedRefresh.calls, 1)
+	})
+}
+
+// Verifies: AUTH-0223
+func TestARefreshTokenRevocationThatTheServiceCannotRecordGives500AndARetryGivesTheArrangementAgain(t *testing.T) {
+	b := newBank(t)
+	a := b.authorise(hour)
+	refreshToken := b.exchange(a)["refresh_token"].(string)
+	b.revokedRefresh.err = errors.New("database failure")
+
+	assert.Equal(t, http.StatusInternalServerError, b.revoke(registeredClientID, refreshToken).status)
+	assert.Equal(t, true, b.introspect(refreshToken).body["active"], "the refresh token stays active")
+
+	b.revokedRefresh.err = nil
+
+	requireRevoked(t, b.revoke(registeredClientID, refreshToken))
+	assert.Equal(t, [][2]string{{registeredClientID, a.consent.ArrangementID}}, b.revokedRefresh.calls)
+	assert.Equal(t, map[string]any{"active": false}, b.introspect(refreshToken).body)
+}
+
+// Verifies: AUTH-0223
 func TestARevokedRefreshTokenEndsEachTokenOfItsGrant(t *testing.T) {
 	b := newBank(t)
 	tokens := b.exchange(b.authorise(hour))

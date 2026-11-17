@@ -15,6 +15,7 @@ import (
 	"github.com/lukemundy/cdr-lab/pkg/cds"
 	"github.com/lukemundy/cdr-lab/pkg/platform/httproute"
 	"github.com/lukemundy/cdr-lab/pkg/platform/jsonhttp"
+	"github.com/lukemundy/cdr-lab/services/dataholder/internal/app"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/domain"
 )
 
@@ -31,6 +32,11 @@ type ConsentTokenVerifier interface {
 		token string,
 		clientCert *x509.Certificate,
 	) (authserver.ConsentToken, error)
+}
+
+type ArrangementChecker interface {
+	// RequireCurrent gives app.ErrArrangementEnded for an arrangement that ended, and app.ErrArrangementNotFound.
+	RequireCurrent(ctx context.Context, arrangementID string) error
 }
 
 type ClientStatusReader interface {
@@ -63,7 +69,7 @@ func registerConsentData(routes *httproute.Routes, s Secure) {
 	logged := routes.With(logInteraction)
 
 	userInfo := logged.With(
-		consentToken(s.ConsentTokens, s.ClientStatuses, scopeOpenID, userInfoNotActive),
+		consentToken(s, scopeOpenID, userInfoNotActive),
 		recordDisclosure(s.Disclosures, userInfoScope),
 	)
 	userInfo.Handle("GET "+s.UserInfoPath, userInfoClaims(s.Customers))
@@ -71,7 +77,7 @@ func registerConsentData(routes *httproute.Routes, s Secure) {
 
 	resource := func(scope string, minV, maxV int) *httproute.Routes {
 		return logged.With(
-			consentToken(s.ConsentTokens, s.ClientStatuses, scope, writeNotActive),
+			consentToken(s, scope, writeNotActive),
 			recordDisclosure(s.Disclosures, func(authserver.ConsentToken) string { return scope }),
 			cds.Versioned(minV, maxV),
 			resourceHeaders,
@@ -118,12 +124,8 @@ type notActiveRefusal func(w http.ResponseWriter, status domain.SoftwareProductS
 
 func userInfoNotActive(w http.ResponseWriter, _ domain.SoftwareProductStatus) { invalidToken(w) }
 
-func consentToken(
-	tokens ConsentTokenVerifier,
-	statuses ClientStatusReader,
-	scope string,
-	notActive notActiveRefusal,
-) httproute.Middleware {
+// consentToken also refuses the token of an arrangement that ended, in case the end did not revoke the token.
+func consentToken(s Secure, scope string, notActive notActiveRefusal) httproute.Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			credentials, ok := bearerToken(r)
@@ -132,7 +134,7 @@ func consentToken(
 				return
 			}
 
-			token, err := tokens.VerifyConsentToken(r.Context(), credentials, clientCertificate(r))
+			token, err := s.ConsentTokens.VerifyConsentToken(r.Context(), credentials, clientCertificate(r))
 			if errors.Is(err, authserver.ErrInvalidToken) {
 				invalidToken(w)
 				return
@@ -143,7 +145,18 @@ func consentToken(
 				return
 			}
 
-			status, err := statuses.Status(r.Context(), token.ClientID)
+			err = s.Arrangements.RequireCurrent(r.Context(), token.ArrangementID)
+			if errors.Is(err, app.ErrArrangementEnded) || errors.Is(err, app.ErrArrangementNotFound) {
+				invalidToken(w)
+				return
+			}
+
+			if err != nil {
+				cds.WriteUnexpected(w, r, err, "The data holder cannot read the arrangement of the access token.")
+				return
+			}
+
+			status, err := s.ClientStatuses.Status(r.Context(), token.ClientID)
 			if err != nil {
 				cds.WriteUnexpected(w, r, err, "The data holder cannot read the status of the software product.")
 				return

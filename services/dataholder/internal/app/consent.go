@@ -43,6 +43,8 @@ type Consents struct {
 	// NewID gives a random version 4 UUID, for a cdr_arrangement_id or a sub.
 	NewID func() string
 	Now   func() time.Time
+	// AccessTokenLifetime is that of the authorisation server, and also the sharing of a once-off arrangement.
+	AccessTokenLifetime time.Duration
 }
 
 type Confirmation struct {
@@ -72,7 +74,7 @@ func (c Consents) Confirm(
 		return Confirmation{}, err
 	}
 
-	arrangement, err := domain.NewArrangement(c.NewID(), request, accounts, selected, c.Now())
+	arrangement, err := domain.NewArrangement(c.NewID(), request, accounts, selected, c.Now(), c.AccessTokenLifetime)
 	if err != nil {
 		return Confirmation{}, err
 	}

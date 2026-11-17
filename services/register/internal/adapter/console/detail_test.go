@@ -66,7 +66,7 @@ func TestADataRecipientDetailGivesEachBrandAndSoftwareProductInTheOrderOfTheReco
 	full.TOSURI = "https://recipient.example/terms"
 	full.PolicyURI = "https://recipient.example/policy"
 	full.RedirectURIs = []string{"https://recipient.example/b", "https://recipient.example/a"}
-	full.Scopes = []string{"openid", "bank:accounts.basic:read"}
+	full.Scopes = []string{"openid", "profile", "bank:accounts.basic:read"}
 	full.ClientCertificates = []string{thumbprint2, thumbprint1}
 
 	dr := recipient("dr-1", "Alpha Pty Ltd", domain.DataRecipientActive,
@@ -91,7 +91,7 @@ func TestADataRecipientDetailGivesEachBrandAndSoftwareProductInTheOrderOfTheReco
 				 "status": "ACTIVE", "clientUri": "https://recipient.example",
 				 "redirectUris": ["https://recipient.example/callback"], "jwksUri": "https://recipient.example/jwks",
 				 "revocationUri": "https://recipient.example/revoke",
-				 "recipientBaseUri": "https://cdr.recipient.example", "scopes": ["openid"],
+				 "recipientBaseUri": "https://cdr.recipient.example", "scopes": ["openid", "profile"],
 				 "clientCertificateThumbprints": []},
 				{"softwareProductId": "sp-2", "softwareProductName": "Product sp-2",
 				 "softwareProductDescription": "A product", "logoUri": "https://recipient.example/product.png",
@@ -100,7 +100,8 @@ func TestADataRecipientDetailGivesEachBrandAndSoftwareProductInTheOrderOfTheReco
 				 "redirectUris": ["https://recipient.example/b", "https://recipient.example/a"],
 				 "tosUri": "https://recipient.example/terms", "policyUri": "https://recipient.example/policy",
 				 "jwksUri": "https://recipient.example/jwks", "revocationUri": "https://recipient.example/revoke",
-				 "recipientBaseUri": "https://cdr.recipient.example", "scopes": ["openid", "bank:accounts.basic:read"],
+				 "recipientBaseUri": "https://cdr.recipient.example",
+				 "scopes": ["openid", "profile", "bank:accounts.basic:read"],
 				 "clientCertificateThumbprints": ["`+thumbprint2+`", "`+thumbprint1+`"]}
 			]},
 			{"dataRecipientBrandId": "dr-1-b2", "brandName": "Brand", "logoUri": "https://recipient.example/brand.png",

@@ -224,11 +224,12 @@ func (c Clients) Client(ctx context.Context, id string) (authserver.DataHolderCl
 	}
 
 	return authserver.DataHolderClient{
-		ID:                      registration.ClientID,
-		JWKSURI:                 registration.JWKSURI,
-		Scopes:                  strings.Fields(registration.Scope),
-		GrantTypes:              grantTypes,
-		RedirectURIs:            registration.RedirectURIs,
-		RequestObjectSigningAlg: string(registration.RequestObjectSigningAlg),
+		ID:                          registration.ClientID,
+		JWKSURI:                     registration.JWKSURI,
+		Scopes:                      strings.Fields(registration.Scope),
+		GrantTypes:                  grantTypes,
+		RedirectURIs:                registration.RedirectURIs,
+		RequestObjectSigningAlg:     string(registration.RequestObjectSigningAlg),
+		TokenEndpointAuthSigningAlg: string(registration.TokenEndpointAuthSigningAlg),
 	}, nil
 }

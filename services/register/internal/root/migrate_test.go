@@ -116,7 +116,7 @@ func TestMigrateFillsTheCountColumnsOfRowsThatExist(t *testing.T) {
 			LogoURI: "https://recipient.example/product.png", Status: domain.Active,
 			ClientURI: "https://recipient.example", RedirectURIs: []string{"https://recipient.example/callback"},
 			JWKSURI: "https://recipient.example/jwks", RevocationURI: "https://recipient.example/revoke",
-			RecipientBaseURI: "https://cdr.recipient.example", Scopes: []string{"openid"},
+			RecipientBaseURI: "https://cdr.recipient.example", Scopes: []string{"openid", "profile"},
 		}
 	}
 	pool := databaseBefore(t, "00014", domain.Participants{

@@ -322,7 +322,7 @@ func TestAHistoryOfTheConsolePutsNoLegalEntityIDAndNoPayloadInTheSpansOrLogs(t *
 				Status: domain.Active, ClientURI: "https://zebracorn.example",
 				RedirectURIs: []string{"https://zebracorn.example/cb"}, JWKSURI: "https://zebracorn.example/jwks",
 				RevocationURI: "https://zebracorn.example/revoke", RecipientBaseURI: "https://zebracorn.example",
-				Scopes: []string{"openid"},
+				Scopes: []string{"openid", "profile"},
 			}},
 		}},
 	}}, DataHolders: []domain.DataHolder{{
@@ -416,7 +416,7 @@ func TestAStatusActionOfTheConsolePutsNoIdentifierAndNoRequestBodyInTheSpansOrLo
 				Status: domain.Active, ClientURI: "https://recipient.example",
 				RedirectURIs: []string{"https://recipient.example/callback"}, JWKSURI: "https://recipient.example/jwks",
 				RevocationURI: "https://recipient.example/revoke", RecipientBaseURI: "https://cdr.recipient.example",
-				Scopes: []string{"openid"},
+				Scopes: []string{"openid", "profile"},
 			}},
 		}},
 	}}}))
@@ -511,7 +511,7 @@ func TestAChangeACreateOrAnAddOfTheConsolePutsNoRequestBodyInTheSpansOrLogs(t *t
 				LogoURI: "https://recipient.example/product.png", Status: domain.Active,
 				ClientURI: "https://recipient.example", RedirectURIs: []string{"https://recipient.example/callback"},
 				JWKSURI: "https://recipient.example/jwks", RevocationURI: "https://recipient.example/revoke",
-				RecipientBaseURI: "https://cdr.recipient.example", Scopes: []string{"openid"},
+				RecipientBaseURI: "https://cdr.recipient.example", Scopes: []string{"openid", "profile"},
 			}},
 		}},
 	}}}))

@@ -90,6 +90,10 @@ func (j jtis) Consume(_ context.Context, jti string) error {
 	return nil
 }
 
+func (j jtis) ConsumeSSA(ctx context.Context, jti string, _ time.Time) error {
+	return j.Consume(ctx, "ssa/"+jti)
+}
+
 func validJWTs() *jwts {
 	return &jwts{
 		ssa: domain.SSA{
@@ -140,12 +144,34 @@ func newRegistrar(j *jwts) app.Registrar {
 		JTIs:          jtis{},
 		Store:         store,
 		Registrations: storeReader{store: store},
+		Statuses:      softwareStatuses{},
+		Arrangements:  &clientArrangements{},
 		Now:           func() time.Time { return registrationTime },
 		NewID: func() string {
 			ids++
 			return fmt.Sprintf("client-%d", ids)
 		},
 	}
+}
+
+// clientArrangements records each end of the arrangements of a deleted registration, or fails with err.
+type clientArrangements struct {
+	ends []string
+	err  error
+}
+
+func (c *clientArrangements) EndForDeletedRegistration(
+	_ context.Context,
+	softwareID, clientID string,
+	deletedAt time.Time,
+) error {
+	if c.err != nil {
+		return c.err
+	}
+
+	c.ends = append(c.ends, softwareID+"/"+clientID+" at "+deletedAt.Format(time.RFC3339))
+
+	return nil
 }
 
 // storeReader finds a registration in the streams of a memoryStore, as the read model does for a real store.
@@ -213,10 +239,90 @@ func TestASecondRegistrationOfTheSameSoftwareProductIsRefused(t *testing.T) {
 	_, err := registrar.Register(t.Context(), requestJWT)
 	require.NoError(t, err)
 
-	j.request.ID = "request-jti-2"
+	j.request.ID, j.ssa.ID = "request-jti-2", "ssa-jti-2"
 	_, err = registrar.Register(t.Context(), requestJWT)
 
 	requireRegistrationError(t, err, domain.InvalidSoftwareStatement, "software_id")
+}
+
+// Verifies: DH-0620
+func TestAnSSAThatTheDataHolderAcceptedBeforeIsRefused(t *testing.T) {
+	j := validJWTs()
+	registrar := newRegistrar(j)
+	_, err := registrar.Register(t.Context(), requestJWT)
+	require.NoError(t, err)
+
+	registrar.Store = &memoryStore{}
+	j.request.ID = "request-jti-2"
+	_, err = registrar.Register(t.Context(), requestJWT)
+
+	requireRegistrationError(t, err, domain.InvalidSoftwareStatement, "jti of the SSA")
+}
+
+func TestTheSSAJTIIsKeptUntilTheSSAExpires(t *testing.T) {
+	j := validJWTs()
+	store := &expiryJTIs{}
+	registrar := newRegistrar(j)
+	registrar.JTIs = store
+
+	_, err := registrar.Register(t.Context(), requestJWT)
+
+	require.NoError(t, err)
+	assert.Equal(t, time.Unix(j.ssa.ExpiresAt, 0), store.ssaExpiresAt)
+}
+
+// expiryJTIs keeps the expiry time of the last SSA JWT ID.
+type expiryJTIs struct{ ssaExpiresAt time.Time }
+
+func (*expiryJTIs) Consume(context.Context, string) error { return nil }
+
+func (e *expiryJTIs) ConsumeSSA(_ context.Context, _ string, expiresAt time.Time) error {
+	e.ssaExpiresAt = expiresAt
+
+	return nil
+}
+
+// Verifies: DH-0693, DH-0655
+func TestARegistrationOfARemovedSoftwareProductIsRefused(t *testing.T) {
+	j := validJWTs()
+	registrar := newRegistrar(j)
+	registrar.Statuses = softwareStatuses{"software-1": domain.SoftwareProductRemoved}
+
+	_, err := registrar.Register(t.Context(), requestJWT)
+
+	requireRegistrationError(t, err, domain.UnapprovedSoftwareStatement, "REMOVED")
+	assert.Empty(t, j.keysFrom, "the data holder does not get the keys of a REMOVED software product")
+}
+
+// Verifies: DH-0621
+func TestASoftwareProductThatIsNotRemovedCanRegister(t *testing.T) {
+	tests := map[string]softwareStatuses{
+		"ACTIVE":    {"software-1": domain.SoftwareProductActive},
+		"INACTIVE":  {"software-1": domain.SoftwareProductInactive},
+		"no status": {},
+	}
+	for name, statuses := range tests {
+		t.Run(name, func(t *testing.T) {
+			registrar := newRegistrar(validJWTs())
+			registrar.Statuses = statuses
+
+			_, err := registrar.Register(t.Context(), requestJWT)
+
+			assert.NoError(t, err)
+		})
+	}
+}
+
+func TestAFailureToReadTheStatusIsNotARegistrationError(t *testing.T) {
+	j := validJWTs()
+	j.ssa.SoftwareID, j.request.Issuer = "software-failure", "software-failure"
+
+	_, err := newRegistrar(j).Register(t.Context(), requestJWT)
+
+	require.Error(t, err)
+
+	var registrationErr domain.RegistrationError
+	assert.NotErrorAs(t, err, &registrationErr)
 }
 
 // Verifies: DH-0608
@@ -305,7 +411,7 @@ func registeredClient(t *testing.T, j *jwts) app.Registrar {
 	_, err := registrar.Register(t.Context(), requestJWT)
 	require.NoError(t, err)
 
-	j.request.ID = "request-jti-2"
+	j.request.ID, j.ssa.ID = "request-jti-2", "ssa-jti-2"
 
 	return registrar
 }
@@ -354,6 +460,9 @@ func TestAnUpdateThatIsRefusedDoesNotChangeTheRegistration(t *testing.T) {
 		"a jti that was used before": {
 			func(j *jwts) { j.request.ID = "request-jti" }, domain.InvalidClientMetadata, "jti",
 		},
+		"the SSA of the registration": {
+			func(j *jwts) { j.ssa.ID = "ssa-jti" }, domain.InvalidSoftwareStatement, "jti of the SSA",
+		},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -398,9 +507,34 @@ func TestADeletionRemovesTheRegistrationAndANewRegistrationGetsANewClientID(t *t
 	_, err := registrar.Registrations.Registration(t.Context(), "client-1")
 	require.ErrorIs(t, err, app.ErrRegistrationNotFound)
 
+	j.ssa.ID = "ssa-jti-3"
 	again, err := registrar.Register(t.Context(), requestJWT)
 	require.NoError(t, err)
 	assert.Equal(t, "client-2", again.ClientID)
+}
+
+// Verifies: DH-0676
+func TestADeletionEndsTheArrangementsOfTheClientAtTheTimeOfTheRequest(t *testing.T) {
+	registrar := registeredClient(t, validJWTs())
+	arrangements := &clientArrangements{}
+	registrar.Arrangements = arrangements
+
+	require.NoError(t, registrar.Delete(t.Context(), "client-1"))
+
+	assert.Equal(t, []string{"software-1/client-1 at " + registrationTime.Format(time.RFC3339)}, arrangements.ends)
+}
+
+func TestADeletionThatCannotEndTheArrangementsKeepsTheRegistration(t *testing.T) {
+	registrar := registeredClient(t, validJWTs())
+	arrangements := &clientArrangements{err: errors.New("database failure")}
+	registrar.Arrangements = arrangements
+
+	err := registrar.Delete(t.Context(), "client-1")
+
+	require.ErrorIs(t, err, arrangements.err)
+
+	_, err = registrar.Registrations.Registration(t.Context(), "client-1")
+	assert.NoError(t, err, "a new DELETE can end the arrangements")
 }
 
 func TestAnUpdateOrADeletionOfAClientIDWithNoRegistrationIsNotFound(t *testing.T) {

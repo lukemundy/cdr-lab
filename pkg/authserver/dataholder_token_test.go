@@ -41,6 +41,8 @@ type bank struct {
 	cfg        authserver.DataHolderConfig
 	grants     *grantStore
 	revoked    *revokedTokenStore
+	// revokedRefresh has the refresh token revocations that the service got.
+	revokedRefresh *refreshRevocations
 	// secure is the handler of the mTLS listener.
 	secure           http.Handler
 	tokenURL         string
@@ -85,12 +87,13 @@ func newBank(t *testing.T) *bank {
 	b.clients = dataHolderClients{}
 	for _, id := range []string{registeredClientID, secondClientID} {
 		b.clients[id] = authserver.DataHolderClient{
-			ID:                      id,
-			JWKSURI:                 jwks.URL,
-			Scopes:                  []string{"openid", "bank:accounts.basic:read", "cdr:registration"},
-			GrantTypes:              []string{"client_credentials", "authorization_code", "refresh_token"},
-			RedirectURIs:            []string{registeredRedirectURI},
-			RequestObjectSigningAlg: "PS256",
+			ID:                          id,
+			JWKSURI:                     jwks.URL,
+			Scopes:                      []string{"openid", "bank:accounts.basic:read", "cdr:registration"},
+			GrantTypes:                  []string{"client_credentials", "authorization_code", "refresh_token"},
+			RedirectURIs:                []string{registeredRedirectURI},
+			RequestObjectSigningAlg:     "PS256",
+			TokenEndpointAuthSigningAlg: "PS256",
 		}
 	}
 
@@ -114,7 +117,8 @@ func newBank(t *testing.T) *bank {
 	b.grants = &grantStore{grants: map[string]authserver.Grant{}}
 	cfg.Grants = b.grants
 	b.revoked = cfg.RevokedTokens.(*revokedTokenStore)
-	cfg.Arrangements = arrangementGrants{b.grants}
+	b.revokedRefresh = &refreshRevocations{}
+	cfg.Arrangements = arrangementGrants{grants: b.grants, revokedRefresh: b.revokedRefresh}
 	b.statuses = &clientStatuses{}
 	cfg.ClientStatuses = b.statuses
 	b.cfg = cfg
@@ -303,7 +307,14 @@ func TestAClientWhoseRegistrationDoesNotPermitTheRequestIsRefused(t *testing.T) 
 	}
 }
 
-// Verifies: AUTH-0026, AUTH-0027
+// registerSigningAlg changes the token_endpoint_auth_signing_alg of the registered client.
+func (b *bank) registerSigningAlg(alg string) {
+	client := b.clients[registeredClientID]
+	client.TokenEndpointAuthSigningAlg = alg
+	b.clients[registeredClientID] = client
+}
+
+// Verifies: AUTH-0026, AUTH-0027, AUTH-0240
 func TestTheDataHolderTokenEndpointAcceptsItsThreeAudiencesAndTwoAlgorithms(t *testing.T) {
 	b := newBank(t)
 
@@ -319,6 +330,8 @@ func TestTheDataHolderTokenEndpointAcceptsItsThreeAudiencesAndTwoAlgorithms(t *t
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
+			b.registerSigningAlg(string(tc.alg))
+
 			a := b.assertion()
 			a.alg, a.key, a.kid = tc.alg, tc.key, tc.kid
 			a.claims["aud"] = tc.aud
@@ -364,6 +377,40 @@ func TestTheDataHolderTokenEndpointRefusesAnAssertionThatIsNotValid(t *testing.T
 			requireError(t, b.token(b.form(a)), http.StatusUnauthorized, "invalid_client")
 		})
 	}
+}
+
+// Verifies: AUTH-0240
+func TestAnAssertionWithAnAlgorithmThatTheClientDidNotRegisterIsRefusedAtEachEndpoint(t *testing.T) {
+	b := newBank(t)
+	accessToken := b.accessToken()
+	arrangementID := b.authorise(hour).consent.ArrangementID
+	// The requests of the bank sign the assertion with PS256.
+	b.registerSigningAlg("ES256")
+
+	tests := map[string]func() reply{
+		"token":            func() reply { return b.token(b.form(b.assertion())) },
+		"PAR":              func() reply { return b.push(b.requestObject()) },
+		"introspection":    func() reply { return b.introspect(accessToken) },
+		"token revocation": func() reply { return b.revoke(registeredClientID, accessToken) },
+		"CDR arrangement revocation": func() reply {
+			r := b.revokeArrangement(registeredClientID, url.Values{"cdr_arrangement_id": {arrangementID}})
+
+			var body map[string]any
+			require.NoError(t, json.Unmarshal([]byte(r.body), &body), r.body)
+
+			return reply{status: r.status, header: r.header, body: body}
+		},
+	}
+	for name, request := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := request()
+
+			require.Equal(t, http.StatusUnauthorized, r.status, r.body)
+			assert.Equal(t, "invalid_client", r.body["error"], r.body)
+		})
+	}
+
+	assert.True(t, b.grants.only(t).RevokedAt.IsZero(), "the arrangement does not end")
 }
 
 // Verifies: AUTH-0036

@@ -146,7 +146,7 @@ func newReader() *fakeReader {
 									JWKSURI:                    "https://recipient.example/jwks",
 									RevocationURI:              "https://recipient.example/revoke",
 									RecipientBaseURI:           "https://cdr.recipient.example",
-									Scopes:                     []string{"openid"},
+									Scopes:                     []string{"openid", "profile"},
 								},
 							},
 						},
@@ -491,6 +491,20 @@ func TestVersionErrors(t *testing.T) {
 	}
 }
 
+// Verifies: REG-1494
+func TestAListRefusesAnAcceptHeaderThatPermitsNoJSON(t *testing.T) {
+	for name, l := range lists {
+		t.Run(name, func(t *testing.T) {
+			rec := serve(t, newReader(), l.path, http.Header{"X-V": {l.version}, "Accept": {"application/xml"}})
+
+			e := requireError(
+				t, rec, http.StatusNotAcceptable, "urn:au-cds:error:cds-all:Header/Invalid", "Invalid Header",
+			)
+			assert.Equal(t, "Accept", e.Detail)
+		})
+	}
+}
+
 func TestMissingVersionDetailIsTheHeaderName(t *testing.T) {
 	rec := serve(t, newReader(), recipientStatusesPath, http.Header{})
 
@@ -615,6 +629,22 @@ func TestAnUnknownPathIsNotFound(t *testing.T) {
 				"urn:au-cds:error:cds-all:Resource/NotFound",
 				"Resource Not Found",
 			)
+		})
+	}
+}
+
+// Verifies: REG-1495
+func TestAnotherMethodOnAListPathIsNotAllowed(t *testing.T) {
+	for name, l := range lists {
+		t.Run(name, func(t *testing.T) {
+			rec := send(t, newReader(), http.MethodPost, l.path, http.Header{"X-V": {l.version}})
+
+			e := requireError(
+				t, rec, http.StatusMethodNotAllowed,
+				"urn:au-cds:error:cds-all:GeneralError/Expected", "Expected Error Encountered",
+			)
+			assert.Equal(t, "The endpoint does not support the method POST.", e.Detail)
+			assert.Equal(t, "GET, HEAD", rec.Header().Get("Allow"))
 		})
 	}
 }

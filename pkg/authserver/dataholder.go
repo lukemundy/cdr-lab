@@ -32,8 +32,12 @@ const (
 // RegistrationScope is the scope of an access token for registration management.
 const RegistrationScope = cdsrules.RegistrationScope
 
+// AccessTokenLifetime is also the sharing of a once-off arrangement, so that the data recipient can collect the data
+// with its only access token.
+const AccessTokenLifetime = 5 * time.Minute
+
 const (
-	dataHolderTokenLifetimeSeconds = 300
+	dataHolderTokenLifetimeSeconds = int(AccessTokenLifetime / time.Second)
 	// A JTIStore must keep a JWT ID for longer than this lifetime.
 	dataHolderAssertionLifetimeSeconds = 600
 	// The CDS permits 10 to 90 seconds.
@@ -53,6 +57,8 @@ type DataHolderClient struct {
 	RedirectURIs []string
 	// RequestObjectSigningAlg is the only algorithm that the client signs a request object with.
 	RequestObjectSigningAlg string
+	// TokenEndpointAuthSigningAlg is the only algorithm that the client signs a client assertion with.
+	TokenEndpointAuthSigningAlg string
 }
 
 type DataHolderClientStore interface {
@@ -170,7 +176,7 @@ func NewDataHolder(cfg DataHolderConfig) (*DataHolder, error) {
 		provider.WithTokenHandler(cdsrules.RecordArrangement),
 		provider.WithIDTokenClaims(cdsrules.IDTokenClaims),
 		provider.WithTokenIntrospection(cdsrules.IntrospectingClient),
-		provider.WithTokenRevocation(revokingClient),
+		provider.WithTokenRevocation(allowRevocation),
 		provider.WithAuthSessionLifetime(dataHolderFlowLifetimeSeconds),
 		provider.WithErrorRenderer(refusedPage(cfg.Pages)),
 		provider.WithTokenOptions(func(_ context.Context, grant *goidc.Grant, _ *goidc.Client) goidc.TokenOptions {
@@ -389,6 +395,11 @@ func (r registeredClients) Client(ctx context.Context, id string) (*goidc.Client
 		ResponseTypes:    []goidc.ResponseType{goidc.ResponseTypeCode},
 		JARSigAlg:        goidc.SignatureAlgorithm(c.RequestObjectSigningAlg),
 		TokenAuthnMethod: goidc.AuthnMethodPrivateKeyJWT,
+		// The library reads a separate algorithm for each endpoint. The CDR arrangement revocation endpoint
+		// authenticates the client at the token revocation endpoint.
+		TokenAuthnSigAlg:              goidc.SignatureAlgorithm(c.TokenEndpointAuthSigningAlg),
+		TokenIntrospectionAuthnSigAlg: goidc.SignatureAlgorithm(c.TokenEndpointAuthSigningAlg),
+		TokenRevocationAuthnSigAlg:    goidc.SignatureAlgorithm(c.TokenEndpointAuthSigningAlg),
 	}, nil
 }
 

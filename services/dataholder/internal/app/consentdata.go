@@ -12,7 +12,10 @@ import (
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/domain"
 )
 
-var ErrArrangementNotFound = errors.New("the data holder has no arrangement with this identifier")
+var (
+	ErrArrangementNotFound = errors.New("the data holder has no arrangement with this identifier")
+	ErrArrangementEnded    = errors.New("the arrangement ended")
+)
 
 type ConsentData struct {
 	Arrangements     eventsourcing.Store
@@ -81,6 +84,24 @@ type ConsentAccount struct {
 	// ID is the accountId that the software product of the arrangement gets.
 	ID      string
 	Account domain.Account
+}
+
+// RequireCurrent gives ErrArrangementNotFound, or ErrArrangementEnded for an arrangement that ended for any reason.
+func (c ConsentData) RequireCurrent(ctx context.Context, arrangementID string) error {
+	state, _, err := ArrangementType.Load(ctx, c.Arrangements, arrangementID)
+	if err != nil {
+		return fmt.Errorf("load the arrangement: %w", err)
+	}
+
+	if !state.Created {
+		return ErrArrangementNotFound
+	}
+
+	if state.Ended(c.Now()) {
+		return ErrArrangementEnded
+	}
+
+	return nil
 }
 
 // Customer gives ErrArrangementNotFound.

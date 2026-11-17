@@ -32,6 +32,8 @@ The Register checks the fields of a participant record each time that it gets on
   - terms of service URI and policy URI
   - JWKS URI, revocation URI and recipient base URI
   - scopes
+- <a id="reg-1496"></a>**REG-1496** The scopes of a software product contain `openid` and `profile`. The Register refuses a list without them. For example, the load refuses a software product with only `openid` and `bank:accounts.basic:read`. ([CDS: SSA Definition][cds-ssa-definition])
+- <a id="reg-1497"></a>**REG-1497** The Register refuses a list of scopes with an empty value. ([CDS: SSA Definition][cds-ssa-definition]; [RFC 6749, section 3.3][rfc6749-scope])
 - <a id="reg-0213"></a>**REG-0213** A software product has a list of the client certificates that the Register trusts for it. For example, [a client certificate issue adds the certificate to this list](certificate-management.md#reg-0610). ([ACCC Developer Portal: Token Endpoint][accc-token])
 - <a id="reg-0214"></a>**REG-0214** When a CDS Register schema gives a text field a `maxLength`, the field has that limit in characters. The Register refuses a longer value. ([CDS: Register API schemas][cds-register-schemas])
 - <a id="reg-0215"></a>**REG-0215** Each URI field of a participant is an absolute URI with the `https` scheme and a host. The Register refuses a value that is not. ([CDS: Common field types][cds-common-field-types]; [CDS: RegistrationProperties schema][cds-dcr-schemas]; [Judgement: only `https` in a URI field](#reg-0262))
@@ -163,6 +165,7 @@ The Register checks the fields of a participant record each time that it gets on
 [cds-participant-endpoints]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#participant-endpoints
 [cds-participant-statuses]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#participant-statuses
 [cds-register-schemas]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api-schemas
+[rfc6749-scope]: https://www.rfc-editor.org/rfc/rfc6749#section-3.3
 [cds-ssa-definition]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#ssa-definition
 [cds-status-mapping]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#status-mapping
 [cds-transaction-security]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#transaction-security

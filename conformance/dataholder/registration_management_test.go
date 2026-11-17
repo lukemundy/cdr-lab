@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/go-jose/go-jose/v4"
 	"github.com/google/uuid"
@@ -54,6 +55,13 @@ func TestASoftwareProductUpdatesAndDeletesItsRegistrationAndRegistersAgain(t *te
 		return client.manageRegistration(t, method, client.cert, client.clientID, token, requestJWT)
 	}
 
+	// The arrangement is before the update, because the update changes the algorithm of the request object.
+	customer := newEligibleAccount(t)
+	tokens := customer.consents(client, noAccountScope, ninetyDays).tokens(t)
+	arrangementID := arrangementIDOf(t, tokens)
+	require.IsType(t, "", tokens["refresh_token"], tokens)
+	refreshToken := tokens["refresh_token"].(string)
+
 	// A new SSA has a new jti, so it is different from the SSA of the registration.
 	newSSA := newRegistrant(t, lifecycleProduct).ssa
 	require.NotEqual(t, r.ssa, newSSA)
@@ -76,6 +84,14 @@ func TestASoftwareProductUpdatesAndDeletesItsRegistrationAndRegistersAgain(t *te
 		assert.Equal(t, created.body, registrationOf(t, manage(http.MethodGet, "")))
 	})
 
+	t.Run("an update with the SSA of the registration is refused", func(t *testing.T) {
+		claims := labtest.RegistrationClaims(lifecycleProduct, r.issuer, r.ssa)
+
+		requireManagementError(t, manage(http.MethodPut, signedRegistration(t, claims)), "invalid_software_statement")
+
+		assert.Equal(t, created.body, registrationOf(t, manage(http.MethodGet, "")))
+	})
+
 	t.Run("an update with a content type that is not a JWT gives 415", func(t *testing.T) {
 		status := putWithContentType(t, client, token, "application/json")
 
@@ -87,6 +103,7 @@ func TestASoftwareProductUpdatesAndDeletesItsRegistrationAndRegistersAgain(t *te
 	claims := labtest.RegistrationClaims(lifecycleProduct, r.issuer, newSSA)
 	claims["grant_types"] = []string{"client_credentials", "authorization_code"}
 	claims["request_object_signing_alg"] = "ES256"
+	claims["token_endpoint_auth_signing_alg"] = "ES256"
 	updated := manage(http.MethodPut, signedRegistration(t, claims))
 	require.Equal(t, http.StatusOK, updated.status, string(updated.body))
 
@@ -104,9 +121,24 @@ func TestASoftwareProductUpdatesAndDeletesItsRegistrationAndRegistersAgain(t *te
 		assert.Equal(t, registration, registrationOf(t, manage(http.MethodGet, "")), "GET gives the same values")
 	})
 
+	t.Run("after an update, the client authenticates only with the algorithm of the update", func(t *testing.T) {
+		endpoint := tokenEndpoint(t, client)
+		es256 := client.assertion(t, endpoint)
+		es256.Alg, es256.Key, es256.KID = jose.ES256, recipientKeys(t).EC, "ec"
+
+		r := client.requestToken(t, es256)
+		assert.Equal(t, http.StatusOK, r.Status, r.Body)
+
+		ps256 := client.requestToken(t, client.assertion(t, endpoint))
+		requireTokenError(t, ps256, http.StatusUnauthorized, "invalid_client")
+	})
+
 	require.False(t, t.Failed())
 
+	deleting := time.Now().Truncate(time.Second)
 	deleted := manage(http.MethodDelete, "")
+	deletedAt := time.Now()
+
 	require.Equal(t, http.StatusNoContent, deleted.status, string(deleted.body))
 	assert.Empty(t, deleted.body)
 
@@ -117,10 +149,29 @@ func TestASoftwareProductUpdatesAndDeletesItsRegistrationAndRegistersAgain(t *te
 		assert.Equal(t, `Bearer error="invalid_token"`, read.header.Get("WWW-Authenticate"))
 	})
 
+	t.Run("after a deletion, the arrangement ends as a revocation, with no notice", func(t *testing.T) {
+		got := arrangementOf(t, customer, arrangementID)
+
+		assert.Equal(t, "REVOKED_BY_DATA_RECIPIENT", got.EndReason)
+		require.NotNil(t, got.EndedAt)
+		assert.WithinRange(t, *got.EndedAt, deleting, deletedAt, "the end has the time of the request")
+		assert.Empty(t, got.NoticeStatus)
+		assert.Empty(t, labtest.NoticesFor(arrangementID))
+	})
+
 	t.Run("after a deletion, client authentication with the client ID fails", func(t *testing.T) {
 		tokenReply := client.requestToken(t, client.assertion(t, tokenEndpoint(t, client)))
 
 		requireTokenError(t, tokenReply, http.StatusUnauthorized, "invalid_client")
+		requireTokenError(t, client.refresh(t, refreshToken), http.StatusUnauthorized, "invalid_client")
+	})
+
+	t.Run("after a deletion, a registration with an SSA that the data holder accepted is refused", func(t *testing.T) {
+		requireRegistrationError(
+			t,
+			r.register(t, labtest.RegistrationClaims(lifecycleProduct, r.issuer, newSSA)),
+			"invalid_software_statement",
+		)
 	})
 
 	t.Run("after a deletion, the software product registers again and gets a new client ID", func(t *testing.T) {

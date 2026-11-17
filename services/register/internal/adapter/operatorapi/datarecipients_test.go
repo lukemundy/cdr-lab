@@ -15,7 +15,7 @@ const softwareProductJSON = `{
 	"logoUri": "https://recipient.example/sp.png", "status": "ACTIVE", "clientUri": "https://recipient.example",
 	"redirectUris": ["https://recipient.example/cb"], "jwksUri": "https://recipient.example/jwks",
 	"revocationUri": "https://recipient.example/revoke", "recipientBaseUri": "https://cdr.recipient.example",
-	"scopes": ["openid"]
+	"scopes": ["openid", "profile"]
 }`
 
 const recipientBrandJSON = `{
@@ -29,7 +29,7 @@ func softwareProduct() domain.SoftwareProduct {
 		LogoURI: "https://recipient.example/sp.png", Status: domain.Active, ClientURI: "https://recipient.example",
 		RedirectURIs: []string{"https://recipient.example/cb"}, JWKSURI: "https://recipient.example/jwks",
 		RevocationURI: "https://recipient.example/revoke", RecipientBaseURI: "https://cdr.recipient.example",
-		Scopes: []string{"openid"},
+		Scopes: []string{"openid", "profile"},
 	}
 }
 
@@ -118,13 +118,13 @@ func TestEachDataRecipientChangeExecutesItsCommand(t *testing.T) {
 			  "logoUri": "https://recipient.example/sp.png", "clientUri": "https://recipient.example",
 			  "redirectUris": ["https://recipient.example/cb"], "jwksUri": "https://recipient.example/jwks",
 			  "revocationUri": "https://recipient.example/revoke", "recipientBaseUri": "https://cdr.recipient.example",
-			  "scopes": ["openid"], "tosUri": "https://recipient.example/tos"}`,
+			  "scopes": ["openid", "profile"], "tosUri": "https://recipient.example/tos"}`,
 			domain.ChangeSoftwareProductDetails{SoftwareProductID: "sp-1", Details: domain.SoftwareProductDetails{
 				SoftwareProductName: "Web", SoftwareProductDescription: "A web app",
 				LogoURI: "https://recipient.example/sp.png", ClientURI: "https://recipient.example",
 				RedirectURIs: []string{"https://recipient.example/cb"}, JWKSURI: "https://recipient.example/jwks",
 				RevocationURI: "https://recipient.example/revoke", RecipientBaseURI: "https://cdr.recipient.example",
-				Scopes: []string{"openid"}, TOSURI: "https://recipient.example/tos",
+				Scopes: []string{"openid", "profile"}, TOSURI: "https://recipient.example/tos",
 			}},
 		},
 	}

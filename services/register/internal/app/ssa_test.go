@@ -46,7 +46,7 @@ func ssaRecipient(status domain.Status) domain.DataRecipient {
 						SoftwareProductID:   "sp-1",
 						SoftwareProductName: "Recipient App Web",
 						Status:              status,
-						Scopes:              []string{"openid"},
+						Scopes:              []string{"openid", "profile"},
 					},
 				},
 			},

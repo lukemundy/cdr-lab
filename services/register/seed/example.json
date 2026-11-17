@@ -620,6 +620,7 @@
               "recipientBaseUri": "https://cdr.web.status-change.example",
               "scopes": [
                 "openid",
+                "profile",
                 "bank:accounts.basic:read"
               ]
             },
@@ -638,6 +639,7 @@
               "recipientBaseUri": "https://cdr.mobile.status-change.example",
               "scopes": [
                 "openid",
+                "profile",
                 "bank:accounts.basic:read"
               ]
             },
@@ -656,6 +658,7 @@
               "recipientBaseUri": "https://cdr.beta.status-change.example",
               "scopes": [
                 "openid",
+                "profile",
                 "bank:accounts.basic:read"
               ]
             }
@@ -682,6 +685,7 @@
               "recipientBaseUri": "https://cdr.legacy.status-change.example",
               "scopes": [
                 "openid",
+                "profile",
                 "bank:accounts.basic:read"
               ]
             }
@@ -718,6 +722,7 @@
               "recipientBaseUri": "https://cdr.web.surrender.example",
               "scopes": [
                 "openid",
+                "profile",
                 "bank:accounts.basic:read"
               ]
             }
@@ -754,6 +759,7 @@
               "recipientBaseUri": "https://cdr.conformance.example",
               "scopes": [
                 "openid",
+                "profile",
                 "bank:accounts.basic:read",
                 "cdr:registration"
               ]
@@ -773,6 +779,7 @@
               "recipientBaseUri": "https://cdr.conformance.example",
               "scopes": [
                 "openid",
+                "profile",
                 "bank:accounts.basic:read",
                 "cdr:registration"
               ]
@@ -810,6 +817,7 @@
               "recipientBaseUri": "https://cdr.conformance.example",
               "scopes": [
                 "openid",
+                "profile",
                 "bank:accounts.basic:read",
                 "cdr:registration"
               ]
@@ -847,6 +855,7 @@
               "recipientBaseUri": "https://cdr.conformance.example",
               "scopes": [
                 "openid",
+                "profile",
                 "bank:accounts.basic:read",
                 "cdr:registration"
               ]
@@ -887,6 +896,7 @@
               "recipientBaseUri": "https://cdr.conformance.example",
               "scopes": [
                 "openid",
+                "profile",
                 "bank:accounts.basic:read"
               ]
             },
@@ -905,6 +915,7 @@
               "recipientBaseUri": "https://cdr.conformance.example",
               "scopes": [
                 "openid",
+                "profile",
                 "bank:accounts.basic:read",
                 "cdr:registration"
               ]
@@ -924,6 +935,7 @@
               "recipientBaseUri": "https://cdr.conformance.example",
               "scopes": [
                 "openid",
+                "profile",
                 "bank:accounts.basic:read",
                 "cdr:registration"
               ]
@@ -966,6 +978,7 @@
               "recipientBaseUri": "https://cdr.conformance.example",
               "scopes": [
                 "openid",
+                "profile",
                 "bank:accounts.basic:read",
                 "cdr:registration"
               ]
@@ -1192,6 +1205,7 @@
               "recipientBaseUri": "https://cdr.console-test.example",
               "scopes": [
                 "openid",
+                "profile",
                 "bank:accounts.basic:read"
               ]
             },
@@ -1210,6 +1224,7 @@
               "recipientBaseUri": "https://cdr.console-test.example",
               "scopes": [
                 "openid",
+                "profile",
                 "bank:accounts.basic:read"
               ]
             }
@@ -1246,6 +1261,7 @@
               "recipientBaseUri": "https://cdr.console-certificate-test.example",
               "scopes": [
                 "openid",
+                "profile",
                 "bank:accounts.basic:read"
               ]
             }
@@ -1291,6 +1307,7 @@
               "recipientBaseUri": "https://cdr.console-product-change-test.example",
               "scopes": [
                 "openid",
+                "profile",
                 "bank:accounts.basic:read"
               ]
             }

@@ -50,6 +50,30 @@ func (a Arrangements) RevokeByDataRecipient(ctx context.Context, clientID, arran
 	return err
 }
 
+// EndOneTimeCollection ends, as a revocation by the data recipient, a current arrangement of the client for a
+// disclosure on one occasion, because the client revoked its refresh token after the collection. It changes nothing
+// for each other arrangement.
+func (a Arrangements) EndOneTimeCollection(ctx context.Context, clientID, arrangementID string) error {
+	now := a.Now()
+
+	state, err := a.load(ctx, arrangementID)
+	if err != nil {
+		return err
+	}
+
+	sharing := time.Duration(state.Arrangement.SharingDurationSeconds) * time.Second
+	if !state.Created || state.Arrangement.ClientID != clientID || state.Ended(now) || !domain.IsOneOccasion(sharing) {
+		return nil
+	}
+
+	_, err = a.end(ctx, state, domain.EndArrangement{EndedAt: now, Reason: domain.EndReasonRevokedByDataRecipient})
+	if errors.Is(err, domain.ErrArrangementEnded) {
+		return nil
+	}
+
+	return err
+}
+
 // WithdrawByConsumer gives ErrCustomerNotFound, domain.ErrArrangementNotFound for an arrangement that the customer
 // does not have, and domain.ErrArrangementEnded.
 func (a Arrangements) WithdrawByConsumer(
@@ -152,6 +176,36 @@ func (a Arrangements) RemoveSoftwareProduct(ctx context.Context, softwareID stri
 	)
 	if err != nil && !errors.Is(err, domain.ErrNoRegistration) {
 		return fmt.Errorf("delete the registration: %w", err)
+	}
+
+	return nil
+}
+
+// EndForDeletedRegistration ends each arrangement of the client as a revocation by the data recipient, because the
+// software product asked for the deletion.
+func (a Arrangements) EndForDeletedRegistration(
+	ctx context.Context,
+	softwareID, clientID string,
+	deletedAt time.Time,
+) error {
+	states, err := a.Reader.ArrangementsOfSoftwareProduct(ctx, softwareID)
+	if err != nil {
+		return fmt.Errorf("read the arrangements: %w", err)
+	}
+
+	for _, state := range states {
+		if state.Arrangement.ClientID != clientID || state.Ended(deletedAt) {
+			continue
+		}
+
+		_, err := a.end(
+			ctx,
+			state,
+			domain.EndArrangement{EndedAt: deletedAt, Reason: domain.EndReasonRevokedByDataRecipient},
+		)
+		if err != nil && !errors.Is(err, domain.ErrArrangementEnded) {
+			return err
+		}
 	}
 
 	return nil

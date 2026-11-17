@@ -98,9 +98,16 @@ type RegistrationRecords interface {
 	RegistrationRecord(ctx context.Context, clientID string, at time.Time) (RegistrationRecord, error)
 }
 
+type RegistrationArrangements interface {
+	// EndForDeletedRegistration ends each arrangement of the client that did not end, and is safe to repeat.
+	EndForDeletedRegistration(ctx context.Context, softwareID, clientID string, deletedAt time.Time) error
+}
+
 type JTIStore interface {
 	// Consume gives ErrJTIUsed when the JWT ID was consumed before.
 	Consume(ctx context.Context, jti string) error
+	// ConsumeSSA gives ErrJTIUsed when the JWT ID of an SSA was consumed before. It keeps the JWT ID until expiresAt.
+	ConsumeSSA(ctx context.Context, jti string, expiresAt time.Time) error
 }
 
 // maxAttempts is the number of times that an update or a deletion reads the stream again after a version conflict.
@@ -114,6 +121,8 @@ type Registrar struct {
 	Store  eventsourcing.Store
 	// Registrations gives the software product of a client ID, which is the stream of its registration.
 	Registrations RegistrationReader
+	Statuses      StatusReader
+	Arrangements  RegistrationArrangements
 	Now           func() time.Time
 	NewID         func() string
 }
@@ -126,12 +135,12 @@ func refused(code domain.RegistrationErrorCode, description string) error {
 func (r Registrar) Register(ctx context.Context, requestJWT string) (domain.Registration, error) {
 	now := r.Now()
 
-	registration, jti, err := r.verifiedRegistration(ctx, requestJWT, now)
+	registration, jtis, err := r.verifiedRegistration(ctx, requestJWT, now)
 	if err != nil {
 		return domain.Registration{}, err
 	}
 
-	if err := r.consume(ctx, jti); err != nil {
+	if err := r.consume(ctx, jtis); err != nil {
 		return domain.Registration{}, err
 	}
 
@@ -167,7 +176,7 @@ func (r Registrar) Update(ctx context.Context, clientID, requestJWT string) (dom
 		return domain.Registration{}, err
 	}
 
-	replacement, jti, err := r.verifiedRegistration(ctx, requestJWT, r.Now())
+	replacement, jtis, err := r.verifiedRegistration(ctx, requestJWT, r.Now())
 	if err != nil {
 		return domain.Registration{}, err
 	}
@@ -179,7 +188,7 @@ func (r Registrar) Update(ctx context.Context, clientID, requestJWT string) (dom
 		)
 	}
 
-	if err := r.consume(ctx, jti); err != nil {
+	if err := r.consume(ctx, jtis); err != nil {
 		return domain.Registration{}, err
 	}
 
@@ -194,11 +203,16 @@ func (r Registrar) Update(ctx context.Context, clientID, requestJWT string) (dom
 	return replacement, nil
 }
 
-// Delete gives ErrRegistrationNotFound when no registration has the client ID.
+// Delete gives ErrRegistrationNotFound when no registration has the client ID. It ends the arrangements before it
+// deletes the registration, so that a new request can end the arrangements after a failure.
 func (r Registrar) Delete(ctx context.Context, clientID string) error {
 	existing, err := r.Registrations.Registration(ctx, clientID)
 	if err != nil {
 		return err
+	}
+
+	if err := r.Arrangements.EndForDeletedRegistration(ctx, existing.SoftwareID, clientID, r.Now()); err != nil {
+		return fmt.Errorf("end the arrangements of the registration: %w", err)
 	}
 
 	return r.execute(ctx, existing.SoftwareID, domain.DeleteClient{ClientID: clientID})
@@ -226,46 +240,84 @@ func (r Registrar) execute(ctx context.Context, softwareID string, command domai
 	return nil
 }
 
-// verifiedRegistration gives the registration that a request asks for, with no client ID, and the jti of the request.
+// verifiedRegistration gives the registration that a request asks for, with no client ID, and the JWT IDs that the
+// data holder consumes when it accepts the request.
 func (r Registrar) verifiedRegistration(
 	ctx context.Context,
 	requestJWT string,
 	now time.Time,
-) (registration domain.Registration, jti string, err error) {
+) (domain.Registration, requestJTIs, error) {
 	ssa, err := r.verifiedSSA(ctx, requestJWT, now)
 	if err != nil {
-		return domain.Registration{}, "", err
+		return domain.Registration{}, requestJTIs{}, err
 	}
+
+	if err := r.refuseRemoved(ctx, ssa.SoftwareID); err != nil {
+		return domain.Registration{}, requestJTIs{}, err
+	}
+
 	// The SSA is verified first, so that the data holder connects only to a JWKS URI that the Register signed.
 	request, err := r.JWTs.VerifyRequest(ctx, requestJWT, ssa.JWKSURI)
 	switch {
 	case errors.Is(err, ErrInvalidJWT):
-		return domain.Registration{}, "", refused(
+		return domain.Registration{}, requestJTIs{}, refused(
 			domain.InvalidClientMetadata,
 			"the signature of the request JWT does not verify with a key at the jwks_uri of the SSA",
 		)
 	case errors.Is(err, ErrKeysNotAvailable):
-		return domain.Registration{}, "", refused(
+		return domain.Registration{}, requestJTIs{}, refused(
 			domain.InvalidClientMetadata,
 			"the data holder cannot get the keys at the jwks_uri of the SSA",
 		)
 	case err != nil:
-		return domain.Registration{}, "", fmt.Errorf("verify the request JWT: %w", err)
+		return domain.Registration{}, requestJTIs{}, fmt.Errorf("verify the request JWT: %w", err)
 	}
 
-	registration, err = domain.NewRegistration(ssa, request, r.Issuer, now)
+	registration, err := domain.NewRegistration(ssa, request, r.Issuer, now)
+	jtis := requestJTIs{request: request.ID, ssa: ssa.ID, ssaExpiresAt: time.Unix(ssa.ExpiresAt, 0)}
 
-	return registration, request.ID, err
+	return registration, jtis, err
 }
 
-func (r Registrar) consume(ctx context.Context, jti string) error {
-	err := r.JTIs.Consume(ctx, jti)
+// refuseRemoved permits a software product with no status, because only REMOVED is final.
+func (r Registrar) refuseRemoved(ctx context.Context, softwareID string) error {
+	status, _, err := r.Statuses.Status(ctx, softwareID)
+	if err != nil {
+		return fmt.Errorf("read the status of the software product: %w", err)
+	}
+
+	if status == domain.SoftwareProductRemoved {
+		return refused(domain.UnapprovedSoftwareStatement, "the software product is REMOVED")
+	}
+
+	return nil
+}
+
+type requestJTIs struct {
+	request      string
+	ssa          string
+	ssaExpiresAt time.Time
+}
+
+// consume uses the jti of the request JWT first, so that a second request with the same request JWT gets the error of
+// the request JWT.
+func (r Registrar) consume(ctx context.Context, jtis requestJTIs) error {
+	err := r.JTIs.Consume(ctx, jtis.request)
 	if errors.Is(err, ErrJTIUsed) {
 		return refused(domain.InvalidClientMetadata, "the jti of the request JWT was used before")
 	}
 
 	if err != nil {
 		return fmt.Errorf("consume the jti of the request JWT: %w", err)
+	}
+
+	err = r.JTIs.ConsumeSSA(ctx, jtis.ssa, jtis.ssaExpiresAt)
+	if errors.Is(err, ErrJTIUsed) {
+		return refused(domain.InvalidSoftwareStatement, "the jti of the SSA was used before")
+	}
+
+	if err != nil {
+		return fmt.Errorf("consume the jti of the SSA: %w", err)
 	}
 
 	return nil

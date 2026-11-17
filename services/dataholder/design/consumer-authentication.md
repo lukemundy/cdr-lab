@@ -9,7 +9,7 @@ This area gives the authentication of a consumer with a one-time password, the O
 - <a id="dh-1202"></a>**DH-1202** The email address of a customer is unique in the brand, with no difference for upper and lower case. For example, when a customer has `Jo@example.test`, no other customer of the brand can have `jo@example.test`. ([CDS: User Identifiers][cds-user-identifiers]; [Judgement: no case difference in an email address](#dh-1271))
 - <a id="dh-1203"></a>**DH-1203** The data holder keeps the email address as the consumer or the lab operator gives it. It finds a customer by the email address with no difference for upper and lower case. ([Judgement: no case difference in an email address](#dh-1271))
 - <a id="dh-1204"></a>**DH-1204** A customer of a different brand can have the same email address. ([Judgement: no case difference in an email address](#dh-1271))
-- <a id="dh-1205"></a>**DH-1205** The email address of the customer is the channel for the one-time password (OTP). ([CDS: One-Time Password Credential Requirements][cds-otp]; [CDR Support: One Time Password (OTP)][support-otp]; [Judgement: the OTP by email](#dh-1276))
+- <a id="dh-1205"></a>**DH-1205** The email address of the customer is the channel for the one-time password (OTP). ([CDS: One-Time Password Credential Requirements][cds-otp]; [CDR Support: One Time Password (OTP)][support-otp]; [Judgement: the OTP by email, also when the email address is the user identifier](#dh-1276))
 - <a id="dh-1206"></a>**DH-1206** When a user identifier contains `@`, the data holder takes it as an email address. When it does not, the data holder takes it as a customer number. ([Judgement: two user identifiers in one field](#dh-1270))
 - <a id="dh-1207"></a>**DH-1207** The data holder removes the spaces at the start and at the end of a user identifier before it finds the customer. For example, ` 40213307 ` finds the customer `40213307`. ([Judgement: two user identifiers in one field](#dh-1270))
 
@@ -26,7 +26,7 @@ This area gives the authentication of a consumer with a one-time password, the O
 
 ## One-time password
 
-- <a id="dh-1220"></a>**DH-1220** When the consumer gives the user identifier of a customer, the data holder makes an OTP. It sends the OTP by email to the email address of that customer. ([CDS: One-Time Password Credential Requirements][cds-otp]; [Judgement: the OTP by email](#dh-1276))
+- <a id="dh-1220"></a>**DH-1220** When the consumer gives the user identifier of a customer, the data holder makes an OTP. It sends the OTP by email to the email address of that customer. ([CDS: One-Time Password Credential Requirements][cds-otp]; [Judgement: the OTP by email, also when the email address is the user identifier](#dh-1276))
 - <a id="dh-1221"></a>**DH-1221** After the consumer gives a user identifier, the next page asks for the OTP. ([CDS: Redirect to Web with One Time Password][cds-cx-otp])
 - <a id="dh-2604"></a>**DH-2604** The OTP page has one field for the OTP, with `autocomplete="one-time-code"`. It does not have one field for each digit. ([WCAG 2.2, SC 3.3.8][wcag-3-3-8]; [Judgement: one field for the OTP](#dh-2612))
 - <a id="dh-1222"></a>**DH-1222** When the consumer enters the correct OTP, the data holder authenticates the customer of that OTP. The authorisation is then for that customer. ([CDS: One-Time Password Credential Requirements][cds-otp])
@@ -70,8 +70,8 @@ This area gives the authentication of a consumer with a one-time password, the O
 
 These rules are lab-only. A production data holder has its own channel for the OTP.
 
-- <a id="dh-1262"></a>**DH-1262** The data holder sends each OTP email through the SMTP server that its configuration gives. ([CDS: One-Time Password Credential Requirements][cds-otp]; [Judgement: the OTP by email](#dh-1276))
-- <a id="dh-1263"></a>**DH-1263** In the lab, the SMTP server is a mail sink. It keeps each email and delivers none. A lab user and the conformance tests read the OTP from the mail sink. ([Judgement: the OTP by email](#dh-1276))
+- <a id="dh-1262"></a>**DH-1262** The data holder sends each OTP email through the SMTP server that its configuration gives. ([CDS: One-Time Password Credential Requirements][cds-otp]; [Judgement: the OTP by email, also when the email address is the user identifier](#dh-1276))
+- <a id="dh-1263"></a>**DH-1263** In the lab, the SMTP server is a mail sink. It keeps each email and delivers none. A lab user and the conformance tests read the OTP from the mail sink. ([Judgement: the OTP by email, also when the email address is the user identifier](#dh-1276))
 - <a id="dh-1264"></a>**DH-1264** The configuration can give fixed OTPs: a list of email addresses, each with an OTP of 6 digits. When a customer has one of these addresses, each OTP of that customer has the fixed value. ([Judgement: fixed OTPs for the OpenID conformance suite](#dh-1288))
 - <a id="dh-1265"></a>**DH-1265** The case of the address has no effect on a fixed OTP. For example, the entry for `openid@mail.test` also applies to `OpenID@mail.test`. ([Judgement: fixed OTPs for the OpenID conformance suite](#dh-1288))
 - <a id="dh-1266"></a>**DH-1266** A fixed OTP changes only the value of the OTP. All the other OTP rules stay the same, and the email still goes to the customer. ([Judgement: fixed OTPs for the OpenID conformance suite](#dh-1288))
@@ -110,11 +110,11 @@ These rules are lab-only. A production data holder has its own channel for the O
 - Basis: Step 3.2. The ACCC says that the data holder "should respond to the ADR (client) with an error outcome" for a cancel ([CDR Support: Error scenarios and responses][support-error-scenarios]). The CDS gives no error value.
 - Reason: `access_denied` is the value of RFC 6749 for a resource owner that denies the request ([RFC 6749, section 4.1.2.1][rfc6749-authorisation-errors]). A flow that ends after incorrect OTPs gets the same value, because the consumer did not authenticate.
 
-### <a id="dh-1276"></a>DH-1276 The OTP by email
+### <a id="dh-1276"></a>DH-1276 The OTP by email, also when the email address is the user identifier
 
-- Kind: choice
-- Basis: Step 3.3. The CDS requires "an existing channel or mechanism", at the discretion of the data holder ([CDS: One-Time Password Credential Requirements][cds-otp]). An OTP does not have to go by SMS ([CDR Support: One Time Password (OTP)][support-otp]).
-- Reason: Email is a channel that a mock can have with the behaviour of a production data holder. A mail sink makes sure that the lab sends no email to a real address.
+- Kind: gap
+- Basis: Step 2. The CDS requires "an existing channel or mechanism", at the discretion of the data holder ([CDS: One-Time Password Credential Requirements][cds-otp]). ACCC guidance says that an OTP does not have to go by SMS. For a data holder that uses the email address as the customer ID, it says: "the general DSB recommendation from a security perspective would be not to send the OTP to an email address" ([CDR Support: One Time Password (OTP)][support-otp]).
+- Reason: The risk is that one breached mailbox gives both the user identifier and the OTP. The lab has only invented customers, and each OTP goes to the mail sink, so no real mailbox receives an OTP. The lab has no second channel, for example SMS, and email is a channel that a mock can have with the behaviour of a production data holder.
 
 ### <a id="dh-1277"></a>DH-1277 An OTP of 6 digits for 5 minutes, with 3 entries at most
 

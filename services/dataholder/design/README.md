@@ -120,3 +120,4 @@ flowchart LR
 ## Withdrawn
 
 - <a id="dh-0232"></a>**DH-0232** Removed.
+- <a id="dh-0678"></a>**DH-0678** Removed.

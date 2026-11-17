@@ -75,11 +75,12 @@ func apiListeners(ctx context.Context, pool *pgxpool.Pool, cfg apiConfig, parts 
 				Now:       time.Now,
 			},
 			app.Consents{
-				Customers: parts.customers,
-				Subjects:  subjectstore.New(pool),
-				Store:     parts.events,
-				NewID:     uuid.NewString,
-				Now:       time.Now,
+				Customers:           parts.customers,
+				Subjects:            subjectstore.New(pool),
+				Store:               parts.events,
+				NewID:               uuid.NewString,
+				Now:                 time.Now,
+				AccessTokenLifetime: authserver.AccessTokenLifetime,
 			},
 			time.Now,
 		),
@@ -109,6 +110,8 @@ func apiListeners(ctx context.Context, pool *pgxpool.Pool, cfg apiConfig, parts 
 		JTIs:          jtis,
 		Store:         parts.events,
 		Registrations: parts.registrations,
+		Statuses:      parts.statuses,
+		Arrangements:  parts.arrangements,
 		Now:           time.Now,
 		NewID:         uuid.NewString,
 	}
@@ -122,6 +125,7 @@ func apiListeners(ctx context.Context, pool *pgxpool.Pool, cfg apiConfig, parts 
 		Tokens:           authServer,
 		Registrations:    parts.registrations,
 		ConsentTokens:    authServer,
+		Arrangements:     consentData,
 		Customers:        consentData,
 		Accounts:         consentData,
 		Transactions:     consentData,
@@ -225,6 +229,10 @@ func (a arrangementRevoker) RevokeArrangement(ctx context.Context, clientID, arr
 	}
 
 	return err
+}
+
+func (a arrangementRevoker) RefreshTokenRevoked(ctx context.Context, clientID, arrangementID string) error {
+	return a.arrangements.EndOneTimeCollection(ctx, clientID, arrangementID)
 }
 
 func randomUint64() uint64 {

@@ -62,7 +62,7 @@ func jwksAt(t *testing.T, url string) *jose.JSONWebKeySet {
 	return &set
 }
 
-// Verifies: REG-0400, REG-0413
+// Verifies: REG-0400, REG-0411, REG-0413, REG-1496
 func TestADataRecipientGetsAnSSAForItsSoftwareProductThatVerifiesWithGetJWKS(t *testing.T) {
 	cert := activeTokenClient(t)
 	token := accessToken(t, idpTestActiveProduct, cert)
@@ -127,7 +127,7 @@ func TestADataRecipientGetsAnSSAForItsSoftwareProductThatVerifiesWithGetJWKS(t *
 		"recipient_base_uri": "https://cdr.conformance.example",
 		"software_id":        idpTestActiveProduct,
 		"software_roles":     "data-recipient-software-product",
-		"scope":              "openid bank:accounts.basic:read cdr:registration",
+		"scope":              "openid profile bank:accounts.basic:read cdr:registration",
 	}, claims)
 
 	require.Equal(t, http.StatusOK, second.status)

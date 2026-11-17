@@ -12,25 +12,30 @@ import (
 
 	"github.com/lukemundy/cdr-lab/pkg/platform/database/databasetest"
 	"github.com/lukemundy/cdr-lab/pkg/platform/jobs"
+	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/arrangementstore"
+	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/grantstore"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/jtistore"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/registrationstore"
+	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/statusstore"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/app"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/domain"
 )
 
 const testIssuer = "https://id.bank.example"
 
-// verifiedJWTs gives a valid SSA and a valid request with a new jti for each request JWT.
+// verifiedJWTs gives a valid SSA and a valid request, each with a new jti for each request JWT.
 type verifiedJWTs struct{ now time.Time }
 
-func (verifiedJWTs) SoftwareStatement(string) (string, error) { return "header.ssa.signature", nil }
+func (verifiedJWTs) SoftwareStatement(requestJWT string) (string, error) {
+	return "ssa-of-" + requestJWT, nil
+}
 
-func (j verifiedJWTs) VerifySSA(context.Context, string) (domain.SSA, error) {
+func (j verifiedJWTs) VerifySSA(_ context.Context, ssa string) (domain.SSA, error) {
 	return domain.SSA{
 		Issuer:            "cdr-register",
 		IssuedAt:          j.now.Unix(),
 		ExpiresAt:         j.now.Add(time.Minute).Unix(),
-		ID:                "ssa-jti",
+		ID:                ssa,
 		OrgID:             "brand-1",
 		OrgName:           "Recipient",
 		ClientName:        "Recipient Web",
@@ -61,7 +66,7 @@ func (j verifiedJWTs) VerifyRequest(_ context.Context, requestJWT, _ string) (do
 		ResponseTypes:                  []string{"code"},
 		IDTokenSignedResponseAlg:       "PS256",
 		AuthorizationSignedResponseAlg: "PS256",
-		SoftwareStatement:              "header.ssa.signature",
+		SoftwareStatement:              "ssa-of-" + requestJWT,
 	}, nil
 }
 
@@ -73,14 +78,20 @@ func startedRegistrar(t *testing.T, pool *pgxpool.Pool) app.Registrar {
 	inserter, err := jobs.NewInsertOnlyClient(pool)
 	require.NoError(t, err)
 
+	events := newEventStore(pool, inserter)
+
 	return app.Registrar{
 		Issuer:        testIssuer,
 		JWTs:          verifiedJWTs{now: now},
 		JTIs:          jtistore.New(pool),
-		Store:         newEventStore(pool, inserter),
+		Store:         events,
 		Registrations: registrationstore.NewQueries(pool),
-		Now:           func() time.Time { return now },
-		NewID:         uuid.NewString,
+		Statuses:      statusstore.New(pool, nil),
+		Arrangements: app.Arrangements{
+			Store: events, Grants: grantstore.New(pool), Reader: arrangementstore.NewQueries(pool), Now: time.Now,
+		},
+		Now:   func() time.Time { return now },
+		NewID: uuid.NewString,
 	}
 }
 

@@ -24,7 +24,7 @@ func newProductJSON(id, name string) string {
 		"softwareProductDescription": "A new app", "logoUri": "https://new.example/app.png", "status": "ACTIVE",
 		"clientUri": "https://new.example", "redirectUris": ["https://new.example/callback"],
 		"jwksUri": "https://new.example/jwks", "revocationUri": "https://new.example/revoke",
-		"recipientBaseUri": "https://cdr.new.example", "scopes": ["openid"]
+		"recipientBaseUri": "https://cdr.new.example", "scopes": ["openid", "profile"]
 	}`
 }
 
@@ -132,7 +132,7 @@ func TestTheOperatorCreatesAndChangesADataRecipientAndThePublicAPIsShowEachChang
 		"logoUri": "https://new.example/app.png", "clientUri": "https://new.example",
 		"redirectUris": ["https://new.example/callback"], "jwksUri": "https://new.example/jwks",
 		"revocationUri": "https://new.example/revoke", "recipientBaseUri": "https://cdr.new.example",
-		"scopes": ["openid"]
+		"scopes": ["openid", "profile"]
 	}`)
 	require.Equal(t, http.StatusNoContent, rec.Code, rec.Body.String())
 	assert.Equal(t, "Renamed Web", productNames(t, handlers)[newProduct])

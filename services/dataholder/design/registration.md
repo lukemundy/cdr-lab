@@ -32,8 +32,8 @@ This area gives the registration of a software product with an SSA, registration
 - <a id="dh-0617"></a>**DH-0617** The SSA has each claim that the SSA definition marks as required. For example, the data holder refuses an SSA with no `revocation_uri`. ([CDS: SSA Definition][cds-ssa-definition])
 - <a id="dh-0618"></a>**DH-0618** The `software_roles` of the SSA is `data-recipient-software-product`. ([CDS: SSA Definition][cds-ssa-definition])
 - <a id="dh-0619"></a>**DH-0619** The `jwks_uri` of the SSA is an `https` URL. When it is not, the data holder refuses the SSA. ([CDS: Transaction Security][cds-transaction-security]; [CDR Support: Egress policy for calls from DH to ADRs][support-egress])
-- <a id="dh-0620"></a>**DH-0620** The data holder does not keep the `jti` of an SSA. A software product can use one SSA again until the SSA expires. ([CDS: SSA Definition][cds-ssa-definition]; [Judgement: an SSA can be used again until it expires](#dh-0704))
-- <a id="dh-0621"></a>**DH-0621** At registration, the data holder does not check the participant status of the software product. ([CDS: Software Statement Assertion][cds-ssa]; [Judgement: no status check at registration](#dh-0705))
+- <a id="dh-0620"></a>**DH-0620** The data holder refuses an SSA whose `jti` it accepted before, until the SSA expires, with 400 and `invalid_software_statement`. For example, a `PUT` with the SSA of the registration gets this refusal. ([CDS: SSA Definition][cds-ssa-definition]; [Judgement: one use of each SSA, until it expires](#dh-0704))
+- <a id="dh-0621"></a>**DH-0621** At registration, the data holder refuses only a software product whose status is REMOVED. For example, a software product that is INACTIVE, or that has no status at the data holder, can register. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [Judgement: only the status REMOVED stops a registration](#dh-0705))
 
 ## Validation of the request
 
@@ -90,7 +90,7 @@ The data holder uses these `error` values:
 | <a id="dh-0653"></a>**DH-0653** | The body is not a JWT or is larger than 64 KiB, the request JWT has a signature, an `aud`, an `iss`, an `exp`, a `jti` or a client metadata value that is not valid, or a required claim is absent | `invalid_client_metadata` | [CDS: Registration Errors][cds-registration-errors]; [Judgement: invalid_software_statement for a fault in the SSA and for a duplicate](#dh-0708) |
 | <a id="dh-0654"></a>**DH-0654** | The data holder cannot get the keys at the `jwks_uri` of the SSA | `invalid_client_metadata` | [CDS: Registration Errors][cds-registration-errors]; [Judgement: invalid_software_statement for a fault in the SSA and for a duplicate](#dh-0708) |
 
-- <a id="dh-0655"></a>**DH-0655** The data holder does not use the error `unapproved_software_statement`. ([RFC 7591, section 3.2.2][rfc7591-errors]; [Judgement: no unapproved_software_statement](#dh-0709))
+- <a id="dh-0655"></a>**DH-0655** The data holder uses the error `unapproved_software_statement` only for [a software product that is REMOVED](#dh-0693). ([RFC 7591, section 3.2.2][rfc7591-errors]; [Judgement: unapproved_software_statement only for a REMOVED software product](#dh-0709))
 - <a id="dh-0656"></a>**DH-0656** When the data holder cannot get the Register JWKS, it responds with 500 and the error `server_error`. ([RFC 7591, section 3.2.2][rfc7591-errors]; [Judgement: server_error when the Register JWKS is not available](#dh-0710))
 
 ## Registration management
@@ -120,9 +120,8 @@ The data holder gives these refusals:
 - <a id="dh-0673"></a>**DH-0673** A `DELETE` deletes the registration and gives 204. ([CDS: DCR APIs][cds-dcr-apis]; [Judgement: support for the deletion of a registration](#dh-0712))
 - <a id="dh-0674"></a>**DH-0674** After a `DELETE`, client authentication with the client ID of the registration fails. ([CDS: DCR APIs][cds-dcr-apis])
 - <a id="dh-0675"></a>**DH-0675** After a `DELETE`, the software product can register again. It then gets a new client ID. ([Judgement: support for the deletion of a registration](#dh-0712))
-- <a id="dh-0676"></a>**DH-0676** When a software product deletes its registration, the arrangements of the client do not end. ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]; [Judgement: a deleted registration keeps its arrangements](#dh-0713))
-- <a id="dh-0677"></a>**DH-0677** After a `DELETE`, the data holder accepts no token of the client. ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]; [Judgement: a deleted registration keeps its arrangements](#dh-0713))
-- <a id="dh-0678"></a>**DH-0678** The lab operator can [withdraw an arrangement](operator-interface.md#dh-0727) of a deleted registration. ([Judgement: a deleted registration keeps its arrangements](#dh-0713))
+- <a id="dh-0676"></a>**DH-0676** When a software product deletes its registration, each arrangement of the client that did not end, ends at the time of the request. The end is a [revocation by the data recipient](end-of-an-arrangement.md#dh-0902), with no notice to the data recipient. ([CDR Support: Guidance on Dynamic Client Registration][support-dcr]; [Judgement: a deletion ends the arrangements of the client as a revocation](#dh-0713))
+- <a id="dh-0677"></a>**DH-0677** After a `DELETE`, the data holder accepts no token of the client. ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints])
 
 ## Participant statuses
 
@@ -140,7 +139,7 @@ The data holder gives these refusals:
 - <a id="dh-0690"></a>**DH-0690** When the data holder gets the status REMOVED for a software product, it ends each arrangement of each registration of that software product at once. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [CDR Support: Status of consent when an ADR Software Product is "Removed"][support-removed]; [Judgement: the clean-up at once when a software product is REMOVED](#dh-0716))
 - <a id="dh-0691"></a>**DH-0691** When the data holder gets the status REMOVED for a software product, it deletes each registration of that software product. Client authentication with the client ID then fails, and the data holder accepts no token of the client. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [CDR Support: Status of consent when an ADR Software Product is "Removed"][support-removed]; [Judgement: the clean-up at once when a software product is REMOVED](#dh-0716))
 - <a id="dh-0692"></a>**DH-0692** The data holder sends no notice to the data recipient for an arrangement that a REMOVED status ends. ([CDR Support: Status of consent when an ADR Software Product is "Removed"][support-removed])
-- <a id="dh-0693"></a>**DH-0693** A software product that is REMOVED cannot register again. The Register gives an SSA only to an ACTIVE software product. ([CDS: Software Statement Assertion][cds-ssa])
+- <a id="dh-0693"></a>**DH-0693** When the status of the software product of the SSA is REMOVED, the data holder refuses a registration request with 400 and the error `unapproved_software_statement`. For example, an SSA that the Register issued before the status REMOVED cannot register the software product again. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [CDR Support: Status of consent when an ADR Software Product is "Removed"][support-removed]; [Judgement: only the status REMOVED stops a registration](#dh-0705))
 
 ## Reaction to participant statuses
 
@@ -183,17 +182,17 @@ The authorisation server library gives the reaction at [the PAR endpoint](../../
 - Basis: Step 3.3. The CDS requires the check of the SSA signature with the Register JWKS, and gives no cache rule for it ([CDS: Registration Validation][cds-registration-validation]).
 - Reason: The Register can change its key, and a registration must then not need a restart of the data holder. The limit stops an SSA with an invented `kid` from making a call to the Register for each request. The Register publishes a new key before it signs with it, so a JWKS from after that time has the key.
 
-### <a id="dh-0704"></a>DH-0704 An SSA can be used again until it expires
+### <a id="dh-0704"></a>DH-0704 One use of each SSA, until it expires
 
 - Kind: choice
-- Basis: Step 3.3. The SSA definition says that its `jti` prevents the reuse of the SSA, but no rule requires that a data holder refuses a second use ([CDS: SSA Definition][cds-ssa-definition]).
-- Reason: A software product can send one SSA in a `POST` and then in a `PUT`. The rule of one registration for each `software_id` and the 10 minutes of the SSA limit a replay.
+- Basis: Step 1. The SSA definition says that the `jti` is "used to prevent reuse of the SSA", and gives no time limit and no error code for a reuse ([CDS: SSA Definition][cds-ssa-definition]).
+- Reason: The data holder refuses an expired SSA, so it keeps each `jti` only until the SSA expires. A software product gets a new SSA from the Register for each registration request, also for a `PUT`. With one use, each registration request shows a recent approval of the Register.
 
-### <a id="dh-0705"></a>DH-0705 No status check at registration
+### <a id="dh-0705"></a>DH-0705 Only the status REMOVED stops a registration
 
 - Kind: choice
-- Basis: Step 3.3. The CDS does not require the check. The Register issues an SSA only for an ACTIVE software product of an ACTIVE data recipient, and the SSA is valid for 10 minutes ([CDS: Software Statement Assertion][cds-ssa]).
-- Reason: The SSA already proves the status at a time near the request. The [reaction to participant statuses](#dh-0694) applies at the other endpoints.
+- Basis: Step 2. The CDS says that the statuses "SHOULD be referenced" for registration management, and gives no response for a registration request ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]). ACCC guidance says that the status REMOVED is final, and that the client ID of a REMOVED software product "cannot be reactivated" ([CDR Support: Status of consent when an ADR Software Product is "Removed"][support-removed]).
+- Reason: An SSA stays valid after the Register changes the status, so only a check at the data holder stops a new registration of a REMOVED software product. An INACTIVE software product can become ACTIVE again, and the [reaction to participant statuses](#dh-0694) stops its sharing. Because no registration can occur after REMOVED, the clean-up at the change to REMOVED is sufficient, and the data holder needs no other clean-up.
 
 ### <a id="dh-0706"></a>DH-0706 Only code in response_types
 
@@ -213,11 +212,11 @@ The authorisation server library gives the reaction at [the PAR endpoint](../../
 - Basis: Step 3.2. The CDS gives the four codes of RFC 7591, and no table of conditions ([CDS: Registration Errors][cds-registration-errors]). For a duplicate registration, the CDS requires 400 and gives no code. Its example, which is not normative, uses `invalid_software_statement`.
 - Reason: A fault in the SSA gives `invalid_software_statement`, and so does a duplicate, because the `software_id` comes from the SSA. A redirect URI that the SSA does not have gives `invalid_redirect_uri`. Each other fault of the request gives `invalid_client_metadata`.
 
-### <a id="dh-0709"></a>DH-0709 No unapproved_software_statement
+### <a id="dh-0709"></a>DH-0709 unapproved_software_statement only for a REMOVED software product
 
 - Kind: choice
-- Basis: Step 3.3. RFC 7591 gives `unapproved_software_statement` for an SSA that the authorisation server does not approve ([RFC 7591, section 3.2.2][rfc7591-errors]).
-- Reason: The data holder approves each valid SSA of the Register, so the condition cannot occur.
+- Basis: Step 3.2. The CDS lists the four codes of RFC 7591, and gives no condition for `unapproved_software_statement` ([CDS: Registration Errors][cds-registration-errors]). RFC 7591 gives it for an SSA that the authorisation server does not approve ([RFC 7591, section 3.2.2][rfc7591-errors]).
+- Reason: The SSA of a REMOVED software product has a valid signature and valid claims, so `invalid_software_statement` is not correct. The data holder does not approve it, because the status REMOVED is final. The data holder approves each other valid SSA of the Register.
 
 ### <a id="dh-0710"></a>DH-0710 server_error when the Register JWKS is not available
 
@@ -237,11 +236,11 @@ The authorisation server library gives the reaction at [the PAR endpoint](../../
 - Basis: Step 3.3. The CDS marks `DELETE` of a registration as optional ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]).
 - Reason: A lab user and the conformance suite can then register a software product again with no reset of the lab.
 
-### <a id="dh-0713"></a>DH-0713 A deleted registration keeps its arrangements
+### <a id="dh-0713"></a>DH-0713 A deletion ends the arrangements of the client as a revocation
 
 - Kind: choice
-- Basis: Step 3.3. The CDS gives no rule for the arrangements of a registration that the software product deletes ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]).
-- Reason: A deletion is an act of the software product, not a withdrawal by the consumer or a REMOVED status, so the arrangements stay. With no registration, no token of the client can be accepted. The lab operator can end an arrangement, and the [notice goes to the `recipient_base_uri` at the confirmation](end-of-an-arrangement.md#dh-0926).
+- Basis: Step 2. The CDS gives no rule for the arrangements of a registration that the software product deletes ([CDS: Dynamic Client Registration endpoints][cds-dcr-endpoints]). ACCC guidance says: "After an ADR registration deletion request there should be no active consents for that ADR" ([CDR Support: Guidance on Dynamic Client Registration][support-dcr]).
+- Reason: The software product asks for the deletion, so the end has the reason and the effects of a revocation by the data recipient. The data holder sends no notice, because the data recipient made the request. The end at the time of the request agrees with a revocation at the CDR arrangement revocation endpoint.
 
 ### <a id="dh-0714"></a>DH-0714 Only the statuses of software products
 

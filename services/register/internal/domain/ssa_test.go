@@ -39,7 +39,7 @@ func TestTheSSAHasTheClaimsOfTheSoftwareProductItsBrandAndItsLegalEntity(t *test
 		"jwks_uri": "https://recipient.example/jwks", "revocation_uri": "https://recipient.example/revoke",
 		"recipient_base_uri": "https://cdr.recipient.example",
 		"software_id": "sp-1", "software_roles": "data-recipient-software-product",
-		"scope": "openid bank:accounts.basic:read"
+		"scope": "openid profile bank:accounts.basic:read"
 	}`, string(data))
 }
 
