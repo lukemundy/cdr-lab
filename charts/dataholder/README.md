@@ -18,6 +18,7 @@ The chart does not render when a required value is missing, and the error names 
 | `brand.preset` or `brand.configMap` | exactly one | `DATA_HOLDER_BRAND`, or `DATA_HOLDER_BRAND_DIR` with the ConfigMap at `/brand` |
 | `brand.id` | yes | `DATA_HOLDER_BRAND_ID`: the `dataHolderBrandId` of the brand on the Register |
 | `publicBaseURL`, `secureBaseURL` | yes | `PUBLIC_BASE_URL` (also the issuer), `SECURE_BASE_URL` |
+| `crlMaxAge` | no (default of the data holder: `1m`) | `CRL_MAX_AGE`, `0s` or more |
 | `register.publicBaseURL` | yes | `REGISTER_PUBLIC_BASE_URL`, and `REGISTER_JWKS_URL` with the CDS path `/cdr-register/v1/jwks` |
 | `register.statusInterval` | yes | `REGISTER_STATUS_INTERVAL`, more than `0s` and at most `4m` |
 | `mail.smtpAddress`, `mail.from` | yes | `SMTP_ADDRESS`, `MAIL_FROM` |

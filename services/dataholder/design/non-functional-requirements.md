@@ -52,7 +52,7 @@ The data holder also obeys the [Telemetry library](../../../pkg/platform/telemet
 
 - <a id="dh-0010"></a>**DH-0010** Least privilege: a process that runs only the APIs, or only the workers, needs only the settings that it uses. For example, a process that runs only the workers needs no TLS key of the APIs, no operator token and no SMTP setting. ([Judgement: background jobs with River (ADR 0010)][adr-0010]; [Judgement: only the settings that a process uses](#dh-0023))
 - <a id="dh-0011"></a>**DH-0011** Least privilege: when a setting that a process uses is not present, the process does not start. Its error names the setting. ([Judgement: only the settings that a process uses](#dh-0023))
-- <a id="dh-0012"></a>**DH-0012** Least privilege: the usage text of the command gives the settings of each subcommand. ([Judgement: only the settings that a process uses](#dh-0023))
+- <a id="dh-0012"></a>**DH-0012** Least privilege: the usage text of the command, in its doc comment, gives the settings of each subcommand. It also gives each optional setting. ([Judgement: only the settings that a process uses](#dh-0023))
 
 ## Portability
 

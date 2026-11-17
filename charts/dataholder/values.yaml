@@ -22,6 +22,10 @@ brand:
 publicBaseURL: ""
 secureBaseURL: ""
 
+# Optional. The maximum age of a CRL in the revocation check of the client certificates, 0s or more, for example 30s.
+# Without a value, the data holder uses its default of 1m. A revocation takes effect within this time.
+crlMaxAge: ""
+
 register:
   # The base URL of the public APIs of the Register. The chart adds the CDS path of the Register JWKS.
   publicBaseURL: ""
