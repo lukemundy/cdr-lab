@@ -108,6 +108,7 @@ func TestATransactionNamesEachRuleThatItBreaks(t *testing.T) {
 	}
 }
 
+// Verifies: DH-0754
 func TestTheExtendedDataOfATransactionNamesEachRuleThatItBreaks(t *testing.T) {
 	tests := map[string]struct {
 		transaction domain.Transaction
