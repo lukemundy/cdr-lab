@@ -76,9 +76,8 @@ func (s sessions) refuse(w http.ResponseWriter, r *http.Request) {
 	problem.WriteSessionEnded(w, http.StatusForbidden, "The bank signed you out. Sign in again.")
 }
 
-// start ends the session of the request, so that each sign-in and sign-up has a new session ID.
-func (s sessions) start(w http.ResponseWriter, r *http.Request, place *place, customerNumber string) {
-	s.endOf(r)
+// start ends the session of the request in the place, so that each sign-in and sign-up has a new session ID.
+func (s sessions) start(w http.ResponseWriter, place *place, customerNumber string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     s.cookieName,
 		Value:    place.start(customerNumber),
@@ -106,28 +105,15 @@ func (s sessions) expire(w http.ResponseWriter) {
 	})
 }
 
-// reserve writes 503 when the store is full.
-func (s sessions) reserve(w http.ResponseWriter) (*place, bool) {
-	place, err := s.store.reserve()
-	if err != nil {
-		writeFull(w)
-		return nil, false
+// reserve gives a place for a sign-in or a sign-up, which replaces the session of the request. It writes 503 when the
+// store is full.
+func (s sessions) reserve(w http.ResponseWriter, r *http.Request) (*place, bool) {
+	var current string
+	if cookie, err := r.Cookie(s.cookieName); err == nil {
+		current = cookie.Value
 	}
 
-	return place, true
-}
-
-// reserveForSignIn uses the place of a valid session of the request when the store is full, because the sign-in ends
-// that session.
-func (s sessions) reserveForSignIn(w http.ResponseWriter, r *http.Request) (*place, bool) {
-	place, err := s.store.reserve()
-
-	_, signedIn := s.customerOf(r)
-	if errors.Is(err, errNoPlace) && signedIn {
-		s.endOf(r)
-		place, err = s.store.reserve()
-	}
-
+	place, err := s.store.reserve(current)
 	if err != nil {
 		writeFull(w)
 		return nil, false
@@ -160,14 +146,16 @@ func signUp(customers Customers, s sessions) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// A pointer is nil after the JSON null, which decodes into a struct with no error.
 		var request *customerCreate
-		if jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxBodyBytes), &request) != nil || request == nil {
-			problem.Write(w, http.StatusBadRequest,
+
+		err := jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxBodyBytes), &request)
+		if err != nil || request == nil {
+			problem.WriteBodyRefusal(w, err,
 				"The request body must be a JSON object with only firstName, lastName and emailAddress.")
 
 			return
 		}
 
-		place, ok := s.reserve(w)
+		place, ok := s.reserve(w, r)
 		if !ok {
 			return
 		}
@@ -181,7 +169,7 @@ func signUp(customers Customers, s sessions) http.Handler {
 			return
 		}
 
-		s.start(w, r, place, created.CustomerNumber)
+		s.start(w, place, created.CustomerNumber)
 		jsonhttp.Write(w, http.StatusCreated, sessionCustomerOf(created))
 	})
 }
@@ -232,12 +220,14 @@ type signInRequest struct {
 func signIn(customers Customers, s sessions) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var request *signInRequest
-		if jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxBodyBytes), &request) != nil || request == nil {
-			problem.Write(w, http.StatusBadRequest, "The request body must be a JSON object with only identifier.")
+
+		err := jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxBodyBytes), &request)
+		if err != nil || request == nil {
+			problem.WriteBodyRefusal(w, err, "The request body must be a JSON object with only identifier.")
 			return
 		}
 
-		place, ok := s.reserveForSignIn(w, r)
+		place, ok := s.reserve(w, r)
 		if !ok {
 			return
 		}
@@ -257,7 +247,7 @@ func signIn(customers Customers, s sessions) http.Handler {
 			return
 		}
 
-		s.start(w, r, place, record.Customer.CustomerNumber)
+		s.start(w, place, record.Customer.CustomerNumber)
 		w.WriteHeader(http.StatusNoContent)
 	})
 }

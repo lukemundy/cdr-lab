@@ -78,7 +78,7 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 
 - <a id="reg-0852"></a>**REG-0852** When a request body is not one JSON object, the response is 400. For example, a body with [a JSON value after its first JSON value](../../../pkg/platform/jsonhttp/DESIGN.md#body-0002) gets 400. ([RFC 8259, section 2][rfc8259-2]; [Judgement: 400 for a body that is not valid alone, and 409 for a conflict](#reg-0894))
 - <a id="reg-0853"></a>**REG-0853** When a request body has [a field that the action does not accept](../../../pkg/platform/jsonhttp/DESIGN.md#body-0001), the response is 400. ([Judgement: 400 for a body that is not valid alone, and 409 for a conflict](#reg-0894))
-- <a id="reg-0854"></a>**REG-0854** When a request body is larger than 1 MiB, the response is 400. ([Judgement: a body limit of 1 MiB, with 400 and not 413](#reg-0895))
+- <a id="reg-0854"></a>**REG-0854** When a request body is larger than its limit, the response is 413. The limit is 16 KiB for a PEM certificate or a PEM CSR, and 1 MiB for each other body. ([the status of a body that is larger than its limit](../../../pkg/platform/problem/DESIGN.md#prob-0012); [Judgement: a body limit of 1 MiB, and 16 KiB for a PEM body, with 413](#reg-0895))
 - <a id="reg-0855"></a>**REG-0855** When a request body does not obey the participant model, the response is 400. For example, a URI with the `http` scheme gets 400. ([Judgement: 400 for a body that is not valid alone, and 409 for a conflict](#reg-0894))
 - <a id="reg-0856"></a>**REG-0856** When a request body obeys the participant model but breaks a status rule, the response is 409. For example, an ACTIVE software product of an INACTIVE brand gets 409. ([RFC 9110, section 15.5.10][rfc9110-409]; [Judgement: 400 for a body that is not valid alone, and 409 for a conflict](#reg-0894))
 - <a id="reg-0857"></a>**REG-0857** When a request body is not valid, the `detail` names each record and rule that fails. ([RFC 9457, section 3.1.4][rfc9457-detail])
@@ -203,11 +203,11 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 - Basis: Step 3.2. A conflict with the current state of the target resource is 409 ([RFC 9110, section 15.5.10][rfc9110-409]).
 - Reason: A body that is not valid alone is a client error (400). A body that is valid alone but does not agree with the current state of the Register is a conflict. The status rules already give 409.
 
-### <a id="reg-0895"></a>REG-0895 A body limit of 1 MiB, with 400 and not 413
+### <a id="reg-0895"></a>REG-0895 A body limit of 1 MiB, and 16 KiB for a PEM body, with 413
 
 - Kind: choice
 - Basis: Step 3.2. [RFC 9110, section 15.5.14][rfc9110-413] gives 413 for content that is larger than the server accepts.
-- Reason: A legal entity in the seed data is less than 20 KiB, and a limit stops a body that fills the memory. 400 is the status of each other body that the operator interface refuses, so a script needs one status for a refused body.
+- Reason: A legal entity in the seed data is less than 20 KiB, a PEM certificate or CSR is less than 16 KiB, and a limit stops a body that fills the memory. The CDS APIs of the data holder also give [413 for a body that is too large](../../dataholder/design/api-standards.md#dh-0453), so a client gets the same status on each lab interface.
 
 [cds-participant-statuses]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#participant-statuses
 [cds-status-mapping]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#status-mapping

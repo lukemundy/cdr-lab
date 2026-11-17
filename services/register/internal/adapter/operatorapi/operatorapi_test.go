@@ -323,7 +323,6 @@ func TestABodyThatIsNotOnePEMCertificateIsRefused(t *testing.T) {
 		"not a certificate": pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: []byte("not DER")}),
 		"a private key":     pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: []byte("key")}),
 		"two certificates":  append(append([]byte{}, pemData...), pemData...),
-		"too large":         append(append([]byte{}, pemData...), bytes.Repeat([]byte("\n"), 1<<16)...),
 	}
 	for name, body := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -336,6 +335,23 @@ func TestABodyThatIsNotOnePEMCertificateIsRefused(t *testing.T) {
 			assert.Nil(t, operator.command)
 		})
 	}
+}
+
+// Verifies: REG-0854
+func TestACertificateBodyLargerThan16KiBGives413(t *testing.T) {
+	pemData, _ := certificatePEM(t)
+	operator := &fakeOperator{}
+
+	rec := serveBody(
+		t,
+		operator,
+		certificatesPath,
+		append(append([]byte{}, pemData...), bytes.Repeat([]byte("\n"), 1<<16)...),
+	)
+
+	p := requireProblem(t, rec, http.StatusRequestEntityTooLarge)
+	assert.Equal(t, "The request body is larger than 16 KiB.", p.Detail)
+	assert.Nil(t, operator.command)
 }
 
 func TestACertificateRequestWithoutTheOperatorTokenIsUnauthorised(t *testing.T) {

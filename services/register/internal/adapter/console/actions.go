@@ -75,9 +75,9 @@ func executeAction[Command any](
 	command func(*http.Request) Command,
 ) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		version, ok := decodeVersion(http.MaxBytesReader(w, r.Body, maxActionBodyBytes))
-		if !ok {
-			problem.Write(w, http.StatusBadRequest, badBody)
+		version, err := decodeVersion(http.MaxBytesReader(w, r.Body, maxActionBodyBytes))
+		if err != nil {
+			problem.WriteBodyRefusal(w, err, badBody)
 			return
 		}
 
@@ -104,14 +104,20 @@ func writeResult(w http.ResponseWriter, r *http.Request, notFound string, err er
 	}
 }
 
-func decodeVersion(body io.Reader) (int64, bool) {
+var errFieldsNotValid = errors.New("the body does not have the fields of the action")
+
+func decodeVersion(body io.Reader) (int64, error) {
 	var request struct {
 		Version *int64 `json:"version"`
 	}
 
-	if jsonhttp.Decode(body, &request) != nil || request.Version == nil || *request.Version < 1 {
-		return 0, false
+	if err := jsonhttp.Decode(body, &request); err != nil {
+		return 0, err
 	}
 
-	return *request.Version, true
+	if request.Version == nil || *request.Version < 1 {
+		return 0, errFieldsNotValid
+	}
+
+	return *request.Version, nil
 }

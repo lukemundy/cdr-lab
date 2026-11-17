@@ -309,7 +309,6 @@ func TestABodyThatIsNotTheExpectedJSONObjectIsRefused(t *testing.T) {
 		"a customer number": `{"lastName":"Example","emailAddress":"alex@example.com","customerNumber":"1"}`,
 		"a wrong type":      `{"lastName":1,"emailAddress":"alex@example.com"}`,
 		"two objects":       customerBody + customerBody,
-		"too large":         `{"lastName":"` + strings.Repeat("a", 70<<10) + `"}`,
 	}
 	for name, body := range bodies {
 		t.Run(name, func(t *testing.T) {
@@ -321,6 +320,16 @@ func TestABodyThatIsNotTheExpectedJSONObjectIsRefused(t *testing.T) {
 			assert.Nil(t, customers.created)
 		})
 	}
+}
+
+// Verifies: DH-2615
+func TestABodyLargerThan64KiBGives413(t *testing.T) {
+	customers := &fakeCustomers{}
+
+	rec := serve(t, customers, createCustomer(`{"lastName":"`+strings.Repeat("a", 64<<10)+`"}`))
+
+	assert.Equal(t, "The request body is larger than 64 KiB.", requireProblem(t, rec, http.StatusRequestEntityTooLarge))
+	assert.Nil(t, customers.created)
 }
 
 // Verifies: DH-0730

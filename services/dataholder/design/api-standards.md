@@ -52,7 +52,7 @@ The first table gives the CDR APIs of the data holder. The second table gives th
 - <a id="dh-0434"></a>**DH-0434** When a request on the resource base URI has no `x-fapi-auth-date`, the response is 400 with `urn:au-cds:error:cds-all:Header/Missing`, and the `detail` is `x-fapi-auth-date`. ([CDS: HTTP Headers][cds-http-headers]; [Judgement: a required x-fapi-auth-date](#dh-0486))
 - <a id="dh-0435"></a>**DH-0435** When the `x-fapi-auth-date` of a request on the resource base URI is not an HTTP-date, the response is 400 with `urn:au-cds:error:cds-all:Header/Invalid`, and the `detail` is `x-fapi-auth-date`. ([CDS: HTTP Headers][cds-http-headers]; [CDR Support: Format for x-fapi-auth-date][support-auth-date])
 - <a id="dh-0436"></a>**DH-0436** The data holder accepts an `x-fapi-customer-ip-address` with an IPv4 or an IPv6 address. ([FAPI 1.0 Baseline, section 6.2.1][fapi-baseline-resource])
-- <a id="dh-0437"></a>**DH-0437** When the `x-fapi-customer-ip-address` of a request on the resource base URI is not an IP address, the response is 400 with `urn:au-cds:error:cds-all:Header/Invalid`, and the `detail` is `x-fapi-customer-ip-address`. ([CDS: Invalid Header][cds-error-400-header-invalid])
+- <a id="dh-0437"></a>**DH-0437** When the `x-fapi-customer-ip-address` of a request on the resource base URI is not an IP address, the response is 400 with `urn:au-cds:error:cds-all:Header/Invalid`, and the `detail` is `x-fapi-customer-ip-address`. ([CDS: Invalid Header][cds-error-400-header-invalid]; [Judgement: 400 for a customer IP address that is not valid](#dh-2613))
 - <a id="dh-0438"></a>**DH-0438** The data holder does not validate `x-cds-client-headers`. For example, a value that is not Base64 does not change the response. ([CDR Support: DH requirement for x-cds-client-headers][support-client-headers])
 - <a id="dh-0439"></a>**DH-0439** Each response of an API on the resource base URI has a `Date` header. ([FAPI 1.0 Baseline, section 6.2.1][fapi-baseline-resource])
 
@@ -211,6 +211,12 @@ The first table gives the CDR APIs of the data holder. The second table gives th
 - Basis: Step 1. The OpenID conformance suite probes TLS 1.2 on the resource endpoint with no client certificate, and it reports the closed connection as a failure of the conditions `DisallowInsecureCipher` and `CheckForBCP195InsecureFAPICiphers`. The CDS requires a client certificate on this endpoint ([CDS: Transaction Security][cds-transaction-security]).
 - Reason: The CDS is the first source, so the data holder accepts these two findings. A handshake with a cipher suite that the CDS does not permit also fails.
 
+### <a id="dh-2613"></a>DH-2613 400 for a customer IP address that is not valid
+
+- Kind: choice
+- Basis: Step 3.2. A software product "MAY send requests with a x-fapi-customer-ip-address header containing a valid IPv4 or IPv6 address" ([CDS: HTTP Headers][cds-http-headers]). The data holder "shall not reject" a request with a valid address ([FAPI 1.0 Baseline, section 6.2.1][fapi-baseline-resource]). Neither source gives the response to an address that is not valid. The other option is to accept the request as unattended, because only a valid address makes a request customer present ([CDS: Definitions][cds-definitions]).
+- Reason: A refusal tells the client of its error. The other option hides the error, and the client does not know that its calls are unattended.
+
 [cds-get-products]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-banking-api_get-products
 [cds-get-product-detail]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-banking-api_get-product-detail
 [cds-get-status]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-common-api_get-status
@@ -241,6 +247,7 @@ The first table gives the CDR APIs of the data holder. The second table gives th
 [support-product-base-uri]: https://cdr-support.zendesk.com/hc/en-us/articles/16505555811855
 [cds-error-404-not-implemented]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-404-resource-not-implemented
 [cds-dcr-apis]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#dcr-apis
+[cds-definitions]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#definitions
 [cds-http-headers]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#http-headers
 [support-auth-date]: https://cdr-support.zendesk.com/hc/en-us/articles/4405773134863
 [fapi-baseline-resource]: https://openid.net/specs/openid-financial-api-part-1-1_0.html#protected-resources-provisions

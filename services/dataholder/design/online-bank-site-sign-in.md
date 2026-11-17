@@ -50,13 +50,13 @@ This area gives the sign-up, the sign-in, the sign-out and the session of the on
 - <a id="dh-2034"></a>**DH-2034** The session cookie has only the session ID. The browser gets no token and no customer number. ([Judgement: one session cookie for a consumer UI with a sign-in (ADR 0014)][adr-0014])
 - <a id="dh-2035"></a>**DH-2035** The session ID is a random value from a cryptographic random source, with at least 128 bits of entropy. ([OWASP ASVS 5.0, 7.2.3][asvs-v7])
 - <a id="dh-2036"></a>**DH-2036** Each sign-in and each sign-up starts a new session with a new session ID. ([OWASP ASVS 5.0, 7.2.4][asvs-v7]; [OWASP Session Management Cheat Sheet][owasp-session])
-- <a id="dh-2037"></a>**DH-2037** When the request of a sign-in or a sign-up has a session cookie, the session of that cookie ends. ([OWASP Session Management Cheat Sheet][owasp-session])
+- <a id="dh-2037"></a>**DH-2037** When a sign-in or a sign-up starts a new session and its request has a session cookie, the session of that cookie ends. A sign-in or a sign-up that fails keeps that session. ([OWASP Session Management Cheat Sheet][owasp-session])
 - <a id="dh-2038"></a>**DH-2038** A session ends 24 hours after its start. ([OWASP ASVS 5.0, 7.1.1 and 7.1.2][asvs-v7]; [WCAG 2.2, SC 2.2.1][wcag-2-2-1]; [Judgement: no inactivity timeout](#dh-2107))
 - <a id="dh-2039"></a>**DH-2039** A session has no inactivity timeout. ([Judgement: no inactivity timeout](#dh-2107))
 - <a id="dh-2040"></a>**DH-2040** A customer can have more than one session at the same time, with no limit. ([Judgement: no inactivity timeout](#dh-2107))
 - <a id="dh-2041"></a>**DH-2041** The data holder keeps at most 10,000 sessions that did not end. ([Judgement: sessions in the memory of the process](#dh-2106))
-- <a id="dh-2042"></a>**DH-2042** When the data holder has 10,000 sessions that did not end, it refuses a sign-up with 503, and it creates no customer. ([Judgement: sessions in the memory of the process](#dh-2106))
-- <a id="dh-2043"></a>**DH-2043** When the data holder has 10,000 sessions that did not end, it refuses a sign-in with 503. When the request of the sign-in has a valid session, the data holder ends that session and starts the new session. ([Judgement: sessions in the memory of the process](#dh-2106))
+- <a id="dh-2042"></a>**DH-2042** When the data holder has 10,000 sessions that did not end and has no [free place for the request](#dh-2043), it refuses a sign-up or a sign-in with 503. A refused sign-up creates no customer. ([Judgement: sessions in the memory of the process](#dh-2106))
+- <a id="dh-2043"></a>**DH-2043** When the data holder has 10,000 sessions that did not end, the place of the valid session of a sign-up or a sign-in request is free for that request only. For example, a different request cannot take the place while the sign-in checks the identifier. ([Judgement: sessions in the memory of the process](#dh-2106))
 - <a id="dh-2044"></a>**DH-2044** After a session ends, its session ID gives no access. ([OWASP ASVS 5.0, 7.4.1][asvs-v7])
 - <a id="dh-2045"></a>**DH-2045** When the data holder no longer has the customer of a session, the session is not valid. The data holder ends it at the next request of the session, also at a read of the session. ([Judgement: a session ends when the data holder does not have its customer](#dh-2112))
 - <a id="dh-2046"></a>**DH-2046** The name of the session cookie is `__Host-bank-session-<DATA_HOLDER_BRAND_ID>`, with the `dataHolderBrandId` of the instance. ([RFC 6265bis, section 4.1.3.2][rfc6265bis-host]; [Judgement: a `__Host-` session cookie with the brand ID in its name](#dh-2108))
@@ -147,7 +147,7 @@ The site is a web UI. The [web UI library specification](../../../pkg/platform/c
 
 - Kind: choice
 - Basis: Step 3.2. A session on the server ends at a sign-out with no revocation list ([OWASP ASVS 5.0, 7.4.1][asvs-v7]), and [RFC 10017, section 7.1][rfc10017-cookie-session] permits a cookie session for an application on one domain with no OAuth.
-- Reason: The lab runs one instance of each brand, so a store in memory is the simplest, with the limit of the authorisation sessions. A full store refuses a new session, so that many sign-ins cannot end the sessions of other consumers. The [production gaps][production-gaps] give the shared store that production needs.
+- Reason: The lab runs one instance of each brand, so a store in memory with the limit of the authorisation sessions is the simplest, and the [production gaps][production-gaps] give the shared store that production needs. A full store refuses a new session, so that many sign-ins cannot end the sessions of other consumers, but a request that replaces its own valid session needs no new place. That session ends only when the new session starts, so a failed sign-in or sign-up keeps it, as at a store that is not full.
 
 ### <a id="dh-2107"></a>DH-2107 No inactivity timeout
 

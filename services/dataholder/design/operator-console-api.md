@@ -28,9 +28,9 @@ This area gives the console API of the operator console. The console API is JSON
 - <a id="dh-1616"></a>**DH-1616** The paths of the console API have no version. For example, the path of the overview is `/api/overview`. ([Judgement: the UI and the API ship together (ADR 0014)][adr-0014])
 - <a id="dh-1617"></a>**DH-1617** The console API ignores a query parameter that it does not know. For example, `GET /api/registrations?colour=red` gives the list. ([Judgement: an unknown query parameter is ignored](#dh-1680))
 - <a id="dh-1618"></a>**DH-1618** An error response is a [problem details](../../../docs/spec/glossary.md#problem-details) body with [the type `about:blank`](../../../pkg/platform/problem/DESIGN.md#prob-0001), except a refusal with field errors. ([RFC 9457][rfc9457])
-- <a id="dh-1619"></a>**DH-1619** The status codes of an error are the codes of the operator interface: 400 for a request that is not valid, 404 for a record that does not exist, and 409 for a change that the rules do not permit now. ([operator interface: a body that is not valid](operator-interface.md#dh-0730); [RFC 9110, section 15.5.10][rfc9110-409])
+- <a id="dh-1619"></a>**DH-1619** The status codes of an error are the codes of the operator interface: 400 for a request that is not valid, 404 for a record that does not exist, 409 for a change that the rules do not permit now, and 413 for a body that is larger than its limit. ([operator interface: a body that is not valid](operator-interface.md#dh-0730); [RFC 9110, section 15.5.10][rfc9110-409]; [the status of a body that is larger than its limit](../../../pkg/platform/problem/DESIGN.md#prob-0012))
 - <a id="dh-1620"></a>**DH-1620** A request body that is not valid gives 400. For example, a body with [a field that the operation does not accept](../../../pkg/platform/jsonhttp/DESIGN.md#body-0001), or with [a second JSON value](../../../pkg/platform/jsonhttp/DESIGN.md#body-0002), is not valid. ([RFC 9110, section 15.5.1][rfc9110-400])
-- <a id="dh-1621"></a>**DH-1621** A request body is 64 KiB or less for a create, and 16 KiB or less for a close. A larger body gives 400. ([Judgement: a body limit for each operation](#dh-1681))
+- <a id="dh-1621"></a>**DH-1621** A request body is 64 KiB or less for a create, and 16 KiB or less for a close. A larger body gives 413. ([the status of a body that is larger than its limit](../../../pkg/platform/problem/DESIGN.md#prob-0012); [Judgement: a body limit for each operation, with 413](#dh-1681))
 - <a id="dh-1622"></a>**DH-1622** A customer, an account, an arrangement or a registration that does not exist gives 404. The `detail` does not contain its identifier. ([RFC 9110, section 15.5.5][rfc9110-404]; [operator interface: no value of the request in a detail](operator-interface.md#dh-0731))
 - <a id="dh-1623"></a>**DH-1623** The fields of a customer, an account, a transaction and an arrangement have the names of the operator interface. For example, an account has `accountId`. ([operator interface: the fields of an arrangement](operator-interface.md#dh-0758); [Judgement: only the required CDS fields and the named optional fields](operator-interface.md#dh-0771))
 - <a id="dh-1624"></a>**DH-1624** Telemetry: the console API puts no request body in telemetry. The telemetry library gives [the route pattern of a path](../../../pkg/platform/telemetry/DESIGN.md#tele-0005) and [the redacted query string](../../../pkg/platform/telemetry/DESIGN.md#tele-0007). ([ADR 0006][adr-0006])
@@ -113,11 +113,11 @@ This area gives the console API of the operator console. The console API is JSON
 - Basis: Step 3.3. The CDS gives no rule for the console API, and RFC 9110 gives no rule for an unknown query parameter.
 - Reason: A query parameter changes no record, so a refusal protects nothing. To read only the known parameters is the least complex. The Register console API has the same rule.
 
-### <a id="dh-1681"></a>DH-1681 A body limit for each operation
+### <a id="dh-1681"></a>DH-1681 A body limit for each operation, with 413
 
 - Kind: choice
-- Basis: Step 3.2. A server can refuse a request body that is larger than it permits ([RFC 9110, section 15.5.14][rfc9110-413]).
-- Reason: A customer, an account or a transaction is a few kilobytes at most, and a close has a list of arrangement IDs. A small limit stops a large body before the data holder decodes it. 400 is the status of each other body that is not valid.
+- Basis: Step 3.2. A server refuses content that is larger than it accepts with 413 ([RFC 9110, section 15.5.14][rfc9110-413]).
+- Reason: A customer, an account or a transaction is a few kilobytes at most, and a close has a list of arrangement IDs. A small limit stops a large body before the data holder decodes it. The CDS APIs of the data holder give [the same 413](api-standards.md#dh-0453), so a client gets one status on each interface.
 
 ### <a id="dh-1682"></a>DH-1682 Pages only for the lists that grow
 

@@ -130,7 +130,7 @@ This area gives the revocation of a CDR certificate, the CRL that the Register s
 ### <a id="reg-0752"></a>REG-0752 The newest CRL at each connection
 
 - Kind: choice
-- Basis: Step 3.3. The CDS gives no time for a revocation to take effect ([CDS: Certificate Validation][cds-cert-validation]). Other relying parties keep a CRL for [a maximum CRL age of 1 minute](../../../pkg/cds/DESIGN.md#cdsl-0068).
+- Basis: Step 2. The CDS gives no time for a revocation to take effect ([CDS: Certificate Validation][cds-cert-validation]). The relying party decides how frequently it gets new revocation data ([ACCC CP, section 4.9.6][accc-cp]). Other relying parties keep a CRL for [a maximum CRL age of 1 minute](../../../pkg/cds/DESIGN.md#cdsl-0068).
 - Reason: The Register signs the CRL, so it reads its newest CRL with no download and no wait. A lab test then sees a revocation at the Register at once.
 
 ### <a id="reg-0753"></a>REG-0753 The CRL of the intermediate covers each CDR client certificate

@@ -125,7 +125,7 @@ func TestTheStylesOfEachPresetBrandAreTheGoldenFiles(t *testing.T) {
 			dir, err := brands.Preset(name)
 			require.NoError(t, err)
 
-			brand, err := branddir.Load(dir, func(string, [][]byte) error { return nil })
+			brand, err := branddir.Load(dir, func([][]byte) error { return nil })
 			require.NoError(t, err)
 
 			mux := http.NewServeMux()

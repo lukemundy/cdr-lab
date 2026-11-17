@@ -78,7 +78,7 @@ func issueCertificate(recordID, notFound string, issue issueFunc) http.Handler {
 
 		err := jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxIssueBodyBytes), &request)
 		if err != nil || request.Version == nil || *request.Version < 1 || request.CSR == nil {
-			problem.Write(w, http.StatusBadRequest, badIssueBody)
+			problem.WriteBodyRefusal(w, err, badIssueBody)
 			return
 		}
 

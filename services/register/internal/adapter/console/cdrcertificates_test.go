@@ -9,7 +9,6 @@ import (
 	"math/big"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 	"time"
 
@@ -151,15 +150,12 @@ func TestARevocationRevokesTheFirstCertificateWithTheReason(t *testing.T) {
 
 // Verifies: REG-1342
 func TestARevocationAndItsCheckRefuseABodyThatIsNotACertificateAndAReason(t *testing.T) {
-	cert, _ := certificatePEM(t)
-
 	for _, path := range []string{checkRevocation, revoke} {
 		for name, body := range map[string]string{
 			"empty":          "",
 			"not JSON":       "certificate",
 			"a number":       `{"certificate": 1, "reason": "superseded"}`,
 			"unknown field":  `{"certificate": "x", "reason": "superseded", "version": 1}`,
-			"too large":      revocationRequest(t, cert+strings.Repeat(" ", 32<<10), "superseded"),
 			"a JSON array":   `["superseded"]`,
 			"a JSON string":  `"superseded"`,
 			"two JSON items": `{} {}`,

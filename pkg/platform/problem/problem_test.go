@@ -3,6 +3,7 @@ package problem_test
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -108,4 +109,40 @@ func TestASessionThatEndedHasTheSessionEndedType(t *testing.T) {
 		"status": 403,
 		"detail": "Sign in again."
 	}`, rec.Body.String())
+}
+
+// Verifies: PROB-0012
+func TestABodyRefusalGives413ForABodyLargerThanItsLimit(t *testing.T) {
+	tests := map[string]struct {
+		limit  int64
+		detail string
+	}{
+		"MiB":   {1 << 20, "The request body is larger than 1 MiB."},
+		"KiB":   {16 << 10, "The request body is larger than 16 KiB."},
+		"bytes": {1000, "The request body is larger than 1000 bytes."},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			rec := httptest.NewRecorder()
+			err := fmt.Errorf("decode: %w", &http.MaxBytesError{Limit: tt.limit})
+
+			problem.WriteBodyRefusal(rec, err, "The body is not valid.")
+
+			require.Equal(t, http.StatusRequestEntityTooLarge, rec.Code)
+			assert.JSONEq(t, `{"type": "about:blank", "title": "Request Entity Too Large", "status": 413,
+				"detail": "`+tt.detail+`"}`, rec.Body.String())
+		})
+	}
+}
+
+func TestABodyRefusalGives400ForEachOtherBody(t *testing.T) {
+	for _, err := range []error{errors.New("not JSON"), nil} {
+		rec := httptest.NewRecorder()
+
+		problem.WriteBodyRefusal(rec, err, "The body is not valid.")
+
+		require.Equal(t, http.StatusBadRequest, rec.Code)
+		assert.JSONEq(t, `{"type": "about:blank", "title": "Bad Request", "status": 400,
+			"detail": "The body is not valid."}`, rec.Body.String())
+	}
 }

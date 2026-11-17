@@ -270,8 +270,8 @@ func loadBrand() (branddir.Brand, error) {
 	return brand, nil
 }
 
-func checkProducts(brandName string, products [][]byte) error {
-	_, err := app.CheckProducts(brandName, products)
+func checkProducts(products [][]byte) error {
+	_, err := app.CheckProducts(products)
 	return err
 }
 

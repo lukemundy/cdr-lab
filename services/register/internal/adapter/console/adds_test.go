@@ -255,7 +255,6 @@ func TestAnAddRefusesABodyThatIsNotValid(t *testing.T) {
 			`{"version": "1", "dataRecipientBrandId": "brand-new", ` + addedBrandFields + `}`,
 			newBrandRequest("1", "brand-new") + ` {}`,
 			`{"version": 1, "dataRecipientBrandId": "brand-new", ` + addedBrandFields + `, "softwareProducts": []}`,
-			`{"version": 1, "dataRecipientBrandId": "brand-new", "logoUri": "` + strings.Repeat("x", 1<<20) + `"}`,
 		},
 		addSoftwareProduct: {
 			`{"softwareProductId": "sp-new", "status": "ACTIVE", ` + addedProductFields + `}`,

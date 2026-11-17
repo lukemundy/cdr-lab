@@ -46,10 +46,16 @@ func ReadPage(params url.Values) (Page, error) {
 
 	if v := params.Get("page-size"); v != "" {
 		size, valid := PositiveInteger(v)
-		if !valid || size > maxPageSize {
+		if !valid {
+			return Page{}, PageError{
+				Parameter: "page-size", error: FieldInvalid, text: "page-size must be an integer of 1 or more",
+			}
+		}
+
+		if size > maxPageSize {
 			return Page{}, PageError{
 				Parameter: "page-size", error: InvalidPageSize,
-				text: "page-size must be an integer from 1 to " + strconv.Itoa(maxPageSize),
+				text: "page-size must be " + strconv.Itoa(maxPageSize) + " or less",
 			}
 		}
 

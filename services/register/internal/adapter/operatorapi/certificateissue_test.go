@@ -136,9 +136,8 @@ func TestAnIssueRefusesABodyThatIsNotOnePEMCSR(t *testing.T) {
 
 	for routeName, route := range issueRoutes {
 		for name, body := range map[string][]byte{
-			"empty":     nil,
-			"two CSRs":  append(append([]byte{}, one...), one...),
-			"too large": append(append([]byte{}, one...), bytes.Repeat([]byte(" "), 16<<10)...),
+			"empty":    nil,
+			"two CSRs": append(append([]byte{}, one...), one...),
 		} {
 			t.Run(routeName+"/"+name, func(t *testing.T) {
 				issuer := &fakeIssuer{}
@@ -149,6 +148,23 @@ func TestAnIssueRefusesABodyThatIsNotOnePEMCSR(t *testing.T) {
 				assert.Nil(t, issuer.csr, "the issuer gets no request")
 			})
 		}
+	}
+}
+
+// Verifies: REG-0854
+func TestAnIssueBodyLargerThan16KiBGives413(t *testing.T) {
+	_, one := csrPEM(t)
+	body := append(append([]byte{}, one...), bytes.Repeat([]byte(" "), 16<<10)...)
+
+	for routeName, route := range issueRoutes {
+		t.Run(routeName, func(t *testing.T) {
+			issuer := &fakeIssuer{}
+
+			p := requireProblem(t, issue(t, issuer, route.path, body), http.StatusRequestEntityTooLarge)
+
+			assert.Equal(t, "The request body is larger than 16 KiB.", p.Detail)
+			assert.Nil(t, issuer.csr, "the issuer gets no request")
+		})
 	}
 }
 

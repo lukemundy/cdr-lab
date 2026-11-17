@@ -43,7 +43,7 @@ func validDir(t *testing.T) fstest.MapFS {
 	return dir
 }
 
-func noProductCheck(string, [][]byte) error { return nil }
+func noProductCheck([][]byte) error { return nil }
 
 func load(t *testing.T, dir fs.FS) (branddir.Brand, error) {
 	t.Helper()
@@ -351,21 +351,18 @@ func TestABSBThatIsNotValidNamesItsRule(t *testing.T) {
 	require.ErrorContains(t, err, "brand.json: bsb: give 6 digits")
 }
 
-func TestLoadGivesTheBrandNameAndTheProductsToTheProductCheck(t *testing.T) {
-	failure := errors.New(`product 1 ("everyday"): brand "Other" is not the brand name`)
-
-	var gotName string
+func TestLoadGivesTheProductsToTheProductCheck(t *testing.T) {
+	failure := errors.New(`product 1 ("everyday"): name is mandatory`)
 
 	var gotProducts [][]byte
 
-	_, err := branddir.Load(validDir(t), func(name string, products [][]byte) error {
-		gotName, gotProducts = name, products
+	_, err := branddir.Load(validDir(t), func(products [][]byte) error {
+		gotProducts = products
 		return failure
 	})
 
-	assert.Equal(t, "Coastal Bank", gotName)
 	assert.Len(t, gotProducts, 1)
-	require.ErrorContains(t, err, `products.json: product 1 ("everyday"): brand "Other" is not the brand name`)
+	require.ErrorContains(t, err, `products.json: product 1 ("everyday"): name is mandatory`)
 }
 
 func TestLoadRefusesAProductsFileThatIsNotAProductSet(t *testing.T) {

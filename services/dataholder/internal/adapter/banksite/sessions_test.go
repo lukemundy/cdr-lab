@@ -19,7 +19,7 @@ func newTestStore(limit int) (*sessionStore, *time.Time) {
 func start(t *testing.T, store *sessionStore, customerNumber string) string {
 	t.Helper()
 
-	place, err := store.reserve()
+	place, err := store.reserve("")
 	require.NoError(t, err)
 
 	return place.start(customerNumber)
@@ -72,7 +72,7 @@ func TestAFullStoreRefusesANewSessionAndKeepsTheSessionsThatDidNotEnd(t *testing
 	first := start(t, store, "00000001")
 	start(t, store, "00000002")
 
-	_, err := store.reserve()
+	_, err := store.reserve("")
 	require.ErrorIs(t, err, errNoPlace)
 
 	_, ok := store.customer(first)
@@ -97,20 +97,20 @@ func TestAFullStoreRemovesTheSessionsThatEndedBeforeItRefuses(t *testing.T) {
 func TestAReservationTakesAPlaceUntilItStartsOrIsReleased(t *testing.T) {
 	store, _ := newTestStore(1)
 
-	place, err := store.reserve()
+	place, err := store.reserve("")
 	require.NoError(t, err)
-	_, err = store.reserve()
+	_, err = store.reserve("")
 	require.ErrorIs(t, err, errNoPlace)
 
 	place.release()
 	place.release()
 
-	place, err = store.reserve()
+	place, err = store.reserve("")
 	require.NoError(t, err)
 	place.start("00000001")
 	place.release()
 
-	_, err = store.reserve()
+	_, err = store.reserve("")
 	assert.ErrorIs(t, err, errNoPlace)
 }
 
@@ -126,7 +126,7 @@ func TestParallelReservationsDoNotGoAboveTheLimit(t *testing.T) {
 
 	for range 200 {
 		wg.Go(func() {
-			if _, err := store.reserve(); err == nil {
+			if _, err := store.reserve(""); err == nil {
 				mu.Lock()
 				granted++
 				mu.Unlock()
@@ -136,4 +136,97 @@ func TestParallelReservationsDoNotGoAboveTheLimit(t *testing.T) {
 
 	wg.Wait()
 	assert.Equal(t, 50, granted)
+}
+
+// Verifies: DH-2042, DH-2043
+func TestAFullStoreGivesThePlaceOfTheValidSessionOfTheRequestAndEndsItOnlyAtTheStart(t *testing.T) {
+	store, _ := newTestStore(2)
+	current := start(t, store, "00000001")
+	other := start(t, store, "00000002")
+
+	place, err := store.reserve(current)
+	require.NoError(t, err)
+
+	_, ok := store.customer(current)
+	assert.True(t, ok, "the session stays until the new session starts")
+
+	place.release()
+
+	_, ok = store.customer(current)
+	assert.True(t, ok, "a release keeps the session")
+
+	place, err = store.reserve(current)
+	require.NoError(t, err)
+
+	_, err = store.reserve(current)
+	require.ErrorIs(t, err, errNoPlace, "the place of one session is free for one reservation only")
+
+	_, err = store.reserve(other + "x")
+	require.ErrorIs(t, err, errNoPlace, "a session ID that is not valid has no place")
+
+	id := place.start("00000001")
+
+	_, ok = store.customer(current)
+	assert.False(t, ok)
+
+	_, ok = store.customer(id)
+	assert.True(t, ok)
+
+	_, err = store.reserve("")
+	assert.ErrorIs(t, err, errNoPlace, "the store stays at its limit")
+}
+
+// Verifies: DH-2037
+func TestAStartEndsTheSessionOfTheRequestAlsoWhenTheStoreIsNotFull(t *testing.T) {
+	store, _ := newTestStore(10)
+	current := start(t, store, "00000001")
+
+	place, err := store.reserve(current)
+	require.NoError(t, err)
+	place.start("00000001")
+
+	_, ok := store.customer(current)
+	assert.False(t, ok)
+}
+
+// Verifies: DH-2041
+func TestParallelReservationsForOneSessionTakeItsPlaceOnce(t *testing.T) {
+	store, _ := newTestStore(1)
+	current := start(t, store, "00000001")
+
+	var (
+		wg      sync.WaitGroup
+		mu      sync.Mutex
+		granted int
+	)
+
+	for range 50 {
+		wg.Go(func() {
+			if _, err := store.reserve(current); err == nil {
+				mu.Lock()
+				granted++
+				mu.Unlock()
+			}
+		})
+	}
+
+	wg.Wait()
+	assert.Equal(t, 1, granted)
+}
+
+// Verifies: DH-2043
+func TestAPlaceFromAStoreThatWasNotFullDoesNotFreeThePlaceThatADifferentReservationTook(t *testing.T) {
+	store, _ := newTestStore(2)
+	current := start(t, store, "00000001")
+
+	first, err := store.reserve(current)
+	require.NoError(t, err, "the store is not full")
+
+	_, err = store.reserve(current)
+	require.NoError(t, err, "the full store gives the place of the session")
+
+	first.release()
+
+	_, err = store.reserve(current)
+	assert.ErrorIs(t, err, errNoPlace, "the second reservation still holds the place of the session")
 }

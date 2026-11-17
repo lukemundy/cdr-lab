@@ -170,7 +170,6 @@ func TestACreateRefusesABodyThatIsNotValid(t *testing.T) {
 		``, `[]`, `null`, `{"legalEntityId": 5}`, newRecipientRequest("dr-new") + ` {}`,
 		`{"version": 1, "legalEntityId": "dr-new", ` + newRecipientFields + `}`,
 		`{"legalEntityId": "dr-new", ` + newRecipientFields + `, "dataRecipientBrands": []}`,
-		`{"legalEntityId": "dr-new", "logoUri": "` + strings.Repeat("x", 1<<20) + `"}`,
 	} {
 		resp := post(t, ports, createDataRecipient, body)
 

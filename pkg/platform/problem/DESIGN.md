@@ -1,6 +1,6 @@
 # Problem details library
 
-The problem details library writes the [RFC 9457][rfc9457] problem details of the lab HTTP interfaces that the CDR does not define. The lab services use it for the operator interfaces, the operator console APIs and the site API of the online bank site. It gives the type of a problem, the format of the field errors and the type of a session that ended. Each service gives the status code and the `detail` of each problem.
+The problem details library writes the [RFC 9457][rfc9457] problem details of the lab HTTP interfaces that the CDR does not define. The lab services use it for the operator interfaces, the operator console APIs and the site API of the online bank site. It gives the type of a problem, the format of the field errors, the type of a session that ended and the status of a body that is too large. Each service gives the status code and the `detail` of each other problem.
 
 ## Context
 
@@ -29,11 +29,12 @@ None.
 - One type for a problem with no type of its own.
 - One problem type and one format for field errors, for each lab interface.
 - One problem type for a session that ended, for each lab interface with a session.
+- One status for a request body that is larger than its limit, for each lab interface.
 
 ## Non-goals
 
 - The errors of the CDR APIs. The [CDS HTTP library](../../cds/DESIGN.md) gives them.
-- The status code of each problem, and the text of each `detail`. The specification of each service gives them.
+- The status code of each problem, and the text of each `detail`, except for a body that is larger than its limit. The specification of each service gives them.
 - The session of a lab interface. The specification of the service gives when a session ends.
 
 ## Problem details
@@ -52,6 +53,10 @@ None.
 ## Session ended
 
 - <a id="prob-0010"></a>**PROB-0010** A problem for a request with a session cookie whose session ended has the type `https://github.com/lukemundy/cdr-lab/blob/main/pkg/platform/problem/DESIGN.md#prob-0010` and the title "The session ended". For example, the online bank site of the data holder gives it after a restart. ([RFC 9457, section 3.2][rfc9457-3-2]; [Judgement: one type for a session that ended](#prob-0011))
+
+## Request body size
+
+- <a id="prob-0012"></a>**PROB-0012** When a request body is larger than the limit that the service gives, the problem has the status 413 and the type `about:blank`. The `detail` gives the limit, for example "The request body is larger than 1 MiB". ([RFC 9110, section 15.5.14][rfc9110-413])
 
 ## Judgements
 
@@ -79,6 +84,7 @@ None.
 
 [adr-0024-identifiers]: ../../../docs/adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md#identifiers
 [rfc6901-6]: https://www.rfc-editor.org/rfc/rfc6901#section-6
+[rfc9110-413]: https://www.rfc-editor.org/rfc/rfc9110#section-15.5.14
 [rfc9457]: https://www.rfc-editor.org/rfc/rfc9457
 [rfc9457-3]: https://www.rfc-editor.org/rfc/rfc9457#section-3
 [rfc9457-3-2]: https://www.rfc-editor.org/rfc/rfc9457#section-3.2

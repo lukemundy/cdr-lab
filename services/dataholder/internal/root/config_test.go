@@ -346,8 +346,10 @@ func TestADirectoryThatBreaksTheContractStopsTheStartAndTheErrorNamesTheFileAndT
 	require.NoError(
 		t,
 		os.WriteFile(
-			filepath.Join(dir, "brand.json"),
-			[]byte(`{"brandName": "Other Bank", "bsb": "376100", "layout": "meadow"}`),
+			filepath.Join(dir, "products.json"),
+			[]byte(`{"products": [{"productId": "everyday", "lastUpdated": "2026-08-03T01:00:00Z",
+				"productCategory": "TRANS_AND_SAVINGS_ACCOUNTS", "name": "Everyday Account",
+				"description": "An account for each day.", "isTailored": false}]}`),
 			0o600,
 		),
 	)
@@ -364,7 +366,7 @@ func TestADirectoryThatBreaksTheContractStopsTheStartAndTheErrorNamesTheFileAndT
 	assert.Contains(t, message, "DATA_HOLDER_BRAND_DIR "+dir+": the brand is not valid:\n")
 	assert.Contains(t, message, "notes.txt: the brand directory contract has no file of this name")
 	assert.Contains(t, message, `products.json: products are not valid:`)
-	assert.Contains(t, message, `brand "Coastal Bank" is not the brand name "Other Bank"`)
+	assert.Contains(t, message, `brand is mandatory`)
 }
 
 // The brand directory is the only source of the display name of the sender.

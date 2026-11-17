@@ -98,8 +98,8 @@ func revocationAction(
 			Reason      *string `json:"reason"`
 		}
 
-		if jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxRegistrationBodyBytes), &request) != nil {
-			problem.Write(w, http.StatusBadRequest, badRevocationBody)
+		if err := jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxRegistrationBodyBytes), &request); err != nil {
+			problem.WriteBodyRefusal(w, err, badRevocationBody)
 			return
 		}
 

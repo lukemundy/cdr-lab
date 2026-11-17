@@ -48,7 +48,7 @@ func presetBrands(t *testing.T) map[string]branddir.Brand {
 func catalogue(t *testing.T, brand branddir.Brand) []domain.Product {
 	t.Helper()
 
-	products, err := app.CheckProducts(brand.Name, brand.Products)
+	products, err := app.CheckProducts(brand.Products)
 	require.NoError(t, err)
 
 	return products

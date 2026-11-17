@@ -51,7 +51,7 @@ func TestParsePageGivesThePageOfTheRequestOrTheCDSDefaults(t *testing.T) {
 	}
 }
 
-// Verifies: CDSL-0020, CDSL-0021
+// Verifies: CDSL-0020, CDSL-0021, CDSL-0070
 func TestParsePageRefusesAPageOrAPageSizeThatIsNotValid(t *testing.T) {
 	const (
 		invalid         = "urn:au-cds:error:cds-all:Field/Invalid"
@@ -64,8 +64,9 @@ func TestParsePageRefusesAPageOrAPageSizeThatIsNotValid(t *testing.T) {
 		"page zero":                   {"page=0", invalid, "Invalid Field", "page"},
 		"page not a number":           {"page=one", invalid, "Invalid Field", "page"},
 		"page negative":               {"page=-1", invalid, "Invalid Field", "page"},
-		"page-size zero":              {"page-size=0", invalidPageSize, "Invalid Page Size", "page-size"},
-		"page-size not a number":      {"page-size=many", invalidPageSize, "Invalid Page Size", "page-size"},
+		"page-size zero":              {"page-size=0", invalid, "Invalid Field", "page-size"},
+		"page-size not a number":      {"page-size=many", invalid, "Invalid Field", "page-size"},
+		"page-size negative":          {"page-size=-1", invalid, "Invalid Field", "page-size"},
 		"page-size above the maximum": {"page-size=1001", invalidPageSize, "Invalid Page Size", "page-size"},
 	}
 	for name, tt := range tests {
@@ -97,7 +98,7 @@ func TestReadPageGivesThePageOrTheParameterThatIsNotValid(t *testing.T) {
 		want  string
 	}{
 		"page":      {url.Values{"page": {"0"}}, "page must be an integer of 1 or more"},
-		"page-size": {url.Values{"page-size": {"1001"}}, "page-size must be an integer from 1 to 1000"},
+		"page-size": {url.Values{"page-size": {"1001"}}, "page-size must be 1000 or less"},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {

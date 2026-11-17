@@ -128,7 +128,7 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 
 - Kind: choice
 - Basis: Step 3.3. [ADR 0023][adr-0023] gives two settings and does not name them.
-- Reason: The names of the other brand settings start with `DATA_HOLDER_BRAND`. `seed` needs the brand name to check the `brand` of each product, also for a load file.
+- Reason: The names of the other brand settings start with `DATA_HOLDER_BRAND`. `seed` needs the brand for its product catalogue, and it [validates the brand directory](#dh-0358).
 
 ### <a id="dh-0374"></a>DH-0374 The field name `brandName`, as on the Register
 

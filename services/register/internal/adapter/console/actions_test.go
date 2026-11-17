@@ -284,7 +284,6 @@ func TestAnActionRefusesABodyThatIsNotValid(t *testing.T) {
 		for _, body := range []string{
 			``, `{}`, `[]`, `null`, `{"version": null}`, `{"version": 0}`, `{"version": -1}`, `{"version": 1.5}`,
 			`{"version": "1"}`, `{"version": 1, "status": "SUSPENDED"}`, `{"version": 1} {}`,
-			`{"version": 1, "padding": "` + strings.Repeat("x", 2048) + `"}`,
 		} {
 			resp := post(t, ports, target, body)
 

@@ -137,6 +137,11 @@ func TestProductsGivesOnlyTheProductsThatMatchEachFilter(t *testing.T) {
 			func(q *app.ProductQuery) { q.Brand = "Mock Bank" },
 			[]string{"loan", "new", "old"},
 		},
+		// Verifies: DH-0217, DH-0240
+		"brand with a sub-brand label": {
+			func(q *app.ProductQuery) { q.Brand = "Mock Bank Private" },
+			[]string{"other-brand"},
+		},
 		"brand is case sensitive": {
 			func(q *app.ProductQuery) { q.Brand = "mock bank" },
 			[]string{},

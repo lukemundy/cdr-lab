@@ -287,12 +287,7 @@ func TestGetDataHolderBrandsRefusesQueryParametersThatAreNotValid(t *testing.T) 
 			"urn:au-cds:error:cds-all:Field/InvalidPageSize",
 			"Invalid Page Size",
 		},
-		"page-size zero": {
-			"page-size=0",
-			400,
-			"urn:au-cds:error:cds-all:Field/InvalidPageSize",
-			"Invalid Page Size",
-		},
+		"page-size zero":    {"page-size=0", 400, "urn:au-cds:error:cds-all:Field/Invalid", "Invalid Field"},
 		"page zero":         {"page=0", 400, "urn:au-cds:error:cds-all:Field/Invalid", "Invalid Field"},
 		"page out of range": {"page=2", 422, "urn:au-cds:error:cds-all:Field/InvalidPage", "Invalid Page"},
 		"updated-since not a date": {
