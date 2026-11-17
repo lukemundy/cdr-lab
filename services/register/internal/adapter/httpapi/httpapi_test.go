@@ -146,7 +146,7 @@ func newReader() *fakeReader {
 									JWKSURI:                    "https://recipient.example/jwks",
 									RevocationURI:              "https://recipient.example/revoke",
 									RecipientBaseURI:           "https://cdr.recipient.example",
-									Scopes:                     []string{"openid"},
+									Scopes:                     []string{"openid", "profile"},
 								},
 							},
 						},

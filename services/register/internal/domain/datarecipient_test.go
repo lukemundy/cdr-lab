@@ -158,6 +158,25 @@ func TestImportDataRecipientRejectsInvalidFields(t *testing.T) {
 			func(dr *domain.DataRecipient) { dr.Brands[0].SoftwareProducts[0].Scopes = nil },
 			`software product "sp-1": scopes is required`,
 		},
+		// Verifies: REG-1496
+		"product with no openid scope": {
+			func(dr *domain.DataRecipient) { dr.Brands[0].SoftwareProducts[0].Scopes = []string{"profile"} },
+			`software product "sp-1": scopes does not contain openid and profile`,
+		},
+		// Verifies: REG-1496
+		"product with no profile scope": {
+			func(dr *domain.DataRecipient) {
+				dr.Brands[0].SoftwareProducts[0].Scopes = []string{"openid", "bank:accounts.basic:read"}
+			},
+			`software product "sp-1": scopes does not contain openid and profile`,
+		},
+		// Verifies: REG-1497
+		"product with an empty scope": {
+			func(dr *domain.DataRecipient) {
+				dr.Brands[0].SoftwareProducts[0].Scopes = []string{"openid", "profile", ""}
+			},
+			`software product "sp-1": scopes has an empty value`,
+		},
 		"product JWKS URI missing": {
 			func(dr *domain.DataRecipient) { dr.Brands[0].SoftwareProducts[0].JWKSURI = "" },
 			`software product "sp-1": jwksUri is required`,

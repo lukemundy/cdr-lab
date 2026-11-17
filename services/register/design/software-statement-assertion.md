@@ -26,7 +26,7 @@ This area gives Get SSA, the claims and the signature of an SSA, and Get JWKS, w
   - `software_id` is the software product ID
 - <a id="reg-0409"></a>**REG-0409** The SSA has `legal_entity_id`, `legal_entity_name` and each optional URI that the software product has. For example, an SSA has `policy_uri` only when the software product has a policy URI. ([CDS: SSA Definition][cds-ssa-definition]; [Judgement: the SSA has each optional claim that has a value](#reg-0423))
 - <a id="reg-0410"></a>**REG-0410** The SSA has a `jti` that the Register does not use again. ([CDS: SSA Definition][cds-ssa-definition])
-- <a id="reg-0411"></a>**REG-0411** The `scope` claim contains the scopes registered for the software product, with a space between them. The claim is the same for each `{industry}`. ([CDS: SSA Definition][cds-ssa-definition]; [Judgement: the `scope` claim has each registered scope, with no industry filter](#reg-0421))
+- <a id="reg-0411"></a>**REG-0411** The `scope` claim contains the scopes registered for the software product, with a space between them. Thus it always contains [`openid` and `profile`](participants.md#reg-1496). The claim is the same for each `{industry}`. ([CDS: SSA Definition][cds-ssa-definition]; [Judgement: the `scope` claim has each registered scope, with no industry filter](#reg-0421))
 - <a id="reg-0412"></a>**REG-0412** The SSA expires 10 minutes after the Register issues it. ([CDS: SSA][cds-ssa])
 
 ## Signature and response
@@ -46,7 +46,7 @@ This area gives Get SSA, the claims and the signature of an SSA, and Get JWKS, w
 ### <a id="reg-0421"></a>REG-0421 The `scope` claim has each registered scope, with no industry filter
 
 - Kind: choice
-- Basis: Step 3.3. The CDS does not say how the Register derives the claim ([CDS: SSA Definition][cds-ssa-definition]). A data holder ignores the scopes that it does not support ([CDS: Registration Validation][cds-registration-validation]).
+- Basis: Step 3.3. The CDS says that the claim includes `openid` and `profile` ([CDS: SSA Definition][cds-ssa-definition]), and the Register refuses a software product without them ([scopes with `openid` and `profile`](participants.md#reg-1496)). The CDS does not say if the claim depends on `{industry}`. A data holder ignores the scopes that it does not support ([CDS: Registration Validation][cds-registration-validation]).
 - Reason: A filter by `{industry}` adds nothing, because the data holder ignores the other scopes. The registered scopes with no filter are the simplest.
 
 ### <a id="reg-0422"></a>REG-0422 The Register checks the software product before the brand

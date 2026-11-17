@@ -48,7 +48,7 @@ func TestTheNextSSAOfASoftwareProductHasTheRedirectURIsOfAChangeInTheConsole(t *
 				LogoURI: "https://recipient.example/product.png", Status: domain.Active,
 				ClientURI: "https://recipient.example", RedirectURIs: []string{"https://recipient.example/callback"},
 				JWKSURI: "https://recipient.example/jwks", RevocationURI: "https://recipient.example/revoke",
-				RecipientBaseURI: "https://cdr.recipient.example", Scopes: []string{"openid"},
+				RecipientBaseURI: "https://cdr.recipient.example", Scopes: []string{"openid", "profile"},
 			}},
 		}},
 	}}}))
@@ -63,7 +63,7 @@ func TestTheNextSSAOfASoftwareProductHasTheRedirectURIsOfAChangeInTheConsole(t *
 		"logoUri": "https://recipient.example/product.png", "clientUri": "https://recipient.example",
 		"redirectUris": ["https://recipient.example/new", "https://recipient.example/second"],
 		"jwksUri": "https://recipient.example/jwks", "revocationUri": "https://recipient.example/revoke",
-		"recipientBaseUri": "https://cdr.recipient.example", "scopes": ["openid"]}`
+		"recipientBaseUri": "https://cdr.recipient.example", "scopes": ["openid", "profile"]}`
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodPost,
 		"/api/data-recipients/dr-1/software-products/product-1/change", strings.NewReader(body))
@@ -103,7 +103,7 @@ func TestASoftwareProductThatTheOperatorAddsInTheConsoleGetsAnSSA(t *testing.T) 
 			"softwareProductDescription": "A product", "logoUri": "https://recipient.example/product.png",
 			"clientUri": "https://recipient.example", "redirectUris": ["https://recipient.example/callback"],
 			"jwksUri": "https://recipient.example/jwks", "revocationUri": "https://recipient.example/revoke",
-			"recipientBaseUri": "https://cdr.recipient.example", "scopes": ["openid"], "status": "ACTIVE"}`},
+			"recipientBaseUri": "https://cdr.recipient.example", "scopes": ["openid", "profile"], "status": "ACTIVE"}`},
 	} {
 		rec := httptest.NewRecorder()
 		req := httptest.NewRequestWithContext(t.Context(), http.MethodPost, r.target, strings.NewReader(r.body))
@@ -156,7 +156,7 @@ func newHolderBrandsTest(t *testing.T) holderBrandsTest {
 				LogoURI: "https://recipient.example/product.png", Status: domain.Active,
 				ClientURI: "https://recipient.example", RedirectURIs: []string{"https://recipient.example/callback"},
 				JWKSURI: "https://recipient.example/jwks", RevocationURI: "https://recipient.example/revoke",
-				RecipientBaseURI: "https://cdr.recipient.example", Scopes: []string{"openid"},
+				RecipientBaseURI: "https://cdr.recipient.example", Scopes: []string{"openid", "profile"},
 			}},
 		}},
 	}}}))

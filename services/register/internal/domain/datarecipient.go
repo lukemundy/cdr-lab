@@ -275,8 +275,24 @@ func (p *problems) softwareProductFields(product record, sp SoftwareProduct) {
 	p.requiredURI(product, "jwksUri", sp.JWKSURI)
 	p.requiredURI(product, "revocationUri", sp.RevocationURI)
 	p.requiredURI(product, "recipientBaseUri", sp.RecipientBaseURI)
-	p.requiredList(product, "scopes", sp.Scopes)
+	p.scopes(product, sp.Scopes)
 	p.clientCertificates(product, sp.ClientCertificates)
+}
+
+func (p *problems) scopes(product record, scopes []string) {
+	p.requiredList(product, "scopes", scopes)
+
+	if len(scopes) == 0 {
+		return
+	}
+
+	if slices.Contains(scopes, "") {
+		p.add(product, "scopes", "scopes has an empty value")
+	}
+
+	if !slices.Contains(scopes, "openid") || !slices.Contains(scopes, "profile") {
+		p.add(product, "scopes", "scopes does not contain openid and profile")
+	}
 }
 
 func (p *problems) recipientStatusRule(

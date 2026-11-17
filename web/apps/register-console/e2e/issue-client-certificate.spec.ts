@@ -69,7 +69,7 @@ test("the operator issues a client certificate from a CSR file, saves the chain,
       jwksUri: "https://client-issue-test.example/jwks",
       revocationUri: "https://client-issue-test.example/revoke",
       recipientBaseUri: "https://cdr.client-issue-test.example",
-      scopes: ["openid"],
+      scopes: ["openid", "profile"],
       status: "ACTIVE",
     },
   );

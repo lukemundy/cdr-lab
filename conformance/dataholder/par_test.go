@@ -229,8 +229,8 @@ func TestARequestObjectThatBreaksARuleIsRefusedWithADescriptionThatNamesTheRule(
 			code:   "invalid_request", names: "openid",
 		},
 		"scope that the registration does not have": {
-			change: map[string]any{"scope": "openid profile"},
-			code:   "invalid_scope", names: "profile",
+			change: map[string]any{"scope": "openid bank:transactions:read"},
+			code:   "invalid_scope", names: "bank:transactions:read",
 		},
 		"registration scope": {
 			change: map[string]any{"scope": "openid cdr:registration"},
