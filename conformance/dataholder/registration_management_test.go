@@ -76,6 +76,14 @@ func TestASoftwareProductUpdatesAndDeletesItsRegistrationAndRegistersAgain(t *te
 		assert.Equal(t, created.body, registrationOf(t, manage(http.MethodGet, "")))
 	})
 
+	t.Run("an update with the SSA of the registration is refused", func(t *testing.T) {
+		claims := labtest.RegistrationClaims(lifecycleProduct, r.issuer, r.ssa)
+
+		requireManagementError(t, manage(http.MethodPut, signedRegistration(t, claims)), "invalid_software_statement")
+
+		assert.Equal(t, created.body, registrationOf(t, manage(http.MethodGet, "")))
+	})
+
 	t.Run("an update with a content type that is not a JWT gives 415", func(t *testing.T) {
 		status := putWithContentType(t, client, token, "application/json")
 
@@ -121,6 +129,14 @@ func TestASoftwareProductUpdatesAndDeletesItsRegistrationAndRegistersAgain(t *te
 		tokenReply := client.requestToken(t, client.assertion(t, tokenEndpoint(t, client)))
 
 		requireTokenError(t, tokenReply, http.StatusUnauthorized, "invalid_client")
+	})
+
+	t.Run("after a deletion, a registration with an SSA that the data holder accepted is refused", func(t *testing.T) {
+		requireRegistrationError(
+			t,
+			r.register(t, labtest.RegistrationClaims(lifecycleProduct, r.issuer, newSSA)),
+			"invalid_software_statement",
+		)
 	})
 
 	t.Run("after a deletion, the software product registers again and gets a new client ID", func(t *testing.T) {

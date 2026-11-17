@@ -90,6 +90,10 @@ func (j jtis) Consume(_ context.Context, jti string) error {
 	return nil
 }
 
+func (j jtis) ConsumeSSA(ctx context.Context, jti string, _ time.Time) error {
+	return j.Consume(ctx, "ssa/"+jti)
+}
+
 func validJWTs() *jwts {
 	return &jwts{
 		ssa: domain.SSA{
@@ -214,10 +218,47 @@ func TestASecondRegistrationOfTheSameSoftwareProductIsRefused(t *testing.T) {
 	_, err := registrar.Register(t.Context(), requestJWT)
 	require.NoError(t, err)
 
-	j.request.ID = "request-jti-2"
+	j.request.ID, j.ssa.ID = "request-jti-2", "ssa-jti-2"
 	_, err = registrar.Register(t.Context(), requestJWT)
 
 	requireRegistrationError(t, err, domain.InvalidSoftwareStatement, "software_id")
+}
+
+// Verifies: DH-0620
+func TestAnSSAThatTheDataHolderAcceptedBeforeIsRefused(t *testing.T) {
+	j := validJWTs()
+	registrar := newRegistrar(j)
+	_, err := registrar.Register(t.Context(), requestJWT)
+	require.NoError(t, err)
+
+	registrar.Store = &memoryStore{}
+	j.request.ID = "request-jti-2"
+	_, err = registrar.Register(t.Context(), requestJWT)
+
+	requireRegistrationError(t, err, domain.InvalidSoftwareStatement, "jti of the SSA")
+}
+
+func TestTheSSAJTIIsKeptUntilTheSSAExpires(t *testing.T) {
+	j := validJWTs()
+	store := &expiryJTIs{}
+	registrar := newRegistrar(j)
+	registrar.JTIs = store
+
+	_, err := registrar.Register(t.Context(), requestJWT)
+
+	require.NoError(t, err)
+	assert.Equal(t, time.Unix(j.ssa.ExpiresAt, 0), store.ssaExpiresAt)
+}
+
+// expiryJTIs keeps the expiry time of the last SSA JWT ID.
+type expiryJTIs struct{ ssaExpiresAt time.Time }
+
+func (*expiryJTIs) Consume(context.Context, string) error { return nil }
+
+func (e *expiryJTIs) ConsumeSSA(_ context.Context, _ string, expiresAt time.Time) error {
+	e.ssaExpiresAt = expiresAt
+
+	return nil
 }
 
 // Verifies: DH-0693, DH-0655
@@ -349,7 +390,7 @@ func registeredClient(t *testing.T, j *jwts) app.Registrar {
 	_, err := registrar.Register(t.Context(), requestJWT)
 	require.NoError(t, err)
 
-	j.request.ID = "request-jti-2"
+	j.request.ID, j.ssa.ID = "request-jti-2", "ssa-jti-2"
 
 	return registrar
 }
@@ -398,6 +439,9 @@ func TestAnUpdateThatIsRefusedDoesNotChangeTheRegistration(t *testing.T) {
 		"a jti that was used before": {
 			func(j *jwts) { j.request.ID = "request-jti" }, domain.InvalidClientMetadata, "jti",
 		},
+		"the SSA of the registration": {
+			func(j *jwts) { j.ssa.ID = "ssa-jti" }, domain.InvalidSoftwareStatement, "jti of the SSA",
+		},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -442,6 +486,7 @@ func TestADeletionRemovesTheRegistrationAndANewRegistrationGetsANewClientID(t *t
 	_, err := registrar.Registrations.Registration(t.Context(), "client-1")
 	require.ErrorIs(t, err, app.ErrRegistrationNotFound)
 
+	j.ssa.ID = "ssa-jti-3"
 	again, err := registrar.Register(t.Context(), requestJWT)
 	require.NoError(t, err)
 	assert.Equal(t, "client-2", again.ClientID)

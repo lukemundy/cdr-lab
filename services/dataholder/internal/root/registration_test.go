@@ -21,17 +21,19 @@ import (
 
 const testIssuer = "https://id.bank.example"
 
-// verifiedJWTs gives a valid SSA and a valid request with a new jti for each request JWT.
+// verifiedJWTs gives a valid SSA and a valid request, each with a new jti for each request JWT.
 type verifiedJWTs struct{ now time.Time }
 
-func (verifiedJWTs) SoftwareStatement(string) (string, error) { return "header.ssa.signature", nil }
+func (verifiedJWTs) SoftwareStatement(requestJWT string) (string, error) {
+	return "ssa-of-" + requestJWT, nil
+}
 
-func (j verifiedJWTs) VerifySSA(context.Context, string) (domain.SSA, error) {
+func (j verifiedJWTs) VerifySSA(_ context.Context, ssa string) (domain.SSA, error) {
 	return domain.SSA{
 		Issuer:            "cdr-register",
 		IssuedAt:          j.now.Unix(),
 		ExpiresAt:         j.now.Add(time.Minute).Unix(),
-		ID:                "ssa-jti",
+		ID:                ssa,
 		OrgID:             "brand-1",
 		OrgName:           "Recipient",
 		ClientName:        "Recipient Web",
@@ -62,7 +64,7 @@ func (j verifiedJWTs) VerifyRequest(_ context.Context, requestJWT, _ string) (do
 		ResponseTypes:                  []string{"code"},
 		IDTokenSignedResponseAlg:       "PS256",
 		AuthorizationSignedResponseAlg: "PS256",
-		SoftwareStatement:              "header.ssa.signature",
+		SoftwareStatement:              "ssa-of-" + requestJWT,
 	}, nil
 }
 

@@ -32,7 +32,7 @@ This area gives the registration of a software product with an SSA, registration
 - <a id="dh-0617"></a>**DH-0617** The SSA has each claim that the SSA definition marks as required. For example, the data holder refuses an SSA with no `revocation_uri`. ([CDS: SSA Definition][cds-ssa-definition])
 - <a id="dh-0618"></a>**DH-0618** The `software_roles` of the SSA is `data-recipient-software-product`. ([CDS: SSA Definition][cds-ssa-definition])
 - <a id="dh-0619"></a>**DH-0619** The `jwks_uri` of the SSA is an `https` URL. When it is not, the data holder refuses the SSA. ([CDS: Transaction Security][cds-transaction-security]; [CDR Support: Egress policy for calls from DH to ADRs][support-egress])
-- <a id="dh-0620"></a>**DH-0620** The data holder does not keep the `jti` of an SSA. A software product can use one SSA again until the SSA expires. ([CDS: SSA Definition][cds-ssa-definition]; [Judgement: an SSA can be used again until it expires](#dh-0704))
+- <a id="dh-0620"></a>**DH-0620** The data holder refuses an SSA whose `jti` it accepted before, until the SSA expires, with 400 and `invalid_software_statement`. For example, a `PUT` with the SSA of the registration gets this refusal. ([CDS: SSA Definition][cds-ssa-definition]; [Judgement: one use of each SSA, until it expires](#dh-0704))
 - <a id="dh-0621"></a>**DH-0621** At registration, the data holder refuses only a software product whose status is REMOVED. For example, a software product that is INACTIVE, or that has no status at the data holder, can register. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [Judgement: only the status REMOVED stops a registration](#dh-0705))
 
 ## Validation of the request
@@ -183,11 +183,11 @@ The authorisation server library gives the reaction at [the PAR endpoint](../../
 - Basis: Step 3.3. The CDS requires the check of the SSA signature with the Register JWKS, and gives no cache rule for it ([CDS: Registration Validation][cds-registration-validation]).
 - Reason: The Register can change its key, and a registration must then not need a restart of the data holder. The limit stops an SSA with an invented `kid` from making a call to the Register for each request. The Register publishes a new key before it signs with it, so a JWKS from after that time has the key.
 
-### <a id="dh-0704"></a>DH-0704 An SSA can be used again until it expires
+### <a id="dh-0704"></a>DH-0704 One use of each SSA, until it expires
 
 - Kind: choice
-- Basis: Step 3.3. The SSA definition says that its `jti` prevents the reuse of the SSA, but no rule requires that a data holder refuses a second use ([CDS: SSA Definition][cds-ssa-definition]).
-- Reason: A software product can send one SSA in a `POST` and then in a `PUT`. The rule of one registration for each `software_id` and the 10 minutes of the SSA limit a replay.
+- Basis: Step 1. The SSA definition says that the `jti` is "used to prevent reuse of the SSA", and gives no time limit and no error code for a reuse ([CDS: SSA Definition][cds-ssa-definition]).
+- Reason: The data holder refuses an expired SSA, so it keeps each `jti` only until the SSA expires. A software product gets a new SSA from the Register for each registration request, also for a `PUT`. With one use, each registration request shows a recent approval of the Register.
 
 ### <a id="dh-0705"></a>DH-0705 Only the status REMOVED stops a registration
 
