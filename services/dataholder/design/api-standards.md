@@ -47,6 +47,7 @@ The first table gives the CDR APIs of the data holder. The second table gives th
 
 - <a id="dh-0430"></a>**DH-0430** The security endpoints have no version. They do not use `x-v` and `x-min-v`, and the version rules of this group do not apply to them. ([CDS: DCR APIs][cds-dcr-apis])
 - <a id="dh-0431"></a>**DH-0431** Each API of the first table of Endpoints uses [the CDS version negotiation](../../../pkg/cds/DESIGN.md#cdsl-0001). Its lowest and its highest version are the version of the table. For example, a request for version 4 of Get Products gives [406 with `Header/UnsupportedVersion`](../../../pkg/cds/DESIGN.md#cdsl-0008). ([CDS: HTTP Headers][cds-http-headers]; [Judgement: only the CDS 1.36.0 version of each API](#dh-0480))
+- <a id="dh-2616"></a>**DH-2616** Each API of the first table of Endpoints uses [the check of the `Accept` header](../../../pkg/cds/DESIGN.md#cdsl-0071). For example, Get Products with `Accept: application/xml` gives 406 with `Header/Invalid`. ([CDS: Request Headers][cds-request-headers])
 - <a id="dh-0432"></a>**DH-0432** When a request has a fault in its version headers and in its path or query parameters, the response gives the version header error. ([Judgement: the version headers before the parameters](#dh-0485))
 - <a id="dh-0433"></a>**DH-0433** Each response of the public listener and the mTLS listener has [the `x-fapi-interaction-id` of the request, or a new UUID](../../../pkg/cds/DESIGN.md#cdsl-0010). ([CDS: HTTP Headers][cds-http-headers])
 - <a id="dh-0434"></a>**DH-0434** When a request on the resource base URI has no `x-fapi-auth-date`, the response is 400 with `urn:au-cds:error:cds-all:Header/Missing`, and the `detail` is `x-fapi-auth-date`. ([CDS: HTTP Headers][cds-http-headers]; [Judgement: a required x-fapi-auth-date](#dh-0486))
@@ -248,6 +249,7 @@ The first table gives the CDR APIs of the data holder. The second table gives th
 [cds-error-404-not-implemented]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-404-resource-not-implemented
 [cds-dcr-apis]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#dcr-apis
 [cds-definitions]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#definitions
+[cds-request-headers]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#request-headers
 [cds-http-headers]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#http-headers
 [support-auth-date]: https://cdr-support.zendesk.com/hc/en-us/articles/4405773134863
 [fapi-baseline-resource]: https://openid.net/specs/openid-financial-api-part-1-1_0.html#protected-resources-provisions

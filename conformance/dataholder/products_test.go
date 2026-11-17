@@ -564,6 +564,31 @@ func TestTheProductAPIsServeOnlyTheirCurrentVersion(t *testing.T) {
 	}
 }
 
+// Verifies: DH-2616, CDSL-0071, CDSL-0072, CDSL-0073, CDSL-0074
+func TestTheProductAPIsRefuseAnAcceptHeaderThatPermitsNoJSONInUTF8(t *testing.T) {
+	for name, api := range productAPIs(t) {
+		for _, accept := range []string{"application/json;charset=UTF-8", "*/*", "application/*"} {
+			t.Run(name+" "+accept, func(t *testing.T) {
+				resp := banking(t, api.path, http.Header{"X-V": {api.version}, "Accept": {accept}})
+
+				assert.Equal(t, http.StatusOK, resp.StatusCode, string(resp.body))
+			})
+		}
+
+		refused := []string{"application/xml", "application/json;charset=iso-8859-1", "application/json;q=0"}
+		for _, accept := range refused {
+			t.Run(name+" "+accept, func(t *testing.T) {
+				resp := banking(t, api.path, http.Header{"X-V": {api.version}, "Accept": {accept}})
+
+				detail := requireCDSError(
+					t, resp, http.StatusNotAcceptable, "urn:au-cds:error:cds-all:Header/Invalid", "Invalid Header",
+				)
+				assert.Equal(t, "Accept", detail)
+			})
+		}
+	}
+}
+
 func TestTheVersionOfAProductRequestIsCheckedBeforeItsParameters(t *testing.T) {
 	resp := banking(t, productsPath+"?page=0", http.Header{})
 

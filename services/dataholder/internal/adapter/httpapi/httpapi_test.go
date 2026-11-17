@@ -207,6 +207,22 @@ func TestTheDiscoveryAPIsRefuseARequestWithNoSupportedVersion(t *testing.T) {
 	}
 }
 
+// Verifies: DH-2616
+func TestAPublicAPIRefusesAnAcceptHeaderThatPermitsNoJSON(t *testing.T) {
+	for _, path := range append([]string{"/cds-au/v1/banking/products"}, discoveryPaths...) {
+		t.Run(path, func(t *testing.T) {
+			rec := send(t, http.MethodGet, path, http.Header{"X-V": {"1"}, "Accept": {"application/xml"}})
+
+			assert.Equal(t, http.StatusNotAcceptable, rec.Code)
+			assert.JSONEq(t, `{"errors": [{
+				"code": "urn:au-cds:error:cds-all:Header/Invalid",
+				"title": "Invalid Header",
+				"detail": "Accept"
+			}]}`, rec.Body.String())
+		})
+	}
+}
+
 func TestAnotherMethodOnADiscoveryPathGivesResourceNotFound(t *testing.T) {
 	rec := send(t, http.MethodPost, "/cds-au/v1/discovery/status", xv("1"))
 

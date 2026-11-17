@@ -12,6 +12,11 @@ import (
 func Versioned(minV, maxV int) httproute.Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if !acceptsJSON(r) {
+				WriteError(w, http.StatusNotAcceptable, HeaderInvalid, "Accept")
+				return
+			}
+
 			xv := r.Header.Get("x-v")
 			if xv == "" {
 				WriteError(w, http.StatusBadRequest, HeaderMissing, "x-v")

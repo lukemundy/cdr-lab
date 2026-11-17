@@ -491,6 +491,20 @@ func TestVersionErrors(t *testing.T) {
 	}
 }
 
+// Verifies: REG-1494
+func TestAListRefusesAnAcceptHeaderThatPermitsNoJSON(t *testing.T) {
+	for name, l := range lists {
+		t.Run(name, func(t *testing.T) {
+			rec := serve(t, newReader(), l.path, http.Header{"X-V": {l.version}, "Accept": {"application/xml"}})
+
+			e := requireError(
+				t, rec, http.StatusNotAcceptable, "urn:au-cds:error:cds-all:Header/Invalid", "Invalid Header",
+			)
+			assert.Equal(t, "Accept", e.Detail)
+		})
+	}
+}
+
 func TestMissingVersionDetailIsTheHeaderName(t *testing.T) {
 	rec := serve(t, newReader(), recipientStatusesPath, http.Header{})
 

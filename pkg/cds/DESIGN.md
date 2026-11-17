@@ -1,6 +1,6 @@
 # CDS HTTP library
 
-The CDS HTTP library gives the HTTP rules of the Consumer Data Standards that the CDR APIs of each lab service share. These rules are the version negotiation, the interaction ID, the CDS error format, pagination, the response envelope, CORS, the TLS and mTLS profile, and a revocation check of client certificates with the CRL. A service chooses the endpoints that each rule applies to. The specification of the service gives that choice.
+The CDS HTTP library gives the HTTP rules of the Consumer Data Standards that the CDR APIs of each lab service share. These rules are the version negotiation, the check of the `Accept` header, the interaction ID, the CDS error format, pagination, the response envelope, CORS, the TLS and mTLS profile, and a revocation check of client certificates with the CRL. A service chooses the endpoints that each rule applies to. The specification of the service gives that choice.
 
 ## Context
 
@@ -52,6 +52,17 @@ flowchart LR
 - <a id="cdsl-0007"></a>**CDSL-0007** When `x-min-v` is equal to or higher than `x-v`, the endpoint ignores `x-min-v`. ([CDS: HTTP Headers][cds-http-headers])
 - <a id="cdsl-0008"></a>**CDSL-0008** When the endpoint supports no requested version, the response is 406 with `urn:au-cds:error:cds-all:Header/UnsupportedVersion`. ([CDS: Unsupported Version][cds-error-406-unsupported-version])
 - <a id="cdsl-0009"></a>**CDSL-0009** After a successful version negotiation, each response of the endpoint has an `x-v` header with the version served, also an error response. ([CDS: HTTP Headers][cds-http-headers])
+
+## Accept header
+
+These rules apply to each versioned endpoint.
+
+- <a id="cdsl-0071"></a>**CDSL-0071** When the `Accept` header of a request permits no JSON response in UTF-8, the response is 406 with `urn:au-cds:error:cds-all:Header/Invalid`, and the `detail` is `Accept`. For example, `Accept: application/xml`. ([CDS: Request Headers][cds-request-headers]; [CDS: HTTP Response Codes][cds-http-response-codes]; [Judgement: Header/Invalid for an Accept header that permits no JSON](#cdsl-0076))
+- <a id="cdsl-0072"></a>**CDSL-0072** A media range of the `Accept` header permits a JSON response when it is `*/*`, `application/*` or `application/json`, in upper or lower case. ([CDS: Request Headers][cds-request-headers]; [RFC 9110, section 12.5.1][rfc9110-accept])
+- <a id="cdsl-0073"></a>**CDSL-0073** A media range permits a response in UTF-8 when it has no `charset` parameter, or a `charset` of `utf-8` in upper or lower case. For example, `application/json;charset=iso-8859-1` permits no JSON response in UTF-8. ([CDS: HTTP Response Codes][cds-http-response-codes])
+- <a id="cdsl-0074"></a>**CDSL-0074** A media range with a quality value of 0, or with a quality value that is not a number, permits no response. For example, `application/json;q=0`. ([RFC 9110, section 12.4.2][rfc9110-quality])
+- <a id="cdsl-0079"></a>**CDSL-0079** An absent or empty `Accept` header permits a JSON response. ([CDS: Request Headers][cds-request-headers]; [Judgement: an empty Accept header is absent](#cdsl-0077))
+- <a id="cdsl-0075"></a>**CDSL-0075** The endpoint checks the `Accept` header before the version headers. For example, a request with `Accept: application/xml` and no `x-v` gets 406. ([Judgement: the Accept header before the version headers](#cdsl-0078))
 
 ## Interaction ID
 
@@ -194,12 +205,33 @@ These rules apply to a service that uses the CRL check of the library as its rev
 - Basis: Step 3.2. A CRL is valid until its next update ([RFC 5280, section 5.1.2.5][rfc5280-next-update]).
 - Reason: When the Register serves the CRL ([ADR 0022][adr-0022]), a short outage of the Register otherwise stops all mTLS clients. A request to a CRL server that does not reply can take 5 seconds, so a load at each connection delays each handshake. The warning shows the outage, because the clients do not see it.
 
+### <a id="cdsl-0076"></a>CDSL-0076 Header/Invalid for an Accept header that permits no JSON
+
+- Kind: choice
+- Basis: Step 3.3. The CDS requires 406 for an unacceptable `Accept` value ([CDS: Request Headers][cds-request-headers]; [CDS: HTTP Response Codes][cds-http-response-codes]), but its error list gives no code for this 406. `Header/Invalid` is the CDS code for a header value that the standards do not permit ([CDS: Invalid Header][cds-error-400-header-invalid]).
+- Reason: `Header/Invalid` with the header name as the `detail` tells the client which header to change. `Header/UnsupportedVersion` is only for a version.
+
+### <a id="cdsl-0077"></a>CDSL-0077 An empty Accept header is absent
+
+- Kind: choice
+- Basis: Step 3.3. The CDS gives the default media type for an absent `Accept` header ([CDS: Request Headers][cds-request-headers]). It does not give a rule for an empty value.
+- Reason: An HTTP library can send an empty header when the client sets no value. The client then expects the default media type.
+
+### <a id="cdsl-0078"></a>CDSL-0078 The Accept header before the version headers
+
+- Kind: choice
+- Basis: Step 3.3. The CDS gives 406 for an `Accept` header and for a version, but no sequence of the checks ([CDS: HTTP Response Codes][cds-http-response-codes]).
+- Reason: No version of the endpoint can give a response that the `Accept` header permits. The client must change the `Accept` header first, also when it changes its versions.
+
 ## Withdrawn
 
 None.
 
 [adr-0022]: ../../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
 [cds-http-headers]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#http-headers
+[cds-request-headers]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#request-headers
+[cds-http-response-codes]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#http-response-codes
+[cds-error-400-header-invalid]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-400-header-invalid
 [cds-error-codes]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-codes
 [cds-error-400-header-missing]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-400-header-missing
 [cds-error-400-invalid-version]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#error-400-header-invalid-version
@@ -223,6 +255,8 @@ None.
 [fetch-cors]: https://fetch.spec.whatwg.org/#http-cors-protocol
 [fapi-tls]: https://openid.net/specs/openid-financial-api-part-2-1_0.html#tls-considerations
 [bcp195]: https://www.rfc-editor.org/rfc/rfc9325#section-4.2
+[rfc9110-accept]: https://www.rfc-editor.org/rfc/rfc9110#section-12.5.1
+[rfc9110-quality]: https://www.rfc-editor.org/rfc/rfc9110#section-12.4.2
 [rfc4122]: https://www.rfc-editor.org/rfc/rfc4122
 [rfc5280-crldp]: https://www.rfc-editor.org/rfc/rfc5280#section-4.2.1.13
 [rfc5280-next-update]: https://www.rfc-editor.org/rfc/rfc5280#section-5.1.2.5
