@@ -213,3 +213,20 @@ func TestParallelReservationsForOneSessionTakeItsPlaceOnce(t *testing.T) {
 	wg.Wait()
 	assert.Equal(t, 1, granted)
 }
+
+// Verifies: DH-2043
+func TestAPlaceFromAStoreThatWasNotFullDoesNotFreeThePlaceThatADifferentReservationTook(t *testing.T) {
+	store, _ := newTestStore(2)
+	current := start(t, store, "00000001")
+
+	first, err := store.reserve(current)
+	require.NoError(t, err, "the store is not full")
+
+	_, err = store.reserve(current)
+	require.NoError(t, err, "the full store gives the place of the session")
+
+	first.release()
+
+	_, err = store.reserve(current)
+	assert.ErrorIs(t, err, errNoPlace, "the second reservation still holds the place of the session")
+}

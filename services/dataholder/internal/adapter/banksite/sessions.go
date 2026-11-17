@@ -44,7 +44,9 @@ type place struct {
 	store *sessionStore
 	// replaces is the session of the request, which ends when the new session starts.
 	replaces string
-	once     sync.Once
+	// takesPlace is true when the place is the place of replaces in a full store.
+	takesPlace bool
+	once       sync.Once
 }
 
 // reserve gives errNoPlace when the store is full. The valid session current ends when the new session starts, so a
@@ -53,17 +55,20 @@ func (s *sessionStore) reserve(current string) (*place, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	p := &place{store: s, replaces: current}
+
 	if s.full() {
 		if !s.valid(current) || s.taken[current] {
 			return nil, errNoPlace
 		}
 
 		s.taken[current] = true
+		p.takesPlace = true
 	}
 
 	s.reserved++
 
-	return &place{store: s, replaces: current}, nil
+	return p, nil
 }
 
 func (s *sessionStore) valid(id string) bool {
@@ -75,7 +80,10 @@ func (s *sessionStore) valid(id string) bool {
 // free ends the reservation. The caller holds the lock of the store.
 func (p *place) free() {
 	p.store.reserved--
-	delete(p.store.taken, p.replaces)
+
+	if p.takesPlace {
+		delete(p.store.taken, p.replaces)
+	}
 }
 
 // full removes the sessions that ended before it gives its answer.
