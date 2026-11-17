@@ -79,6 +79,7 @@ flowchart LR
 - <a id="conf-0020"></a>**CONF-0020** Each test package has its own participants in the seed files and its own listen ports. ([Judgement: the test packages run at the same time](#conf-0043))
 - <a id="conf-0021"></a>**CONF-0021** `go test` runs the test packages at the same time, not one after the other. ([Judgement: the test packages run at the same time](#conf-0043))
 - <a id="conf-0022"></a>**CONF-0022** A test that changes a state uses data that no other test uses. For example, the test has its own participant, customer or account number. ([Judgement: each test changes only its own data](#conf-0044))
+- <a id="conf-0056"></a>**CONF-0056** Tests can share a change that is idempotent and that gives the same end state in each sequence of the tests. For example, each test that needs a revoked client certificate revokes the same fixture with the same reason, and accepts that it is already revoked. ([Judgement: tests share only an idempotent change](#conf-0057))
 - <a id="conf-0023"></a>**CONF-0023** All customer, account and transaction data in the tests is invented. ([Judgement: invented data only](#conf-0045))
 - <a id="conf-0024"></a>**CONF-0024** Telemetry: the rule for CDR data and personal information in telemetry applies also to the mock data of the tests. ([no CDR data or personal information in telemetry](../pkg/platform/telemetry/DESIGN.md#tele-0004))
 
@@ -224,6 +225,12 @@ Each row is an exception to the subject of a test or to the check of each CDS re
 - Kind: choice
 - Basis: Step 3.3. A CDS operation does not give each status that the CDS permits. For example, the banking specification gives no 401 or 403 ([CDS: Banking APIs][cds-banking-apis]).
 - Reason: The specification has no schema for that status. The test checks the status and the error code only.
+
+### <a id="conf-0057"></a>CONF-0057 Tests share only an idempotent change
+
+- Kind: choice
+- Basis: Step 3.3. `go test` gives no fixed sequence for the tests of a package, and a fixture certificate costs a change to the PKI set-up and the seed files.
+- Reason: An idempotent change with one end state gives the same result in each sequence of the tests. One fixture for each test that needs it is then not necessary.
 
 ## Withdrawn
 
