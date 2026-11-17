@@ -4,6 +4,7 @@ import { page } from "vitest/browser";
 
 import {
   consent,
+  endSession,
   http,
   narrowWidth,
   presets,
@@ -167,11 +168,12 @@ test("with no session, the dashboard goes to the sign-in page", async () => {
     .toBeVisible();
 });
 
+// Verifies: DH-2028
 test("when the session ends, the dashboard goes to the sign-in page, which says so", async () => {
   serveConsents([]);
   worker.use(
     http.get("/api/consents", ({ response }) => {
-      worker.use(http.get("/api/session", ({ response: ended }) => ended(403).json(sessionEnded)));
+      endSession();
       return response(403).json(sessionEnded);
     }),
   );

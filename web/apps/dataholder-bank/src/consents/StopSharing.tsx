@@ -7,6 +7,7 @@ import { useState } from "react";
 
 import { withdrawConsent, type Consent } from "../api/client";
 import { useBrand } from "../brand";
+import { recordSessionEnded } from "../session/session";
 import { consentsKey } from "./useConsents";
 
 // The last two effects are the DSB text of CDS: Withdrawal Standards (Consequences and Redundant data), word for word.
@@ -32,6 +33,7 @@ export function StopSharing({ consent }: { consent: Consent }) {
       await withdrawConsent(consent.arrangementId);
     } catch (error) {
       if (!(error instanceof ProblemError)) throw error;
+      recordSessionEnded(queryClient, error);
       setRefused(true);
       return error.problem;
     }

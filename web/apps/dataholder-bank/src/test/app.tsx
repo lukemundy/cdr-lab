@@ -41,7 +41,7 @@ export function serveBrand(fields: Partial<Brand>) {
   );
 }
 
-const noSession = {
+export const noSession = {
   type: "about:blank" as const,
   title: "Forbidden",
   status: 403,
@@ -57,6 +57,12 @@ export const sessionEnded = {
 
 // The customer of the tests is invented.
 export const customer = { customerNumber: "00047291", firstName: "Zebracorn", lastName: "Quoll" };
+
+// The response of a request after the end of the session expires the session cookie, so each later read of the
+// session gets the 403 of a request with no session (services/dataholder/design/online-bank-site-api.md, DH-1744).
+export function endSession() {
+  worker.use(http.get("/api/session", ({ response }) => response(403).json(noSession)));
+}
 
 export function serveSession(signedIn: SessionCustomer = customer) {
   worker.use(http.get("/api/session", ({ response }) => response(200).json(signedIn)));

@@ -4,6 +4,7 @@ import { page } from "vitest/browser";
 
 import {
   account,
+  endSession,
   http,
   narrowWidth,
   presets,
@@ -133,11 +134,12 @@ test("with no session, the accounts page goes to the sign-in page", async () => 
     .toBeVisible();
 });
 
+// Verifies: DH-2028
 test("when the session ends, the accounts page goes to the sign-in page, which says so", async () => {
   serveAccounts([]);
   worker.use(
     http.get("/api/accounts", ({ response }) => {
-      worker.use(http.get("/api/session", ({ response: ended }) => ended(403).json(sessionEnded)));
+      endSession();
       return response(403).json(sessionEnded);
     }),
   );

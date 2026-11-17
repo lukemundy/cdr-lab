@@ -9,7 +9,13 @@ import { Link, useNavigate } from "@tanstack/react-router";
 
 import { signIn } from "../api/client";
 import { useBrand, usePageTitle } from "../brand";
-import { isSessionEnded, sessionKey, useSession } from "./session";
+import {
+  clearSessionEnded,
+  isSessionEnded,
+  sessionKey,
+  useSession,
+  useSessionEndedRecord,
+} from "./session";
 
 // The page requires a password, but the site does not send it (services/dataholder/design/online-bank-site-sign-in.md,
 // DH-2021 and DH-2022).
@@ -22,6 +28,7 @@ export function SignInPage() {
   usePageTitle("Sign in");
   const { name } = useBrand();
   const session = useSession();
+  const endedRecord = useSessionEndedRecord();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -32,6 +39,7 @@ export function SignInPage() {
     } catch (error) {
       return refusalOf(error);
     }
+    clearSessionEnded(queryClient);
     await queryClient.invalidateQueries({ queryKey: sessionKey });
     await navigate({ to: "/accounts" });
     return undefined;
@@ -40,7 +48,7 @@ export function SignInPage() {
   return (
     <ConsumerCard>
       <h1>Sign in to online banking</h1>
-      {isSessionEnded(session.error) && (
+      {(endedRecord || isSessionEnded(session.error)) && (
         <output className="block font-semibold">{name} signed you out. Sign in again.</output>
       )}
       {/* A note that looks different from the lock note of the CDR pages (design/online-bank-site-sign-in.md,
