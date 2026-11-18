@@ -69,9 +69,11 @@ func TestTheDataHolderPassesTheFAPI1AdvancedPlanWithTheCDRProfile(t *testing.T) 
 		case info.Status != statusFinished:
 			failed = append(failed, module.TestModule)
 		case info.Result == resultFailed, info.Result == resultWarning:
-			if !onlyAcceptedFindings(t, s.findings(id)) {
-				failed = append(failed, module.TestModule)
+			for _, f := range s.findings(id) {
+				t.Logf("    %s %s: %.200s", f.Result, f.Src, f.Msg)
 			}
+
+			failed = append(failed, module.TestModule)
 		case info.Result == resultReview:
 			review = append(review, module.TestModule)
 		}

@@ -94,7 +94,7 @@ The first table gives the CDR APIs of the data holder. The second table gives th
 - <a id="dh-0462"></a>**DH-0462** The mTLS listener is separate from the public listener. ([CDS: Participant Endpoints][cds-participant-endpoints]; [Judgement: the issuer on the public listener](authorisation-server.md#dh-0530))
 - <a id="dh-0463"></a>**DH-0463** The mTLS listener presents a server certificate from the CDR CA. ([CDS: Certificate Trust Model][cds-cert-trust-model])
 - <a id="dh-0464"></a>**DH-0464** The mTLS listener accepts only [a client certificate that chains to the CDR CA bundle](../../../pkg/cds/DESIGN.md#cdsl-0044) of the data holder configuration. ([CDS: Certificate Trust Model][cds-cert-trust-model]; [the CDR CA bundle of an mTLS listener](../../../pkg/cds/DESIGN.md#cdsl-0045))
-- <a id="dh-0465"></a>**DH-0465** When a client gives no client certificate, the mTLS listener ends the TLS handshake. ([CDS: Transaction Security][cds-transaction-security]; [Judgement: two accepted TLS findings of the OpenID conformance suite, as the CDS requires](#dh-0497))
+- <a id="dh-0465"></a>**DH-0465** When a client gives no client certificate, the mTLS listener ends the TLS handshake. ([CDS: Transaction Security][cds-transaction-security])
 - <a id="dh-0466"></a>**DH-0466** The data holder checks the revocation status of each client certificate with [the CRL check of the CDS HTTP library](../../../pkg/cds/DESIGN.md#cdsl-0048). It [refuses the certificate when the check fails](../../../pkg/cds/DESIGN.md#cdsl-0047). ([a revocation check for an mTLS listener](../../../pkg/cds/DESIGN.md#cdsl-0046))
 - <a id="dh-0467"></a>**DH-0467** The optional setting `CRL_MAX_AGE` gives the [maximum CRL age](../../../pkg/cds/DESIGN.md#cdsl-0052), 0 or more. For example, `30s`. When the setting is absent, the maximum age is [the default of 1 minute](../../../pkg/cds/DESIGN.md#cdsl-0053). A revocation then [takes effect within 1 minute](../../../pkg/cds/DESIGN.md#cdsl-0058). ([Judgement: a maximum CRL age of 1 minute](../../../pkg/cds/DESIGN.md#cdsl-0068))
 - <a id="dh-0468"></a>**DH-0468** In the lab, the maximum CRL age is 0. The data holder then [loads the CRL at each check](../../../pkg/cds/DESIGN.md#cdsl-0054). ([Judgement: a CRL load at each check in the lab](#dh-0496))
@@ -206,12 +206,6 @@ The first table gives the CDR APIs of the data holder. The second table gives th
 - Kind: choice
 - Basis: Step 3.3. The [default maximum CRL age](../../../pkg/cds/DESIGN.md#cdsl-0068) delays a revocation by up to 1 minute.
 - Reason: A conformance test revokes a certificate and then checks the refusal at once, because the suite does not wait ([a fixed wait in a conformance test is 2 seconds or less](../../../conformance/DESIGN.md#conf-0025)). The CRL server of the lab is in the lab network, so a load at each check costs little.
-
-### <a id="dh-0497"></a>DH-0497 Two accepted TLS findings of the OpenID conformance suite, as the CDS requires
-
-- Kind: conflict
-- Basis: Step 1. The OpenID conformance suite probes TLS 1.2 on the resource endpoint with no client certificate, and it reports the closed connection as a failure of the conditions `DisallowInsecureCipher` and `CheckForBCP195InsecureFAPICiphers`. The CDS requires a client certificate on this endpoint ([CDS: Transaction Security][cds-transaction-security]).
-- Reason: The CDS is the first source, so the data holder accepts these two findings. A handshake with a cipher suite that the CDS does not permit also fails.
 
 ### <a id="dh-2613"></a>DH-2613 400 for a customer IP address that is not valid
 
