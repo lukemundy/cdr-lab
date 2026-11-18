@@ -79,21 +79,17 @@ services:
       # The Register issues CDR certificates as the mock CDR intermediate.
       CDR_INTERMEDIATE_CERT_FILE: /pki/cdr-intermediate.crt
       CDR_INTERMEDIATE_KEY_FILE: /pki/cdr-intermediate.key
-      CDR_INTERMEDIATE_CRL_URL: http://register:8085/crl/cdr-intermediate.crl
+      CDR_INTERMEDIATE_CRL_URL: http://register:8080/crl/cdr-intermediate.crl
       # The Register gets the JWKS of each software product from a lab host, which has a certificate from the mock public CA.
       SSL_CERT_FILE: /pki/public-root.crt
       OPERATOR_TOKEN: lab-operator-token
-      OPERATOR_ALLOWED_HOSTS: register:8082,127.0.0.1:8082,localhost:8082
+      # The operator interface and the console refuse other Host values, so that DNS rebinding cannot reach them.
+      INTERNAL_ALLOWED_HOSTS: register:8080,127.0.0.1:8080,localhost:8080
       CONSOLE_ENABLED: "true"
-      # The Host header values of the console. The console refuses other values, so that DNS rebinding cannot reach it.
-      CONSOLE_ALLOWED_HOSTS: 127.0.0.1:8084,localhost:8084
     ports:
       - 127.0.0.1:8080:8080
       - 127.0.0.1:8081:8081
-      - 127.0.0.1:8082:8082
       - 127.0.0.1:8083:8083
-      - 127.0.0.1:8084:8084
-      - 127.0.0.1:8085:8085
     volumes:
       - ./.lab/pki/register:/tls:ro,z
       - ./.lab/pki/cdr/ca-bundle.pem:/pki/cdr-ca-bundle.pem:ro,z
@@ -411,7 +407,7 @@ services:
       GOMODCACHE: /cache/mod
       GOTOOLCHAIN: local
       REGISTER_PUBLIC_URL: https://register:8081
-      REGISTER_OPERATOR_URL: http://register:8082
+      REGISTER_OPERATOR_URL: http://register:8080
       REGISTER_SECURE_URL: https://register:8083
       REGISTER_OPERATOR_TOKEN: lab-operator-token
       DATAHOLDER_PROBE_URL: http://wattle-bank:8080
@@ -471,7 +467,7 @@ services:
       # The host browser opens the suite on this port of compose.yaml.
       OPENID_SUITE_PUBLIC_URL: https://localhost:8443
       REGISTER_PUBLIC_URL: https://register:8081
-      REGISTER_OPERATOR_URL: http://register:8082
+      REGISTER_OPERATOR_URL: http://register:8080
       REGISTER_SECURE_URL: https://register:8083
       REGISTER_OPERATOR_TOKEN: lab-operator-token
       DATAHOLDER_PROBE_URL: http://wattle-bank:8080

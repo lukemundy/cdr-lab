@@ -155,7 +155,7 @@ depends = ["web:install"]
 dir = "web"
 # Node trusts the lab public CA, so that the tests can call the CDR APIs of the Register with TLS verification.
 # The data holder tests create their customers with the operator interface.
-env = { REGISTER_CONSOLE_URL = "http://localhost:8084", REGISTER_PUBLIC_URL = "https://localhost:8081", DATAHOLDER_CONSOLE_URL = "http://localhost:8184", DATAHOLDER_OPERATOR_URL = "http://localhost:8182", DATAHOLDER_OPERATOR_TOKEN = "lab-operator-token", DATAHOLDER_PUBLIC_URL = "https://localhost:8181", BANK_SITE_URL = "https://localhost:8185", NODE_EXTRA_CA_CERTS = "{{config_root}}/.lab/pki/public/root.crt" }
+env = { REGISTER_CONSOLE_URL = "http://localhost:8080", REGISTER_PUBLIC_URL = "https://localhost:8081", DATAHOLDER_CONSOLE_URL = "http://localhost:8184", DATAHOLDER_OPERATOR_URL = "http://localhost:8182", DATAHOLDER_OPERATOR_TOKEN = "lab-operator-token", DATAHOLDER_PUBLIC_URL = "https://localhost:8181", BANK_SITE_URL = "https://localhost:8185", NODE_EXTRA_CA_CERTS = "{{config_root}}/.lab/pki/public/root.crt" }
 run = [
   "pnpm exec playwright install --only-shell chromium",
   "pnpm exec playwright test",
@@ -201,8 +201,8 @@ run = [
   "go run github.com/lukemundy/cdr-lab/pki/cmd/pki init -dir .lab/pki",
   """
   pki="go run github.com/lukemundy/cdr-lab/pki/cmd/pki"
-  # The CRL listener of the Register (compose.yaml).
-  crl_url=http://register:8085/crl/cdr-intermediate.crl
+  # The CRL on the internal listener of the Register (compose.yaml).
+  crl_url=http://register:8080/crl/cdr-intermediate.crl
   mkdir -p .lab/pki/register .lab/pki/conformance .lab/pki/openid
 
   # Any user can read these lab keys, because the containers read them as another user.

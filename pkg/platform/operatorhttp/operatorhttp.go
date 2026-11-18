@@ -15,8 +15,9 @@ import (
 )
 
 const (
-	TokenEnv        = "OPERATOR_TOKEN"
-	AllowedHostsEnv = "OPERATOR_ALLOWED_HOSTS"
+	TokenEnv = "OPERATOR_TOKEN"
+	// AllowedHostsEnv is the allowlist of the internal listener, which the operator console also uses.
+	AllowedHostsEnv = "INTERNAL_ALLOWED_HOSTS"
 )
 
 type Config struct {
@@ -24,18 +25,18 @@ type Config struct {
 	AllowedHosts []string
 }
 
-func LoadConfig() (Config, error) {
+func LoadConfig(allowedHostsEnv string) (Config, error) {
 	token := os.Getenv(TokenEnv)
 	if token == "" {
 		return Config{}, fmt.Errorf("set %s to the bearer token of the operator interface", TokenEnv)
 	}
 
-	hosts, err := hostallowlist.Parse(os.Getenv(AllowedHostsEnv))
+	hosts, err := hostallowlist.Parse(os.Getenv(allowedHostsEnv))
 	if err != nil {
 		return Config{}, fmt.Errorf(
 			"set %s to the Host header values that clients send to the operator interface, separated by commas, "+
-				"for example 127.0.0.1:8082, or a host with no port behind a TLS proxy: %w",
-			AllowedHostsEnv,
+				"for example a host and a port, or a host with no port behind a TLS proxy: %w",
+			allowedHostsEnv,
 			err,
 		)
 	}

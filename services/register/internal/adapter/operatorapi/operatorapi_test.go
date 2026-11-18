@@ -142,7 +142,7 @@ func TestARequestWithoutTheOperatorTokenIsUnauthorised(t *testing.T) {
 		"empty token":        {http.Header{"Authorization": {"Bearer "}}, invalidChallenge},
 	}
 	for name, tt := range tests {
-		for _, path := range []string{"/v1/data-recipients/dr-1/suspend", "/unknown"} {
+		for _, path := range []string{"/v1/data-recipients/dr-1/suspend", "/v1/unknown"} {
 			t.Run(name+" "+path, func(t *testing.T) {
 				operator := &fakeOperator{}
 
@@ -159,10 +159,10 @@ func TestARequestWithoutTheOperatorTokenIsUnauthorised(t *testing.T) {
 func TestTheProblemDetailSaysWhetherTheTokenIsMissingOrNotValid(t *testing.T) {
 	missing := requireProblem(
 		t,
-		serve(t, &fakeOperator{}, http.MethodPost, "/unknown", http.Header{}),
+		serve(t, &fakeOperator{}, http.MethodPost, "/v1/unknown", http.Header{}),
 		http.StatusUnauthorized,
 	)
-	invalid := requireProblem(t, serve(t, &fakeOperator{}, http.MethodPost, "/unknown",
+	invalid := requireProblem(t, serve(t, &fakeOperator{}, http.MethodPost, "/v1/unknown",
 		http.Header{"Authorization": {"Bearer not-the-token"}}), http.StatusUnauthorized)
 
 	assert.Equal(t, "The request must have the operator token as a bearer token.", missing.Detail)
@@ -223,9 +223,21 @@ func TestErrors(t *testing.T) {
 	}
 }
 
+// Verifies: REG-1508
+func TestTheOperatorInterfaceServesOnlyThePathsUnderV1(t *testing.T) {
+	requireProblem(t, serve(t, &fakeOperator{}, http.MethodGet, "/v1/unknown", http.Header{}), http.StatusUnauthorized)
+
+	for _, path := range []string{"/", "/unknown", "/v2/unknown"} {
+		rec := serve(t, &fakeOperator{}, http.MethodGet, path, http.Header{})
+
+		assert.Equal(t, http.StatusNotFound, rec.Code, path)
+		assert.Empty(t, rec.Header().Get("WWW-Authenticate"), path)
+	}
+}
+
 func TestAnUnknownPathOrMethodIsNotFound(t *testing.T) {
 	for _, tt := range []struct{ method, path string }{
-		{http.MethodPost, "/unknown"},
+		{http.MethodPost, "/v1/unknown"},
 		{http.MethodPost, "/v1/data-recipients/dr-1/pause"},
 		{http.MethodGet, "/v1/data-recipients/dr-1/suspend"},
 	} {

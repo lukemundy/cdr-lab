@@ -62,10 +62,11 @@ type process struct {
 func newProcess(ctx context.Context, pool *pgxpool.Pool, cfg config, m mode) (process, error) {
 	authority := app.NewCertificateAuthority(castore.New(pool), cfg.intermediate, time.Now)
 
-	probes := http.NewServeMux()
-	httpserver.RegisterProbes(probes, readiness(pool, authority, m))
+	// The groups of routes on the internal listener each apply their own policy, so the mux has no middleware.
+	internal := http.NewServeMux()
+	httpserver.RegisterProbes(internal, readiness(pool, authority, m))
 
-	proc := process{listeners: []httpserver.Listener{{Port: probePort, Handler: telemetry.NewHTTPHandler(probes)}}}
+	proc := process{listeners: []httpserver.Listener{{Port: internalPort, Handler: telemetry.NewHTTPHandler(internal)}}}
 
 	if m.api {
 		// A new CRL at each start has the signature of the intermediate key that this process read.
@@ -73,7 +74,7 @@ func newProcess(ctx context.Context, pool *pgxpool.Pool, cfg config, m mode) (pr
 			return process{}, fmt.Errorf("sign the CRL: %w", err)
 		}
 
-		listeners, err := apiListeners(ctx, pool, cfg, authority)
+		listeners, err := apiListeners(ctx, pool, cfg, authority, internal)
 		if err != nil {
 			return process{}, err
 		}
@@ -114,11 +115,13 @@ func readiness(pool *pgxpool.Pool, authority app.CertificateAuthority, m mode) f
 	}
 }
 
+// apiListeners also adds the operator interface, the CRL and the console to the mux of the internal listener.
 func apiListeners(
 	ctx context.Context,
 	pool *pgxpool.Pool,
 	cfg config,
 	authority app.CertificateAuthority,
+	internal *http.ServeMux,
 ) ([]httpserver.Listener, error) {
 	idpStore := idp.NewStore(pool)
 	for _, set := range []app.KeySet{app.AccessTokenKeys, app.SSAKeys} {
@@ -146,9 +149,22 @@ func apiListeners(
 	authServer.RegisterPublic(api)
 
 	operatorUseCases := app.NewOperator(newEventStore(pool))
-	operator := http.NewServeMux()
 	issuer := app.NewCertificateIssuer(newEventStore(pool), cfg.intermediate, time.Now)
-	operatorapi.Register(operator, operatorUseCases, issuer, authority, cfg.cdrCAs, idpStore, cfg.operator)
+	operatorapi.Register(internal, operatorUseCases, issuer, authority, cfg.cdrCAs, idpStore, cfg.operator)
+	crlhttp.Register(internal, authority)
+
+	err = registerConsole(
+		internal,
+		cfg.console,
+		cfg.consoleUI,
+		console.Ports{
+			Readers: queries, Keys: idpStore, KeyChanger: idpStore, Operator: operatorUseCases, Issuer: issuer,
+			CertificateAuthority: authority, CABundle: cfg.cdrCAs,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
 
 	secure := http.NewServeMux()
 	ssaIssuer := app.SSAIssuer{Owners: queries, Signer: ssa.Signer{Keys: ssaKeys}, Now: time.Now, NewID: uuid.NewString}
@@ -160,34 +176,17 @@ func apiListeners(
 		clientCAs.AddCert(ca)
 	}
 
-	crl := http.NewServeMux()
-	crlhttp.Register(crl, authority)
-
-	consoles, err := consoleListeners(
-		cfg.console,
-		console.UI(),
-		console.Ports{
-			Readers: queries, Keys: idpStore, KeyChanger: idpStore, Operator: operatorUseCases, Issuer: issuer,
-			CertificateAuthority: authority, CABundle: cfg.cdrCAs,
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return append([]httpserver.Listener{
+	return []httpserver.Listener{
 		{
 			Port:      apiPort,
 			Handler:   httpapi.AllowAnyOrigin(cds.InteractionID(telemetry.NewHTTPHandler(api))),
 			TLSConfig: cds.TLSConfig(cfg.publicCert),
 		},
-		{Port: operatorPort, Handler: telemetry.NewHTTPHandler(operator)},
 		{
 			Port:    securePort,
 			Handler: cds.InteractionID(telemetry.NewHTTPHandler(secure)),
 			// The CDR root signs only the intermediate, so the CRL of the intermediate covers each client certificate.
 			TLSConfig: cds.MutualTLSConfig(ctx, cfg.secureCert, clientCAs, authority.CheckRevocation),
 		},
-		{Port: crlPort, Handler: telemetry.NewHTTPHandler(crl)},
-	}, consoles...), nil
+	}, nil
 }

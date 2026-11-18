@@ -142,7 +142,7 @@ func TestACertificateRequestPutsNoPEMTextNoSubjectAndNoThumbprintInTheSpansOrLog
 	require.NoError(t, err)
 
 	operator := app.NewOperator(store)
-	listeners, err := consoleListeners(testConsole, ui, console.Ports{
+	consoleRoutes, err := testConsoleRoutes(ui, console.Ports{
 		Readers: readmodel.NewQueries(pool), Operator: operator,
 		CertificateAuthority: app.NewCertificateAuthority(castore.New(pool), authority, time.Now),
 		CABundle:             []*x509.Certificate{authority.Certificate},
@@ -188,10 +188,10 @@ func TestACertificateRequestPutsNoPEMTextNoSubjectAndNoThumbprintInTheSpansOrLog
 		method, target, body string
 		status               int
 	}{
-		{listeners[0].Handler, http.MethodPost, consolePath, string(registration), http.StatusNoContent},
-		{listeners[0].Handler, http.MethodPost, consolePath, string(notPEM), http.StatusBadRequest},
+		{consoleRoutes, http.MethodPost, consolePath, string(registration), http.StatusNoContent},
+		{consoleRoutes, http.MethodPost, consolePath, string(notPEM), http.StatusBadRequest},
 		{
-			listeners[0].Handler, http.MethodPost, consolePath + "/" + thumbprint + "/remove", `{"version": 2}`,
+			consoleRoutes, http.MethodPost, consolePath + "/" + thumbprint + "/remove", `{"version": 2}`,
 			http.StatusNoContent,
 		},
 		{operatorHandler, http.MethodPost, operatorPath, pemText, http.StatusNoContent},
@@ -229,17 +229,17 @@ func TestACertificateRequestPutsNoPEMTextNoSubjectAndNoThumbprintInTheSpansOrLog
 
 		return string(data)
 	}
-	consoleHandler := listeners[0].Handler
-	send(consoleHandler, http.MethodGet, consoleCABundle, "", http.StatusOK)
-	send(consoleHandler, http.MethodPost, consoleCheckRevocation, revocation(string(issuedChain), "keyCompromise"),
+
+	send(consoleRoutes, http.MethodGet, consoleCABundle, "", http.StatusOK)
+	send(consoleRoutes, http.MethodPost, consoleCheckRevocation, revocation(string(issuedChain), "keyCompromise"),
 		http.StatusOK)
-	send(consoleHandler, http.MethodPost, consoleCheckRevocation,
+	send(consoleRoutes, http.MethodPost, consoleCheckRevocation,
 		revocation("zebracorn "+string(issuedChain), "zebracorn"), http.StatusBadRequest)
-	send(consoleHandler, http.MethodPost, consoleRevoke, revocation(string(issuedChain), "keyCompromise"),
+	send(consoleRoutes, http.MethodPost, consoleRevoke, revocation(string(issuedChain), "keyCompromise"),
 		http.StatusNoContent)
-	send(consoleHandler, http.MethodPost, consoleRevoke, revocation(string(issuedChain), "superseded"),
+	send(consoleRoutes, http.MethodPost, consoleRevoke, revocation(string(issuedChain), "superseded"),
 		http.StatusConflict)
-	send(consoleHandler, http.MethodGet, consoleRevocations, "", http.StatusOK)
+	send(consoleRoutes, http.MethodGet, consoleRevocations, "", http.StatusOK)
 	send(operatorHandler, http.MethodPost, revokePath, revocation(string(issuedChain), "superseded"),
 		http.StatusConflict)
 	send(operatorHandler, http.MethodPost, revokePath, revocation("zebracorn "+string(issuedChain), "zebracorn"),

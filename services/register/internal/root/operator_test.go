@@ -31,7 +31,7 @@ import (
 const (
 	testCRLURL       = "http://ca.example/crl/intermediate.crl"
 	labOperatorToken = "test-operator-token"
-	operatorHost     = "register.test:8082"
+	operatorHost     = "register.test:8080"
 )
 
 // Participants of seed/example.json.
@@ -58,7 +58,7 @@ func setLabSettings(t *testing.T) {
 		"PUBLIC_BASE_URL":        "https://register.example",
 		"SECURE_BASE_URL":        "https://secure.register.example",
 		"OPERATOR_TOKEN":         labOperatorToken,
-		"OPERATOR_ALLOWED_HOSTS": operatorHost,
+		"INTERNAL_ALLOWED_HOSTS": operatorHost,
 		"PUBLIC_TLS_CERT_FILE":   certFile,
 		"PUBLIC_TLS_KEY_FILE":    keyFile,
 		"SECURE_TLS_CERT_FILE":   certFile,
@@ -169,7 +169,7 @@ func serveOperatorHost(
 	req := httptest.NewRequestWithContext(t.Context(), method, "http://"+requestHost+path, bytes.NewReader(body))
 	req.Header = header
 	rec := httptest.NewRecorder()
-	handlers[operatorPort].ServeHTTP(rec, req)
+	handlers[internalPort].ServeHTTP(rec, req)
 
 	return rec
 }
@@ -561,7 +561,7 @@ func TestTheOperatorInterfaceRefusesEachRequestForAHostThatIsNotAllowedAndChange
 	}
 	for name, req := range requests {
 		for hostName, requestHost := range map[string]string{
-			"DNS rebinding name": "attacker.example:8082",
+			"DNS rebinding name": "attacker.example:8080",
 			"no port":            "register.test",
 		} {
 			t.Run(name+" "+hostName, func(t *testing.T) {
@@ -582,13 +582,14 @@ func TestTheOperatorInterfaceRefusesEachRequestForAHostThatIsNotAllowedAndChange
 	}
 }
 
+// Verifies: REG-1509
 func TestTheRegisterDoesNotStartWithoutTheAllowedHostsOfTheOperatorInterface(t *testing.T) {
 	setLabSettings(t)
-	t.Setenv("OPERATOR_ALLOWED_HOSTS", "")
+	t.Setenv("INTERNAL_ALLOWED_HOSTS", "")
 
 	_, err := loadConfig(serveMode)
 
-	assert.ErrorContains(t, err, "OPERATOR_ALLOWED_HOSTS")
+	assert.ErrorContains(t, err, "INTERNAL_ALLOWED_HOSTS")
 }
 
 // The operator interface does not check the issuer, so a self-signed certificate is sufficient.
@@ -699,7 +700,10 @@ func TestHealthProbesReturnOK(t *testing.T) {
 	for _, path := range []string{"/livez", "/readyz"} {
 		t.Run(path, func(t *testing.T) {
 			rec := httptest.NewRecorder()
-			handlers[probePort].ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, path, nil))
+			handlers[internalPort].ServeHTTP(
+				rec,
+				httptest.NewRequestWithContext(t.Context(), http.MethodGet, path, nil),
+			)
 
 			assert.Equal(t, http.StatusOK, rec.Code)
 		})

@@ -3,9 +3,10 @@ image:
   tag: 0123abc
 publicBaseURL: https://register.test:8081
 secureBaseURL: https://register.test:8083
-crlURL: http://register.test:8085/crl/cdr-intermediate.crl
+crlURL: http://register.test:8080/crl/cdr-intermediate.crl
+internal:
+  allowedHosts: [register.test:8080]
 operator:
-  allowedHosts: [register.test:8082]
   tokenSecret: register-operator-token
 telemetry:
   otlpEndpoint: http://otel.test:4318

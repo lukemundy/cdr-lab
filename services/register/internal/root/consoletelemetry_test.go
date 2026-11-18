@@ -101,7 +101,7 @@ func TestASearchOfTheConsolePutsNoSearchTextInTheSpansOrLogs(t *testing.T) {
 			},
 		}}}))
 
-	listeners, err := consoleListeners(testConsole, ui, console.Ports{Readers: readmodel.NewQueries(pool)})
+	consoleRoutes, err := testConsoleRoutes(ui, console.Ports{Readers: readmodel.NewQueries(pool)})
 	require.NoError(t, err)
 
 	// The spans of the seed also contain the table names, so only the spans of the requests are counted.
@@ -118,7 +118,7 @@ func TestASearchOfTheConsolePutsNoSearchTextInTheSpansOrLogs(t *testing.T) {
 
 	for _, target := range targets {
 		rec := httptest.NewRecorder()
-		listeners[0].Handler.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, target, nil))
+		consoleRoutes.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, target, nil))
 		require.Contains(t, []int{http.StatusOK, http.StatusBadRequest}, rec.Code)
 	}
 
@@ -157,7 +157,7 @@ func TestTheKeySetsOfTheConsolePutNoKeyMaterialInTheSpansOrLogs(t *testing.T) {
 	require.NoError(t, store.EnsureSigningKey(t.Context(), app.SSAKeys))
 	require.NoError(t, store.PublishNextKey(t.Context(), app.SSAKeys))
 
-	listeners, err := consoleListeners(testConsole, ui, console.Ports{Keys: store, KeyChanger: store})
+	consoleRoutes, err := testConsoleRoutes(ui, console.Ports{Keys: store, KeyChanger: store})
 	require.NoError(t, err)
 
 	var material []string
@@ -209,7 +209,7 @@ func TestTheKeySetsOfTheConsolePutNoKeyMaterialInTheSpansOrLogs(t *testing.T) {
 
 		rec := httptest.NewRecorder()
 		req := httptest.NewRequestWithContext(t.Context(), r.method, r.target, strings.NewReader(r.body))
-		listeners[0].Handler.ServeHTTP(rec, req)
+		consoleRoutes.ServeHTTP(rec, req)
 		require.Equal(t, r.status, rec.Code, "%s %s: %s", r.method, r.target, rec.Body.String())
 	}
 
@@ -253,7 +253,7 @@ func TestADetailOfTheConsolePutsNoLegalEntityIDInTheSpansOrLogs(t *testing.T) {
 			Status: domain.DataHolderActive,
 		}}}))
 
-	listeners, err := consoleListeners(testConsole, ui, console.Ports{Readers: readmodel.NewQueries(pool)})
+	consoleRoutes, err := testConsoleRoutes(ui, console.Ports{Readers: readmodel.NewQueries(pool)})
 	require.NoError(t, err)
 
 	seedSpans := len(spans.Ended())
@@ -266,7 +266,7 @@ func TestADetailOfTheConsolePutsNoLegalEntityIDInTheSpansOrLogs(t *testing.T) {
 	}
 	for target, status := range targets {
 		rec := httptest.NewRecorder()
-		listeners[0].Handler.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, target, nil))
+		consoleRoutes.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, target, nil))
 		require.Equal(t, status, rec.Code, target)
 	}
 
@@ -338,7 +338,7 @@ func TestAHistoryOfTheConsolePutsNoLegalEntityIDAndNoPayloadInTheSpansOrLogs(t *
 		StreamType: app.DataRecipientType.StreamType, StreamID: recipientID, ExpectedVersion: 1, Events: data,
 	}))
 
-	listeners, err := consoleListeners(testConsole, ui, console.Ports{Readers: readmodel.NewQueries(pool)})
+	consoleRoutes, err := testConsoleRoutes(ui, console.Ports{Readers: readmodel.NewQueries(pool)})
 	require.NoError(t, err)
 
 	seedSpans := len(spans.Ended())
@@ -352,7 +352,7 @@ func TestAHistoryOfTheConsolePutsNoLegalEntityIDAndNoPayloadInTheSpansOrLogs(t *
 	}
 	for target, status := range targets {
 		rec := httptest.NewRecorder()
-		listeners[0].Handler.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, target, nil))
+		consoleRoutes.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, target, nil))
 		require.Equal(t, status, rec.Code, target)
 	}
 
@@ -421,7 +421,7 @@ func TestAStatusActionOfTheConsolePutsNoIdentifierAndNoRequestBodyInTheSpansOrLo
 		}},
 	}}}))
 
-	listeners, err := consoleListeners(testConsole, ui, console.Ports{
+	consoleRoutes, err := testConsoleRoutes(ui, console.Ports{
 		Readers: readmodel.NewQueries(pool), Operator: app.NewOperator(store),
 	})
 	require.NoError(t, err)
@@ -452,7 +452,7 @@ func TestAStatusActionOfTheConsolePutsNoIdentifierAndNoRequestBodyInTheSpansOrLo
 	for _, r := range requests {
 		rec := httptest.NewRecorder()
 		req := httptest.NewRequestWithContext(t.Context(), http.MethodPost, r.target, strings.NewReader(r.body))
-		listeners[0].Handler.ServeHTTP(rec, req)
+		consoleRoutes.ServeHTTP(rec, req)
 		require.Equal(t, r.status, rec.Code, "%s: %s", r.target, rec.Body.String())
 	}
 
@@ -516,7 +516,7 @@ func TestAChangeACreateOrAnAddOfTheConsolePutsNoRequestBodyInTheSpansOrLogs(t *t
 		}},
 	}}}))
 
-	listeners, err := consoleListeners(testConsole, ui, console.Ports{
+	consoleRoutes, err := testConsoleRoutes(ui, console.Ports{
 		Readers: readmodel.NewQueries(pool), Operator: app.NewOperator(store),
 	})
 	require.NoError(t, err)
@@ -592,7 +592,7 @@ func TestAChangeACreateOrAnAddOfTheConsolePutsNoRequestBodyInTheSpansOrLogs(t *t
 	} {
 		rec := httptest.NewRecorder()
 		req := httptest.NewRequestWithContext(t.Context(), http.MethodPost, r.target, strings.NewReader(r.body))
-		listeners[0].Handler.ServeHTTP(rec, req)
+		consoleRoutes.ServeHTTP(rec, req)
 		require.Equal(t, r.status, rec.Code, rec.Body.String())
 	}
 

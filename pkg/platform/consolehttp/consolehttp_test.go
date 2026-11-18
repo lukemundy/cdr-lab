@@ -1,6 +1,7 @@
 package consolehttp_test
 
 import (
+	"context"
 	"encoding/json"
 	"maps"
 	"net/http"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/lukemundy/cdr-lab/pkg/platform/consolehttp"
 	"github.com/lukemundy/cdr-lab/pkg/platform/httproute"
+	"github.com/lukemundy/cdr-lab/pkg/platform/httpserver"
 )
 
 const (
@@ -226,6 +228,35 @@ func TestAnUnknownPathOutsideTheAPIGivesTheHTMLPage(t *testing.T) {
 
 			requireHTMLPage(t, rec)
 			assert.Equal(t, indexHTML, rec.Body.String())
+		})
+	}
+}
+
+// Verifies: CNSL-0013
+func TestTheCatchAllDoesNotCatchThePathsOfTheOtherGroupsOnTheListener(t *testing.T) {
+	mux := http.NewServeMux()
+	httpserver.RegisterProbes(mux, func(context.Context) error { return nil })
+	mux.Handle("/v1/", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusTeapot)
+	}))
+	require.NoError(t, consolehttp.Console.Register(mux, ui, []string{host}, func(*httproute.Routes) {}))
+
+	for _, tt := range []struct {
+		method, target string
+		want           int
+	}{
+		{http.MethodGet, "/readyz", http.StatusOK},
+		{http.MethodPost, "/livez", http.StatusMethodNotAllowed},
+		{http.MethodGet, "/v1/unknown", http.StatusTeapot},
+		{http.MethodPost, "/v1/", http.StatusTeapot},
+	} {
+		t.Run(tt.method+" "+tt.target, func(t *testing.T) {
+			req := httptest.NewRequestWithContext(t.Context(), tt.method, "http://10.0.0.7:8080"+tt.target, nil)
+			rec := httptest.NewRecorder()
+			mux.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.want, rec.Code)
+			assert.Empty(t, rec.Header().Get("Content-Security-Policy"))
 		})
 	}
 }

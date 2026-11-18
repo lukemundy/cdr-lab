@@ -47,7 +47,7 @@ func onlyCASettings(t *testing.T) {
 	setLabSettings(t)
 
 	for _, name := range []string{
-		"PUBLIC_BASE_URL", "SECURE_BASE_URL", "OPERATOR_TOKEN", "OPERATOR_ALLOWED_HOSTS", "PUBLIC_TLS_CERT_FILE",
+		"PUBLIC_BASE_URL", "SECURE_BASE_URL", "OPERATOR_TOKEN", "INTERNAL_ALLOWED_HOSTS", "PUBLIC_TLS_CERT_FILE",
 		"PUBLIC_TLS_KEY_FILE", "SECURE_TLS_CERT_FILE", "SECURE_TLS_KEY_FILE",
 	} {
 		t.Setenv(name, "")
@@ -69,11 +69,12 @@ func TestAWorkerNeedsOnlyTheSettingsOfTheCA(t *testing.T) {
 	assert.ErrorContains(t, err, "CDR_INTERMEDIATE_KEY_FILE")
 }
 
+// Verifies: REG-1498, REG-1502
 func TestEachModeHasOnlyItsServersAndItsWorkers(t *testing.T) {
 	pool := databasetest.New(t)
 	require.NoError(t, migrate(t.Context(), pool))
 
-	allPorts := []int{probePort, apiPort, operatorPort, securePort, crlPort}
+	allPorts := []int{internalPort, apiPort, securePort}
 
 	tests := map[string]struct {
 		mode  mode
@@ -82,7 +83,7 @@ func TestEachModeHasOnlyItsServersAndItsWorkers(t *testing.T) {
 	}{
 		"serve":  {mode: serveMode, ports: allPorts, works: true},
 		"api":    {mode: apiMode, ports: allPorts},
-		"worker": {mode: workerMode, ports: []int{probePort}, works: true},
+		"worker": {mode: workerMode, ports: []int{internalPort}, works: true},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {

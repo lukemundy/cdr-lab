@@ -75,12 +75,12 @@ func TestParseReasonAcceptsOnlyTheReasonsForALeafCertificate(t *testing.T) {
 // Verifies: CA-0034
 func TestACDRCertificateHasTheCRLURLOfItsIssuer(t *testing.T) {
 	lab := newLab(t)
-	lab.CDRIntermediate.CRLURL = "http://register:8085/crl/cdr-intermediate.crl"
+	lab.CDRIntermediate.CRLURL = "http://register:8080/crl/cdr-intermediate.crl"
 
 	cert, err := lab.CDRIntermediate.Issue(csr(t, clientCSR()), ca.Client, now)
 
 	require.NoError(t, err)
-	assert.Equal(t, []string{"http://register:8085/crl/cdr-intermediate.crl"}, cert.CRLDistributionPoints)
+	assert.Equal(t, []string{"http://register:8080/crl/cdr-intermediate.crl"}, cert.CRLDistributionPoints)
 }
 
 func TestACertificateHasNoCRLURLWhenItsIssuerHasNone(t *testing.T) {

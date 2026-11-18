@@ -32,10 +32,7 @@ advancedMounts:
 
 {{- define "register.values" -}}
 {{- $v := .Values -}}
-{{- $_ := include "register.required" (list "operator.allowedHosts" $v.operator.allowedHosts "the Host header values of the operator interface") -}}
-{{- if $v.console.enabled -}}
-  {{- $_ = include "register.required" (list "console.allowedHosts" $v.console.allowedHosts "the Host header values of the console") -}}
-{{- end -}}
+{{- $_ := include "register.required" (list "internal.allowedHosts" $v.internal.allowedHosts "the Host header values of the operator interface and the console") -}}
 {{- $image := dict
   "repository" $v.image.repository
   "tag" (include "register.required" (list "image.tag" $v.image.tag "the commit ID of the Register image"))
@@ -107,20 +104,12 @@ controllers:
           SSL_CERT_FILE: /pki/public-root/ca.crt
           {{- end }}
           OPERATOR_TOKEN: {{ include "register.secretKey" (list (include "register.required" (list "operator.tokenSecret" $v.operator.tokenSecret "the Secret of the operator token")) "token") | nindent 12 }}
-          OPERATOR_ALLOWED_HOSTS: {{ $v.operator.allowedHosts | join "," | quote }}
+          INTERNAL_ALLOWED_HOSTS: {{ $v.internal.allowedHosts | join "," | quote }}
           CONSOLE_ENABLED: {{ $v.console.enabled | toString | quote }}
-          {{- if $v.console.enabled }}
-          CONSOLE_ALLOWED_HOSTS: {{ $v.console.allowedHosts | join "," | quote }}
-          {{- end }}
         ports:
-          - {name: health, containerPort: 8080}
+          - {name: internal, containerPort: 8080}
           - {name: public, containerPort: 8081}
-          - {name: operator, containerPort: 8082}
           - {name: secure, containerPort: 8083}
-          {{- if $v.console.enabled }}
-          - {name: console, containerPort: 8084}
-          {{- end }}
-          - {name: crl, containerPort: 8085}
         probes:
           liveness:
             enabled: true
@@ -142,13 +131,9 @@ service:
     # A literal template, because the library can render the name only after it loads its defaults.
     forceRename: {{ `{{ include "bjw-s.common.lib.chart.names.fullname" . }}` | quote }}
     ports:
+      internal: {port: 8080}
       public: {port: 8081}
-      operator: {port: 8082}
       secure: {port: 8083}
-      {{- if $v.console.enabled }}
-      console: {port: 8084}
-      {{- end }}
-      crl: {port: 8085}
 
 persistence:
   public-tls: {{ include "register.secretMount" (list (include "register.required" (list "pki.publicTLSSecret" $v.pki.publicTLSSecret "the TLS Secret of the public APIs")) "/tls/public") | nindent 4 }}

@@ -54,7 +54,7 @@ func TestTheNextSSAOfASoftwareProductHasTheRedirectURIsOfAChangeInTheConsole(t *
 	}}}))
 
 	queries := readmodel.NewQueries(pool)
-	listeners, err := consoleListeners(testConsole, ui, console.Ports{
+	consoleRoutes, err := testConsoleRoutes(ui, console.Ports{
 		Readers: queries, Operator: app.NewOperator(store),
 	})
 	require.NoError(t, err)
@@ -67,7 +67,7 @@ func TestTheNextSSAOfASoftwareProductHasTheRedirectURIsOfAChangeInTheConsole(t *
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodPost,
 		"/api/data-recipients/dr-1/software-products/product-1/change", strings.NewReader(body))
-	listeners[0].Handler.ServeHTTP(rec, req)
+	consoleRoutes.ServeHTTP(rec, req)
 	require.Equal(t, http.StatusNoContent, rec.Code, rec.Body.String())
 
 	signer := &claimsSigner{}
@@ -87,7 +87,7 @@ func TestASoftwareProductThatTheOperatorAddsInTheConsoleGetsAnSSA(t *testing.T) 
 	require.NoError(t, database.Migrate(t.Context(), pool, migrations.FS))
 	store := eventstore.New(pool, readmodel.Projections()...)
 	queries := readmodel.NewQueries(pool)
-	listeners, err := consoleListeners(testConsole, ui, console.Ports{
+	consoleRoutes, err := testConsoleRoutes(ui, console.Ports{
 		Readers: queries, Operator: app.NewOperator(store),
 	})
 	require.NoError(t, err)
@@ -107,7 +107,7 @@ func TestASoftwareProductThatTheOperatorAddsInTheConsoleGetsAnSSA(t *testing.T) 
 	} {
 		rec := httptest.NewRecorder()
 		req := httptest.NewRequestWithContext(t.Context(), http.MethodPost, r.target, strings.NewReader(r.body))
-		listeners[0].Handler.ServeHTTP(rec, req)
+		consoleRoutes.ServeHTTP(rec, req)
 		require.Equal(t, http.StatusCreated, rec.Code, "%s: %s", r.target, rec.Body.String())
 	}
 
@@ -162,7 +162,7 @@ func newHolderBrandsTest(t *testing.T) holderBrandsTest {
 	}}}))
 
 	queries := readmodel.NewQueries(pool)
-	listeners, err := consoleListeners(testConsole, ui, console.Ports{
+	consoleRoutes, err := testConsoleRoutes(ui, console.Ports{
 		Readers: queries, Operator: app.NewOperator(store),
 	})
 	require.NoError(t, err)
@@ -170,7 +170,7 @@ func newHolderBrandsTest(t *testing.T) holderBrandsTest {
 	secure := http.NewServeMux()
 	httpapi.RegisterSecure(secure, queries, callerToken("product-1"), nil, "https://secure.register.example")
 
-	return holderBrandsTest{console: listeners[0].Handler, secure: secure}
+	return holderBrandsTest{console: consoleRoutes, secure: secure}
 }
 
 const holderEndpoints = `"endpointDetail": {
