@@ -2,6 +2,7 @@ package register_test
 
 import (
 	"bytes"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,7 +13,7 @@ import (
 
 func TestEachRequiredValueFailsTheRenderWithItsName(t *testing.T) {
 	for _, value := range []string{
-		"image.tag", "publicBaseURL", "secureBaseURL", "crlURL", "operator.allowedHosts", "telemetry.otlpEndpoint",
+		"image.tag", "publicBaseURL", "secureBaseURL", "crlURL", "internal.allowedHosts", "telemetry.otlpEndpoint",
 		"database.host", "database.name", "database.ownerSecret", "database.serviceSecret",
 		"pki.publicTLSSecret", "pki.secureTLSSecret", "pki.intermediateSecret", "pki.caBundleSecret",
 		"operator.tokenSecret",
@@ -22,13 +23,6 @@ func TestEachRequiredValueFailsTheRenderWithItsName(t *testing.T) {
 		require.Error(t, err, value)
 		assert.Contains(t, err.Error(), value)
 	}
-}
-
-func TestTheConsoleNeedsItsAllowedHosts(t *testing.T) {
-	_, err := charttest.Render(t, "console.enabled=true")
-
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "console.allowedHosts")
 }
 
 func TestOnlyTheMigrationsGetTheOwnerCredentials(t *testing.T) {
@@ -79,9 +73,9 @@ func TestTheRegisterGetsItsConfiguration(t *testing.T) {
 		"PGSSLMODE":                   "require",
 		"PUBLIC_BASE_URL":             "https://register.test:8081",
 		"SECURE_BASE_URL":             "https://register.test:8083",
-		"CDR_INTERMEDIATE_CRL_URL":    "http://register.test:8085/crl/cdr-intermediate.crl",
+		"CDR_INTERMEDIATE_CRL_URL":    "http://register.test:8080/crl/cdr-intermediate.crl",
 		"OPERATOR_TOKEN":              "register-operator-token:token",
-		"OPERATOR_ALLOWED_HOSTS":      "register.test:8082",
+		"INTERNAL_ALLOWED_HOSTS":      "register.test:8080",
 		"OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel.test:4318",
 		"CONSOLE_ENABLED":             "false",
 	} {
@@ -121,30 +115,37 @@ func TestEachSecretIsMountedReadOnly(t *testing.T) {
 	assert.NotEmpty(t, main.Vars()["SSL_CERT_FILE"])
 }
 
-func TestTheConsoleIsOffByDefault(t *testing.T) {
-	objects := charttest.MustRender(t)
-
-	for _, p := range charttest.Only(t, objects, "Service").Spec.Ports {
-		assert.NotEqual(t, 8084, p.Port, p.Name)
-	}
-
-	for _, p := range charttest.Main(t, objects).Ports {
-		assert.NotEqual(t, 8084, p.ContainerPort, p.Name)
-	}
-}
-
-func TestTheConsoleCanBeTurnedOn(t *testing.T) {
-	objects := charttest.MustRender(t, "console.enabled=true", "console.allowedHosts={localhost:8084}")
+func TestTheConsoleCanBeTurnedOnWithNoPortOrAllowlistOfItsOwn(t *testing.T) {
+	objects := charttest.MustRender(t, "console.enabled=true")
 	main := charttest.Main(t, objects)
 
 	assert.Equal(t, "true", main.Vars()["CONSOLE_ENABLED"])
-	assert.Equal(t, "localhost:8084", main.Vars()["CONSOLE_ALLOWED_HOSTS"])
-	assert.Contains(t, charttest.Only(t, objects, "Service").Spec.Ports, charttest.Port{Name: "console", Port: 8084})
+	assert.NotContains(t, main.Vars(), "CONSOLE_ALLOWED_HOSTS")
+	assert.Equal(t, charttest.ServicePorts(t, charttest.MustRender(t)), charttest.ServicePorts(t, objects))
 }
 
-func TestTheServiceGivesEachAPIPort(t *testing.T) {
-	assert.Equal(t, map[string]int{"public": 8081, "operator": 8082, "secure": 8083, "crl": 8085},
-		charttest.ServicePorts(t, charttest.MustRender(t)))
+// Verifies: REG-1503
+func TestTheContainerAndTheServiceGiveOnePortForEachListener(t *testing.T) {
+	objects := charttest.MustRender(t)
+	want := map[string]int{"internal": 8080, "public": 8081, "secure": 8083}
+
+	assert.Equal(t, want, charttest.ServicePorts(t, objects))
+
+	got := map[string]int{}
+	for _, p := range charttest.Main(t, objects).Ports {
+		got[p.Name] = p.ContainerPort
+	}
+
+	assert.Equal(t, want, got)
+}
+
+// Verifies: REG-1506
+func TestTheREADMESaysToExposeOnlyTheCRLPathOfTheInternalListener(t *testing.T) {
+	readme, err := os.ReadFile("README.md")
+	require.NoError(t, err)
+
+	assert.Contains(t, string(readme), "Expose only the CRL path of the internal listener outside the cluster")
+	assert.Contains(t, string(readme), "`/crl/cdr-intermediate.crl`")
 }
 
 func TestAnotherServiceDoesNotRenameTheServiceOfTheChart(t *testing.T) {
@@ -159,7 +160,7 @@ func TestAnotherServiceDoesNotRenameTheServiceOfTheChart(t *testing.T) {
 	assert.Contains(t, names, "test-register")
 }
 
-func TestTheProbesUseTheHealthListener(t *testing.T) {
+func TestTheProbesUseTheInternalListener(t *testing.T) {
 	main := charttest.Main(t, charttest.MustRender(t))
 
 	assert.Equal(t, "/livez", main.LivenessProbe.HTTPGet.Path)

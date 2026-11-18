@@ -13,12 +13,9 @@ import (
 
 const (
 	serviceName  = "register"
-	probePort    = 8080
+	internalPort = 8080
 	apiPort      = 8081
-	operatorPort = 8082
 	securePort   = 8083
-	consolePort  = 8084
-	crlPort      = 8085
 	// With app.CRLRenewalAge, less than 24 hours (ACCC CP, section 4.9.7). The job compares wall-clock times, so the
 	// first run after a suspend of the host renews the CRL.
 	crlRenewalInterval = 10 * time.Minute

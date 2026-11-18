@@ -133,12 +133,9 @@ All ports bind to `127.0.0.1`. `compose.yaml` gives the configuration of each se
 
 | Port | Service | Use |
 |---|---|---|
-| 8080 | `register` | Health probes |
+| 8080 | `register` | Internal (HTTP): health probes, operator interface, operator console (no login) and the CRL of the mock CDR intermediate |
 | 8081 | `register` | Public APIs (TLS) |
-| 8082 | `register` | Operator interface (HTTP) |
 | 8083 | `register` | Secure APIs (mTLS) |
-| 8084 | `register` | Operator console: web UI and its API (HTTP, no login) |
-| 8085 | `register` | CRL of the mock CDR intermediate (HTTP) |
 | 8180 | `wattle-bank` | Health probes |
 | 8181 | `wattle-bank` | Public APIs, OpenID Provider configuration and authorisation pages (TLS) |
 | 8182 | `wattle-bank` | Operator interface (HTTP) |

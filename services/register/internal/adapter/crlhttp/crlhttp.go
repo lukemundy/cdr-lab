@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/lukemundy/cdr-lab/pkg/platform/httpserver"
 	"github.com/lukemundy/cdr-lab/services/register/internal/app"
 )
 
@@ -15,10 +16,14 @@ type Source interface {
 	CurrentCRL(ctx context.Context) (app.CRL, error)
 }
 
-// Register uses a GET pattern, which also matches HEAD, so that the mux gives 405 with an Allow header for another
-// method.
+// Register serves each path under /crl/, so that a catch-all route of a different group on mux does not get them.
 func Register(mux *http.ServeMux, crls Source) {
-	mux.Handle("GET /crl/cdr-intermediate.crl", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("/crl/", http.NotFoundHandler())
+	mux.Handle("/crl/cdr-intermediate.crl", httpserver.GetOnly(currentCRL(crls)))
+}
+
+func currentCRL(crls Source) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		crl, err := crls.CurrentCRL(r.Context())
 		if err != nil {
 			slog.ErrorContext(r.Context(), "the CRL is not available", "error.type", fmt.Sprintf("%T", err))
@@ -35,5 +40,5 @@ func Register(mux *http.ServeMux, crls Source) {
 		}
 
 		_, _ = w.Write(crl.DER)
-	}))
+	})
 }

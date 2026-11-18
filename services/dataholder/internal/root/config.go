@@ -19,6 +19,7 @@ import (
 	"github.com/lukemundy/cdr-lab/services/dataholder/brands"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/banksite"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/branddir"
+	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/console"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/app"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/domain"
 )
@@ -156,7 +157,7 @@ func loadAPIConfig() (apiConfig, error) {
 		)
 	}
 
-	if cfg.operator, err = operatorhttp.LoadConfig(); err != nil {
+	if cfg.operator, err = operatorhttp.LoadConfig("OPERATOR_ALLOWED_HOSTS"); err != nil {
 		return apiConfig{}, err
 	}
 
@@ -201,7 +202,7 @@ func loadAPIConfig() (apiConfig, error) {
 		return apiConfig{}, err
 	}
 
-	if cfg.console, err = consolehttp.Console.LoadConfig(); err != nil {
+	if cfg.console, err = console.Settings.LoadConfig(); err != nil {
 		return apiConfig{}, err
 	}
 

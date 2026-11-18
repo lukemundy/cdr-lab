@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"slices"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/lukemundy/cdr-lab/pkg/cds"
 	"github.com/lukemundy/cdr-lab/pkg/platform/consolehttp"
 	"github.com/lukemundy/cdr-lab/pkg/platform/operatorhttp"
+	"github.com/lukemundy/cdr-lab/services/register/internal/adapter/console"
 )
 
 type config struct {
@@ -23,6 +25,7 @@ type config struct {
 	cdrCAs        []*x509.Certificate
 	intermediate  ca.Authority
 	console       consolehttp.Config
+	consoleUI     fs.FS
 }
 
 // loadConfig loads only the CA settings for a process with no APIs, because the workers only sign CRLs.
@@ -48,7 +51,7 @@ func loadConfig(m mode) (config, error) {
 	}
 
 	var err error
-	if cfg.operator, err = operatorhttp.LoadConfig(); err != nil {
+	if cfg.operator, err = operatorhttp.LoadConfig(operatorhttp.AllowedHostsEnv); err != nil {
 		return config{}, err
 	}
 
@@ -81,6 +84,8 @@ func loadConfig(m mode) (config, error) {
 	if cfg.console, err = consolehttp.Console.LoadConfig(); err != nil {
 		return config{}, err
 	}
+
+	cfg.consoleUI = console.UI()
 
 	return cfg, nil
 }

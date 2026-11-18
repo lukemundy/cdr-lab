@@ -46,9 +46,17 @@ type Ports struct {
 	Now                func() time.Time
 }
 
+// Settings give the settings of the console of the data holder, which has a listener of its own.
+var Settings = consolehttp.Settings{
+	Name:            "console",
+	EnabledEnv:      "CONSOLE_ENABLED",
+	AllowedHostsEnv: "CONSOLE_ALLOWED_HOSTS",
+	ExampleHost:     "127.0.0.1:8084",
+}
+
 // Register returns an error when ui has no build of the UI or allowedHosts is empty.
 func Register(mux *http.ServeMux, ui fs.FS, allowedHosts []string, ports Ports) error {
-	return consolehttp.Console.Register(mux, ui, allowedHosts, func(routes *httproute.Routes) {
+	return Settings.Register(mux, ui, allowedHosts, func(routes *httproute.Routes) {
 		if ports.BrandFiles != nil {
 			ports.BrandFiles(routes)
 		}

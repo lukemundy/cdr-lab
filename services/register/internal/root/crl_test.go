@@ -72,7 +72,7 @@ func intermediateAuthority(t *testing.T) ca.Authority {
 func getCRL(t *testing.T, proc process) *x509.RevocationList {
 	t.Helper()
 
-	handler, _ := listener(t, proc, crlPort)
+	handler, _ := listener(t, proc, internalPort)
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(
 		rec,
@@ -118,9 +118,9 @@ func revokeRequest(t *testing.T, proc process, certificate []byte, reason string
 	body, err := json.Marshal(map[string]string{"certificate": string(certificate), "reason": reason})
 	require.NoError(t, err)
 
-	handler, _ := listener(t, proc, operatorPort)
+	handler, _ := listener(t, proc, internalPort)
 
-	return operate(t, map[int]http.Handler{operatorPort: handler}, "/v1/cdr-certificates/revoke", body)
+	return operate(t, map[int]http.Handler{internalPort: handler}, "/v1/cdr-certificates/revoke", body)
 }
 
 // Verifies: REG-0003, REG-0725

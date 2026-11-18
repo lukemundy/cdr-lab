@@ -1,5 +1,5 @@
-// Package consolehttp serves a browser UI, for example an operator console: a web UI and its same-origin API on one
-// listener, with no credential.
+// Package consolehttp serves a browser UI, for example an operator console: a web UI and its same-origin API as one
+// group of routes on a listener, with no credential.
 package consolehttp
 
 import (
@@ -28,11 +28,11 @@ const (
 	hashedDir = "assets/"
 )
 
-// Settings name the settings of one kind of UI listener, and the UI in the errors.
+// Settings name the settings of one kind of UI, and the UI in the errors.
 type Settings struct {
 	// Name is the UI in the errors, for example "console".
 	Name string
-	// EnabledEnv turns on the listener, because a production service has no such UI.
+	// EnabledEnv turns on the UI, because a production service has no such UI.
 	EnabledEnv string
 	// AllowedHostsEnv has no default, because a default is a value of one deployment.
 	AllowedHostsEnv string
@@ -41,10 +41,11 @@ type Settings struct {
 }
 
 var Console = Settings{
-	Name:            "console",
-	EnabledEnv:      "CONSOLE_ENABLED",
-	AllowedHostsEnv: "CONSOLE_ALLOWED_HOSTS",
-	ExampleHost:     "127.0.0.1:8084",
+	Name:       "console",
+	EnabledEnv: "CONSOLE_ENABLED",
+	// The console shares the allowlist of the internal listener with the operator interface.
+	AllowedHostsEnv: "INTERNAL_ALLOWED_HOSTS",
+	ExampleHost:     "127.0.0.1:8080",
 }
 
 type Config struct {
