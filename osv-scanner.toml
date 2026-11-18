@@ -4,3 +4,8 @@
 id = "GHSA-g3hv-75wg-m249"
 ignoreUntil = 2026-12-30
 reason = "minimatch 5.1.9 does not have the affected code (firstPhasePreProcess, optimizationLevel). Only openapi-typescript uses it, through @redocly/openapi-core 1.x, which needs the minimatch 5 API. The repository gives all its glob patterns."
+
+[[IgnoredVulns]]
+id = "GHSA-fc5q-39xc-vjpf"
+ignoreUntil = 2026-12-30
+reason = "picomatch 4.0.7 has no fixed version. Only the build and test tools use it (Vite, tinyglobby, @rolldown/plugin-babel), and the repository gives all their glob patterns, so no attacker supplies an extglob."
