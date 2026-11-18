@@ -97,17 +97,17 @@ The table gives the text and the fields of each event type in the history.
 
 ## Listener and security
 
-The console is a web UI. The [web UI library](../../../pkg/platform/consolehttp/DESIGN.md) gives the rules of its listener, its browser security, its cache headers and its routes.
+The console is a web UI. The [web UI library](../../../pkg/platform/consolehttp/DESIGN.md) gives the rules of its `Host` allowlist, its browser security, its cache headers and its routes.
 
-- <a id="reg-1061"></a>**REG-1061** The console is on its own listener, separate from the CDR APIs and from the operator interface. ([the web UI and its API on one listener](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0001); [Judgement: web UIs that the service embeds (ADR 0014)][adr-0014])
+- <a id="reg-1507"></a>**REG-1507** The console is on [the internal listener](deployment.md#reg-1499), with the operator interface. ([the web UI and its API on one listener](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0001); [Judgement: web UIs that the service embeds (ADR 0014)][adr-0014]; [Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
 - <a id="reg-1062"></a>**REG-1062** The setting `CONSOLE_ENABLED` [turns the console on, and the console is off by default](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0002). ([Judgement: the web UI is off by default](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0018))
-- <a id="reg-1063"></a>**REG-1063** The setting `CONSOLE_ALLOWED_HOSTS` is [the `Host` allowlist of the console](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0004). Its values are [the values of the `Host` header](../../../pkg/platform/hostallowlist/DESIGN.md#host-0001), with [no difference for upper and lower case](../../../pkg/platform/hostallowlist/DESIGN.md#host-0002). For example, `127.0.0.1:8084`. ([Judgement: a Host allowlist with no default](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0019))
-- <a id="reg-1064"></a>**REG-1064** The console listener is plain HTTP. ([Judgement: plain HTTP for the console](#reg-1094))
+- <a id="reg-1063"></a>**REG-1063** [The `Host` allowlist of the console](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0004) is [the setting `INTERNAL_ALLOWED_HOSTS`](deployment.md#reg-1501), with [no difference for upper and lower case](../../../pkg/platform/hostallowlist/DESIGN.md#host-0002). For example, `127.0.0.1:8080`. ([Judgement: a Host allowlist with no default](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0019))
+- <a id="reg-1064"></a>**REG-1064** The console uses plain HTTP. ([Judgement: plain HTTP for the console](#reg-1094))
 - <a id="reg-1065"></a>**REG-1065** The console has no sign-in, and the browser gets no credential. ([Judgement: web UIs that the service embeds (ADR 0014)][adr-0014])
 
 ## Non-functional requirements
 
-- <a id="reg-1066"></a>**REG-1066** Telemetry: the console API has the same server telemetry as the other listeners of the Register. For example, each request of the console API has a server span. ([Judgement: telemetry with OpenTelemetry (ADR 0006)][adr-0006])
+- <a id="reg-1066"></a>**REG-1066** Telemetry: the console API has the same server telemetry as the other routes of the Register. For example, each request of the console API has a server span. ([Judgement: telemetry with OpenTelemetry (ADR 0006)][adr-0006])
 - <a id="reg-1067"></a>**REG-1067** Telemetry: the UI sends no telemetry. ([Judgement: web UIs that the service embeds (ADR 0014)][adr-0014])
 - <a id="reg-1068"></a>**REG-1068** Performance: on a development workstation, a list of 1,000 data recipients or 1,000 data holders shows within 1 second. ([Judgement: a list or a history of 1,000 records shows within 1 second](#reg-1095))
 - <a id="reg-1069"></a>**REG-1069** Performance: on a development workstation, the first page of a history of 1,000 events shows within 1 second. ([Judgement: a list or a history of 1,000 records shows within 1 second](#reg-1095))
@@ -216,6 +216,7 @@ The console is a web UI. The [web UI library](../../../pkg/platform/consolehttp/
 [adr-0014]: ../../../docs/adr/0014-web-uis-as-embedded-react-single-page-applications.md
 [adr-0021]: ../../../docs/adr/0021-record-one-business-fact-in-each-event-type.md
 [adr-0022]: ../../../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
+[adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md
 [cds-participant-statuses]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#participant-statuses
 [cds-nfrs]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#non-functional-requirements
 [fetch-metadata]: https://w3c.github.io/webappsec-fetch-metadata/

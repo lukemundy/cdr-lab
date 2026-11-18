@@ -45,7 +45,7 @@ The Register also obeys the [Telemetry library](../../../pkg/platform/telemetry/
 
 ## Health
 
-- <a id="reg-0008"></a>**REG-0008** Health: the Register serves its health probes on a plain HTTP listener that is separate from the CDR API listeners. ([the liveness probe](../../../pkg/platform/httpserver/DESIGN.md#srv-0001); [the readiness probe](../../../pkg/platform/httpserver/DESIGN.md#srv-0002); [Judgement: a separate listener for the health probes](#reg-0025))
+- <a id="reg-0008"></a>**REG-0008** Health: the Register serves its health probes on [the internal listener](deployment.md#reg-1499), which is plain HTTP and separate from the CDR API listeners. ([the liveness probe](../../../pkg/platform/httpserver/DESIGN.md#srv-0001); [the readiness probe](../../../pkg/platform/httpserver/DESIGN.md#srv-0002); [Judgement: the health probes on the internal listener](#reg-0025))
 - <a id="reg-0009"></a>**REG-0009** Health: when a process that runs the APIs has no current CRL, its readiness probe fails. For example, after the next update time of the newest CRL, `GET /readyz` gives 503. ([the readiness probe](../../../pkg/platform/httpserver/DESIGN.md#srv-0002); [the CRL check fails with no CRL that it can use](../../../pkg/cds/DESIGN.md#cdsl-0051); [Judgement: an API process with no current CRL is not ready](#reg-0024))
 - <a id="reg-0010"></a>**REG-0010** Health: a process that runs only the background jobs is ready when it can connect to the database. It does not need a current CRL. ([Judgement: background jobs with River (ADR 0010)][adr-0010])
 
@@ -81,11 +81,11 @@ The Register also obeys the [Telemetry library](../../../pkg/platform/telemetry/
 - Basis: Step 3.3. The Kubernetes readiness probe tells the platform when a process can serve traffic ([Kubernetes: API health endpoints][k8s-health]).
 - Reason: With no current CRL, the Register refuses each client certificate, so its mTLS APIs cannot serve. A probe that fails keeps the traffic away until the Register signs a new CRL.
 
-### <a id="reg-0025"></a>REG-0025 A separate listener for the health probes
+### <a id="reg-0025"></a>REG-0025 The health probes on the internal listener
 
 - Kind: choice
-- Basis: Step 3.3. The CDS gives no health probes.
-- Reason: A separate listener keeps the probes out of the CDR APIs. A probe then needs no TLS and no client certificate.
+- Basis: Step 3.3. The CDS gives no health probes. [ADR 0025][adr-0025] gives the internal listener.
+- Reason: The internal listener keeps the probes out of the CDR APIs. A probe then needs no TLS and no client certificate.
 
 ### <a id="reg-0026"></a>REG-0026 Docker Compose for the lab deployment
 
@@ -99,3 +99,4 @@ The Register also obeys the [Telemetry library](../../../pkg/platform/telemetry/
 [k8s-health]: https://kubernetes.io/docs/reference/using-api/health-checks/
 [adr-0010]: ../../../docs/adr/0010-background-jobs-with-river.md
 [adr-0019]: ../../../docs/adr/0019-limit-the-conformance-suite-to-cdr-conformance.md
+[adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md

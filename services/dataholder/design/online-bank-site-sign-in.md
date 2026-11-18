@@ -88,11 +88,11 @@ The sign-in of the site asks for a password, and the CDR authentication does not
 
 ## Listener
 
-The site is a web UI. The [web UI library specification](../../../pkg/platform/consolehttp/DESIGN.md) gives the rules of its listener, its browser security, its cache headers and its routes. These rules are the choices of the site.
+The site is a web UI. The [web UI library specification](../../../pkg/platform/consolehttp/DESIGN.md) gives the rules of its `Host` allowlist, its browser security, its cache headers and its routes. These rules are the choices of the site.
 
-- <a id="dh-2063"></a>**DH-2063** The site is on a listener of its own. It is not on the public listener or on the listener of the operator console. ([Judgement: a listener of its own for the site](#dh-2113))
-- <a id="dh-2064"></a>**DH-2064** The setting `BANK_SITE_ENABLED` [turns the listener of the site on](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0002). ([Judgement: the `BANK_SITE_` prefix for the site settings](#dh-2114))
-- <a id="dh-2065"></a>**DH-2065** The setting `BANK_SITE_ALLOWED_HOSTS` is [the `Host` allowlist](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0003) of the site, with values in the format of the console allowlist. For example, `localhost:8185`. ([Judgement: the `BANK_SITE_` prefix for the site settings](#dh-2114))
+- <a id="dh-2063"></a>**DH-2063** The site is on a listener of its own. It is not on the public listener or on the internal listener. ([Judgement: a listener of its own for the site](#dh-2113))
+- <a id="dh-2064"></a>**DH-2064** The setting `BANK_SITE_ENABLED` [turns the site on](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0002). ([Judgement: the `BANK_SITE_` prefix for the site settings](#dh-2114))
+- <a id="dh-2065"></a>**DH-2065** The setting `BANK_SITE_ALLOWED_HOSTS` is [the `Host` allowlist](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0003) of the site, with [the values of the `Host` header](../../../pkg/platform/hostallowlist/DESIGN.md#host-0001). For example, `localhost:8185`. ([Judgement: the `BANK_SITE_` prefix for the site settings](#dh-2114))
 - <a id="dh-2066"></a>**DH-2066** The listener of the site uses TLS, with the certificate and the key of the public listener. ([Judgement: TLS on the site with the certificate of the public listener](#dh-2115))
 - <a id="dh-2067"></a>**DH-2067** The listener of the site uses [the TLS versions and cipher suites of the CDR listeners](api-standards.md#dh-0460). ([Judgement: TLS on the site with the certificate of the public listener](#dh-2115))
 - <a id="dh-2068"></a>**DH-2068** The listener of the site does not request a client certificate. ([Judgement: TLS on the site with the certificate of the public listener](#dh-2115))
@@ -102,7 +102,7 @@ The site is a web UI. The [web UI library specification](../../../pkg/platform/c
 - <a id="dh-2072"></a>**DH-2072** The listener of the site serves each photo of the brand at `/brand/<file name>`. For example, `/brand/hero.webp`. ([Judgement: brand files at fixed paths under `/brand/`](authorisation.md#dh-2120))
 - <a id="dh-2073"></a>**DH-2073** The listener of the site serves the fonts of the fixed set of the data holder. ([the fixed set of fonts](brand.md#dh-0341))
 - <a id="dh-2074"></a>**DH-2074** The brand files, the photos and the fonts on the listener of the site have [the `Host` allowlist](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0004) and [the response headers](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0007) of the site. ([Judgement: a strict CSP with Trusted Types](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0020))
-- <a id="dh-2075"></a>**DH-2075** The data holder starts the listener of the site only in the process that runs the APIs. ([Judgement: a listener of its own for the site](#dh-2113))
+- <a id="dh-2075"></a>**DH-2075** The data holder starts the listener of the site only when the site is on, in the process that runs the APIs. ([Judgement: a listener of its own for the site](#dh-2113))
 - <a id="dh-2076"></a>**DH-2076** A process that runs only the workers needs no setting of the site. ([a process needs only the settings that it uses](non-functional-requirements.md#dh-0010))
 
 ## Judgements
@@ -188,14 +188,14 @@ The site is a web UI. The [web UI library specification](../../../pkg/platform/c
 ### <a id="dh-2113"></a>DH-2113 A listener of its own for the site
 
 - Kind: choice
-- Basis: Step 3.3. The site is lab-only, and the CDS gives the rules of the public listener ([CDS: CORS][cds-cors]).
-- Reason: On the public listener, the site needs exceptions to the CORS rule and to the not-found rule of the CDR APIs. A lab-only function then goes into the listener of the CDR endpoints. The port of the site is in [the port block of an instance](deployment.md#dh-1310).
+- Basis: Step 3.3. The site is lab-only, and the CDS gives the rules of the public listener ([CDS: CORS][cds-cors]). An origin is the scheme, the host and the port ([RFC 6454, section 4][rfc6454-origin]). [ADR 0025][adr-0025] keeps the site on a listener of its own.
+- Reason: A port of its own gives the site an origin that is different from the consumer pages, with no change to the PKI or the lab DNS. On the public listener, the site also needs exceptions to the CORS rule and to the not-found rule of the CDR APIs. The port of the site is in [the port block of an instance](deployment.md#dh-1310).
 
 ### <a id="dh-2114"></a>DH-2114 The `BANK_SITE_` prefix for the site settings
 
 - Kind: choice
 - Basis: Step 3.3. The [web UI library](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0002) gives a setting that turns a web UI on and an allowlist setting, and does not name them.
-- Reason: The names follow `CONSOLE_ENABLED` and `CONSOLE_ALLOWED_HOSTS`. `BANK_SITE` says what the listener serves, and it is different from the CDR names "public" and "secure".
+- Reason: The names follow `CONSOLE_ENABLED` and `INTERNAL_ALLOWED_HOSTS`. `BANK_SITE` says what the listener serves, and it is different from the CDR names "public" and "secure".
 
 ### <a id="dh-2115"></a>DH-2115 TLS on the site with the certificate of the public listener
 
@@ -217,6 +217,7 @@ The site is a web UI. The [web UI library specification](../../../pkg/platform/c
 
 [adr-0014]: ../../../docs/adr/0014-web-uis-as-embedded-react-single-page-applications.md
 [adr-0021]: ../../../docs/adr/0021-record-one-business-fact-in-each-event-type.md
+[adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md
 [asvs-v7]: https://github.com/OWASP/ASVS/blob/v5.0.0_release/5.0/en/0x16-V7-Session-Management.md
 [cdr-rules]: https://www.legislation.gov.au/F2020L00094/latest/text
 [cds-cors]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cors
@@ -237,3 +238,4 @@ The site is a web UI. The [web UI library specification](../../../pkg/platform/c
 [wcag-2-2-1]: https://www.w3.org/TR/WCAG22/#timing-adjustable
 [wcag-3-3-1]: https://www.w3.org/TR/WCAG22/#error-identification
 [wcag-3-3-8]: https://www.w3.org/TR/WCAG22/#accessible-authentication-minimum
+[rfc6454-origin]: https://www.rfc-editor.org/rfc/rfc6454#section-4

@@ -1,6 +1,7 @@
 # 0022. Run the mock CDR intermediate CA in the Register
 
 - Date: 2026-10-27
+- Amended by [ADR-0025](0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md): the listener of the CRL
 
 ## Context
 

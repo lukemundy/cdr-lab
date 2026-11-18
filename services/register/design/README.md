@@ -94,7 +94,8 @@ flowchart LR
 
 ## Withdrawn
 
-None.
+- <a id="reg-0715"></a>**REG-0715** Removed.
+- <a id="reg-1061"></a>**REG-1061** Removed.
 
 [adr-0022]: ../../../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
 [dsb-537]: https://github.com/ConsumerDataStandardsAustralia/standards-maintenance/issues/537

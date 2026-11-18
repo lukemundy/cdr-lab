@@ -63,11 +63,11 @@ The [CA library](../pkg/ca/DESIGN.md) gives the CSR profile that the CDR CA chec
 
 The [CA library](../pkg/ca/DESIGN.md) gives the profiles of a CDR certificate and of a public TLS server certificate.
 
-- <a id="pki-0041"></a>**PKI-0041** In the lab, the CRL URL is on the CRL listener of the Register in the lab network: `http://register`, the port of the CRL listener in `compose.yaml`, and the path `/crl/cdr-intermediate.crl`. ([Judgement: the Register service name in the CRL URL](#pki-0091))
+- <a id="pki-0041"></a>**PKI-0041** In the lab, the CRL URL is on the internal listener of the Register in the lab network: `http://register`, the port of the internal listener in `compose.yaml`, and the path `/crl/cdr-intermediate.crl`. ([Judgement: the Register service name in the CRL URL](#pki-0091))
 
 ## Revocation
 
-The [Register certificate revocation area](../services/register/design/certificate-revocation.md) gives the revocation request, the CRL listener and the other times of a new CRL. The [CA library](../pkg/ca/DESIGN.md) gives the revocation reasons and the CRL format. The rules of this group apply to each revocation and each CRL.
+The [Register certificate revocation area](../services/register/design/certificate-revocation.md) gives the revocation request, the listener and the path of the CRL, and the other times of a new CRL. The [CA library](../pkg/ca/DESIGN.md) gives the revocation reasons and the CRL format. The rules of this group apply to each revocation and each CRL.
 
 - <a id="pki-0048"></a>**PKI-0048** The Register is the only component that revokes a CDR certificate. ([Judgement: the Register is the CDR intermediate CA (ADR 0022)](../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md))
 - <a id="pki-0049"></a>**PKI-0049** The Register is the only component that signs a CRL of the intermediate. ([Judgement: the Register is the CDR intermediate CA (ADR 0022)](../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md))

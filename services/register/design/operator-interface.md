@@ -71,8 +71,9 @@ This area gives the lab-only HTTP API that creates and changes participants, reg
 
 The operator interface obeys the [operator interface library](../../../pkg/platform/operatorhttp/DESIGN.md): [each request has the operator token](../../../pkg/platform/operatorhttp/DESIGN.md#opi-0001), [a `Host` allowlist with no default](../../../pkg/platform/operatorhttp/DESIGN.md#opi-0005) and [no cross-origin requests](../../../pkg/platform/operatorhttp/DESIGN.md#opi-0007).
 
-- <a id="reg-0850"></a>**REG-0850** The operator interface is on a listener that is separate from the CDR APIs. ([Judgement: a lab-only operator interface](#reg-0880))
-- <a id="reg-0851"></a>**REG-0851** The listener of the operator interface uses plain HTTP, with no TLS. ([Judgement: plain HTTP for the operator interface](#reg-0883))
+- <a id="reg-0850"></a>**REG-0850** The operator interface is on [the internal listener](deployment.md#reg-1499), which is separate from the CDR APIs. ([Judgement: a lab-only operator interface](#reg-0880); [Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
+- <a id="reg-1508"></a>**REG-1508** The operator interface serves each path under `/v1/`. For example, `GET /v1/unknown` with no token gets [401](../../../pkg/platform/operatorhttp/DESIGN.md#opi-0001). ([Judgement: a lab-only operator interface](#reg-0880))
+- <a id="reg-0851"></a>**REG-0851** The operator interface uses plain HTTP, with no TLS. ([Judgement: plain HTTP for the operator interface](#reg-0883))
 
 ## Bodies and errors
 
@@ -117,7 +118,7 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 
 - Kind: choice
 - Basis: Step 3.3. The CDR Registrar keeps the participant data and statuses on the Register ([CDS: Participant Statuses][cds-participant-statuses]). The interface of the production Register for this is not public.
-- Reason: The lab needs a way to change participants that a script can use. A separate listener keeps the lab-only actions out of the CDR APIs.
+- Reason: The lab needs a way to change participants that a script can use. The internal listener keeps the lab-only actions out of the CDR APIs.
 
 ### <a id="reg-0881"></a>REG-0881 Problem details for the operator interface
 
@@ -209,6 +210,7 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 - Basis: Step 3.2. [RFC 9110, section 15.5.14][rfc9110-413] gives 413 for content that is larger than the server accepts.
 - Reason: A legal entity in the seed data is less than 20 KiB, a PEM certificate or CSR is less than 16 KiB, and a limit stops a body that fills the memory. The CDS APIs of the data holder also give [413 for a body that is too large](../../dataholder/design/api-standards.md#dh-0453), so a client gets the same status on each lab interface.
 
+[adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md
 [cds-participant-statuses]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#participant-statuses
 [cds-status-mapping]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#status-mapping
 [cds-register-schemas]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api-schemas

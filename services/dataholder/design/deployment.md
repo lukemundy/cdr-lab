@@ -1,6 +1,22 @@
 # Mock data holder: Deployment
 
-This area gives the four preset brands in the lab, the lab-only features that no other area gives, and the publication of the data holder image and Helm chart. An operator deploys a data holder brand to Kubernetes from the image and the chart that CI publishes. The publication and chart rules apply to the artifacts and to CI, not to a deployment.
+This area gives the listeners of the data holder, the four preset brands in the lab, the lab-only features that no other area gives, and the publication of the data holder image and Helm chart. An operator deploys a data holder brand to Kubernetes from the image and the chart that CI publishes. The publication and chart rules apply to the artifacts and to CI, not to a deployment.
+
+## Listeners
+
+- <a id="dh-2622"></a>**DH-2622** The data holder has four listeners. ([Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
+  - the internal listener, with plain HTTP
+  - the public listener, with TLS and no client authentication
+  - the mTLS listener, with TLS and a required client certificate
+  - the listener of the online bank site, with TLS, [when the site is on](online-bank-site-sign-in.md#dh-2075)
+- <a id="dh-2623"></a>**DH-2623** The internal listener serves these groups of routes, [each with its own security policy](../../../pkg/platform/httpserver/DESIGN.md#srv-0009). ([Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
+  - the health probes
+  - the operator interface
+  - the operator console, when it is on
+- <a id="dh-2624"></a>**DH-2624** The setting `INTERNAL_ALLOWED_HOSTS` is the `Host` allowlist of the operator interface and of the console. Its values are [the values of the `Host` header](../../../pkg/platform/hostallowlist/DESIGN.md#host-0001). For example, `127.0.0.1:8180`. ([Judgement: a Host allowlist with no default](../../../pkg/platform/operatorhttp/DESIGN.md#opi-0009); [Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
+- <a id="dh-2629"></a>**DH-2629** In a process that serves the operator interface, the setting `INTERNAL_ALLOWED_HOSTS` is required, and it has no default. ([Judgement: a Host allowlist with no default](../../../pkg/platform/operatorhttp/DESIGN.md#opi-0009))
+- <a id="dh-2625"></a>**DH-2625** A process that runs only the workers serves only the health probes on the internal listener. ([a process needs only the settings that it uses](non-functional-requirements.md#dh-0010); [Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
+- <a id="dh-2626"></a>**DH-2626** The chart gives one container port and one Service port for each listener that the release runs. ([Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
 
 ## Lab-only features
 
@@ -18,13 +34,11 @@ A production data holder does not have these features. Real components must not 
 - <a id="dh-1307"></a>**DH-1307** The O of the CDR server certificate of an instance is the legal entity name of its brand. Its CN and a SAN are the host name of the instance. For example, O is "Wattle Bank Limited" and CN is `wattle-bank`. ([PKI specification](../../../pki/DESIGN.md); [a CDR CA certificate on the mTLS listener](api-standards.md#dh-0463))
 - <a id="dh-1308"></a>**DH-1308** Each instance has its own sender address for the OTP email: `no-reply@<name>bank.test`. For example, `no-reply@wattlebank.test`. ([the sender of the OTP email](consumer-authentication.md#dh-1244); [Judgement: legal entity names that end with "Limited", and `.test` domains](#dh-1365))
 - <a id="dh-1309"></a>**DH-1309** The OTP email of each instance shows the brand of that instance. ([the sender of the OTP email](consumer-authentication.md#dh-1244); [the logo in the OTP email](consumer-authentication.md#dh-1252))
-- <a id="dh-1310"></a>**DH-1310** On the host, the ports of an instance are a block of six. Each listener has the same last digit in each block. ([Judgement: a block of six ports for each instance, in one pattern](#dh-1362))
-  - 0: the health probes
-  - 1: the public APIs
-  - 2: the operator interface
-  - 3: the secure APIs
-  - 4: the operator console
-  - 5: the online bank site
+- <a id="dh-1310"></a>**DH-1310** On the host, the ports of an instance are in a block of six. Each listener has the same last digit in each block. ([Judgement: a block of six ports for each instance, in one pattern](#dh-1362))
+  - 0: the internal listener
+  - 1: the public listener
+  - 3: the mTLS listener
+  - 5: the listener of the online bank site
 - <a id="dh-1311"></a>**DH-1311** The port blocks of the instances are these. ([Judgement: a block of six ports for each instance, in one pattern](#dh-1362))
   - `wattle-bank`: 8180 to 8185
   - `redgum-bank`: 8280 to 8285
@@ -101,7 +115,7 @@ A production data holder does not have these features. Real components must not 
 
 - Kind: choice
 - Basis: Step 3.3. No source gives the ports of a lab.
-- Reason: Ports 8280 to 8485 are not used in the lab. An operator finds each listener of each instance from one pattern.
+- Reason: Ports 8280 to 8485 are not used in the lab. An operator finds each listener of each instance from one pattern. Each listener has the last digit of [the same listener of the Register](../../register/design/deployment.md#reg-1500).
 
 ### <a id="dh-1363"></a>DH-1363 The set-up of all four instances, also with no profile
 
@@ -214,6 +228,7 @@ A production data holder does not have these features. Real components must not 
 [adr-0002]: ../../../docs/adr/0002-data-store.md
 [adr-0020]: ../../../docs/adr/0020-service-migrations-create-roles-and-the-operator-creates-users.md
 [adr-0023]: ../../../docs/adr/0023-give-the-brand-of-a-data-holder-as-a-strict-brand-directory.md
+[adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md
 [cds-register-apis]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-apis
 [cds-register-schemas]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api-schemas
 [compose-down]: https://docs.docker.com/reference/cli/docker/compose/down/
