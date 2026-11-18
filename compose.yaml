@@ -529,11 +529,11 @@ services:
       openid-mongodb:
         condition: service_started
 
-  # Keep the version that the suite uses (docker-compose-prebuilt.yml of the suite).
+  # Keep the major version that the suite uses (docker-compose-prebuilt.yml of the suite). renovate.json blocks other major versions.
   openid-mongodb:
     <<: *lab-dns
     profiles: [openid]
-    image: docker.io/library/mongo:9.0.4@sha256:452bdaf2127b8ff851e31410a267809b9829eded219979f2210e7c7efb85a058
+    image: docker.io/library/mongo:6.0.28@sha256:8b6d8f5bbedb25cb73517b65cf99f13aeb75ad5b157a56c479287a840bbad3ac
 
   # The mail sink of the lab: it accepts each email of a service over SMTP, keeps it in memory and delivers none.
   mail:
