@@ -286,7 +286,12 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 ### Health probes
 
-- Lab term: the listener and the endpoints of a service for its liveness and readiness.
+- Lab term: the endpoints of a service for its liveness and readiness, on its [internal listener](#internal-listener).
+
+### Internal listener
+
+- Lab term: the plain HTTP listener of a service for the deployment and the lab operator ([ADR 0025][adr-0025]). The health probes, the operator interface and the operator console are on it. On the Register, the CRL is also on it.
+- Not the same as: [public listener](#public-listener), which participants and consumers use.
 
 ### Key set
 
@@ -379,6 +384,7 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 [adr-0006]: ../adr/0006-telemetry.md
 [adr-0024]: ../adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md
+[adr-0025]: ../adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md
 [brands-readme]: ../../services/dataholder/brands/README.md
 [conformance-design]: ../../conformance/DESIGN.md
 [consolehttp-design]: ../../pkg/platform/consolehttp/DESIGN.md

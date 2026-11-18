@@ -81,7 +81,7 @@ The data holder also obeys the [Telemetry library](../../../pkg/platform/telemet
 
 ## Health
 
-- <a id="dh-0017"></a>**DH-0017** Health: the data holder serves its health probes on a plain HTTP listener that is separate from the CDR API listeners. ([the liveness probe](../../../pkg/platform/httpserver/DESIGN.md#srv-0001); [the readiness probe](../../../pkg/platform/httpserver/DESIGN.md#srv-0002); [Judgement: a separate listener for the health probes](#dh-0025))
+- <a id="dh-0017"></a>**DH-0017** Health: the data holder serves its health probes on [the internal listener](deployment.md#dh-2623), which is plain HTTP and separate from the CDR API listeners. ([the liveness probe](../../../pkg/platform/httpserver/DESIGN.md#srv-0001); [the readiness probe](../../../pkg/platform/httpserver/DESIGN.md#srv-0002); [Judgement: the health probes on the internal listener](#dh-0025))
 
 ## Judgements
 
@@ -115,11 +115,11 @@ The data holder also obeys the [Telemetry library](../../../pkg/platform/telemet
 - Basis: Step 3.3. [ADR 0019][adr-0019] limits the suite to CDR conformance, but does not say how the suite finds a data holder and its data.
 - Reason: A participant has only the Register and the CDR APIs, so the suite then proves what a participant sees. The suite runs against each brand with no change, also when a catalogue changes.
 
-### <a id="dh-0025"></a>DH-0025 A separate listener for the health probes
+### <a id="dh-0025"></a>DH-0025 The health probes on the internal listener
 
 - Kind: choice
-- Basis: Step 3.3. The CDS gives no health probes.
-- Reason: A separate listener keeps the probes out of the CDR APIs. A probe then needs no TLS and no client certificate.
+- Basis: Step 3.3. The CDS gives no health probes. [ADR 0025][adr-0025] gives the internal listener.
+- Reason: The internal listener keeps the probes out of the CDR APIs. A probe then needs no TLS and no client certificate.
 
 ### <a id="dh-0026"></a>DH-0026 A real client changes the data holder with configuration only
 
@@ -140,3 +140,4 @@ The data holder also obeys the [Telemetry library](../../../pkg/platform/telemet
 [owasp-logging-exclude]: https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html#data-to-exclude
 [adr-0010]: ../../../docs/adr/0010-background-jobs-with-river.md
 [adr-0019]: ../../../docs/adr/0019-limit-the-conformance-suite-to-cdr-conformance.md
+[adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md

@@ -1,6 +1,24 @@
 # Mock CDR Register: Deployment
 
-This area gives the lab-only participant load, the participant seed of the Helm chart, the example seed of the four preset brands, and the publication of the image and the chart. The production Register has no participant load. Real components must not depend on it. The rules of the chart and of the example seed apply to the chart and to the file, not to a deployment.
+This area gives the listeners of the Register and their ports, the lab-only participant load, the participant seed of the Helm chart, the example seed of the four preset brands, and the publication of the image and the chart. The production Register has no participant load. Real components must not depend on it. The rules of the chart and of the example seed apply to the chart and to the file, not to a deployment.
+
+## Listeners
+
+- <a id="reg-1498"></a>**REG-1498** The Register has three listeners. ([Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
+  - the internal listener, with plain HTTP
+  - the public listener, with TLS and no client authentication
+  - the mTLS listener, with TLS and a required client certificate
+- <a id="reg-1499"></a>**REG-1499** The internal listener serves these groups of routes, [each with its own security policy](../../../pkg/platform/httpserver/DESIGN.md#srv-0009). ([Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
+  - the health probes
+  - the operator interface
+  - the operator console, when it is on
+  - the CRL
+- <a id="reg-1500"></a>**REG-1500** In the lab, the internal listener is on port 8080, the public listener on port 8081 and the mTLS listener on port 8083. ([Judgement: each listener keeps the last digit of its port](#reg-1504))
+- <a id="reg-1501"></a>**REG-1501** The setting `INTERNAL_ALLOWED_HOSTS` is the `Host` allowlist of the operator interface and of the console. Its values are [the values of the `Host` header](../../../pkg/platform/hostallowlist/DESIGN.md#host-0001). For example, `127.0.0.1:8080`. ([Judgement: a Host allowlist with no default](../../../pkg/platform/operatorhttp/DESIGN.md#opi-0009); [Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
+- <a id="reg-1509"></a>**REG-1509** In a process that serves the operator interface, the setting `INTERNAL_ALLOWED_HOSTS` is required, and it has no default. ([Judgement: a Host allowlist with no default](../../../pkg/platform/operatorhttp/DESIGN.md#opi-0009))
+- <a id="reg-1502"></a>**REG-1502** A process that runs only the background jobs serves only the health probes on the internal listener. ([Judgement: background jobs with River (ADR 0010)][adr-0010]; [Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
+- <a id="reg-1503"></a>**REG-1503** The chart gives one container port and one Service port for each listener. ([Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
+- <a id="reg-1506"></a>**REG-1506** The chart README says that a deployment exposes only the CRL path of the internal listener outside the cluster. For example, an ingress rule routes only `/crl/cdr-intermediate.crl` to the internal listener. ([Judgement: the CRL on the internal listener, with no authentication](certificate-revocation.md#reg-0751))
 
 ## Participant load
 
@@ -41,6 +59,12 @@ A deployment changes the endpoints of the example seed to the hosts of the deplo
 - <a id="reg-0926"></a>**REG-0926** When the chart deploys a Register with the example seed, Get Data Holder Brands Summary gives the four preset brands at start-up, with their public base URIs. ([CDS: Get Data Holder Brands Summary][cds-get-dh-brands-summary])
 
 ## Judgements
+
+### <a id="reg-1504"></a>REG-1504 Each listener keeps the last digit of its port
+
+- Kind: choice
+- Basis: Step 3.3. No source gives the ports of a lab. [ADR 0025][adr-0025] gives the listeners.
+- Reason: Each listener then has the same last digit in the Register and in each data holder instance. An operator finds each listener from one pattern.
 
 ### <a id="reg-0940"></a>REG-0940 No load into a Register with participants
 
@@ -93,4 +117,6 @@ A deployment changes the endpoints of the example seed to the hosts of the deplo
 [rfc6761-test]: https://www.rfc-editor.org/rfc/rfc6761#section-6.2
 [register-chart]: ../../../charts/register/README.md
 [readme-conventions]: ../../../README.md#other-conventions
+[adr-0010]: ../../../docs/adr/0010-background-jobs-with-river.md
 [adr-0020]: ../../../docs/adr/0020-service-migrations-create-roles-and-the-operator-creates-users.md
+[adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md

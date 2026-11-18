@@ -19,7 +19,8 @@ This area gives the lab-only operator interface, which creates customers, accoun
 
 The operator interface obeys the [operator interface library](../../../pkg/platform/operatorhttp/DESIGN.md): [each request has the operator token](../../../pkg/platform/operatorhttp/DESIGN.md#opi-0001), [the operator token comes from the configuration](../../../pkg/platform/operatorhttp/DESIGN.md#opi-0004), [a `Host` allowlist with no default](../../../pkg/platform/operatorhttp/DESIGN.md#opi-0005) and [no cross-origin requests](../../../pkg/platform/operatorhttp/DESIGN.md#opi-0007).
 
-- <a id="dh-0728"></a>**DH-0728** The operator interface is on a listener that is separate from the CDR APIs. ([Judgement: an operator interface for the customer data of the lab](#dh-0770))
+- <a id="dh-0728"></a>**DH-0728** The operator interface is on [the internal listener](deployment.md#dh-2623), which is separate from the CDR APIs. ([Judgement: an operator interface for the customer data of the lab](#dh-0770); [Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
+- <a id="dh-2628"></a>**DH-2628** The operator interface serves each path under `/v1/`. For example, `GET /v1/unknown` with no token gets [401](../../../pkg/platform/operatorhttp/DESIGN.md#opi-0001). ([Judgement: an operator interface for the customer data of the lab](#dh-0770))
 
 ## Bodies and errors
 
@@ -93,7 +94,7 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no interface for the customer data of a data holder. A production data holder gets the data from its banking systems.
-- Reason: The lab needs invented customers, accounts and transactions for each test. A JSON API on its own listener lets a lab user and the conformance suite create them, with no access to the CDR APIs.
+- Reason: The lab needs invented customers, accounts and transactions for each test. A JSON API on the internal listener lets a lab user and the conformance suite create them, with no access to the CDR APIs.
 
 ### <a id="dh-0771"></a>DH-0771 Only the required CDS fields and the named optional fields
 
@@ -131,6 +132,7 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 - Basis: Step 3.3. In `extendedData`, the `extensionUType` is optional, and its only value is `nppPayload` ([CDS: BankingTransactionDetailV3][cds-schema-transaction-detail]). The `nppPayload` is mandatory when the `extensionUType` is `nppPayload`.
 - Reason: The CDS gives extended data only for NPP service overlays. A required `extensionUType` gives one shape of `extendedData`, with one set of validation rules. A transaction that is not an NPP payment has no `extendedData`.
 
+[adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md
 [cdr-rules]: https://www.legislation.gov.au/F2020L00094/latest/text
 [cds-withdrawal-standards]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#withdrawal-standards
 [cds-product-categories]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#product-categories

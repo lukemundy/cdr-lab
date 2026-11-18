@@ -1,6 +1,7 @@
 # 0014. Build web UIs as React single-page applications that the service that owns their data embeds and serves
 
 - Date: 2026-10-22
+- Amended by [ADR-0025](0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md): the listener of an operator console
 
 ## Context
 

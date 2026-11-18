@@ -34,7 +34,7 @@ None.
 
 - The CA keys, the lab directory and the permissions of the key files. The [PKI specification](../../pki/DESIGN.md) gives these.
 - The check of the participant names in a CSR ([only the Register checks the participant names of a CSR](../../pki/DESIGN.md#pki-0081)).
-- The list of revocations, the CRL numbers, the times of a new CRL and the CRL listener. The Register gives these ([the Register keeps the only list of revocations](../../pki/DESIGN.md#pki-0050)).
+- The list of revocations, the CRL numbers, the times of a new CRL and the listener and the path of the CRL. The Register gives these ([the Register keeps the only list of revocations](../../pki/DESIGN.md#pki-0050)).
 
 ## CA structure
 

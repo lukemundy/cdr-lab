@@ -1,6 +1,6 @@
 # Web UI library
 
-The web UI library serves a [web UI](../../../docs/spec/glossary.md#web-ui) and its API on one listener. The lab services use it for the operator consoles of the Register and the data holder, and for the online bank site of the data holder. It gives the browser security of the listener, the cache headers, the routes of the UI and its API, and the list parameters of the API. Each service gives the UI, the operations of the API and the names of the settings.
+The web UI library serves a [web UI](../../../docs/spec/glossary.md#web-ui) and its API as one group of routes on a listener. The lab services use it for the operator consoles of the Register and the data holder, and for the online bank site of the data holder. It gives the browser security of the routes of the web UI, the cache headers, the routes of the UI and its API, and the list parameters of the API. Each service gives the UI, the operations of the API and the names of the settings.
 
 ## Context
 
@@ -41,20 +41,21 @@ flowchart LR
 - The format of the values of the `Host` allowlist, and their comparison. The [Host allowlist library](../hostallowlist/DESIGN.md) gives them.
 - The format of a problem details body. The [problem details library](../problem/DESIGN.md) gives it.
 - The operations of each API, the total of a list and the other query parameters. The specification of each service gives them.
-- The brand files that a service serves on the listener.
+- The brand files that a service serves with the web UI.
+- The other groups of routes on the listener, and their paths. The specification of each service gives them.
 
-## Listener
+## Listener and allowlist
 
-- <a id="cnsl-0001"></a>**CNSL-0001** The web UI and its API are on one listener, so they have one origin. ([ADR 0014][adr-0014])
-- <a id="cnsl-0002"></a>**CNSL-0002** The listener is off when its setting has no value or is false. A true value of the setting turns the listener on. For example, the Register console is on when `CONSOLE_ENABLED` is `true`. ([Judgement: the web UI is off by default](#cnsl-0018))
-- <a id="cnsl-0003"></a>**CNSL-0003** When the listener is on, the setting of the `Host` allowlist is required, and it has no default. ([Judgement: a Host allowlist with no default](#cnsl-0019))
-- <a id="cnsl-0004"></a>**CNSL-0004** The listener refuses each request, with each method, whose `Host` header is not in the allowlist. The response is 403 with a problem details body. ([Vite advisory GHSA-vg6x-rcgg-rjx6][vite-dns-rebinding]; [Judgement: a Host allowlist with no default](#cnsl-0019))
+- <a id="cnsl-0001"></a>**CNSL-0001** The web UI and its API are one group of routes on one listener, so they have one origin. The listener can also serve other groups of routes. ([ADR 0014][adr-0014]; [Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
+- <a id="cnsl-0002"></a>**CNSL-0002** The web UI is off when its setting has no value or is false. A true value of the setting turns the web UI on. For example, the Register console is on when `CONSOLE_ENABLED` is `true`. ([Judgement: the web UI is off by default](#cnsl-0018))
+- <a id="cnsl-0003"></a>**CNSL-0003** When the web UI is on, the setting of its `Host` allowlist is required, and it has no default. ([Judgement: a Host allowlist with no default](#cnsl-0019))
+- <a id="cnsl-0004"></a>**CNSL-0004** The routes of the web UI refuse each request, with each method, whose `Host` header is not in the allowlist. The response is 403 with a problem details body. ([Vite advisory GHSA-vg6x-rcgg-rjx6][vite-dns-rebinding]; [Judgement: a Host allowlist with no default](#cnsl-0019))
 
 ## Browser security
 
-- <a id="cnsl-0005"></a>**CNSL-0005** When the browser says that a request is cross-origin, the listener refuses each method other than GET, HEAD and OPTIONS. The browser says this with a `Sec-Fetch-Site` other than `same-origin` or `none`, or with an `Origin` that is not the host. The response is 403 with a problem details body. ([Go: CrossOriginProtection][go-cop]; [OWASP: CSRF Prevention][owasp-csrf])
-- <a id="cnsl-0006"></a>**CNSL-0006** The responses have no CORS headers, so a browser permits no cross-origin request. ([OWASP ASVS 5.0, V3.4.2][asvs-v3])
-- <a id="cnsl-0007"></a>**CNSL-0007** Each response has these headers. ([OWASP ASVS 5.0, V3.4][asvs-v3]; [RFC 9700, section 4.16][rfc9700-clickjacking]; [Judgement: a strict CSP with Trusted Types](#cnsl-0020))
+- <a id="cnsl-0005"></a>**CNSL-0005** When the browser says that a request is cross-origin, the routes of the web UI refuse each method other than GET, HEAD and OPTIONS. The browser says this with a `Sec-Fetch-Site` other than `same-origin` or `none`, or with an `Origin` that is not the host. The response is 403 with a problem details body. ([Go: CrossOriginProtection][go-cop]; [OWASP: CSRF Prevention][owasp-csrf])
+- <a id="cnsl-0006"></a>**CNSL-0006** The responses of the web UI have no CORS headers, so a browser permits no cross-origin request. ([OWASP ASVS 5.0, V3.4.2][asvs-v3])
+- <a id="cnsl-0007"></a>**CNSL-0007** Each response of the web UI has these headers. ([OWASP ASVS 5.0, V3.4][asvs-v3]; [RFC 9700, section 4.16][rfc9700-clickjacking]; [Judgement: a strict CSP with Trusted Types](#cnsl-0020))
   - `Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; require-trusted-types-for 'script'`
   - `X-Content-Type-Options: nosniff`
   - `Referrer-Policy: no-referrer`
@@ -70,7 +71,7 @@ flowchart LR
 
 - <a id="cnsl-0011"></a>**CNSL-0011** The API is under the path `/api/`. ([Judgement: one prefix for the API](#cnsl-0022))
 - <a id="cnsl-0012"></a>**CNSL-0012** A request under `/api/` whose path and method are not an operation of the API gives 404 with a problem details body. For example, `GET /api/unknown` gives 404. ([RFC 9110, section 15.5.5][rfc9110-404])
-- <a id="cnsl-0013"></a>**CNSL-0013** A GET for a path that is not under `/api/` and is not a file of the web UI gives the HTML page. The web UI then shows its own route or its "not found" page. ([Judgement: the web UI routes in the browser](#cnsl-0023))
+- <a id="cnsl-0013"></a>**CNSL-0013** A GET for a path that is not under `/api/`, is not a file of the web UI and is not a path of a different group of routes gives the HTML page. The web UI then shows its own route or its "not found" page. For example, on the internal listener, `GET /readyz` and `GET /v1/unknown` do not give the HTML page. ([Judgement: the web UI routes in the browser](#cnsl-0023); [Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
 
 ## Lists
 
@@ -84,7 +85,7 @@ flowchart LR
 ### <a id="cnsl-0018"></a>CNSL-0018 The web UI is off by default
 
 - Kind: choice
-- Basis: Step 3.3. The CDS and the ACCC give no rule for a lab web UI. [ADR 0014][adr-0014] gives a listener for each web UI.
+- Basis: Step 3.3. The CDS and the ACCC give no rule for a lab web UI. [ADR 0014][adr-0014] gives the web UIs.
 - Reason: A production service has no such UI. A deployment must not get one without an explicit setting.
 
 ### <a id="cnsl-0019"></a>CNSL-0019 A Host allowlist with no default
@@ -140,6 +141,7 @@ flowchart LR
 None.
 
 [adr-0014]: ../../../docs/adr/0014-web-uis-as-embedded-react-single-page-applications.md
+[adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md
 [asvs-v3]: https://github.com/OWASP/ASVS/blob/v5.0.0_release/5.0/en/0x12-V3-Web-Frontend-Security.md
 [bcd-trusted-types]: https://github.com/mdn/browser-compat-data/blob/main/api/TrustedTypePolicyFactory.json
 [cds-pagination]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#pagination

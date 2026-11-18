@@ -28,13 +28,13 @@ This area gives the revocation of a CDR certificate, the CRL that the Register s
 - <a id="reg-0712"></a>**REG-0712** The Register signs a new CRL no later than 24 hours after the `thisUpdate` of the current CRL, also after a suspend of the host. ([a new CRL at least once every 24 hours](../../../pki/DESIGN.md#pki-0061); [Judgement: a new CRL 24 hours after the `thisUpdate` of the current CRL](#reg-0750))
 - <a id="reg-0713"></a>**REG-0713** The Register serves only its newest CRL. ([ACCC CP, section 4.9.7][accc-cp])
 - <a id="reg-0714"></a>**REG-0714** A request never gets a CRL that is only partly written. ([ACCC CPS, section 4.10.2][accc-cps])
-- <a id="reg-0715"></a>**REG-0715** The CRL listener is a plain HTTP listener, separate from each other listener of the Register. ([RFC 5280, section 4.2.1.13][rfc5280-crldp]; [Judgement: a plain HTTP CRL listener with no authentication](#reg-0751))
-- <a id="reg-0716"></a>**REG-0716** The CRL listener needs no authentication. ([Judgement: a plain HTTP CRL listener with no authentication](#reg-0751))
-- <a id="reg-0717"></a>**REG-0717** The CRL listener does not check the `Host` header. ([Judgement: a plain HTTP CRL listener with no authentication](#reg-0751))
+- <a id="reg-1505"></a>**REG-1505** The Register serves the CRL on [the internal listener](deployment.md#reg-1499). ([RFC 5280, section 4.2.1.13][rfc5280-crldp]; [Judgement: the CRL on the internal listener, with no authentication](#reg-0751))
+- <a id="reg-0716"></a>**REG-0716** The CRL path needs no authentication. ([Judgement: the CRL on the internal listener, with no authentication](#reg-0751))
+- <a id="reg-0717"></a>**REG-0717** The CRL path does not check the `Host` header. For example, a request with the IP address of the pod as its `Host` gets the CRL. ([Judgement: the CRL on the internal listener, with no authentication](#reg-0751))
 - <a id="reg-0718"></a>**REG-0718** `GET /crl/cdr-intermediate.crl` gives 200 with [the current CRL in DER](../../../pkg/ca/DESIGN.md#ca-0044) and [the content type `application/pkix-crl`](../../../pki/DESIGN.md#pki-0064). ([RFC 2585, section 4.2][rfc2585-mime])
 - <a id="reg-0719"></a>**REG-0719** `HEAD /crl/cdr-intermediate.crl` gives the headers of the `GET` response, with no body. ([RFC 9110, section 9.1][rfc9110-methods])
 - <a id="reg-0720"></a>**REG-0720** A different method on the CRL path gives 405 with an `Allow` header. ([RFC 9110, section 15.5.6][rfc9110-405])
-- <a id="reg-0721"></a>**REG-0721** A different path on the CRL listener gives 404. ([RFC 9110, section 15.5.5][rfc9110-404])
+- <a id="reg-0721"></a>**REG-0721** A different path under `/crl/` gives 404. ([RFC 9110, section 15.5.5][rfc9110-404])
 - <a id="reg-0722"></a>**REG-0722** When the Register has no current CRL, the CRL path gives 503. ([RFC 9110, section 15.6.4][rfc9110-503]; [Judgement: 503 with no current CRL](#reg-0754))
 - <a id="reg-0723"></a>**REG-0723** The URL of the CRL is a required setting of the Register, with no default. ([the CRL distribution point of a CDR certificate](../../../pkg/ca/DESIGN.md#ca-0034))
 - <a id="reg-0724"></a>**REG-0724** Each certificate that the Register issues gives the URL of this setting as its CRL distribution point. ([the CRL distribution point of a CDR certificate](../../../pkg/ca/DESIGN.md#ca-0034))
@@ -121,11 +121,11 @@ This area gives the revocation of a CDR certificate, the CRL that the Register s
 - Basis: Step 3.3. The [ACCC CP, section 4.9.7, Table 1][accc-cp] gives a CRL at least once every 24 hours, with no start time. A background job follows [ADR 0010][adr-0010].
 - Reason: A periodic job compares the time of day with the `thisUpdate` of the newest CRL, so its first run after a suspend of the host signs a new CRL. A timer of 24 hours does not count the time of a suspend.
 
-### <a id="reg-0751"></a>REG-0751 A plain HTTP CRL listener with no authentication
+### <a id="reg-0751"></a>REG-0751 The CRL on the internal listener, with no authentication
 
 - Kind: choice
 - Basis: Step 3.2. Relying parties get the CRL from the HTTP URL in the certificate ([RFC 5280, section 4.2.1.13][rfc5280-crldp]), and [a CDR certificate gives one CRL distribution point](../../../pkg/ca/DESIGN.md#ca-0034) with an `http` URL. A CRL is signed, so it needs no TLS.
-- Reason: A TLS listener needs a revocation check of its own certificate. The CRL is public data, so the operator token does not apply, and a DNS rebinding attack gets only public data. The probe listener is for the deployment, not for participants, and [ADR 0022][adr-0022] gives the CRL its own listener.
+- Reason: A TLS listener needs a revocation check of its own certificate. The CRL is public data, so the operator token and the `Host` allowlist do not apply, and a DNS rebinding attack gets only public data. [ADR 0025][adr-0025] puts the CRL on the internal listener, and a deployment exposes only the CRL path of that listener.
 
 ### <a id="reg-0752"></a>REG-0752 The newest CRL at each connection
 
@@ -164,3 +164,4 @@ This area gives the revocation of a CDR certificate, the CRL that the Register s
 [adr-0010]: ../../../docs/adr/0010-background-jobs-with-river.md
 [adr-0021]: ../../../docs/adr/0021-record-one-business-fact-in-each-event-type.md
 [adr-0022]: ../../../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
+[adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md

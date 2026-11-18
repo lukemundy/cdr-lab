@@ -40,9 +40,9 @@ flowchart LR
 ## Values
 
 - <a id="host-0001"></a>**HOST-0001** Each value of an allowlist is a value of the `Host` header, in one of these forms. ([RFC 9110, section 7.2][rfc9110-host])
-  - a host and a port, for example `127.0.0.1:8082`
+  - a host and a port, for example `127.0.0.1:8080`
   - a host with no port, for a client that uses the default port of its scheme, for example through a TLS proxy
-- <a id="host-0002"></a>**HOST-0002** The comparison of the `Host` header with a value has no difference for upper and lower case. For example, `LOCALHOST:8082` agrees with `localhost:8082`. ([RFC 3986, section 3.2.2][rfc3986-host])
+- <a id="host-0002"></a>**HOST-0002** The comparison of the `Host` header with a value has no difference for upper and lower case. For example, `LOCALHOST:8080` agrees with `localhost:8080`. ([RFC 3986, section 3.2.2][rfc3986-host])
 
 ## Judgements
 

@@ -112,20 +112,20 @@ This area gives the lab-only operator console: its functions, its presentation, 
 
 ## Listener and security
 
-The console is a web UI. The [web UI library](../../../pkg/platform/consolehttp/DESIGN.md) gives the rules of its listener, its browser security, its cache headers and its routes.
+The console is a web UI. The [web UI library](../../../pkg/platform/consolehttp/DESIGN.md) gives the rules of its `Host` allowlist, its browser security, its cache headers and its routes.
 
-- <a id="dh-1480"></a>**DH-1480** The console is on its own listener, separate from the CDR APIs and from the operator interface. ([the web UI and its API on one listener](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0001); [Judgement: web UIs that the service embeds (ADR 0014)][adr-0014])
+- <a id="dh-2627"></a>**DH-2627** The console is on [the internal listener](deployment.md#dh-2623), with the operator interface. ([the web UI and its API on one listener](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0001); [Judgement: web UIs that the service embeds (ADR 0014)][adr-0014]; [Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
 - <a id="dh-1481"></a>**DH-1481** The setting `CONSOLE_ENABLED` [turns the console on, and the console is off by default](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0002). ([Judgement: the web UI is off by default](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0018))
-- <a id="dh-1482"></a>**DH-1482** The setting `CONSOLE_ALLOWED_HOSTS` is [the `Host` allowlist of the console](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0004). Its values are [the values of the `Host` header](../../../pkg/platform/hostallowlist/DESIGN.md#host-0001), with [no difference for upper and lower case](../../../pkg/platform/hostallowlist/DESIGN.md#host-0002). For example, `127.0.0.1:8184`. ([Judgement: a Host allowlist with no default](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0019))
-- <a id="dh-1483"></a>**DH-1483** The console listener is plain HTTP. ([Judgement: plain HTTP for the console](#dh-1527))
+- <a id="dh-1482"></a>**DH-1482** [The `Host` allowlist of the console](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0004) is [the setting `INTERNAL_ALLOWED_HOSTS`](deployment.md#dh-2624), with [no difference for upper and lower case](../../../pkg/platform/hostallowlist/DESIGN.md#host-0002). For example, `127.0.0.1:8180`. ([Judgement: a Host allowlist with no default](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0019))
+- <a id="dh-1483"></a>**DH-1483** The console uses plain HTTP. ([Judgement: plain HTTP for the console](#dh-1527))
 - <a id="dh-1484"></a>**DH-1484** The console has no sign-in, and the browser gets no credential. ([Judgement: web UIs that the service embeds (ADR 0014)][adr-0014])
-- <a id="dh-1485"></a>**DH-1485** The console listener serves the logo at `/brand/logo.svg`, the mark at `/brand/mark.svg` and a stylesheet at `/brand/console.css`. They have [the `Host` allowlist](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0004) and [the response headers](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0007) of the console. ([Judgement: the console listener serves its own copy of the brand files](#dh-1528))
-- <a id="dh-1486"></a>**DH-1486** The stylesheet of the console sets only the roles of the brand that the console uses. ([Judgement: the console listener serves its own copy of the brand files](#dh-1528))
-- <a id="dh-1487"></a>**DH-1487** The data holder starts the console listener only in the process that runs the APIs. A process that runs only the workers needs no console setting. ([a process needs only the settings that it uses](non-functional-requirements.md#dh-0010))
+- <a id="dh-1485"></a>**DH-1485** The console serves the logo at `/brand/logo.svg`, the mark at `/brand/mark.svg` and a stylesheet at `/brand/console.css`. They have [the `Host` allowlist](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0004) and [the response headers](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0007) of the console. ([Judgement: the console serves its own copy of the brand files](#dh-1528))
+- <a id="dh-1486"></a>**DH-1486** The stylesheet of the console sets only the roles of the brand that the console uses. ([Judgement: the console serves its own copy of the brand files](#dh-1528))
+- <a id="dh-1487"></a>**DH-1487** The data holder serves the console only in the process that runs the APIs. A process that runs only the workers needs no console setting. ([a process needs only the settings that it uses](non-functional-requirements.md#dh-0010))
 
 ## Non-functional requirements
 
-- <a id="dh-1488"></a>**DH-1488** Telemetry: the console API has the same server telemetry as the other listeners, and [the telemetry rules of the data holder](non-functional-requirements.md#dh-0008) apply to it. ([Judgement: telemetry with OpenTelemetry (ADR 0006)][adr-0006])
+- <a id="dh-1488"></a>**DH-1488** Telemetry: the console API has the same server telemetry as the other routes of the data holder, and [the telemetry rules of the data holder](non-functional-requirements.md#dh-0008) apply to it. ([Judgement: telemetry with OpenTelemetry (ADR 0006)][adr-0006])
 - <a id="dh-1489"></a>**DH-1489** Telemetry: no log of the console contains the query string of a request, and [no span contains it](../../../pkg/platform/telemetry/DESIGN.md#tele-0007). For example, a search for a customer name puts no name in telemetry. ([no personal information in telemetry](non-functional-requirements.md#dh-0008); [Judgement: a search of the customers by customer number, name or email address](#dh-1503))
 - <a id="dh-1490"></a>**DH-1490** Telemetry: the UI sends no telemetry. ([Judgement: web UIs that the service embeds (ADR 0014)][adr-0014])
 - <a id="dh-1491"></a>**DH-1491** Performance: on a development workstation, a search of 1,000 customers shows within 1 second. ([Judgement: limits of 1 second, as for the Register console](#dh-1529))
@@ -253,7 +253,7 @@ The console is a web UI. The [web UI library](../../../pkg/platform/consolehttp/
 - Basis: Step 3.3. All lab ports bind to `127.0.0.1`, and the console sets no cookie ([ADR 0014][adr-0014]).
 - Reason: The operator interface is also plain HTTP. With no cookie, the console needs no `Secure` attribute.
 
-### <a id="dh-1528"></a>DH-1528 The console listener serves its own copy of the brand files
+### <a id="dh-1528"></a>DH-1528 The console serves its own copy of the brand files
 
 - Kind: choice
 - Basis: Step 3.3. The Content Security Policy of the console permits images and styles from the same origin only ([a strict CSP](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0020)).
@@ -274,5 +274,6 @@ The console is a web UI. The [web UI library](../../../pkg/platform/consolehttp/
 [adr-0006]: ../../../docs/adr/0006-telemetry.md
 [adr-0012]: ../../../docs/adr/0012-utc-for-all-times.md
 [adr-0014]: ../../../docs/adr/0014-web-uis-as-embedded-react-single-page-applications.md
+[adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md
 [asvs-v3]: https://github.com/OWASP/ASVS/blob/v5.0.0_release/5.0/en/0x12-V3-Web-Frontend-Security.md
 [wcag-1-1-1]: https://www.w3.org/TR/WCAG22/#non-text-content

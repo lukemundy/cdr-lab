@@ -1,6 +1,6 @@
 # Operator interface library
 
-The operator interface library gives the HTTP rules that the [operator interfaces](../../../docs/spec/glossary.md#operator-interface) of the Register and the data holder share: the [operator token](../../../docs/spec/glossary.md#operator-token), the `Host` allowlist and the browser access. Each service gives its listener, its operations and their errors.
+The operator interface library gives the HTTP rules that the [operator interfaces](../../../docs/spec/glossary.md#operator-interface) of the Register and the data holder share: the [operator token](../../../docs/spec/glossary.md#operator-token), the `Host` allowlist and the browser access. Each service gives its listener, the path prefix of its operator interface, its operations and their errors.
 
 ## Context
 
@@ -36,24 +36,25 @@ flowchart LR
 
 ## Non-goals
 
-- The listener, TLS and the operations of each operator interface. The specification of each service gives them.
+- The listener, the path prefix, TLS and the operations of each operator interface. The specification of each service gives them.
+- The other groups of routes on the listener. The specification of each service gives them.
 - An identity for each operator. [Production gaps](../../../docs/production-gaps.md) gives this gap.
 
 ## Operator token
 
-- <a id="opi-0001"></a>**OPI-0001** Each request must have the operator token as a bearer token. This includes a request for an unknown path. ([RFC 6750][rfc6750]; [Judgement: one bearer token from the configuration](#opi-0008))
+- <a id="opi-0001"></a>**OPI-0001** Each request for a path under the prefix of the operator interface must have the operator token as a bearer token. This includes a request for an unknown path under the prefix. For example, `GET /v1/unknown` with no token gets 401. ([RFC 6750][rfc6750]; [Judgement: one bearer token from the configuration](#opi-0008))
 - <a id="opi-0002"></a>**OPI-0002** A request with no bearer token gets 401 with `WWW-Authenticate: Bearer`. ([RFC 6750, section 3.1][rfc6750-errors])
 - <a id="opi-0003"></a>**OPI-0003** A request with a different bearer token gets 401 with `WWW-Authenticate: Bearer error="invalid_token"`. ([RFC 6750, section 3.1][rfc6750-errors])
 - <a id="opi-0004"></a>**OPI-0004** The service gets the operator token from its configuration. For example, the setting `OPERATOR_TOKEN` gives the token. ([Judgement: one bearer token from the configuration](#opi-0008))
 
 ## Host allowlist
 
-- <a id="opi-0005"></a>**OPI-0005** The operator interface refuses each request, with each method and path, whose `Host` header is not in the allowlist. The response is 403 with a problem details body, and the interface does not examine the token. ([Vite advisory GHSA-vg6x-rcgg-rjx6][vite-dns-rebinding]; [Judgement: a Host allowlist with no default](#opi-0009))
-- <a id="opi-0006"></a>**OPI-0006** The allowlist is a setting with [the values of the `Host` header](../hostallowlist/DESIGN.md#host-0001), for example `OPERATOR_ALLOWED_HOSTS`. The setting is required, and has no default. ([Judgement: a Host allowlist with no default](#opi-0009))
+- <a id="opi-0005"></a>**OPI-0005** The operator interface refuses each request, with each method and each path under its prefix, whose `Host` header is not in the allowlist. The response is 403 with a problem details body, and the interface does not examine the token. ([Vite advisory GHSA-vg6x-rcgg-rjx6][vite-dns-rebinding]; [Judgement: a Host allowlist with no default](#opi-0009))
+- <a id="opi-0006"></a>**OPI-0006** The allowlist is a setting with [the values of the `Host` header](../hostallowlist/DESIGN.md#host-0001), for example `INTERNAL_ALLOWED_HOSTS`. The setting is required, and has no default. ([Judgement: a Host allowlist with no default](#opi-0009))
 
 ## Browser access
 
-- <a id="opi-0007"></a>**OPI-0007** The responses have no CORS headers, so a browser permits no cross-origin request. ([OWASP ASVS 5.0, V3.4.2][asvs-v3])
+- <a id="opi-0007"></a>**OPI-0007** The responses of the operator interface have no CORS headers, so a browser permits no cross-origin request. ([OWASP ASVS 5.0, V3.4.2][asvs-v3])
 
 ## Judgements
 
