@@ -15,7 +15,8 @@ test("the operator opens the list of the client registrations and the detail of 
 
   await expect(page).toHaveURL("/registrations");
   const table = page.getByRole("table", { name: "Client registrations" });
-  // With no registrations, the first row has the empty state.
+  // While the table loads, the first row has the loading state. With no registrations, it then has the empty state.
+  await expect(table).not.toHaveAttribute("aria-busy");
   await expect(table.getByRole("row").nth(1)).toBeVisible();
   test.skip(
     await page.getByText("No client registrations").isVisible(),

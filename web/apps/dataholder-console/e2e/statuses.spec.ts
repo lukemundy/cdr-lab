@@ -45,7 +45,8 @@ test("the operator filters the statuses by the registration", async ({ page }) =
 
   await expect(page).toHaveURL("/register-statuses?registration=registered");
   await expect(table.getByText(removedProduct)).toHaveCount(0);
-  // With no registrations, the first row has the empty state.
+  // While the table loads, the first row has the loading state. With no registrations, it then has the empty state.
+  await expect(table).not.toHaveAttribute("aria-busy");
   await expect(table.getByRole("row").nth(1)).toBeVisible();
   // A registration needs an SSA of the Register and a signed request, so this part uses the registrations that the
   // conformance suite makes (mise run conformance).
