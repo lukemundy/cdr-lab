@@ -40,6 +40,11 @@
       "allowedVersions": "<7"
     },
     {
+      "description": "The tags of the OpenID conformance suite have the prefix release-v, which the docker versioning does not read as a version.",
+      "matchDepNames": ["registry.gitlab.com/openid/conformance-suite"],
+      "versioning": "regex:^release-v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
+    },
+    {
       "description": "Node and pnpm install and build the web workspace, and pnpm applies its supply-chain controls. Wait 3 days, as for npm. The Node image also waits, so that the node group updates mise.toml and the image together.",
       "matchDepNames": ["node", "pnpm", "docker.io/library/node"],
       "minimumReleaseAge": "3 days"
