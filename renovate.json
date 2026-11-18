@@ -35,6 +35,11 @@
       "addLabels": ["no-automerge"]
     },
     {
+      "description": "The OpenID conformance suite needs the major version of MongoDB that its docker-compose-prebuilt.yml gives. Change the major version only when a new release of the suite changes it.",
+      "matchDepNames": ["docker.io/library/mongo"],
+      "allowedVersions": "<7"
+    },
+    {
       "description": "Node and pnpm install and build the web workspace, and pnpm applies its supply-chain controls. Wait 3 days, as for npm. The Node image also waits, so that the node group updates mise.toml and the image together.",
       "matchDepNames": ["node", "pnpm", "docker.io/library/node"],
       "minimumReleaseAge": "3 days"
