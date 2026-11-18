@@ -39,7 +39,14 @@ import (
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/domain"
 )
 
-func apiListeners(ctx context.Context, pool *pgxpool.Pool, cfg apiConfig, parts shared) ([]httpserver.Listener, error) {
+// apiListeners also adds the operator interface and the console to the mux of the internal listener.
+func apiListeners(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	cfg apiConfig,
+	parts shared,
+	internal *http.ServeMux,
+) ([]httpserver.Listener, error) {
 	jtis := jtistore.New(pool)
 	transactions := transactionstore.New(pool)
 	disclosures := disclosurestore.New(pool)
@@ -135,17 +142,11 @@ func apiListeners(ctx context.Context, pool *pgxpool.Pool, cfg apiConfig, parts 
 	})
 	authServer.RegisterSecure(secure)
 
-	operator := http.NewServeMux()
 	customers := app.Customers{
 		Store: parts.customers, Arrangements: parts.arrangements, Transactions: transactions, Random: randomUint64,
 		NewID: uuid.NewString, Now: time.Now, Products: products, BSB: cfg.brand.BSB,
 	}
-	operatorapi.Register(
-		operator,
-		customers,
-		parts.arrangements,
-		cfg.operator,
-	)
+	operatorapi.Register(internal, customers, parts.arrangements, cfg.operator)
 
 	clientCAs := x509.NewCertPool()
 	for _, ca := range cfg.cdrCAs {
@@ -155,7 +156,7 @@ func apiListeners(ctx context.Context, pool *pgxpool.Pool, cfg apiConfig, parts 
 	revocations := revocation.NewChecker(cfg.cdrCAs)
 	revocations.MaxAge = cfg.crlMaxAge
 
-	consoles, err := consoleListeners(cfg.console, console.UI(), console.Ports{
+	err = registerConsole(internal, cfg.console, cfg.consoleUI, console.Ports{
 		BrandName:  cfg.brand.Name,
 		BrandFiles: func(routes *httproute.Routes) { cfg.brand.RegisterConsole(routes) },
 		Customers:  parts.customers,
@@ -199,7 +200,7 @@ func apiListeners(ctx context.Context, pool *pgxpool.Pool, cfg apiConfig, parts 
 		return nil, err
 	}
 
-	listeners := append([]httpserver.Listener{
+	return append([]httpserver.Listener{
 		{
 			Port: apiPort,
 			Handler: httpapi.AllowAnyOrigin(
@@ -208,15 +209,12 @@ func apiListeners(ctx context.Context, pool *pgxpool.Pool, cfg apiConfig, parts 
 			),
 			TLSConfig: cds.TLSConfig(cfg.publicCert),
 		},
-		{Port: operatorPort, Handler: telemetry.NewHTTPHandler(operator)},
 		{
 			Port:      securePort,
 			Handler:   cds.InteractionID(telemetry.NewHTTPHandler(secure)),
 			TLSConfig: cds.MutualTLSConfig(ctx, cfg.secureCert, clientCAs, revocations.Check),
 		},
-	}, consoles...)
-
-	return append(listeners, sites...), nil
+	}, sites...), nil
 }
 
 // arrangementRevoker gives the authorisation server the error that it knows.

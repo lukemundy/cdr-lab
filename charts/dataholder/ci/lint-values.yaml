@@ -5,7 +5,6 @@ brand:
   configMap: bank-brand
 console:
   enabled: true
-  allowedHosts: [localhost:8084]
 bankSite:
   enabled: true
   allowedHosts: [localhost:8085]

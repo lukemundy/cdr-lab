@@ -51,7 +51,7 @@ func loadConfig(m mode) (config, error) {
 	}
 
 	var err error
-	if cfg.operator, err = operatorhttp.LoadConfig(operatorhttp.AllowedHostsEnv); err != nil {
+	if cfg.operator, err = operatorhttp.LoadConfig(); err != nil {
 		return config{}, err
 	}
 

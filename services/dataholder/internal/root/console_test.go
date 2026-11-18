@@ -1,6 +1,7 @@
 package root
 
 import (
+	"io/fs"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/lukemundy/cdr-lab/pkg/platform/consolehttp"
+	"github.com/lukemundy/cdr-lab/pkg/platform/telemetry"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/console"
 )
 
@@ -18,23 +20,33 @@ var ui = fstest.MapFS{"index.html": {Data: []byte("<!doctype html><title>Data ho
 // The host of a request from httptest.NewRequestWithContext.
 var testConsole = consolehttp.Config{Enabled: true, AllowedHosts: []string{"example.com"}}
 
-// Verifies: DH-1481
-func TestWithoutTheSettingTheDataHolderOpensNoConsoleListener(t *testing.T) {
-	listeners, err := consoleListeners(consolehttp.Config{}, ui, console.Ports{})
+// testConsoleRoutes gives the console routes of the internal listener, with no other group.
+func testConsoleRoutes(ui fs.FS, ports console.Ports) (http.Handler, error) {
+	mux := http.NewServeMux()
+	if err := registerConsole(mux, testConsole, ui, ports); err != nil {
+		return nil, err
+	}
 
-	require.NoError(t, err)
-	assert.Empty(t, listeners)
+	return telemetry.NewHTTPHandler(mux), nil
 }
 
-func TestWithTheSettingTheConsolePortGivesTheHTMLPage(t *testing.T) {
-	listeners, err := consoleListeners(testConsole, ui, console.Ports{})
-	require.NoError(t, err)
-	require.Len(t, listeners, 1)
-	assert.Equal(t, 8084, listeners[0].Port)
-	assert.Nil(t, listeners[0].TLSConfig)
+// Verifies: DH-1481
+func TestWithoutTheSettingTheInternalListenerHasNoConsole(t *testing.T) {
+	mux := http.NewServeMux()
+	require.NoError(t, registerConsole(mux, consolehttp.Config{}, ui, console.Ports{}))
 
 	rec := httptest.NewRecorder()
-	listeners[0].Handler.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/customers", nil))
+	mux.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil))
+
+	assert.Equal(t, http.StatusNotFound, rec.Code)
+}
+
+func TestWithTheSettingTheConsoleGivesTheHTMLPage(t *testing.T) {
+	consoleRoutes, err := testConsoleRoutes(ui, console.Ports{})
+	require.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	consoleRoutes.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/customers", nil))
 
 	require.Equal(t, http.StatusOK, rec.Code)
 	assert.Equal(t, "text/html; charset=utf-8", rec.Header().Get("Content-Type"))
@@ -43,25 +55,31 @@ func TestWithTheSettingTheConsolePortGivesTheHTMLPage(t *testing.T) {
 }
 
 // Verifies: DH-1482
-func TestTheConsolePortRefusesAHostThatIsNotAllowed(t *testing.T) {
-	listeners, err := consoleListeners(testConsole, ui, console.Ports{})
+func TestTheConsoleRefusesAHostThatIsNotAllowed(t *testing.T) {
+	consoleRoutes, err := testConsoleRoutes(ui, console.Ports{})
 	require.NoError(t, err)
 
-	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "http://attacker.example:8084/", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "http://attacker.example:8080/", nil)
 	rec := httptest.NewRecorder()
-	listeners[0].Handler.ServeHTTP(rec, req)
+	consoleRoutes.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusForbidden, rec.Code)
 }
 
 func TestTheConsoleDoesNotStartWithoutAUIBuild(t *testing.T) {
-	_, err := consoleListeners(testConsole, fstest.MapFS{".gitkeep": {}}, console.Ports{})
+	_, err := testConsoleRoutes(fstest.MapFS{".gitkeep": {}}, console.Ports{})
 
 	assert.ErrorContains(t, err, "index.html")
 }
 
-func TestTheAPIProcessOpensNoConsoleListenerWithoutTheSetting(t *testing.T) {
+func TestTheAPIProcessServesNoConsoleWithoutTheSetting(t *testing.T) {
 	lab := newOperatorLab(t)
 
-	assert.NotContains(t, lab.handlers, consolePort)
+	rec := httptest.NewRecorder()
+	lab.handlers[internalPort].ServeHTTP(
+		rec,
+		httptest.NewRequestWithContext(t.Context(), http.MethodGet, "http://"+operatorHost+"/customers", nil),
+	)
+
+	assert.Equal(t, http.StatusNotFound, rec.Code)
 }

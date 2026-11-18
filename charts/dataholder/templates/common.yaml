@@ -35,10 +35,7 @@ advancedMounts:
 {{- if eq (empty $v.brand.preset) (empty $v.brand.configMap) -}}
   {{- fail "set exactly one of brand.preset (the name of a preset brand) and brand.configMap (the ConfigMap of a brand directory)" -}}
 {{- end -}}
-{{- $_ := include "dataholder.required" (list "operator.allowedHosts" $v.operator.allowedHosts "the Host header values of the operator interface") -}}
-{{- if $v.console.enabled -}}
-  {{- $_ = include "dataholder.required" (list "console.allowedHosts" $v.console.allowedHosts "the Host header values of the console") -}}
-{{- end -}}
+{{- $_ := include "dataholder.required" (list "internal.allowedHosts" $v.internal.allowedHosts "the Host header values of the operator interface and the console") -}}
 {{- if $v.bankSite.enabled -}}
   {{- $_ = include "dataholder.required" (list "bankSite.allowedHosts" $v.bankSite.allowedHosts "the Host header values of the online bank site") -}}
 {{- end -}}
@@ -125,23 +122,16 @@ controllers:
           SMTP_ADDRESS: {{ include "dataholder.required" (list "mail.smtpAddress" $v.mail.smtpAddress "the host:port of the SMTP server") | quote }}
           MAIL_FROM: {{ include "dataholder.required" (list "mail.from" $v.mail.from "the sender address of the email") | quote }}
           OPERATOR_TOKEN: {{ include "dataholder.secretKey" (list (include "dataholder.required" (list "operator.tokenSecret" $v.operator.tokenSecret "the Secret of the operator token")) "token") | nindent 12 }}
-          OPERATOR_ALLOWED_HOSTS: {{ $v.operator.allowedHosts | join "," | quote }}
+          INTERNAL_ALLOWED_HOSTS: {{ $v.internal.allowedHosts | join "," | quote }}
           CONSOLE_ENABLED: {{ $v.console.enabled | toString | quote }}
-          {{- if $v.console.enabled }}
-          CONSOLE_ALLOWED_HOSTS: {{ $v.console.allowedHosts | join "," | quote }}
-          {{- end }}
           BANK_SITE_ENABLED: {{ $v.bankSite.enabled | toString | quote }}
           {{- if $v.bankSite.enabled }}
           BANK_SITE_ALLOWED_HOSTS: {{ $v.bankSite.allowedHosts | join "," | quote }}
           {{- end }}
         ports:
-          - {name: health, containerPort: 8080}
+          - {name: internal, containerPort: 8080}
           - {name: public, containerPort: 8081}
-          - {name: operator, containerPort: 8082}
           - {name: secure, containerPort: 8083}
-          {{- if $v.console.enabled }}
-          - {name: console, containerPort: 8084}
-          {{- end }}
           {{- if $v.bankSite.enabled }}
           - {name: bank-site, containerPort: 8085}
           {{- end }}
@@ -166,12 +156,9 @@ service:
     # A literal template, because the library can render the name only after it loads its defaults.
     forceRename: {{ `{{ include "bjw-s.common.lib.chart.names.fullname" . }}` | quote }}
     ports:
+      internal: {port: 8080}
       public: {port: 8081}
-      operator: {port: 8082}
       secure: {port: 8083}
-      {{- if $v.console.enabled }}
-      console: {port: 8084}
-      {{- end }}
       {{- if $v.bankSite.enabled }}
       bank-site: {port: 8085}
       {{- end }}

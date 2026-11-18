@@ -62,7 +62,7 @@ func Register(mux *http.ServeMux, customers Customers, arrangements Arrangements
 		"POST /v1/customers/{customerNumber}/arrangements/{arrangementId}/withdraw",
 		withdrawArrangement(arrangements),
 	)
-	routes.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	routes.Handle("/v1/", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		problem.Write(w, http.StatusNotFound, "The URL and method are not an operator action.")
 	}))
 }

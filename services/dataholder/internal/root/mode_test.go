@@ -41,11 +41,12 @@ func TestEachModeSubcommandIsAMode(t *testing.T) {
 	}
 }
 
+// Verifies: DH-2622, DH-2625
 func TestEachModeHasOnlyItsServersAndItsWorkers(t *testing.T) {
 	pool := databasetest.New(t)
 	require.NoError(t, migrate(t.Context(), pool))
 
-	allPorts := []int{probePort, apiPort, operatorPort, securePort}
+	allPorts := []int{internalPort, apiPort, securePort}
 
 	tests := map[string]struct {
 		mode  mode
@@ -54,7 +55,7 @@ func TestEachModeHasOnlyItsServersAndItsWorkers(t *testing.T) {
 	}{
 		"serve":  {mode: mode{api: true, workers: true}, ports: allPorts, works: true},
 		"api":    {mode: mode{api: true}, ports: allPorts},
-		"worker": {mode: mode{workers: true}, ports: []int{probePort}, works: true},
+		"worker": {mode: mode{workers: true}, ports: []int{internalPort}, works: true},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {

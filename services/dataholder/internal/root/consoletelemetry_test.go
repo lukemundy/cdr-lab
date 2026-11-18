@@ -271,7 +271,7 @@ func TestTheConsolePutsNoCustomerAccountOrTransactionDataInTheSpansMetricsOrLogs
 		},
 	}))
 
-	listeners, err := consoleListeners(testConsole, ui, console.Ports{
+	consoleRoutes, err := testConsoleRoutes(ui, console.Ports{
 		BrandName: "Coastal Bank",
 		Customers: store,
 		Details: app.CustomerDetails{
@@ -326,7 +326,7 @@ func TestTheConsolePutsNoCustomerAccountOrTransactionDataInTheSpansMetricsOrLogs
 
 	for target, status := range targets {
 		rec := httptest.NewRecorder()
-		listeners[0].Handler.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, target, nil))
+		consoleRoutes.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, target, nil))
 		require.Equal(t, status, rec.Code, target)
 	}
 
@@ -335,7 +335,7 @@ func TestTheConsolePutsNoCustomerAccountOrTransactionDataInTheSpansMetricsOrLogs
 
 	for _, status := range []int{http.StatusNoContent, http.StatusConflict} {
 		rec := httptest.NewRecorder()
-		listeners[0].Handler.ServeHTTP(
+		consoleRoutes.ServeHTTP(
 			rec,
 			httptest.NewRequestWithContext(t.Context(), http.MethodPost, closePath, strings.NewReader(`{"ends": []}`)),
 		)
@@ -354,13 +354,13 @@ func TestTheConsolePutsNoCustomerAccountOrTransactionDataInTheSpansMetricsOrLogs
 
 	for _, w := range withdrawals {
 		rec := httptest.NewRecorder()
-		listeners[0].Handler.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodPost, w.path, nil))
+		consoleRoutes.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodPost, w.path, nil))
 		require.Equal(t, w.status, rec.Code, w.path)
 	}
 
-	createCustomers(t, listeners[0].Handler)
-	createAccounts(t, listeners[0].Handler)
-	createTransactions(t, listeners[0].Handler)
+	createCustomers(t, consoleRoutes)
+	createAccounts(t, consoleRoutes)
+	createTransactions(t, consoleRoutes)
 
 	routes, customerQueries := map[string]int{}, 0
 

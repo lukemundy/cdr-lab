@@ -147,24 +147,10 @@ func setEnv(t *testing.T, tokenValue, hostsValue string) {
 func TestLoadConfigGetsTheTokenAndTheAllowedHosts(t *testing.T) {
 	setEnv(t, token, "127.0.0.1:8080, Register:8080")
 
-	got, err := operatorhttp.LoadConfig(operatorhttp.AllowedHostsEnv)
+	got, err := operatorhttp.LoadConfig()
 
 	require.NoError(t, err)
 	assert.Equal(t, operatorhttp.Config{Token: token, AllowedHosts: []string{"127.0.0.1:8080", "register:8080"}}, got)
-}
-
-func TestLoadConfigGetsTheAllowedHostsFromTheSettingThatTheServiceGives(t *testing.T) {
-	t.Setenv(operatorhttp.TokenEnv, token)
-	t.Setenv("OTHER_ALLOWED_HOSTS", "127.0.0.1:8182")
-
-	got, err := operatorhttp.LoadConfig("OTHER_ALLOWED_HOSTS")
-	require.NoError(t, err)
-	assert.Equal(t, []string{"127.0.0.1:8182"}, got.AllowedHosts)
-
-	t.Setenv("OTHER_ALLOWED_HOSTS", "")
-
-	_, err = operatorhttp.LoadConfig("OTHER_ALLOWED_HOSTS")
-	assert.ErrorContains(t, err, "OTHER_ALLOWED_HOSTS")
 }
 
 // Verifies: OPI-0004, OPI-0006
@@ -180,7 +166,7 @@ func TestLoadConfigNeedsEachSetting(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			setEnv(t, tt.token, tt.hosts)
 
-			_, err := operatorhttp.LoadConfig(operatorhttp.AllowedHostsEnv)
+			_, err := operatorhttp.LoadConfig()
 
 			assert.ErrorContains(t, err, tt.wantEnv)
 		})

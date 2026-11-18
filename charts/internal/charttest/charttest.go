@@ -8,6 +8,8 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
+	"slices"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -114,6 +116,21 @@ func (c Container) Vars() map[string]string {
 	}
 
 	return vars
+}
+
+// AllowlistVars gives the names of the Host allowlist variables, in order.
+func (c Container) AllowlistVars() []string {
+	var names []string
+
+	for _, e := range c.Env {
+		if strings.HasSuffix(e.Name, "_ALLOWED_HOSTS") {
+			names = append(names, e.Name)
+		}
+	}
+
+	slices.Sort(names)
+
+	return names
 }
 
 // Render uses the release name "test" and ci/test-values.yaml. The error is the stderr of helm.

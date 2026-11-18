@@ -48,6 +48,7 @@ type apiConfig struct {
 	cdrCAs     []*x509.Certificate
 	crlMaxAge  time.Duration
 	console    consolehttp.Config
+	consoleUI  fs.FS
 	bankSite   consolehttp.Config
 	// brandID is the dataHolderBrandId of the brand on the Register. Only the online bank site uses it.
 	brandID string
@@ -157,7 +158,7 @@ func loadAPIConfig() (apiConfig, error) {
 		)
 	}
 
-	if cfg.operator, err = operatorhttp.LoadConfig("OPERATOR_ALLOWED_HOSTS"); err != nil {
+	if cfg.operator, err = operatorhttp.LoadConfig(); err != nil {
 		return apiConfig{}, err
 	}
 
@@ -202,9 +203,11 @@ func loadAPIConfig() (apiConfig, error) {
 		return apiConfig{}, err
 	}
 
-	if cfg.console, err = console.Settings.LoadConfig(); err != nil {
+	if cfg.console, err = consolehttp.Console.LoadConfig(); err != nil {
 		return apiConfig{}, err
 	}
+
+	cfg.consoleUI = console.UI()
 
 	if cfg.bankSite, err = banksite.Settings.LoadConfig(); err != nil {
 		return apiConfig{}, err

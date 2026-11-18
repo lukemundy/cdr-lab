@@ -38,18 +38,23 @@ mail:
   # The sender address, with no display name.
   from: ""
 
-operator:
-  # The Host header values (host:port) of the operator interface.
+# The internal listener (port 8080) serves the health probes, the operator interface and the console.
+internal:
+  # The Host header values (host:port) of the operator interface and the console. The probes do not check the Host
+  # header.
   allowedHosts: []
+
+operator:
   # An existing Secret with the operator token in the key token.
   tokenSecret: ""
 
-# Lab-only. The Host header values (host:port) are required when the feature is on.
+# Lab-only.
 console:
+  # The console is on the internal listener, with internal.allowedHosts.
   enabled: false
-  allowedHosts: []
 bankSite:
   enabled: false
+  # The Host header values (host:port) of the online bank site (port 8085). Required when the site is on.
   allowedHosts: []
 
 telemetry:

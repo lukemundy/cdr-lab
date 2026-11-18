@@ -46,7 +46,7 @@ func certificateFiles(t *testing.T) (certFile, keyFile string) {
 	return certFile, keyFile
 }
 
-const operatorHost = "bank.test:8082"
+const operatorHost = "bank.test:8080"
 
 // testBrandDir is a valid brand directory with the brand name "Coastal Bank".
 const testBrandDir = "../adapter/branddir/testdata/valid"
@@ -70,7 +70,7 @@ func apiSettings(t *testing.T) map[string]string {
 		"SECURE_BASE_URL":        "https://mtls.bank.example",
 		"REGISTER_JWKS_URL":      "https://register.example/jwks",
 		"OPERATOR_TOKEN":         "test-operator-token",
-		"OPERATOR_ALLOWED_HOSTS": operatorHost,
+		"INTERNAL_ALLOWED_HOSTS": operatorHost,
 		"SMTP_ADDRESS":           "mail.bank.example:25",
 		"MAIL_FROM":              "no-reply@bank.example",
 		"SECURE_TLS_CERT_FILE":   certFile,
@@ -224,27 +224,34 @@ func TestFixedOTPsLoadAndAnEntryThatIsNotValidStopsTheStart(t *testing.T) {
 	assert.ErrorContains(t, err, "FIXED_OTPS")
 }
 
-func TestTheAPIsLoadTheConsoleSettings(t *testing.T) {
+// Verifies: DH-2629
+func TestTheAPIsDoNotStartWithoutTheAllowlistOfTheInternalListener(t *testing.T) {
+	for _, m := range []mode{apiMode, serveMode} {
+		setOnly(t, m)
+		t.Setenv("INTERNAL_ALLOWED_HOSTS", "")
+
+		_, err := loadConfig(m)
+
+		assert.ErrorContains(t, err, "INTERNAL_ALLOWED_HOSTS")
+	}
+}
+
+// Verifies: DH-1482, DH-2624
+func TestTheConsoleLoadsTheAllowlistOfTheInternalListener(t *testing.T) {
 	setOnly(t, apiMode)
 	t.Setenv("CONSOLE_ENABLED", "true")
-	t.Setenv("CONSOLE_ALLOWED_HOSTS", "bank.test:8084")
 
 	cfg, err := loadConfig(apiMode)
 
 	require.NoError(t, err)
-	assert.Equal(t, consolehttp.Config{Enabled: true, AllowedHosts: []string{"bank.test:8084"}}, cfg.api.console)
-
-	t.Setenv("CONSOLE_ALLOWED_HOSTS", "")
-
-	_, err = loadConfig(apiMode)
-	assert.ErrorContains(t, err, "CONSOLE_ALLOWED_HOSTS")
+	assert.Equal(t, consolehttp.Config{Enabled: true, AllowedHosts: []string{operatorHost}}, cfg.api.console)
 }
 
 // Verifies: DH-1487
 func TestTheWorkersNeedNoConsoleSettingAndNoBrandSetting(t *testing.T) {
 	setOnly(t, workerMode)
 	t.Setenv("CONSOLE_ENABLED", "true")
-	t.Setenv("CONSOLE_ALLOWED_HOSTS", "")
+	t.Setenv("INTERNAL_ALLOWED_HOSTS", "")
 	t.Setenv("DATA_HOLDER_BRAND", "")
 	t.Setenv("DATA_HOLDER_BRAND_DIR", "")
 

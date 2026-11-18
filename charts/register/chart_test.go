@@ -120,7 +120,7 @@ func TestTheConsoleCanBeTurnedOnWithNoPortOrAllowlistOfItsOwn(t *testing.T) {
 	main := charttest.Main(t, objects)
 
 	assert.Equal(t, "true", main.Vars()["CONSOLE_ENABLED"])
-	assert.NotContains(t, main.Vars(), "CONSOLE_ALLOWED_HOSTS")
+	assert.Equal(t, []string{"INTERNAL_ALLOWED_HOSTS"}, main.AllowlistVars())
 	assert.Equal(t, charttest.ServicePorts(t, charttest.MustRender(t)), charttest.ServicePorts(t, objects))
 }
 

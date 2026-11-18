@@ -30,7 +30,7 @@ func initContainer(t *testing.T, objects []charttest.Object, name string) chartt
 func TestEachRequiredValueFailsTheRenderWithItsName(t *testing.T) {
 	for _, value := range []string{
 		"image.tag", "brand.id", "publicBaseURL", "secureBaseURL", "register.publicBaseURL", "register.statusInterval",
-		"mail.smtpAddress", "mail.from", "operator.allowedHosts", "operator.tokenSecret", "telemetry.otlpEndpoint",
+		"mail.smtpAddress", "mail.from", "internal.allowedHosts", "operator.tokenSecret", "telemetry.otlpEndpoint",
 		"database.host", "database.name", "database.ownerSecret", "database.serviceSecret",
 		"pki.publicTLSSecret", "pki.secureTLSSecret", "pki.caBundleSecret",
 	} {
@@ -170,7 +170,7 @@ func TestTheDataHolderGetsItsConfiguration(t *testing.T) {
 		"SMTP_ADDRESS":                "mail.test:25",
 		"MAIL_FROM":                   "no-reply@bank.test",
 		"OPERATOR_TOKEN":              "bank-operator-token:token",
-		"OPERATOR_ALLOWED_HOSTS":      "bank.test:8082",
+		"INTERNAL_ALLOWED_HOSTS":      "bank.test:8080",
 		"OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel.test:4318",
 		"CONSOLE_ENABLED":             "false",
 		"BANK_SITE_ENABLED":           "false",
@@ -207,8 +207,15 @@ func TestTheRegisterJWKSURLIsTheCDSPathOnTheRegisterBaseURL(t *testing.T) {
 
 // Verifies: DH-1353
 func TestTheChartHasNoFixedOTPs(t *testing.T) {
-	spec := charttest.Pod(t, charttest.MustRender(t, "console.enabled=true", "console.allowedHosts={localhost:8084}",
-		"bankSite.enabled=true", "bankSite.allowedHosts={localhost:8085}"))
+	spec := charttest.Pod(
+		t,
+		charttest.MustRender(
+			t,
+			"console.enabled=true",
+			"bankSite.enabled=true",
+			"bankSite.allowedHosts={localhost:8085}",
+		),
+	)
 
 	for _, c := range append(spec.InitContainers, spec.Containers...) {
 		assert.NotContains(t, c.Vars(), "FIXED_OTPS", c.Name)
@@ -241,42 +248,66 @@ func TestTheLabFeaturesAreOffByDefault(t *testing.T) {
 	objects := charttest.MustRender(t)
 	main := charttest.Main(t, objects)
 
-	assert.Equal(t, map[string]int{"public": 8081, "operator": 8082, "secure": 8083},
-		charttest.ServicePorts(t, objects))
-
-	for _, p := range main.Ports {
-		assert.NotContains(t, []int{8084, 8085}, p.ContainerPort, p.Name)
-	}
-
-	assert.NotContains(t, main.Vars(), "CONSOLE_ALLOWED_HOSTS")
+	assert.Equal(t, "false", main.Vars()["CONSOLE_ENABLED"])
+	assert.Equal(t, "false", main.Vars()["BANK_SITE_ENABLED"])
 	assert.NotContains(t, main.Vars(), "BANK_SITE_ALLOWED_HOSTS")
+	assert.NotContains(t, charttest.ServicePorts(t, objects), "bank-site")
 }
 
-func TestEachLabFeatureNeedsItsAllowedHosts(t *testing.T) {
-	for _, feature := range []string{"console", "bankSite"} {
-		_, err := charttest.Render(t, feature+".enabled=true")
-
-		require.Error(t, err, feature)
-		assert.Contains(t, err.Error(), feature+".allowedHosts")
-	}
-}
-
-func TestEachLabFeatureCanBeTurnedOn(t *testing.T) {
+// Verifies: DH-2626
+func TestTheContainerAndTheServiceGiveOnePortForEachListener(t *testing.T) {
 	for _, tc := range []struct {
-		feature, env, portName string
-		portNumber             int
+		name   string
+		values []string
+		want   map[string]int
 	}{
-		{feature: "console", env: "CONSOLE", portName: "console", portNumber: 8084},
-		{feature: "bankSite", env: "BANK_SITE", portName: "bank-site", portNumber: 8085},
+		{name: "default", want: map[string]int{"internal": 8080, "public": 8081, "secure": 8083}},
+		{
+			name:   "with the online bank site",
+			values: []string{"bankSite.enabled=true", "bankSite.allowedHosts={localhost:8085}"},
+			want:   map[string]int{"internal": 8080, "public": 8081, "secure": 8083, "bank-site": 8085},
+		},
 	} {
-		objects := charttest.MustRender(t, tc.feature+".enabled=true", tc.feature+".allowedHosts={localhost:9999}")
-		main := charttest.Main(t, objects)
+		t.Run(tc.name, func(t *testing.T) {
+			objects := charttest.MustRender(t, tc.values...)
 
-		assert.Equal(t, "true", main.Vars()[tc.env+"_ENABLED"], tc.feature)
-		assert.Equal(t, "localhost:9999", main.Vars()[tc.env+"_ALLOWED_HOSTS"], tc.feature)
-		assert.Contains(t, main.Ports, charttest.Port{Name: tc.portName, ContainerPort: tc.portNumber}, tc.feature)
-		assert.Equal(t, tc.portNumber, charttest.ServicePorts(t, objects)[tc.portName], tc.feature)
+			assert.Equal(t, tc.want, charttest.ServicePorts(t, objects), "Service ports")
+
+			got := map[string]int{}
+			for _, p := range charttest.Main(t, objects).Ports {
+				got[p.Name] = p.ContainerPort
+			}
+
+			assert.Equal(t, tc.want, got, "container ports")
+		})
 	}
+}
+
+func TestTheBankSiteNeedsItsAllowedHosts(t *testing.T) {
+	_, err := charttest.Render(t, "bankSite.enabled=true")
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "bankSite.allowedHosts")
+}
+
+func TestTheBankSiteCanBeTurnedOn(t *testing.T) {
+	main := charttest.Main(
+		t,
+		charttest.MustRender(t, "bankSite.enabled=true", "bankSite.allowedHosts={localhost:9999}"),
+	)
+
+	assert.Equal(t, "true", main.Vars()["BANK_SITE_ENABLED"])
+	assert.Equal(t, "localhost:9999", main.Vars()["BANK_SITE_ALLOWED_HOSTS"])
+}
+
+// Verifies: DH-2624, DH-2627
+func TestTheConsoleCanBeTurnedOnWithNoPortOrAllowlistOfItsOwn(t *testing.T) {
+	objects := charttest.MustRender(t, "console.enabled=true")
+	main := charttest.Main(t, objects)
+
+	assert.Equal(t, "true", main.Vars()["CONSOLE_ENABLED"])
+	assert.Equal(t, []string{"INTERNAL_ALLOWED_HOSTS"}, main.AllowlistVars())
+	assert.Equal(t, charttest.ServicePorts(t, charttest.MustRender(t)), charttest.ServicePorts(t, objects))
 }
 
 func TestAnotherServiceDoesNotRenameTheServiceOfTheChart(t *testing.T) {
@@ -291,7 +322,7 @@ func TestAnotherServiceDoesNotRenameTheServiceOfTheChart(t *testing.T) {
 	assert.Contains(t, names, "test-dataholder")
 }
 
-func TestTheProbesUseTheHealthListener(t *testing.T) {
+func TestTheProbesUseTheInternalListener(t *testing.T) {
 	main := charttest.Main(t, charttest.MustRender(t))
 
 	assert.Equal(t, "/livez", main.LivenessProbe.HTTPGet.Path)

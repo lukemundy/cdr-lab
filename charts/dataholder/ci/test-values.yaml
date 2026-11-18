@@ -12,8 +12,9 @@ register:
 mail:
   smtpAddress: mail.test:25
   from: no-reply@bank.test
+internal:
+  allowedHosts: [bank.test:8080]
 operator:
-  allowedHosts: [bank.test:8082]
   tokenSecret: bank-operator-token
 telemetry:
   otlpEndpoint: http://otel.test:4318
