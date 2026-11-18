@@ -48,5 +48,5 @@ LABEL org.opencontainers.image.source=https://github.com/lukemundy/cdr-lab
 COPY --from=build /out/dataholder /dataholder
 # The SIL Open Font License requires its text with each copy of the fonts of the web UIs.
 COPY --from=web /src/web/packages/tokens/dist/fonts/*-LICENSE.txt /licenses/fonts/
-EXPOSE 8080 8081 8082 8083 8084 8085
+EXPOSE 8080 8081 8083 8085
 ENTRYPOINT ["/dataholder"]

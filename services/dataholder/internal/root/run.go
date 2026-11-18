@@ -17,11 +17,9 @@ import (
 
 const (
 	serviceName  = "dataholder"
-	probePort    = 8080
+	internalPort = 8080
 	apiPort      = 8081
-	operatorPort = 8082
 	securePort   = 8083
-	consolePort  = 8084
 	bankSitePort = 8085
 	// With the server shutdown, less than 10 seconds: the default wait before a container stop sends SIGKILL.
 	telemetryShutdownTimeout = 3 * time.Second

@@ -22,8 +22,8 @@ The chart does not render when a required value is missing, and the error names 
 | `register.publicBaseURL` | yes | `REGISTER_PUBLIC_BASE_URL`, and `REGISTER_JWKS_URL` with the CDS path `/cdr-register/v1/jwks` |
 | `register.statusInterval` | yes | `REGISTER_STATUS_INTERVAL`, more than `0s` and at most `4m` |
 | `mail.smtpAddress`, `mail.from` | yes | `SMTP_ADDRESS`, `MAIL_FROM` |
-| `operator.allowedHosts` | yes | `OPERATOR_ALLOWED_HOSTS` |
-| `console.enabled`, `console.allowedHosts` | hosts when on (default off) | `CONSOLE_ENABLED`, `CONSOLE_ALLOWED_HOSTS`, port 8084 |
+| `internal.allowedHosts` | yes | `INTERNAL_ALLOWED_HOSTS`: the `Host` allowlist of the operator interface and the console |
+| `console.enabled` | no (default off) | `CONSOLE_ENABLED`. The console is on the internal listener. |
 | `bankSite.enabled`, `bankSite.allowedHosts` | hosts when on (default off) | `BANK_SITE_ENABLED`, `BANK_SITE_ALLOWED_HOSTS`, port 8085 |
 | `telemetry.otlpEndpoint` | yes | `OTEL_EXPORTER_OTLP_ENDPOINT` |
 | `database.host`, `database.name` | yes | `PGHOST`, `PGDATABASE`. `database.port` (5432) and `database.sslMode` (`require`) have defaults. |
@@ -55,6 +55,7 @@ A brand directory in `brand.configMap` is an existing ConfigMap, for example fro
 - PostgreSQL is outside the chart. Before the data holder starts, an init container runs the migrations as the owner user, and then a second init container loads the product catalogue of the brand as the service user when the data holder has no products ([ADR 0020](../../docs/adr/0020-service-migrations-create-roles-and-the-operator-creates-users.md)). The migrations create the role `dataholder_app`. The product load and the data holder can start only after the operator grants that role to the service user. A role is global to the PostgreSQL server, so all brands on one server share it. With CloudNativePG, also declare `dataholder_app` (`login: false`) as a managed role, and give it in `inRoles` of the service user. CloudNativePG does not try a grant again when the role did not exist, and the migration accepts a role that exists.
 - The pod is ready only after the data holder gets the statuses of the software products from a Register that it trusts. A Register outage makes the pod not ready.
 - The chart runs one pod, and an upgrade stops the old pod before it starts the new pod. A restart ends each authorisation flow and each session of the online bank site.
+- The data holder has four listeners, and the container and the Service give one port for each: `internal` (8080, plain HTTP), `public` (8081, TLS), `secure` (8083, mTLS) and `bank-site` (8085, TLS, only when the site is on). The internal listener serves the health probes, the operator interface and the console ([ADR 0025](../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md)). Do not expose the internal listener outside the cluster: the console has no login.
 - The Services are ClusterIP only. The Service of the chart keeps the full name of the release when the values add more Services, because the certificates and the base URLs give that name. The data holder terminates TLS on the public and the secure listeners. The secure listener needs mTLS from end to end, so a proxy that terminates TLS cannot be in front of port 8083: use TCP pass-through. Behind a proxy that terminates TLS on port 443, give the `allowedHosts` values the host name with no port, because HTTP clients do not send the default port in the `Host` header.
 
 `ci/test-values.yaml` has the values that the tests and `mise run lint:chart` render, and `ci/lint-values.yaml` turns on each optional part for `lint:chart`. They are not for a deployment.

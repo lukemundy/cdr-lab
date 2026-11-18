@@ -136,11 +136,9 @@ All ports bind to `127.0.0.1`. `compose.yaml` gives the configuration of each se
 | 8080 | `register` | Internal (HTTP): health probes, operator interface, operator console (no login) and the CRL of the mock CDR intermediate |
 | 8081 | `register` | Public APIs (TLS) |
 | 8083 | `register` | Secure APIs (mTLS) |
-| 8180 | `wattle-bank` | Health probes |
+| 8180 | `wattle-bank` | Internal (HTTP): health probes, operator interface and operator console (no login) |
 | 8181 | `wattle-bank` | Public APIs, OpenID Provider configuration and authorisation pages (TLS) |
-| 8182 | `wattle-bank` | Operator interface (HTTP) |
 | 8183 | `wattle-bank` | Secure APIs: authorisation server endpoints and resource APIs (mTLS) |
-| 8184 | `wattle-bank` | Operator console: web UI and its API (HTTP, no login) |
 | 8185 | `wattle-bank` | Online bank site: web UI and its API (TLS, lab-only) |
 | 8280–8285 | `redgum-bank` | As 8180–8185 (profile `all-banks`) |
 | 8380–8385 | `harbour-bank` | As 8180–8185 (profile `all-banks`) |

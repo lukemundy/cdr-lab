@@ -68,13 +68,14 @@ func newProcess(ctx context.Context, pool *pgxpool.Pool, cfg config, m mode) (pr
 		},
 	}
 
-	probes := http.NewServeMux()
-	httpserver.RegisterProbes(probes, readiness(pool, parts.statuses, m))
+	// The groups of routes on the internal listener each apply their own policy, so the mux has no middleware.
+	internal := http.NewServeMux()
+	httpserver.RegisterProbes(internal, readiness(pool, parts.statuses, m))
 
-	proc := process{listeners: []httpserver.Listener{{Port: probePort, Handler: telemetry.NewHTTPHandler(probes)}}}
+	proc := process{listeners: []httpserver.Listener{{Port: internalPort, Handler: telemetry.NewHTTPHandler(internal)}}}
 
 	if m.api {
-		listeners, err := apiListeners(ctx, pool, cfg.api, parts)
+		listeners, err := apiListeners(ctx, pool, cfg.api, parts, internal)
 		if err != nil {
 			return process{}, err
 		}

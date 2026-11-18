@@ -141,20 +141,17 @@ services:
       DATA_HOLDER_BRAND: wattle-bank
       PUBLIC_BASE_URL: https://wattle-bank:8081
       SECURE_BASE_URL: https://wattle-bank:8083
-      # Clients on the compose network use port 8082, and the host uses port 8182.
-      OPERATOR_ALLOWED_HOSTS: wattle-bank:8082,127.0.0.1:8182,localhost:8182
+      # The operator interface and the console refuse other Host values, so that DNS rebinding cannot reach them. Clients
+      # on the compose network use port 8080, and the host uses port 8180.
+      INTERNAL_ALLOWED_HOSTS: wattle-bank:8080,127.0.0.1:8180,localhost:8180
       MAIL_FROM: no-reply@wattlebank.test
       # The browser of the OpenID conformance suite cannot read the mail sink.
       FIXED_OTPS: openid@mail.test:111111,fixed-otp@mail.test:024680
-      # The Host header values of the console. The console refuses other values, so that DNS rebinding cannot reach it.
-      CONSOLE_ALLOWED_HOSTS: 127.0.0.1:8184,localhost:8184
       BANK_SITE_ALLOWED_HOSTS: 127.0.0.1:8185,localhost:8185
     ports:
       - 127.0.0.1:8180:8080
       - 127.0.0.1:8181:8081
-      - 127.0.0.1:8182:8082
       - 127.0.0.1:8183:8083
-      - 127.0.0.1:8184:8084
       - 127.0.0.1:8185:8085
     volumes:
       - ./.lab/pki/wattle-bank:/tls:ro,z
@@ -211,16 +208,13 @@ services:
       DATA_HOLDER_BRAND: redgum-bank
       PUBLIC_BASE_URL: https://redgum-bank:8081
       SECURE_BASE_URL: https://redgum-bank:8083
-      OPERATOR_ALLOWED_HOSTS: redgum-bank:8082,127.0.0.1:8282,localhost:8282
+      INTERNAL_ALLOWED_HOSTS: redgum-bank:8080,127.0.0.1:8280,localhost:8280
       MAIL_FROM: no-reply@redgumbank.test
-      CONSOLE_ALLOWED_HOSTS: 127.0.0.1:8284,localhost:8284
       BANK_SITE_ALLOWED_HOSTS: 127.0.0.1:8285,localhost:8285
     ports:
       - 127.0.0.1:8280:8080
       - 127.0.0.1:8281:8081
-      - 127.0.0.1:8282:8082
       - 127.0.0.1:8283:8083
-      - 127.0.0.1:8284:8084
       - 127.0.0.1:8285:8085
     volumes:
       - ./.lab/pki/redgum-bank:/tls:ro,z
@@ -277,16 +271,13 @@ services:
       DATA_HOLDER_BRAND: harbour-bank
       PUBLIC_BASE_URL: https://harbour-bank:8081
       SECURE_BASE_URL: https://harbour-bank:8083
-      OPERATOR_ALLOWED_HOSTS: harbour-bank:8082,127.0.0.1:8382,localhost:8382
+      INTERNAL_ALLOWED_HOSTS: harbour-bank:8080,127.0.0.1:8380,localhost:8380
       MAIL_FROM: no-reply@harbourbank.test
-      CONSOLE_ALLOWED_HOSTS: 127.0.0.1:8384,localhost:8384
       BANK_SITE_ALLOWED_HOSTS: 127.0.0.1:8385,localhost:8385
     ports:
       - 127.0.0.1:8380:8080
       - 127.0.0.1:8381:8081
-      - 127.0.0.1:8382:8082
       - 127.0.0.1:8383:8083
-      - 127.0.0.1:8384:8084
       - 127.0.0.1:8385:8085
     volumes:
       - ./.lab/pki/harbour-bank:/tls:ro,z
@@ -343,16 +334,13 @@ services:
       DATA_HOLDER_BRAND: kestrel-bank
       PUBLIC_BASE_URL: https://kestrel-bank:8081
       SECURE_BASE_URL: https://kestrel-bank:8083
-      OPERATOR_ALLOWED_HOSTS: kestrel-bank:8082,127.0.0.1:8482,localhost:8482
+      INTERNAL_ALLOWED_HOSTS: kestrel-bank:8080,127.0.0.1:8480,localhost:8480
       MAIL_FROM: no-reply@kestrelbank.test
-      CONSOLE_ALLOWED_HOSTS: 127.0.0.1:8484,localhost:8484
       BANK_SITE_ALLOWED_HOSTS: 127.0.0.1:8485,localhost:8485
     ports:
       - 127.0.0.1:8480:8080
       - 127.0.0.1:8481:8081
-      - 127.0.0.1:8482:8082
       - 127.0.0.1:8483:8083
-      - 127.0.0.1:8484:8084
       - 127.0.0.1:8485:8085
     volumes:
       - ./.lab/pki/kestrel-bank:/tls:ro,z
@@ -411,7 +399,7 @@ services:
       REGISTER_SECURE_URL: https://register:8083
       REGISTER_OPERATOR_TOKEN: lab-operator-token
       DATAHOLDER_PROBE_URL: http://wattle-bank:8080
-      DATAHOLDER_OPERATOR_URL: http://wattle-bank:8082
+      DATAHOLDER_OPERATOR_URL: http://wattle-bank:8080
       DATAHOLDER_OPERATOR_TOKEN: lab-operator-token
       DATAHOLDER_STATUS_INTERVAL: *dataholder-status-interval
       MAIL_SINK_URL: http://mail:8025
@@ -471,7 +459,7 @@ services:
       REGISTER_SECURE_URL: https://register:8083
       REGISTER_OPERATOR_TOKEN: lab-operator-token
       DATAHOLDER_PROBE_URL: http://wattle-bank:8080
-      DATAHOLDER_OPERATOR_URL: http://wattle-bank:8082
+      DATAHOLDER_OPERATOR_URL: http://wattle-bank:8080
       DATAHOLDER_OPERATOR_TOKEN: lab-operator-token
       # The Wattle Bank brand of services/register/seed/example.json.
       DATAHOLDER_BRAND_ID: d7385786-d8b1-4d4b-bb80-b21616df1a4d

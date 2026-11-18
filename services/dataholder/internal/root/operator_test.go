@@ -163,7 +163,7 @@ func (l operatorLab) requestHost(
 	req := httptest.NewRequestWithContext(t.Context(), method, "http://"+requestHost+path, bytes.NewReader(encoded))
 	req.Header = header
 	rec := httptest.NewRecorder()
-	l.handlers[operatorPort].ServeHTTP(rec, req)
+	l.handlers[internalPort].ServeHTTP(rec, req)
 
 	return operatorReply{status: rec.Code, header: rec.Header(), body: rec.Body.Bytes()}
 }
@@ -656,7 +656,7 @@ func TestEachOperatorRequestNeedsAnAllowedHostAndTheOperatorTokenAndARefusedRequ
 		t.Run(name+" for a host that is not allowed", func(t *testing.T) {
 			header := http.Header{"Authorization": {"Bearer test-operator-token"}}
 
-			reply := l.requestHost(t, "attacker.example:8082", req.method, req.path, header, req.body)
+			reply := l.requestHost(t, "attacker.example:8080", req.method, req.path, header, req.body)
 
 			reply.problemDetail(t, http.StatusForbidden)
 		})
@@ -708,7 +708,10 @@ func TestHealthProbesReturnOK(t *testing.T) {
 	for _, path := range []string{"/livez", "/readyz"} {
 		t.Run(path, func(t *testing.T) {
 			rec := httptest.NewRecorder()
-			l.handlers[probePort].ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, path, nil))
+			l.handlers[internalPort].ServeHTTP(
+				rec,
+				httptest.NewRequestWithContext(t.Context(), http.MethodGet, path, nil),
+			)
 
 			assert.Equal(t, http.StatusOK, rec.Code)
 		})

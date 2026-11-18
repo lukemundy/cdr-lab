@@ -492,8 +492,6 @@ func TestAnUnknownPathOrMethodIsNotFound(t *testing.T) {
 			path:   "/v1/customers/" + customerNumber + "/accounts",
 			header: authorised(),
 		},
-		"root":               {method: http.MethodGet, path: "/", header: authorised()},
-		"no version in path": {method: http.MethodPost, path: "/customers", body: customerBody, header: authorised()},
 	}
 	for name, req := range requests {
 		t.Run(name, func(t *testing.T) {
@@ -501,5 +499,22 @@ func TestAnUnknownPathOrMethodIsNotFound(t *testing.T) {
 
 			requireProblem(t, rec, http.StatusNotFound)
 		})
+	}
+}
+
+// Verifies: DH-2628
+func TestTheOperatorInterfaceServesOnlyThePathsUnderV1(t *testing.T) {
+	unknown := serve(t, &fakeCustomers{}, request{method: http.MethodGet, path: "/v1/unknown", header: http.Header{}})
+	requireProblem(t, unknown, http.StatusUnauthorized)
+
+	for _, req := range []request{
+		{method: http.MethodGet, path: "/", header: authorised()},
+		{method: http.MethodPost, path: "/customers", body: customerBody, header: authorised()},
+		{method: http.MethodGet, path: "/v2/unknown", header: http.Header{}},
+	} {
+		rec := serve(t, &fakeCustomers{}, req)
+
+		assert.Equal(t, http.StatusNotFound, rec.Code, req.path)
+		assert.Empty(t, rec.Header().Get("WWW-Authenticate"), req.path)
 	}
 }
