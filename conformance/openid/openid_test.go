@@ -161,7 +161,7 @@ func operate(t *testing.T, path string, body, into any) {
 	require.NoError(t, err)
 
 	req, err := http.NewRequestWithContext(
-		t.Context(), http.MethodPost, labtest.Env(t, "DATAHOLDER_OPERATOR_URL")+path, bytes.NewReader(data),
+		t.Context(), http.MethodPost, labtest.Env(t, "DATAHOLDER_INTERNAL_URL")+path, bytes.NewReader(data),
 	)
 	require.NoError(t, err)
 	req.Header.Set("Authorization", "Bearer "+labtest.Env(t, "DATAHOLDER_OPERATOR_TOKEN"))

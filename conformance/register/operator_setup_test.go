@@ -28,7 +28,7 @@ func operate(t *testing.T, path string) (int, problem) {
 	t.Helper()
 
 	req, err := http.NewRequestWithContext(
-		t.Context(), http.MethodPost, labtest.Env(t, "REGISTER_OPERATOR_URL")+path, http.NoBody,
+		t.Context(), http.MethodPost, labtest.Env(t, "REGISTER_INTERNAL_URL")+path, http.NoBody,
 	)
 	require.NoError(t, err)
 

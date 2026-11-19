@@ -18,7 +18,7 @@ async function operatorPost(
   path: string,
   body: unknown,
   status = 201,
-  operatorURL = requiredEnv("DATAHOLDER_OPERATOR_URL"),
+  operatorURL = requiredEnv("DATAHOLDER_INTERNAL_URL"),
 ): Promise<unknown> {
   const response = await fetch(new URL(path, operatorURL), {
     method: "POST",

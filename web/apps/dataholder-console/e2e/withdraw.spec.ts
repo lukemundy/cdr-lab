@@ -5,7 +5,7 @@ import { expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
 import type { paths } from "../src/api/schema.gen";
 import { requiredEnv } from "@cdr-lab/console/e2e/dataholder-lab";
 
-const api = createClient<paths>({ baseUrl: requiredEnv("DATAHOLDER_CONSOLE_URL") });
+const api = createClient<paths>({ baseUrl: requiredEnv("DATAHOLDER_INTERNAL_URL") });
 
 // An arrangement needs the full consent flow of a registered client, so this test withdraws an arrangement that the
 // conformance suite makes (mise run conformance). The conformance suite changed its customers last.

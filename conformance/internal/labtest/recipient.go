@@ -171,7 +171,7 @@ func RegisterClientCertificate(t *testing.T, legalEntityID, softwareProductID, c
 	pemData, err := os.ReadFile(Env(t, certVariable))
 	require.NoError(t, err)
 
-	target := Env(t, "REGISTER_OPERATOR_URL") + registerDataRecipientsPath + legalEntityID +
+	target := Env(t, "REGISTER_INTERNAL_URL") + registerDataRecipientsPath + legalEntityID +
 		"/software-products/" + softwareProductID + "/certificates"
 
 	// The Register gives 409 when a different request changes the same data recipient at the same time, and the test
@@ -197,7 +197,7 @@ const maxOperatorAttempts = 5
 func ChangeSoftwareProductStatus(t *testing.T, legalEntityID, softwareProductID, action string) {
 	t.Helper()
 
-	target := Env(t, "REGISTER_OPERATOR_URL") + registerDataRecipientsPath + legalEntityID +
+	target := Env(t, "REGISTER_INTERNAL_URL") + registerDataRecipientsPath + legalEntityID +
 		"/software-products/" + softwareProductID + "/" + action
 
 	var (

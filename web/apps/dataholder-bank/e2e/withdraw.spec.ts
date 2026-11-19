@@ -7,7 +7,7 @@ type ConsoleCustomer = { customerNumber: string; currentArrangementCount: number
 type ConsoleArrangement = { arrangementId: string; clientName: string; actions: unknown[] };
 
 async function consoleGet<T>(path: string): Promise<T> {
-  const response = await fetch(new URL(path, requiredEnv("DATAHOLDER_CONSOLE_URL")));
+  const response = await fetch(new URL(path, requiredEnv("DATAHOLDER_INTERNAL_URL")));
   if (!response.ok) throw new Error(`The console API gave ${response.status} for ${path}`);
   // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the console OpenAPI document gives the shape, and the test fails when the site does not show it.
   return (await response.json()) as T;
