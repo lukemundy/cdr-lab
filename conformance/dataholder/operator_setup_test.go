@@ -74,7 +74,7 @@ func operate(t *testing.T, method, path string, body any) operatorReply {
 	req, err := http.NewRequestWithContext(
 		t.Context(),
 		method,
-		labtest.Env(t, "DATAHOLDER_OPERATOR_URL")+path,
+		labtest.Env(t, "DATAHOLDER_INTERNAL_URL")+path,
 		bytes.NewReader(encoded),
 	)
 	require.NoError(t, err)

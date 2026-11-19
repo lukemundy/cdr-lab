@@ -39,7 +39,7 @@ func revoke(t *testing.T, certVariable, reason string) (status int, body string)
 	require.NoError(t, err)
 
 	req, err := http.NewRequestWithContext(
-		t.Context(), http.MethodPost, Env(t, "REGISTER_OPERATOR_URL")+"/v1/cdr-certificates/revoke",
+		t.Context(), http.MethodPost, Env(t, "REGISTER_INTERNAL_URL")+"/v1/cdr-certificates/revoke",
 		bytes.NewReader(reqBody),
 	)
 	require.NoError(t, err)

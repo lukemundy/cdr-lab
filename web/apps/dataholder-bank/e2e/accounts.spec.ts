@@ -49,7 +49,7 @@ async function accountsOfCustomer(
   customerNumber: string,
 ): Promise<{ bsb: string; accountNumber: string }[]> {
   const response = await fetch(
-    new URL(`/v1/customers/${customerNumber}`, requiredEnv("DATAHOLDER_OPERATOR_URL")),
+    new URL(`/v1/customers/${customerNumber}`, requiredEnv("DATAHOLDER_INTERNAL_URL")),
     { headers: { Authorization: `Bearer ${requiredEnv("DATAHOLDER_OPERATOR_TOKEN")}` } },
   );
   if (!response.ok) throw new Error(`The operator interface gave ${response.status}`);

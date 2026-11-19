@@ -172,7 +172,7 @@ func readFile(t *testing.T, path string) string {
 func ready(t *testing.T) {
 	t.Helper()
 
-	target := labtest.Env(t, "DATAHOLDER_PROBE_URL") + "/readyz"
+	target := labtest.Env(t, "DATAHOLDER_INTERNAL_URL") + "/readyz"
 
 	require.Eventually(t, func() bool {
 		req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, target, nil)

@@ -15,7 +15,7 @@ const waitForReady = time.Minute
 
 // The data holder gives no data until it has the statuses of the Register.
 func TestMain(m *testing.M) {
-	if err := ready(os.Getenv("DATAHOLDER_PROBE_URL") + "/readyz"); err != nil {
+	if err := ready(os.Getenv("DATAHOLDER_INTERNAL_URL") + "/readyz"); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

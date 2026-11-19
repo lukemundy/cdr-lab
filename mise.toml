@@ -155,7 +155,7 @@ depends = ["web:install"]
 dir = "web"
 # Node trusts the lab public CA, so that the tests can call the CDR APIs of the Register with TLS verification.
 # The data holder tests create their customers with the operator interface.
-env = { REGISTER_CONSOLE_URL = "http://localhost:8080", REGISTER_PUBLIC_URL = "https://localhost:8081", DATAHOLDER_CONSOLE_URL = "http://localhost:8180", DATAHOLDER_OPERATOR_URL = "http://localhost:8180", DATAHOLDER_OPERATOR_TOKEN = "lab-operator-token", DATAHOLDER_PUBLIC_URL = "https://localhost:8181", BANK_SITE_URL = "https://localhost:8185", NODE_EXTRA_CA_CERTS = "{{config_root}}/.lab/pki/public/root.crt" }
+env = { REGISTER_INTERNAL_URL = "http://localhost:8080", REGISTER_PUBLIC_URL = "https://localhost:8081", DATAHOLDER_INTERNAL_URL = "http://localhost:8180", DATAHOLDER_OPERATOR_TOKEN = "lab-operator-token", DATAHOLDER_PUBLIC_URL = "https://localhost:8181", BANK_SITE_URL = "https://localhost:8185", NODE_EXTRA_CA_CERTS = "{{config_root}}/.lab/pki/public/root.crt" }
 run = [
   "pnpm exec playwright install --only-shell chromium",
   "pnpm exec playwright test",

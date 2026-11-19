@@ -395,11 +395,10 @@ services:
       GOMODCACHE: /cache/mod
       GOTOOLCHAIN: local
       REGISTER_PUBLIC_URL: https://register:8081
-      REGISTER_OPERATOR_URL: http://register:8080
+      REGISTER_INTERNAL_URL: http://register:8080
       REGISTER_SECURE_URL: https://register:8083
       REGISTER_OPERATOR_TOKEN: lab-operator-token
-      DATAHOLDER_PROBE_URL: http://wattle-bank:8080
-      DATAHOLDER_OPERATOR_URL: http://wattle-bank:8080
+      DATAHOLDER_INTERNAL_URL: http://wattle-bank:8080
       DATAHOLDER_OPERATOR_TOKEN: lab-operator-token
       DATAHOLDER_STATUS_INTERVAL: *dataholder-status-interval
       MAIL_SINK_URL: http://mail:8025
@@ -455,11 +454,10 @@ services:
       # The host browser opens the suite on this port of compose.yaml.
       OPENID_SUITE_PUBLIC_URL: https://localhost:8443
       REGISTER_PUBLIC_URL: https://register:8081
-      REGISTER_OPERATOR_URL: http://register:8080
+      REGISTER_INTERNAL_URL: http://register:8080
       REGISTER_SECURE_URL: https://register:8083
       REGISTER_OPERATOR_TOKEN: lab-operator-token
-      DATAHOLDER_PROBE_URL: http://wattle-bank:8080
-      DATAHOLDER_OPERATOR_URL: http://wattle-bank:8080
+      DATAHOLDER_INTERNAL_URL: http://wattle-bank:8080
       DATAHOLDER_OPERATOR_TOKEN: lab-operator-token
       # The Wattle Bank brand of services/register/seed/example.json.
       DATAHOLDER_BRAND_ID: d7385786-d8b1-4d4b-bb80-b21616df1a4d

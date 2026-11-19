@@ -11,7 +11,7 @@ function requiredURL(name: string): string {
 
 const dataholderConsole = {
   browserName: "chromium",
-  baseURL: requiredURL("DATAHOLDER_CONSOLE_URL"),
+  baseURL: requiredURL("DATAHOLDER_INTERNAL_URL"),
   timezoneId: "Australia/Perth",
 } as const;
 
@@ -27,7 +27,7 @@ export default defineConfig({
       // A fixed time zone, so that the times show the same on each computer.
       use: {
         browserName: "chromium",
-        baseURL: requiredURL("REGISTER_CONSOLE_URL"),
+        baseURL: requiredURL("REGISTER_INTERNAL_URL"),
         timezoneId: "Australia/Perth",
       },
     },
