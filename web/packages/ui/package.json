@@ -7,7 +7,8 @@
     "./consumer.css": "./src/consumer.css",
     "./*": "./src/components/*.tsx",
     "./test/checks": "./src/test/checks.ts",
-    "./test/render": "./src/test/render.tsx"
+    "./test/render": "./src/test/render.tsx",
+    "./third-party-notices": "./src/third-party-notices.ts"
   },
   "scripts": {
     "build": "node src/build-consumer-pages.ts"

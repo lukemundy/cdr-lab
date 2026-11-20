@@ -31,7 +31,7 @@ flowchart LR
 | Consumer pages | [consumer-pages.md](consumer-pages.md) | The design guide of the consumer pages: the visual pattern of each part of a page. |
 | Accessibility | [accessibility.md](accessibility.md) | The accessibility level of each type of UI, the automated checks and the names of repeated links. |
 | Content | [content.md](content.md) | The language, and the format of dates, times, amounts and identifiers. |
-| Non-functional requirements | [non-functional-requirements.md](non-functional-requirements.md) | The supply chain and the single source of the tokens and the components. |
+| Non-functional requirements | [non-functional-requirements.md](non-functional-requirements.md) | The supply chain, the single source of the tokens and the components, and the third-party notices of each UI. |
 
 ## Library specifications
 
