@@ -2,7 +2,7 @@
 
 ignore_merge_commits = true
 
-scopes = ["authserver", "ca", "cds", "conformance", "dataholder", "eventsourcing", "pki", "openapi", "platform", "register", "deps", "web", "ui", "tokens", "console", "register-console", "dataholder-console", "dataholder-bank", "speccheck"]
+scopes = ["authserver", "ca", "cds", "conformance", "dataholder", "eventsourcing", "pki", "openapi", "platform", "register", "deps", "web", "ui", "tokens", "console", "register-console", "dataholder-console", "dataholder-bank", "speccheck", "notices"]
 
 [git_hooks.commit-msg]
 script = """#!/bin/sh

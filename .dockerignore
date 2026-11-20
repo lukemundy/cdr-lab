@@ -3,6 +3,7 @@
 !go.sum
 !pkg/
 !services/
+!tools/notices/
 !web/
 **/node_modules/
 web/**/dist/

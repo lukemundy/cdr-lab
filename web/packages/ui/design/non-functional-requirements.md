@@ -6,6 +6,8 @@ This area gives the non-functional requirements of all the design system.
 
 - <a id="ui-0180"></a>**UI-0180** Supply chain: the design system has 0 dependencies that run an install script. ([Judgement: the npm supply-chain controls (ADR 0015)][adr-0015])
 - <a id="ui-0181"></a>**UI-0181** Single source: a UI keeps no copy of a token or a component. A change to a token or a component shows in each UI at its next build. ([Judgement: one design system (ADR 0016)][adr-0016])
+- <a id="ui-0182"></a>**UI-0182** Third-party notices: the build of each UI contains the file `third-party-notices.txt` at the root of the UI. The file gives the licence files of each npm package that has code in the bundle, also the Tailwind CSS styles and the bundler runtime, with the location of the source of each package at its version. The build fails when such a package has no licence file. ([Judgement: the licence notices of each image (ADR 0018)][adr-0018])
 
 [adr-0015]: ../../../../docs/adr/0015-web-toolchain-and-npm-supply-chain-controls.md
 [adr-0016]: ../../../../docs/adr/0016-design-system-on-shadcn-base-ui-and-dtcg-tokens.md
+[adr-0018]: ../../../../docs/adr/0018-container-images-with-a-web-ui-build-stage.md
