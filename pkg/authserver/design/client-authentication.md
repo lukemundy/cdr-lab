@@ -19,11 +19,18 @@ This area gives the client authentication of each endpoint that authenticates a 
 - <a id="auth-0028"></a>**AUTH-0028** The authorisation server refuses an assertion with no `jti` or no `exp`. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
 - <a id="auth-0029"></a>**AUTH-0029** The authorisation server refuses an assertion that is expired. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
 - <a id="auth-0030"></a>**AUTH-0030** The authorisation server refuses an assertion whose `jti` it accepted before. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
+- <a id="auth-0250"></a>**AUTH-0250** A service must keep each `jti` that the authorisation server accepted for more than 10 minutes. For example, the Register keeps each `jti` for 1 hour. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt]; [Judgement: a maximum client assertion lifetime of 10 minutes](#auth-0033))
 - <a id="auth-0031"></a>**AUTH-0031** The authorisation server refuses an assertion whose `exp` is more than 10 minutes after the time of the request. ([Judgement: a maximum client assertion lifetime of 10 minutes](#auth-0033))
+
+## JWKS of a client
+
+- <a id="auth-0242"></a>**AUTH-0242** When the authorisation server gets the JWKS of a client, it does not follow a redirect. For example, a JWKS URI that responds with 302 gives no keys. ([Judgement: limits on the request for the JWKS of a client](#auth-0244))
+- <a id="auth-0243"></a>**AUTH-0243** Performance: the authorisation server stops a request for the JWKS of a client after 5 seconds. ([Judgement: limits on the request for the JWKS of a client](#auth-0244))
 
 ## Refusal
 
 - <a id="auth-0032"></a>**AUTH-0032** When the client authentication fails, the response is 401 with `invalid_client`, also when the client does not exist. ([RFC 6749, section 5.2][rfc6749-errors]; [Judgement: 401 for invalid_client, not the 400 of the ACCC guidance](#auth-0241))
+- <a id="auth-0248"></a>**AUTH-0248** Telemetry: the log of a refused request has only the error code and the error description. For example, it has no client ID and no claim of the assertion. ([no CDR data or personal information in telemetry](../../platform/telemetry/DESIGN.md#tele-0004))
 
 ## Judgements
 
@@ -39,6 +46,12 @@ This area gives the client authentication of each endpoint that authenticates a 
 - Basis: Step 2. ACCC guidance says: "When client authentication occurs against the token endpoint and the sub claim on the client assertion is missing or does not match the client, then the most appropriate response is to return 400: invalid_client in the body." ([CDR Support: Error scenarios and responses][support-error-scenarios]). RFC 6749 permits 401: "The authorization server MAY return an HTTP 401 (Unauthorized) status code to indicate which HTTP authentication schemes are supported" ([RFC 6749, section 5.2][rfc6749-errors]).
 - Reason: The ACCC text says "most appropriate", so it is not a requirement. The authorisation server library gives 401 for each `invalid_client`, and one status code for each failure of the client authentication is the least complex. A client that follows RFC 6749 accepts the two status codes.
 
+### <a id="auth-0244"></a>AUTH-0244 Limits on the request for the JWKS of a client
+
+- Kind: choice
+- Basis: Step 3.2. A server that gets a URL from a client must not follow a redirect ([OWASP: Server-Side Request Forgery Prevention][owasp-ssrf]).
+- Reason: A redirect can send the request to a host that the registration does not name. A JWKS URI that does not reply must not hold a request of a client with no end.
+
 [cds-private-key-jwt]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#private-key-jwt-client-authentication
 [cds-dr-calling-register]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#data-recipients-calling-the-cdr-register
 [cds-client-auth]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#client-authentication
@@ -46,3 +59,4 @@ This area gives the client authentication of each endpoint that authenticates a 
 [rfc6749-errors]: https://www.rfc-editor.org/rfc/rfc6749#section-5.2
 [support-error-scenarios]: https://cdr-support.zendesk.com/hc/en-us/articles/5729181240591
 [oidc-dcr-metadata]: https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata
+[owasp-ssrf]: https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html

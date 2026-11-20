@@ -128,6 +128,8 @@ These rules apply to each listener of a service that uses them. They also apply 
 - <a id="cdsl-0045"></a>**CDSL-0045** For an mTLS listener, a service must give the CDR CA bundle, with the intermediate and the root. ([relying parties trust the CDR CA bundle](../../pki/DESIGN.md#pki-0013))
 - <a id="cdsl-0046"></a>**CDSL-0046** For an mTLS listener, a service must give a revocation check of client certificates. ([CDS: Certificate Validation][cds-cert-validation])
 - <a id="cdsl-0047"></a>**CDSL-0047** When the revocation check of the service fails, the mTLS listener refuses the client certificate. ([CDS: Certificate Validation][cds-cert-validation])
+- <a id="cdsl-0084"></a>**CDSL-0084** When a client resumes a TLS session, the mTLS listener does the revocation check again. For example, a client whose certificate is revoked after its first connection cannot resume the session. ([CDS: Certificate Validation][cds-cert-validation]; [Judgement: a revocation check at each resumption](#cdsl-0085))
+- <a id="cdsl-0086"></a>**CDSL-0086** Performance: the mTLS listener stops each revocation check after 5 seconds at most. For example, the CRL check stops a load from a CRL server that does not reply. ([Judgement: a limit of 5 seconds for a revocation check](#cdsl-0087))
 
 ## CRL check
 
@@ -237,6 +239,18 @@ These rules apply to a service that uses the CRL check of the library as its rev
 - Basis: Step 3.3. The CDS requires 405 for a method that the resource does not support ([CDS: HTTP Response Codes][cds-http-response-codes]), but its error list gives no code for 405. `GeneralError/Expected` is the CDS code for an expected error that no specific code covers ([CDS: Expected Error][cds-error-4xx-expected]).
 - Reason: The client gets the CDS error format for each error of a CDS API. `Resource/NotFound` is not correct, because the path exists.
 
+### <a id="cdsl-0085"></a>CDSL-0085 A revocation check at each resumption
+
+- Kind: choice
+- Basis: Step 3.2. A resumed TLS session uses the authentication of the first handshake and sends no new certificate ([RFC 8446, section 2.2][rfc8446-resumption]). A TLS 1.3 ticket can be valid for 7 days ([RFC 8446, section 4.6.1][rfc8446-ticket]).
+- Reason: Without the check, a client can use a revoked certificate until its ticket expires. A second check needs no new CRL, because [the CRL check loads the CRL again only after the maximum age](#cdsl-0052).
+
+### <a id="cdsl-0087"></a>CDSL-0087 A limit of 5 seconds for a revocation check
+
+- Kind: choice
+- Basis: Step 3.3. The CDS gives no time for the check ([CDS: Certificate Validation][cds-cert-validation]).
+- Reason: A CRL server that does not reply must not hold a TLS handshake with no end. The CRL check then uses [the last CRL after a failed load](#cdsl-0055), or refuses the certificate.
+
 ## Withdrawn
 
 None.
@@ -278,3 +292,5 @@ None.
 [rfc4122]: https://www.rfc-editor.org/rfc/rfc4122
 [rfc5280-crldp]: https://www.rfc-editor.org/rfc/rfc5280#section-4.2.1.13
 [rfc5280-next-update]: https://www.rfc-editor.org/rfc/rfc5280#section-5.1.2.5
+[rfc8446-resumption]: https://www.rfc-editor.org/rfc/rfc8446#section-2.2
+[rfc8446-ticket]: https://www.rfc-editor.org/rfc/rfc8446#section-4.6.1

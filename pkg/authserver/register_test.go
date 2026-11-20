@@ -1,6 +1,7 @@
 package authserver_test
 
 import (
+	"bytes"
 	"context"
 	"crypto"
 	"crypto/ecdsa"
@@ -15,6 +16,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log/slog"
 	"math/big"
 	"net/http"
 	"net/http/httptest"
@@ -261,6 +263,7 @@ func requireError(t *testing.T, r reply, status int, code string) {
 	assert.Equal(t, code, r.body["error"], r.body)
 	assert.Contains(t, r.header.Get("Content-Type"), "application/json")
 	assert.Equal(t, "no-store", r.header.Get("Cache-Control"))
+	assert.Equal(t, "no-cache", r.header.Get("Pragma"))
 	assert.NotContains(t, r.body, "access_token")
 
 	for field := range r.body {
@@ -268,7 +271,7 @@ func requireError(t *testing.T, r reply, status int, code string) {
 	}
 }
 
-// Verifies: AUTH-0042, AUTH-0043, AUTH-0045, AUTH-0046, AUTH-0047
+// Verifies: AUTH-0042, AUTH-0043, AUTH-0045, AUTH-0046, AUTH-0047, AUTH-0247
 func TestAnActiveSoftwareProductWithARegisteredCertificateGetsABoundToken(t *testing.T) {
 	l := newLab(t)
 
@@ -280,6 +283,7 @@ func TestAnActiveSoftwareProductWithARegisteredCertificateGetsABoundToken(t *tes
 	assert.Equal(t, "cdr-register:read", r.body["scope"])
 	assert.NotContains(t, r.body, "refresh_token")
 	assert.Equal(t, "no-store", r.header.Get("Cache-Control"))
+	assert.Equal(t, "no-cache", r.header.Get("Pragma"))
 	assert.Equal(t, issuer, claims["iss"])
 	assert.Equal(t, productID, claims["sub"])
 	assert.Equal(t, productID, claims["client_id"])
@@ -435,6 +439,7 @@ func TestTheTokenEndpointRefusesOtherGrantsAndScopes(t *testing.T) {
 	}{
 		"authorization_code grant": {"grant_type", "authorization_code", "unsupported_grant_type"},
 		"refresh_token grant":      {"grant_type", "refresh_token", "unsupported_grant_type"},
+		// Verifies: AUTH-0249
 		"a scope of the data APIs": {"scope", "bank:accounts.basic:read", "invalid_scope"},
 	}
 	for name, tt := range tests {
@@ -482,6 +487,59 @@ func TestAStoreFailureIsAServerErrorWithNoDetail(t *testing.T) {
 
 	assert.Equal(t, http.StatusInternalServerError, rec.Code)
 	assert.JSONEq(t, `{"error":"server_error"}`, rec.Body.String())
+}
+
+// Verifies: AUTH-0246
+func TestTheJWKSIsAServerErrorWhenTheSigningKeysAreNotAvailable(t *testing.T) {
+	register, err := authserver.NewRegister(authserver.RegisterConfig{
+		PublicBaseURL: publicBaseURL,
+		SecureBaseURL: "https://secure.example",
+		Clients:       clientStore{},
+		JTIs:          &jtiStore{seen: map[string]bool{}},
+		SigningKeys:   func(context.Context) ([]authserver.SigningKey, error) { return nil, errors.New("no keys") },
+	})
+	require.NoError(t, err)
+
+	mux := http.NewServeMux()
+	register.RegisterPublic(mux)
+
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequestWithContext(
+		t.Context(), http.MethodGet, "/idp/.well-known/openid-configuration/jwks", nil,
+	))
+
+	assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	assert.Empty(t, rec.Body.String())
+}
+
+// Verifies: AUTH-0248
+func TestTheLogOfARefusalHasOnlyTheErrorCodeAndTheDescription(t *testing.T) {
+	var logs bytes.Buffer
+
+	previous := slog.Default()
+
+	slog.SetDefault(slog.New(slog.NewJSONHandler(&logs, nil)))
+	t.Cleanup(func() { slog.SetDefault(previous) })
+
+	l := newLab(t)
+	a := l.assertion()
+	a.claims["iss"], a.claims["sub"] = "unknown-product", "unknown-product"
+	form := l.form(a)
+	form.Set("client_id", "unknown-product")
+
+	requireError(t, l.token(form), http.StatusUnauthorized, "invalid_client")
+
+	var record map[string]any
+	require.NoError(t, json.Unmarshal(logs.Bytes(), &record), logs.String())
+	assert.Equal(t, "request refused", record["msg"])
+	assert.Equal(t, "invalid_client", record["error.type"])
+	assert.Contains(t, record, "error.message")
+
+	for key := range record {
+		assert.Contains(t, []string{"time", "level", "msg", "error.type", "error.message"}, key)
+	}
+
+	assert.NotContains(t, logs.String(), "unknown-product", "the log has no data of the request")
 }
 
 type failingStore struct{}
@@ -564,11 +622,13 @@ func TestTheOpenIDProviderConfiguration(t *testing.T) {
 	}, body)
 }
 
-// Verifies: AUTH-0006, AUTH-0007
+// Verifies: AUTH-0006, AUTH-0007, AUTH-0245
 func TestTheJWKSHasThePublicSigningKeyOnly(t *testing.T) {
 	l := newLab(t)
 
-	_, body := l.getPublic("/idp/.well-known/openid-configuration/jwks")
+	rec, body := l.getPublic("/idp/.well-known/openid-configuration/jwks")
+
+	assert.Equal(t, "no-cache", rec.Header().Get("Cache-Control"))
 
 	keys := body["keys"].([]any)
 	require.Len(t, keys, 1)

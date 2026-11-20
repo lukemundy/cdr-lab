@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -11,6 +12,7 @@ import (
 	"github.com/lukemundy/cdr-lab/pkg/authserver"
 )
 
+// Verifies: AUTH-0242
 func TestTheJWKSClientDoesNotFollowARedirect(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/other", http.StatusFound)
@@ -28,6 +30,7 @@ func TestTheJWKSClientDoesNotFollowARedirect(t *testing.T) {
 	assert.Equal(t, http.StatusFound, resp.StatusCode)
 }
 
-func TestTheJWKSClientHasATimeout(t *testing.T) {
-	assert.Positive(t, authserver.NewJWKSClient(nil).Timeout)
+// Verifies: AUTH-0243
+func TestTheJWKSClientHasATimeoutOf5Seconds(t *testing.T) {
+	assert.Equal(t, 5*time.Second, authserver.NewJWKSClient(nil).Timeout)
 }

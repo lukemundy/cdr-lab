@@ -40,6 +40,12 @@ None.
 ## Problem details
 
 - <a id="prob-0001"></a>**PROB-0001** A problem with no type of its own has the type `about:blank`. For example, a 404 for a record that does not exist has the type `about:blank`. ([RFC 9457, section 4.2.1][rfc9457-about-blank])
+- <a id="prob-0013"></a>**PROB-0013** Each problem response has the content type `application/problem+json`. ([RFC 9457, section 3][rfc9457-3])
+- <a id="prob-0014"></a>**PROB-0014** The `title` of a problem with the type `about:blank` is the phrase of its HTTP status code. For example, a 409 has the title "Conflict". ([RFC 9457, section 4.2.1][rfc9457-about-blank])
+
+## Unexpected errors
+
+- <a id="prob-0015"></a>**PROB-0015** Telemetry: the log of an unexpected error has the type of the error, but not its message. For example, a database error that contains a query argument logs only its Go type. ([no CDR data or personal information in telemetry](../telemetry/DESIGN.md#tele-0004))
 
 ## Field errors
 

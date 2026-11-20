@@ -101,6 +101,7 @@ func TestTheRedactorReplacesTheQueryString(t *testing.T) {
 	assert.Equal(t, redacted, attrs(got[0])[string(semconv.URLQueryKey)])
 }
 
+// Verifies: TELE-0008
 func TestHTTPHandlerRecordsRequestDurationByRouteWithoutHostHeader(t *testing.T) {
 	_, rm := serve(t, "/accounts/"+secret)
 

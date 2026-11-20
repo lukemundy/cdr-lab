@@ -16,3 +16,8 @@ func TestEachServerLimitsTheTimeOfARequestAndOfAnIdleConnection(t *testing.T) {
 	assert.Equal(t, 60*time.Second, srv.WriteTimeout)
 	assert.Equal(t, 120*time.Second, srv.IdleTimeout)
 }
+
+// Verifies: SRV-0014
+func TestTheServersWaitAtMost5SecondsForTheOpenRequestsAtAStop(t *testing.T) {
+	assert.Equal(t, 5*time.Second, shutdownTimeout)
+}

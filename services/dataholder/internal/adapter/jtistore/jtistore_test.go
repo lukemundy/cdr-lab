@@ -53,6 +53,18 @@ func TestAJTIThatIsOlderThanTheRetentionCanBeConsumedAgain(t *testing.T) {
 	assert.NoError(t, store.Consume(t.Context(), "jti-1"))
 }
 
+// Verifies: DH-0608, AUTH-0250
+func TestAJTIStaysConsumedForTheRetention(t *testing.T) {
+	pool := newPool(t)
+	store := jtistore.New(pool)
+	require.NoError(t, store.Consume(t.Context(), "jti-1"))
+
+	_, err := pool.Exec(t.Context(), "UPDATE consumed_jtis SET consumed_at = now() - interval '59 minutes'")
+	require.NoError(t, err)
+
+	assert.ErrorIs(t, store.Consume(t.Context(), "jti-1"), app.ErrJTIUsed)
+}
+
 func TestTheAuthorisationServerAndTheRegistrationUseOneStore(t *testing.T) {
 	store := jtistore.New(newPool(t))
 	require.NoError(t, store.Consume(t.Context(), "jti-1"))

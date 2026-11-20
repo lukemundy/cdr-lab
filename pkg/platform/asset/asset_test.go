@@ -23,6 +23,7 @@ func get(t *testing.T, handler http.Handler, header http.Header) *httptest.Respo
 	return rec
 }
 
+// Verifies: ASSET-0003, ASSET-0004
 func TestTheHandlerGivesTheDataWithItsTypeAndNoSniff(t *testing.T) {
 	rec := get(t, asset.Handler("text/css; charset=utf-8", []byte("body {}"), ""), http.Header{})
 
@@ -33,6 +34,7 @@ func TestTheHandlerGivesTheDataWithItsTypeAndNoSniff(t *testing.T) {
 	assert.Equal(t, "body {}", rec.Body.String())
 }
 
+// Verifies: ASSET-0004
 func TestTheHandlerSetsThePolicy(t *testing.T) {
 	rec := get(t, asset.Handler("image/svg+xml", []byte("<svg/>"), "sandbox"), http.Header{})
 

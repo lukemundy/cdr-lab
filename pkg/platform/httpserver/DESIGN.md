@@ -27,6 +27,7 @@ None.
 
 - The same health probes on each lab service.
 - The same limits on slow and idle connections on each lab service.
+- A stop of each lab service that completes before the container runtime stops the process.
 - One security policy for each group of routes, also when groups share a listener.
 
 ## Non-goals
@@ -39,6 +40,7 @@ None.
 
 - <a id="srv-0001"></a>**SRV-0001** `GET /livez` responds with 200 while the process runs. The response does not depend on the readiness check. ([Kubernetes: API health endpoints][k8s-health]; [Judgement: the probe paths of the Kubernetes API server](#srv-0003))
 - <a id="srv-0002"></a>**SRV-0002** `GET /readyz` responds with 200 when the readiness check of the service passes, and with 503 when it fails. For example, a service that cannot connect to its database responds with 503. ([Kubernetes: API health endpoints][k8s-health]; [Judgement: the probe paths of the Kubernetes API server](#srv-0003))
+- <a id="srv-0015"></a>**SRV-0015** A 503 response of `GET /readyz` does not give the cause of the failure. For example, the body does not contain the error of the database. ([Judgement: a readiness response with no cause](#srv-0016))
 
 - <a id="srv-0011"></a>**SRV-0011** The health probes do not check the `Host` header. For example, a probe with the IP address of the pod as its `Host` gets the probe response. ([Kubernetes: HTTP probes][k8s-http-probes]; [Judgement: health probes with no `Host` check and no authentication](#srv-0013))
 - <a id="srv-0012"></a>**SRV-0012** The health probes need no authentication. ([Kubernetes: HTTP probes][k8s-http-probes]; [Judgement: health probes with no `Host` check and no authentication](#srv-0013))
@@ -54,6 +56,7 @@ None.
 - <a id="srv-0005"></a>**SRV-0005** A server stops a request when the client does not send all of the request, with its body, in 30 seconds. ([Judgement: limits that stop slow and idle connections](#srv-0008))
 - <a id="srv-0006"></a>**SRV-0006** A server stops a response that it does not write in 60 seconds from the end of the request headers. ([Judgement: limits that stop slow and idle connections](#srv-0008))
 - <a id="srv-0007"></a>**SRV-0007** A server closes a keep-alive connection that has no request for 120 seconds. ([Judgement: limits that stop slow and idle connections](#srv-0008))
+- <a id="srv-0014"></a>**SRV-0014** When the service stops, its servers accept no new connection, and let the open requests complete for 5 seconds at most. ([Judgement: a stop of 5 seconds at most](#srv-0017))
 
 ## Judgements
 
@@ -75,12 +78,26 @@ None.
 - Basis: Step 3.2. The kubelet sends an HTTP probe to the IP address of the pod, unless the probe gives a host ([Kubernetes: HTTP probes][k8s-http-probes]). The kubelet sends no credential that the service can check.
 - Reason: A `Host` check then refuses the probes of a usual Kubernetes deployment. The probes give only the state of the process, so a DNS rebinding attack gets no data of value.
 
+### <a id="srv-0016"></a>SRV-0016 A readiness response with no cause
+
+- Kind: choice
+- Basis: Step 3.2. The kubelet uses only the status code of an HTTP probe ([Kubernetes: HTTP probes][k8s-http-probes]). An error message must not show internal data to a client ([OWASP: Error Handling][owasp-error-handling]).
+- Reason: The probes need no authentication, so each client can read the response. The cause can contain internal data, for example a host name of the database.
+
+### <a id="srv-0017"></a>SRV-0017 A stop of 5 seconds at most
+
+- Kind: choice
+- Basis: Step 3.2. Docker sends SIGKILL 10 seconds after the stop signal of a Linux container, by default ([Docker: docker container stop][docker-stop]).
+- Reason: An open request then usually completes. The service also has time for its other stop steps, for example the export of its telemetry, before SIGKILL.
+
 ## Withdrawn
 
 None.
 
 [adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md
+[docker-stop]: https://docs.docker.com/reference/cli/docker/container/stop/
 [k8s-health]: https://kubernetes.io/docs/reference/using-api/health-checks/
 [go-http-server]: https://pkg.go.dev/net/http#Server
 [k8s-http-probes]: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#http-probes
+[owasp-error-handling]: https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html
 [rfc9110-404]: https://www.rfc-editor.org/rfc/rfc9110#section-15.5.5

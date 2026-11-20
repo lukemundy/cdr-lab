@@ -53,6 +53,8 @@ The Register authorisation server serves Get OpenId Provider Config.
 - <a id="auth-0006"></a>**AUTH-0006** The JWKS of the `jwks_uri` has the public key of each signing key that the service gives, and no private key. ([CDS: JSON Web Key Set endpoint][cds-jwks-endpoint])
 - <a id="auth-0007"></a>**AUTH-0007** Each public key that the library publishes has the JWK members `alg`, `e`, `key_ops`, `kid`, `kty` and `n`. ([CDS: JWK][cds-schema-jwk])
 - <a id="auth-0008"></a>**AUTH-0008** A service must give each signing key a different key ID. ([CDS: JSON Web Key Set endpoint][cds-jwks-endpoint])
+- <a id="auth-0245"></a>**AUTH-0245** The response of the JWKS has `Cache-Control: no-cache`. ([RFC 9111: no-cache][rfc9111-no-cache]; [Judgement: no cache lifetime for the configuration](#auth-0018))
+- <a id="auth-0246"></a>**AUTH-0246** When the service cannot give the signing keys, the JWKS endpoint responds with 500 and no body. ([RFC 9110, section 15.6.1][rfc9110-500])
 
 ## Signing keys
 
@@ -120,3 +122,4 @@ The Register authorisation server serves Get OpenId Provider Config.
 [cds-registration-request]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#registration-request-using-jwt
 [cds-dcr-endpoints]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#dynamic-client-registration-endpoints
 [cds-metadata-cache]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#metadata-cache-management
+[rfc9110-500]: https://www.rfc-editor.org/rfc/rfc9110#section-15.6.1

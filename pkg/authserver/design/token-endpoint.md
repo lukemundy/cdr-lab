@@ -6,6 +6,7 @@ This area gives the token endpoint of each authorisation server: the grants, the
 
 - <a id="auth-0034"></a>**AUTH-0034** The token endpoint of the Register authorisation server accepts only `grant_type=client_credentials`. ([CDS: Data Recipients calling the CDR Register][cds-dr-calling-register])
 - <a id="auth-0035"></a>**AUTH-0035** The token endpoint of the data holder authorisation server accepts the grant types `client_credentials`, `authorization_code` and `refresh_token`. ([CDS: Data Recipients calling Data Holders][cds-dr-calling-dh])
+- <a id="auth-0249"></a>**AUTH-0249** When a request to the Register authorisation server asks for a scope other than `cdr-register:read`, the response is 400 with `invalid_scope`. ([CDS: Data Recipients calling the CDR Register][cds-dr-calling-register]; [RFC 6749, section 5.2][rfc6749-errors])
 - <a id="auth-0036"></a>**AUTH-0036** When the grant type of a request is not one that the endpoint accepts, the response is 400 with `unsupported_grant_type`. ([RFC 6749, section 5.2][rfc6749-errors])
 - <a id="auth-0037"></a>**AUTH-0037** When the registration of a client does not have the grant type of the request in its `grant_types`, the data holder authorisation server responds with 400 and `unauthorized_client`. ([RFC 6749, section 5.2][rfc6749-errors])
 
@@ -27,6 +28,7 @@ This area gives the token endpoint of each authorisation server: the grants, the
 
 - <a id="auth-0046"></a>**AUTH-0046** A successful response has `access_token`, `token_type` with the value `Bearer`, `expires_in` and `scope`. ([RFC 6749, section 5.1][rfc6749-token-response])
 - <a id="auth-0047"></a>**AUTH-0047** Each response of the token endpoint has `Cache-Control: no-store`, also an error response. ([RFC 6749, section 5.1][rfc6749-token-response]; [RFC 6749, section 5.2][rfc6749-errors])
+- <a id="auth-0247"></a>**AUTH-0247** Each response of the token endpoint has `Pragma: no-cache`, also an error response. ([RFC 6749, section 5.1][rfc6749-token-response]; [RFC 6749, section 5.2][rfc6749-errors])
 
 ## Errors
 

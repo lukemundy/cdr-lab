@@ -232,7 +232,7 @@ func leaf(t *testing.T, cert tls.Certificate) *x509.Certificate {
 	return parsed
 }
 
-// Verifies: AUTH-0038, AUTH-0042, AUTH-0043, AUTH-0046, AUTH-0047
+// Verifies: AUTH-0038, AUTH-0042, AUTH-0043, AUTH-0046, AUTH-0047, AUTH-0247
 func TestARegisteredClientGetsARegistrationTokenThatIsBoundToItsCertificate(t *testing.T) {
 	b := newBank(t)
 
@@ -244,6 +244,7 @@ func TestARegisteredClientGetsARegistrationTokenThatIsBoundToItsCertificate(t *t
 	assert.Equal(t, "cdr:registration", r.body["scope"])
 	assert.NotContains(t, r.body, "refresh_token")
 	assert.Equal(t, "no-store", r.header.Get("Cache-Control"))
+	assert.Equal(t, "no-cache", r.header.Get("Pragma"))
 
 	verified, err := b.dataHolder.VerifyAccessToken(t.Context(), r.body["access_token"].(string), leaf(t, b.cert))
 

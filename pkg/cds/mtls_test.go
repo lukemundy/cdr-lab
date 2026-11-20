@@ -11,6 +11,7 @@ import (
 	"math/big"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -166,4 +167,87 @@ func TestTheSecureAPIsUseTheTLSVersionsAndSuitesOfThePublicAPIs(t *testing.T) {
 
 	assert.Equal(t, public.MinVersion, secure.MinVersion)
 	assert.Equal(t, public.CipherSuites, secure.CipherSuites)
+}
+
+// Verifies: CDSL-0084
+func TestAResumedSessionGetsTheRevocationCheckAgain(t *testing.T) {
+	ca := newTestCA(t)
+	client := ca.issue(t, x509.ExtKeyUsageClientAuth)
+
+	var (
+		checks  atomic.Int32
+		revoked atomic.Bool
+	)
+
+	srv := httptest.NewUnstartedServer(
+		http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusNoContent) }),
+	)
+	srv.TLS = cds.MutualTLSConfig(
+		t.Context(),
+		ca.issue(t, x509.ExtKeyUsageServerAuth, "register"),
+		ca.pool(),
+		func(context.Context, *x509.Certificate) error {
+			checks.Add(1)
+
+			if revoked.Load() {
+				return errors.New("revoked")
+			}
+
+			return nil
+		},
+	)
+	srv.StartTLS()
+	t.Cleanup(srv.Close)
+
+	cfg := &tls.Config{
+		RootCAs: ca.pool(), ServerName: "register", MinVersion: tls.VersionTLS12,
+		Certificates: []tls.Certificate{client}, ClientSessionCache: tls.NewLRUClientSessionCache(1),
+	}
+	connect := func() (*http.Response, error) {
+		httpClient := &http.Client{Transport: &http.Transport{TLSClientConfig: cfg, DisableKeepAlives: true}}
+		req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, srv.URL, nil)
+		require.NoError(t, err)
+
+		return httpClient.Do(req)
+	}
+
+	first, err := connect()
+	require.NoError(t, err)
+	require.NoError(t, first.Body.Close())
+	assert.False(t, first.TLS.DidResume)
+
+	resumed, err := connect()
+	require.NoError(t, err)
+	require.NoError(t, resumed.Body.Close())
+	require.True(t, resumed.TLS.DidResume, "the client resumes the session")
+	assert.EqualValues(t, 2, checks.Load(), "the resumption gets the revocation check")
+
+	revoked.Store(true)
+
+	refused, err := connect()
+	if err == nil {
+		_ = refused.Body.Close()
+	}
+
+	assert.Error(t, err, "a revoked certificate cannot resume")
+}
+
+// Verifies: CDSL-0086
+func TestARevocationCheckHasALimitOf5Seconds(t *testing.T) {
+	ca := newTestCA(t)
+	client := ca.issue(t, x509.ExtKeyUsageClientAuth)
+
+	var limit time.Duration
+
+	err := mutualTLSRequest(t, ca, func(ctx context.Context, _ *x509.Certificate) error {
+		deadline, ok := ctx.Deadline()
+		require.True(t, ok)
+
+		limit = time.Until(deadline)
+
+		return nil
+	}, &client)
+
+	require.NoError(t, err)
+	assert.InDelta(t, 5*time.Second, limit, float64(time.Second))
 }

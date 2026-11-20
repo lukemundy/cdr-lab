@@ -43,14 +43,20 @@ flowchart LR
   - a host and a port, for example `127.0.0.1:8080`
   - a host with no port, for a client that uses the default port of its scheme, for example through a TLS proxy
 - <a id="host-0002"></a>**HOST-0002** The comparison of the `Host` header with a value has no difference for upper and lower case. For example, `LOCALHOST:8080` agrees with `localhost:8080`. ([RFC 3986, section 3.2.2][rfc3986-host])
+- <a id="host-0003"></a>**HOST-0003** The setting of an allowlist gives its values separated by commas. The library ignores the spaces around each value. For example, `127.0.0.1:8080, localhost:8080` has two values. ([Judgement: values separated by commas](#host-0004))
 
 ## Judgements
 
-None.
+### <a id="host-0004"></a>HOST-0004 Values separated by commas
+
+- Kind: choice
+- Basis: Step 3.3. The CDS and the ACCC give no rule for a lab setting. An environment variable has one string value ([POSIX: Environment Variables][posix-env]).
+- Reason: A comma cannot be in a value of the `Host` header, so it separates the values with no escape. Spaces around a value are a usual typing error.
 
 ## Withdrawn
 
 None.
 
+[posix-env]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap08.html
 [rfc3986-host]: https://www.rfc-editor.org/rfc/rfc3986#section-3.2.2
 [rfc9110-host]: https://www.rfc-editor.org/rfc/rfc9110#section-7.2

@@ -79,6 +79,7 @@ func TestDecodeGivesTheErrorOfTheReader(t *testing.T) {
 	require.ErrorAs(t, jsonhttp.Decode(body, &got), &tooLarge)
 }
 
+// Verifies: BODY-0004
 func TestWriteGivesTheBodyAsJSONWithTheStatus(t *testing.T) {
 	rec := httptest.NewRecorder()
 

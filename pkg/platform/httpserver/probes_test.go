@@ -44,7 +44,7 @@ func TestReadinessIsOKWhenTheCheckPasses(t *testing.T) {
 	assert.Equal(t, "ok", rec.Body.String())
 }
 
-// Verifies: SRV-0002
+// Verifies: SRV-0002, SRV-0015
 func TestReadinessIsUnavailableWhenTheCheckFails(t *testing.T) {
 	rec := probe(t, notReady, "/readyz")
 

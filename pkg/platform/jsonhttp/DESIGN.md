@@ -28,6 +28,7 @@ None.
 
 - One rule for an unknown field in a JSON request body of a lab interface.
 - One rule for a JSON request body with more than one value.
+- One content type for a JSON response body of a lab interface.
 
 ## Non-goals
 
@@ -39,6 +40,10 @@ None.
 
 - <a id="body-0001"></a>**BODY-0001** A JSON request body with a field that the operation does not accept is not valid. For example, a body with a `pasword` field, when the operation accepts a `password` field, is not valid. ([Judgement: an unknown field is not valid](#body-0003))
 - <a id="body-0002"></a>**BODY-0002** A request body with a JSON value after its first JSON value is not valid. For example, the body `{} {}` is not valid. ([RFC 8259, section 2][rfc8259-2])
+
+## Response bodies
+
+- <a id="body-0004"></a>**BODY-0004** A JSON response body has the content type `application/json`. ([RFC 8259, section 11][rfc8259-11])
 
 ## Judgements
 
@@ -52,5 +57,6 @@ None.
 
 None.
 
+[rfc8259-11]: https://www.rfc-editor.org/rfc/rfc8259#section-11
 [rfc8259-2]: https://www.rfc-editor.org/rfc/rfc8259#section-2
 [rfc8259-4]: https://www.rfc-editor.org/rfc/rfc8259#section-4

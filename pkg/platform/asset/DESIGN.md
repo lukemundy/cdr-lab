@@ -27,6 +27,7 @@ None.
 
 - A browser gets a new version of a fixed file after a restart of the service, with no change of its path.
 - A browser that has the current version gets a small response.
+- A browser uses each file only as the type that the service gives.
 
 ## Non-goals
 
@@ -37,6 +38,11 @@ None.
 
 - <a id="asset-0001"></a>**ASSET-0001** Each response has `Cache-Control: no-cache` and an `ETag` that the content of the file gives. A request with an `If-None-Match` that agrees with the `ETag` gets 304. ([RFC 9111, section 5.2.2.4][rfc9111-no-cache]; [RFC 9110, section 13.1.2][rfc9110-if-none-match]; [Judgement: the browser asks again each time](#asset-0002))
 
+## Headers
+
+- <a id="asset-0003"></a>**ASSET-0003** Each response has the `Content-Type` that the service gives for the file, and `X-Content-Type-Options: nosniff`. ([OWASP ASVS 5.0, V3.4][asvs-v3])
+- <a id="asset-0004"></a>**ASSET-0004** The response has the `Content-Security-Policy` that the service gives for the file. When the service gives no policy, the response has no `Content-Security-Policy`. ([Judgement: the service gives the policy of each file](#asset-0005))
+
 ## Judgements
 
 ### <a id="asset-0002"></a>ASSET-0002 The browser asks again each time
@@ -45,9 +51,17 @@ None.
 - Basis: Step 3.2. `no-cache` makes a cache validate the stored response before each use ([RFC 9111, section 5.2.2.4][rfc9111-no-cache]).
 - Reason: The file names have no content hash, so a browser must not keep a file after a new version starts. The `ETag` makes the answer small when the file did not change.
 
+### <a id="asset-0005"></a>ASSET-0005 The service gives the policy of each file
+
+- Kind: choice
+- Basis: Step 3.2. A browser applies a policy to a document, for example an SVG file that it opens directly ([MDN: Content-Security-Policy][mdn-csp]).
+- Reason: Only the service knows which files can be documents, and the policy that each one needs. For example, a logo in SVG gets a policy, but a stylesheet needs none.
+
 ## Withdrawn
 
 None.
 
+[asvs-v3]: https://github.com/OWASP/ASVS/blob/v5.0.0_release/5.0/en/0x12-V3-Web-Frontend-Security.md
+[mdn-csp]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy
 [rfc9110-if-none-match]: https://www.rfc-editor.org/rfc/rfc9110#section-13.1.2
 [rfc9111-no-cache]: https://www.rfc-editor.org/rfc/rfc9111#section-5.2.2.4

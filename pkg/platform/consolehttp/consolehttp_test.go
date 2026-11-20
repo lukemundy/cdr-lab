@@ -261,6 +261,7 @@ func TestTheCatchAllDoesNotCatchThePathsOfTheOtherGroupsOnTheListener(t *testing
 	}
 }
 
+// Verifies: CNSL-0028
 func TestAHEADRequestGetsTheHeadersOfTheHTMLPage(t *testing.T) {
 	rec := serve(t, http.MethodHead, "/data-recipients", nil)
 
@@ -281,6 +282,7 @@ func TestAnUnknownAPIPathIsNotFound(t *testing.T) {
 	})
 }
 
+// Verifies: CNSL-0027
 func TestAChangeToAPathOfTheUIIsNotAllowed(t *testing.T) {
 	for _, method := range []string{http.MethodPost, http.MethodOptions} {
 		t.Run(method, func(t *testing.T) {

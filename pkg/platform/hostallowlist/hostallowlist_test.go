@@ -75,7 +75,7 @@ func TestAnEmptyAllowlistRefusesEachRequest(t *testing.T) {
 	assert.Equal(t, http.StatusForbidden, serve(t, nil, "server.test:8082", http.MethodGet).Code)
 }
 
-// Verifies: HOST-0001, HOST-0002
+// Verifies: HOST-0001, HOST-0002, HOST-0003
 func TestParseGivesTheHostsInLowerCase(t *testing.T) {
 	got, err := hostallowlist.Parse(" 127.0.0.1:8084, Localhost:8084 ,[::1]:8084, Proxy.Test, [::1]")
 
