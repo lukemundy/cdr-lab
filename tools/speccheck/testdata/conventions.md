@@ -1,6 +1,6 @@
 # Specification conventions
 
-The check does not read the links of this file, for example [an example rule](#xx-0001).
+The check does not read the identifier links of this file, for example [an example rule](#xx-0001).
 
 ### Component codes
 

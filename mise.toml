@@ -88,7 +88,7 @@ run = "golangci-lint run ./..."
 
 # The rules are in ADR 0024 and docs/spec/conventions.md.
 [tasks."lint:spec"]
-description = "Check the structure of the specifications that follow ADR 0024, and the Verifies comments of the tests"
+description = "Check the structure of the specifications that follow ADR 0024, the Verifies comments of the tests and the links with a fragment in the Markdown files"
 run = "go run ./tools/speccheck"
 
 [tasks."lint:versions"]

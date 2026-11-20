@@ -113,7 +113,7 @@ mise run test:lab-web # browser tests of the web UIs against the running lab dep
 mise run openid-conformance # the OpenID FAPI 1.0 Advanced test plan against the data holder in the running lab
 ```
 
-`build`, `fmt`, `lint` and `test` run a `:go` and a `:web` task, for example `mise run test:web`. `lint` also runs `lint:versions`, `lint:chart` and `lint:spec`. `lint:spec` checks the structure of the specifications and the `// Verifies:` comments of the tests ([conventions](docs/spec/conventions.md#the-specification-check)). The web tasks install the workspace from the lock file first. CI runs each job only when its inputs change (`.github/workflows/ci.yml`).
+`build`, `fmt`, `lint` and `test` run a `:go` and a `:web` task, for example `mise run test:web`. `lint` also runs `lint:versions`, `lint:chart` and `lint:spec`. `lint:spec` checks the structure of the specifications, the `// Verifies:` comments of the tests and the heading links of the Markdown files ([conventions](docs/spec/conventions.md#the-specification-check)). The web tasks install the workspace from the lock file first. CI runs each job only when its inputs change (`.github/workflows/ci.yml`).
 
 ## Lab deployment
 

@@ -124,6 +124,18 @@ func TestCheck(t *testing.T) {
 			},
 		},
 		{
+			fixture: "heading-link",
+			wantErrors: []string{
+				"docs/guide.md:7: the link goes to docs/target.md#Errors, which is not a heading or an anchor",
+				"docs/guide.md:8: the link goes to docs/target.md#errors-2, which is not a heading or an anchor",
+				"docs/guide.md:8: the link goes to docs/target.md#in-a-fence, which is not a heading or an anchor",
+				"docs/guide.md:8: the link goes to docs/guide.md#nothing, which is not a heading or an anchor",
+				"docs/guide.md:9: the link goes to docs/deleted.md, which does not exist",
+				"docs/guide.md:9: the link goes to docs/deleted.png, which does not exist",
+				"docs/guide.md:17: the link goes to docs/target.md#no-definition, which is not a heading or an anchor",
+			},
+		},
+		{
 			fixture: "bare-identifier",
 			wantErrors: []string{
 				"pki/DESIGN.md:9: the text refers to PKI-0001 with no link",
@@ -255,5 +267,23 @@ func TestSkipsTestdata(t *testing.T) {
 
 	if !slices.Equal(got, []string{"pki/DESIGN.md"}) {
 		t.Errorf("got %v", got)
+	}
+}
+
+func TestHeadingAnchor(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]string{
+		"Errors": "errors",
+		"The `x-v` header and [a link](other.md)":  "the-x-v-header-and-a-link",
+		`<a id="pki-0001"></a>PKI-0001 One CA`:     "pki-0001-one-ca",
+		"Sources for requirements: CDS, then ACCC": "sources-for-requirements-cds-then-accc",
+		"Café snake_case  two spaces":              "café-snake_case--two-spaces",
+	}
+
+	for heading, want := range tests {
+		if got := headingAnchor(heading); got != want {
+			t.Errorf("headingAnchor(%q) = %q, want %q", heading, got, want)
+		}
 	}
 }
