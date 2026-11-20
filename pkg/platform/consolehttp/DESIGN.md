@@ -72,13 +72,16 @@ flowchart LR
 - <a id="cnsl-0011"></a>**CNSL-0011** The API is under the path `/api/`. ([Judgement: one prefix for the API](#cnsl-0022))
 - <a id="cnsl-0012"></a>**CNSL-0012** A request under `/api/` whose path and method are not an operation of the API gives 404 with a problem details body. For example, `GET /api/unknown` gives 404. ([RFC 9110, section 15.5.5][rfc9110-404])
 - <a id="cnsl-0013"></a>**CNSL-0013** A GET for a path that is not under `/api/`, is not a file of the web UI and is not a path of a different group of routes gives the HTML page. The web UI then shows its own route or its "not found" page. For example, on the internal listener, `GET /readyz` and `GET /v1/unknown` do not give the HTML page. ([Judgement: the web UI routes in the browser](#cnsl-0023); [Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
+- <a id="cnsl-0027"></a>**CNSL-0027** A request for a path of the web UI with a method other than GET or HEAD gets 405 with `Allow: GET, HEAD` and a problem details body. For example, `POST /data-recipients` gets 405. ([RFC 9110, section 15.5.6][rfc9110-405])
+- <a id="cnsl-0028"></a>**CNSL-0028** A HEAD request for a path of the web UI gets the headers of the GET response, with no body. ([RFC 9110, section 9.3.2][rfc9110-head])
 
 ## Lists
 
 - <a id="cnsl-0014"></a>**CNSL-0014** A list of the API gets the page in the query parameter `page` and the page size in the query parameter `pageSize`. ([Judgement: page parameters, not the CDS pagination](#cnsl-0024))
-- <a id="cnsl-0015"></a>**CNSL-0015** The page size is 25 by default, and 100 at most. ([Judgement: a page size of 25 by default and 100 at most](#cnsl-0025))
+- <a id="cnsl-0015"></a>**CNSL-0015** The page is 1 and the page size is 25 by default. The page size is 100 at most. ([Judgement: a page size of 25 by default and 100 at most](#cnsl-0025))
 - <a id="cnsl-0016"></a>**CNSL-0016** When `page` or `pageSize` is not an integer of 1 or more, the response is 400. A `pageSize` above 100 also gives 400. For example, `page=0` gives 400. ([Judgement: page parameters, not the CDS pagination](#cnsl-0024))
 - <a id="cnsl-0017"></a>**CNSL-0017** An empty value of `page`, `pageSize`, `sort`, `order` or a filter is the same as an absent parameter. For example, `sort=` gives the default sort. ([Judgement: an empty value is absent](#cnsl-0026))
+- <a id="cnsl-0029"></a>**CNSL-0029** When `sort`, `order` or a filter has a value that the list does not accept, the response is 400. For example, `order` accepts only `asc` and `desc`, so `order=up` gives 400. ([Judgement: a list value that the list does not accept is refused](#cnsl-0030))
 
 ## Judgements
 
@@ -136,6 +139,12 @@ flowchart LR
 - Basis: Step 3.2. A form sends a field with no value as a parameter with an empty value ([HTML: Constructing the entry list][html-form-entry-list]).
 - Reason: This is the usual HTTP behaviour. A link from a form with an empty field then still works.
 
+### <a id="cnsl-0030"></a>CNSL-0030 A list value that the list does not accept is refused
+
+- Kind: choice
+- Basis: Step 3.3. The CDS and the ACCC give no rule for a lab web UI. 400 is the status for a request that the server does not process because of a client error ([RFC 9110, section 15.5.1][rfc9110-400]).
+- Reason: A client that sends a wrong value gets an error, not a list with a different sort or filter. The same rule applies to [an unknown field in a request body](../jsonhttp/DESIGN.md#body-0001).
+
 ## Withdrawn
 
 None.
@@ -148,7 +157,10 @@ None.
 [go-cop]: https://pkg.go.dev/net/http#CrossOriginProtection
 [html-form-entry-list]: https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#constructing-the-form-data-set
 [owasp-csrf]: https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
+[rfc9110-400]: https://www.rfc-editor.org/rfc/rfc9110#section-15.5.1
 [rfc9110-404]: https://www.rfc-editor.org/rfc/rfc9110#section-15.5.5
+[rfc9110-405]: https://www.rfc-editor.org/rfc/rfc9110#section-15.5.6
+[rfc9110-head]: https://www.rfc-editor.org/rfc/rfc9110#section-9.3.2
 [rfc9110-host]: https://www.rfc-editor.org/rfc/rfc9110#section-7.2
 [rfc9111]: https://www.rfc-editor.org/rfc/rfc9111
 [rfc9700-clickjacking]: https://www.rfc-editor.org/rfc/rfc9700.html#section-4.16

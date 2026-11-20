@@ -51,6 +51,7 @@ func TestAPageThatIsNotValidIsAnError(t *testing.T) {
 
 type colour string
 
+// Verifies: CNSL-0029
 func TestAnEnumParameterIsOneOfTheAllowedValues(t *testing.T) {
 	allowed := []colour{"RED", "BLUE"}
 
@@ -66,6 +67,7 @@ func TestAnEnumParameterIsOneOfTheAllowedValues(t *testing.T) {
 	require.EqualError(t, err, "colour must be one of [RED BLUE]")
 }
 
+// Verifies: CNSL-0029
 func TestASortIsOneOfTheSortsOrTheFallback(t *testing.T) {
 	sorts := map[string]int{"name": 1, "lastUpdated": 2}
 
@@ -81,6 +83,7 @@ func TestASortIsOneOfTheSortsOrTheFallback(t *testing.T) {
 	require.EqualError(t, err, "sort must be one of [lastUpdated name]")
 }
 
+// Verifies: CNSL-0029
 func TestAnOrderIsAscendingOrDescending(t *testing.T) {
 	tests := map[string]struct {
 		order      string

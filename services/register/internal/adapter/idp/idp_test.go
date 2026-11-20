@@ -90,7 +90,7 @@ func TestAJTIIsConsumedOneTime(t *testing.T) {
 	assert.ErrorIs(t, store.Consume(t.Context(), "jti-1"), authserver.ErrJTIUsed)
 }
 
-// Verifies: REG-0455
+// Verifies: REG-0455, AUTH-0250
 func TestOldJTIsAreRemoved(t *testing.T) {
 	pool := newPool(t)
 	store := idp.NewStore(pool)

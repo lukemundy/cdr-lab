@@ -78,3 +78,61 @@ func TestListenAndServeStopsWithAnErrorWhenAListenerFails(t *testing.T) {
 
 	assert.Error(t, err)
 }
+
+// Verifies: SRV-0014
+func TestAnOpenRequestCompletesWhenTheServersStop(t *testing.T) {
+	ctx, cancel := context.WithCancel(t.Context())
+	port := freePort(t)
+	started := make(chan struct{})
+	stopped := make(chan error, 1)
+
+	go func() {
+		stopped <- httpserver.ListenAndServe(ctx, []httpserver.Listener{{
+			Port: port,
+			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/slow" {
+					close(started)
+					time.Sleep(200 * time.Millisecond)
+				}
+
+				w.WriteHeader(http.StatusNoContent)
+			}),
+		}})
+	}()
+
+	baseURL := "http://127.0.0.1:" + strconv.Itoa(port)
+	get := func(path string) (int, error) {
+		req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, baseURL+path, nil)
+		if err != nil {
+			return 0, err
+		}
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return 0, err
+		}
+
+		defer func() { _ = resp.Body.Close() }()
+
+		return resp.StatusCode, nil
+	}
+
+	assert.EventuallyWithT(t, func(c *assert.CollectT) {
+		code, err := get("/")
+		require.NoError(c, err)
+		assert.Equal(c, http.StatusNoContent, code)
+	}, 5*time.Second, 20*time.Millisecond)
+
+	status := make(chan int, 1)
+
+	go func() {
+		code, _ := get("/slow")
+		status <- code
+	}()
+
+	<-started
+	cancel()
+
+	assert.Equal(t, http.StatusNoContent, <-status)
+	assert.NoError(t, <-stopped)
+}

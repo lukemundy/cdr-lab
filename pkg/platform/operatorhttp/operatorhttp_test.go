@@ -73,7 +73,7 @@ func TestARequestWithTheOperatorTokenReachesTheHandler(t *testing.T) {
 	}
 }
 
-// Verifies: OPI-0001, OPI-0002, OPI-0003
+// Verifies: OPI-0001, OPI-0002, OPI-0003, OPI-0010
 func TestARequestWithoutTheOperatorTokenIsUnauthorised(t *testing.T) {
 	const (
 		noErrorChallenge, invalidChallenge = `Bearer`, `Bearer error="invalid_token"`

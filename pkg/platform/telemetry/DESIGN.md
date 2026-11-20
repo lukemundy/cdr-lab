@@ -30,6 +30,7 @@ flowchart LR
 - The same signals from each lab service, with one set-up.
 - No CDR data and no personal information in the URL of a span.
 - Telemetry that identifies the build of the service.
+- HTTP metrics whose number of series a client cannot increase.
 
 ## Non-goals
 
@@ -50,10 +51,20 @@ flowchart LR
 - <a id="tele-0006"></a>**TELE-0006** When no route matches the request, the URL path of the span is `REDACTED`. ([Judgement: OpenTelemetry for traces, metrics and logs (ADR 0006)](../../../docs/adr/0006-telemetry.md))
 - <a id="tele-0007"></a>**TELE-0007** An HTTP server span has no query string, or `REDACTED` when an instrumentation records the query string. For example, a search with `?q=jane@example.com` gives no `jane@example.com` in the span. ([Judgement: OpenTelemetry for traces, metrics and logs (ADR 0006)](../../../docs/adr/0006-telemetry.md))
 
+## Metrics
+
+- <a id="tele-0008"></a>**TELE-0008** The HTTP server metrics do not have the attributes `server.address` and `server.port`. For example, `http.server.request.duration` has `http.route`, but not the `Host` header of the request. ([Judgement: no server address in the HTTP server metrics](#tele-0009))
+
 ## Judgements
 
-None.
+### <a id="tele-0009"></a>TELE-0009 No server address in the HTTP server metrics
+
+- Kind: choice
+- Basis: Step 3.2. For the HTTP server metrics, `server.address` and `server.port` are opt-in. They come from the HTTP headers, which "may allow an attacker to trigger cardinality limits" ([OpenTelemetry: HTTP metrics][otel-http-metrics]).
+- Reason: The client sets the `Host` header, so each new value can make a new series. The resource attributes and the route identify the service and the endpoint.
 
 ## Withdrawn
 
 None.
+
+[otel-http-metrics]: https://opentelemetry.io/docs/specs/semconv/http/http-metrics/#metric-httpserverrequestduration

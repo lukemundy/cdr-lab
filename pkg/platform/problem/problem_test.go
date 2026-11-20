@@ -15,7 +15,7 @@ import (
 	"github.com/lukemundy/cdr-lab/pkg/platform/problem"
 )
 
-// Verifies: PROB-0001
+// Verifies: PROB-0001, PROB-0013, PROB-0014
 func TestAProblemHasTheStatusPhraseAsItsTitle(t *testing.T) {
 	rec := httptest.NewRecorder()
 
@@ -30,6 +30,7 @@ func TestAProblemHasTheStatusPhraseAsItsTitle(t *testing.T) {
 	)
 }
 
+// Verifies: PROB-0015
 func TestAnUnexpectedErrorLogsOnlyTheTypeOfTheError(t *testing.T) {
 	var logs bytes.Buffer
 

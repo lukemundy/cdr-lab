@@ -45,6 +45,7 @@ flowchart LR
 - <a id="opi-0001"></a>**OPI-0001** Each request for a path under the prefix of the operator interface must have the operator token as a bearer token. This includes a request for an unknown path under the prefix. For example, `GET /v1/unknown` with no token gets 401. ([RFC 6750][rfc6750]; [Judgement: one bearer token from the configuration](#opi-0008))
 - <a id="opi-0002"></a>**OPI-0002** A request with no bearer token gets 401 with `WWW-Authenticate: Bearer`. ([RFC 6750, section 3.1][rfc6750-errors])
 - <a id="opi-0003"></a>**OPI-0003** A request with a different bearer token gets 401 with `WWW-Authenticate: Bearer error="invalid_token"`. ([RFC 6750, section 3.1][rfc6750-errors])
+- <a id="opi-0010"></a>**OPI-0010** Each 401 response has a problem details body. ([RFC 9457, section 3][rfc9457-3])
 - <a id="opi-0004"></a>**OPI-0004** The service gets the operator token from its configuration. For example, the setting `OPERATOR_TOKEN` gives the token. ([Judgement: one bearer token from the configuration](#opi-0008))
 
 ## Host allowlist
@@ -78,4 +79,5 @@ None.
 [cds-participant-statuses]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#participant-statuses
 [rfc6750]: https://www.rfc-editor.org/rfc/rfc6750
 [rfc6750-errors]: https://www.rfc-editor.org/rfc/rfc6750#section-3.1
+[rfc9457-3]: https://www.rfc-editor.org/rfc/rfc9457#section-3
 [vite-dns-rebinding]: https://github.com/vitejs/vite/security/advisories/GHSA-vg6x-rcgg-rjx6
