@@ -91,10 +91,10 @@ jobs:
                 services/dataholder/internal/adapter/banksite/openapi.yaml services/dataholder/brands \
                 services/dataholder/internal/adapter/consumerpages/testdata)"
               # All inputs of each image, so that each change to an image publishes it, and the lab that the job starts.
-              echo "register-image=$(changed "${shared[@]}" go.mod go.sum pkg services/register web .dockerignore \
-                compose.yaml lab)"
-              echo "dataholder-image=$(changed "${shared[@]}" go.mod go.sum pkg services/dataholder web .dockerignore \
-                compose.yaml lab)"
+              echo "register-image=$(changed "${shared[@]}" go.mod go.sum pkg services/register tools/notices web \
+                .dockerignore compose.yaml lab)"
+              echo "dataholder-image=$(changed "${shared[@]}" go.mod go.sum pkg services/dataholder tools/notices web \
+                .dockerignore compose.yaml lab)"
               echo "audit=$(changed "${shared[@]}" osv-scanner.toml go.mod go.sum web/pnpm-lock.yaml)"
               echo "chart=$(changed "${shared[@]}" charts go.mod go.sum)"
               # The specifications, the Go imports that their library tables give, and the Verifies comments of the tests.

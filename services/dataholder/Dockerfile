@@ -32,6 +32,10 @@ COPY --from=web /src/web/apps/dataholder-console/dist/ services/dataholder/inter
 COPY --from=web /src/web/apps/dataholder-bank/dist/ services/dataholder/internal/adapter/banksite/dist/
 COPY --from=web /src/web/packages/ui/dist/consumer-pages/ services/dataholder/internal/adapter/consumerpages/static/
 
+COPY tools/notices/ tools/notices/
+RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build \
+    mkdir -p /out && go run ./tools/notices ./services/dataholder/cmd/dataholder > /out/third-party-notices.txt
+
 ARG BUILD_COMMIT=unknown BUILD_COMMIT_SHORT=unknown BUILD_TIME=unknown BUILD_ID=local
 RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build \
     buildinfo=github.com/lukemundy/cdr-lab/pkg/platform/buildinfo && \
@@ -48,5 +52,9 @@ LABEL org.opencontainers.image.source=https://github.com/lukemundy/cdr-lab
 COPY --from=build /out/dataholder /dataholder
 # The SIL Open Font License requires its text with each copy of the fonts of the web UIs.
 COPY --from=web /src/web/packages/tokens/dist/fonts/*-LICENSE.txt /licenses/fonts/
+# The licences of the Go modules and the npm packages require their notices with each copy of their code.
+COPY --from=build /out/third-party-notices.txt /licenses/go/
+COPY --from=web /src/web/apps/dataholder-console/dist/third-party-notices.txt /licenses/web/dataholder-console/
+COPY --from=web /src/web/apps/dataholder-bank/dist/third-party-notices.txt /licenses/web/dataholder-bank/
 EXPOSE 8080 8081 8083 8085
 ENTRYPOINT ["/dataholder"]
