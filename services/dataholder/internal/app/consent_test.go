@@ -85,13 +85,17 @@ func consentRequest() domain.ConsentRequest {
 	}
 }
 
-func TestTheAccountsOfAConsentAreTheOpenAccountsOfTheCustomer(t *testing.T) {
+// Verifies: DH-2639
+func TestTheAccountsForAConsentAreEachAccountOfTheCustomerAlsoAClosedAccount(t *testing.T) {
 	consents, _ := newConsents(t)
 
 	accounts, err := consents.Accounts(t.Context(), consentCustomer)
 
 	require.NoError(t, err)
-	assert.Equal(t, []domain.Account{openAccount("account-1"), openAccount("account-2")}, accounts)
+	assert.Equal(t, []domain.Account{
+		openAccount("account-1"), openAccount("account-2"),
+		{AccountID: "account-4", OpenStatus: domain.OpenStatusClosed},
+	}, accounts)
 }
 
 func TestAConfirmationCreatesAnArrangementWithANewIdentifier(t *testing.T) {
@@ -140,6 +144,7 @@ func TestAConfirmationThatBreaksARuleCreatesNoArrangement(t *testing.T) {
 	}{
 		"no account":                      {selected: nil, want: domain.ErrNoAccountSelected},
 		"account of a different customer": {selected: []string{"account-3"}, want: domain.ErrAccountNotOfCustomer},
+		"closed account":                  {selected: []string{"account-4"}, want: domain.ErrAccountNotOfCustomer},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {

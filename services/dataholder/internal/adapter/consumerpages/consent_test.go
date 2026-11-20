@@ -156,7 +156,28 @@ func TestTheConsentPageListsTheOpenAccountsOfTheCustomerWithMaskedNumbersAndNone
 	assert.Contains(t, consent.body, "Holiday &lt;Saver&gt; (xxx-xxx xxxx4321)")
 	assert.NotContains(t, consent.body, "12345678")
 	assert.NotContains(t, consent.body, "checked")
-	assert.NotContains(t, consent.body, "account-3", "a closed account")
+}
+
+// Verifies: DH-2639
+func TestTheConsentPageListsTheClosedAccountsOfTheCustomerWithAReasonAndNoControl(t *testing.T) {
+	b := newBrowser(t)
+
+	consent := b.consent()
+
+	assert.Contains(t, consent.body, "Accounts that you cannot share")
+	assert.Contains(t, consent.body, "Closed (xxx-xxx xxxx3344)")
+	assert.Contains(t, consent.body, "Coastal Bank does not share data from a closed account.")
+	assert.NotContains(t, consent.body, "account-3", "the closed account has no control")
+}
+
+// Verifies: DH-2639
+func TestTheConsentPageWithNoClosedAccountHasNoListOfAccountsThatTheConsumerCannotShare(t *testing.T) {
+	b := newBrowser(t)
+	b.customers.accounts = ownAccounts()[:2]
+
+	consent := b.consent()
+
+	assert.NotContains(t, consent.body, "Accounts that you cannot share")
 }
 
 // Verifies: DH-0822
@@ -168,6 +189,7 @@ func TestTheConsentPageOfARequestWithNoBankScopeHasNoAccountSelection(t *testing
 
 	assert.NotContains(t, consent.body, `name="account"`)
 	assert.NotContains(t, consent.body, "Everyday")
+	assert.NotContains(t, consent.body, "Accounts that you cannot share")
 	assert.Contains(t, consent.body, `value="confirm"`)
 }
 
@@ -186,6 +208,7 @@ func TestACustomerWithNoOpenAccountCanOnlyCancel(t *testing.T) {
 			consent := b.consent()
 
 			assert.Contains(t, consent.body, "You have no open account at Coastal Bank, so you cannot share your data")
+			assert.NotContains(t, consent.body, "Accounts that you cannot share", "the page has no account selection")
 			assert.NotContains(t, consent.body, `value="confirm"`)
 			assert.Contains(t, consent.body, `value="cancel"`)
 

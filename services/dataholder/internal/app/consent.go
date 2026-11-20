@@ -53,14 +53,14 @@ type Confirmation struct {
 	Subject string
 }
 
-// Accounts gives the accounts that the customer can select, or ErrCustomerNotFound.
+// Accounts gives each account of the customer, also a closed account, or ErrCustomerNotFound.
 func (c Consents) Accounts(ctx context.Context, customerNumber string) ([]domain.Account, error) {
 	record, err := c.Customers.Customer(ctx, customerNumber)
 	if err != nil {
 		return nil, fmt.Errorf("read the customer: %w", err)
 	}
 
-	return domain.OpenAccounts(record.Accounts), nil
+	return record.Accounts, nil
 }
 
 // Confirm creates the arrangement, or gives the errors of domain.NewArrangement and of Accounts.
@@ -74,7 +74,9 @@ func (c Consents) Confirm(
 		return Confirmation{}, err
 	}
 
-	arrangement, err := domain.NewArrangement(c.NewID(), request, accounts, selected, c.Now(), c.AccessTokenLifetime)
+	arrangement, err := domain.NewArrangement(
+		c.NewID(), request, domain.OpenAccounts(accounts), selected, c.Now(), c.AccessTokenLifetime,
+	)
 	if err != nil {
 		return Confirmation{}, err
 	}
