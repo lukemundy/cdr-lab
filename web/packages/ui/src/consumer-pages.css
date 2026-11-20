@@ -318,6 +318,21 @@ fieldset {
   cursor: pointer;
 }
 
+/* An account that the consumer cannot select has the size of a choice, but no border that shows a control. */
+.cp-closed-accounts {
+  margin: 0 0 var(--ds-space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.cp-closed-accounts > li {
+  margin: 0 0 var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-control-x);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-fg-muted);
+}
+
 .cp-button {
   display: block;
   inline-size: 100%;

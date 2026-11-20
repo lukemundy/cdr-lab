@@ -278,12 +278,15 @@ func TestTheConsentPageSaysThatTheDataIncludesEarlierDataAndHowToWithdraw(t *tes
 	assert.NotContains(t, consent.body, "<script")
 }
 
-// Verifies: DH-0819, DH-0820
+// Verifies: DH-0819, DH-0820, DH-2639
 func TestTheConsentPageListsOnlyTheAccountsOfTheCustomerWithMaskedNumbersAndNoneSelected(t *testing.T) {
 	client := registered(t, allScopesProduct)
 	customer, other := newAccount(t), newAccount(t)
 	everyday := customer.addAccount("Everyday", "20000001")
 	saver := customer.addAccount("Holiday Saver", "2000000002")
+	closed := customer.addAccount("Old Saver", "2000000005")
+	closeAccount(t, customer.customer.CustomerNumber, closed.AccountID)
+
 	otherAccount := other.addAccount("Other Everyday", "20000003")
 
 	consent := customer.authenticate(client, client.requestObjectClaims())
@@ -296,6 +299,13 @@ func TestTheConsentPageListsOnlyTheAccountsOfTheCustomerWithMaskedNumbersAndNone
 	assert.NotContains(t, consent.body, "20000001", "the page does not show a full account number")
 	assert.NotContains(t, consent.body, "checked", "no account is selected at the start")
 	assert.True(t, canConfirm(consent))
+
+	t.Run("the page lists a closed account with its reason, and the consumer cannot select it", func(t *testing.T) {
+		assert.Contains(t, text(consent), "Accounts that you cannot share")
+		assert.Contains(t, text(consent), "Old Saver (xxx-xxx xxxxxx0005)")
+		assert.Contains(t, text(consent), bankName(t)+" does not share data from a closed account.")
+		assert.NotContains(t, consent.body, closed.AccountID)
+	})
 }
 
 // Verifies: DH-0826

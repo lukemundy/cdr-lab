@@ -134,7 +134,9 @@ type consentView struct {
 	Eligible      bool
 	NeedsAccounts bool
 	Accounts      []accountView
-	OneOccasion   bool
+	// ClosedAccounts are on the page with no control, because the data holder does not share their data.
+	ClosedAccounts []accountView
+	OneOccasion    bool
 	// Duration and EndDate are for a consent that is not for one occasion. The EndDate is in UTC.
 	Duration string
 	EndDate  string
@@ -332,15 +334,20 @@ func (p Pages) showConsent(
 		return unavailable(r.Context(), err)
 	}
 
-	consent.Eligible = len(accounts) > 0
+	consent.Eligible = len(domain.OpenAccounts(accounts)) > 0
 
 	if consent.NeedsAccounts {
 		for _, account := range accounts {
-			consent.Accounts = append(consent.Accounts, accountView{
+			view := accountView{
 				ID:           account.AccountID,
 				DisplayName:  account.DisplayName,
 				MaskedNumber: account.MaskedNumber(),
-			})
+			}
+			if account.OpenStatus == domain.OpenStatusOpen {
+				consent.Accounts = append(consent.Accounts, view)
+			} else {
+				consent.ClosedAccounts = append(consent.ClosedAccounts, view)
+			}
 		}
 	}
 

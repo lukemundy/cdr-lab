@@ -33,7 +33,8 @@ After the authentication, one page asks the consumer for the authorisation to di
 
 ## Account selection
 
-- <a id="dh-0819"></a>**DH-0819** When the request has a scope with the prefix `bank:`, the authorisation page lists each open account of the customer, with its display name and its masked number. For example: "Everyday xxx-xxx xxxxx1234". ([CDS: Authorisation Standards][cds-authorisation-standards]; [Judgement: closed accounts are not on the authorisation page](#dh-0854))
+- <a id="dh-0819"></a>**DH-0819** When the request has a scope with the prefix `bank:`, the authorisation page lists each open account of the customer, with its display name and its masked number. For example: "Everyday xxx-xxx xxxxx1234". ([CDS: Authorisation Standards][cds-authorisation-standards])
+- <a id="dh-2639"></a>**DH-2639** When the authorisation page lists accounts, it also lists each closed account of the customer, with its display name, its masked number and the reason that the consumer cannot select it. The consumer cannot select a closed account. ([CDR Support: Closed accounts in the banking and non-bank lenders sectors][support-closed-accounts]; [CX Guidelines: Authorisation to disclose][cx-authorise])
 - <a id="dh-0820"></a>**DH-0820** When the authorisation page lists accounts, no account is selected before the consumer selects it. ([CDS: Authorisation Standards][cds-authorisation-standards])
 - <a id="dh-0821"></a>**DH-0821** When the authorisation page lists accounts, the consumer selects one or more accounts. The consumer cannot confirm with no account selected. ([CDS: Authorisation Standards][cds-authorisation-standards])
 - <a id="dh-0822"></a>**DH-0822** When the request has no scope with the prefix `bank:`, the authorisation page has no account selection. ([CDS: Authorisation Standards][cds-authorisation-standards])
@@ -119,12 +120,6 @@ These rules apply to each page of the authentication and of the authorisation. T
 - Kind: choice
 - Basis: Step 3.1. Rule 4.23(1)(g) requires instructions, and rule 4.24(d) forbids a reference to other documents in the authorisation process ([CDR Rules][cdr-rules]). The CDS also forbids other documents and services in the flow ([CDS: Common Authentication Standards][cds-cx-authentication]).
 - Reason: The text names the two methods of rule 4.25(1). A description of the consumer dashboard is the instruction that rule 4.23(1)(g) asks for, not a different document or service. The online bank site also has no link to the authorisation page ([the site has no link to the consumer pages](online-bank-site-sign-in.md#dh-2059)).
-
-### <a id="dh-0854"></a>DH-0854 Closed accounts are not on the authorisation page
-
-- Kind: gap
-- Basis: Step 2. The ACCC says that a data holder that does not share a closed account should show these accounts in the account selection step, but they must not be selectable ([CDR Support: Closed accounts in the banking and non-bank lenders sectors][support-closed-accounts]). The authorisation page shows only the open accounts.
-- Reason: The ACCC text is guidance ("should"), and the page shows only the accounts that the consumer can select. A lab user can still test a closed account, because an arrangement keeps an account that closes after the confirmation.
 
 ### <a id="dh-0855"></a>DH-0855 Only a cancel for a customer with no open account
 

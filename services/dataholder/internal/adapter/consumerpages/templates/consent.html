@@ -21,6 +21,11 @@
 <legend>Select the accounts to share</legend>
 {{range .Accounts}}<p class="cp-choice"><input type="checkbox" id="account-{{.ID}}" name="account" value="{{.ID}}"> <label for="account-{{.ID}}">{{.DisplayName}} ({{.MaskedNumber}})</label></p>
 {{end}}</fieldset>
-{{end}}<button class="cp-button cp-primary" type="submit" name="action" value="confirm">Share my data</button>
+{{with .ClosedAccounts}}<h3>Accounts that you cannot share</h3>
+<p>{{$.Bank}} does not share data from a closed account.</p>
+<ul class="cp-closed-accounts">
+{{range .}}<li>{{.DisplayName}} ({{.MaskedNumber}})</li>
+{{end}}</ul>
+{{end}}{{end}}<button class="cp-button cp-primary" type="submit" name="action" value="confirm">Share my data</button>
 </form>
 {{end}}{{end}}{{template "cancel" .}}{{template "card-end"}}{{template "foot" .}}
