@@ -7,6 +7,7 @@ import (
 	"go/token"
 	"io/fs"
 	"maps"
+	"net/url"
 	"path"
 	"regexp"
 	"slices"
@@ -47,6 +48,11 @@ var (
 	verifiesRe        = regexp.MustCompile(`^\s*// Verifies: [A-Z]{2,5}-[0-9]{4}(, [A-Z]{2,5}-[0-9]{4})*$`)
 	verifiesIDRe      = regexp.MustCompile(`[A-Z]{2,5}-[0-9]{4}`)
 	subHeadingRe      = regexp.MustCompile(`^#{3,6}(\s|$)`)
+	headingRe         = regexp.MustCompile(`^#{1,6}(\s.*)?$`)
+	closingHashesRe   = regexp.MustCompile(`(^|\s)#+$`)
+	htmlAnchorRe      = regexp.MustCompile(`<a\s+(?:id|name)="([^"]*)"`)
+	htmlTagRe         = regexp.MustCompile(`<[^>]*>`)
+	linkTextRe        = regexp.MustCompile(`!?\[([^\]]*)\]\([^)]*\)`)
 )
 
 var fixedHeadings = map[string]bool{
@@ -112,6 +118,7 @@ type checker struct {
 	anchors    map[string]bool       // "path#anchor" of each definition
 	titles     map[string]string     // "path#anchor" of each judgement: its title
 	verified   map[string]bool
+	mdAnchors  map[string]map[string]bool // Markdown file to its anchors, or nil when the file cannot be read
 	bareIDRe   *regexp.Regexp
 	components map[string][]*spec
 }
@@ -132,6 +139,7 @@ func check(fsys fs.FS, paths []string) result {
 		anchors:    map[string]bool{},
 		titles:     map[string]string{},
 		verified:   map[string]bool{},
+		mdAnchors:  map[string]map[string]bool{},
 		components: map[string][]*spec{},
 	}
 
@@ -151,7 +159,7 @@ func check(fsys fs.FS, paths []string) result {
 
 	for _, p := range paths {
 		switch {
-		case strings.HasSuffix(p, ".md") && p != conventionsPath:
+		case strings.HasSuffix(p, ".md"):
 			c.checkLinkTargets(p)
 		case isTestFile(p):
 			c.checkVerifies(p)
@@ -578,8 +586,9 @@ func (c *checker) checkLines(s *spec) {
 	})
 }
 
-// checkLinkTargets makes sure that each link to an identifier, from any Markdown file, goes to an identifier that
-// exists.
+// checkLinkTargets makes sure that each relative link with a fragment goes to a file that exists and, in a Markdown
+// file, to an anchor. A fragment in the identifier format must go to an identifier instead, except in the
+// conventions, which have example identifiers.
 func (c *checker) checkLinkTargets(p string) {
 	lines, ok := c.readLines(p)
 	if !ok {
@@ -602,14 +611,24 @@ func (c *checker) checkLinkTargets(p string) {
 
 		for _, l := range links {
 			file, fragment, found := strings.Cut(l.target, "#")
-			if !found || !idFragmentRe.MatchString(fragment) || strings.Contains(file, ":") {
+			if !found || strings.Contains(file, ":") {
 				continue
 			}
 
 			if file == "" {
 				file = p
 			} else {
-				file = path.Join(path.Dir(p), file)
+				file = path.Join(path.Dir(p), unescape(file))
+			}
+
+			if !idFragmentRe.MatchString(fragment) {
+				c.checkHeadingLink(p, n, file, unescape(fragment))
+
+				continue
+			}
+
+			if p == conventionsPath {
+				continue
 			}
 
 			if !c.anchors[file+"#"+fragment] {
@@ -623,6 +642,87 @@ func (c *checker) checkLinkTargets(p string) {
 			}
 		}
 	})
+}
+
+func (c *checker) checkHeadingLink(p string, n int, file, fragment string) {
+	if !strings.HasSuffix(file, ".md") {
+		if _, err := fs.Stat(c.fsys, file); err != nil {
+			c.errorf(p, n, "the link goes to %s, which does not exist", file)
+		}
+
+		return
+	}
+
+	anchors, ok := c.mdAnchors[file]
+	if !ok {
+		anchors = c.readAnchors(file)
+		c.mdAnchors[file] = anchors
+	}
+
+	switch {
+	case anchors == nil:
+		c.errorf(p, n, "the link goes to %s, which does not exist", file)
+	case !anchors[fragment]:
+		c.errorf(p, n, "the link goes to %s#%s, which is not a heading or an anchor", file, fragment)
+	}
+}
+
+// readAnchors gives nil for a file that cannot be read.
+func (c *checker) readAnchors(p string) map[string]bool {
+	data, err := fs.ReadFile(c.fsys, p)
+	if err != nil {
+		return nil
+	}
+
+	anchors := map[string]bool{}
+	headings := map[string]int{}
+
+	outsideFences(strings.Split(string(data), "\n"), func(_ int, line string) {
+		for _, m := range htmlAnchorRe.FindAllStringSubmatch(codeSpanRe.ReplaceAllString(line, ""), -1) {
+			anchors[m[1]] = true
+		}
+
+		m := headingRe.FindStringSubmatch(line)
+		if m == nil {
+			return
+		}
+
+		anchor := headingAnchor(closingHashesRe.ReplaceAllString(strings.TrimSpace(m[1]), ""))
+		if count := headings[anchor]; count > 0 {
+			anchors[anchor+"-"+strconv.Itoa(count)] = true
+		} else {
+			anchors[anchor] = true
+		}
+
+		headings[anchor]++
+	})
+
+	return anchors
+}
+
+// headingAnchor uses the rules of GitHub, which makes the anchor from the heading text as it shows it.
+func headingAnchor(heading string) string {
+	text := linkTextRe.ReplaceAllString(withoutLinksInCodeSpans(heading), "$1")
+	text = htmlTagRe.ReplaceAllString(text, "")
+
+	return strings.Map(func(r rune) rune {
+		switch {
+		case r == ' ':
+			return '-'
+		case unicode.IsLetter(r) || unicode.IsNumber(r) || unicode.IsMark(r) || r == '-' || r == '_':
+			return r
+		default:
+			return -1
+		}
+	}, strings.ToLower(text))
+}
+
+func unescape(s string) string {
+	if decoded, err := url.PathUnescape(s); err == nil {
+		return decoded
+	}
+
+	return s
 }
 
 // checkJudgementLink makes sure that a Judgement: link goes to a judgement and has its title as text. The case of

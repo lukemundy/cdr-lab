@@ -1,5 +1,5 @@
-// Command speccheck checks the structure of the specifications that follow ADR 0024, and the Verifies comments of
-// the tests. Run it from the repository root.
+// Command speccheck checks the structure of the specifications that follow ADR 0024, the Verifies comments of the
+// tests and the links with a fragment in the Markdown files. Run it from the repository root.
 package main
 
 import (

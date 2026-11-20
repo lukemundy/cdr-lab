@@ -276,6 +276,8 @@ In each specification file, these are errors:
 
 In all Markdown files except this file, a link with an identifier anchor as its fragment must go to an identifier that exists. A `Judgement:` link must go to a judgement, with its title as text.
 
+In all Markdown files, also this file, a relative link with a fragment that is not an identifier anchor must go to a file that exists. When that file is a Markdown file, the fragment must be one of its anchors, as GitHub makes them: the anchor of each heading, with `-1`, `-2` for a duplicate heading, and each `<a id>` or `<a name>`. The fragment must agree exactly, also in case. A link with no fragment gets no check. The check does not see a link with a title, a link on more than one line or a link with brackets in its text. It gives no anchor for a setext heading, and it keeps the `_` of emphasis in the anchor of a heading.
+
 In each test file (`_test.go`, `.test.ts`, `.test.tsx`, `.spec.ts`, `.spec.tsx`), a `// Verifies` line must agree with [Verifies comments](#verifies-comments), and each identifier must be a requirement that exists. A requirement that no `// Verifies:` comment refers to gives a warning.
 
 ## Words and patterns to avoid
