@@ -14,9 +14,11 @@ var (
 	// ErrInvalidJWT means that the JWT is not a JWT, or that its signature does not verify with the keys of its signer.
 	ErrInvalidJWT = errors.New("the JWT is not valid")
 	// ErrKeysNotAvailable means that the data holder cannot get the keys of a software product.
-	ErrKeysNotAvailable     = errors.New("the keys of the software product are not available")
-	ErrJTIUsed              = errors.New("the JWT ID is used again")
-	ErrRegistrationNotFound = errors.New("the data holder has no registration with this client ID")
+	ErrKeysNotAvailable = errors.New("the keys of the software product are not available")
+	// ErrSectorDocumentNotAvailable means that the data holder cannot get the document, or cannot read it.
+	ErrSectorDocumentNotAvailable = errors.New("the sector identifier document is not available")
+	ErrJTIUsed                    = errors.New("the JWT ID is used again")
+	ErrRegistrationNotFound       = errors.New("the data holder has no registration with this client ID")
 )
 
 var ClientRegistrationType = eventsourcing.AggregateType[
@@ -46,6 +48,11 @@ type RegistrationJWTs interface {
 	// VerifyRequest verifies the request JWT with the keys at jwksURI, and gives ErrKeysNotAvailable when it cannot get
 	// them.
 	VerifyRequest(ctx context.Context, requestJWT, jwksURI string) (domain.RegistrationRequest, error)
+}
+
+type SectorIdentifiers interface {
+	// RedirectURIs gives the redirect URIs of the document at uri, or ErrSectorDocumentNotAvailable.
+	RedirectURIs(ctx context.Context, uri string) ([]string, error)
 }
 
 type RegistrationReader interface {
@@ -123,6 +130,7 @@ type Registrar struct {
 	Registrations RegistrationReader
 	Statuses      StatusReader
 	Arrangements  RegistrationArrangements
+	Sectors       SectorIdentifiers
 	Now           func() time.Time
 	NewID         func() string
 }
@@ -274,9 +282,37 @@ func (r Registrar) verifiedRegistration(
 	}
 
 	registration, err := domain.NewRegistration(ssa, request, r.Issuer, now)
+	if err != nil {
+		return domain.Registration{}, requestJTIs{}, err
+	}
+
+	if err := r.checkSectorIdentifier(ctx, registration); err != nil {
+		return domain.Registration{}, requestJTIs{}, err
+	}
+
 	jtis := requestJTIs{request: request.ID, ssa: ssa.ID, ssaExpiresAt: time.Unix(ssa.ExpiresAt, 0)}
 
-	return registration, jtis, err
+	return registration, jtis, nil
+}
+
+func (r Registrar) checkSectorIdentifier(ctx context.Context, registration domain.Registration) error {
+	if registration.SectorIdentifierURI == "" {
+		return nil
+	}
+
+	published, err := r.Sectors.RedirectURIs(ctx, registration.SectorIdentifierURI)
+	if errors.Is(err, ErrSectorDocumentNotAvailable) {
+		return refused(
+			domain.InvalidClientMetadata,
+			"the data holder cannot get a JSON array of redirect URIs at the sector_identifier_uri of the SSA",
+		)
+	}
+
+	if err != nil {
+		return fmt.Errorf("get the sector identifier document: %w", err)
+	}
+
+	return registration.CheckSectorIdentifierDocument(published)
 }
 
 // refuseRemoved permits a software product with no status, because only REMOVED is final.

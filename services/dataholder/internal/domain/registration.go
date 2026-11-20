@@ -129,6 +129,10 @@ func (s SSA) Validate(now time.Time) error {
 		return invalidSSA("the SSA jwks_uri is not an https URL")
 	}
 
+	if s.SectorIdentifierURI != "" && !strings.HasPrefix(s.SectorIdentifierURI, "https://") {
+		return invalidSSA("the SSA sector_identifier_uri is not an https URL")
+	}
+
 	if s.SoftwareRoles != ssaSoftwareRoles {
 		return invalidSSA("the SSA software_roles is not %s", ssaSoftwareRoles)
 	}
@@ -235,6 +239,19 @@ func NewRegistration(ssa SSA, request RegistrationRequest, issuer string, now ti
 	metadata.Scope = supportedScopesOf(ssa.Scope)
 
 	return metadata, nil
+}
+
+func (r Registration) CheckSectorIdentifierDocument(published []string) error {
+	for _, uri := range r.RedirectURIs {
+		if !slices.Contains(published, uri) {
+			return RegistrationError{
+				Code:        InvalidRedirectURI,
+				Description: "a value of redirect_uris is not in the document at the sector_identifier_uri",
+			}
+		}
+	}
+
+	return nil
 }
 
 func (r RegistrationRequest) validateJWT(softwareID, issuer string, now time.Time) error {

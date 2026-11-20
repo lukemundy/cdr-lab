@@ -78,6 +78,18 @@ func (j *jwts) VerifyRequest(_ context.Context, _, jwksURI string) (domain.Regis
 	return j.request, j.requestErr
 }
 
+type sectorDocuments struct {
+	redirectURIs []string
+	err          error
+	requested    []string
+}
+
+func (s *sectorDocuments) RedirectURIs(_ context.Context, uri string) ([]string, error) {
+	s.requested = append(s.requested, uri)
+
+	return s.redirectURIs, s.err
+}
+
 type jtis map[string]bool
 
 func (j jtis) Consume(_ context.Context, jti string) error {
@@ -146,6 +158,7 @@ func newRegistrar(j *jwts) app.Registrar {
 		Registrations: storeReader{store: store},
 		Statuses:      softwareStatuses{},
 		Arrangements:  &clientArrangements{},
+		Sectors:       &sectorDocuments{redirectURIs: []string{"https://recipient.example/cb"}},
 		Now:           func() time.Time { return registrationTime },
 		NewID: func() string {
 			ids++
@@ -401,6 +414,104 @@ func TestARequestThatIsRefusedDoesNotUseItsJTI(t *testing.T) {
 	_, err = registrar.Register(t.Context(), requestJWT)
 
 	assert.NoError(t, err)
+}
+
+const sectorURI = "https://recipient.example/sector.json"
+
+// Verifies: DH-2630
+func TestARegistrationWithASectorIdentifierURIGetsTheDocumentAtEachRegistrationAndUpdate(t *testing.T) {
+	j := validJWTs()
+	j.ssa.SectorIdentifierURI = sectorURI
+	registrar := newRegistrar(j)
+	sectors := &sectorDocuments{redirectURIs: []string{"https://recipient.example/cb"}}
+	registrar.Sectors = sectors
+
+	registration, err := registrar.Register(t.Context(), requestJWT)
+	require.NoError(t, err)
+
+	j.request.ID, j.ssa.ID = "request-jti-2", "ssa-jti-2"
+	_, err = registrar.Update(t.Context(), registration.ClientID, requestJWT)
+	require.NoError(t, err)
+
+	assert.Equal(t, []string{sectorURI, sectorURI}, sectors.requested)
+}
+
+// Verifies: DH-2630
+func TestARegistrationWithNoSectorIdentifierURIGetsNoDocument(t *testing.T) {
+	registrar := newRegistrar(validJWTs())
+	sectors := &sectorDocuments{}
+	registrar.Sectors = sectors
+
+	_, err := registrar.Register(t.Context(), requestJWT)
+
+	require.NoError(t, err)
+	assert.Empty(t, sectors.requested)
+}
+
+// Verifies: DH-2630
+func TestTheDataHolderGetsNoSectorIdentifierDocumentForARequestThatDoesNotVerify(t *testing.T) {
+	j := validJWTs()
+	j.ssa.SectorIdentifierURI = sectorURI
+	j.requestErr = app.ErrInvalidJWT
+	registrar := newRegistrar(j)
+	sectors := &sectorDocuments{}
+	registrar.Sectors = sectors
+
+	_, err := registrar.Register(t.Context(), requestJWT)
+
+	require.Error(t, err)
+	assert.Empty(t, sectors.requested)
+}
+
+// Verifies: DH-2635, DH-2636
+func TestARegistrationThatTheSectorIdentifierDocumentDoesNotPermitIsRefused(t *testing.T) {
+	tests := map[string]struct {
+		sectors     *sectorDocuments
+		code        domain.RegistrationErrorCode
+		description string
+	}{
+		"a document that is not available": {
+			&sectorDocuments{
+				err: app.ErrSectorDocumentNotAvailable,
+			},
+			domain.InvalidClientMetadata,
+			"sector_identifier_uri",
+		},
+		"a document with no redirect URI of the registration": {
+			&sectorDocuments{redirectURIs: []string{"https://recipient.example/other"}},
+			domain.InvalidRedirectURI,
+			"sector_identifier_uri",
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			j := validJWTs()
+			j.ssa.SectorIdentifierURI = sectorURI
+			registrar := newRegistrar(j)
+			registrar.Sectors = tc.sectors
+
+			_, err := registrar.Register(t.Context(), requestJWT)
+			requireRegistrationError(t, err, tc.code, tc.description)
+
+			tc.sectors.redirectURIs, tc.sectors.err = []string{"https://recipient.example/cb"}, nil
+			_, err = registrar.Register(t.Context(), requestJWT)
+			assert.NoError(t, err, "the refused request did not use its jti")
+		})
+	}
+}
+
+func TestAFailureToGetTheSectorIdentifierDocumentThatIsNotTheFaultOfTheRequestIsNotARegistrationError(t *testing.T) {
+	j := validJWTs()
+	j.ssa.SectorIdentifierURI = sectorURI
+	registrar := newRegistrar(j)
+	registrar.Sectors = &sectorDocuments{err: errors.New("the context is cancelled")}
+
+	_, err := registrar.Register(t.Context(), requestJWT)
+
+	require.Error(t, err)
+
+	var registrationErr domain.RegistrationError
+	assert.NotErrorAs(t, err, &registrationErr)
 }
 
 // registeredClient gives a registrar with one registration, whose client ID is client-1.

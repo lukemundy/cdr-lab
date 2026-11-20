@@ -1005,7 +1005,7 @@
                 "bank:transactions:read",
                 "cdr:registration"
               ],
-              "sectorIdentifierUri": "https://sector.conformance.example/redirect-uris.json"
+              "sectorIdentifierUri": "https://conformance:8444/sector-identifier.json"
             },
             {
               "softwareProductId": "3e5a7c94-1b2d-4f6e-8a9b-0c1d2e3f4a87",

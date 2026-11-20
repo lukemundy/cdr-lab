@@ -420,7 +420,36 @@ func TestTheSubjectOfACustomerIsPairwiseAndStaysTheSame(t *testing.T) {
 		assert.NotEqual(t, sub, client.subjectOf(t, otherCustomer))
 	})
 
-	// This test registers the software product with the sector identifier, and no other test uses it.
+	// This test registers the software product with the sector identifier, and no other test uses it. The data holder
+	// gets the sector identifier document from the JWKS server of this process.
+	sector := newRegistrant(t, sectorProduct)
+
+	labtest.ServeSectorIdentifierDocument(http.StatusOK, `["https://conformance.example/other"]`)
+
+	withoutRedirectURI := sector.register(t, sector.claims())
+
+	labtest.ServeSectorIdentifierDocument(http.StatusNotFound, "")
+
+	notAvailable := sector.register(t, sector.claims())
+
+	t.Run(
+		"a registration is refused when the sector identifier document does not have its redirect URI",
+		func(t *testing.T) {
+			assert.Equal(t, http.StatusBadRequest, withoutRedirectURI.status)
+			assert.Equal(t, "invalid_redirect_uri", withoutRedirectURI.body["error"])
+		},
+	)
+
+	t.Run(
+		"a registration is refused when the data holder cannot get the sector identifier document",
+		func(t *testing.T) {
+			assert.Equal(t, http.StatusBadRequest, notAvailable.status)
+			assert.Equal(t, "invalid_client_metadata", notAvailable.body["error"])
+		},
+	)
+
+	labtest.ServeSectorIdentifierDocument(http.StatusOK, `["https://conformance.example/callback"]`)
+
 	sectorClient := registerNew(t, sectorProduct)
 	sectorSub := sectorClient.subjectOf(t, customer.consents(sectorClient, noAccountScope, ninetyDays).tokens(t))
 

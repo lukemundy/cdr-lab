@@ -42,6 +42,24 @@ var jwksServer struct {
 	keys RecipientKeys
 }
 
+// SectorIdentifierPath is the path of the sector identifier document on the JWKS server.
+const SectorIdentifierPath = "/sector-identifier.json"
+
+var sectorDocument struct {
+	mu     sync.Mutex
+	status int
+	body   string
+}
+
+// ServeSectorIdentifierDocument sets the response of the JWKS server at SectorIdentifierPath. Before the first call,
+// the response is 404.
+func ServeSectorIdentifierDocument(status int, body string) {
+	sectorDocument.mu.Lock()
+	defer sectorDocument.mu.Unlock()
+
+	sectorDocument.status, sectorDocument.body = status, body
+}
+
 // ServeJWKS starts the JWKS server of the test process one time, and the
 // server runs until the process ends. Each test package has its own address,
 // because the packages run at the same time. The server is also the CDR
@@ -92,6 +110,20 @@ func serveJWKS(t *testing.T, addressVariable string, keys *RecipientKeys) error 
 			{Key: &keys.RSA.PublicKey, KeyID: "rsa", Algorithm: "PS256", Use: "sig"},
 			{Key: &keys.EC.PublicKey, KeyID: "ec", Algorithm: "ES256", Use: "sig"},
 		}})
+	})
+
+	mux.HandleFunc("GET "+SectorIdentifierPath, func(w http.ResponseWriter, _ *http.Request) {
+		sectorDocument.mu.Lock()
+		status, body := sectorDocument.status, sectorDocument.body
+		sectorDocument.mu.Unlock()
+
+		if status == 0 {
+			status = http.StatusNotFound
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(status)
+		_, _ = io.WriteString(w, body)
 	})
 
 	mux.HandleFunc("POST /arrangements/revoke", receiveNotice)
