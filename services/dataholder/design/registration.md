@@ -49,6 +49,14 @@ This area gives the registration of a software product with an SSA, registration
 - <a id="dh-0631"></a>**DH-0631** When the request has `redirect_uris`, each value is in the `redirect_uris` of the SSA. ([CDS: Registration Request using JWT][cds-registration-request])
 - <a id="dh-0632"></a>**DH-0632** The data holder permits one registration for each `software_id`. ([CDS: Registration Validation][cds-registration-validation])
 
+## Validation of the sector identifier
+
+- <a id="dh-2630"></a>**DH-2630** When the SSA has a `sector_identifier_uri`, the data holder gets its document at each `POST` and `PUT`, after it verifies the SSA and the request JWT. ([CDR Support: Guidance on Dynamic Client Registration][support-dcr]; [OpenID Connect Registration, section 5][oidc-registration-sector])
+- <a id="dh-2631"></a>**DH-2631** A `sector_identifier_uri` is an `https` URL, or the data holder refuses the SSA. ([OpenID Connect Registration, section 5][oidc-registration-sector])
+- <a id="dh-2632"></a>**DH-2632** The data holder connects to the `sector_identifier_uri` with the rules of the [connection to the `jwks_uri`](#dh-0623). ([CDR Support: Egress policy for calls from DH to ADRs][support-egress])
+- <a id="dh-2633"></a>**DH-2633** The document is one JSON array of redirect URIs, of 1 MiB at most. ([OpenID Connect Registration, section 5][oidc-registration-sector]; [Judgement: a sector identifier document of 1 MiB at most](#dh-2638))
+- <a id="dh-2634"></a>**DH-2634** Each value of the `redirect_uris` of the registration is in the document. ([OpenID Connect Registration, section 5][oidc-registration-sector]; [CDR Support: Guidance on Dynamic Client Registration][support-dcr])
+
 ## Registration values
 
 - <a id="dh-0633"></a>**DH-0633** The data holder issues a new client ID for each registration. The client ID is a random RFC 4122 UUID, and it is not the `software_id`. ([CDS: Registration Response][cds-registration-response])
@@ -60,7 +68,6 @@ This area gives the registration of a software product with an SSA, registration
   - `software_id`, `software_roles` and `scope`
   - `legal_entity_id`, `legal_entity_name`, `sector_identifier_uri`, `tos_uri` and `policy_uri`, when the SSA has them
 - <a id="dh-0636"></a>**DH-0636** A claim of the request with the name of a value from the SSA has no effect, except `redirect_uris`. For example, a `client_name` in the request does not change the `client_name` of the registration. ([RFC 7591, section 2.3][rfc7591-software-statement])
-- <a id="dh-0637"></a>**DH-0637** The data holder does not get the document at the `sector_identifier_uri`. ([CDR Support: Guidance on Dynamic Client Registration][support-dcr]; [Judgement: no check of the sector identifier document](#dh-0707))
 - <a id="dh-0638"></a>**DH-0638** The `scope` of the registration has the scopes of the SSA that the data holder supports, in the sequence of the SSA. ([CDS: Registration Validation][cds-registration-validation])
 - <a id="dh-0639"></a>**DH-0639** The `redirect_uris` of the registration are those of the request. When the request has none, they are those of the SSA. ([CDS: Registration Request using JWT][cds-registration-request])
 - <a id="dh-0640"></a>**DH-0640** When the request has no `request_object_signing_alg`, the registration has `PS256`. ([CDS: Registration Request using JWT][cds-registration-request])
@@ -89,6 +96,8 @@ The data holder uses these `error` values:
 | <a id="dh-0652"></a>**DH-0652** | A value of `redirect_uris` is not in the SSA | `invalid_redirect_uri` | [CDS: Registration Errors][cds-registration-errors]; [Judgement: invalid_software_statement for a fault in the SSA and for a duplicate](#dh-0708) |
 | <a id="dh-0653"></a>**DH-0653** | The body is not a JWT or is larger than 64 KiB, the request JWT has a signature, an `aud`, an `iss`, an `exp`, a `jti` or a client metadata value that is not valid, or a required claim is absent | `invalid_client_metadata` | [CDS: Registration Errors][cds-registration-errors]; [Judgement: invalid_software_statement for a fault in the SSA and for a duplicate](#dh-0708) |
 | <a id="dh-0654"></a>**DH-0654** | The data holder cannot get the keys at the `jwks_uri` of the SSA | `invalid_client_metadata` | [CDS: Registration Errors][cds-registration-errors]; [Judgement: invalid_software_statement for a fault in the SSA and for a duplicate](#dh-0708) |
+| <a id="dh-2635"></a>**DH-2635** | The data holder cannot get the document at the `sector_identifier_uri`, or it is not a JSON array of strings | `invalid_client_metadata` | [CDR Support: Guidance on Dynamic Client Registration][support-dcr]; [Judgement: the error codes of the sector identifier check](#dh-2637) |
+| <a id="dh-2636"></a>**DH-2636** | A value of the `redirect_uris` is not in the document at the `sector_identifier_uri` | `invalid_redirect_uri` | [OpenID Connect Registration, section 5][oidc-registration-sector]; [Judgement: the error codes of the sector identifier check](#dh-2637) |
 
 - <a id="dh-0655"></a>**DH-0655** The data holder uses the error `unapproved_software_statement` only for [a software product that is REMOVED](#dh-0693). ([RFC 7591, section 3.2.2][rfc7591-errors]; [Judgement: unapproved_software_statement only for a REMOVED software product](#dh-0709))
 - <a id="dh-0656"></a>**DH-0656** When the data holder cannot get the Register JWKS, it responds with 500 and the error `server_error`. ([RFC 7591, section 3.2.2][rfc7591-errors]; [Judgement: server_error when the Register JWKS is not available](#dh-0710))
@@ -200,12 +209,6 @@ The authorisation server library gives the reaction at [the PAR endpoint](../../
 - Basis: Step 3.2. The CDS schema lists `code id_token`, but data recipients use only `code` ([CDS: Registration Request using JWT][cds-registration-request]). An authorisation server can replace a requested value ([RFC 7591, section 2][rfc7591-metadata]).
 - Reason: A data recipient that sends the two values can still register. The response shows what is registered.
 
-### <a id="dh-0707"></a>DH-0707 No check of the sector identifier document
-
-- Kind: gap
-- Basis: Step 2. ACCC guidance says that a data holder gets the document at the `sector_identifier_uri` at `POST` and `PUT`, and refuses the request when it cannot get it ([CDR Support: Guidance on Dynamic Client Registration][support-dcr]). OpenID Connect requires that the document contains each registered redirect URI ([OpenID Connect Core, section 8.1][oidc-core-pairwise]).
-- Reason: The data holder registers the `sector_identifier_uri` as the SSA gives it, and uses only its host for the pairwise `sub`. An older DSB article with the same procedure is under review, but that does not withdraw the guidance.
-
 ### <a id="dh-0708"></a>DH-0708 invalid_software_statement for a fault in the SSA and for a duplicate
 
 - Kind: choice
@@ -260,6 +263,18 @@ The authorisation server library gives the reaction at [the PAR endpoint](../../
 - Basis: Step 3.3. The CDS permits a batch, for example each night ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]). The ACCC also permits it each time the Register cache is refreshed ([CDR Support: Status of consent when an ADR Software Product is "Removed"][support-removed]).
 - Reason: One step at the time of the status is less complex than a separate batch. A lab test then does not wait for a batch.
 
+### <a id="dh-2637"></a>DH-2637 The error codes of the sector identifier check
+
+- Kind: choice
+- Basis: Step 3.2. OpenID Connect ([section 5][oidc-registration-sector]) and the ACCC ([CDR Support: Guidance on Dynamic Client Registration][support-dcr]) say that the registration fails, but give no error code. RFC 7591 gives `invalid_redirect_uri` and `invalid_client_metadata` ([section 3.2.2][rfc7591-errors]).
+- Reason: The codes agree with those for a redirect URI that is not in the SSA and for a `jwks_uri` that the data holder cannot get. Thus the code tells the data recipient which value to correct.
+
+### <a id="dh-2638"></a>DH-2638 A sector identifier document of 1 MiB at most
+
+- Kind: choice
+- Basis: Step 3.3. OpenID Connect gives no size limit ([section 5][oidc-registration-sector]).
+- Reason: The host is not under the control of the data holder. The limit is that of a software product JWKS, and is much larger than a list of redirect URIs.
+
 [cds-registration-request]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#registration-request-using-jwt
 [cds-registration-validation]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#registration-validation
 [cds-registration-response]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#registration-response
@@ -284,7 +299,7 @@ The authorisation server library gives the reaction at [the PAR endpoint](../../
 [support-removed]: https://cdr-support.zendesk.com/hc/en-us/articles/900001657906
 [support-error-scenarios]: https://cdr-support.zendesk.com/hc/en-us/articles/5729181240591
 [fapi-algorithms]: https://openid.net/specs/openid-financial-api-part-2-1_0.html#algorithm-considerations
-[oidc-core-pairwise]: https://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg
+[oidc-registration-sector]: https://openid.net/specs/openid-connect-registration-1_0.html#SectorIdentifierValidation
 [rfc6750]: https://www.rfc-editor.org/rfc/rfc6750
 [rfc6750-errors]: https://www.rfc-editor.org/rfc/rfc6750#section-3.1
 [rfc7591-metadata]: https://www.rfc-editor.org/rfc/rfc7591#section-2

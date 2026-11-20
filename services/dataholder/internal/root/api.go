@@ -32,6 +32,7 @@ import (
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/registrationjwt"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/registrationstore"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/revokedtokenstore"
+	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/sectoridentifier"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/smtpmail"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/subjectstore"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/transactionstore"
@@ -119,6 +120,7 @@ func apiListeners(
 		Registrations: parts.registrations,
 		Statuses:      parts.statuses,
 		Arrangements:  parts.arrangements,
+		Sectors:       sectoridentifier.NewDocuments(http.DefaultTransport),
 		Now:           time.Now,
 		NewID:         uuid.NewString,
 	}

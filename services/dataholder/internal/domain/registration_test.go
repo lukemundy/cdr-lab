@@ -72,7 +72,7 @@ func TestAValidSSAIsAccepted(t *testing.T) {
 	assert.NoError(t, validSSA().Validate(now))
 }
 
-// Verifies: DH-0615, DH-0616, DH-0617, DH-0618, DH-0619
+// Verifies: DH-0615, DH-0616, DH-0617, DH-0618, DH-0619, DH-2631
 func TestAnSSAWithAClaimThatIsNotValidIsRefused(t *testing.T) {
 	tests := map[string]struct {
 		change      func(*domain.SSA)
@@ -91,11 +91,15 @@ func TestAnSSAWithAClaimThatIsNotValidIsRefused(t *testing.T) {
 		"no logo_uri":          {func(s *domain.SSA) { s.LogoURI = "" }, "logo_uri"},
 		"no jwks_uri":          {func(s *domain.SSA) { s.JWKSURI = "" }, "jwks_uri"},
 		"a jwks_uri with http": {func(s *domain.SSA) { s.JWKSURI = "http://recipient.example/jwks" }, "jwks_uri"},
-		"no revocation_uri":    {func(s *domain.SSA) { s.RevocationURI = "" }, "revocation_uri"},
-		"no recipient base":    {func(s *domain.SSA) { s.RecipientBaseURI = "" }, "recipient_base_uri"},
-		"no software_id":       {func(s *domain.SSA) { s.SoftwareID = "" }, "software_id"},
-		"different roles":      {func(s *domain.SSA) { s.SoftwareRoles = "data-holder" }, "software_roles"},
-		"no scope":             {func(s *domain.SSA) { s.Scope = "" }, "scope"},
+		"a sector_identifier_uri with http": {
+			func(s *domain.SSA) { s.SectorIdentifierURI = "http://recipient.example/sector.json" },
+			"sector_identifier_uri",
+		},
+		"no revocation_uri": {func(s *domain.SSA) { s.RevocationURI = "" }, "revocation_uri"},
+		"no recipient base": {func(s *domain.SSA) { s.RecipientBaseURI = "" }, "recipient_base_uri"},
+		"no software_id":    {func(s *domain.SSA) { s.SoftwareID = "" }, "software_id"},
+		"different roles":   {func(s *domain.SSA) { s.SoftwareRoles = "data-holder" }, "software_roles"},
+		"no scope":          {func(s *domain.SSA) { s.Scope = "" }, "scope"},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -177,6 +181,29 @@ func TestARegistrationHasOnlyTheResponseTypeCode(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Equal(t, []string{"code"}, registration.ResponseTypes)
+}
+
+// Verifies: DH-2634, DH-2636
+func TestARegistrationWithARedirectURIThatTheSectorIdentifierDocumentDoesNotHaveIsRefused(t *testing.T) {
+	registration := domain.Registration{
+		RedirectURIs: []string{"https://recipient.example/cb", "https://recipient.example/other"},
+	}
+
+	t.Run("each redirect URI is in the document", func(t *testing.T) {
+		published := []string{
+			"https://recipient.example/other",
+			"https://recipient.example/cb",
+			"https://recipient.example/more",
+		}
+
+		assert.NoError(t, registration.CheckSectorIdentifierDocument(published))
+	})
+
+	t.Run("a redirect URI is not in the document", func(t *testing.T) {
+		err := registration.CheckSectorIdentifierDocument([]string{"https://recipient.example/cb"})
+
+		requireRegistrationError(t, err, domain.InvalidRedirectURI, "sector_identifier_uri")
+	})
 }
 
 // Verifies: DH-0631, DH-0652
