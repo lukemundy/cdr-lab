@@ -264,7 +264,7 @@ func TestTheBankSitePutsNoCustomerDataSessionIDOrPasswordInTheSpansMetricsOrLogs
 		"each server span has the route pattern")
 
 	text := metricText(t, metrics)
-	assert.Contains(t, text, "/api/session", "the test sees the metrics of the requests")
+	assert.NotContains(t, text, "/api/session", "the requests make no metrics, because their spans give the detail")
 
 	for _, value := range values {
 		assert.NotContains(t, text, value)

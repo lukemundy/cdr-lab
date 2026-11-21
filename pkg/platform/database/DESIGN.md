@@ -21,7 +21,9 @@ flowchart LR
 
 ## Library specifications
 
-None.
+| Library | Specification |
+|---|---|
+| `pkg/platform/telemetry` | [Telemetry library](../telemetry/DESIGN.md) |
 
 ## Goals
 
@@ -46,6 +48,7 @@ None.
 
 - <a id="dbase-0004"></a>**DBASE-0004** A database span has the SQL text with its placeholders, and no query arguments. ([Judgement: one PostgreSQL database for each service (ADR 0002)](../../../docs/adr/0002-data-store.md); [Judgement: OpenTelemetry for traces, metrics and logs (ADR 0006)](../../../docs/adr/0006-telemetry.md))
 - <a id="dbase-0005"></a>**DBASE-0005** The span of a query that fails has the SQLSTATE of the error, and not its message. For example, a value that is not a UUID gives `22P02` in the span, with no value. ([Judgement: one PostgreSQL database for each service (ADR 0002)](../../../docs/adr/0002-data-store.md); [Judgement: OpenTelemetry for traces, metrics and logs (ADR 0006)](../../../docs/adr/0006-telemetry.md))
+- <a id="dbase-0006"></a>**DBASE-0006** The pool sends its statistics as metrics, one series each, and no metrics for each query: `pgxpool.acquires`, `pgxpool.acquire_duration`, `pgxpool.acquired_connections`, `pgxpool.canceled_acquires`, `pgxpool.constructing_connections`, `pgxpool.empty_acquire`, `pgxpool.empty_acquire_wait_time`, `pgxpool.idle_connections`, `pgxpool.max_connections`, `pgxpool.max_idle_destroys`, `pgxpool.max_lifetime_destroys`, `pgxpool.new_connections` and `pgxpool.total_connections`. The span of a query gives its duration. ([Judgement: metrics only for the state of the process](../telemetry/DESIGN.md#tele-0013))
 
 ## Judgements
 

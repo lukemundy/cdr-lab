@@ -28,7 +28,14 @@ const (
 
 // Run runs the subcommand of the arguments, which are the command-line arguments with no program name.
 func Run(ctx context.Context, args []string) error {
-	shutdownTelemetry, err := telemetry.Setup(ctx, serviceName, os.Stdout)
+	m, serving := modeOf(args)
+
+	process := telemetry.OneShot
+	if serving {
+		process = telemetry.LongRunning
+	}
+
+	shutdownTelemetry, err := telemetry.Setup(ctx, serviceName, process, os.Stdout)
 	if err != nil {
 		return fmt.Errorf("set up telemetry: %w", err)
 	}
@@ -45,7 +52,7 @@ func Run(ctx context.Context, args []string) error {
 	}
 	defer pool.Close()
 
-	if m, found := modeOf(args); found {
+	if serving {
 		return serve(ctx, pool, m)
 	}
 

@@ -89,10 +89,16 @@ To explore, search with TraceQL. Search shows a trace only approximately 30 seco
 http --ignore-stdin :3200/api/search q=='{resource.service.name="register"}' limit==20 | jq '.traces[] | {rootTraceName, traceID}'
 ```
 
-Metrics (Prometheus, PromQL). Prometheus changes dots in OpenTelemetry names to underscores, for example `http.server.request.duration` becomes `http_server_request_duration_seconds`:
+Rates, error rates and latencies of requests come from the traces, with TraceQL metrics, because the services send no request metrics ([ADR 0026](docs/adr/0026-send-metrics-only-for-the-state-of-a-process.md)):
 
 ```sh
-http --ignore-stdin :9090/api/v1/query query=='http_server_request_duration_seconds_count{service_name="register"}'
+http --ignore-stdin :3200/api/metrics/query_range q=='{resource.service.name="register" && kind=server} | rate() by (span.http.route)' since==15m
+```
+
+Metrics (Prometheus, PromQL) give only the state of each process, for example the goroutines, the memory, the connection pool and the active HTTP requests. Prometheus changes dots in OpenTelemetry names to underscores, for example `http.server.active_requests` becomes `http_server_active_requests`:
+
+```sh
+http --ignore-stdin :9090/api/v1/query query=='http_server_active_requests{job="register"}'
 http --ignore-stdin :9090/api/v1/label/__name__/values
 ```
 

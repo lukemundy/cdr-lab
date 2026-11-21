@@ -1,6 +1,7 @@
 # 0006. Use OpenTelemetry for traces, metrics and logs
 
 - Date: 2026-10-04
+- Amended by [ADR-0026](0026-send-metrics-only-for-the-state-of-a-process.md): the metrics of the services
 
 ## Context
 

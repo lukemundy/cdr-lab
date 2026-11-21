@@ -6,9 +6,8 @@ import (
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
-	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/metric/noop"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.43.0"
 	"go.opentelemetry.io/otel/trace"
@@ -17,13 +16,24 @@ import (
 const redacted = "REDACTED"
 
 func NewHTTPHandler(mux *http.ServeMux) http.Handler {
-	return newHTTPHandler(mux, otel.GetTracerProvider(), otel.GetMeterProvider())
+	return newHTTPHandler(mux, otel.GetTracerProvider(), ProcessMeterProvider())
 }
 
+// The traces give the duration and the status of each request, so otelhttp makes no metrics.
 func newHTTPHandler(mux *http.ServeMux, tp trace.TracerProvider, mp metric.MeterProvider) http.Handler {
-	instrumented := otelhttp.NewHandler(mux, "", otelhttp.WithTracerProvider(tp), otelhttp.WithMeterProvider(mp))
+	instrumented := otelhttp.NewHandler(mux, "",
+		otelhttp.WithTracerProvider(tp), otelhttp.WithMeterProvider(noop.NewMeterProvider()))
+
+	active, err := mp.Meter(scope).Int64UpDownCounter("http.server.active_requests",
+		metric.WithUnit("{request}"), metric.WithDescription("Number of active HTTP server requests."))
+	if err != nil {
+		otel.Handle(err)
+	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		active.Add(r.Context(), 1)
+		defer active.Add(r.Context(), -1)
+
 		// otelhttp reads r.Pattern when it starts the span, before mux sets it. The copy keeps the caller's request.
 		r = r.WithContext(r.Context())
 		_, r.Pattern = mux.Handler(r)
@@ -61,10 +71,3 @@ func (urlRedactor) OnStart(_ context.Context, s sdktrace.ReadWriteSpan) {
 func (urlRedactor) OnEnd(sdktrace.ReadOnlySpan)      {}
 func (urlRedactor) Shutdown(context.Context) error   { return nil }
 func (urlRedactor) ForceFlush(context.Context) error { return nil }
-
-func metricViews() []sdkmetric.View {
-	return []sdkmetric.View{sdkmetric.NewView(
-		sdkmetric.Instrument{Name: "http.server.*"},
-		sdkmetric.Stream{AttributeFilter: attribute.NewDenyKeysFilter(semconv.ServerAddressKey, semconv.ServerPortKey)},
-	)}
-}

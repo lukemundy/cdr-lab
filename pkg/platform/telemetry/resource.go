@@ -2,6 +2,7 @@ package telemetry
 
 import (
 	"context"
+	"os"
 
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel"
@@ -26,7 +27,7 @@ func newResource(ctx context.Context, serviceName string) *resource.Resource {
 		resource.WithAttributes(
 			semconv.ServiceName(serviceName),
 			semconv.ServiceVersion(build.CommitShort),
-			semconv.ServiceInstanceID(uuid.NewString()),
+			semconv.ServiceInstanceID(instanceID()),
 			semconv.VCSRefHeadRevision(build.Commit),
 			attribute.String("app.build.time", build.Time),
 			attribute.String("app.build.id", build.ID),
@@ -37,4 +38,13 @@ func newResource(ctx context.Context, serviceName string) *resource.Resource {
 	}
 
 	return res
+}
+
+// instanceID is the host name, so that a restart of the container keeps the same metric series.
+func instanceID() string {
+	if host, err := os.Hostname(); err == nil && host != "" {
+		return host
+	}
+
+	return uuid.NewString()
 }

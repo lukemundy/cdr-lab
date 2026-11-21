@@ -30,7 +30,7 @@ flowchart LR
 - The same signals from each lab service, with one set-up.
 - No CDR data and no personal information in the URL of a span.
 - Telemetry that identifies the build of the service.
-- HTTP metrics whose number of series a client cannot increase.
+- A small, fixed number of metric series, which traffic, routes and new features do not change.
 
 ## Non-goals
 
@@ -53,18 +53,29 @@ flowchart LR
 
 ## Metrics
 
-- <a id="tele-0008"></a>**TELE-0008** The HTTP server metrics do not have the attributes `server.address` and `server.port`. For example, `http.server.request.duration` has `http.route`, but not the `Host` header of the request. ([Judgement: no server address in the HTTP server metrics](#tele-0009))
+- <a id="tele-0010"></a>**TELE-0010** A long-running process sends only the metrics of its state, with no attributes other than the ones given here: the Go runtime metrics `go.config.gogc`, `go.goroutine.count`, `go.memory.allocated`, `go.memory.allocations`, `go.memory.gc.goal`, `go.processor.limit` and `go.memory.used` (with `go.memory.type` `stack` or `other`), `http.server.active_requests` (the HTTP server requests that the process has not completed, with no attributes), and the [statistics of the connection pool](../database/DESIGN.md#dbase-0006). Thus each long-running process has 23 series. The duration and the status of a request, a query or a job are in its span, not in a metric. ([Judgement: metrics only for the state of the process](#tele-0013))
+- <a id="tele-0011"></a>**TELE-0011** A one-shot subcommand, for example `migrate`, sends no metrics. ([Judgement: metrics only for the state of the process](#tele-0013))
+- <a id="tele-0012"></a>**TELE-0012** The resource attribute `service.instance.id` is the host name of the process. When the host name is not available, it is a random UUID. For example, in Kubernetes it is the pod name. ([Judgement: the host name as the instance ID](#tele-0014))
 
 ## Judgements
 
-### <a id="tele-0009"></a>TELE-0009 No server address in the HTTP server metrics
+### <a id="tele-0013"></a>TELE-0013 Metrics only for the state of the process
 
 - Kind: choice
-- Basis: Step 3.2. For the HTTP server metrics, `server.address` and `server.port` are opt-in. They come from the HTTP headers, which "may allow an attacker to trigger cardinality limits" ([OpenTelemetry: HTTP metrics][otel-http-metrics]).
-- Reason: The client sets the `Host` header, so each new value can make a new series. The resource attributes and the route identify the service and the endpoint.
+- Basis: Step 3.2. "Every unique combination of key-value label pairs represents a new time series" ([Prometheus: labels][prometheus-labels]). The traces give the route, the status and the duration of each request, and a backend can calculate rates and percentiles from them. The OpenTelemetry convention for `http.server.active_requests` requires `http.request.method` and `url.scheme` ([OpenTelemetry: HTTP metrics][otel-http-active-requests]). This library does not give them, so that the metric has one series.
+- Reason: The lab can share a metrics backend that has a limit on the series, and the number of series must not change with traffic, routes or features ([ADR 0026](../../../docs/adr/0026-send-metrics-only-for-the-state-of-a-process.md)). The runtime, the pool and the active requests are state that a trace cannot give. A one-shot subcommand stops after some seconds, so its series show nothing about capacity.
+
+### <a id="tele-0014"></a>TELE-0014 The host name as the instance ID
+
+- Kind: choice
+- Basis: Step 3.2. `service.instance.id` "MUST be unique for each instance of the same `service.namespace,service.name` pair" ([OpenTelemetry: service attributes][otel-service-instance]). A pod name in Kubernetes and a container ID in Docker are unique for each running container.
+- Reason: A random UUID at each start gives a new set of series at each restart of a container, and the old set stays active in the backend until it is stale. The host name stays the same when the container restarts.
 
 ## Withdrawn
 
-None.
+- <a id="tele-0008"></a>**TELE-0008** Removed.
+- <a id="tele-0009"></a>**TELE-0009** Removed.
 
-[otel-http-metrics]: https://opentelemetry.io/docs/specs/semconv/http/http-metrics/#metric-httpserverrequestduration
+[otel-http-active-requests]: https://opentelemetry.io/docs/specs/semconv/http/http-metrics/#metric-httpserveractive_requests
+[otel-service-instance]: https://opentelemetry.io/docs/specs/semconv/registry/attributes/service/
+[prometheus-labels]: https://prometheus.io/docs/practices/naming/#labels

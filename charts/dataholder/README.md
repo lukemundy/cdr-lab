@@ -25,7 +25,7 @@ The chart does not render when a required value is missing, and the error names 
 | `internal.allowedHosts` | yes | `INTERNAL_ALLOWED_HOSTS`: the `Host` allowlist of the operator interface and the console |
 | `console.enabled` | no (default off) | `CONSOLE_ENABLED`. The console is on the internal listener. |
 | `bankSite.enabled`, `bankSite.allowedHosts` | hosts when on (default off) | `BANK_SITE_ENABLED`, `BANK_SITE_ALLOWED_HOSTS`, port 8085 |
-| `telemetry.otlpEndpoint` | yes | `OTEL_EXPORTER_OTLP_ENDPOINT` |
+| `telemetry.otlpEndpoint` | no (default empty: the pods send no telemetry) | `OTEL_EXPORTER_OTLP_ENDPOINT`. The data holder sends 23 metric series ([ADR 0026](../../docs/adr/0026-send-metrics-only-for-the-state-of-a-process.md)). |
 | `database.host`, `database.name` | yes | `PGHOST`, `PGDATABASE`. `database.port` (5432) and `database.sslMode` (`require`) have defaults. |
 
 The console and the online bank site are lab-only features. The chart has no value for the fixed one-time passwords, which are only for the OpenID conformance suite in the lab.

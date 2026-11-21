@@ -1,9 +1,11 @@
 package telemetry
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
 	semconv "go.opentelemetry.io/otel/semconv/v1.43.0"
 )
@@ -22,8 +24,17 @@ func TestNewResource(t *testing.T) {
 	t.Run("code sets the service identity and environment variables cannot change it", func(t *testing.T) {
 		assert.Equal(t, "register", value(semconv.ServiceNameKey))
 		assert.Equal(t, "unknown", value(semconv.ServiceVersionKey))
-		assert.NotEmpty(t, value(semconv.ServiceInstanceIDKey))
 	})
+
+	// Verifies: TELE-0012
+	t.Run(
+		"the instance ID is the host name, so that a restart of the container keeps its metric series",
+		func(t *testing.T) {
+			host, err := os.Hostname()
+			require.NoError(t, err)
+			assert.Equal(t, host, value(semconv.ServiceInstanceIDKey))
+		},
+	)
 
 	t.Run("build information", func(t *testing.T) {
 		assert.Equal(t, "unknown", value(semconv.VCSRefHeadRevisionKey))

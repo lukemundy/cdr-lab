@@ -13,7 +13,7 @@ import (
 
 func TestEachRequiredValueFailsTheRenderWithItsName(t *testing.T) {
 	for _, value := range []string{
-		"image.tag", "publicBaseURL", "secureBaseURL", "crlURL", "internal.allowedHosts", "telemetry.otlpEndpoint",
+		"image.tag", "publicBaseURL", "secureBaseURL", "crlURL", "internal.allowedHosts",
 		"database.host", "database.name", "database.ownerSecret", "database.serviceSecret",
 		"pki.publicTLSSecret", "pki.secureTLSSecret", "pki.intermediateSecret", "pki.caBundleSecret",
 		"operator.tokenSecret",
@@ -229,5 +229,15 @@ func TestASeedConfigMapLoadsBeforeTheRegisterStarts(t *testing.T) {
 
 	for _, m := range charttest.Main(t, objects).VolumeMounts {
 		assert.NotEqual(t, volume, m.Name, "only the load gets the seed file")
+	}
+}
+
+func TestWithNoOTLPEndpointNoContainerGetsATelemetryVariable(t *testing.T) {
+	spec := charttest.Pod(t, charttest.MustRender(t, "telemetry.otlpEndpoint=null"))
+
+	for _, c := range append(spec.InitContainers, spec.Containers...) {
+		for name := range c.Vars() {
+			assert.NotContains(t, name, "OTEL_", c.Name)
+		}
 	}
 }

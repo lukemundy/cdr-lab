@@ -394,7 +394,7 @@ func TestTheConsolePutsNoCustomerAccountOrTransactionDataInTheSpansMetricsOrLogs
 	assert.Positive(t, customerQueries, "the test sees the database spans of the search")
 
 	text := metricText(t, metrics)
-	assert.Contains(t, text, "/api/customers", "the test sees the metrics of the requests")
+	assert.NotContains(t, text, "/api/customers", "the requests make no metrics, because their spans give the detail")
 
 	for _, value := range customerValues {
 		assert.NotContains(t, text, value)
