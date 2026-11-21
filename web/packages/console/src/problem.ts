@@ -38,11 +38,14 @@ export function refusalOf(error: unknown): FormRefusal {
 }
 
 // The service is the name in a sentence, for example "the Register".
-export function problemOf(error: unknown, service: string): Problem {
-  return error instanceof ProblemError
-    ? error.problem
-    : {
-        title: `The console cannot get data from ${service}`,
-        detail: `Make sure that ${service} runs, and then try again.`,
-      };
+export function consoleReadFailure(service: string): Problem {
+  return {
+    title: `The console cannot get data from ${service}`,
+    detail: `Make sure that ${service} runs, and then try again.`,
+  };
+}
+
+// The failure is the problem to show for an error with no problem details, for example a network error.
+export function problemOf(error: unknown, failure: Problem): Problem {
+  return error instanceof ProblemError ? error.problem : failure;
 }

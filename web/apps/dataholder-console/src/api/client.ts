@@ -1,4 +1,8 @@
-import { ProblemError, problemOf as problemOfService } from "@cdr-lab/console/problem";
+import {
+  consoleReadFailure,
+  ProblemError,
+  problemOf as problemOfService,
+} from "@cdr-lab/console/problem";
 import type { Problem } from "@cdr-lab/ui/states";
 import createClient from "openapi-fetch";
 
@@ -61,8 +65,10 @@ export type ExtensionUType = components["schemas"]["ExtensionUType"];
 
 const api = createClient<paths>();
 
+const readFailure = consoleReadFailure("the data holder");
+
 export function problemOf(error: unknown): Problem {
-  return problemOfService(error, "the data holder");
+  return problemOfService(error, readFailure);
 }
 
 export async function getBrand(signal: AbortSignal) {

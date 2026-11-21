@@ -1,4 +1,8 @@
-import { ProblemError, problemOf as problemOfService } from "@cdr-lab/console/problem";
+import {
+  consoleReadFailure,
+  ProblemError,
+  problemOf as problemOfService,
+} from "@cdr-lab/console/problem";
 import type { Problem } from "@cdr-lab/ui/states";
 import createClient from "openapi-fetch";
 
@@ -86,8 +90,10 @@ export type HistoryQuery = NonNullable<
 
 const api = createClient<paths>();
 
+const readFailure = consoleReadFailure("the Register");
+
 export function problemOf(error: unknown): Problem {
-  return problemOfService(error, "the Register");
+  return problemOfService(error, readFailure);
 }
 
 export async function listDataRecipients(query: DataRecipientQuery, signal: AbortSignal) {

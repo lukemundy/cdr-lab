@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { page } from "vitest/browser";
 
-import { product, renderApp, serveProducts } from "../test/app";
+import { http, product, renderApp, serveProducts, worker } from "../test/app";
 
 // Verifies: DH-1812, DH-1814
 test("the product list shows the name and the description of each product in the group of its category", async () => {
@@ -56,4 +56,15 @@ test("each product links to its detail", async () => {
   await expect
     .element(page.getByRole("link", { name: "Everyday Account" }))
     .toHaveAttribute("href", "/products/everyday");
+});
+
+// Verifies: DH-2640
+test("the product list shows a text for a customer when the site API cannot answer", async () => {
+  worker.use(http.untyped.get("/api/products", () => Response.error()));
+
+  renderApp("/products");
+
+  const alert = page.getByRole("alert");
+  await expect.element(alert.getByText("We cannot show this information now")).toBeVisible();
+  await expect.element(alert.getByText("Try again later.")).toBeVisible();
 });

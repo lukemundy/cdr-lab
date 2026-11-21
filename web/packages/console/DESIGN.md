@@ -32,7 +32,7 @@ None.
 
 - One URL format for the filter, the search, the sort and the page of a list.
 - One rule for the white space of the values of a form.
-- One retry rule and one error for a read that fails.
+- One retry rule for a read that fails, and one error text for the read failures of a console.
 - One behaviour for the refusal, the result and the refresh of an action of a record in a console.
 
 ## Non-goals
@@ -61,7 +61,8 @@ None.
 
 - <a id="wcon-0010"></a>**WCON-0010** When a read fails with a status of 500 or more, or with no response, the UI sends it again, 2 times at most. ([Judgement: only a server or network failure of a read is tried again](#wcon-0024))
 - <a id="wcon-0011"></a>**WCON-0011** When the service refuses a read with a status below 500, the UI does not send it again. ([Judgement: only a server or network failure of a read is tried again](#wcon-0024))
-- <a id="wcon-0012"></a>**WCON-0012** When a read fails with no problem details, the error state has the title `The console cannot get data from {service}` and the detail `Make sure that {service} runs, and then try again.`, with the name of the service in a sentence. For example, the title is "The console cannot get data from the Register". ([the error state](../ui/design/components.md#ui-0276); [Judgement: a read failure with no problem details names the service](#wcon-0025))
+- <a id="wcon-0027"></a>**WCON-0027** When a read fails with no problem details, the error state shows the title and the detail that the UI gives for that failure. For example, the online bank site gives a text for a customer. ([the error state](../ui/design/components.md#ui-0276); [Judgement: each UI gives the text of a read failure](#wcon-0028))
+- <a id="wcon-0012"></a>**WCON-0012** In a console, when a read fails with no problem details, the error state has the title `The console cannot get data from {service}` and the detail `Make sure that {service} runs, and then try again.`, with the name of the service in a sentence. For example, the title is "The console cannot get data from the Register". ([the error state](../ui/design/components.md#ui-0276); [Judgement: a read failure with no problem details names the service](#wcon-0025))
 - <a id="wcon-0013"></a>**WCON-0013** The UI takes field errors only from a problem with the field-errors type. A refusal with a different problem shows in the error summary of the form. ([the field-errors problem type](../../../pkg/platform/problem/DESIGN.md#prob-0002); [the error of the form in the error summary](../ui/design/forms-and-dialogs.md#ui-0329))
 
 ## Actions of a record
@@ -117,6 +118,12 @@ These rules apply to the operator consoles. The specification of each console gi
 - Kind: choice
 - Basis: Step 3.3. The CDS and the ACCC give no rule for a tool of the lab operator.
 - Reason: A refusal often means that the view is not current. For example, a stale version means that a different tab changed the record.
+
+### <a id="wcon-0028"></a>WCON-0028 Each UI gives the text of a read failure
+
+- Kind: choice
+- Basis: Step 3.3. The design system gives the error state of a problem, but not the text for a failure with no problem ([the error state](../ui/design/components.md#ui-0276)).
+- Reason: The lab operator of a console can start a service, but a customer of the online bank site cannot. Thus each UI gives a text for its own user.
 
 ## Withdrawn
 
