@@ -1,6 +1,13 @@
 import { describe, expect, test } from "vitest";
 
-import { fieldErrorsType, hasFieldErrors, ProblemError, problemOf, refusalOf } from "./problem";
+import {
+  consoleReadFailure,
+  fieldErrorsType,
+  hasFieldErrors,
+  ProblemError,
+  problemOf,
+  refusalOf,
+} from "./problem";
 
 const fieldErrorsProblem = {
   type: fieldErrorsType,
@@ -54,12 +61,18 @@ test("refusalOf gives the problem and the field errors to the form", () => {
   expect(() => refusalOf(failure)).toThrow(failure);
 });
 
-// Verifies: WCON-0012
-test("problemOf names the service when the console gets no problem", () => {
+// Verifies: WCON-0027
+test("problemOf gives the problem of the service, or the failure that the UI gives", () => {
   const conflict = { title: "Conflict", detail: "The account is closed." };
+  const failure = { title: "We cannot show this information now", detail: "Try again later." };
 
-  expect(problemOf(new ProblemError(conflict, 409), "the data holder")).toBe(conflict);
-  expect(problemOf(new TypeError("Failed to fetch"), "the data holder")).toEqual({
+  expect(problemOf(new ProblemError(conflict, 409), failure)).toBe(conflict);
+  expect(problemOf(new TypeError("Failed to fetch"), failure)).toBe(failure);
+});
+
+// Verifies: WCON-0012
+test("the read failure of a console names the service", () => {
+  expect(consoleReadFailure("the data holder")).toEqual({
     title: "The console cannot get data from the data holder",
     detail: "Make sure that the data holder runs, and then try again.",
   });

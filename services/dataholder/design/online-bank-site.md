@@ -44,7 +44,7 @@ This area gives the lab-only online bank site of the brand: its pages and their 
 
 ## Presentation
 
-The site uses the [console package](../../../web/packages/console/DESIGN.md). Its rules for the site are [the removal of the white space at the ends of each value](../../../web/packages/console/DESIGN.md#wcon-0008) and [the retry of a read after a server or network failure](../../../web/packages/console/DESIGN.md#wcon-0010).
+The site uses the [console package](../../../web/packages/console/DESIGN.md). Its rules for the site are [the removal of the white space at the ends of each value](../../../web/packages/console/DESIGN.md#wcon-0008), [the retry of a read after a server or network failure](../../../web/packages/console/DESIGN.md#wcon-0010) and [the text of a read failure that the site gives](../../../web/packages/console/DESIGN.md#wcon-0027).
 
 - <a id="dh-1825"></a>**DH-1825** The site uses the tokens and the components of the design system, with the colours, the fonts and the radius of the brand. ([what a brand can change](../../../web/packages/ui/design/tokens-and-brands.md#ui-0031); [Judgement: one design system (ADR 0016)][adr-0016])
 - <a id="dh-1826"></a>**DH-1826** The site has a shell of its own, with a header, a main area and a footer. It does not use the shell of the operator console. ([the structure of a console](../../../web/packages/ui/design/layout.md#ui-0071))
@@ -55,6 +55,7 @@ The site uses the [console package](../../../web/packages/console/DESIGN.md). It
 - <a id="dh-1831"></a>**DH-1831** The title of each page is the name of the page, then "<brand name> online banking". For example, "Data sharing - <brand name> online banking". ([Judgement: a site that does not look like the consumer pages](#dh-1890))
 - <a id="dh-1832"></a>**DH-1832** Until the site API gives the brand, and when it fails, the pages say "Bank" in place of the brand name. ([Judgement: "Bank" before the brand name is known](#dh-1893))
 - <a id="dh-1833"></a>**DH-1833** The site shows dates and amounts with the rules of the design system: Australian English and the locale `en-AU`. ([the formats with `Intl` and `en-AU`](../../../web/packages/ui/design/content.md#ui-0160))
+- <a id="dh-2640"></a>**DH-2640** When a read of the site fails with no problem details, the error state has the title "We cannot show this information now" and the detail "Try again later.". ([the text of a read failure that the site gives](../../../web/packages/console/DESIGN.md#wcon-0027); [Judgement: a read failure text for a customer](#dh-2641))
 
 ## Layouts
 
@@ -205,6 +206,12 @@ The site API also obeys [route patterns in place of raw paths](../../../pkg/plat
 - Kind: choice
 - Basis: Step 3.3. The CDS performance requirements are for the CDR APIs, not for a web site ([the response time target of the APIs](non-functional-requirements.md#dh-0001)).
 - Reason: The site uses the same limits as the operator consoles.
+
+### <a id="dh-2641"></a>DH-2641 A read failure text for a customer
+
+- Kind: choice
+- Basis: Step 3.3. The CDS and the ACCC give no text for a failure of a web site of a data holder.
+- Reason: A customer cannot start the bank, and does not know the services of the lab. The text is in the voice of the bank, as the other text of the site is.
 
 [readme-component-types]: ../../../README.md#component-types
 [adr-0006]: ../../../docs/adr/0006-telemetry.md
