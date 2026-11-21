@@ -88,7 +88,7 @@ describe("the create of a data holder", () => {
     await expectNoAxeViolations(document.body);
   });
 
-  // Verifies: REG-1430, REG-1434, REG-1445
+  // Verifies: REG-1434, REG-1445, WCON-0008
   test("sends each field with no white space and no version, then shows the detail with a toast", async () => {
     const bodies = serveCreate({ status: 201 });
     const router = renderApp("/create/data-holder");

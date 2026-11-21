@@ -319,7 +319,7 @@ describe("the revocation of a CDR certificate", () => {
     expect(confirmation().query()).toBeNull();
   });
 
-  // Verifies: REG-1220
+  // Verifies: WCON-0014
   test("a revocation that the Register refuses after the check shows the problem in the confirmation", async () => {
     const requests = serve();
     serveCheck(requests, "success");

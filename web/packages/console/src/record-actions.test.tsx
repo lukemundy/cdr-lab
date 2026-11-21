@@ -55,6 +55,7 @@ const group = () => page.getByRole("group", { name: "Actions of Everyday", exact
 const dialog = () => page.getByRole("alertdialog", { name: "Close Everyday?" });
 
 describe("the actions of a record", () => {
+  // Verifies: WCON-0015, WCON-0016, WCON-0018
   test("a confirmed action runs one time, refreshes the views and shows the result in a toast", async () => {
     const requests: Action[] = [];
     render(<Record refuse={false} requests={requests} />);
@@ -77,6 +78,7 @@ describe("the actions of a record", () => {
     await expect.poll(() => document.activeElement).toBe(group().element());
   });
 
+  // Verifies: WCON-0014, WCON-0015, WCON-0017
   test("a refused action keeps its dialog as it opened, with the problem, after the refresh removes the action", async () => {
     const requests: Action[] = [];
     render(<Record refuse requests={requests} />);

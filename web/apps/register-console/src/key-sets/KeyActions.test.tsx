@@ -190,7 +190,7 @@ describe("the key actions of a key set", () => {
     await expect.element(key("SSA keys", "Previous key").getByText("ssa-2")).toBeVisible();
   });
 
-  // Verifies: REG-1220
+  // Verifies: WCON-0014
   test("a refused step shows the detail in the confirmation, also when the current state no longer permits the step", async () => {
     serveStep(serveKeySets(ssaPublished, ssaActivated), "activate-next", "conflict");
     renderApp("/signing-keys");

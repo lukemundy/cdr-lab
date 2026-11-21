@@ -52,7 +52,7 @@ describe("the data recipients page", () => {
     await expect.element(page.getByText("No data recipients match")).toBeVisible();
   });
 
-  // Verifies: REG-1052
+  // Verifies: WCON-0001
   test("a URL gives the API the same filter, search, sort and page", async () => {
     const requests = serve({ data: [recipient("Mock Budgeting Pty Ltd")], totalRecords: 60 });
 

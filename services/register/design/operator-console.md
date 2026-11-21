@@ -81,15 +81,16 @@ The table gives the text and the fields of each event type in the history.
 
 ## Presentation
 
+The [console package](../../../web/packages/console/DESIGN.md) gives the rules of the URL of a list. For example, [the filter, the search, the sort and the page of a list are in the URL](../../../web/packages/console/DESIGN.md#wcon-0001).
+
 - <a id="reg-1048"></a>**REG-1048** The console is for desktop browsers, with the minimum width of a console of the design system. ([the minimum width of a console](../../../web/packages/ui/design/layout.md#ui-0070); [Judgement: web UIs that the service embeds (ADR 0014)][adr-0014])
 - <a id="reg-1049"></a>**REG-1049** The console has the shell of a console of the design system, with the lab brand for each role and the compact density. ([the lab brand for each role that a participant brand does not give](../../../web/packages/ui/design/tokens-and-brands.md#ui-0034); [the compact density of a console](../../../web/packages/ui/design/tokens-and-brands.md#ui-0028))
 - <a id="reg-1050"></a>**REG-1050** The side navigation marks the section of each page as current, also when the URL of the page is not under the URL of the section. For example, each form of a data recipient, a brand or a software product marks "Data recipients". ([Judgement: a form marks the section of its record as current](#reg-1087))
 - <a id="reg-1051"></a>**REG-1051** The header and the title of the browser tab give the name "CDR Register". ([Judgement: the name "CDR Register" in the header and the browser tab](#reg-1088))
-- <a id="reg-1052"></a>**REG-1052** The filter, the sort and the page of a list are in the URL. For example, a reload of a list shows the same filter, sort and page. ([Judgement: the filter, the sort and the page are in the URL](#reg-1089))
 - <a id="reg-1053"></a>**REG-1053** The search of a list applies while the lab operator types, as the design system gives it. ([when the search of the filter bar applies](../../../web/packages/ui/design/components.md#ui-0271))
 - <a id="reg-1054"></a>**REG-1054** A search replaces the history entry of the list. A filter, a sort and a page add a history entry. ([Judgement: a search replaces the history entry, and other list changes add one](#reg-1090))
 - <a id="reg-1055"></a>**REG-1055** The detail and the history of a participant each have their own URL. The page of the history is in the URL. ([Judgement: the detail and the history on two pages](#reg-1091))
-- <a id="reg-1056"></a>**REG-1056** The CDR certificates page has its own URL. The page of the list of the revocations is in the URL. ([Judgement: the filter, the sort and the page are in the URL](#reg-1089))
+- <a id="reg-1056"></a>**REG-1056** The CDR certificates page has its own URL. The page of the list of the revocations is in the URL. ([Judgement: the state of a list is in the URL](../../../web/packages/console/DESIGN.md#wcon-0020))
 - <a id="reg-1057"></a>**REG-1057** The console shows each time in the time zone of the browser, as the design system gives it. ([the time zone and the offset of a time](../../../web/packages/ui/design/content.md#ui-0147); [Judgement: the time zone of the browser](#reg-1092))
 - <a id="reg-1058"></a>**REG-1058** The console loads no image from a participant. It shows a logo URI as text. ([OWASP ASVS 5.0, V3.6.1][asvs-v3]; [the Content Security Policy of the web UI](../../../pkg/platform/consolehttp/DESIGN.md#cnsl-0007))
 - <a id="reg-1059"></a>**REG-1059** The console shows each URI of a participant as text with a copy button, not as a link. For example, a redirect URI has a copy button. ([Judgement: the URIs of a participant as text](#reg-1093))
@@ -167,12 +168,6 @@ The console is a web UI. The [web UI library](../../../pkg/platform/consolehttp/
 - Kind: choice
 - Basis: Step 3.3. The CDS and the ACCC give no rule for a tool of the lab operator.
 - Reason: The lab operator manages the Register. "Console" is the name of the component, not of what the lab operator sees.
-
-### <a id="reg-1089"></a>REG-1089 The filter, the sort and the page are in the URL
-
-- Kind: choice
-- Basis: Step 3.3. The CDS and the ACCC give no rule for a tool of the lab operator.
-- Reason: The lab operator can share a view, or go back to it, with its URL.
 
 ### <a id="reg-1090"></a>REG-1090 A search replaces the history entry, and other list changes add one
 

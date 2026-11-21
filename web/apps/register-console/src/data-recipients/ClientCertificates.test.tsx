@@ -201,7 +201,7 @@ describe("the client certificates of a software product", () => {
     await expectNoAxeViolations(document.body);
   });
 
-  // Verifies: REG-1220, REG-1222
+  // Verifies: WCON-0014, WCON-0015
   test("a refused registration shows the detail in the dialog and the current state, also when the registration is no longer permitted", async () => {
     const detail =
       "The data recipient changed after the version in the request. The Register changed nothing.";

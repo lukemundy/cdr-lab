@@ -94,6 +94,8 @@ This area gives the lab-only operator console: its functions, its presentation, 
 
 ## Presentation
 
+The [console package](../../../web/packages/console/DESIGN.md) gives the rules of the URL of a list. For example, [the filter, the search, the sort and the page of a list are in the URL](../../../web/packages/console/DESIGN.md#wcon-0001).
+
 - <a id="dh-1465"></a>**DH-1465** The console is for desktop browsers, with the minimum width of a console of the design system. ([the minimum width of a console](../../../web/packages/ui/design/layout.md#ui-0070); [Judgement: web UIs that the service embeds (ADR 0014)][adr-0014])
 - <a id="dh-1466"></a>**DH-1466** The header of the console shows the logo of the brand on the brand colour, and the label "Operator console". The text alternative of the logo is the brand name. ([WCAG 2.2, SC 1.1.1][wcag-1-1-1]; [Judgement: the brand on the shell, and the lab brand for the rest](#dh-1523))
 - <a id="dh-1467"></a>**DH-1467** The console gets the brand name from the console API. Until the response, and when the request fails, the header and the tab title say "Data holder". ([one source of the brand name](brand.md#dh-0305); [Judgement: the brand name from the console API, or "Data holder"](#dh-1524))
@@ -102,7 +104,6 @@ This area gives the lab-only operator console: its functions, its presentation, 
 - <a id="dh-1470"></a>**DH-1470** The side navigation of each preset brand is not white. With the logo hidden, the colours of the shell tell the console of each preset brand from the console of each other preset brand and from the Register console. ([Judgement: a shell colour that is not white for each preset brand](#dh-1525))
 - <a id="dh-1471"></a>**DH-1471** "Overview" is the first item of the side navigation. ([Judgement: an overview of counts and newest changes, with no personal information](#dh-1500))
 - <a id="dh-1472"></a>**DH-1472** The title of the browser tab is the brand name. The icon of the tab is [the mark of the brand](brand.md#dh-0326). ([Judgement: the brand on the shell, and the lab brand for the rest](#dh-1523))
-- <a id="dh-1473"></a>**DH-1473** The search, the sort and the page of a list are in the URL. For example, a reload of a list shows the same search, sort and page. ([Judgement: the same action and form rules in each console](operator-console-create.md#dh-1517))
 - <a id="dh-1474"></a>**DH-1474** A search replaces the history entry of the list. A sort and a page add a history entry. ([Judgement: the same action and form rules in each console](operator-console-create.md#dh-1517))
 - <a id="dh-1475"></a>**DH-1475** The detail of a customer, the transactions of an account and the detail of a registration each have their own URL. The page of the arrangements of a registration is in the URL of the detail of the registration. ([Judgement: the same action and form rules in each console](operator-console-create.md#dh-1517))
 - <a id="dh-1476"></a>**DH-1476** The console shows each time in the time zone of the browser, as the design system gives it. ([Judgement: UTC for all times (ADR 0012)][adr-0012]; [the time zone and the offset of a time](../../../web/packages/ui/design/content.md#ui-0147))

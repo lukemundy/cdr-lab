@@ -44,6 +44,8 @@ This area gives the lab-only online bank site of the brand: its pages and their 
 
 ## Presentation
 
+The site uses the [console package](../../../web/packages/console/DESIGN.md). Its rules for the site are [the removal of the white space at the ends of each value](../../../web/packages/console/DESIGN.md#wcon-0008) and [the retry of a read after a server or network failure](../../../web/packages/console/DESIGN.md#wcon-0010).
+
 - <a id="dh-1825"></a>**DH-1825** The site uses the tokens and the components of the design system, with the colours, the fonts and the radius of the brand. ([what a brand can change](../../../web/packages/ui/design/tokens-and-brands.md#ui-0031); [Judgement: one design system (ADR 0016)][adr-0016])
 - <a id="dh-1826"></a>**DH-1826** The site has a shell of its own, with a header, a main area and a footer. It does not use the shell of the operator console. ([the structure of a console](../../../web/packages/ui/design/layout.md#ui-0071))
 - <a id="dh-1827"></a>**DH-1827** Headings use the heading font of the brand. The other text uses the body font. ([what a brand can change](../../../web/packages/ui/design/tokens-and-brands.md#ui-0031))

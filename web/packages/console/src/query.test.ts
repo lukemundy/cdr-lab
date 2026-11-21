@@ -10,6 +10,7 @@ function retries(failures: number, error: Error): boolean {
   return retry(failures, error);
 }
 
+// Verifies: WCON-0010
 test("a server or network failure is tried again two times", () => {
   const serverError = new ProblemError({ title: "Internal Server Error" }, 500);
 
@@ -18,6 +19,7 @@ test("a server or network failure is tried again two times", () => {
   expect(retries(2, serverError)).toBe(false);
 });
 
+// Verifies: WCON-0011
 test("a request that the API refused is not tried again", () => {
   expect(retries(0, new ProblemError({ title: "Not Found" }, 404))).toBe(false);
 });

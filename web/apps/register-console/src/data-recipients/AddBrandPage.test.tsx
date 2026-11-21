@@ -68,7 +68,7 @@ describe("the add of a data recipient brand", () => {
     await expectNoAxeViolations(document.body);
   });
 
-  // Verifies: REG-1430, REG-1434, REG-1445
+  // Verifies: REG-1434, REG-1445, WCON-0008
   test("sends the version that it loaded and each field with no white space, then shows the detail with a toast", async () => {
     const bodies = serve();
     const router = renderApp(formURL);

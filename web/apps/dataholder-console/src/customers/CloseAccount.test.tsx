@@ -153,7 +153,7 @@ describe("the close of an account", () => {
       );
   });
 
-  // Verifies: DH-1448, DH-1449
+  // Verifies: WCON-0014, WCON-0015
   test("a close of an account that a different tab closed shows the refusal in the dialog, and then the current state", async () => {
     const requests = serve(twoOpen, lastOpen, "conflict");
     await renderDetail();

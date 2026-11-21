@@ -4,6 +4,8 @@ This area gives the actions of the lab-only operator console and its create form
 
 ## Actions
 
+The [console package](../../../web/packages/console/DESIGN.md) gives the refusal, the refresh and the result of an action: [the `detail` of a refusal in the dialog or the form of the action](../../../web/packages/console/DESIGN.md#wcon-0014), [the current state after each action](../../../web/packages/console/DESIGN.md#wcon-0015) and [the result of a success in a toast](../../../web/packages/console/DESIGN.md#wcon-0016). The design system gives that [the UI never sends an action again by itself](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0301).
+
 - <a id="dh-1443"></a>**DH-1443** The console does these actions of the operator interface, with the same rules. ([Judgement: an operator interface for the customer data of the lab](operator-interface.md#dh-0770))
   - [create a customer](operator-interface.md#dh-0720)
   - [create an account for a customer](operator-interface.md#dh-0722)
@@ -14,17 +16,13 @@ This area gives the actions of the lab-only operator console and its create form
 - <a id="dh-1445"></a>**DH-1445** The confirmation of a close of the last open account of a customer names each arrangement that ends. It says that the data holder sends a notice for each one. ([the end of eligibility](end-of-an-arrangement.md#dh-0918); [Judgement: the confirmation names each arrangement that a close ends](#dh-1516))
 - <a id="dh-1446"></a>**DH-1446** The confirmation of a withdrawal names the arrangement and its software product. It says that the withdrawal cannot be reversed, and that the data holder sends a notice to the data recipient. ([WCAG 2.2, SC 3.3.4][wcag-3-3-4]; [the notice to the data recipient](end-of-an-arrangement.md#dh-0924))
 - <a id="dh-1447"></a>**DH-1447** The console offers only the actions that the rules permit for the current state of the record. The [console API](operator-console-api.md#dh-1643) gives these actions, and the UI has no copy of the rules. ([Judgement: web UIs that the service embeds (ADR 0014)][adr-0014])
-- <a id="dh-1448"></a>**DH-1448** When the data holder refuses an action, the console shows the `detail` of the problem in the dialog or in the form of the action. ([WCAG 2.2, SC 3.3.1][wcag-3-3-1])
-- <a id="dh-1449"></a>**DH-1449** After an action, also after a refused action, each view shows the current state with no reload of the page. For example, after a refused close of an account that a different tab closed, the detail shows the account as closed. ([Judgement: the same action and form rules in each console](#dh-1517))
-- <a id="dh-1450"></a>**DH-1450** The console never sends an action again by itself. ([Judgement: the same action and form rules in each console](#dh-1517))
-- <a id="dh-1451"></a>**DH-1451** The console shows the result of a successful action in a toast. The view also shows the new state, so the toast is never the only place of the result. ([WCAG 2.2, SC 4.1.3][wcag-4-1-3])
 
 ## Create forms
 
 - <a id="dh-1452"></a>**DH-1452** Each create is a form on its own page, with its own URL. A URL of a form is never the URL of a record. ([Judgement: the same action and form rules in each console](#dh-1517))
 - <a id="dh-1453"></a>**DH-1453** Each create form obeys these rules. ([WCAG 2.2, SC 3.3.1][wcag-3-3-1]; [SC 3.3.2][wcag-3-3-2]; [SC 3.3.3][wcag-3-3-3]; [SC 2.4.3][wcag-2-4-3]; [GOV.UK Design System: Error summary][govuk-error-summary]; [GOV.UK Design System: Question pages][govuk-question-pages]; [Judgement: the same action and form rules in each console](#dh-1517))
   - Each field that the console API schema does not require is an [optional field](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0326).
-  - The console removes the white space at the start and at the end of each value. It sends an optional field that has no value as no field.
+  - The console [removes the white space at the ends of each value](../../../web/packages/console/DESIGN.md#wcon-0008). It sends an optional field that has no value as no field.
   - The console does not check the values. The data holder checks each value.
   - When the data holder refuses the value of a field, the console shows the `detail` of the field error as the error message of that field.
   - After a refusal, the form shows the [error summary](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0327). The summary gives the `detail` of the problem. A refusal that names no field shows only in the summary.

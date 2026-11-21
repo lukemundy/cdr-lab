@@ -221,7 +221,7 @@ describe("the status actions of a data recipient", () => {
     await expectNoAxeViolations(document.body);
   });
 
-  // Verifies: REG-1201, REG-1212, REG-1222
+  // Verifies: REG-1201, REG-1212, WCON-0015
   test("a suspension names each software product that it changes, sends the version, and shows the new state", async () => {
     const bodies = serveDetails(active, suspended);
     serveSuspension(bodies, "success");
@@ -324,7 +324,7 @@ describe("the status actions of a data recipient", () => {
       );
   });
 
-  // Verifies: REG-1220
+  // Verifies: WCON-0014
   test("a refused action shows the detail in the confirmation, also when the current state no longer permits the action", async () => {
     serveSuspension(serveDetails(active, suspended), "conflict");
     await renderDetail(`/data-recipients/${id}`);
