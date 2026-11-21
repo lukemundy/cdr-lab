@@ -29,9 +29,11 @@ const (
 	registerTokenPath            = registerEndpointPath + "/token"
 	registerScope                = "cdr-register:read"
 	registerTokenLifetimeSeconds = 300
-	// A JTIStore must keep a JWT ID for longer than this lifetime.
+	// A JTIStore must keep a JWT ID for longer than this lifetime plus clockLeewaySeconds.
 	registerAssertionLifetimeSeconds = 600
 )
+
+const clockLeewaySeconds = 30
 
 var (
 	ErrClientNotFound = errors.New("the client does not exist")
@@ -110,6 +112,7 @@ func NewRegister(cfg RegisterConfig) (*Register, error) {
 		provider.WithDCR(softwareProducts{cfg.Clients}),
 		provider.WithGrantHandler(r.checkClient),
 		provider.WithJWTLifetime(registerAssertionLifetimeSeconds),
+		provider.WithJWTLeewayTime(clockLeewaySeconds),
 		provider.WithJTIConsumer(func(ctx context.Context, jti string) error { return cfg.JTIs.Consume(ctx, jti) }),
 		provider.WithHTTPClientFunc(func(context.Context) *http.Client { return jwksClient }),
 		provider.WithErrorHandler(logRefusal),

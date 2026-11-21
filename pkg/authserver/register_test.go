@@ -15,8 +15,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
+	"maps"
 	"math/big"
 	"net/http"
 	"net/http/httptest"
@@ -428,6 +430,40 @@ func TestTheTokenEndpointRefusesAClientThatItCannotTrust(t *testing.T) {
 
 			requireError(t, r, http.StatusUnauthorized, "invalid_client")
 		})
+	}
+}
+
+// skewedClaims gives an iat or an nbf that is skew in the future, or an exp that is skew in the past.
+func skewedClaims(skew time.Duration) map[string]map[string]any {
+	now := time.Now()
+
+	return map[string]map[string]any{
+		"iat": {"iat": now.Add(skew).Unix()},
+		"nbf": {"nbf": now.Add(skew).Unix()},
+		"exp": {"iat": now.Add(-time.Minute).Unix(), "nbf": now.Add(-time.Minute).Unix(), "exp": now.Add(-skew).Unix()},
+	}
+}
+
+// Verifies: AUTH-0029, AUTH-0251
+func TestTheTokenEndpointAcceptsAClockSkewInTheLeeway(t *testing.T) {
+	for _, tc := range []struct {
+		skew   time.Duration
+		status int
+	}{
+		{skew: 20 * time.Second, status: http.StatusOK},
+		{skew: time.Minute, status: http.StatusUnauthorized},
+	} {
+		for claim, claims := range skewedClaims(tc.skew) {
+			t.Run(fmt.Sprintf("%s skewed by %s", claim, tc.skew), func(t *testing.T) {
+				l := newLab(t)
+				a := l.assertion()
+				maps.Copy(a.claims, claims)
+
+				r := l.token(l.form(a))
+
+				require.Equal(t, tc.status, r.status, r.body)
+			})
+		}
 	}
 }
 

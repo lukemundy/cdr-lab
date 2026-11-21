@@ -26,7 +26,8 @@ This area gives the authorisation flow of the data holder authorisation server: 
 - <a id="auth-0077"></a>**AUTH-0077** The request object has an `nbf` and an `exp`. ([CDS: Request Object, Data Holders][cds-request-object-dh]; [FAPI 1.0 Advanced, section 5.2.2][fapi-advanced-server], items 13 and 17)
 - <a id="auth-0078"></a>**AUTH-0078** The `nbf` is not more than 60 minutes before the time of the request. ([FAPI 1.0 Advanced, section 5.2.2][fapi-advanced-server], item 17)
 - <a id="auth-0079"></a>**AUTH-0079** The `exp` is not more than 60 minutes after the `nbf`. ([CDS: Request Object, Data Holders][cds-request-object-dh]; [FAPI 1.0 Advanced, section 5.2.2][fapi-advanced-server], item 13)
-- <a id="auth-0080"></a>**AUTH-0080** The authorisation server refuses a request object that is expired. ([FAPI 1.0 Advanced, section 5.2.2][fapi-advanced-server], item 13)
+- <a id="auth-0080"></a>**AUTH-0080** The authorisation server refuses a request object that is expired, after the [clock leeway](client-authentication.md#auth-0251). ([FAPI 1.0 Advanced, section 5.2.2][fapi-advanced-server], item 13)
+- <a id="auth-0253"></a>**AUTH-0253** When a request object has a `jti`, the authorisation server refuses the request object if it accepted that `jti` before. A service keeps each `jti` as the [rule for the `jti` of a client assertion](client-authentication.md#auth-0250) gives. ([RFC 7519, section 4.1.7][rfc7519-jti])
 - <a id="auth-0081"></a>**AUTH-0081** The `response_type` is `code`. ([CDS: Baseline Security Provisions][cds-baseline-security])
 - <a id="auth-0082"></a>**AUTH-0082** The `response_mode` is `jwt`. ([FAPI 1.0 Advanced, section 5.2.2.2][fapi-advanced-jarm]; [Judgement: only the jwt response mode](#auth-0117))
 - <a id="auth-0083"></a>**AUTH-0083** The `redirect_uri` is present, and it is equal to one of the `redirect_uris` of the registration. ([FAPI 1.0 Baseline, section 5.2.2][fapi-baseline-server], items 9 and 10)
@@ -174,6 +175,7 @@ The service gives the authorisation server the status of the software product of
 [rfc6749-errors]: https://www.rfc-editor.org/rfc/rfc6749#section-5.2
 [rfc6749-code]: https://www.rfc-editor.org/rfc/rfc6749#section-4.1.2
 [rfc6749-authorisation-errors]: https://www.rfc-editor.org/rfc/rfc6749#section-4.1.2.1
+[rfc7519-jti]: https://www.rfc-editor.org/rfc/rfc7519#section-4.1.7
 [rfc7636-challenge]: https://www.rfc-editor.org/rfc/rfc7636#section-4.2
 [rfc9126-request]: https://www.rfc-editor.org/rfc/rfc9126#section-2.1
 [rfc9126-response]: https://www.rfc-editor.org/rfc/rfc9126#section-2.2

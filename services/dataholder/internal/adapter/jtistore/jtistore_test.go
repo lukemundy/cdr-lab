@@ -47,7 +47,7 @@ func TestAJTIThatIsOlderThanTheRetentionCanBeConsumedAgain(t *testing.T) {
 	store := jtistore.New(pool)
 	require.NoError(t, store.Consume(t.Context(), "jti-1"))
 
-	_, err := pool.Exec(t.Context(), "UPDATE consumed_jtis SET consumed_at = now() - interval '61 minutes'")
+	_, err := pool.Exec(t.Context(), "UPDATE consumed_jtis SET consumed_at = now() - interval '121 minutes'")
 	require.NoError(t, err)
 
 	assert.NoError(t, store.Consume(t.Context(), "jti-1"))
@@ -59,7 +59,7 @@ func TestAJTIStaysConsumedForTheRetention(t *testing.T) {
 	store := jtistore.New(pool)
 	require.NoError(t, store.Consume(t.Context(), "jti-1"))
 
-	_, err := pool.Exec(t.Context(), "UPDATE consumed_jtis SET consumed_at = now() - interval '59 minutes'")
+	_, err := pool.Exec(t.Context(), "UPDATE consumed_jtis SET consumed_at = now() - interval '119 minutes'")
 	require.NoError(t, err)
 
 	assert.ErrorIs(t, store.Consume(t.Context(), "jti-1"), app.ErrJTIUsed)
@@ -88,9 +88,9 @@ func TestAnSSAJTIIsConsumedOneTimeUntilTheSSAExpires(t *testing.T) {
 
 func TestAnSSAJTIIsKeptLongerThanTheRetentionOfARequestJTI(t *testing.T) {
 	store := jtistore.New(newPool(t))
-	require.NoError(t, store.ConsumeSSA(t.Context(), "ssa-1", time.Now().Add(2*time.Hour)))
+	require.NoError(t, store.ConsumeSSA(t.Context(), "ssa-1", time.Now().Add(3*time.Hour)))
 
-	assert.ErrorIs(t, store.ConsumeSSA(t.Context(), "ssa-1", time.Now().Add(2*time.Hour)), app.ErrJTIUsed)
+	assert.ErrorIs(t, store.ConsumeSSA(t.Context(), "ssa-1", time.Now().Add(3*time.Hour)), app.ErrJTIUsed)
 }
 
 func TestAnSSAJTIOfAnExpiredSSACanBeConsumedAgain(t *testing.T) {

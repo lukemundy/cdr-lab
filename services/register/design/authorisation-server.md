@@ -46,7 +46,7 @@ The library gives [the format and the codes of RFC 6749, section 5.2](../../../p
 
 - Kind: choice
 - Basis: Step 3.3. The CDS says only that the Register refuses a `jti` that it accepted before ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt]).
-- Reason: A client assertion is valid for [10 minutes at most](../../../pkg/authserver/design/client-authentication.md#auth-0031). Thus a longer memory adds nothing.
+- Reason: A client assertion is valid for [10 minutes at most](../../../pkg/authserver/design/client-authentication.md#auth-0031), plus a [clock leeway of 30 seconds](../../../pkg/authserver/design/client-authentication.md#auth-0251). Thus a longer memory adds nothing.
 
 ### <a id="reg-0482"></a>REG-0482 A key change in two operator steps, with no timer
 

@@ -17,10 +17,14 @@ This area gives the client authentication of each endpoint that authenticates a 
   - the URL of the token endpoint
   - the URL of the endpoint that the client calls
 - <a id="auth-0028"></a>**AUTH-0028** The authorisation server refuses an assertion with no `jti` or no `exp`. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
-- <a id="auth-0029"></a>**AUTH-0029** The authorisation server refuses an assertion that is expired. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
+- <a id="auth-0029"></a>**AUTH-0029** The authorisation server refuses an assertion that is expired, after the [clock leeway](#auth-0251). ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
 - <a id="auth-0030"></a>**AUTH-0030** The authorisation server refuses an assertion whose `jti` it accepted before. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt])
-- <a id="auth-0250"></a>**AUTH-0250** A service must keep each `jti` that the authorisation server accepted for more than 10 minutes. For example, the Register keeps each `jti` for 1 hour. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt]; [Judgement: a maximum client assertion lifetime of 10 minutes](#auth-0033))
+- <a id="auth-0250"></a>**AUTH-0250** A service must keep each `jti` that the authorisation server accepted for longer than the JWT can be valid, plus the [clock leeway](#auth-0251). This is more than 10 minutes and 30 seconds for a client assertion, and more than 60 minutes and 30 seconds for a [request object](authorisation-request.md#auth-0253). For example, the Register keeps each `jti` for 1 hour, and the data holder for 2 hours. ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt]; [Judgement: a maximum client assertion lifetime of 10 minutes](#auth-0033); [Judgement: a clock leeway of 30 seconds](#auth-0252))
 - <a id="auth-0031"></a>**AUTH-0031** The authorisation server refuses an assertion whose `exp` is more than 10 minutes after the time of the request. ([Judgement: a maximum client assertion lifetime of 10 minutes](#auth-0033))
+
+## Clock leeway
+
+- <a id="auth-0251"></a>**AUTH-0251** The authorisation server accepts a clock difference of 30 seconds or less in the time claims of a client assertion and of a request object. It accepts an `iat` or an `nbf` that is 30 seconds or less after the time of the request, and an `exp` that is 30 seconds or less before it. For example, it accepts an assertion with an `iat` 20 seconds in the future, and it refuses one with an `iat` 60 seconds in the future. ([RFC 7519, section 4.1.4][rfc7519-exp]; [Judgement: a clock leeway of 30 seconds](#auth-0252))
 
 ## JWKS of a client
 
@@ -39,6 +43,12 @@ This area gives the client authentication of each endpoint that authenticates a 
 - Kind: choice
 - Basis: Step 3.3. The CDS requires that an assertion is used one time, and gives no lifetime ([CDS: Private Key JWT Client Authentication][cds-private-key-jwt]).
 - Reason: A short limit keeps the window for a stolen assertion small. The data holder uses the same limit for a registration request JWT.
+
+### <a id="auth-0252"></a>AUTH-0252 A clock leeway of 30 seconds
+
+- Kind: choice
+- Basis: Step 3.2. The CDS and FAPI 1.0 Advanced give no leeway for clock differences. RFC 7519 permits "some small leeway, usually no more than a few minutes, to account for clock skew" ([RFC 7519, section 4.1.4][rfc7519-exp]). As an industry benchmark, the FAPI 2.0 Security Profile requires a server to accept an `iat` or an `nbf` 10 seconds or less in the future, and to refuse one more than 60 seconds in the future. It says: "Some ecosystems have found that the value of 30 seconds is needed to fully eliminate clock skew issues" ([FAPI 2.0 Security Profile, section 5.3.2.1][fapi2-clock]).
+- Reason: The lab exists to test real clients, and their clocks are not exact. With no leeway, a correct client whose clock is 1 second ahead fails. 30 seconds is in the range of the benchmark. One value for `iat`, `nbf` and `exp` is the least complex. The value is small against the lifetime of an assertion or a request object, so it does not make the window for a stolen JWT much larger. The negative time tests of the OpenID FAPI 1.0 Advanced test plan are 5 minutes or more from the time of the server, so the leeway does not change their results.
 
 ### <a id="auth-0241"></a>AUTH-0241 401 for invalid_client, not the 400 of the ACCC guidance
 
@@ -59,4 +69,6 @@ This area gives the client authentication of each endpoint that authenticates a 
 [rfc6749-errors]: https://www.rfc-editor.org/rfc/rfc6749#section-5.2
 [support-error-scenarios]: https://cdr-support.zendesk.com/hc/en-us/articles/5729181240591
 [oidc-dcr-metadata]: https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata
+[rfc7519-exp]: https://www.rfc-editor.org/rfc/rfc7519#section-4.1.4
+[fapi2-clock]: https://openid.net/specs/fapi-security-profile-2_0-final.html#section-5.3.2.1
 [owasp-ssrf]: https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html
