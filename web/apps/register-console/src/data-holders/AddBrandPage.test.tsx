@@ -85,7 +85,7 @@ describe("the add of a data holder brand", () => {
     await expectNoAxeViolations(document.body);
   });
 
-  // Verifies: REG-1430, REG-1432, REG-1434
+  // Verifies: REG-1432, REG-1434, WCON-0008
   test("sends the version, each field with no white space and no optional field with no value, then shows the detail", async () => {
     const bodies = serve();
     const router = renderApp(formURL);

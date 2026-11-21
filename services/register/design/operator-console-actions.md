@@ -29,12 +29,10 @@ This area gives the actions of the operator console, the rules for each action, 
 
 ## Results and refusals
 
+The [console package](../../../web/packages/console/DESIGN.md) gives the refusal, the refresh and the result of an action: [the `detail` of a refusal in the dialog or the form of the action](../../../web/packages/console/DESIGN.md#wcon-0014), [the current state after each action](../../../web/packages/console/DESIGN.md#wcon-0015) and [the result of a success in a toast](../../../web/packages/console/DESIGN.md#wcon-0016). The design system gives that [the UI never sends an action again by itself](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0301).
+
 - <a id="reg-1219"></a>**REG-1219** The console offers only the actions that the console API permits for the current state of the record. The UI has no copy of the rules. ([the permitted status actions](operator-console-api.md#reg-1132); [the permitted certificate actions](operator-console-api.md#reg-1136); [Judgement: the domain rules give the permitted actions and their changes](operator-console-api.md#reg-1181))
-- <a id="reg-1220"></a>**REG-1220** When the Register refuses an action, the console shows the `detail` of the problem in the dialog of the action. For example, a stale version shows its `detail` in the confirmation dialog. ([WCAG 2.2, SC 3.3.1][wcag-3-3-1])
 - <a id="reg-1221"></a>**REG-1221** When the Register refuses a PEM certificate, the console shows the `detail` as the error of the certificate field. ([WCAG 2.2, SC 3.3.1][wcag-3-3-1])
-- <a id="reg-1222"></a>**REG-1222** After an action, also after a refused action, each view shows the current state with no reload of the page. ([Judgement: no body after an action](operator-console-api.md#reg-1183); [Judgement: each view gets the current state after a refusal](#reg-1283))
-- <a id="reg-1223"></a>**REG-1223** The console never sends an action again by itself. ([Judgement: no automatic second request](#reg-1284))
-- <a id="reg-1224"></a>**REG-1224** The console shows the result of a successful action in a toast. The view also shows the new state, so the toast is never the only place of the result. ([WCAG 2.2, SC 4.1.3][wcag-4-1-3])
 - <a id="reg-1225"></a>**REG-1225** For a certificate file or a CSR file, the console puts the text of the file in the text field of the certificate or the CSR. The lab operator can see the text before the action. ([Judgement: the console puts the text of a file in its field](#reg-1285))
 - <a id="reg-1226"></a>**REG-1226** The console does not read a certificate or a CSR, and does not compare a CSR with the names of the record. The Register checks them. ([the CSR rules of the Register](certificate-management.md#reg-0604); [Judgement: the console puts the text of a file in its field](#reg-1285))
 
@@ -107,12 +105,6 @@ This area gives the actions of the operator console, the rules for each action, 
 - Kind: choice
 - Basis: Step 3.3. The operator interface has no step that removes a published key or activates a previous key again ([the two steps of a key change](authorisation-server.md#reg-0468)).
 - Reason: An activation changes the key that participants must trust, and a publish deletes the previous key. A publish with no previous key is also a step that the lab operator cannot reverse.
-
-### <a id="reg-1283"></a>REG-1283 Each view gets the current state after a refusal
-
-- Kind: choice
-- Basis: Step 3.3. The CDS and the ACCC give no rule for a tool of the lab operator.
-- Reason: A refusal often means that the view is not current. For example, a stale version means that a different tab changed the participant.
 
 ### <a id="reg-1284"></a>REG-1284 No automatic second request
 

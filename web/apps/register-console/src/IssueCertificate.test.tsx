@@ -263,7 +263,7 @@ describe("the issue of a client certificate", () => {
     await expectNoAxeViolations(document.body);
   });
 
-  // Verifies: REG-1222, REG-1237
+  // Verifies: REG-1237, WCON-0015
   test("a different refusal shows in an alert in the dialog, and the views show the current state", async () => {
     const detail =
       "The participant changed after the version in the request. The Register changed nothing.";

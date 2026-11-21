@@ -86,7 +86,7 @@ test("the operator finds a customer by a part of each field, with no difference 
   ).toBeVisible();
 });
 
-// Verifies: DH-1473
+// Verifies: WCON-0001
 test("the search, the sort and the page of the list stay the same after a reload and in a link", async ({
   page,
   browser,

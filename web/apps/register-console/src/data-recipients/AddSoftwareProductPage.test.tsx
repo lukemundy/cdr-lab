@@ -100,7 +100,7 @@ describe("the add of a software product", () => {
     await expectNoAxeViolations(document.body);
   });
 
-  // Verifies: REG-1431, REG-1432, REG-1434
+  // Verifies: REG-1432, REG-1434, WCON-0009
   test("sends the version, each list with no empty line, and no optional field that has no value", async () => {
     const bodies = serve();
     const router = renderApp(formURL);

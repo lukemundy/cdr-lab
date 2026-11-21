@@ -95,7 +95,18 @@ flowchart LR
 ## Withdrawn
 
 - <a id="reg-0715"></a>**REG-0715** Removed.
+- <a id="reg-1052"></a>**REG-1052** Moved to [the filter, the search, the sort and the page of a list are in the URL](../../../web/packages/console/DESIGN.md#wcon-0001).
 - <a id="reg-1061"></a>**REG-1061** Removed.
+- <a id="reg-1089"></a>**REG-1089** Moved to [Judgement: the state of a list is in the URL](../../../web/packages/console/DESIGN.md#wcon-0020).
+- <a id="reg-1220"></a>**REG-1220** Moved to [the `detail` of a refusal in the dialog or the form of the action](../../../web/packages/console/DESIGN.md#wcon-0014).
+- <a id="reg-1222"></a>**REG-1222** Moved to [the current state after each action](../../../web/packages/console/DESIGN.md#wcon-0015).
+- <a id="reg-1223"></a>**REG-1223** Moved to [the UI never sends an action again by itself](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0301).
+- <a id="reg-1224"></a>**REG-1224** Moved to [the result of a success in a toast](../../../web/packages/console/DESIGN.md#wcon-0016).
+- <a id="reg-1283"></a>**REG-1283** Moved to [Judgement: each view gets the current state after a refusal](../../../web/packages/console/DESIGN.md#wcon-0026).
+- <a id="reg-1430"></a>**REG-1430** Moved to [the removal of the white space at the ends of each value](../../../web/packages/console/DESIGN.md#wcon-0008).
+- <a id="reg-1431"></a>**REG-1431** Moved to [the lines of a list with no white space and no empty lines](../../../web/packages/console/DESIGN.md#wcon-0009).
+- <a id="reg-1444"></a>**REG-1444** Moved to [the UI never sends an action again by itself](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0301).
+- <a id="reg-1489"></a>**REG-1489** Moved to [Judgement: the UI removes the white space at the ends of each value](../../../web/packages/console/DESIGN.md#wcon-0023).
 
 [adr-0022]: ../../../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
 [dsb-537]: https://github.com/ConsumerDataStandardsAustralia/standards-maintenance/issues/537

@@ -97,7 +97,7 @@ describe("the change of the details of a data recipient", () => {
     await expectNoAxeViolations(document.body);
   });
 
-  // Verifies: REG-1430, REG-1433, REG-1434, REG-1445
+  // Verifies: REG-1433, REG-1434, REG-1445, WCON-0008
   test("sends each field with the loaded version and no white space, then shows the detail with a toast", async () => {
     const bodies = serve({ status: 204 });
     const router = renderApp(`/data-recipients/${id}/change`);

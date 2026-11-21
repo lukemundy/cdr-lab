@@ -74,7 +74,7 @@ describe("the customers page", () => {
     expect(requests).toEqual(["?pageSize=25"]);
   });
 
-  // Verifies: DH-1473, DH-1474
+  // Verifies: DH-1474, WCON-0001
   test("a search, a sort and a page change the URL, and a search adds no history entry", async () => {
     const requests = serve({ data: [customer("12345678")], totalRecords: 60 });
     const router = renderApp("/customers?page=2");

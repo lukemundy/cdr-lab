@@ -103,7 +103,7 @@ This glossary gives one term for each concept that two or more specifications us
 
 ### User
 
-- Lab term: a person who uses a lab UI in a browser, that is a [web UI](#web-ui) or the [consumer pages](#consumer-pages). Use it only in the design system specification, where a rule applies to each UI.
+- Lab term: a person who uses a lab UI in a browser, that is a [web UI](#web-ui) or the [consumer pages](#consumer-pages). Use it only in the specifications of the design system and the console package, where a rule applies to each UI that uses them.
 - Not the same as: [CDR consumer](#cdr-consumer), [lab operator](#lab-operator). In a service specification, name the role.
 
 ## Consent and authorisation

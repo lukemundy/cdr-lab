@@ -108,7 +108,7 @@ describe("the change of a software product", () => {
     await expectNoAxeViolations(document.body);
   });
 
-  // Verifies: REG-1430, REG-1431, REG-1432
+  // Verifies: REG-1432, WCON-0009
   test("sends each list with no white space and no empty line, and no optional field that has no value", async () => {
     serveDetail();
     const bodies = serveChange({ status: 204 });

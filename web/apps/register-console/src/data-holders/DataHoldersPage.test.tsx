@@ -73,7 +73,7 @@ describe("the data holders page", () => {
     await expect.element(page.getByText("No data holders match")).toBeVisible();
   });
 
-  // Verifies: REG-1052
+  // Verifies: WCON-0001
   test("a URL gives the API the same filter, search, sort and page", async () => {
     const requests = serve({ data: [holder("Mock Holdings Ltd")], totalRecords: 60 });
 

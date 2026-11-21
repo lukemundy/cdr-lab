@@ -44,8 +44,8 @@ This area gives the forms of the operator console that create, add and change pa
 
 ## Values that the console sends
 
-- <a id="reg-1430"></a>**REG-1430** The console removes the white space at the start and at the end of each value, and of each line of a list. ([Judgement: the console removes the white space at the ends of each value](#reg-1489))
-- <a id="reg-1431"></a>**REG-1431** The console ignores an empty line of a list. For example, an empty last line of the redirect URIs gives no value. ([Judgement: the console removes the white space at the ends of each value](#reg-1489))
+The [console package](../../../web/packages/console/DESIGN.md) gives [the removal of the white space at the ends of each value](../../../web/packages/console/DESIGN.md#wcon-0008) and [the lines of a list](../../../web/packages/console/DESIGN.md#wcon-0009).
+
 - <a id="reg-1432"></a>**REG-1432** The console sends an optional field that has no value as no field. For example, a change with no policy URI sends no `policyUri`. ([a field that is not in the body of a change](operator-console-change-api.md#reg-1324))
 - <a id="reg-1433"></a>**REG-1433** A change form sends each field of the change, also the fields that the lab operator did not change. ([the body of a change](operator-console-change-api.md#reg-1323); [a field that is not in the body of a change](operator-console-change-api.md#reg-1324))
 - <a id="reg-1434"></a>**REG-1434** A change form and an add form send the version of the participant that the form loaded. A create form sends no version. ([the version in the body of an action](operator-console-api.md#reg-1139); [Judgement: a version in the body, and 409 for a stale view](operator-console-api.md#reg-1180))
@@ -63,8 +63,9 @@ This area gives the forms of the operator console that create, add and change pa
 
 ## Submit, success and cancel
 
+The design system gives that [the UI never sends a request of a form again by itself](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0301).
+
 - <a id="reg-1443"></a>**REG-1443** While the request runs, the form is busy, as the design system gives it. ([the busy state of a form](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0323); [Judgement: no automatic second request](operator-console-actions.md#reg-1284))
-- <a id="reg-1444"></a>**REG-1444** The console never sends a create, an add or a change again by itself. ([Judgement: no automatic second request](operator-console-actions.md#reg-1284))
 - <a id="reg-1445"></a>**REG-1445** After a success, the console goes to the detail of the participant and shows the result in a toast. ([WCAG 2.2, SC 4.1.3][wcag-4-1-3])
 - <a id="reg-1446"></a>**REG-1446** After a success, the focus moves to the heading of the detail, because the page of the form no longer exists. ([WCAG 2.2, SC 2.4.3][wcag-2-4-3])
 - <a id="reg-1447"></a>**REG-1447** After a success, the card of the record that the form changed or added is open. For example, after an add of a software product, the card of the new software product is open. ([the cards of a detail](operator-console.md#reg-1413); [the cards that are open after a form](../../../web/packages/ui/design/components.md#ui-0242))
@@ -126,12 +127,6 @@ This area gives the forms of the operator console that create, add and change pa
 - Kind: choice
 - Basis: Step 3.3. The CDS gives no usual accreditation level ([the accreditation of a data recipient legal entity](participants.md#reg-0211)).
 - Reason: A value that the console selects can go to the Register with no decision of the lab operator. The Register then refuses a create with no level at its field.
-
-### <a id="reg-1489"></a>REG-1489 The console removes the white space at the ends of each value
-
-- Kind: choice
-- Basis: Step 3.3. The CDS and the ACCC give no rule for a tool of the lab operator.
-- Reason: A value that the lab operator pastes often has white space or an empty last line. A space at the end of a URI or an identifier is never intended. This is not a rule of the Register, which still checks each value.
 
 ### <a id="reg-1490"></a>REG-1490 A form shows an error summary, also for a refusal with no field
 
