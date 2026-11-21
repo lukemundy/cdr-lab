@@ -12,8 +12,9 @@ import (
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/app"
 )
 
-// retention is longer than the maximum lifetime of a JWT that the data holder accepts.
-const retention = time.Hour
+// retention is longer than a request object of 60 minutes, the longest JWT that the data holder accepts, plus the
+// leeway.
+const retention = 2 * time.Hour
 
 type Store struct {
 	pool *pgxpool.Pool

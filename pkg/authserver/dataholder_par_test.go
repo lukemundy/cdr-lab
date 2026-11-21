@@ -6,7 +6,9 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"net/url"
 	"strings"
@@ -205,6 +207,67 @@ func TestAPushedRequestWithAClientAssertionThatIsNotValidIsRefused(t *testing.T)
 	description := requirePushRefused(t, b.par(form), http.StatusUnauthorized, "invalid_client")
 
 	assert.Equal(t, "invalid client", description, "the response does not give the cause of a failed authentication")
+}
+
+// Verifies: AUTH-0029, AUTH-0080, AUTH-0251
+func TestThePAREndpointAcceptsAClockSkewInTheLeeway(t *testing.T) {
+	for _, tc := range []struct {
+		skew   time.Duration
+		status int
+		code   string
+	}{
+		{skew: 20 * time.Second, status: http.StatusCreated},
+		{skew: time.Minute, status: http.StatusBadRequest, code: "invalid_request_object"},
+	} {
+		for claim, claims := range skewedClaims(tc.skew) {
+			t.Run(fmt.Sprintf("request object %s skewed by %s", claim, tc.skew), func(t *testing.T) {
+				b := newBank(t)
+				object := b.requestObject()
+				maps.Copy(object, claims)
+
+				r := b.push(object)
+
+				require.Equal(t, tc.status, r.status, r.body)
+
+				if tc.code != "" {
+					assert.Equal(t, tc.code, r.body["error"], r.body)
+				}
+			})
+		}
+	}
+
+	for _, tc := range []struct {
+		skew   time.Duration
+		status int
+	}{
+		{skew: 20 * time.Second, status: http.StatusCreated},
+		{skew: time.Minute, status: http.StatusUnauthorized},
+	} {
+		for claim, claims := range skewedClaims(tc.skew) {
+			t.Run(fmt.Sprintf("client assertion %s skewed by %s", claim, tc.skew), func(t *testing.T) {
+				b := newBank(t)
+				form := b.parForm(b.signedObject(b.requestObject()))
+				clientAssertion := b.assertion()
+				clientAssertion.claims["aud"] = b.parURL
+				maps.Copy(clientAssertion.claims, claims)
+				form.Set("client_assertion", b.form(clientAssertion).Get("client_assertion"))
+
+				r := b.par(form)
+
+				require.Equal(t, tc.status, r.status, r.body)
+			})
+		}
+	}
+}
+
+// Verifies: AUTH-0253
+func TestARequestObjectWithAJTIThatWasUsedBeforeIsRefused(t *testing.T) {
+	b := newBank(t)
+	object := b.requestObject()
+	object["jti"] = rand.Text()
+	require.Equal(t, http.StatusCreated, b.push(object).status)
+
+	requirePushRefused(t, b.push(object), http.StatusBadRequest, "invalid_request_object")
 }
 
 // Verifies: AUTH-0064

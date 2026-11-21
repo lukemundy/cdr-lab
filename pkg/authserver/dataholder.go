@@ -38,7 +38,7 @@ const AccessTokenLifetime = 5 * time.Minute
 
 const (
 	dataHolderTokenLifetimeSeconds = int(AccessTokenLifetime / time.Second)
-	// A JTIStore must keep a JWT ID for longer than this lifetime.
+	// A JTIStore must keep a JWT ID for longer than the 60 minutes of a request object plus clockLeewaySeconds.
 	dataHolderAssertionLifetimeSeconds = 600
 	// The CDS permits 10 to 90 seconds.
 	dataHolderRequestURILifetimeSeconds = 60
@@ -198,6 +198,7 @@ func NewDataHolder(cfg DataHolderConfig) (*DataHolder, error) {
 			return registrationScopeOnly(ctx, grantType, grant)
 		}),
 		provider.WithJWTLifetime(dataHolderAssertionLifetimeSeconds),
+		provider.WithJWTLeewayTime(clockLeewaySeconds),
 		provider.WithJTIConsumer(consumeJTI(cfg.JTIs)),
 		provider.WithHTTPClientFunc(func(context.Context) *http.Client { return jwksClient }),
 		provider.WithErrorHandler(recordRefusal),
