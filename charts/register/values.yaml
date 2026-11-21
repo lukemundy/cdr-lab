@@ -35,7 +35,7 @@ console:
   enabled: false
 
 telemetry:
-  # The OTLP HTTP endpoint for traces, metrics and logs.
+  # The OTLP HTTP endpoint for traces, metrics and logs. Empty: the pods send no telemetry.
   otlpEndpoint: ""
 
 database:

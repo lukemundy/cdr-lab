@@ -30,7 +30,7 @@ func initContainer(t *testing.T, objects []charttest.Object, name string) chartt
 func TestEachRequiredValueFailsTheRenderWithItsName(t *testing.T) {
 	for _, value := range []string{
 		"image.tag", "brand.id", "publicBaseURL", "secureBaseURL", "register.publicBaseURL", "register.statusInterval",
-		"mail.smtpAddress", "mail.from", "internal.allowedHosts", "operator.tokenSecret", "telemetry.otlpEndpoint",
+		"mail.smtpAddress", "mail.from", "internal.allowedHosts", "operator.tokenSecret",
 		"database.host", "database.name", "database.ownerSecret", "database.serviceSecret",
 		"pki.publicTLSSecret", "pki.secureTLSSecret", "pki.caBundleSecret",
 	} {
@@ -344,5 +344,15 @@ func TestThePodHasTheLeastPrivilege(t *testing.T) {
 		assert.False(t, *c.SecurityContext.AllowPrivilegeEscalation, c.Name)
 		assert.True(t, c.SecurityContext.ReadOnlyRootFilesystem, c.Name)
 		assert.Equal(t, []string{"ALL"}, c.SecurityContext.Capabilities.Drop, c.Name)
+	}
+}
+
+func TestWithNoOTLPEndpointNoContainerGetsATelemetryVariable(t *testing.T) {
+	spec := charttest.Pod(t, charttest.MustRender(t, "telemetry.otlpEndpoint=null"))
+
+	for _, c := range append(spec.InitContainers, spec.Containers...) {
+		for name := range c.Vars() {
+			assert.NotContains(t, name, "OTEL_", c.Name)
+		}
 	}
 }

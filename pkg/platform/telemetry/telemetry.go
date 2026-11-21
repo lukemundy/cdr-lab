@@ -12,6 +12,8 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/contrib/propagators/autoprop"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/noop"
 	"go.opentelemetry.io/otel/propagation"
 	sdklog "go.opentelemetry.io/otel/sdk/log"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
@@ -21,7 +23,28 @@ import (
 
 const scope = "github.com/lukemundy/cdr-lab/pkg/platform/telemetry"
 
-func Setup(ctx context.Context, serviceName string, stdout io.Writer) (shutdown func(context.Context), err error) {
+type Process int
+
+const (
+	// LongRunning is a server or a worker. It sends the metrics of its process state.
+	LongRunning Process = iota
+	// OneShot stops when its work is done, for example migrate. It sends no metrics.
+	OneShot
+)
+
+var processMeterProvider metric.MeterProvider = noop.NewMeterProvider()
+
+// ProcessMeterProvider is the only provider that makes metrics, so that an instrumentation adds no series by default.
+func ProcessMeterProvider() metric.MeterProvider {
+	return processMeterProvider
+}
+
+func Setup(
+	ctx context.Context,
+	serviceName string,
+	process Process,
+	stdout io.Writer,
+) (shutdown func(context.Context), err error) {
 	var shutdowns []func(context.Context) error
 
 	shutdown = func(ctx context.Context) {
@@ -57,13 +80,22 @@ func Setup(ctx context.Context, serviceName string, stdout io.Writer) (shutdown 
 	shutdowns = append(shutdowns, tp.Shutdown)
 	otel.SetTracerProvider(tp)
 
-	mp, err := newMeterProvider(ctx, res)
-	if err != nil {
-		return fail(err)
-	}
+	otel.SetMeterProvider(noop.NewMeterProvider())
+	processMeterProvider = noop.NewMeterProvider()
 
-	shutdowns = append(shutdowns, mp.Shutdown)
-	otel.SetMeterProvider(mp)
+	if process == LongRunning {
+		mp, err := newMeterProvider(ctx, res)
+		if err != nil {
+			return fail(err)
+		}
+
+		shutdowns = append(shutdowns, mp.Shutdown)
+		processMeterProvider = mp
+
+		if err := startRuntimeMetrics(mp); err != nil {
+			return fail(err)
+		}
+	}
 
 	lp, err := newLoggerProvider(ctx, res)
 	if err != nil {
@@ -72,10 +104,6 @@ func Setup(ctx context.Context, serviceName string, stdout io.Writer) (shutdown 
 
 	shutdowns = append(shutdowns, lp.Shutdown)
 	otel.SetLoggerProvider(lp)
-
-	if err := runtime.Start(runtime.WithMeterProvider(mp)); err != nil {
-		return fail(err)
-	}
 
 	slog.SetDefault(slog.New(slog.NewMultiHandler(
 		text,
@@ -109,7 +137,7 @@ func newTracerProvider(ctx context.Context, res *resource.Resource) (*sdktrace.T
 }
 
 func newMeterProvider(ctx context.Context, res *resource.Resource) (*sdkmetric.MeterProvider, error) {
-	opts := []sdkmetric.Option{sdkmetric.WithResource(res), sdkmetric.WithView(metricViews()...)}
+	opts := []sdkmetric.Option{sdkmetric.WithResource(res)}
 	if !exportConfigured(metrics) {
 		return sdkmetric.NewMeterProvider(opts...), nil
 	}
@@ -134,4 +162,8 @@ func newLoggerProvider(ctx context.Context, res *resource.Resource) (*sdklog.Log
 	}
 
 	return sdklog.NewLoggerProvider(append(opts, sdklog.WithProcessor(sdklog.NewBatchProcessor(exporter)))...), nil
+}
+
+func startRuntimeMetrics(mp metric.MeterProvider) error {
+	return runtime.Start(runtime.WithMeterProvider(mp))
 }

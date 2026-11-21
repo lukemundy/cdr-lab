@@ -29,7 +29,7 @@ func serve(t *testing.T, target string) (tracetest.SpanStub, metricdata.Resource
 		sdktrace.WithSyncer(spans),
 	)
 	reader := sdkmetric.NewManualReader()
-	mp := sdkmetric.NewMeterProvider(sdkmetric.WithReader(reader), sdkmetric.WithView(metricViews()...))
+	mp := sdkmetric.NewMeterProvider(sdkmetric.WithReader(reader))
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET "+route, func(http.ResponseWriter, *http.Request) {})
@@ -101,27 +101,38 @@ func TestTheRedactorReplacesTheQueryString(t *testing.T) {
 	assert.Equal(t, redacted, attrs(got[0])[string(semconv.URLQueryKey)])
 }
 
-// Verifies: TELE-0008
-func TestHTTPHandlerRecordsRequestDurationByRouteWithoutHostHeader(t *testing.T) {
+// Verifies: TELE-0010
+func TestHTTPHandlerRecordsOnlyTheActiveRequestsWithNoAttributes(t *testing.T) {
 	_, rm := serve(t, "/accounts/"+secret)
 
-	var routes []string
+	require.Len(t, rm.ScopeMetrics, 1)
+	require.Len(t, rm.ScopeMetrics[0].Metrics, 1)
 
-	for _, sm := range rm.ScopeMetrics {
-		for _, m := range sm.Metrics {
-			if m.Name != "http.server.request.duration" {
-				continue
-			}
+	m := rm.ScopeMetrics[0].Metrics[0]
+	assert.Equal(t, "http.server.active_requests", m.Name)
 
-			for _, dp := range m.Data.(metricdata.Histogram[float64]).DataPoints {
-				v, _ := dp.Attributes.Value(semconv.HTTPRouteKey)
-				routes = append(routes, v.AsString())
+	points := m.Data.(metricdata.Sum[int64]).DataPoints
+	require.Len(t, points, 1)
+	assert.Equal(t, 0, points[0].Attributes.Len())
+	assert.Equal(t, int64(0), points[0].Value, "no request is active after the response")
+}
 
-				assert.False(t, dp.Attributes.HasValue(semconv.ServerAddressKey), "metric has server.address")
-				assert.False(t, dp.Attributes.HasValue(semconv.ServerPortKey), "metric has server.port")
-			}
-		}
-	}
+// Verifies: TELE-0010
+func TestHTTPHandlerCountsARequestWhileItIsActive(t *testing.T) {
+	reader := sdkmetric.NewManualReader()
+	mp := sdkmetric.NewMeterProvider(sdkmetric.WithReader(reader))
 
-	assert.Equal(t, []string{route}, routes)
+	var active int64
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET "+route, func(_ http.ResponseWriter, r *http.Request) {
+		var rm metricdata.ResourceMetrics
+		assert.NoError(t, reader.Collect(r.Context(), &rm))
+		active = rm.ScopeMetrics[0].Metrics[0].Data.(metricdata.Sum[int64]).DataPoints[0].Value
+	})
+
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/accounts/1", nil)
+	newHTTPHandler(mux, sdktrace.NewTracerProvider(), mp).ServeHTTP(httptest.NewRecorder(), req)
+
+	assert.Equal(t, int64(1), active)
 }

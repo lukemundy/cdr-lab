@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.opentelemetry.io/otel/trace"
@@ -145,3 +146,41 @@ func TestOpenRejectsInvalidConnString(t *testing.T) {
 }
 
 var _ pgxpool.AcquireTracer = redactingTracer{}
+
+// Verifies: DBASE-0006
+func TestThePoolMakesOnlyItsStatisticsAndNoQueryMetrics(t *testing.T) {
+	if os.Getenv("PGHOST") == "" {
+		t.Fatal("PGHOST is not set. Run mise run up, then mise run test.")
+	}
+
+	reader := sdkmetric.NewManualReader()
+	pool, err := open(
+		t.Context(),
+		"",
+		sdktrace.NewTracerProvider(),
+		sdkmetric.NewMeterProvider(sdkmetric.WithReader(reader)),
+	)
+	require.NoError(t, err)
+	t.Cleanup(pool.Close)
+
+	var one int
+	require.NoError(t, pool.QueryRow(t.Context(), "SELECT 1").Scan(&one))
+
+	var rm metricdata.ResourceMetrics
+	require.NoError(t, reader.Collect(t.Context(), &rm))
+
+	var names []string
+
+	for _, sm := range rm.ScopeMetrics {
+		for _, m := range sm.Metrics {
+			names = append(names, m.Name)
+		}
+	}
+
+	assert.ElementsMatch(t, []string{
+		"pgxpool.acquires", "pgxpool.acquire_duration", "pgxpool.acquired_connections", "pgxpool.canceled_acquires",
+		"pgxpool.constructing_connections", "pgxpool.empty_acquire", "pgxpool.empty_acquire_wait_time",
+		"pgxpool.idle_connections", "pgxpool.max_connections", "pgxpool.max_idle_destroys",
+		"pgxpool.max_lifetime_destroys", "pgxpool.new_connections", "pgxpool.total_connections",
+	}, names, "only the pool statistics, one series each, and no query metrics")
+}

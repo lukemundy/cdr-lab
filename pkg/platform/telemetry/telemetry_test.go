@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/metric/noop"
 
 	"github.com/lukemundy/cdr-lab/pkg/platform/telemetry"
 )
@@ -35,7 +36,7 @@ func setup(t *testing.T) *bytes.Buffer {
 
 	var stdout bytes.Buffer
 
-	shutdown, err := telemetry.Setup(t.Context(), "test", &stdout)
+	shutdown, err := telemetry.Setup(t.Context(), "test", telemetry.LongRunning, &stdout)
 	require.NoError(t, err)
 	t.Cleanup(func() { shutdown(t.Context()) })
 
@@ -63,7 +64,7 @@ func TestSetupWithNoExportConfiguredDropsTelemetryWithoutErrors(t *testing.T) {
 
 	var stdout bytes.Buffer
 
-	shutdown, err := telemetry.Setup(t.Context(), "test", &stdout)
+	shutdown, err := telemetry.Setup(t.Context(), "test", telemetry.LongRunning, &stdout)
 	require.NoError(t, err)
 
 	slog.InfoContext(t.Context(), "a log record")
@@ -99,4 +100,31 @@ func TestSetupKeepsMetricExportIntervalFromEnvironment(t *testing.T) {
 	setup(t)
 
 	assert.Equal(t, "5000", os.Getenv("OTEL_METRIC_EXPORT_INTERVAL"))
+}
+
+// Verifies: TELE-0010
+func TestSetupGivesAGlobalMeterProviderThatMakesNoMetrics(t *testing.T) {
+	clearExportEnv(t)
+	t.Setenv("OTEL_METRICS_EXPORTER", "console")
+	setup(t)
+
+	assert.IsType(t, noop.MeterProvider{}, otel.GetMeterProvider())
+	assert.NotEqual(t, noop.MeterProvider{}, telemetry.ProcessMeterProvider())
+}
+
+// Verifies: TELE-0011
+func TestAOneShotProcessMakesNoMetrics(t *testing.T) {
+	clearExportEnv(t)
+	t.Setenv("OTEL_METRICS_EXPORTER", "console")
+
+	defaultLogger := slog.Default()
+
+	t.Cleanup(func() { slog.SetDefault(defaultLogger) })
+
+	shutdown, err := telemetry.Setup(t.Context(), "test", telemetry.OneShot, &bytes.Buffer{})
+	require.NoError(t, err)
+	t.Cleanup(func() { shutdown(t.Context()) })
+
+	assert.IsType(t, noop.MeterProvider{}, otel.GetMeterProvider())
+	assert.IsType(t, noop.MeterProvider{}, telemetry.ProcessMeterProvider())
 }

@@ -43,8 +43,10 @@ advancedMounts:
   "PGPORT" ($v.database.port | toString)
   "PGDATABASE" (include "register.required" (list "database.name" $v.database.name "the database of the Register"))
   "PGSSLMODE" $v.database.sslMode
-  "OTEL_EXPORTER_OTLP_ENDPOINT" (include "register.required" (list "telemetry.otlpEndpoint" $v.telemetry.otlpEndpoint "the OTLP HTTP endpoint"))
 -}}
+{{- with $v.telemetry.otlpEndpoint }}
+{{- $_ := set $database "OTEL_EXPORTER_OTLP_ENDPOINT" . }}
+{{- end }}
 {{- $owner := include "register.required" (list "database.ownerSecret" $v.database.ownerSecret "the Secret of the owner user") -}}
 {{- $service := include "register.required" (list "database.serviceSecret" $v.database.serviceSecret "the Secret of the service user") -}}
 defaultPodOptions:

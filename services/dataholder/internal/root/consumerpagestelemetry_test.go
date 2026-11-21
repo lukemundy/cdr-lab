@@ -168,7 +168,12 @@ func TestTheIdentificationOfTheConsumerAuthenticationPutsNoEmailAddressInTheSpan
 	}
 
 	text := metricText(t, metrics)
-	assert.Contains(t, text, "/authorize/{flow}", "the test sees the metrics of the requests")
+	assert.NotContains(
+		t,
+		text,
+		"/authorize/{flow}",
+		"the requests make no metrics, because their spans give the detail",
+	)
 	assert.Contains(t, logs.String(), "authorisation flow failed", "the test sees the log of the mail failure")
 
 	for _, value := range identificationValues {

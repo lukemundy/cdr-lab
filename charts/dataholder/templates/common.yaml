@@ -49,8 +49,10 @@ advancedMounts:
   "PGPORT" ($v.database.port | toString)
   "PGDATABASE" (include "dataholder.required" (list "database.name" $v.database.name "the database of the brand"))
   "PGSSLMODE" $v.database.sslMode
-  "OTEL_EXPORTER_OTLP_ENDPOINT" (include "dataholder.required" (list "telemetry.otlpEndpoint" $v.telemetry.otlpEndpoint "the OTLP HTTP endpoint"))
 -}}
+{{- with $v.telemetry.otlpEndpoint }}
+{{- $_ := set $database "OTEL_EXPORTER_OTLP_ENDPOINT" . }}
+{{- end }}
 {{- $brand := dict "DATA_HOLDER_BRAND" $v.brand.preset -}}
 {{- if $v.brand.configMap -}}
   {{- $brand = dict "DATA_HOLDER_BRAND_DIR" "/brand" -}}
