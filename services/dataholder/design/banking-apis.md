@@ -35,7 +35,7 @@ The [operator interface](operator-interface.md) gives the fields of a request th
 
 ## Access to the data
 
-The rules of this group are for the APIs on the resource base URI and for the UserInfo endpoint. Registration gives the responses for [a software product that is not ACTIVE](registration.md#dh-0695).
+The rules of this group are for the APIs on the resource base URI and for the UserInfo endpoint. Registration management gives the responses for [a software product that is not ACTIVE](registration-management.md#dh-0695).
 
 - <a id="dh-1020"></a>**DH-1020** A request has the access token in the `Authorization` header with the scheme `Bearer`. The data holder ignores an access token in the query or in the body. ([FAPI 1.0 Baseline, section 6.2.1][fapi-baseline-resource]; [RFC 6750, section 2.1][rfc6750-header])
 - <a id="dh-1021"></a>**DH-1021** The data holder accepts an access token of an arrangement only when all of these are true. ([FAPI 1.0 Baseline, section 6.2.1][fapi-baseline-resource]; [CDS: Holder of Key Mechanism][cds-hok]; [the token is valid only with its client certificate](../../../pkg/authserver/design/token-endpoint.md#auth-0055))
@@ -45,7 +45,7 @@ The rules of this group are for the APIs on the resource base URI and for the Us
   - The token is bound to the client certificate of the request.
 - <a id="dh-1022"></a>**DH-1022** A client credentials token gives no access to the CDR data of an arrangement. ([CDS: Authorisation Scopes][cds-authorisation-scopes])
 - <a id="dh-1023"></a>**DH-1023** The data holder returns only the data of the customer of the arrangement, of the accounts in the arrangement, and of the scopes of the token. For example, a token with only `bank:accounts.basic:read` gets no transactions. ([FAPI 1.0 Baseline, section 6.2.1][fapi-baseline-resource])
-- <a id="dh-1024"></a>**DH-1024** The data holder checks the access token before the other checks of the request. For example, a request with a refused token and no `x-v` header gets 401. ([CDR Support: Error scenarios and responses][support-error-scenarios]; [the status check after the token check](registration.md#dh-0699))
+- <a id="dh-1024"></a>**DH-1024** The data holder checks the access token before the other checks of the request. For example, a request with a refused token and no `x-v` header gets 401. ([CDR Support: Error scenarios and responses][support-error-scenarios]; [the status check after the token check](registration-management.md#dh-0699))
 - <a id="dh-1025"></a>**DH-1025** When the data holder refuses a token, the response is one of the table below. The responses follow RFC 6750. ([RFC 6750, section 3.1][rfc6750-errors])
 
 | ID | Condition | Response | Source |

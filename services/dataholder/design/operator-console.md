@@ -81,7 +81,7 @@ This area gives the lab-only operator console: its functions, its presentation, 
 
 ## Participant statuses
 
-- <a id="dh-1436"></a>**DH-1436** The participant statuses page gives each software product that the data holder has a status for, with its name and its status. ([CDS: Metadata Cache Management][cds-metadata-cache]; [the statuses from the Register](registration.md#dh-0679))
+- <a id="dh-1436"></a>**DH-1436** The participant statuses page gives each software product that the data holder has a status for, with its name and its status. ([CDS: Metadata Cache Management][cds-metadata-cache]; [the statuses from the Register](registration-management.md#dh-0679))
 - <a id="dh-1437"></a>**DH-1437** The name of a software product is the `client_name` of its registration. A software product with no registration shows "Not registered". ([Judgement: the `client_name` of the registration is the name of a software product](#dh-1513))
 - <a id="dh-1438"></a>**DH-1438** The page gives the time of the last response of Get Software Products Statuses. A response with no change (304) also sets the time, and a request that fails does not change it. ([CDS: Metadata Cache Management][cds-metadata-cache]; [Judgement: a 304 response also sets the time of the last Register response](#dh-1514))
 - <a id="dh-1439"></a>**DH-1439** Before the data holder gets the statuses one time, the page gives no time. ([Judgement: a 304 response also sets the time of the last Register response](#dh-1514))
