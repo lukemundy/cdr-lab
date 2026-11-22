@@ -12,6 +12,8 @@ import (
 
 const issuer = "https://id.bank.example"
 
+const leeway = 30 * time.Second
+
 var now = time.Date(2026, 10, 9, 12, 0, 0, 0, time.UTC)
 
 func validSSA() domain.SSA {
@@ -69,17 +71,16 @@ func requireRegistrationError(t *testing.T, err error, code domain.RegistrationE
 }
 
 func TestAValidSSAIsAccepted(t *testing.T) {
-	assert.NoError(t, validSSA().Validate(now))
+	assert.NoError(t, validSSA().Validate(now, leeway))
 }
 
-// Verifies: DH-0615, DH-0616, DH-0617, DH-0618, DH-0619, DH-2631
+// Verifies: DH-0615, DH-0617, DH-0618, DH-0619, DH-2631
 func TestAnSSAWithAClaimThatIsNotValidIsRefused(t *testing.T) {
 	tests := map[string]struct {
 		change      func(*domain.SSA)
 		description string
 	}{
 		"a different issuer":   {func(s *domain.SSA) { s.Issuer = "other-register" }, "iss"},
-		"expired":              {func(s *domain.SSA) { s.ExpiresAt = now.Unix() }, "expired"},
 		"no jti":               {func(s *domain.SSA) { s.ID = "" }, "jti"},
 		"no iat":               {func(s *domain.SSA) { s.IssuedAt = 0 }, "iat"},
 		"no org_id":            {func(s *domain.SSA) { s.OrgID = "" }, "org_id"},
@@ -106,7 +107,7 @@ func TestAnSSAWithAClaimThatIsNotValidIsRefused(t *testing.T) {
 			ssa := validSSA()
 			tc.change(&ssa)
 
-			requireRegistrationError(t, ssa.Validate(now), domain.InvalidSoftwareStatement, tc.description)
+			requireRegistrationError(t, ssa.Validate(now, leeway), domain.InvalidSoftwareStatement, tc.description)
 		})
 	}
 }
@@ -118,7 +119,7 @@ func TestARegistrationHasTheValuesOfTheSSAAndTheRequest(t *testing.T) {
 	ssa.TOSURI = "https://recipient.example/tos"
 	ssa.PolicyURI = "https://recipient.example/policy"
 
-	registration, err := domain.NewRegistration(ssa, validRequest(), issuer, now)
+	registration, err := domain.NewRegistration(ssa, validRequest(), issuer, now, leeway)
 
 	require.NoError(t, err)
 	//nolint:gosec // G101 reads the protocol field token_endpoint_auth_method as a credential
@@ -160,7 +161,7 @@ func TestARegistrationHasTheDefaultsForClaimsThatTheRequestDoesNotHave(t *testin
 	request.RequestObjectSigningAlg = ""
 	request.ApplicationType = ""
 
-	registration, err := domain.NewRegistration(validSSA(), request, issuer, now)
+	registration, err := domain.NewRegistration(validSSA(), request, issuer, now, leeway)
 
 	require.NoError(t, err)
 	assert.Equal(
@@ -177,7 +178,7 @@ func TestARegistrationHasOnlyTheResponseTypeCode(t *testing.T) {
 	request := validRequest()
 	request.ResponseTypes = []string{"code id_token", "code"}
 
-	registration, err := domain.NewRegistration(validSSA(), request, issuer, now)
+	registration, err := domain.NewRegistration(validSSA(), request, issuer, now, leeway)
 
 	require.NoError(t, err)
 	assert.Equal(t, []string{"code"}, registration.ResponseTypes)
@@ -211,12 +212,12 @@ func TestARequestWithARedirectURIThatTheSSADoesNotHaveIsRefused(t *testing.T) {
 	request := validRequest()
 	request.RedirectURIs = []string{"https://recipient.example/cb1", "https://other.example/cb"}
 
-	_, err := domain.NewRegistration(validSSA(), request, issuer, now)
+	_, err := domain.NewRegistration(validSSA(), request, issuer, now, leeway)
 
 	requireRegistrationError(t, err, domain.InvalidRedirectURI, "redirect_uris")
 }
 
-// Verifies: DH-0604, DH-0605, DH-0606, DH-0607, DH-0624, DH-0625, DH-0626, DH-0627, DH-0628, DH-0629
+// Verifies: DH-0604, DH-0605, DH-0624, DH-0625, DH-0626, DH-0627, DH-0628, DH-0629
 func TestARequestWithAClaimThatIsNotValidIsRefused(t *testing.T) {
 	tests := map[string]struct {
 		change      func(*domain.RegistrationRequest)
@@ -226,13 +227,9 @@ func TestARequestWithAClaimThatIsNotValidIsRefused(t *testing.T) {
 		"an aud that is not the issuer": {
 			func(r *domain.RegistrationRequest) { r.Audience = []string{"https://other.example"} }, "aud",
 		},
-		"no aud":  {func(r *domain.RegistrationRequest) { r.Audience = nil }, "aud"},
-		"no iat":  {func(r *domain.RegistrationRequest) { r.IssuedAt = 0 }, "iat"},
-		"no jti":  {func(r *domain.RegistrationRequest) { r.ID = "" }, "jti"},
-		"expired": {func(r *domain.RegistrationRequest) { r.ExpiresAt = now.Unix() }, "expired"},
-		"an exp of more than 10 minutes": {
-			func(r *domain.RegistrationRequest) { r.ExpiresAt = now.Add(10*time.Minute + time.Second).Unix() }, "exp",
-		},
+		"no aud": {func(r *domain.RegistrationRequest) { r.Audience = nil }, "aud"},
+		"no iat": {func(r *domain.RegistrationRequest) { r.IssuedAt = 0 }, "iat"},
+		"no jti": {func(r *domain.RegistrationRequest) { r.ID = "" }, "jti"},
 		"a different authentication method": {
 			func(r *domain.RegistrationRequest) { r.TokenEndpointAuthMethod = "client_secret_basic" },
 			"token_endpoint_auth_method",
@@ -273,26 +270,81 @@ func TestARequestWithAClaimThatIsNotValidIsRefused(t *testing.T) {
 			request := validRequest()
 			tc.change(&request)
 
-			_, err := domain.NewRegistration(validSSA(), request, issuer, now)
+			_, err := domain.NewRegistration(validSSA(), request, issuer, now, leeway)
 
 			requireRegistrationError(t, err, domain.InvalidClientMetadata, tc.description)
 		})
 	}
 }
 
-// Verifies: DH-0607
-func TestAnExpOfExactly10MinutesIsAccepted(t *testing.T) {
-	request := validRequest()
-	request.ExpiresAt = now.Add(10 * time.Minute).Unix()
+func TestARequestJWTWithAnExpInTheClockLeewayIsAccepted(t *testing.T) {
+	tests := map[string]time.Duration{
+		// Verifies: DH-0606
+		"29 seconds before now": -29 * time.Second,
+		// Verifies: DH-0606
+		"30 seconds before now": -30 * time.Second,
+		// Verifies: DH-0607
+		"10 minutes after now": 10 * time.Minute,
+		// Verifies: DH-0607
+		"10 minutes and 30 seconds after now": 10*time.Minute + 30*time.Second,
+	}
+	for name, fromNow := range tests {
+		t.Run(name, func(t *testing.T) {
+			request := validRequest()
+			request.ExpiresAt = now.Add(fromNow).Unix()
 
-	_, err := domain.NewRegistration(validSSA(), request, issuer, now)
+			_, err := domain.NewRegistration(validSSA(), request, issuer, now, leeway)
 
-	assert.NoError(t, err)
+			assert.NoError(t, err)
+		})
+	}
+}
+
+func TestARequestJWTWithAnExpOutsideTheClockLeewayIsRefused(t *testing.T) {
+	tests := map[string]struct {
+		fromNow     time.Duration
+		description string
+	}{
+		// Verifies: DH-0606
+		"31 seconds before now": {-31 * time.Second, "expired"},
+		// Verifies: DH-0607
+		"10 minutes and 31 seconds after now": {10*time.Minute + 31*time.Second, "10 minutes"},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			request := validRequest()
+			request.ExpiresAt = now.Add(tc.fromNow).Unix()
+
+			_, err := domain.NewRegistration(validSSA(), request, issuer, now, leeway)
+
+			requireRegistrationError(t, err, domain.InvalidClientMetadata, tc.description)
+		})
+	}
+}
+
+// Verifies: DH-0616
+func TestAnSSAWithAnExpInTheClockLeewayIsAccepted(t *testing.T) {
+	for _, fromNow := range []time.Duration{-29 * time.Second, -30 * time.Second} {
+		t.Run(fromNow.String(), func(t *testing.T) {
+			ssa := validSSA()
+			ssa.ExpiresAt = now.Add(fromNow).Unix()
+
+			assert.NoError(t, ssa.Validate(now, leeway))
+		})
+	}
+}
+
+// Verifies: DH-0616
+func TestAnSSAWithAnExpMoreThanTheClockLeewayBeforeNowIsRefused(t *testing.T) {
+	ssa := validSSA()
+	ssa.ExpiresAt = now.Add(-31 * time.Second).Unix()
+
+	requireRegistrationError(t, ssa.Validate(now, leeway), domain.InvalidSoftwareStatement, "expired")
 }
 
 // Verifies: DH-0632, DH-0651
 func TestASoftwareProductRegistersOneTime(t *testing.T) {
-	registration, err := domain.NewRegistration(validSSA(), validRequest(), issuer, now)
+	registration, err := domain.NewRegistration(validSSA(), validRequest(), issuer, now, leeway)
 	require.NoError(t, err)
 
 	registration.ClientID = "client-1"
@@ -318,7 +370,7 @@ func TestASoftwareProductRegistersOneTime(t *testing.T) {
 func registeredState(t *testing.T) domain.ClientRegistrationState {
 	t.Helper()
 
-	registration, err := domain.NewRegistration(validSSA(), validRequest(), issuer, now)
+	registration, err := domain.NewRegistration(validSSA(), validRequest(), issuer, now, leeway)
 	require.NoError(t, err)
 
 	registration.ClientID = "client-1"
@@ -336,7 +388,7 @@ func TestAnUpdateReplacesAllValuesButNotTheClientIDAndItsIssueTime(t *testing.T)
 	request := validRequest()
 	request.GrantTypes = []string{"client_credentials"}
 	request.RedirectURIs = []string{"https://recipient.example/cb2"}
-	replacement, err := domain.NewRegistration(validSSA(), request, issuer, now)
+	replacement, err := domain.NewRegistration(validSSA(), request, issuer, now, leeway)
 	require.NoError(t, err)
 
 	events, err := domain.HandleClientRegistration(
@@ -361,7 +413,7 @@ func TestAnUpdateWithAnSSAOfADifferentSoftwareProductIsRefused(t *testing.T) {
 	ssa.SoftwareID = "software-2"
 	request := validRequest()
 	request.Issuer = "software-2"
-	replacement, err := domain.NewRegistration(ssa, request, issuer, now)
+	replacement, err := domain.NewRegistration(ssa, request, issuer, now, leeway)
 	require.NoError(t, err)
 
 	_, err = domain.HandleClientRegistration(

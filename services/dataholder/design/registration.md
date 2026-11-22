@@ -15,8 +15,8 @@ This area gives the registration of a software product with an SSA. [Registratio
   - `software_statement`
 - <a id="dh-0604"></a>**DH-0604** The `aud` of a request JWT is the issuer, or a list that contains the issuer. ([CDS: Registration Request using JWT][cds-registration-request])
 - <a id="dh-0605"></a>**DH-0605** The `iss` of a request JWT is the `software_id` of the SSA. ([CDS: Registration Request using JWT][cds-registration-request])
-- <a id="dh-0606"></a>**DH-0606** The data holder refuses a request JWT that is expired. ([CDS: Registration Request using JWT][cds-registration-request])
-- <a id="dh-0607"></a>**DH-0607** The data holder refuses a request JWT whose `exp` is more than 10 minutes after the time of the request. ([Judgement: a request JWT of 10 minutes at most, with no reuse for 1 hour](#dh-0701))
+- <a id="dh-0606"></a>**DH-0606** The data holder refuses a request JWT whose `exp` is more than 30 seconds before the time of the request. For example, it accepts an `exp` 10 seconds in the past, and it refuses an `exp` 60 seconds in the past. ([CDS: Registration Request using JWT][cds-registration-request]; [the clock leeway of the authorisation server](../../../pkg/authserver/design/client-authentication.md#auth-0251); [Judgement: a clock leeway of 30 seconds](../../../pkg/authserver/design/client-authentication.md#auth-0252))
+- <a id="dh-0607"></a>**DH-0607** The data holder refuses a request JWT whose `exp` is more than 10 minutes and 30 seconds after the time of the request. The 30 seconds are the [clock leeway of the authorisation server](../../../pkg/authserver/design/client-authentication.md#auth-0251). ([Judgement: a request JWT of 10 minutes at most, with no reuse for 1 hour](#dh-0701); [Judgement: a clock leeway of 30 seconds](../../../pkg/authserver/design/client-authentication.md#auth-0252))
 - <a id="dh-0608"></a>**DH-0608** The data holder refuses a request JWT whose `jti` it accepted in the last hour, from any software product. For example, a second `POST` with the same request JWT gets `invalid_client_metadata`. ([CDS: Registration Request using JWT][cds-registration-request]; [Judgement: a request JWT of 10 minutes at most, with no reuse for 1 hour](#dh-0701))
 - <a id="dh-0609"></a>**DH-0609** The data holder refuses a registration request body that is larger than 64 KiB. ([Judgement: a registration request of 64 KiB at most](#dh-0702))
 
@@ -28,11 +28,11 @@ This area gives the registration of a software product with an SSA. [Registratio
 - <a id="dh-0613"></a>**DH-0613** For the connection to the Register JWKS, the data holder trusts only the public CAs in its configuration. ([CDS: Transaction Security][cds-transaction-security])
 - <a id="dh-0614"></a>**DH-0614** When the SSA has a `kid` that the data holder does not have, the data holder gets the Register JWKS again before it refuses the SSA. It gets the JWKS again one time each second at most. ([Judgement: a new get of the Register JWKS for an unknown key ID](#dh-0703))
 - <a id="dh-0615"></a>**DH-0615** The `iss` of the SSA is `cdr-register`. ([CDS: SSA Definition][cds-ssa-definition])
-- <a id="dh-0616"></a>**DH-0616** The data holder refuses an SSA that is expired. ([CDS: SSA Definition][cds-ssa-definition])
+- <a id="dh-0616"></a>**DH-0616** The data holder refuses an SSA whose `exp` is more than 30 seconds before the time of the request. For example, it accepts an SSA that expired 10 seconds before the request. ([CDS: SSA Definition][cds-ssa-definition]; [the clock leeway of the authorisation server](../../../pkg/authserver/design/client-authentication.md#auth-0251); [Judgement: a clock leeway of 30 seconds](../../../pkg/authserver/design/client-authentication.md#auth-0252))
 - <a id="dh-0617"></a>**DH-0617** The SSA has each claim that the SSA definition marks as required. For example, the data holder refuses an SSA with no `revocation_uri`. ([CDS: SSA Definition][cds-ssa-definition])
 - <a id="dh-0618"></a>**DH-0618** The `software_roles` of the SSA is `data-recipient-software-product`. ([CDS: SSA Definition][cds-ssa-definition])
 - <a id="dh-0619"></a>**DH-0619** The `jwks_uri` of the SSA is an `https` URL. When it is not, the data holder refuses the SSA. ([CDS: Transaction Security][cds-transaction-security]; [CDR Support: Egress policy for calls from DH to ADRs][support-egress])
-- <a id="dh-0620"></a>**DH-0620** The data holder refuses an SSA whose `jti` it accepted before, until the SSA expires, with 400 and `invalid_software_statement`. For example, a `PUT` with the SSA of the registration gets this refusal. ([CDS: SSA Definition][cds-ssa-definition]; [Judgement: one use of each SSA, until it expires](#dh-0704))
+- <a id="dh-0620"></a>**DH-0620** The data holder refuses an SSA whose `jti` it accepted before, with 400 and `invalid_software_statement`. It keeps the `jti` until 30 seconds after the `exp` of the SSA, the end of the [clock leeway](#dh-0616). For example, a `PUT` with the SSA of the registration gets this refusal. ([CDS: SSA Definition][cds-ssa-definition]; [Judgement: one use of each SSA, until it expires](#dh-0704))
 - <a id="dh-0621"></a>**DH-0621** At registration, the data holder refuses only a software product whose status is REMOVED. For example, a software product that is INACTIVE, or that has no status at the data holder, can register. ([CDS: Data Holder Responsibilities][cds-dh-responsibilities]; [Judgement: only the status REMOVED stops a registration](#dh-0705))
 
 ## Validation of the request
@@ -132,7 +132,7 @@ The data holder uses these `error` values:
 
 - Kind: choice
 - Basis: Step 1. The SSA definition says that the `jti` is "used to prevent reuse of the SSA", and gives no time limit and no error code for a reuse ([CDS: SSA Definition][cds-ssa-definition]).
-- Reason: The data holder refuses an expired SSA, so it keeps each `jti` only until the SSA expires. A software product gets a new SSA from the Register for each registration request, also for a `PUT`. With one use, each registration request shows a recent approval of the Register.
+- Reason: The data holder refuses an expired SSA, so it keeps each `jti` only until the SSA expires, plus the clock leeway. A software product gets a new SSA from the Register for each registration request, also for a `PUT`. With one use, each registration request shows a recent approval of the Register.
 
 ### <a id="dh-0705"></a>DH-0705 Only the status REMOVED stops a registration
 

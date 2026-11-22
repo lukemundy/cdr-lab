@@ -38,7 +38,7 @@ const AccessTokenLifetime = 5 * time.Minute
 
 const (
 	dataHolderTokenLifetimeSeconds = int(AccessTokenLifetime / time.Second)
-	// A JTIStore must keep a JWT ID for longer than the 60 minutes of a request object plus clockLeewaySeconds.
+	// A JTIStore must keep a JWT ID for longer than the 60 minutes of a request object plus ClockLeeway.
 	dataHolderAssertionLifetimeSeconds = 600
 	// The CDS permits 10 to 90 seconds.
 	dataHolderRequestURILifetimeSeconds = 60

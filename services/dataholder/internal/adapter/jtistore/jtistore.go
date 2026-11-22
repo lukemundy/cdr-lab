@@ -47,9 +47,9 @@ func (s *Store) Consume(ctx context.Context, jti string) error {
 	return nil
 }
 
-// ConsumeSSA keeps the JWT ID until the SSA expires, because the data holder refuses an expired SSA.
+// ConsumeSSA keeps the JWT ID also at expiresAt, which is the last time at which the data holder accepts the SSA.
 func (s *Store) ConsumeSSA(ctx context.Context, jti string, expiresAt time.Time) error {
-	if _, err := s.pool.Exec(ctx, "DELETE FROM consumed_ssa_jtis WHERE expires_at <= now()"); err != nil {
+	if _, err := s.pool.Exec(ctx, "DELETE FROM consumed_ssa_jtis WHERE expires_at < now()"); err != nil {
 		return err
 	}
 

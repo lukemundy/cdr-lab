@@ -88,7 +88,7 @@ type SSA struct {
 }
 
 // Validate does not check the signature.
-func (s SSA) Validate(now time.Time) error {
+func (s SSA) Validate(now time.Time, leeway time.Duration) error {
 	if s.Issuer != ssaIssuer {
 		return invalidSSA("the SSA iss is not %s", ssaIssuer)
 	}
@@ -97,7 +97,7 @@ func (s SSA) Validate(now time.Time) error {
 		return invalidSSA("the SSA has no iat")
 	}
 
-	if !now.Before(time.Unix(s.ExpiresAt, 0)) {
+	if now.Add(-leeway).After(time.Unix(s.ExpiresAt, 0)) {
 		return invalidSSA("the SSA is expired")
 	}
 
@@ -194,8 +194,14 @@ type Registration struct {
 
 // NewRegistration gives a registration with no client ID; ssa must be valid, and issuer is the issuer of the data
 // holder.
-func NewRegistration(ssa SSA, request RegistrationRequest, issuer string, now time.Time) (Registration, error) {
-	if err := request.validateJWT(ssa.SoftwareID, issuer, now); err != nil {
+func NewRegistration(
+	ssa SSA,
+	request RegistrationRequest,
+	issuer string,
+	now time.Time,
+	leeway time.Duration,
+) (Registration, error) {
+	if err := request.validateJWT(ssa.SoftwareID, issuer, now, leeway); err != nil {
 		return Registration{}, err
 	}
 
@@ -254,7 +260,7 @@ func (r Registration) CheckSectorIdentifierDocument(published []string) error {
 	return nil
 }
 
-func (r RegistrationRequest) validateJWT(softwareID, issuer string, now time.Time) error {
+func (r RegistrationRequest) validateJWT(softwareID, issuer string, now time.Time, leeway time.Duration) error {
 	if r.Issuer != softwareID {
 		return invalidMetadata("the request iss is not the software_id of the SSA")
 	}
@@ -272,11 +278,11 @@ func (r RegistrationRequest) validateJWT(softwareID, issuer string, now time.Tim
 	}
 
 	expiry := time.Unix(r.ExpiresAt, 0)
-	if !now.Before(expiry) {
+	if now.Add(-leeway).After(expiry) {
 		return invalidMetadata("the request is expired")
 	}
 
-	if expiry.After(now.Add(maxRequestLifetime)) {
+	if expiry.After(now.Add(maxRequestLifetime + leeway)) {
 		return invalidMetadata(
 			"the request exp is more than %d minutes after the time of the request",
 			int(maxRequestLifetime.Minutes()),
