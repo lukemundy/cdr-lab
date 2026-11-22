@@ -1,4 +1,4 @@
-import { ProblemError } from "@cdr-lab/app/problem";
+import { ProblemError } from "@cdr-lab/web-platform/problem";
 import { LoadingState } from "@cdr-lab/ui/states";
 import { type QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Navigate } from "@tanstack/react-router";

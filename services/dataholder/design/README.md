@@ -126,9 +126,9 @@ flowchart LR
 - <a id="dh-0678"></a>**DH-0678** Removed.
 - <a id="dh-0707"></a>**DH-0707** Removed.
 - <a id="dh-0854"></a>**DH-0854** Removed.
-- <a id="dh-1448"></a>**DH-1448** Moved to [the `detail` of a refusal in the dialog or the form of the action](../../../web/packages/app/DESIGN.md#wcon-0014).
-- <a id="dh-1449"></a>**DH-1449** Moved to [the current state after each action](../../../web/packages/app/DESIGN.md#wcon-0015).
+- <a id="dh-1448"></a>**DH-1448** Moved to [the `detail` of a refusal in the dialog or the form of the action](../../../web/packages/web-platform/DESIGN.md#wcon-0014).
+- <a id="dh-1449"></a>**DH-1449** Moved to [the current state after each action](../../../web/packages/web-platform/DESIGN.md#wcon-0015).
 - <a id="dh-1450"></a>**DH-1450** Moved to [the UI never sends an action again by itself](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0301).
-- <a id="dh-1451"></a>**DH-1451** Moved to [the result of a success in a toast](../../../web/packages/app/DESIGN.md#wcon-0016).
-- <a id="dh-1473"></a>**DH-1473** Moved to [the filter, the search, the sort and the page of a list are in the URL](../../../web/packages/app/DESIGN.md#wcon-0001).
+- <a id="dh-1451"></a>**DH-1451** Moved to [the result of a success in a toast](../../../web/packages/web-platform/DESIGN.md#wcon-0016).
+- <a id="dh-1473"></a>**DH-1473** Moved to [the filter, the search, the sort and the page of a list are in the URL](../../../web/packages/web-platform/DESIGN.md#wcon-0001).
 - <a id="dh-1480"></a>**DH-1480** Removed.

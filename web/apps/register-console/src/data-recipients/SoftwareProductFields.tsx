@@ -1,7 +1,7 @@
 import { TextArea, TextField } from "@cdr-lab/ui/form-field";
 
 import type { SoftwareProductChange } from "../api/client";
-import { linesOf, textOf } from "@cdr-lab/app/form-values";
+import { linesOf, textOf } from "@cdr-lab/web-platform/form-values";
 
 function uri(label: string, name: keyof SoftwareProductChange, value: string | undefined) {
   return <TextField label={label} name={name} spellCheck={false} defaultValue={value ?? ""} />;

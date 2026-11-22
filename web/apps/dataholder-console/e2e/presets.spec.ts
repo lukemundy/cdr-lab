@@ -1,12 +1,12 @@
 import { expect, test } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/web-platform/e2e/checks";
 import {
   createAccount,
   createCustomer,
   uniqueAccountNumber,
   uniqueName,
-} from "@cdr-lab/app/e2e/dataholder-lab";
+} from "@cdr-lab/web-platform/e2e/dataholder-lab";
 
 // The four preset banks of compose.yaml, each with its own block of ports. The lab runs only wattle-bank by default;
 // mise run up --all-banks starts the others. A bank that does not run is skipped.

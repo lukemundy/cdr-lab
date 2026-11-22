@@ -1,16 +1,16 @@
 {
-  "name": "@cdr-lab/app",
+  "name": "@cdr-lab/web-platform",
   "private": true,
   "type": "module",
   "exports": {
-    "./app": "./src/app.tsx",
+    "./shell": "./src/shell.tsx",
     "./form-values": "./src/form-values.ts",
     "./list-search": "./src/list-search.ts",
     "./problem": "./src/problem.ts",
     "./query": "./src/query.ts",
     "./record-actions": "./src/record-actions.tsx",
     "./router-search": "./src/router-search.ts",
-    "./test/app": "./src/test/app.tsx",
+    "./test/shell": "./src/test/shell.tsx",
     "./e2e/checks": "./src/e2e/checks.ts",
     "./e2e/dataholder-lab": "./src/e2e/dataholder-lab.ts"
   },

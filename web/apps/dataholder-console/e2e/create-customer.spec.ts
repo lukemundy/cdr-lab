@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
-import { uniqueName } from "@cdr-lab/app/e2e/dataholder-lab";
+import { expectNoAxeViolations } from "@cdr-lab/web-platform/e2e/checks";
+import { uniqueName } from "@cdr-lab/web-platform/e2e/dataholder-lab";
 
 const emailError = "emailAddress must be one email address";
 

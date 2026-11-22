@@ -9,7 +9,7 @@ import type { Problem } from "@cdr-lab/ui/states";
 import { Download, FileBadge } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
-import { ProblemError } from "@cdr-lab/app/problem";
+import { ProblemError } from "@cdr-lab/web-platform/problem";
 
 import type { CertificateIssue } from "./api/client";
 import { saveFile } from "./save-file";

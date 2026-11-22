@@ -3,7 +3,7 @@ import { render } from "@cdr-lab/ui/test/render";
 import { afterEach, beforeAll, beforeEach } from "vitest";
 import { page } from "vitest/browser";
 
-import { ConsoleApp } from "../app";
+import { AppShell } from "../shell";
 import { createQueryClient } from "../query";
 
 // Each console makes its own MSW worker, because the types of a second copy of msw do not agree.
@@ -24,8 +24,8 @@ export function setUpConsoleTests(worker: MockWorker) {
   afterEach(() => worker.resetHandlers());
 }
 
-export function renderConsole<Router extends AnyRouter>(router: Router): Router {
-  render(<ConsoleApp router={router} queryClient={createQueryClient()} />);
+export function renderAppShell<Router extends AnyRouter>(router: Router): Router {
+  render(<AppShell router={router} queryClient={createQueryClient()} />);
   return router;
 }
 

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/web-platform/e2e/checks";
 import { showAllBrands } from "./lab";
 
 // Only this test changes this record of services/register/seed/example.json, and it gives back its redirect URIs.

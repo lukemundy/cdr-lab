@@ -1,5 +1,10 @@
 import type { DataHolderQuery, DataHolderStatus } from "../api/client";
-import { listSearchValidator, oneOf, pageSize, type ListSearch } from "@cdr-lab/app/list-search";
+import {
+  listSearchValidator,
+  oneOf,
+  pageSize,
+  type ListSearch,
+} from "@cdr-lab/web-platform/list-search";
 
 export const statuses = ["ACTIVE", "REMOVED"] as const satisfies readonly DataHolderStatus[];
 

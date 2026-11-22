@@ -1,6 +1,6 @@
-import { renderConsole, setUpConsoleTests } from "@cdr-lab/app/test/app";
+import { renderAppShell, setUpConsoleTests } from "@cdr-lab/web-platform/test/shell";
 
-export { definitionOf } from "@cdr-lab/app/test/app";
+export { definitionOf } from "@cdr-lab/web-platform/test/shell";
 import { createMemoryHistory } from "@tanstack/react-router";
 import { setupWorker } from "msw/browser";
 import { createOpenApiHttp } from "openapi-msw";
@@ -27,7 +27,7 @@ export const worker = setupWorker(
 setUpConsoleTests(worker);
 
 export function renderApp(url: string) {
-  return renderConsole(createAppRouter(createMemoryHistory({ initialEntries: [url] })));
+  return renderAppShell(createAppRouter(createMemoryHistory({ initialEntries: [url] })));
 }
 
 // All customer data in the tests is invented.

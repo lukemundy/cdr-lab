@@ -1,4 +1,4 @@
-import { fieldErrorsType } from "@cdr-lab/app/problem";
+import { fieldErrorsType } from "@cdr-lab/web-platform/problem";
 import { expectTypeOf, test } from "vitest";
 
 import type { components } from "./schema.gen";

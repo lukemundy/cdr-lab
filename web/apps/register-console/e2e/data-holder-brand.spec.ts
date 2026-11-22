@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/web-platform/e2e/checks";
 import { publicURL } from "./lab";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;

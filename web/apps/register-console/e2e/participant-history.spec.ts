@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/web-platform/e2e/checks";
 
 // The seed file of the lab (services/register/seed/example.json).
 const recipient = { name: "Mock Budgeting Pty Ltd", id: "c7b88455-4a14-479e-b53e-fbc4000716b3" };

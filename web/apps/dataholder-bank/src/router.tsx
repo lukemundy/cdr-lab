@@ -1,4 +1,4 @@
-import { validatePageSearch } from "@cdr-lab/app/list-search";
+import { validatePageSearch } from "@cdr-lab/web-platform/list-search";
 import { ConsumerFooter, ConsumerNavItem, PasswordStatement } from "@cdr-lab/ui/consumer-page";
 import { useQueryClient } from "@tanstack/react-query";
 import {

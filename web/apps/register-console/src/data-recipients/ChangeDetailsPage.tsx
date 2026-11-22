@@ -14,7 +14,7 @@ import {
   problemOf,
   type DataRecipientDetail,
 } from "../api/client";
-import { textOf } from "@cdr-lab/app/form-values";
+import { textOf } from "@cdr-lab/web-platform/form-values";
 import { levels } from "./levels";
 import { useChange } from "../use-change";
 

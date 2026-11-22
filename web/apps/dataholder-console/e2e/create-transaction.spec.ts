@@ -1,13 +1,13 @@
 import { expect, test } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/web-platform/e2e/checks";
 import {
   closeAccount,
   createAccount,
   createCustomer,
   uniqueAccountNumber,
   uniqueName,
-} from "@cdr-lab/app/e2e/dataholder-lab";
+} from "@cdr-lab/web-platform/e2e/dataholder-lab";
 
 const payerError = "extendedData.payer must be present for a positive amount";
 

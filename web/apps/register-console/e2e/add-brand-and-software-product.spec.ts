@@ -3,7 +3,7 @@ import { createHash, X509Certificate } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/web-platform/e2e/checks";
 import { publicURL } from "./lab";
 
 // The same certificate as the client certificate test. The Register permits it for more than one software product.

@@ -2,8 +2,8 @@
 import "@cdr-lab/ui/consumer.css";
 import "../site.css";
 
-import { ConsoleApp } from "@cdr-lab/app/app";
-import { createQueryClient } from "@cdr-lab/app/query";
+import { AppShell } from "@cdr-lab/web-platform/shell";
+import { createQueryClient } from "@cdr-lab/web-platform/query";
 import { render } from "@cdr-lab/ui/test/render";
 import { createMemoryHistory } from "@tanstack/react-router";
 import { setupWorker } from "msw/browser";
@@ -98,7 +98,7 @@ export function termsOf(within: ParentNode): string[] {
 
 export function renderApp(url: string) {
   const router = createAppRouter(createMemoryHistory({ initialEntries: [url] }));
-  render(<ConsoleApp router={router} queryClient={createQueryClient()} />);
+  render(<AppShell router={router} queryClient={createQueryClient()} />);
   return router;
 }
 

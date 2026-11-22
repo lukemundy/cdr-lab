@@ -3,7 +3,7 @@ import { Fieldset } from "@cdr-lab/ui/fieldset";
 import { TextField } from "@cdr-lab/ui/form-field";
 
 import type { DataHolderBrandChange, Industry } from "../api/client";
-import { textOf } from "@cdr-lab/app/form-values";
+import { textOf } from "@cdr-lab/web-platform/form-values";
 
 const industryOptions = [
   { value: "banking", label: "Banking" },

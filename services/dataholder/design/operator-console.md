@@ -94,7 +94,7 @@ This area gives the lab-only operator console: its functions, its presentation, 
 
 ## Presentation
 
-The [app package](../../../web/packages/app/DESIGN.md) gives the rules of the URL of a list. For example, [the filter, the search, the sort and the page of a list are in the URL](../../../web/packages/app/DESIGN.md#wcon-0001).
+The [web platform package](../../../web/packages/web-platform/DESIGN.md) gives the rules of the URL of a list. For example, [the filter, the search, the sort and the page of a list are in the URL](../../../web/packages/web-platform/DESIGN.md#wcon-0001).
 
 - <a id="dh-1465"></a>**DH-1465** The console is for desktop browsers, with the minimum width of a console of the design system. ([the minimum width of a console](../../../web/packages/ui/design/layout.md#ui-0070); [Judgement: web UIs that the service embeds (ADR 0014)][adr-0014])
 - <a id="dh-1466"></a>**DH-1466** The header of the console shows the logo of the brand on the brand colour, and the label "Operator console". The text alternative of the logo is the brand name. ([WCAG 2.2, SC 1.1.1][wcag-1-1-1]; [Judgement: the brand on the shell, and the lab brand for the rest](#dh-1523))

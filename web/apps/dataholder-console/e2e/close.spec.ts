@@ -1,12 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/web-platform/e2e/checks";
 import {
   createAccount,
   createCustomer,
   uniqueAccountNumber,
   uniqueName,
-} from "@cdr-lab/app/e2e/dataholder-lab";
+} from "@cdr-lab/web-platform/e2e/dataholder-lab";
 
 // The lab browser tests make no arrangement (see detail.spec.ts), so the close of the last open account ends no
 // arrangement here. The unit tests of the console API and of the UI cover the arrangements that a close ends.

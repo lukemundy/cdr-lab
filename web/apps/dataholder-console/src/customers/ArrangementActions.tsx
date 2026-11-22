@@ -1,4 +1,4 @@
-import { RecordActions, type ActionDialog } from "@cdr-lab/app/record-actions";
+import { RecordActions, type ActionDialog } from "@cdr-lab/web-platform/record-actions";
 import { Button } from "@cdr-lab/ui/button";
 import { Ban } from "lucide-react";
 

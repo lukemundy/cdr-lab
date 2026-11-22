@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/web-platform/e2e/checks";
 
 import { categoryLabels } from "../src/products/categories";
 import { formatRate } from "../src/products/format";
