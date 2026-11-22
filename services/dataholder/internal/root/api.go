@@ -122,6 +122,7 @@ func apiListeners(
 		Arrangements:  parts.arrangements,
 		Sectors:       sectoridentifier.NewDocuments(http.DefaultTransport),
 		Now:           time.Now,
+		ClockLeeway:   authserver.ClockLeeway,
 		NewID:         uuid.NewString,
 	}
 

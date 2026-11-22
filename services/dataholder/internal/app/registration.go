@@ -132,7 +132,9 @@ type Registrar struct {
 	Arrangements  RegistrationArrangements
 	Sectors       SectorIdentifiers
 	Now           func() time.Time
-	NewID         func() string
+	// ClockLeeway is the clock difference that the data holder accepts in the exp of a request JWT and of an SSA.
+	ClockLeeway time.Duration
+	NewID       func() string
 }
 
 func refused(code domain.RegistrationErrorCode, description string) error {
@@ -281,7 +283,7 @@ func (r Registrar) verifiedRegistration(
 		return domain.Registration{}, requestJTIs{}, fmt.Errorf("verify the request JWT: %w", err)
 	}
 
-	registration, err := domain.NewRegistration(ssa, request, r.Issuer, now)
+	registration, err := domain.NewRegistration(ssa, request, r.Issuer, now, r.ClockLeeway)
 	if err != nil {
 		return domain.Registration{}, requestJTIs{}, err
 	}
@@ -290,7 +292,11 @@ func (r Registrar) verifiedRegistration(
 		return domain.Registration{}, requestJTIs{}, err
 	}
 
-	jtis := requestJTIs{request: request.ID, ssa: ssa.ID, ssaExpiresAt: time.Unix(ssa.ExpiresAt, 0)}
+	jtis := requestJTIs{
+		request:      request.ID,
+		ssa:          ssa.ID,
+		ssaKeptUntil: time.Unix(ssa.ExpiresAt, 0).Add(r.ClockLeeway),
+	}
 
 	return registration, jtis, nil
 }
@@ -332,7 +338,7 @@ func (r Registrar) refuseRemoved(ctx context.Context, softwareID string) error {
 type requestJTIs struct {
 	request      string
 	ssa          string
-	ssaExpiresAt time.Time
+	ssaKeptUntil time.Time
 }
 
 // consume uses the jti of the request JWT first, so that a second request with the same request JWT gets the error of
@@ -347,7 +353,7 @@ func (r Registrar) consume(ctx context.Context, jtis requestJTIs) error {
 		return fmt.Errorf("consume the jti of the request JWT: %w", err)
 	}
 
-	err = r.JTIs.ConsumeSSA(ctx, jtis.ssa, jtis.ssaExpiresAt)
+	err = r.JTIs.ConsumeSSA(ctx, jtis.ssa, jtis.ssaKeptUntil)
 	if errors.Is(err, ErrJTIUsed) {
 		return refused(domain.InvalidSoftwareStatement, "the jti of the SSA was used before")
 	}
@@ -385,5 +391,5 @@ func (r Registrar) verifiedSSA(ctx context.Context, requestJWT string, now time.
 		return domain.SSA{}, fmt.Errorf("verify the SSA: %w", err)
 	}
 
-	return ssa, ssa.Validate(now)
+	return ssa, ssa.Validate(now, r.ClockLeeway)
 }

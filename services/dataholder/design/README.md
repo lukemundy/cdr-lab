@@ -39,7 +39,8 @@ flowchart LR
 | Product reference data | [product-reference-data.md](product-reference-data.md) | The products of the brand, their load, Get Products, Get Product Detail, Get Status and Get Outages. |
 | API standards | [api-standards.md](api-standards.md) | The endpoints, versions, headers, errors, CORS and transport security of all CDR APIs. |
 | Authorisation server | [authorisation-server.md](authorisation-server.md) | The choices of the data holder for its authorisation server, the authorisation request and the tokens of an arrangement. |
-| Registration | [registration.md](registration.md) | The registration of a software product, registration management and the reaction to participant statuses. |
+| Registration | [registration.md](registration.md) | The registration of a software product with an SSA, and the validation of the request. |
+| Registration management | [registration-management.md](registration-management.md) | Registration management, the participant statuses from the Register and the reaction to them. |
 | Consumer authentication | [consumer-authentication.md](consumer-authentication.md) | The authentication of a consumer with a one-time password, and the OTP email. |
 | Authorisation | [authorisation.md](authorisation.md) | The authorisation page, the authorisation response, the CDR arrangement and the presentation of the consumer pages. |
 | End of an arrangement | [end-of-an-arrangement.md](end-of-an-arrangement.md) | CDR arrangement revocation, withdrawal, the end of the sharing period and of eligibility, and the notice to the data recipient. |
@@ -81,12 +82,12 @@ flowchart LR
 - For public clients: Get Products, Get Product Detail, Get Status and Get Outages on the public listener ([product reference data](product-reference-data.md)).
 - For data recipient software products:
   - the OpenID Provider configuration and the JWKS of the brand ([authorisation server](authorisation-server.md))
-  - registration with an SSA, and registration management ([registration](registration.md))
+  - registration with an SSA, and registration management ([registration](registration.md), [registration management](registration-management.md))
   - the token endpoint, for the client credentials, authorisation code and refresh token grants, and the PAR, authorisation, introspection, token revocation and CDR arrangement revocation endpoints ([authorisation server](authorisation-server.md))
   - Get Customer, Get Accounts, Get Account Detail, Get Account Balance, Get Bulk Balances, Get Balances For Specific Accounts, Get Transactions For Account, Get Transaction Detail and UserInfo ([banking APIs](banking-apis.md))
 - For consumers: authentication with a one-time password, and the authorisation page in a browser ([consumer authentication](consumer-authentication.md), [authorisation](authorisation.md)).
 - The end of an arrangement: a revocation by the data recipient, a withdrawal by the consumer, the end of the sharing period and the end of the eligibility of the consumer, with the notice to the data recipient ([end of an arrangement](end-of-an-arrangement.md)).
-- The reaction to the participant status of a software product on the Register ([registration](registration.md)).
+- The reaction to the participant status of a software product on the Register ([registration management](registration-management.md)).
 - The customers, accounts and transactions of the brand ([banking APIs](banking-apis.md)).
 - For the lab operator (lab-only):
   - the operator interface, which creates customer data, closes accounts and withdraws authorisations for a consumer ([operator interface](operator-interface.md))

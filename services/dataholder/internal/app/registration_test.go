@@ -160,6 +160,7 @@ func newRegistrar(j *jwts) app.Registrar {
 		Arrangements:  &clientArrangements{},
 		Sectors:       &sectorDocuments{redirectURIs: []string{"https://recipient.example/cb"}},
 		Now:           func() time.Time { return registrationTime },
+		ClockLeeway:   30 * time.Second,
 		NewID: func() string {
 			ids++
 			return fmt.Sprintf("client-%d", ids)
@@ -272,7 +273,8 @@ func TestAnSSAThatTheDataHolderAcceptedBeforeIsRefused(t *testing.T) {
 	requireRegistrationError(t, err, domain.InvalidSoftwareStatement, "jti of the SSA")
 }
 
-func TestTheSSAJTIIsKeptUntilTheSSAExpires(t *testing.T) {
+// Verifies: DH-0620
+func TestTheSSAJTIIsKeptUntilTheEndOfTheClockLeewayAfterTheSSAExpires(t *testing.T) {
 	j := validJWTs()
 	store := &expiryJTIs{}
 	registrar := newRegistrar(j)
@@ -281,7 +283,44 @@ func TestTheSSAJTIIsKeptUntilTheSSAExpires(t *testing.T) {
 	_, err := registrar.Register(t.Context(), requestJWT)
 
 	require.NoError(t, err)
-	assert.Equal(t, time.Unix(j.ssa.ExpiresAt, 0), store.ssaExpiresAt)
+	assert.Equal(t, time.Unix(j.ssa.ExpiresAt, 0).Add(30*time.Second), store.ssaExpiresAt)
+}
+
+// Verifies: DH-0620
+func TestAnSSAThatTheDataHolderAcceptedBeforeIsRefusedInTheClockLeewayAfterItExpires(t *testing.T) {
+	j := validJWTs()
+	at := registrationTime
+	registrar := newRegistrar(j)
+	registrar.Now = func() time.Time { return at }
+	registrar.JTIs = &expiringJTIs{now: registrar.Now, ssa: map[string]time.Time{}}
+	_, err := registrar.Register(t.Context(), requestJWT)
+	require.NoError(t, err)
+
+	at = time.Unix(j.ssa.ExpiresAt, 0).Add(30 * time.Second)
+	registrar.Store = &memoryStore{}
+	j.request.ID = "request-jti-2"
+	j.request.ExpiresAt = at.Add(time.Minute).Unix()
+	_, err = registrar.Register(t.Context(), requestJWT)
+
+	requireRegistrationError(t, err, domain.InvalidSoftwareStatement, "jti of the SSA")
+}
+
+// expiringJTIs keeps each SSA JWT ID until its expiry time, as the JWT ID store of the data holder does.
+type expiringJTIs struct {
+	now func() time.Time
+	ssa map[string]time.Time
+}
+
+func (*expiringJTIs) Consume(context.Context, string) error { return nil }
+
+func (e *expiringJTIs) ConsumeSSA(_ context.Context, jti string, expiresAt time.Time) error {
+	if kept, ok := e.ssa[jti]; ok && !e.now().After(kept) {
+		return app.ErrJTIUsed
+	}
+
+	e.ssa[jti] = expiresAt
+
+	return nil
 }
 
 // expiryJTIs keeps the expiry time of the last SSA JWT ID.

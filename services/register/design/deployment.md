@@ -99,7 +99,7 @@ A deployment changes the endpoints of the example seed to the hosts of the deplo
 ### <a id="reg-0945"></a>REG-0945 The example seed has only the four preset brands
 
 - Kind: choice
-- Basis: Step 3.3. A data holder is ready when its list of software product statuses is empty ([data holder: readiness after the first participant statuses](../../dataholder/design/registration.md#dh-0689)).
+- Basis: Step 3.3. A data holder is ready when its list of software product statuses is empty ([data holder: readiness after the first participant statuses](../../dataholder/design/registration-management.md#dh-0689)).
 - Reason: The data recipients of the lab seed are fixtures of the conformance suite, with hosts that are only in the lab. A Register with only the four preset brands is enough to start the data holders.
 
 ### <a id="reg-0946"></a>REG-0946 Invented `.test` hosts for the endpoints of the example seed

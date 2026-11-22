@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/luikyv/go-oidc/pkg/goidc"
 	"github.com/luikyv/go-oidc/pkg/provider"
@@ -29,11 +30,14 @@ const (
 	registerTokenPath            = registerEndpointPath + "/token"
 	registerScope                = "cdr-register:read"
 	registerTokenLifetimeSeconds = 300
-	// A JTIStore must keep a JWT ID for longer than this lifetime plus clockLeewaySeconds.
+	// A JTIStore must keep a JWT ID for longer than this lifetime plus ClockLeeway.
 	registerAssertionLifetimeSeconds = 600
 )
 
-const clockLeewaySeconds = 30
+// ClockLeeway is the clock difference that the authorisation server accepts in the time claims of a client JWT.
+const ClockLeeway = 30 * time.Second
+
+const clockLeewaySeconds = int(ClockLeeway / time.Second)
 
 var (
 	ErrClientNotFound = errors.New("the client does not exist")
