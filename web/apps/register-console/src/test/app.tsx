@@ -1,6 +1,6 @@
-import { renderConsole, setUpConsoleTests } from "@cdr-lab/console/test/app";
+import { renderConsole, setUpConsoleTests } from "@cdr-lab/app/test/app";
 
-export { definitionOf } from "@cdr-lab/console/test/app";
+export { definitionOf } from "@cdr-lab/app/test/app";
 import { createMemoryHistory } from "@tanstack/react-router";
 import { setupWorker } from "msw/browser";
 import { createOpenApiHttp } from "openapi-msw";

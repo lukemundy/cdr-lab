@@ -1,5 +1,5 @@
 {
-  "name": "@cdr-lab/console",
+  "name": "@cdr-lab/app",
   "private": true,
   "type": "module",
   "exports": {

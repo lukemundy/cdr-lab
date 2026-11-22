@@ -2,7 +2,7 @@ import { randomInt, randomUUID } from "node:crypto";
 
 import { expect, test } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
 
 // The journey makes its own customer, because the lab has no seed customers. A new customer has no consent, so the
 // test runs also in CI, where the lab has no conformance data.

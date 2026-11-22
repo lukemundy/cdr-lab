@@ -1,4 +1,4 @@
-import { pageSize } from "@cdr-lab/console/list-search";
+import { pageSize } from "@cdr-lab/app/list-search";
 import { DataTable, dataTableColumns, type DataTableStatus } from "@cdr-lab/ui/data-table";
 import { DescriptionItem, DescriptionList } from "@cdr-lab/ui/description-list";
 import { Identifier } from "@cdr-lab/ui/identifier";

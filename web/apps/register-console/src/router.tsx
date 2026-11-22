@@ -31,8 +31,8 @@ import { validateDataRecipientSearch } from "./data-recipients/search";
 import { DataHolderHistoryPage, DataRecipientHistoryPage } from "./history/HistoryPage";
 import { KeySetsPage } from "./key-sets/KeySetsPage";
 import { NotFoundPage } from "./NotFoundPage";
-import { parseSearch, stringifySearch } from "@cdr-lab/console/router-search";
-import { validatePageSearch } from "@cdr-lab/console/list-search";
+import { parseSearch, stringifySearch } from "@cdr-lab/app/router-search";
+import { validatePageSearch } from "@cdr-lab/app/list-search";
 
 type Section = "data-recipients" | "data-holders" | "signing-keys" | "cdr-certificates";
 

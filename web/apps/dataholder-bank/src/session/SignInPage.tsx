@@ -1,5 +1,5 @@
-import { refusalOf } from "@cdr-lab/console/problem";
-import { textOf } from "@cdr-lab/console/form-values";
+import { refusalOf } from "@cdr-lab/app/problem";
+import { textOf } from "@cdr-lab/app/form-values";
 import { ConsumerCard } from "@cdr-lab/ui/consumer-page";
 import { Form, type FormRefusal } from "@cdr-lab/ui/form";
 import { TextField } from "@cdr-lab/ui/form-field";

@@ -27,8 +27,8 @@ import { RegistrationsPage } from "./registrations/RegistrationsPage";
 import { validateRegistrationSearch } from "./registrations/search";
 import { validateStatusSearch } from "./statuses/search";
 import { StatusesPage } from "./statuses/StatusesPage";
-import { parseSearch, stringifySearch } from "@cdr-lab/console/router-search";
-import { validatePageSearch } from "@cdr-lab/console/list-search";
+import { parseSearch, stringifySearch } from "@cdr-lab/app/router-search";
+import { validatePageSearch } from "@cdr-lab/app/list-search";
 
 type Section = "overview" | "customers" | "registrations" | "register-statuses";
 

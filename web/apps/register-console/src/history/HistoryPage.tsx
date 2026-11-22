@@ -17,7 +17,7 @@ import {
   type DataHolderHistoryEntry,
   type DataRecipientHistoryEntry,
 } from "../api/client";
-import { pageSize, validatePageSearch, type PageSearch } from "@cdr-lab/console/list-search";
+import { pageSize, validatePageSearch, type PageSearch } from "@cdr-lab/app/list-search";
 
 type HistoryEntry = DataRecipientHistoryEntry | DataHolderHistoryEntry;
 

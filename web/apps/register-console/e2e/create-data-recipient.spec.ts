@@ -1,6 +1,6 @@
 import { expect, test, type APIRequestContext } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
 import { publicURL } from "./lab";
 
 // Mock Budgeting Pty Ltd in services/register/seed/example.json. The refused create does not change it.

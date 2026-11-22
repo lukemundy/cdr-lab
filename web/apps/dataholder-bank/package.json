@@ -7,7 +7,7 @@
     "generate": "openapi-typescript ../../../services/dataholder/internal/adapter/banksite/openapi.yaml --enum-values --output src/api/schema.gen.ts"
   },
   "dependencies": {
-    "@cdr-lab/console": "workspace:*",
+    "@cdr-lab/app": "workspace:*",
     "@cdr-lab/ui": "workspace:*",
     "@tanstack/react-query": "5.107.1",
     "@tanstack/react-router": "1.170.46",

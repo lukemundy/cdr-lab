@@ -3,8 +3,8 @@ import { randomInt, randomUUID } from "node:crypto";
 
 import { expect, test, type Page } from "@playwright/test";
 
-import { definitionOf, expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
-import { requiredEnv } from "@cdr-lab/console/e2e/dataholder-lab";
+import { definitionOf, expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
+import { requiredEnv } from "@cdr-lab/app/e2e/dataholder-lab";
 
 import { loanProductCategoryValues, revolvingProductCategoryValues } from "../src/api/schema.gen";
 

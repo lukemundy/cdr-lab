@@ -4,7 +4,7 @@ import { useToast } from "@cdr-lab/ui/toast";
 import { Plus, Power, type LucideIcon } from "lucide-react";
 import { useRef, useState } from "react";
 
-import { ProblemError } from "@cdr-lab/console/problem";
+import { ProblemError } from "@cdr-lab/app/problem";
 import { changeKey, type KeyAction, type KeySet, type KeyState } from "../api/client";
 
 export type KeySetNames = { title: string; noun: string; signs: string };

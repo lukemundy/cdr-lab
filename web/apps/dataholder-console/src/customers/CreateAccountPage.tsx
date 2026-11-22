@@ -7,8 +7,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getRouteApi, Link as RouterLink, useNavigate } from "@tanstack/react-router";
 
 import { createAccount, problemOf, productCategoryValues } from "../api/client";
-import { textOf } from "@cdr-lab/console/form-values";
-import { refusalOf } from "@cdr-lab/console/problem";
+import { textOf } from "@cdr-lab/app/form-values";
+import { refusalOf } from "@cdr-lab/app/problem";
 import { customerQuery, nameOf } from "./CustomerPage";
 
 const route = getRouteApi("/customers/$customerNumber/create-account");

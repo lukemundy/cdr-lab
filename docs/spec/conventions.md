@@ -99,7 +99,7 @@ This table is the registry of the codes. A new specification adds its code in th
 | `pki` | `PKI` |
 | `conformance` | `CONF` |
 | `web/packages/ui` | `UI` |
-| `web/packages/console` | `WCON` |
+| `web/packages/app` | `WCON` |
 | `pkg/cds` | `CDSL` |
 | `pkg/authserver` | `AUTH` |
 | `pkg/ca` | `CA` |

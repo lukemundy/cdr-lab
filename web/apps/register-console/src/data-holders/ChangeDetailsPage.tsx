@@ -14,7 +14,7 @@ import {
   problemOf,
   type DataHolderDetail,
 } from "../api/client";
-import { textOf } from "@cdr-lab/console/form-values";
+import { textOf } from "@cdr-lab/app/form-values";
 import { useChange } from "../use-change";
 
 const route = getRouteApi("/data-holders/$legalEntityId/change");

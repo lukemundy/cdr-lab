@@ -44,7 +44,7 @@ This area gives the forms of the operator console that create, add and change pa
 
 ## Values that the console sends
 
-The [console package](../../../web/packages/console/DESIGN.md) gives [the removal of the white space at the ends of each value](../../../web/packages/console/DESIGN.md#wcon-0008) and [the lines of a list](../../../web/packages/console/DESIGN.md#wcon-0009).
+The [app package](../../../web/packages/app/DESIGN.md) gives [the removal of the white space at the ends of each value](../../../web/packages/app/DESIGN.md#wcon-0008) and [the lines of a list](../../../web/packages/app/DESIGN.md#wcon-0009).
 
 - <a id="reg-1432"></a>**REG-1432** The console sends an optional field that has no value as no field. For example, a change with no policy URI sends no `policyUri`. ([a field that is not in the body of a change](operator-console-change-api.md#reg-1324))
 - <a id="reg-1433"></a>**REG-1433** A change form sends each field of the change, also the fields that the lab operator did not change. ([the body of a change](operator-console-change-api.md#reg-1323); [a field that is not in the body of a change](operator-console-change-api.md#reg-1324))

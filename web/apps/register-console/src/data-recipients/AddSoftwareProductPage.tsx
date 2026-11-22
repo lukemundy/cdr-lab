@@ -14,7 +14,7 @@ import {
   problemOf,
   type DataRecipientBrand,
 } from "../api/client";
-import { textOf } from "@cdr-lab/console/form-values";
+import { textOf } from "@cdr-lab/app/form-values";
 import { brandAndProductStatusOf, brandAndProductStatusOptions } from "../statuses";
 import { SoftwareProductFields, softwareProductDetailsOf } from "./SoftwareProductFields";
 import { useSend } from "../use-change";

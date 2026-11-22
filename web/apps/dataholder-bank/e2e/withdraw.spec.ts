@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
-import { requiredEnv } from "@cdr-lab/console/e2e/dataholder-lab";
+import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
+import { requiredEnv } from "@cdr-lab/app/e2e/dataholder-lab";
 
 type ConsoleCustomer = { customerNumber: string; currentArrangementCount: number };
 type ConsoleArrangement = { arrangementId: string; clientName: string; actions: unknown[] };

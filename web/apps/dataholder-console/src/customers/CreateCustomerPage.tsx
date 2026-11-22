@@ -6,8 +6,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Link as RouterLink, useNavigate } from "@tanstack/react-router";
 
 import { createCustomer } from "../api/client";
-import { textOf } from "@cdr-lab/console/form-values";
-import { refusalOf } from "@cdr-lab/console/problem";
+import { textOf } from "@cdr-lab/app/form-values";
+import { refusalOf } from "@cdr-lab/app/problem";
 
 export function CreateCustomerPage() {
   const queryClient = useQueryClient();

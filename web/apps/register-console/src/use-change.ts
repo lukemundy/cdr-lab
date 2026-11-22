@@ -3,7 +3,7 @@ import { useToast } from "@cdr-lab/ui/toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
-import { refusalOf } from "@cdr-lab/console/problem";
+import { refusalOf } from "@cdr-lab/app/problem";
 
 export type Participant = "data-recipient" | "data-holder";
 

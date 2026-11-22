@@ -1,5 +1,5 @@
 import type { RegistrationQuery } from "../api/client";
-import { listSearchValidator, oneOf, type ListSearch } from "@cdr-lab/console/list-search";
+import { listSearchValidator, oneOf, type ListSearch } from "@cdr-lab/app/list-search";
 
 const sortColumns = [
   "clientName",

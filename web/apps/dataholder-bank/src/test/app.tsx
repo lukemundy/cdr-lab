@@ -2,8 +2,8 @@
 import "@cdr-lab/ui/consumer.css";
 import "../site.css";
 
-import { ConsoleApp } from "@cdr-lab/console/app";
-import { createQueryClient } from "@cdr-lab/console/query";
+import { ConsoleApp } from "@cdr-lab/app/app";
+import { createQueryClient } from "@cdr-lab/app/query";
 import { render } from "@cdr-lab/ui/test/render";
 import { createMemoryHistory } from "@tanstack/react-router";
 import { setupWorker } from "msw/browser";

@@ -1,5 +1,5 @@
 import { DescriptionItem, DescriptionList } from "@cdr-lab/ui/description-list";
-import { ProblemError } from "@cdr-lab/console/problem";
+import { ProblemError } from "@cdr-lab/app/problem";
 import { ConsumerCard } from "@cdr-lab/ui/consumer-page";
 import { Pagination } from "@cdr-lab/ui/pagination";
 import { ErrorState, LoadingState } from "@cdr-lab/ui/states";

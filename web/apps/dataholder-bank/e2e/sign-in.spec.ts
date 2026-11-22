@@ -2,12 +2,12 @@ import { randomInt, randomUUID } from "node:crypto";
 
 import { expect, test } from "@playwright/test";
 
-import { definitionOf, expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
+import { definitionOf, expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
 import {
   createAccount,
   createTransaction,
   uniqueAccountNumber,
-} from "@cdr-lab/console/e2e/dataholder-lab";
+} from "@cdr-lab/app/e2e/dataholder-lab";
 
 // The journey makes its own customer, account and transaction, with invented values, because the lab has no seed
 // customers.

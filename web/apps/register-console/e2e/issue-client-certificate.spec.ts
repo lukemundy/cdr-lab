@@ -2,7 +2,7 @@ import { expect, test, type APIRequestContext } from "@playwright/test";
 import { randomUUID, X509Certificate } from "node:crypto";
 import { readFileSync } from "node:fs";
 
-import { expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
 import { firstCertificateOf, makeCSR, publicKeyOf } from "./csr";
 import { showAllBrands } from "./lab";
 

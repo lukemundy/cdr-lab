@@ -16,7 +16,7 @@ import {
   pageSize,
   tableSort,
   type ListSearchChange,
-} from "@cdr-lab/console/list-search";
+} from "@cdr-lab/app/list-search";
 import {
   apiQuery,
   sortColumnOf,

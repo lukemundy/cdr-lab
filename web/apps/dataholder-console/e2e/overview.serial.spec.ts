@@ -1,13 +1,13 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { definitionOf, expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
+import { definitionOf, expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
 import {
   closeAccount,
   createAccount,
   createCustomer,
   uniqueAccountNumber,
   uniqueName,
-} from "@cdr-lab/console/e2e/dataholder-lab";
+} from "@cdr-lab/app/e2e/dataholder-lab";
 
 // playwright.config.ts runs this file after the other tests of the data holder, so that no other test changes the
 // counts while it runs.
