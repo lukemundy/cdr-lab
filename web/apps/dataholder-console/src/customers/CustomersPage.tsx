@@ -14,7 +14,7 @@ import {
   pageSize,
   tableSort,
   type ListSearchChange,
-} from "@cdr-lab/app/list-search";
+} from "@cdr-lab/web-platform/list-search";
 import { apiQuery, sortColumnOf, validateCustomerSearch, type CustomerSearch } from "./search";
 
 const route = getRouteApi("/customers");

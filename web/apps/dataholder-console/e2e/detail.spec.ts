@@ -1,13 +1,13 @@
 import { expect, test } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/web-platform/e2e/checks";
 import {
   createAccount,
   createCustomer,
   createTransaction,
   uniqueAccountNumber,
   uniqueName,
-} from "@cdr-lab/app/e2e/dataholder-lab";
+} from "@cdr-lab/web-platform/e2e/dataholder-lab";
 
 const day = (n: number) => new Date(Date.UTC(2026, 8, 1 + n, 1)).toISOString();
 

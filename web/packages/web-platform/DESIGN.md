@@ -1,6 +1,6 @@
-# App package
+# Web platform package
 
-The app package is the shared code of the lab web UIs that get their data from a lab API: the two operator consoles and the online bank site. It gives the state of a list in the URL, the form values that a UI sends, the retry and the errors of a read, and the actions of a record in a console. Thus each UI has the same behaviour, and each rule has one place. The [design system](../ui/design/README.md) gives the components and the patterns that the package uses.
+The web platform package is the shared code of the lab web UIs that get their data from a lab API: the two operator consoles and the online bank site. It gives the state of a list in the URL, the form values that a UI sends, the retry and the errors of a read, and the actions of a record in a console. Thus each UI has the same behaviour, and each rule has one place. The [design system](../ui/design/README.md) gives the components and the patterns that the package uses.
 
 ## Context
 
@@ -9,7 +9,7 @@ flowchart LR
   registerconsole["Register operator console<br>[External system]"]
   dataholderconsole["Data holder operator console<br>[External system]"]
   banksite["Online bank site<br>[External system]"]
-  package["App package<br>[System]"]
+  package["Web platform package<br>[System]"]
   design["Design system<br>[External system]"]
 
   registerconsole -- "Uses the lists, the form values, the reads and the actions<br>Build-time import" --> package

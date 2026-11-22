@@ -3,7 +3,7 @@ import { X509Certificate } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/web-platform/e2e/checks";
 
 // A self-signed certificate with no private key in the repository.
 const selfSignedFile = fileURLToPath(new URL("fixtures/client-certificate.pem", import.meta.url));

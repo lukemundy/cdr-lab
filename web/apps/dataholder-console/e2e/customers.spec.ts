@@ -1,12 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/web-platform/e2e/checks";
 import {
   createAccount,
   createCustomer,
   uniqueAccountNumber,
   uniqueName,
-} from "@cdr-lab/app/e2e/dataholder-lab";
+} from "@cdr-lab/web-platform/e2e/dataholder-lab";
 
 // The brandName of the Wattle Bank brand in services/register/seed/example.json, which compose.yaml gives.
 const brandName = "Wattle Bank";

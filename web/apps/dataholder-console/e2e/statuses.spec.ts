@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/web-platform/e2e/checks";
 
 // Mock Budget Beta in services/register/seed/example.json. A REMOVED software product cannot change its status, so
 // the conformance suite and the other tests do not change it.

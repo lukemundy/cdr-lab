@@ -2,7 +2,7 @@ import {
   consoleReadFailure,
   ProblemError,
   problemOf as problemOfService,
-} from "@cdr-lab/app/problem";
+} from "@cdr-lab/web-platform/problem";
 import type { Problem } from "@cdr-lab/ui/states";
 import createClient from "openapi-fetch";
 

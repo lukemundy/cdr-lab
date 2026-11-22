@@ -1,8 +1,8 @@
 import "@cdr-lab/ui/consumer.css";
 import "./site.css";
 
-import { ConsoleApp } from "@cdr-lab/app/app";
-import { createQueryClient } from "@cdr-lab/app/query";
+import { AppShell } from "@cdr-lab/web-platform/shell";
+import { createQueryClient } from "@cdr-lab/web-platform/query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -15,6 +15,6 @@ if (!container) {
 
 createRoot(container).render(
   <StrictMode>
-    <ConsoleApp router={createAppRouter()} queryClient={createQueryClient()} />
+    <AppShell router={createAppRouter()} queryClient={createQueryClient()} />
   </StrictMode>,
 );

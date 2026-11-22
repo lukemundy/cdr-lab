@@ -10,7 +10,12 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { getRouteApi, Link as RouterLink } from "@tanstack/react-router";
 
 import { listSoftwareProductStatuses, problemOf, type SoftwareProductStatus } from "../api/client";
-import { changedSearch, orderOf, tableSort, type ListSearchChange } from "@cdr-lab/app/list-search";
+import {
+  changedSearch,
+  orderOf,
+  tableSort,
+  type ListSearchChange,
+} from "@cdr-lab/web-platform/list-search";
 import { registrations, sortColumnOf, validateStatusSearch, type StatusSearch } from "./search";
 import { statusTones } from "./tones";
 

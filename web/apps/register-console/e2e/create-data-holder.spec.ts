@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/web-platform/e2e/checks";
 
 // Mock Holdings Ltd in services/register/seed/example.json. The refused create does not change it.
 const seededID = "a81975c6-1ac9-4fe4-88fc-68f50efd27cb";

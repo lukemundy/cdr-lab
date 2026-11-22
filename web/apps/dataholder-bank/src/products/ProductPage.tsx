@@ -1,5 +1,5 @@
 import { DescriptionItem, DescriptionList } from "@cdr-lab/ui/description-list";
-import { ProblemError } from "@cdr-lab/app/problem";
+import { ProblemError } from "@cdr-lab/web-platform/problem";
 import { ConsumerButton, ConsumerCard } from "@cdr-lab/ui/consumer-page";
 import { ErrorState, LoadingState } from "@cdr-lab/ui/states";
 import { useQuery } from "@tanstack/react-query";

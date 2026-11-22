@@ -1,5 +1,5 @@
 import type { SoftwareProductStatusQuery } from "../api/client";
-import { listSearchValidator, oneOf, type Order } from "@cdr-lab/app/list-search";
+import { listSearchValidator, oneOf, type Order } from "@cdr-lab/web-platform/list-search";
 
 type Registration = NonNullable<SoftwareProductStatusQuery["registration"]>;
 

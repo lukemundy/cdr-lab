@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-import { definitionOf as definition, expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
+import {
+  definitionOf as definition,
+  expectNoAxeViolations,
+} from "@cdr-lab/web-platform/e2e/checks";
 import { showAllBrands } from "./lab";
 
 // The seed file of the lab (services/register/seed/example.json).
