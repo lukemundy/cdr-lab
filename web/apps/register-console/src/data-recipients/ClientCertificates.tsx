@@ -10,7 +10,7 @@ import { useToast } from "@cdr-lab/ui/toast";
 import { FileKey, Trash2 } from "lucide-react";
 import { useRef, useState, type FormEvent } from "react";
 
-import { ProblemError } from "@cdr-lab/console/problem";
+import { ProblemError } from "@cdr-lab/app/problem";
 
 const unexpectedProblem: Problem = {
   title: "The action did not complete",

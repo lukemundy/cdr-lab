@@ -1,6 +1,6 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
 import { publicURL } from "./lab";
 
 // Only this test changes this record of services/register/seed/example.json, and it gives back its details.

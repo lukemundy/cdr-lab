@@ -1,6 +1,6 @@
 import { expect, test, type APIRequestContext } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
 import { publicURL, showAllBrands } from "./lab";
 
 // Only this test changes these records of services/register/seed/example.json, and it gives back their statuses.

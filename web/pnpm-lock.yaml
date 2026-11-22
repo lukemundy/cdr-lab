@@ -44,9 +44,9 @@ importers:
 
   apps/dataholder-bank:
     dependencies:
-      '@cdr-lab/console':
+      '@cdr-lab/app':
         specifier: workspace:*
-        version: link:../../packages/console
+        version: link:../../packages/app
       '@cdr-lab/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -105,9 +105,9 @@ importers:
 
   apps/dataholder-console:
     dependencies:
-      '@cdr-lab/console':
+      '@cdr-lab/app':
         specifier: workspace:*
-        version: link:../../packages/console
+        version: link:../../packages/app
       '@cdr-lab/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -169,9 +169,9 @@ importers:
 
   apps/register-console:
     dependencies:
-      '@cdr-lab/console':
+      '@cdr-lab/app':
         specifier: workspace:*
-        version: link:../../packages/console
+        version: link:../../packages/app
       '@cdr-lab/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -231,7 +231,7 @@ importers:
         specifier: 8.3.8
         version: 8.3.8(@types/node@26.6.6)(jiti@2.7.0)(yaml@2.9.1)
 
-  packages/console:
+  packages/app:
     dependencies:
       '@cdr-lab/ui':
         specifier: workspace:*

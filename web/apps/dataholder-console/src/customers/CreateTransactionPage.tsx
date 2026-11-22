@@ -15,8 +15,8 @@ import {
   transactionTypeValues,
   type TransactionCreate,
 } from "../api/client";
-import { textOf } from "@cdr-lab/console/form-values";
-import { refusalOf } from "@cdr-lab/console/problem";
+import { textOf } from "@cdr-lab/app/form-values";
+import { refusalOf } from "@cdr-lab/app/problem";
 import { customerQuery } from "./CustomerPage";
 
 const route = getRouteApi("/customers/$customerNumber/accounts/$accountId/create-transaction");

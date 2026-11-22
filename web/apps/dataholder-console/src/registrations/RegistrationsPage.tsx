@@ -9,7 +9,7 @@ import { getRouteApi, Link as RouterLink } from "@tanstack/react-router";
 
 import { listRegistrations, problemOf, type Registration } from "../api/client";
 import { statusTones } from "../statuses/tones";
-import { changedSearch, orderOf, tableSort } from "@cdr-lab/console/list-search";
+import { changedSearch, orderOf, tableSort } from "@cdr-lab/app/list-search";
 import { sortColumnOf, validateRegistrationSearch } from "./search";
 
 const route = getRouteApi("/registrations");

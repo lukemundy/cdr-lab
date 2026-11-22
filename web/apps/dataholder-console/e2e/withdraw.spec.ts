@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
 import createClient from "openapi-fetch";
 
-import { expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
 import type { paths } from "../src/api/schema.gen";
-import { requiredEnv } from "@cdr-lab/console/e2e/dataholder-lab";
+import { requiredEnv } from "@cdr-lab/app/e2e/dataholder-lab";
 
 const api = createClient<paths>({ baseUrl: requiredEnv("DATAHOLDER_INTERNAL_URL") });
 

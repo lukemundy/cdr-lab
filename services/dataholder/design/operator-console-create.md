@@ -4,7 +4,7 @@ This area gives the actions of the lab-only operator console and its create form
 
 ## Actions
 
-The [console package](../../../web/packages/console/DESIGN.md) gives the refusal, the refresh and the result of an action: [the `detail` of a refusal in the dialog or the form of the action](../../../web/packages/console/DESIGN.md#wcon-0014), [the current state after each action](../../../web/packages/console/DESIGN.md#wcon-0015) and [the result of a success in a toast](../../../web/packages/console/DESIGN.md#wcon-0016). The design system gives that [the UI never sends an action again by itself](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0301).
+The [app package](../../../web/packages/app/DESIGN.md) gives the refusal, the refresh and the result of an action: [the `detail` of a refusal in the dialog or the form of the action](../../../web/packages/app/DESIGN.md#wcon-0014), [the current state after each action](../../../web/packages/app/DESIGN.md#wcon-0015) and [the result of a success in a toast](../../../web/packages/app/DESIGN.md#wcon-0016). The design system gives that [the UI never sends an action again by itself](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0301).
 
 - <a id="dh-1443"></a>**DH-1443** The console does these actions of the operator interface, with the same rules. ([Judgement: an operator interface for the customer data of the lab](operator-interface.md#dh-0770))
   - [create a customer](operator-interface.md#dh-0720)
@@ -22,7 +22,7 @@ The [console package](../../../web/packages/console/DESIGN.md) gives the refusal
 - <a id="dh-1452"></a>**DH-1452** Each create is a form on its own page, with its own URL. A URL of a form is never the URL of a record. ([Judgement: the same action and form rules in each console](#dh-1517))
 - <a id="dh-1453"></a>**DH-1453** Each create form obeys these rules. ([WCAG 2.2, SC 3.3.1][wcag-3-3-1]; [SC 3.3.2][wcag-3-3-2]; [SC 3.3.3][wcag-3-3-3]; [SC 2.4.3][wcag-2-4-3]; [GOV.UK Design System: Error summary][govuk-error-summary]; [GOV.UK Design System: Question pages][govuk-question-pages]; [Judgement: the same action and form rules in each console](#dh-1517))
   - Each field that the console API schema does not require is an [optional field](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0326).
-  - The console [removes the white space at the ends of each value](../../../web/packages/console/DESIGN.md#wcon-0008). It sends an optional field that has no value as no field.
+  - The console [removes the white space at the ends of each value](../../../web/packages/app/DESIGN.md#wcon-0008). It sends an optional field that has no value as no field.
   - The console does not check the values. The data holder checks each value.
   - When the data holder refuses the value of a field, the console shows the `detail` of the field error as the error message of that field.
   - After a refusal, the form shows the [error summary](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0327). The summary gives the `detail` of the problem. A refusal that names no field shows only in the summary.

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
 
 // The seed file of the lab (services/register/seed/example.json). The conformance suite does not change its status.
 const seeded = "Mock Budgeting Pty Ltd";

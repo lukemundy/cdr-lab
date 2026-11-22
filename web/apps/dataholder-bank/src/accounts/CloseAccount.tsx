@@ -1,4 +1,4 @@
-import { ProblemError } from "@cdr-lab/console/problem";
+import { ProblemError } from "@cdr-lab/app/problem";
 import { ConfirmationDialog } from "@cdr-lab/ui/confirmation-dialog";
 import { ConsumerButton } from "@cdr-lab/ui/consumer-page";
 import { useQueryClient } from "@tanstack/react-query";

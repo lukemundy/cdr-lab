@@ -1,4 +1,4 @@
-import { fieldErrorsType } from "@cdr-lab/console/problem";
+import { fieldErrorsType } from "@cdr-lab/app/problem";
 import { expectTypeOf, test } from "vitest";
 
 import { sessionEndedType } from "./client";

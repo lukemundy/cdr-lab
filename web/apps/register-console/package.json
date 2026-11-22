@@ -7,7 +7,7 @@
     "generate": "openapi-typescript ../../../services/register/internal/adapter/console/openapi.yaml --output src/api/schema.gen.ts"
   },
   "dependencies": {
-    "@cdr-lab/console": "workspace:*",
+    "@cdr-lab/app": "workspace:*",
     "@cdr-lab/ui": "workspace:*",
     "@tanstack/react-query": "5.107.1",
     "@tanstack/react-router": "1.170.46",

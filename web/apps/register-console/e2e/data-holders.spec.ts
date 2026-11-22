@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
 
 // The seed brand "Mock Mutual" is not in this legal entity name, so a match shows that the search includes brand names.
 const seeded = "Mock Holdings Ltd";

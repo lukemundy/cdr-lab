@@ -9,7 +9,7 @@ import {
   Trash2,
   type LucideIcon,
 } from "lucide-react";
-import { RecordActions, type ActionDialog } from "@cdr-lab/console/record-actions";
+import { RecordActions, type ActionDialog } from "@cdr-lab/app/record-actions";
 
 import {
   type DataHolderBrandStatusAction,

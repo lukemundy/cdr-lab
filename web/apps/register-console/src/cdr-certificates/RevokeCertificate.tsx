@@ -10,7 +10,7 @@ import { useToast } from "@cdr-lab/ui/toast";
 import { Ban } from "lucide-react";
 import { useId, useState, type FormEvent } from "react";
 
-import { ProblemError, refusalOf } from "@cdr-lab/console/problem";
+import { ProblemError, refusalOf } from "@cdr-lab/app/problem";
 
 import type {
   RevocableCertificate,

@@ -3,7 +3,7 @@ import { createHash, X509Certificate } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-import { expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
 import { showAllBrands } from "./lab";
 
 // Only this test changes this record of services/register/seed/example.json, and it removes the certificate again.

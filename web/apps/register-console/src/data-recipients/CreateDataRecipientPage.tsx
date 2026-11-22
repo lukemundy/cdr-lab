@@ -5,7 +5,7 @@ import { Link as RouterLink } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { createDataRecipient } from "../api/client";
-import { textOf } from "@cdr-lab/console/form-values";
+import { textOf } from "@cdr-lab/app/form-values";
 import { levels } from "./levels";
 import { statuses } from "./search";
 import { useSend } from "../use-change";

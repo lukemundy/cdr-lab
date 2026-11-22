@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { expectNoAxeViolations } from "@cdr-lab/console/e2e/checks";
+import { expectNoAxeViolations } from "@cdr-lab/app/e2e/checks";
 
 // A registration needs an SSA of the Register and a signed request, so this test uses the registrations that the
 // conformance suite makes (mise run conformance).

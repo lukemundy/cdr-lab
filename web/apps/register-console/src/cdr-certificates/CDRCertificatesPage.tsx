@@ -11,7 +11,7 @@ import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-quer
 import { getRouteApi } from "@tanstack/react-router";
 import { Download } from "lucide-react";
 
-import { pageSize, validatePageSearch } from "@cdr-lab/console/list-search";
+import { pageSize, validatePageSearch } from "@cdr-lab/app/list-search";
 
 import {
   checkRevocation,

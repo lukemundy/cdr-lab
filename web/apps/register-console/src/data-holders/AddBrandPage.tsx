@@ -7,7 +7,7 @@ import { getRouteApi, Link as RouterLink } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { addDataHolderBrand, getDataHolder, problemOf } from "../api/client";
-import { textOf } from "@cdr-lab/console/form-values";
+import { textOf } from "@cdr-lab/app/form-values";
 import { brandAndProductStatusOf, brandAndProductStatusOptions } from "../statuses";
 import { useSend } from "../use-change";
 import { BrandFields, brandDetailsOf } from "./BrandFields";
