@@ -156,25 +156,100 @@ func createdState(t *testing.T, sharingDuration time.Duration) domain.Arrangemen
 	return domain.ApplyArrangement(domain.ArrangementState{}, domain.ArrangementCreated{Arrangement: arrangement})
 }
 
-func end(at time.Time) domain.EndArrangement {
-	return domain.EndArrangement{EndedAt: at, Reason: domain.EndReasonRevokedByDataRecipient}
+func end(at time.Time) domain.RevokeArrangement {
+	return domain.RevokeArrangement{RevokedAt: at}
 }
 
-func TestAnArrangementEndsAtTheTimeAndForTheReasonOfTheCommand(t *testing.T) {
-	state := createdState(t, time.Hour)
-	endedAt := confirmedAt.Add(time.Minute)
+// endCause is one event of the end table, with the state that the event gives.
+type endCause struct {
+	command func(at time.Time) domain.ArrangementCommand
+	event   func(at time.Time) domain.ArrangementEvent
+	reason  domain.EndReason
+	method  domain.WithdrawalMethod
+	notice  domain.NoticeStatus
+}
 
-	events, err := domain.HandleArrangement(state, end(endedAt))
+func endCauses() map[string]endCause {
+	return map[string]endCause{
+		"revocation": {
+			command: func(at time.Time) domain.ArrangementCommand { return domain.RevokeArrangement{RevokedAt: at} },
+			event:   func(at time.Time) domain.ArrangementEvent { return domain.ArrangementRevoked{RevokedAt: at} },
+			reason:  domain.EndReasonRevokedByDataRecipient,
+		},
+		"withdrawal on the consumer dashboard": {
+			command: func(at time.Time) domain.ArrangementCommand {
+				return domain.WithdrawArrangement{WithdrawnAt: at, Method: domain.WithdrawalMethodConsumerDashboard}
+			},
+			event: func(at time.Time) domain.ArrangementEvent {
+				return domain.ArrangementWithdrawn{WithdrawnAt: at, Method: domain.WithdrawalMethodConsumerDashboard}
+			},
+			reason: domain.EndReasonWithdrawnByConsumer,
+			method: domain.WithdrawalMethodConsumerDashboard,
+			notice: domain.NoticePending,
+		},
+		"withdrawal by the alternative method": {
+			command: func(at time.Time) domain.ArrangementCommand { return withdraw(at) },
+			event: func(at time.Time) domain.ArrangementEvent {
+				return domain.ArrangementWithdrawn{WithdrawnAt: at, Method: domain.WithdrawalMethodAlternative}
+			},
+			reason: domain.EndReasonWithdrawnByConsumer,
+			method: domain.WithdrawalMethodAlternative,
+			notice: domain.NoticePending,
+		},
+		"ineligibility": {
+			command: func(at time.Time) domain.ArrangementCommand {
+				return domain.EndArrangementForIneligibility{EndedAt: at}
+			},
+			event: func(at time.Time) domain.ArrangementEvent {
+				return domain.ArrangementEndedForIneligibility{EndedAt: at}
+			},
+			reason: domain.EndReasonConsumerNotEligible,
+			notice: domain.NoticePending,
+		},
+		"removal": {
+			command: func(at time.Time) domain.ArrangementCommand {
+				return domain.EndArrangementForRemoval{EndedAt: at}
+			},
+			event: func(at time.Time) domain.ArrangementEvent {
+				return domain.ArrangementEndedForRemoval{EndedAt: at}
+			},
+			reason: domain.EndReasonSoftwareProductRemoved,
+		},
+		"deletion": {
+			command: func(at time.Time) domain.ArrangementCommand {
+				return domain.EndArrangementForDeletion{EndedAt: at}
+			},
+			event: func(at time.Time) domain.ArrangementEvent {
+				return domain.ArrangementEndedForDeletion{EndedAt: at}
+			},
+			reason: domain.EndReasonRevokedByDataRecipient,
+		},
+	}
+}
 
-	require.NoError(t, err)
-	assert.Equal(t, []domain.ArrangementEvent{domain.ArrangementEnded{
-		EndedAt: endedAt, Reason: domain.EndReasonRevokedByDataRecipient,
-	}}, events)
+// Verifies: DH-0900, DH-0902, DH-0903, DH-0904, DH-0905, DH-0909, DH-0917, DH-2618
+func TestEachCauseOfAnEndHasItsOwnEventAndGivesItsStateInUTC(t *testing.T) {
+	for name, cause := range endCauses() {
+		t.Run(name, func(t *testing.T) {
+			state := createdState(t, time.Hour)
+			endedAt := confirmedAt.Add(time.Minute)
 
-	ended := domain.ApplyArrangement(state, events[0])
-	assert.True(t, ended.Ended(endedAt))
-	assert.Equal(t, endedAt, ended.EndedAt)
-	assert.Equal(t, domain.EndReasonRevokedByDataRecipient, ended.EndReason)
+			events, err := domain.HandleArrangement(
+				state, cause.command(endedAt.In(time.FixedZone("AWST", 8*60*60))),
+			)
+
+			require.NoError(t, err)
+			assert.Equal(t, []domain.ArrangementEvent{cause.event(endedAt)}, events, "the event has the time in UTC")
+
+			ended := domain.ApplyArrangement(state, events[0])
+			assert.True(t, ended.Ended(endedAt))
+			assert.Equal(t, endedAt, ended.EndedAt)
+			assert.Equal(t, endedAt, ended.EndsAt())
+			assert.Equal(t, cause.reason, ended.EndReason)
+			assert.Equal(t, cause.method, ended.WithdrawalMethod)
+			assert.Equal(t, cause.notice, ended.NoticeStatus())
+		})
+	}
 }
 
 // Verifies: DH-0834, DH-0901
@@ -208,46 +283,35 @@ func TestAnArrangementWithNoSharingDurationCanEndBeforeItsAccessTokenExpires(t *
 	assert.Equal(t, endedAt, domain.ApplyArrangement(state, events[0]).EndsAt())
 }
 
-func TestAnArrangementEndsAtItsEndOrElseAtTheEndOfItsSharing(t *testing.T) {
-	state := createdState(t, time.Hour)
-	assert.Equal(t, confirmedAt.Add(time.Hour), state.EndsAt())
-
-	endedAt := confirmedAt.Add(time.Minute)
-	events, err := domain.HandleArrangement(state, end(endedAt))
-	require.NoError(t, err)
-
-	assert.Equal(t, endedAt, domain.ApplyArrangement(state, events[0]).EndsAt())
+func TestAnArrangementThatDidNotEndEndsAtTheEndOfItsSharing(t *testing.T) {
+	assert.Equal(t, confirmedAt.Add(time.Hour), createdState(t, time.Hour).EndsAt())
 }
 
 // Verifies: DH-0907
-func TestAnArrangementThatEndedDoesNotEndAgain(t *testing.T) {
+func TestAnArrangementThatEndedDoesNotEndAgainForAnyCause(t *testing.T) {
 	state := createdState(t, time.Hour)
-	events, err := domain.HandleArrangement(state, end(confirmedAt.Add(time.Minute)))
-	require.NoError(t, err)
 
-	ended := domain.ApplyArrangement(state, events[0])
+	for firstName, first := range endCauses() {
+		ended := domain.ApplyArrangement(state, first.event(confirmedAt.Add(time.Minute)))
 
-	_, err = domain.HandleArrangement(ended, end(confirmedAt.Add(2*time.Minute)))
-	require.ErrorIs(t, err, domain.ErrArrangementEnded)
+		for secondName, second := range endCauses() {
+			_, err := domain.HandleArrangement(ended, second.command(confirmedAt.Add(2*time.Minute)))
+			require.ErrorIs(t, err, domain.ErrArrangementEnded, "%s after %s", secondName, firstName)
+		}
+	}
 
-	_, err = domain.HandleArrangement(state, end(confirmedAt.Add(time.Hour)))
-	require.ErrorIs(t, err, domain.ErrArrangementEnded, "the sharing ended")
+	for name, cause := range endCauses() {
+		_, err := domain.HandleArrangement(state, cause.command(confirmedAt.Add(time.Hour)))
+		require.ErrorIs(t, err, domain.ErrArrangementEnded, "%s after the end of the sharing", name)
+	}
 }
 
 func TestAnArrangementThatDoesNotExistCannotEnd(t *testing.T) {
-	_, err := domain.HandleArrangement(domain.ArrangementState{}, end(confirmedAt))
+	for name, cause := range endCauses() {
+		_, err := domain.HandleArrangement(domain.ArrangementState{}, cause.command(confirmedAt))
 
-	require.ErrorIs(t, err, domain.ErrArrangementNotFound)
-}
-
-func TestAnArrangementEndHasItsTimeInUTC(t *testing.T) {
-	events, err := domain.HandleArrangement(
-		createdState(t, time.Hour),
-		end(confirmedAt.In(time.FixedZone("AWST", 8*60*60))),
-	)
-
-	require.NoError(t, err)
-	assert.Equal(t, time.UTC, events[0].(domain.ArrangementEnded).EndedAt.Location())
+		require.ErrorIs(t, err, domain.ErrArrangementNotFound, name)
+	}
 }
 
 func withdraw(at time.Time) domain.WithdrawArrangement {
@@ -255,75 +319,19 @@ func withdraw(at time.Time) domain.WithdrawArrangement {
 }
 
 // Verifies: DH-0917
-func TestAWithdrawalEndsTheArrangementAndRecordsItsMethod(t *testing.T) {
-	for _, method := range []domain.WithdrawalMethod{
-		domain.WithdrawalMethodConsumerDashboard, domain.WithdrawalMethodAlternative,
-	} {
-		t.Run(string(method), func(t *testing.T) {
-			state := createdState(t, time.Hour)
-			withdrawnAt := confirmedAt.Add(time.Minute).In(time.FixedZone("AWST", 8*60*60))
-
-			events, err := domain.HandleArrangement(
-				state,
-				domain.WithdrawArrangement{WithdrawnAt: withdrawnAt, Method: method},
-			)
-
-			require.NoError(t, err)
-			assert.Equal(t, []domain.ArrangementEvent{domain.ArrangementWithdrawn{
-				WithdrawnAt: withdrawnAt.UTC(), Method: method,
-			}}, events)
-
-			withdrawn := domain.ApplyArrangement(state, events[0])
-			assert.True(t, withdrawn.Ended(withdrawnAt))
-			assert.Equal(t, withdrawnAt.UTC(), withdrawn.EndedAt)
-			assert.Equal(t, domain.EndReasonWithdrawnByConsumer, withdrawn.EndReason)
-			assert.Equal(t, method, withdrawn.WithdrawalMethod())
-		})
-	}
-}
-
-func TestAWithdrawalHasTheRulesOfAnEndAndNeedsAKnownMethod(t *testing.T) {
-	state := createdState(t, time.Hour)
-
-	_, err := domain.HandleArrangement(domain.ArrangementState{}, withdraw(confirmedAt))
-	require.ErrorIs(t, err, domain.ErrArrangementNotFound)
-
-	_, err = domain.HandleArrangement(state, withdraw(confirmedAt.Add(time.Hour)))
-	require.ErrorIs(t, err, domain.ErrArrangementEnded, "the sharing ended")
-
-	events, err := domain.HandleArrangement(state, end(confirmedAt.Add(time.Minute)))
-	require.NoError(t, err)
-	_, err = domain.HandleArrangement(domain.ApplyArrangement(state, events[0]), withdraw(confirmedAt.Add(time.Minute)))
-	require.ErrorIs(t, err, domain.ErrArrangementEnded)
-
+func TestAWithdrawalNeedsAKnownMethod(t *testing.T) {
 	for _, method := range []domain.WithdrawalMethod{"", "EMAIL"} {
-		_, err = domain.HandleArrangement(
-			state,
+		_, err := domain.HandleArrangement(
+			createdState(t, time.Hour),
 			domain.WithdrawArrangement{WithdrawnAt: confirmedAt.Add(time.Minute), Method: method},
 		)
 		require.ErrorIs(t, err, domain.ErrUnknownWithdrawalMethod, "method %q", method)
 	}
 }
 
-// Each withdrawal before the record of the method was through the operator interface.
-func TestAWithdrawalBeforeTheRecordOfTheMethodHasTheAlternativeMethod(t *testing.T) {
-	withdrawn := domain.ApplyArrangement(createdState(t, time.Hour), domain.ArrangementEnded{
-		EndedAt: confirmedAt.Add(time.Minute), Reason: domain.EndReasonWithdrawnByConsumer,
-	})
+func TestAnArrangementThatDidNotEndHasNoEndReasonOrWithdrawalMethod(t *testing.T) {
+	state := createdState(t, time.Hour)
 
-	assert.Equal(t, domain.WithdrawalMethodAlternative, withdrawn.WithdrawalMethod())
-}
-
-func TestOnlyAWithdrawalHasAMethod(t *testing.T) {
-	assert.Empty(t, createdState(t, time.Hour).WithdrawalMethod())
-
-	for _, reason := range []domain.EndReason{
-		domain.EndReasonRevokedByDataRecipient, domain.EndReasonConsumerNotEligible,
-		domain.EndReasonSoftwareProductRemoved,
-	} {
-		ended := domain.ApplyArrangement(createdState(t, time.Hour), domain.ArrangementEnded{
-			EndedAt: confirmedAt.Add(time.Minute), Reason: reason,
-		})
-		assert.Empty(t, ended.WithdrawalMethod(), reason)
-	}
+	assert.Empty(t, state.EndReason)
+	assert.Empty(t, state.WithdrawalMethod)
 }

@@ -42,7 +42,7 @@ func (a Arrangements) RevokeByDataRecipient(ctx context.Context, clientID, arran
 		return ErrInvalidArrangement
 	}
 
-	_, err = a.end(ctx, state, domain.EndArrangement{EndedAt: now, Reason: domain.EndReasonRevokedByDataRecipient})
+	_, err = a.end(ctx, state, domain.RevokeArrangement{RevokedAt: now})
 	if errors.Is(err, domain.ErrArrangementEnded) {
 		return ErrInvalidArrangement
 	}
@@ -66,7 +66,7 @@ func (a Arrangements) EndOneTimeCollection(ctx context.Context, clientID, arrang
 		return nil
 	}
 
-	_, err = a.end(ctx, state, domain.EndArrangement{EndedAt: now, Reason: domain.EndReasonRevokedByDataRecipient})
+	_, err = a.end(ctx, state, domain.RevokeArrangement{RevokedAt: now})
 	if errors.Is(err, domain.ErrArrangementEnded) {
 		return nil
 	}
@@ -130,7 +130,7 @@ func (a Arrangements) EndForIneligibleCustomer(ctx context.Context, customerNumb
 		_, err := a.end(
 			ctx,
 			state,
-			domain.EndArrangement{EndedAt: closedAt, Reason: domain.EndReasonConsumerNotEligible},
+			domain.EndArrangementForIneligibility{EndedAt: closedAt},
 		)
 		if err != nil && !errors.Is(err, domain.ErrArrangementEnded) {
 			errs = append(errs, err)
@@ -155,7 +155,7 @@ func (a Arrangements) RemoveSoftwareProduct(ctx context.Context, softwareID stri
 		_, err := a.end(
 			ctx,
 			state,
-			domain.EndArrangement{EndedAt: removedAt, Reason: domain.EndReasonSoftwareProductRemoved},
+			domain.EndArrangementForRemoval{EndedAt: removedAt},
 		)
 		if err != nil && !errors.Is(err, domain.ErrArrangementEnded) {
 			return err
@@ -201,7 +201,7 @@ func (a Arrangements) EndForDeletedRegistration(
 		_, err := a.end(
 			ctx,
 			state,
-			domain.EndArrangement{EndedAt: deletedAt, Reason: domain.EndReasonRevokedByDataRecipient},
+			domain.EndArrangementForDeletion{EndedAt: deletedAt},
 		)
 		if err != nil && !errors.Is(err, domain.ErrArrangementEnded) {
 			return err

@@ -11,13 +11,11 @@ import (
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/domain"
 )
 
-func endedState(t *testing.T, reason domain.EndReason) domain.ArrangementState {
+func endedState(t *testing.T, command domain.ArrangementCommand) domain.ArrangementState {
 	t.Helper()
 
 	state := createdState(t, time.Hour)
-	events, err := domain.HandleArrangement(state, domain.EndArrangement{
-		EndedAt: confirmedAt.Add(time.Minute), Reason: reason,
-	})
+	events, err := domain.HandleArrangement(state, command)
 	require.NoError(t, err)
 
 	return domain.ApplyArrangement(state, events[0])
@@ -46,15 +44,15 @@ func apply(t *testing.T, state domain.ArrangementState, command domain.Arrangeme
 }
 
 func TestOnlyAnEndThatNeedsANoticeHasANoticeStatus(t *testing.T) {
-	assert.Equal(t, domain.NoticePending, endedState(t, domain.EndReasonWithdrawnByConsumer).NoticeStatus())
-	assert.Equal(t, domain.NoticePending, endedState(t, domain.EndReasonConsumerNotEligible).NoticeStatus())
-	assert.Empty(t, endedState(t, domain.EndReasonRevokedByDataRecipient).NoticeStatus())
-	assert.Empty(t, endedState(t, domain.EndReasonSoftwareProductRemoved).NoticeStatus())
+	for name, cause := range endCauses() {
+		assert.Equal(t, cause.notice, endedState(t, cause.command(confirmedAt.Add(time.Minute))).NoticeStatus(), name)
+	}
+
 	assert.Empty(t, createdState(t, time.Hour).NoticeStatus())
 }
 
 func TestAnAttemptThatLeavesTheNoticePendingIsRecorded(t *testing.T) {
-	state := endedState(t, domain.EndReasonWithdrawnByConsumer)
+	state := endedState(t, withdraw(confirmedAt.Add(time.Minute)))
 
 	events, err := domain.HandleArrangement(state, domain.RecordNoticeAttempt{Attempt: firstAttempt})
 
@@ -67,7 +65,7 @@ func TestAnAttemptThatLeavesTheNoticePendingIsRecorded(t *testing.T) {
 }
 
 func TestARecordedNoticeHasItsStatusAndEachAttempt(t *testing.T) {
-	state := apply(t, endedState(t, domain.EndReasonWithdrawnByConsumer),
+	state := apply(t, endedState(t, withdraw(confirmedAt.Add(time.Minute))),
 		domain.RecordNoticeAttempt{Attempt: firstAttempt})
 
 	events, err := domain.HandleArrangement(state, recordNotice(domain.NoticeComplete))
@@ -84,7 +82,7 @@ func TestARecordedNoticeHasItsStatusAndEachAttempt(t *testing.T) {
 }
 
 func TestTheAttemptsOfANoticeRecordedWithNoEarlierEventAreThoseOfTheRecord(t *testing.T) {
-	state := domain.ApplyArrangement(endedState(t, domain.EndReasonWithdrawnByConsumer), domain.NoticeRecorded{
+	state := domain.ApplyArrangement(endedState(t, withdraw(confirmedAt.Add(time.Minute))), domain.NoticeRecorded{
 		Status: domain.NoticeFailed, Attempts: []domain.NoticeAttempt{firstAttempt},
 	})
 
@@ -92,13 +90,13 @@ func TestTheAttemptsOfANoticeRecordedWithNoEarlierEventAreThoseOfTheRecord(t *te
 }
 
 func TestANoticeAndItsAttemptsAreRecordedOnlyWhenItIsPending(t *testing.T) {
-	pending := endedState(t, domain.EndReasonWithdrawnByConsumer)
+	pending := endedState(t, withdraw(confirmedAt.Add(time.Minute)))
 	events, err := domain.HandleArrangement(pending, recordNotice(domain.NoticeFailed))
 	require.NoError(t, err)
 
 	tests := map[string]domain.ArrangementState{
 		"notice recorded":     domain.ApplyArrangement(pending, events[0]),
-		"end with no notice":  endedState(t, domain.EndReasonRevokedByDataRecipient),
+		"end with no notice":  endedState(t, end(confirmedAt.Add(time.Minute))),
 		"arrangement not end": createdState(t, time.Hour),
 	}
 	for name, state := range tests {
@@ -114,7 +112,7 @@ func TestANoticeAndItsAttemptsAreRecordedOnlyWhenItIsPending(t *testing.T) {
 
 func TestANoticeIsRecordedOnlyAsCompleteOrFailed(t *testing.T) {
 	_, err := domain.HandleArrangement(
-		endedState(t, domain.EndReasonWithdrawnByConsumer), recordNotice(domain.NoticePending),
+		endedState(t, withdraw(confirmedAt.Add(time.Minute))), recordNotice(domain.NoticePending),
 	)
 
 	require.Error(t, err)

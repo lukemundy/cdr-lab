@@ -204,7 +204,7 @@ func arrangementOf(detail app.ArrangementDetail, now time.Time) arrangement {
 		SharingEndsAt:    a.SharingEndsAt().UTC(),
 		Status:           statusOf(state, now),
 		EndReason:        state.EndReason,
-		WithdrawalMethod: state.WithdrawalMethod(),
+		WithdrawalMethod: state.WithdrawalMethod,
 		NoticeStatus:     state.NoticeStatus(),
 	}
 

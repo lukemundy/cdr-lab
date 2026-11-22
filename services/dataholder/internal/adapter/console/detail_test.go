@@ -114,8 +114,8 @@ func TestTheDetailOfACustomerGivesTheCustomerEachAccountWithItsBalancesAndEachAr
 		ConfirmedAt: now.Add(-time.Hour), SharingDurationSeconds: 86_400,
 	})
 	// A withdrawal before the data holder recorded the method.
-	require.NoError(t, app.ArrangementType.Execute(t.Context(), r.events, "arrangement-2", domain.EndArrangement{
-		EndedAt: now.Add(-time.Minute), Reason: domain.EndReasonWithdrawnByConsumer,
+	require.NoError(t, app.ArrangementType.Execute(t.Context(), r.events, "arrangement-2", domain.WithdrawArrangement{
+		WithdrawnAt: now.Add(-time.Minute), Method: domain.WithdrawalMethodAlternative,
 	}))
 
 	resp := get(t, r.ports, "/api/customers/00000001")
@@ -174,7 +174,7 @@ func TestAnArrangementWithANoticeGivesEachAttemptOfTheNotice(t *testing.T) {
 	at := func(seconds int) time.Time {
 		return now.Add(-time.Hour + time.Duration(seconds)*time.Second).In(time.FixedZone("UTC+8", 8*3600))
 	}
-	withdraw := domain.EndArrangement{EndedAt: now.Add(-time.Hour), Reason: domain.EndReasonWithdrawnByConsumer}
+	withdraw := domain.WithdrawArrangement{WithdrawnAt: now.Add(-time.Hour), Method: domain.WithdrawalMethodAlternative}
 
 	execute("arrangement-pending", withdraw)
 	execute("arrangement-pending", domain.RecordNoticeAttempt{
@@ -191,9 +191,7 @@ func TestAnArrangementWithANoticeGivesEachAttemptOfTheNotice(t *testing.T) {
 		RecordedAt: at(71), Status: domain.NoticeFailed,
 		Attempt: domain.NoticeAttempt{Attempt: 3, At: at(71), Result: "tls error"},
 	})
-	execute("arrangement-revoked", domain.EndArrangement{
-		EndedAt: now.Add(-time.Hour), Reason: domain.EndReasonRevokedByDataRecipient,
-	})
+	execute("arrangement-revoked", domain.RevokeArrangement{RevokedAt: now.Add(-time.Hour)})
 
 	resp := get(t, r.ports, "/api/customers/00000001")
 

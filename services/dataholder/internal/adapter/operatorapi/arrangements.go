@@ -45,7 +45,7 @@ func arrangementView(state domain.ArrangementState) arrangementJSON {
 		ConfirmedAt:      a.ConfirmedAt,
 		SharingEndsAt:    a.SharingEndsAt(),
 		EndReason:        string(state.EndReason),
-		WithdrawalMethod: string(state.WithdrawalMethod()),
+		WithdrawalMethod: string(state.WithdrawalMethod),
 		NoticeStatus:     string(state.NoticeStatus()),
 	}
 

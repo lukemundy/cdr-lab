@@ -35,7 +35,7 @@ func project(ctx context.Context, tx pgx.Tx, arrangementID string, recorded []ev
 	}
 
 	stored := stateJSON{
-		Arrangement: state.Arrangement, EndReason: state.EndReason, WithdrawalMethod: state.RecordedWithdrawalMethod,
+		Arrangement: state.Arrangement, EndReason: state.EndReason, WithdrawalMethod: state.WithdrawalMethod,
 		RecordedNotice: state.RecordedNotice, NoticeAttempts: state.NoticeAttempts,
 	}
 	if !state.EndedAt.IsZero() {
@@ -52,7 +52,7 @@ func project(ctx context.Context, tx pgx.Tx, arrangementID string, recorded []ev
 			client_name = excluded.client_name, sharing_ends_at = excluded.sharing_ends_at, ends_at = excluded.ends_at,
 			end_reason = excluded.end_reason, withdrawal_method = excluded.withdrawal_method, state = excluded.state`,
 		arrangementID, a.CustomerNumber, a.ClientID, a.SoftwareID, a.ClientName, a.ConfirmedAt, a.SharingEndsAt(),
-		state.EndsAt(), state.EndReason, state.WithdrawalMethod(), stored,
+		state.EndsAt(), state.EndReason, state.WithdrawalMethod, stored,
 	); err != nil {
 		return err
 	}
@@ -147,12 +147,12 @@ func (q Queries) states(ctx context.Context, query string, arg string) ([]domain
 
 func (stored stateJSON) state() domain.ArrangementState {
 	state := domain.ArrangementState{
-		Created:                  true,
-		Arrangement:              stored.Arrangement,
-		EndReason:                stored.EndReason,
-		RecordedWithdrawalMethod: stored.WithdrawalMethod,
-		RecordedNotice:           stored.RecordedNotice,
-		NoticeAttempts:           stored.NoticeAttempts,
+		Created:          true,
+		Arrangement:      stored.Arrangement,
+		EndReason:        stored.EndReason,
+		WithdrawalMethod: stored.WithdrawalMethod,
+		RecordedNotice:   stored.RecordedNotice,
+		NoticeAttempts:   stored.NoticeAttempts,
 	}
 	if stored.EndedAt != nil {
 		state.EndedAt = *stored.EndedAt

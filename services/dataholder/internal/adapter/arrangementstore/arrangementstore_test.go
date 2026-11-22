@@ -75,8 +75,8 @@ func TestTheReadModelHasTheEndOfAnArrangement(t *testing.T) {
 	store := eventstore.New(pool, arrangementstore.Projections()...)
 	create(t, store, arrangement("arrangement-1", "00000001", confirmedAt))
 	endedAt := confirmedAt.Add(time.Minute + time.Nanosecond)
-	require.NoError(t, app.ArrangementType.Execute(t.Context(), store, "arrangement-1", domain.EndArrangement{
-		EndedAt: endedAt, Reason: domain.EndReasonWithdrawnByConsumer,
+	require.NoError(t, app.ArrangementType.Execute(t.Context(), store, "arrangement-1", domain.WithdrawArrangement{
+		WithdrawnAt: endedAt, Method: domain.WithdrawalMethodAlternative,
 	}))
 
 	got, err := arrangementstore.NewQueries(pool).ArrangementsOf(t.Context(), "00000001")
@@ -100,7 +100,7 @@ func TestTheReadModelHasTheMethodOfAWithdrawal(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, got, 1)
 	assert.Equal(t, domain.EndReasonWithdrawnByConsumer, got[0].EndReason)
-	assert.Equal(t, domain.WithdrawalMethodAlternative, got[0].RecordedWithdrawalMethod)
+	assert.Equal(t, domain.WithdrawalMethodAlternative, got[0].WithdrawalMethod)
 }
 
 func TestACustomerWithNoArrangementHasAnEmptyList(t *testing.T) {
@@ -126,8 +126,8 @@ func TestTheReadModelHasTheOutcomeOfTheNoticeAndEachAttempt(t *testing.T) {
 	pool := newPool(t)
 	store := eventstore.New(pool, arrangementstore.Projections()...)
 	create(t, store, arrangement("arrangement-1", "00000001", confirmedAt))
-	require.NoError(t, app.ArrangementType.Execute(t.Context(), store, "arrangement-1", domain.EndArrangement{
-		EndedAt: confirmedAt.Add(time.Minute), Reason: domain.EndReasonWithdrawnByConsumer,
+	require.NoError(t, app.ArrangementType.Execute(t.Context(), store, "arrangement-1", domain.WithdrawArrangement{
+		WithdrawnAt: confirmedAt.Add(time.Minute), Method: domain.WithdrawalMethodAlternative,
 	}))
 	first := domain.NoticeAttempt{Attempt: 1, At: confirmedAt.Add(time.Minute + time.Nanosecond), Result: "timeout"}
 	last := domain.NoticeAttempt{Attempt: 2, At: confirmedAt.Add(2 * time.Minute), Result: "status 400"}
@@ -226,8 +226,8 @@ func TestTheArrangementPageOfAClientGivesTheEndOfAnArrangement(t *testing.T) {
 	create(t, store, a)
 
 	endedAt := confirmedAt.Add(time.Minute)
-	require.NoError(t, app.ArrangementType.Execute(t.Context(), store, a.ArrangementID, domain.EndArrangement{
-		EndedAt: endedAt, Reason: domain.EndReasonWithdrawnByConsumer,
+	require.NoError(t, app.ArrangementType.Execute(t.Context(), store, a.ArrangementID, domain.WithdrawArrangement{
+		WithdrawnAt: endedAt, Method: domain.WithdrawalMethodAlternative,
 	}))
 
 	page, _, err := arrangementstore.NewQueries(pool).ArrangementPageOfClient(t.Context(), "client-1", 1, 25)

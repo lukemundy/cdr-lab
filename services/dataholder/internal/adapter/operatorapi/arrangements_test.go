@@ -49,6 +49,7 @@ func activeArrangement() domain.ArrangementState {
 func withdrawnArrangement() domain.ArrangementState {
 	state := activeArrangement()
 	state.EndedAt, state.EndReason = confirmedAt.Add(30*time.Minute), domain.EndReasonWithdrawnByConsumer
+	state.WithdrawalMethod = domain.WithdrawalMethodAlternative
 
 	return state
 }

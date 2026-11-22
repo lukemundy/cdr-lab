@@ -177,8 +177,8 @@ func TestTheCountsHaveOnlyTheOpenAccountsAndTheArrangementsThatDidNotEnd(t *test
 	arrangementOf(t, events, "current", "00000001", pageTime.Add(-time.Minute))
 	arrangementOf(t, events, "expired", "00000001", pageTime.Add(-time.Hour))
 	arrangementOf(t, events, "withdrawn", "00000001", pageTime.Add(-time.Minute))
-	require.NoError(t, app.ArrangementType.Execute(t.Context(), events, "withdrawn", domain.EndArrangement{
-		EndedAt: pageTime.Add(-time.Second), Reason: domain.EndReasonWithdrawnByConsumer,
+	require.NoError(t, app.ArrangementType.Execute(t.Context(), events, "withdrawn", domain.WithdrawArrangement{
+		WithdrawnAt: pageTime.Add(-time.Second), Method: domain.WithdrawalMethodAlternative,
 	}))
 	arrangementOf(t, events, "other", "00000002", pageTime.Add(-time.Minute))
 
@@ -220,8 +220,8 @@ func TestTheCustomersSortByTheCountsAndThenByTheCustomerNumber(t *testing.T) {
 	// The arrangements of 00000001 ended: the first at the end of its sharing, and the second with an end event.
 	arrangementOf(t, events, "expired", "00000001", pageTime.Add(-time.Hour))
 	arrangementOf(t, events, "withdrawn", "00000001", pageTime.Add(-time.Minute))
-	require.NoError(t, app.ArrangementType.Execute(t.Context(), events, "withdrawn", domain.EndArrangement{
-		EndedAt: pageTime.Add(-time.Second), Reason: domain.EndReasonWithdrawnByConsumer,
+	require.NoError(t, app.ArrangementType.Execute(t.Context(), events, "withdrawn", domain.WithdrawArrangement{
+		WithdrawnAt: pageTime.Add(-time.Second), Method: domain.WithdrawalMethodAlternative,
 	}))
 	arrangementOf(t, events, "current-2", "00000002", pageTime.Add(-time.Minute))
 	arrangementOf(t, events, "current-3a", "00000003", pageTime.Add(-time.Minute))

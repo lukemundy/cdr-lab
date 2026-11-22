@@ -232,8 +232,8 @@ func TestARegistrationHasTheNumberOfAllTheArrangementsOfItsClientAndOfTheArrange
 
 	createArrangement(t, store, arrangement("current", "client-1", at.Add(-time.Hour), 24*time.Hour))
 	createArrangement(t, store, arrangement("ended", "client-1", at.Add(-time.Hour), 24*time.Hour))
-	require.NoError(t, app.ArrangementType.Execute(t.Context(), store, "ended", domain.EndArrangement{
-		EndedAt: at.Add(-time.Minute), Reason: domain.EndReasonWithdrawnByConsumer,
+	require.NoError(t, app.ArrangementType.Execute(t.Context(), store, "ended", domain.WithdrawArrangement{
+		WithdrawnAt: at.Add(-time.Minute), Method: domain.WithdrawalMethodAlternative,
 	}))
 	// The sharing ends at the time of the request, so the arrangement ended with no event.
 	createArrangement(t, store, arrangement("expired", "client-1", at.Add(-time.Hour), time.Hour))
