@@ -119,7 +119,7 @@ func TestTheDashboardShowsTheDisclosuresOfAConsentAndAWithdrawalOnTheDashboardSt
 	assert.Equal(t, domain.EndReasonWithdrawnByConsumer, state.EndReason)
 	assert.True(t, lab.now.Add(3*time.Hour).Equal(state.EndedAt), "the end is at the time of the request: %s",
 		state.EndedAt)
-	assert.Equal(t, domain.WithdrawalMethodConsumerDashboard, state.WithdrawalMethod())
+	assert.Equal(t, domain.WithdrawalMethodConsumerDashboard, state.WithdrawalMethod)
 	assert.Equal(t, domain.NoticePending, state.NoticeStatus())
 	assert.Equal(t, map[string]string{"arrangement-1": "CONSUMER_DASHBOARD"}, lab.operatorWithdrawalMethods(t))
 

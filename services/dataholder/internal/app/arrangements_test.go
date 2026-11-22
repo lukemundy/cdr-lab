@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/lukemundy/cdr-lab/pkg/eventsourcing"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/app"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/domain"
 )
@@ -259,32 +258,32 @@ func TestAWithdrawalByTheConsumerEndsTheArrangementWithTheMethodOfTheAdapterAndR
 			assert.Equal(t, arrangementState(t, store), withdrawn)
 			assert.Equal(t, now, withdrawn.EndedAt)
 			assert.Equal(t, domain.EndReasonWithdrawnByConsumer, withdrawn.EndReason)
-			assert.Equal(t, method, withdrawn.RecordedWithdrawalMethod)
+			assert.Equal(t, method, withdrawn.WithdrawalMethod)
 		})
 	}
 }
 
-// The stored events of a withdrawal before the record of the method.
-func TestAStoredWithdrawalWithNoMethodHasTheAlternativeMethod(t *testing.T) {
-	recorded := []eventsourcing.RecordedEvent{
-		{
-			EventType: "ArrangementCreated", SchemaVersion: 1, StreamVersion: 1,
-			Payload: []byte(`{"arrangement": {"arrangementId": "arrangement-1", "customerNumber": "00000001",
-				"clientId": "client-1", "softwareId": "software-1", "clientName": "Recipient Web",
-				"recipientBaseUri": "https://recipient.example", "scopes": ["openid"], "accountIds": [],
-				"confirmedAt": "2026-10-17T01:00:00Z", "sharingDurationSeconds": 3600}}`),
+func TestEachEndOfAnArrangementIsStoredAsItsOwnEventType(t *testing.T) {
+	at := consentTime.Add(time.Minute)
+	events := map[string]domain.ArrangementEvent{
+		"ArrangementRevoked": domain.ArrangementRevoked{RevokedAt: at},
+		"ArrangementWithdrawn": domain.ArrangementWithdrawn{
+			WithdrawnAt: at, Method: domain.WithdrawalMethodConsumerDashboard,
 		},
-		{
-			EventType: "ArrangementEnded", SchemaVersion: 1, StreamVersion: 2,
-			Payload: []byte(`{"endedAt": "2026-10-17T01:30:00Z", "reason": "WITHDRAWN_BY_CONSUMER"}`),
-		},
+		"ArrangementEndedForIneligibility": domain.ArrangementEndedForIneligibility{EndedAt: at},
+		"ArrangementEndedForRemoval":       domain.ArrangementEndedForRemoval{EndedAt: at},
+		"ArrangementEndedForDeletion":      domain.ArrangementEndedForDeletion{EndedAt: at},
 	}
 
-	state, _, err := app.ArrangementType.Fold("arrangement-1", recorded)
+	for eventType, event := range events {
+		data, err := app.ArrangementType.Codec.Encode(event)
+		require.NoError(t, err)
+		assert.Equal(t, eventType, data.EventType)
 
-	require.NoError(t, err)
-	assert.Equal(t, domain.EndReasonWithdrawnByConsumer, state.EndReason)
-	assert.Equal(t, domain.WithdrawalMethodAlternative, state.WithdrawalMethod())
+		decoded, err := app.ArrangementType.Codec.Decode(data)
+		require.NoError(t, err)
+		assert.Equal(t, event, decoded)
+	}
 }
 
 func TestAWithdrawalThatTheOperatorCannotMakeGivesItsErrorAndChangesNothing(t *testing.T) {
@@ -392,8 +391,8 @@ func TestTheEndForACustomerWhoIsNotEligibleEndsEachArrangementThatDidNotEndAtThe
 	addArrangement(t, store, "arrangement-2", consentCustomer, "client-2")
 	addArrangement(t, store, "arrangement-3", consentCustomer, "client-1")
 	addArrangement(t, store, "arrangement-4", "00000002", "client-1")
-	require.NoError(t, app.ArrangementType.Execute(t.Context(), store, "arrangement-3", domain.EndArrangement{
-		EndedAt: consentTime.Add(time.Minute), Reason: domain.EndReasonWithdrawnByConsumer,
+	require.NoError(t, app.ArrangementType.Execute(t.Context(), store, "arrangement-3", domain.WithdrawArrangement{
+		WithdrawnAt: consentTime.Add(time.Minute), Method: domain.WithdrawalMethodAlternative,
 	}))
 
 	require.NoError(t, arrangements.EndForIneligibleCustomer(t.Context(), consentCustomer, closedAt))
@@ -509,8 +508,8 @@ func TestTheEndForADeletedRegistrationEndsEachCurrentArrangementOfTheClientAsARe
 	}
 	ofSoftwareProduct("arrangement-2", "client-1")
 	ofSoftwareProduct("arrangement-3", "client-0")
-	require.NoError(t, app.ArrangementType.Execute(t.Context(), store, "arrangement-2", domain.EndArrangement{
-		EndedAt: consentTime.Add(time.Minute), Reason: domain.EndReasonWithdrawnByConsumer,
+	require.NoError(t, app.ArrangementType.Execute(t.Context(), store, "arrangement-2", domain.WithdrawArrangement{
+		WithdrawnAt: consentTime.Add(time.Minute), Method: domain.WithdrawalMethodAlternative,
 	}))
 
 	require.NoError(t, arrangements.EndForDeletedRegistration(t.Context(), "software-1", "client-1", deletedAt))

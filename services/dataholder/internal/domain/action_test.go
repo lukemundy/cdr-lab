@@ -19,7 +19,7 @@ func currentState(t *testing.T, id string) domain.ArrangementState {
 }
 
 func TestALossOfEligibilityEndsEachArrangementThatDidNotEnd(t *testing.T) {
-	current, ended := currentState(t, "current"), endedState(t, domain.EndReasonWithdrawnByConsumer)
+	current, ended := currentState(t, "current"), endedState(t, withdraw(confirmedAt.Add(time.Minute)))
 	ended.Arrangement.ArrangementID = "ended"
 	expired := currentState(t, "expired")
 	expired.Arrangement.SharingDurationSeconds = 60
@@ -60,7 +60,7 @@ func TestTheCloseOfTheLastOpenAccountEndsEachArrangementThatDidNotEndAndAClosedA
 		{AccountID: "closed", OpenStatus: domain.OpenStatusClosed},
 		{AccountID: "last", OpenStatus: domain.OpenStatusOpen},
 	}
-	current, ended := currentState(t, "current"), endedState(t, domain.EndReasonWithdrawnByConsumer)
+	current, ended := currentState(t, "current"), endedState(t, withdraw(confirmedAt.Add(time.Minute)))
 
 	actions := domain.PermittedAccountActions(accounts, []domain.ArrangementState{current, ended}, confirmedAt)
 
@@ -75,7 +75,7 @@ func TestTheCloseOfTheLastOpenAccountEndsEachArrangementThatDidNotEndAndAClosedA
 
 func TestEachArrangementThatDidNotEndHasAWithdrawThatEndsOnlyThatArrangement(t *testing.T) {
 	current := currentState(t, "current")
-	ended := endedState(t, domain.EndReasonWithdrawnByConsumer)
+	ended := endedState(t, withdraw(confirmedAt.Add(time.Minute)))
 	ended.Arrangement.ArrangementID = "ended"
 	expired := currentState(t, "expired")
 	expired.Arrangement.SharingDurationSeconds = 60

@@ -146,26 +146,12 @@ type ArrangementState struct {
 	// Arrangement is valid only when Created is true.
 	Arrangement Arrangement
 	// EndedAt and EndReason are zero until an event ends the arrangement before the end of its sharing.
-	EndedAt   time.Time
-	EndReason EndReason
-	// RecordedWithdrawalMethod is zero for a withdrawal before the data holder recorded the method.
-	RecordedWithdrawalMethod WithdrawalMethod
+	EndedAt          time.Time
+	EndReason        EndReason
+	WithdrawalMethod WithdrawalMethod
 	// RecordedNotice is zero until the outcome of the notice is recorded.
 	RecordedNotice NoticeStatus
 	NoticeAttempts []NoticeAttempt
-}
-
-// WithdrawalMethod gives the alternative method for a withdrawal with no recorded method, because each such
-// withdrawal was through the operator interface.
-func (s ArrangementState) WithdrawalMethod() WithdrawalMethod {
-	switch {
-	case s.EndReason != EndReasonWithdrawnByConsumer:
-		return ""
-	case s.RecordedWithdrawalMethod != "":
-		return s.RecordedWithdrawalMethod
-	default:
-		return WithdrawalMethodAlternative
-	}
 }
 
 // EndsAt gives the time of the event that ended the arrangement, or else the end of its sharing.
@@ -189,12 +175,36 @@ type CreateArrangement struct {
 
 func (CreateArrangement) isArrangementCommand() {}
 
-type EndArrangement struct {
-	EndedAt time.Time
-	Reason  EndReason
+type RevokeArrangement struct {
+	RevokedAt time.Time
 }
 
-func (EndArrangement) isArrangementCommand() {}
+func (RevokeArrangement) isArrangementCommand() {}
+
+type WithdrawArrangement struct {
+	WithdrawnAt time.Time
+	Method      WithdrawalMethod
+}
+
+func (WithdrawArrangement) isArrangementCommand() {}
+
+type EndArrangementForIneligibility struct {
+	EndedAt time.Time
+}
+
+func (EndArrangementForIneligibility) isArrangementCommand() {}
+
+type EndArrangementForRemoval struct {
+	EndedAt time.Time
+}
+
+func (EndArrangementForRemoval) isArrangementCommand() {}
+
+type EndArrangementForDeletion struct {
+	EndedAt time.Time
+}
+
+func (EndArrangementForDeletion) isArrangementCommand() {}
 
 type ArrangementEvent interface{ isArrangementEvent() }
 
@@ -204,28 +214,36 @@ type ArrangementCreated struct {
 
 func (ArrangementCreated) isArrangementEvent() {}
 
-type ArrangementEnded struct {
-	EndedAt time.Time `json:"endedAt"`
-	Reason  EndReason `json:"reason"`
+type ArrangementRevoked struct {
+	RevokedAt time.Time `json:"revokedAt"`
 }
 
-func (ArrangementEnded) isArrangementEvent() {}
+func (ArrangementRevoked) isArrangementEvent() {}
 
-type WithdrawArrangement struct {
-	WithdrawnAt time.Time
-	Method      WithdrawalMethod
-}
-
-func (WithdrawArrangement) isArrangementCommand() {}
-
-// ArrangementWithdrawn is a separate event type so that the payloads of the ArrangementEnded withdrawals that exist,
-// which have no method, do not change.
 type ArrangementWithdrawn struct {
 	WithdrawnAt time.Time        `json:"withdrawnAt"`
 	Method      WithdrawalMethod `json:"method"`
 }
 
 func (ArrangementWithdrawn) isArrangementEvent() {}
+
+type ArrangementEndedForIneligibility struct {
+	EndedAt time.Time `json:"endedAt"`
+}
+
+func (ArrangementEndedForIneligibility) isArrangementEvent() {}
+
+type ArrangementEndedForRemoval struct {
+	EndedAt time.Time `json:"endedAt"`
+}
+
+func (ArrangementEndedForRemoval) isArrangementEvent() {}
+
+type ArrangementEndedForDeletion struct {
+	EndedAt time.Time `json:"endedAt"`
+}
+
+func (ArrangementEndedForDeletion) isArrangementEvent() {}
 
 func HandleArrangement(state ArrangementState, command ArrangementCommand) ([]ArrangementEvent, error) {
 	switch c := command.(type) {
@@ -235,12 +253,8 @@ func HandleArrangement(state ArrangementState, command ArrangementCommand) ([]Ar
 		}
 
 		return []ArrangementEvent{ArrangementCreated(c)}, nil
-	case EndArrangement:
-		if err := canEnd(state, c.EndedAt); err != nil {
-			return nil, err
-		}
-
-		return []ArrangementEvent{ArrangementEnded{EndedAt: c.EndedAt.UTC(), Reason: c.Reason}}, nil
+	case RevokeArrangement:
+		return endOnce(state, c.RevokedAt, ArrangementRevoked{RevokedAt: c.RevokedAt.UTC()})
 	case WithdrawArrangement:
 		if err := canEnd(state, c.WithdrawnAt); err != nil {
 			return nil, err
@@ -251,6 +265,12 @@ func HandleArrangement(state ArrangementState, command ArrangementCommand) ([]Ar
 		}
 
 		return []ArrangementEvent{ArrangementWithdrawn{WithdrawnAt: c.WithdrawnAt.UTC(), Method: c.Method}}, nil
+	case EndArrangementForIneligibility:
+		return endOnce(state, c.EndedAt, ArrangementEndedForIneligibility{EndedAt: c.EndedAt.UTC()})
+	case EndArrangementForRemoval:
+		return endOnce(state, c.EndedAt, ArrangementEndedForRemoval{EndedAt: c.EndedAt.UTC()})
+	case EndArrangementForDeletion:
+		return endOnce(state, c.EndedAt, ArrangementEndedForDeletion{EndedAt: c.EndedAt.UTC()})
 	case RecordNoticeAttempt:
 		return handleRecordNoticeAttempt(state, c)
 	case RecordNotice:
@@ -258,6 +278,14 @@ func HandleArrangement(state ArrangementState, command ArrangementCommand) ([]Ar
 	default:
 		return nil, fmt.Errorf("the command %T is not an arrangement command", command)
 	}
+}
+
+func endOnce(state ArrangementState, at time.Time, event ArrangementEvent) ([]ArrangementEvent, error) {
+	if err := canEnd(state, at); err != nil {
+		return nil, err
+	}
+
+	return []ArrangementEvent{event}, nil
 }
 
 func canEnd(state ArrangementState, at time.Time) error {
@@ -276,13 +304,25 @@ func ApplyArrangement(state ArrangementState, event ArrangementEvent) Arrangemen
 	switch e := event.(type) {
 	case ArrangementCreated:
 		return ArrangementState{Created: true, Arrangement: e.Arrangement}
-	case ArrangementEnded:
-		state.EndedAt, state.EndReason = e.EndedAt, e.Reason
+	case ArrangementRevoked:
+		state.EndedAt, state.EndReason = e.RevokedAt, EndReasonRevokedByDataRecipient
 
 		return state
 	case ArrangementWithdrawn:
 		state.EndedAt, state.EndReason = e.WithdrawnAt, EndReasonWithdrawnByConsumer
-		state.RecordedWithdrawalMethod = e.Method
+		state.WithdrawalMethod = e.Method
+
+		return state
+	case ArrangementEndedForIneligibility:
+		state.EndedAt, state.EndReason = e.EndedAt, EndReasonConsumerNotEligible
+
+		return state
+	case ArrangementEndedForRemoval:
+		state.EndedAt, state.EndReason = e.EndedAt, EndReasonSoftwareProductRemoved
+
+		return state
+	case ArrangementEndedForDeletion:
+		state.EndedAt, state.EndReason = e.EndedAt, EndReasonRevokedByDataRecipient
 
 		return state
 	case NoticeAttempted:

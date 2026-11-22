@@ -22,8 +22,19 @@ var ArrangementType = eventsourcing.AggregateType[
 func arrangementCodec() eventsourcing.Codec[domain.ArrangementEvent] {
 	c := eventsourcing.NewJSONCodec[domain.ArrangementEvent]()
 	eventsourcing.RegisterJSON[domain.ArrangementEvent, domain.ArrangementCreated](c, "ArrangementCreated")
-	eventsourcing.RegisterJSON[domain.ArrangementEvent, domain.ArrangementEnded](c, "ArrangementEnded")
+	eventsourcing.RegisterJSON[domain.ArrangementEvent, domain.ArrangementRevoked](c, "ArrangementRevoked")
 	eventsourcing.RegisterJSON[domain.ArrangementEvent, domain.ArrangementWithdrawn](c, "ArrangementWithdrawn")
+	eventsourcing.RegisterJSON[domain.ArrangementEvent, domain.ArrangementEndedForIneligibility](
+		c, "ArrangementEndedForIneligibility",
+	)
+	eventsourcing.RegisterJSON[domain.ArrangementEvent, domain.ArrangementEndedForRemoval](
+		c,
+		"ArrangementEndedForRemoval",
+	)
+	eventsourcing.RegisterJSON[domain.ArrangementEvent, domain.ArrangementEndedForDeletion](
+		c,
+		"ArrangementEndedForDeletion",
+	)
 	eventsourcing.RegisterJSON[domain.ArrangementEvent, domain.NoticeAttempted](c, "NoticeAttempted")
 	eventsourcing.RegisterJSON[domain.ArrangementEvent, domain.NoticeRecorded](c, "NoticeRecorded")
 

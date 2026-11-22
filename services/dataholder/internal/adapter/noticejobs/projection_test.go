@@ -36,7 +36,11 @@ func newStore(t *testing.T) (*pgxpool.Pool, *eventstore.Store, *river.Client[pgx
 	return pool, eventstore.New(pool, noticejobs.Projection(inserter)), inserter
 }
 
-func endArrangement(t *testing.T, store *eventstore.Store, reason domain.EndReason) {
+func withdrawal() domain.ArrangementCommand {
+	return domain.WithdrawArrangement{WithdrawnAt: time.Now(), Method: domain.WithdrawalMethodAlternative}
+}
+
+func endArrangement(t *testing.T, store *eventstore.Store, end domain.ArrangementCommand) {
 	t.Helper()
 
 	confirmed := time.Now().Add(-time.Minute)
@@ -46,9 +50,7 @@ func endArrangement(t *testing.T, store *eventstore.Store, reason domain.EndReas
 			ConfirmedAt: confirmed, SharingDurationSeconds: 3600,
 		},
 	}))
-	require.NoError(t, app.ArrangementType.Execute(t.Context(), store, "arrangement-1", domain.EndArrangement{
-		EndedAt: time.Now(), Reason: reason,
-	}))
+	require.NoError(t, app.ArrangementType.Execute(t.Context(), store, "arrangement-1", end))
 }
 
 func noticeJobs(t *testing.T, client *river.Client[pgx.Tx]) []*rivertype.JobRow {
@@ -64,7 +66,7 @@ func noticeJobs(t *testing.T, client *river.Client[pgx.Tx]) []*rivertype.JobRow 
 func TestAnEndThatNeedsANoticeInsertsOneJob(t *testing.T) {
 	_, store, inserter := newStore(t)
 
-	endArrangement(t, store, domain.EndReasonWithdrawnByConsumer)
+	endArrangement(t, store, withdrawal())
 	require.NoError(t, store.ProjectAll(t.Context()))
 
 	listed := noticeJobs(t, inserter)
@@ -77,7 +79,7 @@ func TestAnEndThatNeedsANoticeInsertsOneJob(t *testing.T) {
 func TestAnEndThatNeedsNoNoticeInsertsNoJob(t *testing.T) {
 	_, store, inserter := newStore(t)
 
-	endArrangement(t, store, domain.EndReasonRevokedByDataRecipient)
+	endArrangement(t, store, domain.RevokeArrangement{RevokedAt: time.Now()})
 
 	assert.Empty(t, noticeJobs(t, inserter))
 }
@@ -130,7 +132,7 @@ func TestANoticeContinuesItsAttemptsAfterARestart(t *testing.T) {
 	pool, store, inserter := newStore(t)
 	notices := &sequenceNotices{attempted: make(chan int, 2)}
 
-	endArrangement(t, store, domain.EndReasonWithdrawnByConsumer)
+	endArrangement(t, store, withdrawal())
 
 	first := startWorker(t, pool, notices)
 	requireAttempt(t, notices.attempted, 1)
@@ -167,7 +169,7 @@ func withoutTime(r recorded) recorded {
 
 func TestARecordedAttemptInsertsNoSecondJob(t *testing.T) {
 	_, store, inserter := newStore(t)
-	endArrangement(t, store, domain.EndReasonWithdrawnByConsumer)
+	endArrangement(t, store, withdrawal())
 
 	require.NoError(t, app.ArrangementType.Execute(t.Context(), store, "arrangement-1", domain.RecordNoticeAttempt{
 		Attempt: domain.NoticeAttempt{Attempt: 1, At: time.Now(), Result: "status 503"},
