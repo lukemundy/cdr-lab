@@ -304,7 +304,9 @@ go build -o bin/ -ldflags "-X $p.commit=$BUILD_COMMIT -X $p.commitShort=$BUILD_C
 description = "Create the lab CAs and the public TLS certificates of the lab in .lab/pki, or renew the certificates"
 run = """
 set -eu
-cdrlab() { go run github.com/lukemundy/cdr-lab/cli/cdrlab/cmd/cdrlab "$@"; }
+# One build, because each go run links the binary again.
+go build -o bin/cdrlab github.com/lukemundy/cdr-lab/cli/cdrlab/cmd/cdrlab
+cdrlab() { bin/cdrlab "$@"; }
 cdrlab ca init -dir .lab/pki
 
 # Any user can read these lab keys, because the containers read them as a different user (pki/DESIGN.md#pki-0077).
@@ -346,7 +348,9 @@ fi
 # The Register issues each CDR certificate of the lab, so it starts first (ADR 0038).
 docker-compose up --detach "$build" --wait --wait-timeout 60 register
 
-cdrlab() { go run github.com/lukemundy/cdr-lab/cli/cdrlab/cmd/cdrlab "$@"; }
+# One build, because each go run links the binary again.
+go build -o bin/cdrlab github.com/lukemundy/cdr-lab/cli/cdrlab/cmd/cdrlab
+cdrlab() { bin/cdrlab "$@"; }
 # The operator interface of the Register on the host (compose.yaml).
 export REGISTER_OPERATOR_TOKEN=lab-operator-token
 register=http://127.0.0.1:8080
