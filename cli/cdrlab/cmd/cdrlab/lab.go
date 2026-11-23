@@ -41,7 +41,6 @@ func (l *labFlags) project(stdout io.Writer, env []string, d deps) compose.Proje
 	}
 }
 
-// defaultImagePrefix is the repository prefix of the release images (CLI-0141).
 const defaultImagePrefix = "ghcr.io/lukemundy/cdr-lab"
 
 // releaseImages gives, for each service image, the variable that sets its image in compose.yaml.
@@ -100,7 +99,7 @@ func up(ctx context.Context, args []string, stdout io.Writer, d deps) error {
 	}
 
 	project := lab.project(stdout, env, d)
-	// The release mode pulls the images, and never builds (CLI-0141).
+	// The release mode pulls the images, and never builds.
 	opts := compose.UpOptions{Build: *source && !*noBuild, WaitTimeout: *waitTimeout}
 
 	if err := makeCertificates(ctx, lab.dir, list, stdout, d); err != nil {
@@ -132,7 +131,6 @@ func refuseModeFlags(fs *flag.FlagSet, source bool) error {
 	return refuseFlags(fs, "the release mode (no -source) cannot go with", "no-build")
 }
 
-// releaseImageEnv gives the image of each service from the release images (CLI-0141 to CLI-0143).
 func releaseImageEnv(version, prefix, tag string) ([]string, error) {
 	if prefix == "" {
 		return nil, fmt.Errorf("%w: -image-prefix must have a value", errUsage)
@@ -260,7 +258,6 @@ func reset(ctx context.Context, args []string, stdout io.Writer, d deps) error {
 		return err
 	}
 
-	// A lab of the release mode (CLI-0156).
 	return labproject.Remove(lab.dir, d.project)
 }
 

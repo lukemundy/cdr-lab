@@ -218,7 +218,7 @@ jobs:
           path: ${{ runner.temp }}/notes.md
           if-no-files-found: error
 
-  # The release builds the cdrlab binaries from the release commit, because CI builds no host binaries (ADR 0039).
+  # The release builds the cdrlab binaries from the release commit, because CI builds no host binaries.
   binaries:
     needs: plan
     if: github.ref == 'refs/heads/main' && inputs.mode != 'check'
@@ -267,7 +267,7 @@ jobs:
           path: ${{ steps.build.outputs.archive }}
           if-no-files-found: error
 
-  # One keyless cosign signature of one checksum file covers each platform (tools/release/DESIGN.md#rls-0131).
+  # One keyless cosign signature of one checksum file covers each platform.
   checksums:
     needs: [plan, binaries]
     if: github.ref == 'refs/heads/main' && inputs.mode != 'check'
@@ -310,7 +310,7 @@ jobs:
           if-no-files-found: error
 
   # The release mode of cdrlab up, with the linux/amd64 binary and the images of the run, in a directory with no
-  # checkout (tools/release/DESIGN.md#rls-0124). A user verifies the assets in the same way before a run.
+  # checkout. A user verifies the assets in the same way before a run.
   lab:
     needs: [plan, images, checksums]
     if: github.ref == 'refs/heads/main' && inputs.mode != 'check'

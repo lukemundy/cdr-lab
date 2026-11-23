@@ -1,5 +1,5 @@
 // Package labproject writes the compose project of the binary into a lab directory, with a record of the version of
-// the binary, and removes it again (ADR 0038).
+// the binary, and removes it again.
 package labproject
 
 import (
@@ -19,8 +19,8 @@ import (
 // RecordFile is the version record, relative to the lab directory.
 const RecordFile = ".lab/cdrlab-version"
 
-// Write writes each file of project into dir. It changes nothing when dir has a file of project and no record
-// (CLI-0144), or a record of a different version (CLI-0145).
+// Write writes each file of project into dir. It changes nothing when dir has a file of project and no record, or a
+// record of a different version.
 func Write(dir string, project fs.FS, version string) error {
 	names, err := files(project)
 	if err != nil {
@@ -77,8 +77,7 @@ func Recorded(dir string) (bool, error) {
 	return found, err
 }
 
-// Remove deletes each file of project, the record, and each directory that becomes empty. It deletes no other file
-// (CLI-0156).
+// Remove deletes each file of project, the record, and each directory that becomes empty. It deletes no other file.
 func Remove(dir string, project fs.FS) error {
 	names, err := files(project)
 	if err != nil {
