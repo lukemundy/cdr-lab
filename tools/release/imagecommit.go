@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
-	"strings"
 )
 
 // readInputs reads the git pathspecs of the image inputs of each service, by service directory name.
@@ -22,20 +20,6 @@ func readInputs(path string) (map[string][]string, error) {
 	}
 
 	return inputs, nil
-}
-
-type gitRepo struct {
-	dir string
-}
-
-func (g gitRepo) run(ctx context.Context, args ...string) ([]string, error) {
-	//nolint:gosec // The arguments are a revision and pathspecs after "--", so git cannot read a pathspec as a flag.
-	out, err := exec.CommandContext(ctx, "git", append([]string{"-C", g.dir}, args...)...).Output()
-	if err != nil {
-		return nil, fmt.Errorf("git %s: %w", args[0], err)
-	}
-
-	return strings.Fields(string(out)), nil
 }
 
 // imageCommit walks the first-parent history back from rev, and gives the first commit that has a published image.

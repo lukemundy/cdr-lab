@@ -28,6 +28,34 @@ Add `--bundle-from-oci` to read the attestations from the registry. The SBOM lis
 - The Services are ClusterIP only. The Service of the chart keeps the full name of the release when the values add more Services, because certificates and the CRL URL give that name. The operator console is off by default. Behind a proxy that terminates TLS on port 443, give `internal.allowedHosts` the host name with no port, because HTTP clients do not send the default port in the `Host` header.
 - Expose only the CRL path of the internal listener outside the cluster, for example with an ingress rule that routes only `/crl/cdr-intermediate.crl` to the port `internal`. The operator interface and the console are on the same port, and the console has no login. The chart does not make an ingress, so it cannot enforce this rule.
 
+## Verify a release
+
+A release `vX.Y.Z` publishes the chart as version `X.Y.Z`, with the `appVersion` `vX.Y.Z`. The image of the Register gets the tag `vX.Y.Z` on the digest of its image commit. The release workflow on `main` signs the chart and the image with keyless cosign, and attests the provenance of the chart. The CI run that built the image attests its provenance and its SBOM. The release notes give each digest ([release specification](../../tools/release/DESIGN.md)).
+
+A tag can move after you verify it, but a digest cannot. Thus verify the chart and the image by their digests from the release notes, and then install the chart by its digest:
+
+```sh
+chart=ghcr.io/lukemundy/cdr-lab/charts/register@<chart digest>
+image=ghcr.io/lukemundy/cdr-lab/register@<image digest>
+
+for ref in "$chart" "$image"; do
+  cosign verify "$ref" \
+    --certificate-identity https://github.com/lukemundy/cdr-lab/.github/workflows/release.yml@refs/heads/main \
+    --certificate-oidc-issuer https://token.actions.githubusercontent.com
+done
+
+gh attestation verify "oci://$chart" --repo lukemundy/cdr-lab \
+  --signer-workflow lukemundy/cdr-lab/.github/workflows/release.yml --source-ref refs/heads/main
+gh attestation verify "oci://$image" --repo lukemundy/cdr-lab \
+  --signer-workflow lukemundy/cdr-lab/.github/workflows/ci.yml --source-ref refs/heads/main
+gh attestation verify "oci://$image" --repo lukemundy/cdr-lab --predicate-type https://spdx.dev/Document/v2.3 \
+  --signer-workflow lukemundy/cdr-lab/.github/workflows/ci.yml --source-ref refs/heads/main
+
+helm install register "oci://$chart" --values my-values.yaml
+```
+
+The SBOM does not list the npm packages of the web UIs.
+
 ## Participant seed
 
 A Register from the chart starts with no participants. To start it with participants, make a ConfigMap with a seed file in the key `participants.json`, and give its name in `seed.configMap`. The seed is a lab-only feature, and it is off by default. The requirements are in the [Register specification](../../services/register/design/deployment.md#reg-0911).

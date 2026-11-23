@@ -1,6 +1,7 @@
 # 0027. Release all artifacts with one version, from a manual workflow on a commit of main
 
 - Date: 2026-11-23
+- Amended by [ADR-0037](0037-calculate-the-release-version-in-the-release-tool-and-not-with-cog-bump.md): the release tool calculates the version, not `cog bump`
 
 ## Context
 

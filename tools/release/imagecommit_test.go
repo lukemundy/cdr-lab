@@ -34,7 +34,7 @@ func (h history) git(args ...string) string {
 
 	//nolint:gosec // The arguments are the git commands of the tests.
 	cmd := exec.CommandContext(h.t.Context(), "git",
-		append([]string{"-C", h.repo.dir, "-c", "commit.gpgsign=false"}, args...)...)
+		append([]string{"-C", h.repo.dir, "-c", "commit.gpgsign=false", "-c", "tag.gpgsign=false"}, args...)...)
 	cmd.Env = append(os.Environ(), "GIT_AUTHOR_NAME=test", "GIT_AUTHOR_EMAIL=test@example.com",
 		"GIT_COMMITTER_NAME=test", "GIT_COMMITTER_EMAIL=test@example.com")
 
@@ -53,6 +53,29 @@ func (h history) commit(path string) string {
 	require.NoError(h.t, os.WriteFile(file, []byte(h.t.Name()+path+h.git("rev-list", "--all", "--count")), 0o600))
 	h.git("add", "--all")
 	h.git("commit", "--quiet", "--message", "change "+path)
+
+	return h.git("rev-parse", "HEAD")
+}
+
+// change writes the files, commits them with the message and gives the full commit ID. An empty content deletes the
+// file.
+func (h history) change(message string, files map[string]string) string {
+	h.t.Helper()
+
+	for path, content := range files {
+		file := filepath.Join(h.repo.dir, path)
+		if content == "" {
+			require.NoError(h.t, os.Remove(file))
+
+			continue
+		}
+
+		require.NoError(h.t, os.MkdirAll(filepath.Dir(file), 0o750))
+		require.NoError(h.t, os.WriteFile(file, []byte(content), 0o600))
+	}
+
+	h.git("add", "--all")
+	h.git("commit", "--quiet", "--allow-empty", "--message", message)
 
 	return h.git("rev-parse", "HEAD")
 }
@@ -192,6 +215,7 @@ func TestTheRegistryGivesAnImageOfATagWithAnAnonymousToken(t *testing.T) {
 			w.WriteHeader(http.StatusUnauthorized)
 		case r.Method == http.MethodHead && r.URL.Path == "/v2/team/register/manifests/published":
 			assert.Contains(t, r.Header.Get("Accept"), "application/vnd.oci.image.index.v1+json")
+			w.Header().Set("Docker-Content-Digest", "sha256:0123")
 			w.WriteHeader(http.StatusOK)
 		case r.URL.Path == "/v2/team/register/manifests/broken":
 			w.WriteHeader(http.StatusInternalServerError)
@@ -212,5 +236,12 @@ func TestTheRegistryGivesAnImageOfATagWithAnAnonymousToken(t *testing.T) {
 	}
 
 	_, err = reg.has(t.Context(), "broken")
+	require.Error(t, err)
+
+	digest, err := reg.digest(t.Context(), "published")
+	require.NoError(t, err)
+	assert.Equal(t, "sha256:0123", digest)
+
+	_, err = reg.digest(t.Context(), "missing")
 	require.Error(t, err)
 }
