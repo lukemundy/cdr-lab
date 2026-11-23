@@ -619,6 +619,10 @@ jobs:
           docker load --input "$RUNNER_TEMP/cdrlab.tar"
           CONFORMANCE_GO_CACHE="$HOME/.cache/conformance-go" mise run cluster:up
 
+      # Before the suite, because the suite changes the statuses of participants and adds customers.
+      - name: Check the seed Jobs with a fresh deployment and an upgrade
+        run: mise run cluster:seed
+
       - name: Run the conformance tests in the cluster
         run: mise run cluster:conformance
 

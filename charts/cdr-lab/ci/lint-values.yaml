@@ -43,6 +43,19 @@ brands:
       allowedHosts: [localhost:8180]
     console:
       enabled: true
+    # Invented customer data.
+    customers:
+      - firstName: Jordan
+        lastName: Lee
+        emailAddress: jordan.lee@wattlebank.test
+        accounts:
+          - productId: wattle-pocket
+            accountNumber: "12345678"
+            transactions:
+              - {type: PAYMENT, status: POSTED, description: Coffee, amount: "-4.50", age: P1D}
+          - productId: canopy-rewards-card
+            accountNumber: "87654321"
+            openStatus: CLOSED
   redgum-bank:
     public:
       host: redgum.lab.test

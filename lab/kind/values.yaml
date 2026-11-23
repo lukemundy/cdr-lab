@@ -1,5 +1,6 @@
 # The release of the cluster job: the default preset brand, with no routes and no external host names. The
-# cluster:up task adds the image tags and the participants of the conformance suite from the Register seed.
+# cluster:up task adds the image tags and the participants of the conformance suite from the Register seed. The
+# cluster:seed task reads the consoles to compare two installs.
 operator:
   tokenSecret: lab-operator-token
 database:
@@ -10,8 +11,10 @@ publicTLS:
   rootSecret: public-root
 register:
   internal:
-    # The port-forward of the cluster:conformance task, which gets the fixture certificates.
+    # The port-forward of the cluster:conformance and cluster:seed tasks.
     allowedHosts: [localhost:18080]
+  console:
+    enabled: true
   database: {name: register, ownerSecret: register-owner, serviceSecret: register-service}
 dataHolders:
   # The values of compose.yaml: the conformance suite gets the same status interval, and sees a revocation with no wait.
@@ -21,3 +24,23 @@ brands:
   wattle-bank:
     database: {name: wattle_bank, ownerSecret: wattle-bank-owner, serviceSecret: wattle-bank-service}
     mail: {smtpAddress: "mail:1025", from: no-reply@wattlebank.test}
+    # The port-forward of the cluster:seed task.
+    internal:
+      allowedHosts: [localhost:18180]
+    console:
+      enabled: true
+    # Invented data. The account numbers have 10 digits, because the conformance suite uses 8 digits.
+    customers:
+      - firstName: Sam
+        lastName: Seed
+        emailAddress: sam.seed@wattlebank.test
+        accounts:
+          - productId: wattle-pocket
+            accountNumber: "9900000001"
+            transactions:
+              - {type: PAYMENT, status: POSTED, description: Coffee, amount: "-4.50", age: P1D}
+              - {type: TRANSFER_INCOMING, status: PENDING, description: Pay, amount: "1200.00", age: PT2H}
+          - productId: canopy-rewards-card
+            accountNumber: "9900000002"
+            creditLimit: "500.00"
+            openStatus: CLOSED

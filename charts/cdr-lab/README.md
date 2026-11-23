@@ -1,6 +1,6 @@
 # Umbrella chart
 
-A Helm chart that deploys the lab to one namespace of a Kubernetes cluster with one release: the mock CDR Register and a set of the four preset brands of the mock data holder. It makes the mock CDR CA when it is absent, gets the CDR certificates from the Register and renews them, and makes the Register seed from its values. The requirements are in the [umbrella chart specification](DESIGN.md), and the decisions are in [ADR 0033](../../docs/adr/0033-deploy-the-lab-to-a-cluster-with-one-umbrella-chart-that-derives-each-brand-from-its-register-record.md) and [ADR 0034](../../docs/adr/0034-expose-the-tls-listeners-of-a-cluster-deployment-with-optional-gateway-api-tlsroutes-in-passthrough-mode.md).
+A Helm chart that deploys the lab to one namespace of a Kubernetes cluster with one release: the mock CDR Register and a set of the four preset brands of the mock data holder. It makes the mock CDR CA when it is absent, gets the CDR certificates from the Register and renews them, and adds the participants and the customers of its values ([seed data](#seed-data)). The requirements are in the [umbrella chart specification](DESIGN.md), and the decisions are in [ADR 0033](../../docs/adr/0033-deploy-the-lab-to-a-cluster-with-one-umbrella-chart-that-derives-each-brand-from-its-register-record.md) and [ADR 0034](../../docs/adr/0034-expose-the-tls-listeners-of-a-cluster-deployment-with-optional-gateway-api-tlsroutes-in-passthrough-mode.md).
 
 A namespace holds one release of the chart. The Services have the fixed names `register` and the name of each brand, for example `wattle-bank`, and the Secrets have fixed names. For a second lab, use a second namespace.
 
@@ -65,6 +65,7 @@ At the install:
 2. The Register starts when the CA Secrets and its public TLS Secret exist. Its init containers run the migrations and load the seed, only into a Register with no participants. The Register issues the certificate of its own mTLS listener.
 3. The certificate Job of each brand runs `cdrlab cert issue`. It tries again until the Register is ready, and fails after 10 minutes.
 4. Each brand starts when its CDR server certificate Secret exists.
+5. The participants Job runs `cdrlab participants add` with the Register seed, and the customers Job of each brand with customers runs `cdrlab customers add`. Each tries again until its service is ready, and fails after 10 minutes.
 
 A pod with a Secret that is absent does not start, so no step waits for a manual action. A Job that fails has the state `Failed`, and `helm install --wait` stops with an error. Use `--timeout 10m` or more, because the certificate Jobs try for 10 minutes. `kubectl logs job/<name>` gives the cause.
 
@@ -91,7 +92,67 @@ The response gives each brand of the release with its base URIs. Give `-k` only 
 
 The Secrets that the Jobs write stay after an uninstall. Thus an install with the same values and the same databases gives the Register the same CA. To give your own mock CDR CA, make `cdr-ca-intermediate` and `cdr-ca-bundle` before the install. The CA Job does not change a CA that exists, and it fails when only one of the two Secrets exists.
 
-The ServiceAccount of each Job and CronJob can get, update, patch and delete only the Secrets that it writes, and create Secrets. The Register and the brands have no API access.
+The ServiceAccount of each Job and CronJob that writes a Secret can get, update, patch and delete only the Secrets that it writes, and create Secrets. The seed Jobs, the Register and the brands have no API access.
+
+## Seed data
+
+The values give the seed data of the release: the participants of the Register and the customers of each brand. The Register records of the brands of the release come from the chart. `participants` adds more records in the format of the load file of the Register, for example a data recipient with its brands and software products. `brands.<brand>.customers` gives the customers of that brand in the format of the [customer load file](../../services/dataholder/design/operator-interface.md#customer-load) of the data holder. Use invented data only:
+
+```yaml
+participants:
+  dataRecipients:
+    - legalEntityId: 6f6c2a04-6a2f-4c2a-9b77-0c1f8c0a1b01
+      legalEntityName: Example Budget Pty Ltd
+      accreditationNumber: ADR-EXAMPLE-0001
+      accreditationLevel: UNRESTRICTED
+      logoUri: https://budget.example/logo.png
+      status: ACTIVE
+      dataRecipientBrands:
+        - dataRecipientBrandId: 1d5e3e7a-6c0b-4d43-9a8a-3f1a2c4b5d02
+          brandName: Example Budget
+          logoUri: https://budget.example/logo.png
+          status: ACTIVE
+          softwareProducts:
+            - softwareProductId: 2b7f9c1e-0d4a-4e6b-8f3c-5a6b7c8d9e03
+              softwareProductName: Example Budget Web
+              softwareProductDescription: Example Budget Web, a software product in development
+              logoUri: https://web.budget.example/logo.png
+              status: ACTIVE
+              clientUri: https://web.budget.example
+              redirectUris: [https://web.budget.example/callback]
+              tosUri: https://web.budget.example/terms
+              policyUri: https://web.budget.example/privacy
+              jwksUri: https://web.budget.example/jwks
+              revocationUri: https://web.budget.example/revoke
+              recipientBaseUri: https://cdr.web.budget.example
+              scopes: [openid, profile, "bank:accounts.basic:read", "bank:transactions:read", "cdr:registration"]
+brands:
+  wattle-bank:
+    customers:
+      - firstName: Jordan
+        lastName: Lee
+        emailAddress: jordan.lee@example.test
+        accounts:
+          - productId: wattle-pocket
+            accountNumber: "12345678"
+            transactions:
+              - {type: PAYMENT, status: POSTED, description: Coffee, amount: "-4.50", age: P1D}
+          - productId: canopy-rewards-card
+            accountNumber: "87654321"
+            creditLimit: "500.00"
+            openStatus: CLOSED
+```
+
+An account names a product of its brand by its `productId`: the data holder gives the product name, the product category and the BSB of the brand. A transaction has an `age` in place of its times, and the load sets its times from the time of the load. The schema of the values refuses a field that the load files do not have, and the services check the values.
+
+After each install and each upgrade, the seed Jobs add each record of the values that the service does not have. A participant exists when the Register has a record of the same kind with its identifier, and a customer exists when the brand has a customer with its email address. Thus:
+
+- An upgrade adds only the new participants and customers of the values, for example the Register record of a new brand. It changes no record that exists, and it removes no record.
+- A change or a removal of a seed record needs a [fresh deployment](#fresh-deployment).
+- A list in a second values file replaces the full list of the first file. To add one customer in a second values file, give all the customers of that brand there.
+- A fresh deployment with the same values gives the same participants and the same customers, accounts and transactions. The customer numbers and the account IDs change: find a seed customer by its email address, and an account by its account number.
+
+The log of a seed Job gives the participant identifiers and the number of customers that it created, and no customer value. A Job that fails gives the status and the `detail` of the response, for example the position of a customer in the file. The customers of a brand are in a ConfigMap, at most 1 MiB for each brand.
 
 ## Public TLS certificates
 
@@ -259,7 +320,7 @@ helm upgrade cdr-lab oci://ghcr.io/lukemundy/cdr-lab/charts/cdr-lab --version X.
   --namespace lab --values my-values.yaml --wait --timeout 10m
 ```
 
-The name of each Job has the revision of the release, for example `cdr-lab-ca-r2`. Thus each upgrade runs the Jobs again, also when their image changes, and Helm deletes the Jobs of the earlier revision. The Jobs change nothing when their Secrets are current. The Register and each brand run one pod, and an upgrade stops the old pod before it starts the new pod. Data stays across an upgrade only when the release notes say so: before version 1.0.0, a release can need a fresh deployment.
+The name of each Job has the revision of the release, for example `cdr-lab-ca-r2`. Thus each upgrade runs the Jobs again, also when their image changes, and Helm deletes the Jobs of the earlier revision. The Jobs change nothing when their Secrets are current, and the seed Jobs add only the new seed records. The Register and each brand run one pod, and an upgrade stops the old pod before it starts the new pod. Data stays across an upgrade only when the release notes say so: before version 1.0.0, a release can need a fresh deployment.
 
 ## Fresh deployment
 
@@ -268,7 +329,7 @@ A fresh deployment deletes all data and the mock CDR CA:
 1. `helm uninstall cdr-lab --namespace lab`
 2. Delete the Secrets that the Jobs made: `kubectl delete secret --namespace lab cdr-ca-intermediate cdr-ca-bundle <brand>-secure-tls...`
 3. Make new, empty databases for the Register and each brand, with the same users.
-4. Install the chart again.
+4. Install the chart again. The seed Jobs add the participants and the customers of the values.
 
 ## Verify a release
 

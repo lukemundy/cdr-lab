@@ -172,6 +172,7 @@ None.
 - <a id="lab-0115"></a>**LAB-0115** The cluster job gets each CDR client certificate fixture of the suite from the Register issue path, before the suite starts. ([Judgement: CDR certificates from the Register (ADR 0032)][adr-0032])
 - <a id="lab-0116"></a>**LAB-0116** The cluster job fails when the suite fails. ([Judgement: a kind cluster in CI (ADR 0036)][adr-0036])
 - <a id="lab-0118"></a>**LAB-0118** `mise run lint:chart` renders the chart with each optional part on, also the routes, and checks the result against the Kubernetes and Gateway API schemas. ([Judgement: a kind cluster in CI (ADR 0036)][adr-0036])
+- <a id="lab-0119"></a>**LAB-0119** The release of the cluster job gives one seed customer for the default brand. Before the suite, the cluster job makes a fresh deployment with the same values and new databases. It fails when the participants or the customers differ from those of the first install. Then it upgrades the release with one more customer, and fails when the upgrade adds a participant or adds a customer other than that customer. ([the same participants and customers after a new install](#lab-0134); [only the new records after an upgrade](#lab-0135); [Judgement: a kind cluster in CI (ADR 0036)][adr-0036])
 
 ## Non-functional requirements
 
