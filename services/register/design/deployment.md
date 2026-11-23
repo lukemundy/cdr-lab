@@ -38,7 +38,8 @@ This area gives the listeners of the Register and their ports, the lab-only part
 - <a id="reg-1510"></a>**REG-1510** Each image of the Register that CI publishes is an OCI image index with an image for `linux/amd64` and an image for `linux/arm64`. ([OCI: image index][oci-image-index]; [Judgement: images for linux/amd64 and linux/arm64 (ADR 0030)][adr-0030])
 - <a id="reg-1511"></a>**REG-1511** Integrity: the `linux/amd64` image of the index has the same configuration digest as the image that the lab jobs of its commit tested. ([Judgement: images for linux/amd64 and linux/arm64 (ADR 0030)][adr-0030])
 - <a id="reg-1512"></a>**REG-1512** The `appVersion` of a chart from `main` is the full commit ID of the [image commit](../../../docs/spec/glossary.md#image-commit) of the Register at that commit. ([Helm: charts][helm-charts]; [Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
-- <a id="reg-1513"></a>**REG-1513** CI publishes the chart from `main` only when the image commit of the Register is the last commit that changes an input of the image. For example, when the commit changes an input of the image, the chart waits until CI publishes the image of that commit. ([Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
+- <a id="reg-1513"></a>**REG-1513** CI publishes the chart from `main` only when no commit after the image commit of the Register changes an input of the image. For example, when the commit changes an input of the image, the chart waits until CI publishes the image of that commit. ([Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
+- <a id="reg-1530"></a>**REG-1530** When the chart changes, or when CI publishes the Register image, CI publishes the chart from `main`. ([Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
 
 ## Chart
 

@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
@@ -137,15 +138,33 @@ func (c Container) AllowlistVars() []string {
 func Render(t *testing.T, set ...string) ([]Object, error) {
 	t.Helper()
 
-	return render(t, nil, set)
+	return render(t, ".", nil, set)
 }
 
-func render(t *testing.T, files []string, set []string) ([]Object, error) {
+// RenderPackaged renders the chart that helm package gives with the appVersion, as CI publishes it.
+func RenderPackaged(t *testing.T, appVersion string, set ...string) ([]Object, error) {
+	t.Helper()
+
+	dir := t.TempDir()
+
+	//nolint:gosec // The appVersion comes from the chart tests.
+	out, err := exec.CommandContext(t.Context(), "helm", "package", ".", "--app-version", appVersion,
+		"--destination", dir).CombinedOutput()
+	require.NoError(t, err, string(out))
+
+	packages, err := filepath.Glob(filepath.Join(dir, "*.tgz"))
+	require.NoError(t, err)
+	require.Len(t, packages, 1)
+
+	return render(t, packages[0], nil, set)
+}
+
+func render(t *testing.T, chart string, files []string, set []string) ([]Object, error) {
 	t.Helper()
 
 	readChartFiles(t)
 
-	args := []string{"template", "test", ".", "--values", "ci/test-values.yaml"}
+	args := []string{"template", "test", chart, "--values", "ci/test-values.yaml"}
 	for _, f := range files {
 		args = append(args, "--values", f)
 	}
@@ -156,6 +175,7 @@ func render(t *testing.T, files []string, set []string) ([]Object, error) {
 
 	var stdout, stderr bytes.Buffer
 
+	//nolint:gosec // The chart, the values files and the values come from the chart tests.
 	cmd := exec.CommandContext(t.Context(), "helm", args...)
 	cmd.Stdout, cmd.Stderr = &stdout, &stderr
 
@@ -215,7 +235,7 @@ func MustRender(t *testing.T, set ...string) []Object {
 func MustRenderValues(t *testing.T, file string, set ...string) []Object {
 	t.Helper()
 
-	objects, err := render(t, []string{file}, set)
+	objects, err := render(t, ".", []string{file}, set)
 	require.NoError(t, err)
 
 	return objects

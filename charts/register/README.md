@@ -2,7 +2,7 @@
 
 A Helm chart that runs the mock CDR Register on Kubernetes, on the [bjw-s common library chart](https://github.com/bjw-s-labs/helm-charts/tree/main/charts/library/common).
 
-CI publishes the chart from `main` when a chart changes, as `oci://ghcr.io/lukemundy/cdr-lab/charts/register`, version `0.0.0-g<short commit>`. Pin the exact version: a version range does not include prerelease versions.
+CI publishes the chart from `main` when the chart changes or when CI publishes the Register image, as `oci://ghcr.io/lukemundy/cdr-lab/charts/register`, version `0.0.0-g<short commit>`. Pin the exact version: a version range does not include prerelease versions. The `appVersion` of the chart is the full commit ID of the [image commit](../../docs/spec/glossary.md#image-commit) of the Register, and it is the default of `image.tag`. Thus the chart deploys a published image with no `image.tag` in the values.
 
 ```sh
 helm install register oci://ghcr.io/lukemundy/cdr-lab/charts/register --version 0.0.0-g<short commit> --values my-values.yaml

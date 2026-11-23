@@ -41,7 +41,7 @@ advancedMounts:
 {{- end -}}
 {{- $image := dict
   "repository" $v.image.repository
-  "tag" (include "dataholder.required" (list "image.tag" $v.image.tag "the commit ID of the data holder image"))
+  "tag" (include "dataholder.required" (list "image.tag" ($v.image.tag | default $.Chart.AppVersion) "the commit ID of the data holder image, or a chart with an appVersion"))
   "digest" $v.image.digest
 -}}
 {{- $database := dict

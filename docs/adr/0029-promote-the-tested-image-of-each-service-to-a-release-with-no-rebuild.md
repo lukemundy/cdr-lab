@@ -26,7 +26,7 @@ A release uses, for each service, the image that CI tested and published from `m
 
 - The **image commit** of a service is the first commit with an image of that service, in the first-parent history of `main` from the release commit back.
 - The release refuses a commit whose CI run on `main` did not pass.
-- For each service, the release refuses when the image commit is not the last commit, at or before the release commit, that changes an input of the image. This check stops the release of an old image after a failed or cancelled publish.
+- For each service, the release refuses when a commit after the image commit, up to the release commit, changes an input of the image. This check stops the release of an old image after a failed or cancelled publish. An image of a commit that changes no input, for example from a run with no base commit, passes the check.
 - One file in the repository gives the inputs of the image of each service. The path filter of CI and the release read that file, so that the two lists cannot differ.
 - The release adds the tag `vX.Y.Z` to the digest of the image commit. The digest does not change.
 - The release notes give the image commit of each service, because the services can have different image commits.
@@ -37,6 +37,7 @@ The charts select the image of their own version:
 - The default of `image.tag` is the `appVersion` of the chart. A value of `image.tag` still overrides it. This replaces the chart rule that `image.tag` is required.
 - A chart of a release has the `appVersion` `vX.Y.Z`, the tag that the release puts on the images.
 - A chart from `main` has the full commit ID of the image commit of its service as its `appVersion`, from the same rule. Thus the default also gives an image that exists.
+- CI publishes the chart of a service from `main` also when it publishes the image of that service. Thus the newest chart from `main` deploys the newest image.
 
 ## Consequences
 
@@ -46,4 +47,5 @@ The charts select the image of their own version:
 - A commit that starts no CI run, for example a change to `renovate.json` only, cannot be a release commit. The release of the commit before it is possible.
 - A change to the CI workflow or to `mise.toml` is an input of each image, so it gives a new image of each service.
 - The chart from `main` must wait for the image of its own commit, when the commit changes an input of the image.
+- A commit that changes only an image also gives a new chart version from `main`, so the charts from `main` have more versions.
 - A team that installs a chart with no `image.tag` gets the image that belongs to the chart.

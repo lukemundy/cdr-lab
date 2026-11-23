@@ -2,7 +2,8 @@ apiVersion: v2
 name: register
 description: The mock CDR Register of cdr-lab
 type: application
-# CI publishes each chart as 0.0.0-g<short commit>, with the short commit as the appVersion.
+# CI publishes each chart as 0.0.0-g<short commit>. The appVersion is the full commit ID of the image commit of the
+# service, and it is the default image tag.
 version: 0.0.0
 dependencies:
   - name: common

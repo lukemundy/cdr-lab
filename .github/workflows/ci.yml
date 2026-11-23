@@ -90,11 +90,11 @@ jobs:
                 services/dataholder/internal/adapter/console/openapi.yaml \
                 services/dataholder/internal/adapter/banksite/openapi.yaml services/dataholder/brands \
                 services/dataholder/internal/adapter/consumerpages/testdata)"
-              # All inputs of each image, so that each change to an image publishes it, and the lab that the job starts.
-              echo "register-image=$(changed "${shared[@]}" go.mod go.sum pkg services/register tools/notices web \
-                .dockerignore compose.yaml lab)"
-              echo "dataholder-image=$(changed "${shared[@]}" go.mod go.sum pkg services/dataholder tools/notices web \
-                .dockerignore compose.yaml lab)"
+              # The image inputs file gives the pathspecs of each image, also the excludes. The release reads the same file.
+              for service in register dataholder; do
+                mapfile -t inputs < <(jq --raw-output --arg service "$service" '.[$service][]' .github/image-inputs.json)
+                echo "$service-image=$(changed_all "${inputs[@]}")"
+              done
               echo "audit=$(changed "${shared[@]}" osv-scanner.toml go.mod go.sum web/pnpm-lock.yaml)"
               echo "chart=$(changed "${shared[@]}" charts go.mod go.sum)"
               # The specifications, the Go imports that their library tables give, and the Verifies comments of the tests.
@@ -464,9 +464,12 @@ jobs:
           docker push --all-tags "$REGISTER_IMAGE"
           docker logout ghcr.io
 
+  # The chart job also runs for a new image, because CI then publishes the chart of that service with the new image.
   chart:
     needs: changes
-    if: needs.changes.outputs.chart == 'true'
+    if: >-
+      needs.changes.outputs.chart == 'true' || needs.changes.outputs.register-image == 'true' ||
+      needs.changes.outputs.dataholder-image == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -482,9 +485,12 @@ jobs:
       - name: Test
         run: mise exec -- go test ./charts/...
 
+  # The chart waits for the image publish jobs of its commit. A failed or cancelled image publish stops it.
   chart-publish:
-    needs: chart
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: [changes, chart, register-image-publish, dataholder-image-publish]
+    if: >-
+      github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !cancelled() && !failure() &&
+      needs.chart.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -494,15 +500,22 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          # The image commit can be an earlier commit of main.
+          fetch-depth: 0
 
       - *install-mise
 
       # A SemVer prerelease cannot start with a zero digit, so the version has a g before the short commit ID.
       # Each chart gets the version of the commit, so a push never changes the version of a different commit.
+      # The chart directory name is the service directory name. The appVersion is the image commit of the service,
+      # and the tool fails when the image of a later change to an input is not published.
       - name: Push the charts
         env:
           GH_TOKEN: ${{ github.token }}
           CHART_REPOSITORY: oci://ghcr.io/${{ github.repository }}/charts
+          IMAGE_REPOSITORY: ghcr.io/${{ github.repository }}
+          CHART_CHANGED: ${{ needs.changes.outputs.chart }}
+          NEEDS: ${{ toJSON(needs) }}
         run: |
           set -euo pipefail
           commit=$(git describe --always --exclude='*')
@@ -510,8 +523,14 @@ jobs:
           helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin <<< "$GH_TOKEN"
           for chart in charts/*/Chart.yaml; do
             dir=${chart%/Chart.yaml}
-            helm package "$dir" --version "0.0.0-g$commit" --app-version "$commit" --destination "$RUNNER_TEMP"
-            helm push "$RUNNER_TEMP/${dir#charts/}-0.0.0-g$commit.tgz" "$CHART_REPOSITORY"
+            service=${dir#charts/}
+            published=$(jq --raw-output --arg job "$service-image-publish" '.[$job].result' <<< "$NEEDS")
+            if [ "$CHART_CHANGED" != true ] && [ "$published" != success ]; then
+              continue
+            fi
+            app=$(mise exec -- go run ./tools/release image-commit -service "$service" -image "$IMAGE_REPOSITORY/$service")
+            helm package "$dir" --version "0.0.0-g$commit" --app-version "$app" --destination "$RUNNER_TEMP"
+            helm push "$RUNNER_TEMP/$service-0.0.0-g$commit.tgz" "$CHART_REPOSITORY"
           done
           helm registry logout ghcr.io
 

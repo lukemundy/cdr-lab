@@ -53,6 +53,19 @@ func TestOnePodRunsAtATime(t *testing.T) {
 	assert.Equal(t, "Recreate", deployment.Spec.Strategy.Type)
 }
 
+// Verifies: REG-1514
+func TestTheImageTagIsTheAppVersionWhenTheValuesGiveNoTag(t *testing.T) {
+	const appVersion = "0123456789abcdef0123456789abcdef01234567"
+
+	objects, err := charttest.RenderPackaged(t, appVersion, "image.tag=null")
+	require.NoError(t, err)
+	assert.Equal(t, "ghcr.io/lukemundy/cdr-lab/register:"+appVersion, charttest.Main(t, objects).Image)
+
+	objects, err = charttest.RenderPackaged(t, appVersion, "image.tag=fedcba9")
+	require.NoError(t, err)
+	assert.Equal(t, "ghcr.io/lukemundy/cdr-lab/register:fedcba9", charttest.Main(t, objects).Image)
+}
+
 func TestTheImageIsTheTagAndTheOptionalDigest(t *testing.T) {
 	assert.Equal(t, "ghcr.io/lukemundy/cdr-lab/register:0123abc", charttest.Main(t, charttest.MustRender(t)).Image)
 
