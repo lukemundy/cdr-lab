@@ -1,0 +1,427 @@
+{
+  "data-holder/DataHolderBrandActivated": {
+    "schemaVersion": 1,
+    "payload": {
+      "brandId": "dhb-1"
+    }
+  },
+  "data-holder/DataHolderBrandAdded": {
+    "schemaVersion": 1,
+    "payload": {
+      "brand": {
+        "dataHolderBrandId": "dhb-1",
+        "interimId": "interim-1",
+        "brandName": "Sample Bank",
+        "brandGroup": "Sample Group",
+        "industries": [
+          "banking"
+        ],
+        "logoUri": "https://bank.example.com/logo.png",
+        "status": "ACTIVE",
+        "endpointDetail": {
+          "version": "1",
+          "publicBaseUri": "https://bank.example.com",
+          "productBaseUri": "https://products.bank.example.com",
+          "resourceBaseUri": "https://api.bank.example.com",
+          "infosecBaseUri": "https://auth.bank.example.com",
+          "extensionBaseUri": "https://extension.bank.example.com",
+          "websiteUri": "https://www.bank.example.com"
+        },
+        "jwksEndpoint": "https://bank.example.com/jwks"
+      }
+    }
+  },
+  "data-holder/DataHolderBrandDeactivated": {
+    "schemaVersion": 1,
+    "payload": {
+      "brandId": "dhb-1"
+    }
+  },
+  "data-holder/DataHolderBrandDetailsChanged": {
+    "schemaVersion": 1,
+    "payload": {
+      "brandId": "dhb-1",
+      "brandName": "Sample Bank Online",
+      "brandGroup": "Sample Group",
+      "industries": [
+        "banking"
+      ],
+      "logoUri": "https://bank.example.com/logo-2.png",
+      "endpointDetail": {
+        "version": "1",
+        "publicBaseUri": "https://bank.example.com",
+        "productBaseUri": "https://products.bank.example.com",
+        "resourceBaseUri": "https://api.bank.example.com",
+        "infosecBaseUri": "https://auth.bank.example.com",
+        "extensionBaseUri": "https://extension.bank.example.com",
+        "websiteUri": "https://www.bank.example.com"
+      },
+      "jwksEndpoint": "https://bank.example.com/jwks"
+    }
+  },
+  "data-holder/DataHolderBrandRemoved": {
+    "schemaVersion": 1,
+    "payload": {
+      "brandId": "dhb-1"
+    }
+  },
+  "data-holder/DataHolderCreated": {
+    "schemaVersion": 1,
+    "payload": {
+      "dataHolder": {
+        "legalEntityId": "le-holder",
+        "legalEntityName": "Sample Holder Pty Ltd",
+        "logoUri": "https://holder.example.com/logo.png",
+        "status": "ACTIVE",
+        "dataHolderBrands": [
+          {
+            "dataHolderBrandId": "dhb-1",
+            "interimId": "interim-1",
+            "brandName": "Sample Bank",
+            "brandGroup": "Sample Group",
+            "industries": [
+              "banking"
+            ],
+            "logoUri": "https://bank.example.com/logo.png",
+            "status": "ACTIVE",
+            "endpointDetail": {
+              "version": "1",
+              "publicBaseUri": "https://bank.example.com",
+              "productBaseUri": "https://products.bank.example.com",
+              "resourceBaseUri": "https://api.bank.example.com",
+              "infosecBaseUri": "https://auth.bank.example.com",
+              "extensionBaseUri": "https://extension.bank.example.com",
+              "websiteUri": "https://www.bank.example.com"
+            },
+            "jwksEndpoint": "https://bank.example.com/jwks"
+          }
+        ]
+      }
+    }
+  },
+  "data-holder/DataHolderDetailsChanged": {
+    "schemaVersion": 1,
+    "payload": {
+      "legalEntityName": "Sample Holder Group Pty Ltd",
+      "logoUri": "https://holder.example.com/logo-2.png"
+    }
+  },
+  "data-holder/DataHolderImported": {
+    "schemaVersion": 1,
+    "payload": {
+      "dataHolder": {
+        "legalEntityId": "le-holder",
+        "legalEntityName": "Sample Holder Pty Ltd",
+        "logoUri": "https://holder.example.com/logo.png",
+        "status": "ACTIVE",
+        "dataHolderBrands": [
+          {
+            "dataHolderBrandId": "dhb-1",
+            "interimId": "interim-1",
+            "brandName": "Sample Bank",
+            "brandGroup": "Sample Group",
+            "industries": [
+              "banking"
+            ],
+            "logoUri": "https://bank.example.com/logo.png",
+            "status": "ACTIVE",
+            "endpointDetail": {
+              "version": "1",
+              "publicBaseUri": "https://bank.example.com",
+              "productBaseUri": "https://products.bank.example.com",
+              "resourceBaseUri": "https://api.bank.example.com",
+              "infosecBaseUri": "https://auth.bank.example.com",
+              "extensionBaseUri": "https://extension.bank.example.com",
+              "websiteUri": "https://www.bank.example.com"
+            },
+            "jwksEndpoint": "https://bank.example.com/jwks"
+          }
+        ]
+      }
+    }
+  },
+  "data-holder/DataHolderLegalEntityRemoved": {
+    "schemaVersion": 1,
+    "payload": {}
+  },
+  "data-holder/ServerCertificateIssued": {
+    "schemaVersion": 1,
+    "payload": {
+      "brandId": "dhb-1",
+      "thumbprint": "sample-server-thumbprint"
+    }
+  },
+  "data-recipient/AccreditationReinstated": {
+    "schemaVersion": 1,
+    "payload": {}
+  },
+  "data-recipient/AccreditationRevoked": {
+    "schemaVersion": 1,
+    "payload": {}
+  },
+  "data-recipient/AccreditationSurrendered": {
+    "schemaVersion": 1,
+    "payload": {}
+  },
+  "data-recipient/AccreditationSuspended": {
+    "schemaVersion": 1,
+    "payload": {}
+  },
+  "data-recipient/ClientCertificateIssued": {
+    "schemaVersion": 1,
+    "payload": {
+      "softwareProductId": "sp-1",
+      "thumbprint": "sample-client-thumbprint"
+    }
+  },
+  "data-recipient/ClientCertificateRegistered": {
+    "schemaVersion": 1,
+    "payload": {
+      "softwareProductId": "sp-1",
+      "thumbprint": "sample-client-thumbprint"
+    }
+  },
+  "data-recipient/ClientCertificateRemoved": {
+    "schemaVersion": 1,
+    "payload": {
+      "softwareProductId": "sp-1",
+      "thumbprint": "sample-client-thumbprint"
+    }
+  },
+  "data-recipient/DataRecipientBrandActivated": {
+    "schemaVersion": 1,
+    "payload": {
+      "brandId": "drb-1"
+    }
+  },
+  "data-recipient/DataRecipientBrandAdded": {
+    "schemaVersion": 1,
+    "payload": {
+      "brand": {
+        "dataRecipientBrandId": "drb-1",
+        "brandName": "Sample App",
+        "logoUri": "https://app.example.com/logo.png",
+        "status": "ACTIVE",
+        "softwareProducts": [
+          {
+            "softwareProductId": "sp-1",
+            "softwareProductName": "Sample Budget",
+            "softwareProductDescription": "A sample budget product.",
+            "logoUri": "https://app.example.com/budget.png",
+            "status": "ACTIVE",
+            "clientUri": "https://app.example.com",
+            "sectorIdentifierUri": "https://app.example.com/sector",
+            "redirectUris": [
+              "https://app.example.com/callback"
+            ],
+            "tosUri": "https://app.example.com/terms",
+            "policyUri": "https://app.example.com/policy",
+            "jwksUri": "https://app.example.com/jwks",
+            "revocationUri": "https://app.example.com/revoke",
+            "recipientBaseUri": "https://api.app.example.com",
+            "scopes": [
+              "openid",
+              "bank:accounts.basic:read"
+            ],
+            "clientCertificates": [
+              "sample-client-thumbprint"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "data-recipient/DataRecipientBrandDeactivated": {
+    "schemaVersion": 1,
+    "payload": {
+      "brandId": "drb-1"
+    }
+  },
+  "data-recipient/DataRecipientBrandDetailsChanged": {
+    "schemaVersion": 1,
+    "payload": {
+      "brandId": "drb-1",
+      "brandName": "Sample App Plus",
+      "logoUri": "https://app.example.com/logo-2.png"
+    }
+  },
+  "data-recipient/DataRecipientBrandRemoved": {
+    "schemaVersion": 1,
+    "payload": {
+      "brandId": "drb-1"
+    }
+  },
+  "data-recipient/DataRecipientCreated": {
+    "schemaVersion": 1,
+    "payload": {
+      "dataRecipient": {
+        "legalEntityId": "le-recipient",
+        "legalEntityName": "Sample Recipient Pty Ltd",
+        "accreditationNumber": "ADR-000001",
+        "accreditationLevel": "UNRESTRICTED",
+        "logoUri": "https://recipient.example.com/logo.png",
+        "status": "ACTIVE",
+        "dataRecipientBrands": [
+          {
+            "dataRecipientBrandId": "drb-1",
+            "brandName": "Sample App",
+            "logoUri": "https://app.example.com/logo.png",
+            "status": "ACTIVE",
+            "softwareProducts": [
+              {
+                "softwareProductId": "sp-1",
+                "softwareProductName": "Sample Budget",
+                "softwareProductDescription": "A sample budget product.",
+                "logoUri": "https://app.example.com/budget.png",
+                "status": "ACTIVE",
+                "clientUri": "https://app.example.com",
+                "sectorIdentifierUri": "https://app.example.com/sector",
+                "redirectUris": [
+                  "https://app.example.com/callback"
+                ],
+                "tosUri": "https://app.example.com/terms",
+                "policyUri": "https://app.example.com/policy",
+                "jwksUri": "https://app.example.com/jwks",
+                "revocationUri": "https://app.example.com/revoke",
+                "recipientBaseUri": "https://api.app.example.com",
+                "scopes": [
+                  "openid",
+                  "bank:accounts.basic:read"
+                ],
+                "clientCertificates": [
+                  "sample-client-thumbprint"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "data-recipient/DataRecipientDetailsChanged": {
+    "schemaVersion": 1,
+    "payload": {
+      "legalEntityName": "Sample Recipient Group Pty Ltd",
+      "accreditationNumber": "ADR-000002",
+      "accreditationLevel": "SPONSORED",
+      "logoUri": "https://recipient.example.com/logo-2.png"
+    }
+  },
+  "data-recipient/DataRecipientImported": {
+    "schemaVersion": 1,
+    "payload": {
+      "dataRecipient": {
+        "legalEntityId": "le-recipient",
+        "legalEntityName": "Sample Recipient Pty Ltd",
+        "accreditationNumber": "ADR-000001",
+        "accreditationLevel": "UNRESTRICTED",
+        "logoUri": "https://recipient.example.com/logo.png",
+        "status": "ACTIVE",
+        "dataRecipientBrands": [
+          {
+            "dataRecipientBrandId": "drb-1",
+            "brandName": "Sample App",
+            "logoUri": "https://app.example.com/logo.png",
+            "status": "ACTIVE",
+            "softwareProducts": [
+              {
+                "softwareProductId": "sp-1",
+                "softwareProductName": "Sample Budget",
+                "softwareProductDescription": "A sample budget product.",
+                "logoUri": "https://app.example.com/budget.png",
+                "status": "ACTIVE",
+                "clientUri": "https://app.example.com",
+                "sectorIdentifierUri": "https://app.example.com/sector",
+                "redirectUris": [
+                  "https://app.example.com/callback"
+                ],
+                "tosUri": "https://app.example.com/terms",
+                "policyUri": "https://app.example.com/policy",
+                "jwksUri": "https://app.example.com/jwks",
+                "revocationUri": "https://app.example.com/revoke",
+                "recipientBaseUri": "https://api.app.example.com",
+                "scopes": [
+                  "openid",
+                  "bank:accounts.basic:read"
+                ],
+                "clientCertificates": [
+                  "sample-client-thumbprint"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "data-recipient/SoftwareProductActivated": {
+    "schemaVersion": 1,
+    "payload": {
+      "softwareProductId": "sp-1"
+    }
+  },
+  "data-recipient/SoftwareProductAdded": {
+    "schemaVersion": 1,
+    "payload": {
+      "brandId": "drb-1",
+      "softwareProduct": {
+        "softwareProductId": "sp-1",
+        "softwareProductName": "Sample Budget",
+        "softwareProductDescription": "A sample budget product.",
+        "logoUri": "https://app.example.com/budget.png",
+        "status": "ACTIVE",
+        "clientUri": "https://app.example.com",
+        "sectorIdentifierUri": "https://app.example.com/sector",
+        "redirectUris": [
+          "https://app.example.com/callback"
+        ],
+        "tosUri": "https://app.example.com/terms",
+        "policyUri": "https://app.example.com/policy",
+        "jwksUri": "https://app.example.com/jwks",
+        "revocationUri": "https://app.example.com/revoke",
+        "recipientBaseUri": "https://api.app.example.com",
+        "scopes": [
+          "openid",
+          "bank:accounts.basic:read"
+        ],
+        "clientCertificates": [
+          "sample-client-thumbprint"
+        ]
+      }
+    }
+  },
+  "data-recipient/SoftwareProductDeactivated": {
+    "schemaVersion": 1,
+    "payload": {
+      "softwareProductId": "sp-1"
+    }
+  },
+  "data-recipient/SoftwareProductDetailsChanged": {
+    "schemaVersion": 1,
+    "payload": {
+      "softwareProductId": "sp-1",
+      "softwareProductName": "Sample Budget",
+      "softwareProductDescription": "A sample budget product.",
+      "logoUri": "https://app.example.com/budget-2.png",
+      "clientUri": "https://app.example.com",
+      "sectorIdentifierUri": "https://app.example.com/sector",
+      "redirectUris": [
+        "https://app.example.com/callback"
+      ],
+      "tosUri": "https://app.example.com/terms",
+      "policyUri": "https://app.example.com/policy",
+      "jwksUri": "https://app.example.com/jwks",
+      "revocationUri": "https://app.example.com/revoke",
+      "recipientBaseUri": "https://api.app.example.com",
+      "scopes": [
+        "openid"
+      ]
+    }
+  },
+  "data-recipient/SoftwareProductRemoved": {
+    "schemaVersion": 1,
+    "payload": {
+      "softwareProductId": "sp-1"
+    }
+  }
+}

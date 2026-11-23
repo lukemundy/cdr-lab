@@ -121,6 +121,10 @@ None.
 - <a id="rls-0082"></a>**RLS-0082** When a registered event type has no sample, the tests of the service fail. ([Judgement: a fresh deployment from the migrations and the event golden files (ADR 0028)][adr-0028])
 - <a id="rls-0083"></a>**RLS-0083** When the encoded sample of an event type is not the same as its entry in the event golden file, the tests of the service fail. ([Judgement: a fresh deployment from the migrations and the event golden files (ADR 0028)][adr-0028])
 - <a id="rls-0084"></a>**RLS-0084** The tests write the event golden file again only when a person asks for it. For example, with a flag of the test command. ([Judgement: a fresh deployment from the migrations and the event golden files (ADR 0028)][adr-0028])
+- <a id="rls-0085"></a>**RLS-0085** Each field of a sample has a value that is not the zero value of its type. This includes each field of a nested object, each item of a list and each value of a map. A list and a map have one or more items. When a field of a sample has the zero value, the tests of the service fail. ([Judgement: each field of a sample has a value](#rls-0111))
+- <a id="rls-0086"></a>**RLS-0086** When the codec of the service cannot decode an entry of the event golden file back to its sample, the tests of the service fail. ([Judgement: the codec decodes each entry](#rls-0112))
+- <a id="rls-0087"></a>**RLS-0087** When the event golden file has an entry for an event type that the service does not register, the tests of the service fail. ([Judgement: a fresh deployment from the migrations and the event golden files (ADR 0028)][adr-0028])
+- <a id="rls-0088"></a>**RLS-0088** The event golden file of a service is `services/<service>/internal/app/testdata/events.golden.json`. It is one JSON object, indented, with its keys in sorted order. The key of an entry is `<stream type>/<event type>`, and its value is an object with the fields `schemaVersion` and `payload`. ([Judgement: the path and the format of the event golden file](#rls-0113))
 
 ## Verification by a lab user
 
@@ -199,6 +203,24 @@ None.
 - Basis: Step 3.2. Helm verifies only PGP provenance files ([Helm: provenance and integrity][helm-provenance]). cosign verifies the signature of a digest ([cosign: verify][cosign-verify]).
 - Reason: `helm install` does not verify a cosign signature. A tag can move after the verification, but a digest cannot, so the installed chart is the verified chart.
 
+### <a id="rls-0111"></a>RLS-0111 Each field of a sample has a value
+
+- Kind: choice
+- Basis: Step 3.2. `encoding/json` does not encode a field with the `omitempty` option when the field has an empty value, and it encodes a nil pointer as `null` ([Go: encoding/json][go-json]).
+- Reason: A field that is not in the encoded sample is not in the event golden file. Then a change of the name or the type of that field does not change the file, and the release does not find the change.
+
+### <a id="rls-0112"></a>RLS-0112 The codec decodes each entry
+
+- Kind: choice
+- Basis: Step 3.3. ADR 0028 compares the encoded samples with the file. A field can encode but not decode, for example a type with a `MarshalJSON` method and no `UnmarshalJSON` method.
+- Reason: The release must know whether the new version can read the stored events. A decode of each entry with the codec of the service shows this directly, at a small cost.
+
+### <a id="rls-0113"></a>RLS-0113 The path and the format of the event golden file
+
+- Kind: choice
+- Basis: Step 3.3. The codecs of a service are in its `internal/app` package, and Go tools ignore a `testdata` directory ([Go: test packages][go-testdata]). An event type name is unique only in its codec.
+- Reason: The release finds the files with one pattern, and it compares the entries by key. Indented JSON lets a reviewer see a payload change in the diff. The stream type in the key keeps two codecs of one service apart.
+
 ## Withdrawn
 
 None.
@@ -217,6 +239,8 @@ None.
 [gha-concurrency]: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#concurrency
 [gha-permissions]: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions
 [gha-workflow-dispatch]: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_dispatch
+[go-json]: https://pkg.go.dev/encoding/json#Marshal
+[go-testdata]: https://pkg.go.dev/cmd/go#hdr-Test_packages
 [helm-chart-versions]: https://helm.sh/docs/topics/charts/
 [helm-provenance]: https://helm.sh/docs/topics/provenance/
 [ntia-sbom]: https://www.ntia.gov/report/2021/minimum-elements-software-bill-materials-sbom
