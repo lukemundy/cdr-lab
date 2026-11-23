@@ -20,16 +20,21 @@ type harness struct {
 	api       *kubetest.API
 	register  *registertest.Register
 	env       map[string]string
+	environ   []string
+	compose   *fakeCompose
 	kubeCalls int
 }
 
 func newHarness(t *testing.T) *harness {
 	t.Helper()
 
+	register := registertest.New(t)
+
 	return &harness{
 		api:      kubetest.New(t),
-		register: registertest.New(t),
+		register: register,
 		env:      map[string]string{"REGISTER_OPERATOR_TOKEN": registertest.Token},
+		compose:  &fakeCompose{register: register},
 	}
 }
 
@@ -44,6 +49,8 @@ func (h *harness) run(args ...string) (code int, stdout, stderr string) {
 		},
 		httpClient: http.DefaultClient,
 		getenv:     func(k string) string { return h.env[k] },
+		environ:    func() []string { return h.environ },
+		compose:    h.compose.exec,
 		now:        time.Now,
 		caKeyBits:  2048,
 	})

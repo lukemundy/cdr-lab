@@ -20,6 +20,7 @@ import (
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/cainit"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/certcheck"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/certissue"
+	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/compose"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/kube"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/pemfile"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/publiccert"
@@ -51,6 +52,14 @@ commands:
                             certificate file has no current certificate. The first NAME is the CN.
                             cdrlab public-cert issue -dir DIR -cert FILE -key FILE [-key-readable-by-all]
                               [-renew-before DURATION] NAME...
+  cdrlab up                 make the CAs and the certificates of the compose lab, and start the compose lab. The
+                            certificate list lab/certificates.json of the lab directory gives the certificates.
+                            cdrlab up -source [-dir DIR] [-all-banks] [-no-build] [-no-telemetry]
+                              [-wait-timeout DURATION] [SERVICE]...
+  cdrlab down               stop the compose lab, and keep its data: cdrlab down [-dir DIR]
+  cdrlab reset              stop the compose lab, and delete its data and its CAs: cdrlab reset [-dir DIR]
+
+The compose commands run Docker Compose as "docker compose", or as the command in the variable CDRLAB_COMPOSE.
 `
 
 // requestTimeout is more than the time of a Register issue, which signs one certificate.
@@ -62,6 +71,9 @@ type deps struct {
 	getenv     func(string) string
 	now        func() time.Time
 	caKeyBits  int
+	environ    func() []string
+	compose    compose.Exec
+	stderr     io.Writer
 }
 
 // errUsage gives the exit status 2, as for a flag error.
@@ -74,6 +86,8 @@ func main() {
 		httpClient: &http.Client{Timeout: requestTimeout},
 		getenv:     os.Getenv,
 		now:        time.Now,
+		environ:    os.Environ,
+		compose:    compose.OSExec,
 		// The size of the CA keys of the PKI specification (PKI-0003).
 		caKeyBits: 4096,
 	})
@@ -95,20 +109,23 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer, d deps) i
 		return 0
 	}
 
-	commands := map[string]func(context.Context, []string, io.Writer, deps) error{
+	commands := map[string]command{
 		"ca init":           caInit,
 		"cert issue":        certIssue,
 		"public-cert issue": publicCertIssue,
+		"up":                up,
+		"down":              down,
+		"reset":             reset,
 	}
 
-	if len(args) < 2 || commands[args[0]+" "+args[1]] == nil {
+	name, rest := commandName(args, commands)
+	if name == "" {
 		_, _ = fmt.Fprint(stderr, usage)
 		return 2
 	}
 
-	name := args[0] + " " + args[1]
-
-	err := commands[name](ctx, args[2:], stdout, d)
+	d.stderr = stderr
+	err := commands[name](ctx, rest, stdout, d)
 
 	switch {
 	case err == nil:
@@ -120,6 +137,25 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer, d deps) i
 		_, _ = fmt.Fprintf(stderr, "cdrlab %s: %v\n", name, err)
 		return 1
 	}
+}
+
+type command func(context.Context, []string, io.Writer, deps) error
+
+// commandName gives the command of one or two words at the start of args, and the other arguments.
+func commandName(args []string, commands map[string]command) (string, []string) {
+	if len(args) >= 1 {
+		if _, ok := commands[args[0]]; ok {
+			return args[0], args[1:]
+		}
+	}
+
+	if len(args) >= 2 {
+		if _, ok := commands[args[0]+" "+args[1]]; ok {
+			return args[0] + " " + args[1], args[2:]
+		}
+	}
+
+	return "", nil
 }
 
 func newFlags(name string) *flag.FlagSet {

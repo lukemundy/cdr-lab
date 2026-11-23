@@ -124,12 +124,12 @@ mise run openid-conformance # the OpenID FAPI 1.0 Advanced test plan against the
 The supported environments are the lab deployment (Docker Compose), a cluster deployment from the umbrella chart ([specification](charts/cdr-lab/DESIGN.md)) and CI. The lab deployment is Docker Compose (`compose.yaml`). It runs all services, PostgreSQL, a [Mailpit](https://mailpit.axllent.org) mail sink and a [`grafana/otel-lgtm`](https://github.com/grafana/docker-otel-lgtm) telemetry backend. It needs Docker, or Podman with its Docker-compatible API (`DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock`).
 
 ```sh
-mise run up         # create the lab CAs if necessary, build and start the lab (or only the named services), and wait until it is healthy
-mise run down       # stop the lab; data stays
-mise run reset      # stop the lab and delete all its data and its CAs
+mise run up         # cdrlab up -source: make the lab CAs and certificates if necessary, build and start the lab (or only the named services), and wait until it is healthy
+mise run down       # cdrlab down: stop the lab; data stays
+mise run reset      # cdrlab reset: stop the lab and delete all its data and its CAs
 ```
 
-To start the lab without telemetry, set `COMPOSE_PROFILES` and `LAB_OTLP_ENDPOINT` to empty values, as CI does.
+To start the lab without telemetry, run `mise run up --no-telemetry`, as CI does. `cdrlab` runs Docker Compose as `docker compose`, or as the command in `CDRLAB_COMPOSE` (mise sets the pinned `docker-compose`).
 
 The lab and CI run one bank, `wattle-bank`. To also start the three other preset banks (compose profile `all-banks`), run `mise run up --all-banks`. Each bank is its own instance, with its own Register record and its own block of ports.
 
@@ -164,7 +164,7 @@ http --verify .lab/pki/cdr/ca-bundle.pem --cert .lab/pki/conformance/client.crt 
 
 ### Certificates
 
-`mise run pki` runs `cdrlab` to create the lab CAs (a CDR CA and a separate public CA) and the public TLS certificates of the lab in `.lab/pki/`, which git ignores. `mise run up` runs it first, starts the Register, gets each CDR certificate of the lab services and tests from the Register operator interface, and then starts the other services. The Register issues the certificate of its own mTLS listener at start, and renews it, with the key in memory only. `mise run reset` deletes the CAs. TLS clients trust `public/root.crt`, and mTLS clients and servers trust `cdr/ca-bundle.pem`. `cdrlab cert issue` also gets a CDR certificate from a CSR. See [pki/DESIGN.md](pki/DESIGN.md) and `go run ./cli/cdrlab/cmd/cdrlab -h`. In a running lab, the Register is the CDR intermediate CA: its operator interface issues CDR client and server certificates from a CSR and revokes CDR certificates, with no host access, and the Register signs and serves the CRL ([ADR 0022](docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md)).
+`cdrlab up` creates the lab CAs (a CDR CA and a separate public CA) and the public TLS certificates of the lab in `.lab/pki/`, which git ignores. Then it starts the Register, gets each CDR certificate of the lab services and tests from the Register operator interface, and starts the other services. [`lab/certificates.json`](lab/certificates.json) lists the certificates ([cdrlab: the certificate list](cli/cdrlab/design/compose-lab.md#cli-0147)). The Register issues the certificate of its own mTLS listener at start, and renews it, with the key in memory only. `mise run reset` deletes the CAs. TLS clients trust `public/root.crt`, and mTLS clients and servers trust `cdr/ca-bundle.pem`. `cdrlab cert issue` also gets a CDR certificate from a CSR. See [pki/DESIGN.md](pki/DESIGN.md) and `go run ./cli/cdrlab/cmd/cdrlab -h`. In a running lab, the Register is the CDR intermediate CA: its operator interface issues CDR client and server certificates from a CSR and revokes CDR certificates, with no host access, and the Register signs and serves the CRL ([ADR 0022](docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md)).
 
 ### Data
 
