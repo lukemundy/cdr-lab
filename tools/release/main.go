@@ -175,6 +175,9 @@ func runNotes(args []string, stdout io.Writer) error {
 			}
 
 			digests[chart] = strings.TrimSpace(string(digest))
+			if digests[chart] == "" {
+				return fmt.Errorf("the digest file of the chart %s is empty", chart)
+			}
 		}
 	}
 
