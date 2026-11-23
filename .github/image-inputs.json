@@ -32,5 +32,19 @@
     "lab",
     ":(exclude)*.md",
     ":(exclude)docs"
+  ],
+  "cdrlab": [
+    ".github/image-inputs.json",
+    ".github/workflows/ci.yml",
+    ".github/actions/publish-image",
+    "mise.toml",
+    "go.mod",
+    "go.sum",
+    "pkg",
+    "cli/cdrlab",
+    "tools/notices",
+    ".dockerignore",
+    ":(exclude)*.md",
+    ":(exclude)docs"
   ]
 }

@@ -21,7 +21,7 @@ PNPM_VERSION = '''{{ exec(command=`awk -F'"' '/^pnpm = /{print $2}' "` ~ config_
 COMPOSE_PROFILES = "{{ get_env(name='COMPOSE_PROFILES', default='telemetry') }}"
 
 [vars]
-# The -X flags in services/*/Dockerfile must match these variables.
+# The -X flags in services/*/Dockerfile and cli/*/Dockerfile must match these variables.
 build_env = """
 export BUILD_COMMIT="$(git describe --always --dirty --abbrev=40 --exclude='*')"
 export BUILD_COMMIT_SHORT="$(git describe --always --dirty --exclude='*')"
@@ -101,7 +101,7 @@ status=0
 for pair in go:golang node:node; do
   tool=${pair%%:*} image=${pair#*:}
   want=$(awk -F'"' "/^$tool = /{print \$2}" mise.toml)
-  for ref in $(grep -oh "docker.io/library/$image:[^@ ]*" services/*/Dockerfile compose.yaml); do
+  for ref in $(grep -oh "docker.io/library/$image:[^@ ]*" services/*/Dockerfile cli/*/Dockerfile compose.yaml); do
     tag=${ref#*:}
     case "$tag" in
       "$want" | "$want"-*) ;;

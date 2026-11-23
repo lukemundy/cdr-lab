@@ -192,3 +192,39 @@ func TestACSRNamesEachRuleThatItBreaks(t *testing.T) {
 
 	assert.EqualError(t, ca.ValidateCSR(csr(t, tmpl), ca.Client), "subject CN is required\nsubject C is required")
 }
+
+// Verifies: CA-0012, CA-0013, CA-0015, CA-0017
+func TestNewCSRGivesAServerCSRThatFollowsTheCDSProfile(t *testing.T) {
+	data, err := ca.NewCSR(key(3), ca.Server, "wattle-bank", "Wattle Bank Ltd", []string{"wattle-bank", "localhost"})
+	require.NoError(t, err)
+
+	parsed, err := ca.ParseCSR(data)
+	require.NoError(t, err)
+	require.NoError(t, ca.ValidateCSR(parsed, ca.Server))
+	assert.Equal(t, "CN=wattle-bank,OU=Consumer Data Right,O=Wattle Bank Ltd,C=AU", parsed.Subject.String())
+	assert.Equal(t, []string{"wattle-bank", "localhost"}, parsed.DNSNames)
+	assert.True(t, key(3).PublicKey.Equal(parsed.PublicKey))
+}
+
+// Verifies: CA-0024
+func TestNewCSRGivesAClientCSRWithNoSubjectAlternativeNames(t *testing.T) {
+	data, err := ca.NewCSR(key(3), ca.Client, "Recipient App Web", "Recipient Brand", nil)
+	require.NoError(t, err)
+
+	parsed, err := ca.ParseCSR(data)
+	require.NoError(t, err)
+	require.NoError(t, ca.ValidateCSR(parsed, ca.Client))
+	assert.Empty(t, parsed.DNSNames)
+}
+
+// Verifies: CA-0011
+func TestNewCSRRefusesACSRThatBreaksTheProfile(t *testing.T) {
+	_, err := ca.NewCSR(key(3), ca.Client, "Recipient App Web", "Recipient Brand", []string{"app.example"})
+	require.Error(t, err)
+
+	large, err := rsa.GenerateKey(rand.Reader, 3072)
+	require.NoError(t, err)
+
+	_, err = ca.NewCSR(large, ca.Server, "holder.example", "Holder", nil)
+	require.Error(t, err)
+}

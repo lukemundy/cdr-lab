@@ -1,6 +1,7 @@
 *
 !go.mod
 !go.sum
+!cli/
 !pkg/
 !services/
 !tools/notices/

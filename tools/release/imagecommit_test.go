@@ -162,24 +162,40 @@ func TestNoCommitThatChangesAnInputIsRefused(t *testing.T) {
 	require.Error(t, err)
 }
 
-// Verifies: RLS-0023
-func TestTheImageInputsFileHasEachService(t *testing.T) {
+// Verifies: RLS-0023, RLS-0011
+func TestTheImageInputsFileHasEachImage(t *testing.T) {
 	t.Parallel()
 
 	inputs, err := readInputs("../../.github/image-inputs.json")
 	require.NoError(t, err)
 
-	entries, err := os.ReadDir("../../services")
+	dockerfiles, err := filepath.Glob("../../*/*/Dockerfile")
 	require.NoError(t, err)
 
-	for _, e := range entries {
-		if _, err := os.Stat(filepath.Join("../../services", e.Name(), "Dockerfile")); err != nil {
+	for _, dockerfile := range dockerfiles {
+		dir := filepath.ToSlash(strings.TrimPrefix(filepath.Dir(dockerfile), "../../"))
+		if !strings.HasPrefix(dir, "services/") && !strings.HasPrefix(dir, "cli/") {
 			continue
 		}
 
-		assert.Contains(t, inputs[e.Name()], "services/"+e.Name(), e.Name())
-		assert.Contains(t, inputs[e.Name()], ".github/image-inputs.json", e.Name())
-		assert.Contains(t, inputs[e.Name()], ".github/actions/publish-image", e.Name())
+		name := filepath.Base(dir)
+		assert.Contains(t, inputs[name], dir, name)
+		assert.Contains(t, inputs[name], ".github/image-inputs.json", name)
+		assert.Contains(t, inputs[name], ".github/actions/publish-image", name)
+	}
+
+	assert.Contains(t, inputs, "cdrlab")
+}
+
+// Verifies: CLI-0051
+func TestTheInputsOfTheCdrlabImageAreItsGoCodeTheLibrariesAndTheModuleFiles(t *testing.T) {
+	t.Parallel()
+
+	inputs, err := readInputs("../../.github/image-inputs.json")
+	require.NoError(t, err)
+
+	for _, input := range []string{"cli/cdrlab", "pkg", "go.mod", "go.sum"} {
+		assert.Contains(t, inputs["cdrlab"], input)
 	}
 }
 

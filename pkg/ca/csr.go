@@ -2,10 +2,14 @@
 package ca
 
 import (
+	"crypto"
 	"crypto/ecdsa"
 	"crypto/ed25519"
+	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"net/netip"
@@ -134,4 +138,32 @@ func keyName(k any) string {
 	default:
 		return fmt.Sprintf("%T", k)
 	}
+}
+
+// NewCSR gives a PEM CSR with the CDS profile, for the subject O and CN. It refuses a CSR that ValidateCSR refuses.
+func NewCSR(key crypto.Signer, kind Kind, commonName, organisation string, dnsNames []string) ([]byte, error) {
+	der, err := x509.CreateCertificateRequest(rand.Reader, &x509.CertificateRequest{
+		Subject: pkix.Name{
+			Country:            []string{"AU"},
+			Organization:       []string{organisation},
+			OrganizationalUnit: []string{cdrOrganisationalUnit},
+			CommonName:         commonName,
+		},
+		DNSNames:           dnsNames,
+		SignatureAlgorithm: x509.SHA256WithRSA,
+	}, key)
+	if err != nil {
+		return nil, err
+	}
+
+	csr, err := x509.ParseCertificateRequest(der)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := ValidateCSR(csr, kind); err != nil {
+		return nil, err
+	}
+
+	return pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE REQUEST", Bytes: der}), nil
 }

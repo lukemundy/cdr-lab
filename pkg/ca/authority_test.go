@@ -264,3 +264,16 @@ func TestEachCDRCertificateHasTheSubjectKeyIdentifierOfItsKey(t *testing.T) {
 		})
 	}
 }
+
+func TestNewCDRGivesTheCDRRootAndIntermediateOfTheLab(t *testing.T) {
+	root, intermediate, err := ca.NewCDR(key(0), key(1), now)
+	require.NoError(t, err)
+
+	lab := newLab(t)
+	assert.Equal(t, lab.CDRRoot.Certificate.Subject.String(), root.Certificate.Subject.String())
+	assert.Equal(t, lab.CDRIntermediate.Certificate.Subject.String(), intermediate.Certificate.Subject.String())
+	require.NoError(t, intermediate.Certificate.CheckSignatureFrom(root.Certificate))
+	assert.True(t, intermediate.Certificate.MaxPathLenZero)
+	assert.Equal(t, now.AddDate(20, 0, 0), root.Certificate.NotAfter)
+	assert.Equal(t, now.AddDate(10, 0, 0), intermediate.Certificate.NotAfter)
+}
