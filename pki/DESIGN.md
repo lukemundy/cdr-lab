@@ -1,6 +1,6 @@
 # Mock CDR PKI
 
-The mock CDR PKI gives the lab a CDR CA and a separate public CA. They have the structure and the certificate profiles of production. In production, the ACCC operates the CDR CA, and TLS endpoints use certificates from public CAs. A real component that trusts the mock CAs then needs only a change of its CA bundles and certificates to work with production. The `pki` command makes the CAs and issues the certificates of the lab at set-up, except the certificate of the mTLS listener of the Register, which [the Register issues](../services/register/design/certificate-management.md#reg-1515). In a running lab, the Register is the CDR intermediate CA ([ADR 0022][adr-0022]).
+The mock CDR PKI gives the lab a CDR CA and a separate public CA. They have the structure and the certificate profiles of production. In production, the ACCC operates the CDR CA, and TLS endpoints use certificates from public CAs. A real component that trusts the mock CAs then needs only a change of its CA bundles and certificates to work with production. The [`cdrlab` CA set-up](../cli/cdrlab/DESIGN.md#cli-0105) makes the CAs, and `cdrlab` issues the public TLS certificates of the lab. In a running lab, the Register is the CDR intermediate CA ([ADR 0022][adr-0022]). Each CDR certificate of a lab service or a lab test comes from the Register ([ADR 0032][adr-0032]), and the Register [issues the certificate of its own mTLS listener](../services/register/design/certificate-management.md#reg-1515).
 
 ## Context
 
@@ -11,9 +11,10 @@ flowchart LR
   register["Mock CDR Register<br>[External system]"]
   services["Lab services and tests<br>[External system]"]
 
-  labuser -- "Makes the CAs and issues certificates<br>pki command" --> pki
+  labuser -- "Makes the CAs and issues public TLS certificates<br>cdrlab" --> pki
   pki -- "Gives the intermediate certificate and key<br>Files" --> register
   pki -- "Gives the CA bundles, certificates and keys<br>Files" --> services
+  services -- "Get CDR certificates from a CSR<br>HTTP, operator interface" --> register
   services -- "Get the CRL of the intermediate<br>HTTP" --> register
 
   classDef person fill:#08427b,color:#fff,stroke:#052e56
@@ -34,8 +35,8 @@ flowchart LR
 
 - A mock CDR CA: a root CA and one issuing intermediate CA.
 - A mock public CA for TLS endpoints.
-- The issue of CDR certificates from CSRs, and of public TLS server certificates for lab hosts. The `pki` command issues at the set-up of the lab. In a running lab, the Register issues CDR client and server certificates as the intermediate CA ([ADR 0022][adr-0022]).
-- The revocation of CDR certificates, and a CRL of the CDR intermediate. In a running lab, the Register revokes CDR certificates, and signs and serves the CRL ([ADR 0022][adr-0022]). The `pki` command does neither.
+- The issue of CDR certificates from CSRs, and of public TLS server certificates for lab hosts. The Register issues each CDR client and server certificate as the intermediate CA ([ADR 0022][adr-0022], [ADR 0032][adr-0032]). `cdrlab` issues the public TLS server certificates.
+- The revocation of CDR certificates, and a CRL of the CDR intermediate. In a running lab, the Register revokes CDR certificates, and signs and serves the CRL ([ADR 0022][adr-0022]). [`cdrlab` does neither](../cli/cdrlab/DESIGN.md#cli-0112).
 
 ## Non-goals
 
@@ -51,13 +52,6 @@ flowchart LR
 - <a id="pki-0003"></a>**PKI-0003** The root key and the intermediate key are RSA 4096 keys. ([CP section 6.1.5, Table 5][accc-cp]; observed on 2026-10-02: the key of "CDR Intermediate CA 2025" is RSA 4096)
 - <a id="pki-0012"></a>**PKI-0012** A TLS endpoint uses a certificate from the public CA, not a CDR certificate. ([CDS: Participant Endpoints][cds-participant-endpoints])
 - <a id="pki-0013"></a>**PKI-0013** Relying parties trust the CDR CA bundle, which has the intermediate and the root. ([ACCC: Certificate Management][accc-cert-mgmt]; observed on 2026-10-02: `secure.api.cdr.gov.au` sends only its leaf certificate, so a client that trusts only the root cannot verify it)
-
-## CSR profile
-
-The [CA library](../pkg/ca/DESIGN.md) gives the CSR profile that the CDR CA checks.
-
-- <a id="pki-0028"></a>**PKI-0028** The `pki` command does not check the O of a server CSR. ([Judgement: only the Register checks the participant names of a CSR](#pki-0081))
-- <a id="pki-0030"></a>**PKI-0030** The `pki` command does not check the CN and the O of a client CSR. ([Judgement: only the Register checks the participant names of a CSR](#pki-0081))
 
 ## Certificate profile
 
@@ -81,10 +75,10 @@ The [Register certificate revocation area](../services/register/design/certifica
 - <a id="pki-0064"></a>**PKI-0064** The Register serves the CRL over HTTP, with the content type `application/pkix-crl`, at the URL in each CDR certificate. ([RFC 2585, section 4.2][rfc2585-mime])
 - <a id="pki-0065"></a>**PKI-0065** A lab reset deletes the CAs and the Register database, and thus each revocation and each CRL. ([Judgement: CRL numbers from the time across lab resets](#pki-0089))
 - <a id="pki-0066"></a>**PKI-0066** After a lab reset, the new intermediate has no revocations. Its first CRL has a higher CRL number than each CRL of an earlier lab: the number of a new CRL is the time of its signature in seconds since the Unix epoch, or the number of the previous CRL plus 1 when that is higher. ([Judgement: CRL numbers from the time across lab resets](#pki-0089))
-- <a id="pki-0067"></a>**PKI-0067** The `pki` command does not revoke certificates, sign CRLs or keep a list of revocations, and it has no `revoke` command and no `crl` command. ([Judgement: the Register is the CDR intermediate CA (ADR 0022)](../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md))
-- <a id="pki-0068"></a>**PKI-0068** The set-up issues the fixture `conformance/revoked.crt` before the lab starts, as each other fixture, and does not revoke it. ([Judgement: each conformance test revokes the fixture](#pki-0090))
+- <a id="pki-0068"></a>**PKI-0068** The set-up gets the fixture `conformance/revoked.crt` through the Register issue path before the conformance tests start, as each other fixture, and does not revoke it. ([Judgement: each conformance test revokes the fixture](#pki-0090))
 - <a id="pki-0069"></a>**PKI-0069** When a conformance test needs a revoked certificate, the test revokes the fixture through the Register operator interface with the reason `keyCompromise`. ([Judgement: each conformance test revokes the fixture](#pki-0090))
 - <a id="pki-0070"></a>**PKI-0070** When the fixture is already revoked (409), the conformance test accepts the response. ([Judgement: each conformance test revokes the fixture](#pki-0090))
+- <a id="pki-0096"></a>**PKI-0096** When a conformance test needs a client certificate that the Register does not accept, the test first removes the registration of the fixture `conformance/unregistered.crt` through the Register operator interface. ([Judgement: each conformance test removes the registration of the fixture](#pki-0097))
 
 ## Keys
 
@@ -132,7 +126,7 @@ The [Register certificate revocation area](../services/register/design/certifica
 
 - Kind: choice
 - Basis: Step 3.3. The CDS defines no interface to revoke a certificate, and the Register keeps the only list of revocations ([ADR 0022][adr-0022]). A test can use an interface that the CDR does not define to set up a state ([a conformance test can set up a state through an interface that the CDR does not define](../conformance/DESIGN.md#conf-0002)).
-- Reason: In the lab, [the data holder loads the CRL at each check](../services/dataholder/design/api-standards.md#dh-0468), so it sees the revocation at once. The lab start then has no step after the Register starts.
+- Reason: In the lab, [the data holder loads the CRL at each check](../services/dataholder/design/api-standards.md#dh-0468), so it sees the revocation at once. The set-up then has no revocation step.
 
 ### <a id="pki-0091"></a>PKI-0091 The Register service name in the CRL URL
 
@@ -157,6 +151,12 @@ The [Register certificate revocation area](../services/register/design/certifica
 - Kind: choice
 - Basis: Step 3.3. Lab containers read the keys as a different user ([production gaps][production-gaps]).
 - Reason: The intermediate key signs only lab certificates. The key of a lab certificate protects only a throwaway lab identity. The lab data has no value.
+
+### <a id="pki-0097"></a>PKI-0097 Each conformance test removes the registration of the fixture
+
+- Kind: choice
+- Basis: Step 3.3. [A client certificate issue also registers the certificate](../services/register/design/certificate-management.md#reg-0610), and [a removal that is not necessary changes nothing](../services/register/design/operator-interface.md#reg-0842). Tests can [share a change that is idempotent](../conformance/DESIGN.md#conf-0056).
+- Reason: The Register is the only issuer of the fixture, so the fixture is registered after its issue. The removal is idempotent, so each test that needs the fixture does it, in each sequence of the tests.
 
 ## Withdrawn
 
@@ -183,7 +183,9 @@ The [Register certificate revocation area](../services/register/design/certifica
 - <a id="pki-0025"></a>**PKI-0025** Moved to [the length of a host name](../pkg/ca/DESIGN.md#ca-0021).
 - <a id="pki-0026"></a>**PKI-0026** Moved to [the length of the CN of a server CSR](../pkg/ca/DESIGN.md#ca-0022).
 - <a id="pki-0027"></a>**PKI-0027** Moved to [a valid host name with no dot](../pkg/ca/DESIGN.md#ca-0023).
+- <a id="pki-0028"></a>**PKI-0028** Removed.
 - <a id="pki-0029"></a>**PKI-0029** Moved to [no subject alternative names in a client CSR](../pkg/ca/DESIGN.md#ca-0024).
+- <a id="pki-0030"></a>**PKI-0030** Removed.
 - <a id="pki-0031"></a>**PKI-0031** Moved to [the subject of a CDR certificate](../pkg/ca/DESIGN.md#ca-0025).
 - <a id="pki-0032"></a>**PKI-0032** Moved to [the validity of a CDR certificate](../pkg/ca/DESIGN.md#ca-0026).
 - <a id="pki-0033"></a>**PKI-0033** Moved to [no validity after the issuer expires](../pkg/ca/DESIGN.md#ca-0027).
@@ -207,6 +209,7 @@ The [Register certificate revocation area](../services/register/design/certifica
 - <a id="pki-0057"></a>**PKI-0057** Moved to [the signature algorithm of the CRL](../pkg/ca/DESIGN.md#ca-0045).
 - <a id="pki-0058"></a>**PKI-0058** Moved to [the extensions of the CRL](../pkg/ca/DESIGN.md#ca-0046).
 - <a id="pki-0060"></a>**PKI-0060** Moved to [the next update of a CRL](../pkg/ca/DESIGN.md#ca-0047).
+- <a id="pki-0067"></a>**PKI-0067** Moved to [no command that revokes a certificate or signs a CRL](../cli/cdrlab/DESIGN.md#cli-0112).
 - <a id="pki-0078"></a>**PKI-0078** Moved to [the judgement on mock CA names](../pkg/ca/DESIGN.md#ca-0048).
 - <a id="pki-0079"></a>**PKI-0079** Moved to [the judgement on the production profiles](../pkg/ca/DESIGN.md#ca-0049).
 - <a id="pki-0080"></a>**PKI-0080** Moved to [the judgement on the host name rules of a server CSR](../pkg/ca/DESIGN.md#ca-0050).
@@ -217,6 +220,7 @@ The [Register certificate revocation area](../services/register/design/certifica
 - <a id="pki-0092"></a>**PKI-0092** Moved to [the judgement on no check of unique subject names](../pkg/ca/DESIGN.md#ca-0055).
 
 [adr-0022]: ../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
+[adr-0032]: ../docs/adr/0032-issue-each-cdr-certificate-of-a-deployment-through-the-register-and-renew-it-with-no-manual-step.md
 [production-gaps]: ../docs/production-gaps.md
 [cds-csr-profile]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#certificate-signing-request-profile
 [cds-participant-endpoints]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#participant-endpoints

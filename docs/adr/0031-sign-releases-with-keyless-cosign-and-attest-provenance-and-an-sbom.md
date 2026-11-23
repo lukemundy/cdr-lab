@@ -1,6 +1,7 @@
 # 0031. Sign releases with keyless cosign, and attest the provenance and an SBOM with GitHub artifact attestations
 
 - Date: 2026-11-23
+- Amended by [ADR-0039](0039-build-the-cdrlab-binaries-in-the-release-with-the-release-version-and-sign-their-checksums-with-keyless-cosign.md): the signatures and the attestations of the `cdrlab` binaries
 
 ## Context
 

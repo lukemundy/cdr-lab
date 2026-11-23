@@ -267,6 +267,11 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 - Lab term: the lab services from one release of the [umbrella chart](#umbrella-chart), in one namespace of a Kubernetes cluster ([umbrella chart][umbrella-chart-design]). It is a lab, not a production service.
 - Not the same as: [lab](#lab), which is the deployment with Docker Compose.
 
+### Compose project
+
+- Lab term: the compose file of the lab and the files that it mounts or that `cdrlab` reads: the certificate list, the seed file of the Register and the set-up SQL files of the lab PostgreSQL ([ADR 0038][adr-0038]).
+- Not the same as: [lab directory](#lab-directory), which also holds the CAs and the certificates.
+
 ### Conformance suite
 
 - Lab term: the black-box tests in `conformance/` ([conformance DESIGN.md][conformance-design]). One test of the suite is a conformance test.
@@ -314,6 +319,10 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 ### Lab brand
 
 - Lab term: the neutral brand of the design system, for each role that the brand of a participant does not give ([the lab brand](../../web/packages/ui/design/tokens-and-brands.md#ui-0033)).
+
+### Lab directory
+
+- Lab term: the directory of the compose project of a lab, with its CAs and its certificates in `.lab/pki` ([cdrlab DESIGN.md][cdrlab-design]).
 
 ### Load file
 
@@ -369,10 +378,14 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 - Lab term: the artifacts of one commit of `main` with one version, `vX.Y.Z`, and the GitHub Release with their notes ([ADR 0027][adr-0027]).
 - Not the same as: a publication from `main`, which has commit versions.
 
+### Release mode, source mode
+
+- Lab term: the two modes of `cdrlab up` ([ADR 0038][adr-0038]). The release mode runs the compose project that the binary contains, with the images of a release. The source mode runs the compose project of a checkout, and builds the images.
+
 ### Seed file
 
 - Lab term: a load file that the lab loads before the services start ([README: Data][readme-data]).
-- Not the same as: a fixture, which is a certificate that the set-up of the lab issues for a test.
+- Not the same as: a fixture, which is a certificate that the set-up of the lab gets for a test.
 
 ### Sign-in
 
@@ -406,7 +419,9 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 [adr-0025]: ../adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md
 [adr-0027]: ../adr/0027-release-all-artifacts-with-one-version-from-a-manual-workflow-on-main.md
 [adr-0029]: ../adr/0029-promote-the-tested-image-of-each-service-to-a-release-with-no-rebuild.md
+[adr-0038]: ../adr/0038-run-the-compose-lab-with-cdrlab-from-a-compose-project-in-the-binary-and-issue-its-cdr-certificates-from-the-host.md
 [brands-readme]: ../../services/dataholder/brands/README.md
+[cdrlab-design]: ../../cli/cdrlab/DESIGN.md
 [conformance-design]: ../../conformance/DESIGN.md
 [consolehttp-design]: ../../pkg/platform/consolehttp/DESIGN.md
 [pki-design]: ../../pki/DESIGN.md

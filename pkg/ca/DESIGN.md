@@ -1,6 +1,6 @@
 # CA library
 
-The CA library makes the mock CDR CA and the mock public CA, checks CSRs, issues certificates and makes the CRL of a CA. It gives the certificate profiles and the CRL format of the mock CDR PKI. The `pki` command uses it at the set-up of the lab ([PKI specification](../../pki/DESIGN.md)). In a running lab, the Register uses it as the CDR intermediate CA ([ADR 0022][adr-0022]).
+The CA library makes the mock CDR CA and the mock public CA, checks CSRs, issues certificates and makes the CRL of a CA. It gives the certificate profiles and the CRL format of the mock CDR PKI. `cdrlab` uses it at the set-up of the lab ([PKI specification](../../pki/DESIGN.md)). In a running lab, the Register uses it as the CDR intermediate CA ([ADR 0022][adr-0022]).
 
 ## Context
 

@@ -285,7 +285,7 @@ func TestAnUnknownCommandGivesTheUsage(t *testing.T) {
 }
 
 // The Register keeps the only list of revocations, and signs each CRL.
-// Verifies: PKI-0067
+// Verifies: CLI-0112
 func TestThePKICommandDoesNotRevokeOrSignACRL(t *testing.T) {
 	dir := newLabDir(t)
 
