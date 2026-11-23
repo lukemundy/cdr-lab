@@ -1,6 +1,7 @@
 # 0018. Build service images on distroless, with a build stage for an embedded web UI, and pin all images by digest
 
 - Date: 2026-10-22
+- Amended by [ADR-0030](0030-build-each-service-image-for-linux-amd64-and-linux-arm64-with-a-cross-compile.md): the platforms of each image
 
 ## Context
 

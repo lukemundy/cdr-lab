@@ -70,10 +70,16 @@ A production data holder does not have these features. Real components must not 
 - <a id="dh-1330"></a>**DH-1330** The data holder in a published image identifies its commit in its telemetry: [`service.version` is the short commit ID of the build](../../../pkg/platform/telemetry/DESIGN.md#tele-0003). The image tag has the same short commit ID. ([`service.version` is the short commit ID](../../../pkg/platform/telemetry/DESIGN.md#tele-0003); [Judgement: commit ID tags and versions, as for the other published artifacts](#dh-1370))
 - <a id="dh-1331"></a>**DH-1331** When the chart changes, CI publishes the chart from `main` as `oci://ghcr.io/lukemundy/cdr-lab/charts/dataholder`. The version is `0.0.0-g<short commit>`. ([Register chart][register-chart]; [Judgement: commit ID tags and versions, as for the other published artifacts](#dh-1370))
 - <a id="dh-1332"></a>**DH-1332** CI publishes the chart of a commit only after the tests of the chart of that commit pass. ([Judgement: the chart publishes after only its own tests pass](#dh-1373))
+- <a id="dh-2642"></a>**DH-2642** Each image of the data holder that CI publishes is an OCI image index with an image for `linux/amd64` and an image for `linux/arm64`. ([OCI: image index][oci-image-index]; [Judgement: images for linux/amd64 and linux/arm64 (ADR 0030)][adr-0030])
+- <a id="dh-2643"></a>**DH-2643** Integrity: the `linux/amd64` image of the index has the same configuration digest as the image that the gate jobs of its commit tested. ([Judgement: images for linux/amd64 and linux/arm64 (ADR 0030)][adr-0030])
+- <a id="dh-2644"></a>**DH-2644** The `appVersion` of a chart from `main` is the full commit ID of the [image commit](../../../docs/spec/glossary.md#image-commit) of the data holder at that commit. ([Helm: charts][helm-charts]; [Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
+- <a id="dh-2645"></a>**DH-2645** CI publishes the chart from `main` only when the image commit of the data holder is the last commit that changes an input of the image. For example, when the commit changes an input of the image, the chart waits until CI publishes the image of that commit. ([Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
+- <a id="dh-2647"></a>**DH-2647** The data holder image and chart of a [release](../../../tools/release/DESIGN.md#rls-0009) have the version of the release. ([Judgement: one version from a manual workflow on main (ADR 0027)][adr-0027])
 
 ## Chart
 
 - <a id="dh-1340"></a>**DH-1340** One image and one chart serve all brands. Brands differ only in the values of the chart and in the brand directory. ([Judgement: one artifact for all brands](#dh-1374))
+- <a id="dh-2646"></a>**DH-2646** When the values give no image tag, the chart uses its `appVersion` as the tag of the data holder image. A value of the image tag overrides the `appVersion`. ([Helm: charts][helm-charts]; [Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
 - <a id="dh-1341"></a>**DH-1341** No default value of the chart is a value of one deployment. For example, the base URIs have no default. ([Judgement: no default for a value of one deployment](#dh-1375))
 - <a id="dh-1342"></a>**DH-1342** When a value that each deployment must give is absent, the chart does not render. The error names the value. ([Helm: `required`][helm-required]; [Judgement: no default for a value of one deployment](#dh-1375))
 - <a id="dh-1343"></a>**DH-1343** The chart README gives each value and each Secret that a deployment of a brand needs. ([Judgement: the chart uses existing Secrets and makes none](#dh-1376))
@@ -169,7 +175,7 @@ A production data holder does not have these features. Real components must not 
 
 - Kind: choice
 - Basis: Step 3.3. No source gives the gate of a chart publication.
-- Reason: The chart does not refer to an image of its own commit, because the image tag is a required value. A failure of the tests of the service does not make the chart incorrect.
+- Reason: A failure of the tests of the service does not make the chart incorrect. The chart waits only for [the image that its default refers to](#dh-2645), and that image passed its own gate.
 
 ### <a id="dh-1374"></a>DH-1374 One artifact for all brands
 
@@ -229,16 +235,21 @@ A production data holder does not have these features. Real components must not 
 [adr-0020]: ../../../docs/adr/0020-service-migrations-create-roles-and-the-operator-creates-users.md
 [adr-0023]: ../../../docs/adr/0023-give-the-brand-of-a-data-holder-as-a-strict-brand-directory.md
 [adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md
+[adr-0027]: ../../../docs/adr/0027-release-all-artifacts-with-one-version-from-a-manual-workflow-on-main.md
+[adr-0029]: ../../../docs/adr/0029-promote-the-tested-image-of-each-service-to-a-release-with-no-rebuild.md
+[adr-0030]: ../../../docs/adr/0030-build-each-service-image-for-linux-amd64-and-linux-arm64-with-a-cross-compile.md
 [cds-register-apis]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-apis
 [cds-register-schemas]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api-schemas
 [compose-down]: https://docs.docker.com/reference/cli/docker/compose/down/
 [compose-profiles]: https://docs.docker.com/reference/compose-file/profiles/
 [gha-needs]: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idneeds
 [gha-status-checks]: https://docs.github.com/en/actions/reference/workflows-and-actions/expressions#status-check-functions
+[helm-charts]: https://helm.sh/docs/topics/charts/
 [helm-files]: https://helm.sh/docs/chart_template_guide/accessing_files/
 [helm-required]: https://helm.sh/docs/howto/charts_tips_and_tricks/#using-the-required-function
 [k8s-configmap-volume]: https://kubernetes.io/docs/concepts/storage/volumes/#configmap
 [k8s-init-containers]: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+[oci-image-index]: https://github.com/opencontainers/image-spec/blob/main/image-index.md
 [postgres-image-init]: https://hub.docker.com/_/postgres
 [readme-component-types]: ../../../README.md#component-types
 [readme-conventions]: ../../../README.md#other-conventions

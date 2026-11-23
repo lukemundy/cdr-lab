@@ -1,6 +1,7 @@
 # 0007. Use Conventional Commits for commit messages
 
 - Date: 2026-10-04
+- Amended by [ADR-0027](0027-release-all-artifacts-with-one-version-from-a-manual-workflow-on-main.md): cocogitto gives the version and the changelog of a release
 
 ## Context
 

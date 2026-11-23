@@ -98,6 +98,7 @@ This table is the registry of the codes. A new specification adds its code in th
 | `services/dataholder` | `DH` |
 | `pki` | `PKI` |
 | `conformance` | `CONF` |
+| `tools/release` | `RLS` |
 | `web/packages/ui` | `UI` |
 | `web/packages/web-platform` | `WCON` |
 | `pkg/cds` | `CDSL` |

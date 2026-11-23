@@ -288,6 +288,10 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 - Lab term: the endpoints of a service for its liveness and readiness, on its [internal listener](#internal-listener).
 
+### Image commit
+
+- Lab term: for one service and one commit of `main`, the first commit with an image of that service, in the first-parent history of `main` from that commit back ([ADR 0029][adr-0029]).
+
 ### Internal listener
 
 - Lab term: the plain HTTP listener of a service for the deployment and the lab operator ([ADR 0025][adr-0025]). The health probes, the operator interface and the operator console are on it. On the Register, the CRL is also on it.
@@ -355,6 +359,11 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 - Lab term: the TLS listener of a service with no client authentication. The public APIs, the OpenID Provider configuration and the consumer pages are on it.
 - Do not use: TLS listener.
 
+### Release
+
+- Lab term: the artifacts of one commit of `main` with one version, `vX.Y.Z`, and the GitHub Release with their notes ([ADR 0027][adr-0027]).
+- Not the same as: a publication from `main`, which has commit versions.
+
 ### Seed file
 
 - Lab term: a load file that the lab loads before the services start ([README: Data][readme-data]).
@@ -385,6 +394,8 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 [adr-0006]: ../adr/0006-telemetry.md
 [adr-0024]: ../adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md
 [adr-0025]: ../adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md
+[adr-0027]: ../adr/0027-release-all-artifacts-with-one-version-from-a-manual-workflow-on-main.md
+[adr-0029]: ../adr/0029-promote-the-tested-image-of-each-service-to-a-release-with-no-rebuild.md
 [brands-readme]: ../../services/dataholder/brands/README.md
 [conformance-design]: ../../conformance/DESIGN.md
 [consolehttp-design]: ../../pkg/platform/consolehttp/DESIGN.md
