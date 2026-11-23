@@ -22,7 +22,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
 
-# CI does not start the telemetry backend of the lab deployment.
+# CI starts the lab with no telemetry (mise run up --no-telemetry). These values give the same to the other Compose commands.
 env:
   COMPOSE_PROFILES: ""
   LAB_OTLP_ENDPOINT: ""
@@ -319,7 +319,7 @@ jobs:
           path: ${{ runner.temp }}
 
       - name: Start the lab deployment
-        run: docker load --input "$RUNNER_TEMP/images.tar" && mise run up --no-build
+        run: docker load --input "$RUNNER_TEMP/images.tar" && mise run up --no-build --no-telemetry
 
       - name: Run the conformance tests
         run: CONFORMANCE_GO_CACHE="$HOME/.cache/conformance-go" mise run conformance
@@ -442,7 +442,7 @@ jobs:
       - *download-images
 
       - name: Start the Register
-        run: docker load --input "$RUNNER_TEMP/images.tar" && mise run up --no-build register
+        run: docker load --input "$RUNNER_TEMP/images.tar" && mise run up --no-build --no-telemetry register
 
       - name: Check that the Register image has no Node
         run: |
@@ -613,7 +613,7 @@ jobs:
       - *download-images
 
       - name: Start the data holder
-        run: docker load --input "$RUNNER_TEMP/images.tar" && mise run up --no-build wattle-bank
+        run: docker load --input "$RUNNER_TEMP/images.tar" && mise run up --no-build --no-telemetry wattle-bank
 
       - name: Check that the data holder image has no Node
         run: |

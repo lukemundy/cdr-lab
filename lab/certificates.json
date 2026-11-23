@@ -1,0 +1,205 @@
+{
+  "register": {
+    "url": "http://127.0.0.1:8080",
+    "operator-token": "lab-operator-token"
+  },
+  "public": [
+    {
+      "cert": ".lab/pki/register/public.crt",
+      "key": ".lab/pki/register/public.key",
+      "names": [
+        "register",
+        "localhost"
+      ]
+    },
+    {
+      "cert": ".lab/pki/wattle-bank/public.crt",
+      "key": ".lab/pki/wattle-bank/public.key",
+      "names": [
+        "wattle-bank",
+        "localhost"
+      ]
+    },
+    {
+      "cert": ".lab/pki/redgum-bank/public.crt",
+      "key": ".lab/pki/redgum-bank/public.key",
+      "names": [
+        "redgum-bank",
+        "localhost"
+      ]
+    },
+    {
+      "cert": ".lab/pki/harbour-bank/public.crt",
+      "key": ".lab/pki/harbour-bank/public.key",
+      "names": [
+        "harbour-bank",
+        "localhost"
+      ]
+    },
+    {
+      "cert": ".lab/pki/kestrel-bank/public.crt",
+      "key": ".lab/pki/kestrel-bank/public.key",
+      "names": [
+        "kestrel-bank",
+        "localhost"
+      ]
+    },
+    {
+      "cert": ".lab/pki/conformance/jwks.crt",
+      "key": ".lab/pki/conformance/jwks.key",
+      "names": [
+        "conformance"
+      ]
+    },
+    {
+      "cert": ".lab/pki/openid/suite.crt",
+      "key": ".lab/pki/openid/suite.key",
+      "names": [
+        "openid",
+        "localhost"
+      ]
+    },
+    {
+      "cert": ".lab/pki/openid/jwks.crt",
+      "key": ".lab/pki/openid/jwks.key",
+      "names": [
+        "openid-runner"
+      ]
+    }
+  ],
+  "cdr": [
+    {
+      "kind": "server",
+      "legal-entity-id": "dd4d6bc6-22f4-4f61-aae9-9580382718c8",
+      "brand-id": "d7385786-d8b1-4d4b-bb80-b21616df1a4d",
+      "cn": "wattle-bank",
+      "o": "Wattle Bank Limited",
+      "dns": [
+        "wattle-bank",
+        "localhost"
+      ],
+      "cert": ".lab/pki/wattle-bank/secure.crt",
+      "key": ".lab/pki/wattle-bank/secure.key"
+    },
+    {
+      "kind": "server",
+      "legal-entity-id": "830186b8-6060-4773-8b59-e8567a13df01",
+      "brand-id": "4967dd80-2cd2-43c3-8b13-f6faafb684ad",
+      "cn": "redgum-bank",
+      "o": "Redgum Bank Limited",
+      "dns": [
+        "redgum-bank",
+        "localhost"
+      ],
+      "cert": ".lab/pki/redgum-bank/secure.crt",
+      "key": ".lab/pki/redgum-bank/secure.key"
+    },
+    {
+      "kind": "server",
+      "legal-entity-id": "00b12e81-207f-4fb7-b01f-d0c50cb1a06c",
+      "brand-id": "366f7b1c-93c7-4b84-9c92-ab2456614095",
+      "cn": "harbour-bank",
+      "o": "Harbour Bank Limited",
+      "dns": [
+        "harbour-bank",
+        "localhost"
+      ],
+      "cert": ".lab/pki/harbour-bank/secure.crt",
+      "key": ".lab/pki/harbour-bank/secure.key"
+    },
+    {
+      "kind": "server",
+      "legal-entity-id": "0ed9945f-022e-4dca-9d05-ce327566e3de",
+      "brand-id": "1ee54312-624b-4679-bf33-cf4af113f934",
+      "cn": "kestrel-bank",
+      "o": "Kestrel Bank Limited",
+      "dns": [
+        "kestrel-bank",
+        "localhost"
+      ],
+      "cert": ".lab/pki/kestrel-bank/secure.crt",
+      "key": ".lab/pki/kestrel-bank/secure.key"
+    },
+    {
+      "kind": "client",
+      "legal-entity-id": "bd653a0f-cf64-40ae-b914-aa479f5fb725",
+      "software-product-id": "33bfd771-cac1-44c2-8940-a82f529b6170",
+      "cn": "Token Test Active",
+      "o": "Token Test",
+      "cert": ".lab/pki/conformance/client.crt",
+      "key": ".lab/pki/conformance/client.key"
+    },
+    {
+      "kind": "client",
+      "legal-entity-id": "bd653a0f-cf64-40ae-b914-aa479f5fb725",
+      "software-product-id": "33bfd771-cac1-44c2-8940-a82f529b6170",
+      "cn": "Token Test Active",
+      "o": "Token Test",
+      "cert": ".lab/pki/conformance/unregistered.crt",
+      "key": ".lab/pki/conformance/unregistered.key"
+    },
+    {
+      "kind": "client",
+      "legal-entity-id": "bd653a0f-cf64-40ae-b914-aa479f5fb725",
+      "software-product-id": "839ffa5f-09dd-4e00-9bbc-38dff23a9b2f",
+      "cn": "Token Test Inactive",
+      "o": "Token Test",
+      "cert": ".lab/pki/conformance/inactive.crt",
+      "key": ".lab/pki/conformance/inactive.key"
+    },
+    {
+      "kind": "client",
+      "legal-entity-id": "bd653a0f-cf64-40ae-b914-aa479f5fb725",
+      "software-product-id": "33bfd771-cac1-44c2-8940-a82f529b6170",
+      "cn": "Token Test Active",
+      "o": "Token Test",
+      "cert": ".lab/pki/conformance/revoked.crt",
+      "key": ".lab/pki/conformance/revoked.key"
+    },
+    {
+      "kind": "client",
+      "legal-entity-id": "bd653a0f-cf64-40ae-b914-aa479f5fb725",
+      "software-product-id": "33bfd771-cac1-44c2-8940-a82f529b6170",
+      "cn": "Token Test Active",
+      "o": "Token Test",
+      "cert": ".lab/pki/conformance/revocation.crt",
+      "key": ".lab/pki/conformance/revocation.key"
+    },
+    {
+      "kind": "client",
+      "legal-entity-id": "41090368-a571-41df-a2c2-a9ad32dfa512",
+      "software-product-id": "8bbe8ce3-3d90-44b2-b97d-383d7fa7e579",
+      "cn": "Status Test Web",
+      "o": "Status Test",
+      "cert": ".lab/pki/conformance/status.crt",
+      "key": ".lab/pki/conformance/status.key"
+    },
+    {
+      "kind": "client",
+      "legal-entity-id": "6f1d2a57-0c5e-4b0e-9d0a-3f6c1b7e8a41",
+      "software-product-id": "d4f6a8c0-2e4b-4c6d-9e8f-0a1b2c3d4e5f",
+      "cn": "Registration Test Web",
+      "o": "Registration Test",
+      "cert": ".lab/pki/conformance/registration.crt",
+      "key": ".lab/pki/conformance/registration.key"
+    },
+    {
+      "kind": "client",
+      "legal-entity-id": "1c664017-a83c-4086-96f8-d61026d2df41",
+      "software-product-id": "aa29d742-9413-4d10-850c-70b310427da2",
+      "cn": "OpenID Test Client 1",
+      "o": "OpenID Test",
+      "cert": ".lab/pki/openid/client-1.crt",
+      "key": ".lab/pki/openid/client-1.key"
+    },
+    {
+      "kind": "client",
+      "legal-entity-id": "1c664017-a83c-4086-96f8-d61026d2df41",
+      "software-product-id": "d07c4109-dc08-4319-9856-274afa9fa7e2",
+      "cn": "OpenID Test Client 2",
+      "o": "OpenID Test",
+      "cert": ".lab/pki/openid/client-2.crt",
+      "key": ".lab/pki/openid/client-2.key"
+    }
+  ]
+}
