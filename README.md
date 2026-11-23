@@ -15,6 +15,25 @@ Early development. Two services run in the lab deployment, and a black-box confo
 
 The lab CLI `cdrlab` makes the CAs and the certificates of the compose lab and of a cluster deployment, adds participants and customers to them, and starts the compose lab from a checkout or from a release binary ([specification](cli/cdrlab/design/README.md)).
 
+## Quick start
+
+The compose lab from a release `vX.Y.Z`, on a host with Docker (the [install guide](docs/guides/install.md) also verifies the download):
+
+```sh
+gh release download vX.Y.Z --repo lukemundy/cdr-lab --pattern 'cdrlab-vX.Y.Z-linux-amd64.tar.gz'
+tar -xzf cdrlab-vX.Y.Z-linux-amd64.tar.gz cdrlab
+./cdrlab up
+```
+
+The umbrella chart in a namespace of a Kubernetes cluster, after the [prerequisites](charts/cdr-lab/README.md#before-the-install):
+
+```sh
+helm install cdr-lab oci://ghcr.io/lukemundy/cdr-lab/charts/cdr-lab --version X.Y.Z --namespace lab --values my-values.yaml --wait --timeout 10m
+kubectl get pods,jobs --namespace lab
+```
+
+Guides: [install](docs/guides/install.md), [upgrade](docs/guides/upgrade.md), [ADR developers](docs/guides/adr-developers.md), [data holder developers](docs/guides/data-holder-developers.md), [CI](docs/guides/ci.md).
+
 ## Target standards
 
 | Item | Version |
@@ -41,6 +60,7 @@ cdr-lab/
 ├── conformance/         # black-box tests of deployed components, and the pinned CDS OpenAPI specifications
 ├── docs/
 │   ├── adr/             # architecture decision records
+│   ├── guides/          # guides for the users of the lab: install, upgrade, ADR and data holder developers, CI
 │   ├── production-gaps.md # shortcuts that are acceptable in the lab only
 │   ├── spec/            # the conventions and the glossary of the specifications
 │   └── research/        # dated research notes with sources (background only)
