@@ -11,10 +11,10 @@ import (
 )
 
 // TLSConfig permits the TLS 1.2 suites that the CDS permits, and TLS 1.3, whose suites Go does not let a server choose.
-func TLSConfig(cert tls.Certificate) *tls.Config {
+func TLSConfig(cert *ServerCertificate) *tls.Config {
 	return &tls.Config{
-		Certificates: []tls.Certificate{cert},
-		MinVersion:   tls.VersionTLS12,
+		GetCertificate: cert.GetCertificate,
+		MinVersion:     tls.VersionTLS12,
 		CipherSuites: []uint16{
 			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
 			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
@@ -28,7 +28,7 @@ const revocationCheckTimeout = 5 * time.Second
 // of ctx, because a TLS handshake has no context of its own.
 func MutualTLSConfig(
 	ctx context.Context,
-	cert tls.Certificate,
+	cert *ServerCertificate,
 	clientCAs *x509.CertPool,
 	checkRevocation func(context.Context, *x509.Certificate) error,
 ) *tls.Config {

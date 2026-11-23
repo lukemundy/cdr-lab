@@ -185,7 +185,17 @@ func apiListeners(
 		Disclosures: disclosures, Now: time.Now,
 	}
 
-	sites, err := bankSiteListeners(cfg.bankSite, cfg.publicCert, banksite.UI(), banksite.Ports{
+	publicCert, err := cfg.publicCert.watch(ctx, "public")
+	if err != nil {
+		return nil, err
+	}
+
+	secureCert, err := cfg.secureCert.watch(ctx, "secure")
+	if err != nil {
+		return nil, err
+	}
+
+	sites, err := bankSiteListeners(cfg.bankSite, publicCert, banksite.UI(), banksite.Ports{
 		BrandName:   cfg.brand.Name,
 		BrandLayout: cfg.brand.Layout,
 		BrandPhotos: cfg.brand.Photos(),
@@ -210,12 +220,12 @@ func apiListeners(
 				cds.InteractionID(telemetry.NewHTTPHandler(api)),
 				authServer.AuthorisationPath(),
 			),
-			TLSConfig: cds.TLSConfig(cfg.publicCert),
+			TLSConfig: cds.TLSConfig(publicCert),
 		},
 		{
 			Port:      securePort,
 			Handler:   cds.InteractionID(telemetry.NewHTTPHandler(secure)),
-			TLSConfig: cds.MutualTLSConfig(ctx, cfg.secureCert, clientCAs, revocations.Check),
+			TLSConfig: cds.MutualTLSConfig(ctx, secureCert, clientCAs, revocations.Check),
 		},
 	}, sites...), nil
 }

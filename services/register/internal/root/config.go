@@ -1,7 +1,7 @@
 package root
 
 import (
-	"crypto/tls"
+	"context"
 	"crypto/x509"
 	"errors"
 	"fmt"
@@ -20,12 +20,19 @@ type config struct {
 	publicBaseURL string
 	secureBaseURL string
 	operator      operatorhttp.Config
-	publicCert    tls.Certificate
-	secureCert    tls.Certificate
+	publicCert    certificatePaths
+	secureCert    certificatePaths
 	cdrCAs        []*x509.Certificate
 	intermediate  ca.Authority
 	console       consolehttp.Config
 	consoleUI     fs.FS
+}
+
+// The listeners, not the configuration, read the files, because the reload lasts as long as the process.
+type certificatePaths struct{ cert, key string }
+
+func (f certificatePaths) watch(ctx context.Context, name string) (*cds.ServerCertificate, error) {
+	return cds.WatchCertificateFiles(ctx, name, f.cert, f.key)
 }
 
 // loadConfig loads only the CA settings for a process with no APIs, because the workers only sign CRLs.
@@ -55,26 +62,18 @@ func loadConfig(m mode) (config, error) {
 		return config{}, err
 	}
 
-	publicCertFile, publicKeyFile := os.Getenv("PUBLIC_TLS_CERT_FILE"), os.Getenv("PUBLIC_TLS_KEY_FILE")
-	if publicCertFile == "" || publicKeyFile == "" {
+	cfg.publicCert = certificatePaths{cert: os.Getenv("PUBLIC_TLS_CERT_FILE"), key: os.Getenv("PUBLIC_TLS_KEY_FILE")}
+	if cfg.publicCert.cert == "" || cfg.publicCert.key == "" {
 		return config{}, errors.New(
 			"set PUBLIC_TLS_CERT_FILE and PUBLIC_TLS_KEY_FILE to the TLS certificate and key of the public APIs",
 		)
 	}
 
-	if cfg.publicCert, err = tls.LoadX509KeyPair(publicCertFile, publicKeyFile); err != nil {
-		return config{}, fmt.Errorf("load the TLS certificate of the public APIs: %w", err)
-	}
-
-	secureCertFile, secureKeyFile := os.Getenv("SECURE_TLS_CERT_FILE"), os.Getenv("SECURE_TLS_KEY_FILE")
-	if secureCertFile == "" || secureKeyFile == "" {
+	cfg.secureCert = certificatePaths{cert: os.Getenv("SECURE_TLS_CERT_FILE"), key: os.Getenv("SECURE_TLS_KEY_FILE")}
+	if cfg.secureCert.cert == "" || cfg.secureCert.key == "" {
 		return config{}, errors.New(
 			"set SECURE_TLS_CERT_FILE and SECURE_TLS_KEY_FILE to the TLS certificate and key of the secure APIs",
 		)
-	}
-
-	if cfg.secureCert, err = tls.LoadX509KeyPair(secureCertFile, secureKeyFile); err != nil {
-		return config{}, fmt.Errorf("load the TLS certificate of the secure APIs: %w", err)
 	}
 
 	if err := loadCA(&cfg); err != nil {

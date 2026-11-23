@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lukemundy/cdr-lab/pkg/cds"
 	"github.com/lukemundy/cdr-lab/pkg/platform/consolehttp"
 	"github.com/lukemundy/cdr-lab/pkg/platform/database/databasetest"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/banksite"
@@ -24,7 +25,7 @@ var testBankSite = consolehttp.Config{Enabled: true, AllowedHosts: []string{"exa
 
 // Verifies: DH-2064
 func TestWithoutTheSettingTheDataHolderOpensNoBankSiteListener(t *testing.T) {
-	listeners, err := bankSiteListeners(consolehttp.Config{}, tls.Certificate{}, ui, banksite.Ports{})
+	listeners, err := bankSiteListeners(consolehttp.Config{}, nil, ui, banksite.Ports{})
 
 	require.NoError(t, err)
 	assert.Empty(t, listeners)
@@ -32,14 +33,21 @@ func TestWithoutTheSettingTheDataHolderOpensNoBankSiteListener(t *testing.T) {
 
 // Verifies: DH-2063, DH-2064, DH-2066
 func TestWithTheSettingTheBankSitePortGivesTheHTMLPageWithTheTLSOfThePublicListener(t *testing.T) {
-	cert := tls.Certificate{Certificate: [][]byte{[]byte("public certificate")}}
+	pair, err := tls.LoadX509KeyPair(certificateFiles(t))
+	require.NoError(t, err)
+	cert, err := cds.NewServerCertificate(t.Context(), "public", pair)
+	require.NoError(t, err)
 
 	listeners, err := bankSiteListeners(testBankSite, cert, ui, banksite.Ports{})
 	require.NoError(t, err)
 	require.Len(t, listeners, 1)
 	assert.Equal(t, 8085, listeners[0].Port)
 	require.NotNil(t, listeners[0].TLSConfig)
-	assert.Equal(t, []tls.Certificate{cert}, listeners[0].TLSConfig.Certificates)
+
+	want, _ := cert.GetCertificate(nil)
+	got, err := listeners[0].TLSConfig.GetCertificate(nil)
+	require.NoError(t, err)
+	assert.Same(t, want, got)
 	assert.Equal(t, tls.NoClientCert, listeners[0].TLSConfig.ClientAuth)
 	assert.Equal(t, uint16(tls.VersionTLS12), listeners[0].TLSConfig.MinVersion)
 
@@ -52,7 +60,7 @@ func TestWithTheSettingTheBankSitePortGivesTheHTMLPageWithTheTLSOfThePublicListe
 }
 
 func TestTheBankSitePortRefusesAHostThatIsNotAllowed(t *testing.T) {
-	listeners, err := bankSiteListeners(testBankSite, tls.Certificate{}, ui, banksite.Ports{})
+	listeners, err := bankSiteListeners(testBankSite, nil, ui, banksite.Ports{})
 	require.NoError(t, err)
 
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "https://attacker.example:8185/", nil)
@@ -225,7 +233,7 @@ func canonical(t *testing.T, values []json.RawMessage) []string {
 func TestTheBankSitePutsNoQueryStringAndNoPathValueInTheSpansMetricsOrLogs(t *testing.T) {
 	spans, metrics, logs := recordTelemetry(t)
 
-	listeners, err := bankSiteListeners(testBankSite, tls.Certificate{}, ui, banksite.Ports{
+	listeners, err := bankSiteListeners(testBankSite, nil, ui, banksite.Ports{
 		BrandName: "Coastal Bank", Products: catalogueReader{}, Now: time.Now,
 	})
 	require.NoError(t, err)

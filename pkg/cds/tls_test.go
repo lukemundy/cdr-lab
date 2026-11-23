@@ -47,7 +47,7 @@ func publicTLSServer(t *testing.T) (*httptest.Server, *x509.CertPool) {
 	srv := httptest.NewUnstartedServer(
 		http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusNoContent) }),
 	)
-	srv.TLS = cds.TLSConfig(cert)
+	srv.TLS = cds.TLSConfig(newServerCertificate(t, cert))
 	srv.StartTLS()
 	t.Cleanup(srv.Close)
 

@@ -84,7 +84,7 @@ func mutualTLSRequest(
 	)
 	srv.TLS = cds.MutualTLSConfig(
 		t.Context(),
-		ca.issue(t, x509.ExtKeyUsageServerAuth, "register"),
+		newServerCertificate(t, ca.issue(t, x509.ExtKeyUsageServerAuth, "register")),
 		ca.pool(),
 		check,
 	)
@@ -161,7 +161,7 @@ func TestTheSecureAPIsRefuseOtherClients(t *testing.T) {
 // Verifies: CDSL-0041, CDSL-0042
 func TestTheSecureAPIsUseTheTLSVersionsAndSuitesOfThePublicAPIs(t *testing.T) {
 	ca := newTestCA(t)
-	server := ca.issue(t, x509.ExtKeyUsageServerAuth, "register")
+	server := newServerCertificate(t, ca.issue(t, x509.ExtKeyUsageServerAuth, "register"))
 
 	secure, public := cds.MutualTLSConfig(t.Context(), server, ca.pool(), notRevoked), cds.TLSConfig(server)
 
@@ -184,7 +184,7 @@ func TestAResumedSessionGetsTheRevocationCheckAgain(t *testing.T) {
 	)
 	srv.TLS = cds.MutualTLSConfig(
 		t.Context(),
-		ca.issue(t, x509.ExtKeyUsageServerAuth, "register"),
+		newServerCertificate(t, ca.issue(t, x509.ExtKeyUsageServerAuth, "register")),
 		ca.pool(),
 		func(context.Context, *x509.Certificate) error {
 			checks.Add(1)

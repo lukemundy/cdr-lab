@@ -3,7 +3,6 @@ package root
 import (
 	"context"
 	"crypto/sha256"
-	"crypto/tls"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
@@ -143,7 +142,7 @@ func newSiteLab(t *testing.T) siteLab {
 		Customers: customers, TransactionStore: transactionstore.New(pool), Arrangements: reader,
 		Disclosures: disclosurestore.New(pool), Now: clock,
 	}
-	listeners, err := bankSiteListeners(testBankSite, tls.Certificate{}, ui, banksite.Ports{
+	listeners, err := bankSiteListeners(testBankSite, nil, ui, banksite.Ports{
 		BrandName:  "Coastal Bank",
 		BrandID:    "d7385786-d8b1-4d4b-bb80-b21616df1a4d",
 		Customers:  siteCustomers,

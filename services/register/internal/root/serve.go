@@ -176,17 +176,27 @@ func apiListeners(
 		clientCAs.AddCert(ca)
 	}
 
+	publicCert, err := cfg.publicCert.watch(ctx, "public")
+	if err != nil {
+		return nil, err
+	}
+
+	secureCert, err := cfg.secureCert.watch(ctx, "secure")
+	if err != nil {
+		return nil, err
+	}
+
 	return []httpserver.Listener{
 		{
 			Port:      apiPort,
 			Handler:   httpapi.AllowAnyOrigin(cds.InteractionID(telemetry.NewHTTPHandler(api))),
-			TLSConfig: cds.TLSConfig(cfg.publicCert),
+			TLSConfig: cds.TLSConfig(publicCert),
 		},
 		{
 			Port:    securePort,
 			Handler: cds.InteractionID(telemetry.NewHTTPHandler(secure)),
 			// The CDR root signs only the intermediate, so the CRL of the intermediate covers each client certificate.
-			TLSConfig: cds.MutualTLSConfig(ctx, cfg.secureCert, clientCAs, authority.CheckRevocation),
+			TLSConfig: cds.MutualTLSConfig(ctx, secureCert, clientCAs, authority.CheckRevocation),
 		},
 	}, nil
 }
