@@ -44,6 +44,14 @@ type fakeCustomers struct {
 	closed         [2]string
 	transaction    *domain.Transaction
 	transactionsOf [2]string
+	load           *domain.CustomerLoad
+	loadResults    []app.LoadResult
+}
+
+func (f *fakeCustomers) Load(_ context.Context, load domain.CustomerLoad) ([]app.LoadResult, error) {
+	f.load = &load
+
+	return f.loadResults, f.err
 }
 
 func (f *fakeCustomers) Create(_ context.Context, customer domain.Customer) (domain.Customer, error) {

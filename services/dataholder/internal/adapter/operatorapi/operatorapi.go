@@ -31,6 +31,7 @@ type Customers interface {
 	) (domain.Transaction, error)
 	AccountTransactions(ctx context.Context, customerNumber, accountID string) ([]domain.Transaction, error)
 	Customer(ctx context.Context, customerNumber string) (app.CustomerRecord, error)
+	Load(ctx context.Context, load domain.CustomerLoad) ([]app.LoadResult, error)
 }
 
 // The data holder creates the customer number, so a request does not have it.
@@ -58,6 +59,7 @@ func Register(mux *http.ServeMux, customers Customers, arrangements Arrangements
 	routes.Handle("POST /v1/customers/{customerNumber}/accounts/{accountId}/transactions", createTransaction(customers))
 	routes.Handle("GET /v1/customers/{customerNumber}/accounts/{accountId}/transactions", readTransactions(customers))
 	routes.Handle("GET /v1/customers/{customerNumber}/arrangements", readArrangements(arrangements))
+	routes.Handle("POST /v1/customer-loads", loadCustomers(customers))
 	routes.Handle(
 		"POST /v1/customers/{customerNumber}/arrangements/{arrangementId}/withdraw",
 		withdrawArrangement(arrangements),
@@ -142,7 +144,11 @@ func readCustomer(customers Customers) http.Handler {
 
 // decode writes the response when the body is not one JSON object with only the fields of into.
 func decode(w http.ResponseWriter, r *http.Request, into any) bool {
-	err := jsonhttp.Decode(http.MaxBytesReader(w, r.Body, maxRequestBytes), into)
+	return decodeUpTo(w, r, into, maxRequestBytes)
+}
+
+func decodeUpTo(w http.ResponseWriter, r *http.Request, into any, limit int64) bool {
+	err := jsonhttp.Decode(http.MaxBytesReader(w, r.Body, limit), into)
 	if err == nil {
 		return true
 	}
@@ -161,26 +167,41 @@ func decode(w http.ResponseWriter, r *http.Request, into any) bool {
 }
 
 func writeError(w http.ResponseWriter, r *http.Request, err error) {
+	status, detail := problemOf(err)
+	if status == 0 {
+		problem.WriteUnexpected(w, r, err, "The data holder could not complete the request.")
+		return
+	}
+
+	if record, ok := errors.AsType[app.LoadRecordError](err); ok {
+		detail = record.Position + ": " + detail
+	}
+
+	problem.Write(w, status, detail)
+}
+
+// problemOf gives the status 0 for an error that the operator cannot correct.
+func problemOf(err error) (int, string) {
 	var invalid domain.ValidationError
 
 	switch {
 	case errors.As(err, &invalid):
-		problem.Write(w, http.StatusBadRequest, invalid.Error())
+		return http.StatusBadRequest, invalid.Error()
 	case errors.Is(err, app.ErrCustomerNotFound):
-		problem.Write(w, http.StatusNotFound, "The data holder has no customer with this customer number.")
+		return http.StatusNotFound, "The data holder has no customer with this customer number."
 	case errors.Is(err, app.ErrEmailAddressUsed):
-		problem.Write(w, http.StatusConflict, "A customer has this emailAddress.")
+		return http.StatusConflict, "A customer has this emailAddress."
 	case errors.Is(err, app.ErrAccountExists):
-		problem.Write(w, http.StatusConflict, "An account has this bsb and accountNumber.")
+		return http.StatusConflict, "An account has this bsb and accountNumber."
 	case errors.Is(err, app.ErrAccountNotFound):
-		problem.Write(w, http.StatusNotFound, "The customer has no account with this accountId.")
+		return http.StatusNotFound, "The customer has no account with this accountId."
 	case errors.Is(err, domain.ErrAccountClosed):
-		problem.Write(w, http.StatusConflict, "The account is closed.")
+		return http.StatusConflict, "The account is closed."
 	case errors.Is(err, domain.ErrArrangementNotFound):
-		problem.Write(w, http.StatusNotFound, "The customer has no arrangement with this arrangementId.")
+		return http.StatusNotFound, "The customer has no arrangement with this arrangementId."
 	case errors.Is(err, domain.ErrArrangementEnded):
-		problem.Write(w, http.StatusConflict, "The arrangement ended.")
+		return http.StatusConflict, "The arrangement ended."
 	default:
-		problem.WriteUnexpected(w, r, err, "The data holder could not complete the request.")
+		return 0, ""
 	}
 }

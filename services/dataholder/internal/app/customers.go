@@ -80,8 +80,10 @@ type Customers struct {
 	Now   func() time.Time
 	// Products gives the product of an open on the online bank site.
 	Products ProductReader
-	// BSB is the bsb of the brand directory, for the accounts that a consumer opens.
+	// BSB is the bsb of the brand directory, for the accounts that a consumer opens and that a load adds.
 	BSB string
+	// Writes gives the stores of one database transaction to a load.
+	Writes CustomerWrites
 }
 
 // Create gives a domain.ValidationError when the customer is not valid, ErrEmailAddressUsed and

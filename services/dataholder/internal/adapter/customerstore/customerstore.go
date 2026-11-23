@@ -27,8 +27,16 @@ type NoOpenAccountHook func(ctx context.Context, tx pgx.Tx, customerNumber strin
 
 type TransactionInserter func(ctx context.Context, tx pgx.Tx, accountID string, t domain.Transaction) error
 
+// db is a pool, or a transaction in which each write of the store has a savepoint.
+type db interface {
+	Begin(ctx context.Context) (pgx.Tx, error)
+	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+}
+
 type Store struct {
-	pool              *pgxpool.Pool
+	db                db
 	onNoOpenAccount   NoOpenAccountHook
 	insertTransaction TransactionInserter
 }
@@ -38,7 +46,14 @@ var _ app.CustomerStore = (*Store)(nil)
 // New takes a nil onNoOpenAccount when nothing must occur at the close of the last open account, and a nil
 // insertTransaction when no account is added with a transaction.
 func New(pool *pgxpool.Pool, onNoOpenAccount NoOpenAccountHook, insertTransaction TransactionInserter) *Store {
-	return &Store{pool: pool, onNoOpenAccount: onNoOpenAccount, insertTransaction: insertTransaction}
+	return &Store{db: pool, onNoOpenAccount: onNoOpenAccount, insertTransaction: insertTransaction}
+}
+
+// InTransaction gives write a store that writes in tx. When write gives an error, nothing that it wrote stays.
+func (s *Store) InTransaction(ctx context.Context, write func(store *Store, tx pgx.Tx) error) error {
+	return pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
+		return write(&Store{db: tx, onNoOpenAccount: s.onNoOpenAccount, insertTransaction: s.insertTransaction}, tx)
+	})
 }
 
 func violates(err error, code string) bool {
@@ -54,13 +69,20 @@ func violatesConstraint(err error, constraint string) bool {
 	return errors.As(err, &pgErr) && pgErr.Code == uniqueViolation && pgErr.ConstraintName == constraint
 }
 
+// AddCustomer has its own transaction, so that in the transaction of a load a customer number that is in use undoes
+// only this insert, and Create can try a different number.
 func (s *Store) AddCustomer(ctx context.Context, customer domain.Customer) error {
-	_, err := s.pool.Exec(
-		ctx,
-		`INSERT INTO customers (customer_number, first_name, last_name, email_address, last_updated, created_at)
-		VALUES ($1, $2, $3, $4, $5, $5)`,
-		customer.CustomerNumber, customer.FirstName, customer.LastName, customer.EmailAddress, customer.LastUpdated,
-	)
+	err := pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
+		_, err := tx.Exec(
+			ctx,
+			`INSERT INTO customers (customer_number, first_name, last_name, email_address, last_updated, created_at)
+			VALUES ($1, $2, $3, $4, $5, $5)`,
+			customer.CustomerNumber, customer.FirstName, customer.LastName, customer.EmailAddress,
+			customer.LastUpdated,
+		)
+
+		return err
+	})
 	switch {
 	case violatesConstraint(err, emailAddressConstraint):
 		return app.ErrEmailAddressUsed
@@ -74,7 +96,7 @@ func (s *Store) AddCustomer(ctx context.Context, customer domain.Customer) error
 func (s *Store) CustomerNumberOf(ctx context.Context, emailAddress string) (string, error) {
 	var customerNumber string
 
-	err := s.pool.QueryRow(
+	err := s.db.QueryRow(
 		ctx, "SELECT customer_number FROM customers WHERE lower(email_address) = lower($1)", emailAddress,
 	).Scan(&customerNumber)
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -85,7 +107,7 @@ func (s *Store) CustomerNumberOf(ctx context.Context, emailAddress string) (stri
 }
 
 func (s *Store) AddAccount(ctx context.Context, customerNumber string, account domain.Account) error {
-	return addAccount(ctx, s.pool, customerNumber, account)
+	return addAccount(ctx, s.db, customerNumber, account)
 }
 
 var errNoTransactionInserter = errors.New("the customer store has no transaction inserter")
@@ -100,7 +122,7 @@ func (s *Store) AddAccountWithTransaction(
 		return errNoTransactionInserter
 	}
 
-	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+	return pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
 		if err := addAccount(ctx, tx, customerNumber, account); err != nil {
 			return err
 		}
@@ -137,7 +159,7 @@ func addAccount(ctx context.Context, db execer, customerNumber string, account d
 func (s *Store) Customer(ctx context.Context, customerNumber string) (app.CustomerRecord, error) {
 	record := app.CustomerRecord{Customer: domain.Customer{CustomerNumber: customerNumber}}
 
-	err := s.pool.QueryRow(
+	err := s.db.QueryRow(
 		ctx,
 		"SELECT first_name, last_name, email_address, last_updated FROM customers WHERE customer_number = $1",
 		customerNumber,
@@ -155,7 +177,7 @@ func (s *Store) Customer(ctx context.Context, customerNumber string) (app.Custom
 
 	record.Customer.LastUpdated = record.Customer.LastUpdated.UTC()
 
-	rows, err := s.pool.Query(
+	rows, err := s.db.Query(
 		ctx,
 		`SELECT account_id, display_name, product_category, product_name, bsb, account_number, credit_limit_cents,
 			open_status, created_at
@@ -193,7 +215,7 @@ func (s *Store) CloseAccount(
 ) (bool, error) {
 	noOpenAccount := false
 
-	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+	err := pgx.BeginFunc(ctx, s.db, func(tx pgx.Tx) error {
 		var customerNumber string
 
 		err := tx.QueryRow(ctx, `SELECT customer_number FROM customers

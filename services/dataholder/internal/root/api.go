@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/lukemundy/cdr-lab/pkg/authserver"
@@ -23,6 +24,7 @@ import (
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/banksite"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/console"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/consumerpages"
+	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/customerstore"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/disclosurestore"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/httpapi"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/adapter/jtistore"
@@ -148,6 +150,7 @@ func apiListeners(
 	customers := app.Customers{
 		Store: parts.customers, Arrangements: parts.arrangements, Transactions: transactions, Random: randomUint64,
 		NewID: uuid.NewString, Now: time.Now, Products: products, BSB: cfg.brand.BSB,
+		Writes: customerWrites(parts.customers),
 	}
 	operatorapi.Register(internal, customers, parts.arrangements, cfg.operator)
 
@@ -253,4 +256,12 @@ func randomUint64() uint64 {
 	_, _ = rand.Read(random[:])
 
 	return binary.BigEndian.Uint64(random[:])
+}
+
+func customerWrites(customers *customerstore.Store) app.CustomerWrites {
+	return func(ctx context.Context, write func(app.CustomerStore, app.TransactionStore) error) error {
+		return customers.InTransaction(ctx, func(store *customerstore.Store, tx pgx.Tx) error {
+			return write(store, transactionstore.New(tx))
+		})
+	}
 }
