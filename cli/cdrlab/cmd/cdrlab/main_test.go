@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/dataholder/dataholdertest"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/kube"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/kube/kubetest"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/register/registertest"
@@ -19,6 +20,7 @@ import (
 type harness struct {
 	api       *kubetest.API
 	register  *registertest.Register
+	holder    *dataholdertest.DataHolder
 	env       map[string]string
 	environ   []string
 	compose   *fakeCompose
@@ -33,8 +35,12 @@ func newHarness(t *testing.T) *harness {
 	return &harness{
 		api:      kubetest.New(t),
 		register: register,
-		env:      map[string]string{"REGISTER_OPERATOR_TOKEN": registertest.Token},
-		compose:  &fakeCompose{register: register},
+		holder:   dataholdertest.New(t),
+		env: map[string]string{
+			"REGISTER_OPERATOR_TOKEN":   registertest.Token,
+			"DATAHOLDER_OPERATOR_TOKEN": dataholdertest.Token,
+		},
+		compose: &fakeCompose{register: register},
 	}
 }
 

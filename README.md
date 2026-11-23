@@ -13,7 +13,7 @@ Early development. Two services run in the lab deployment, and a black-box confo
 | Mock CDR Register | Participants and their statuses, SSAs, and the Register APIs | [design/README.md](services/register/design/README.md) |
 | Mock data holder | One banking brand for each instance, from four preset brands: product data, the authorisation server, authorisations, and the banking APIs of an arrangement | [design/README.md](services/dataholder/design/README.md) |
 
-The lab CLI `cdrlab` makes the CAs and the certificates of the compose lab and of a cluster deployment ([specification](cli/cdrlab/design/README.md)).
+The lab CLI `cdrlab` makes the CAs and the certificates of the compose lab and of a cluster deployment, and adds participants and customers to them ([specification](cli/cdrlab/design/README.md)).
 
 ## Target standards
 
@@ -171,8 +171,8 @@ http --verify .lab/pki/cdr/ca-bundle.pem --cert .lab/pki/conformance/client.crt 
 - **Database:** each service reads its connection from the libpq variables (`PG*`). A service applies its migrations at startup only when `DATABASE_MIGRATE_ON_START` is `true`; otherwise, run its `migrate` subcommand. Migrations are goose SQL files. In the lab, a one-shot `<service>-migrate` container runs the migrations as the owner user, and the service connects as a service user with the application role only ([ADR 0020](docs/adr/0020-service-migrations-create-roles-and-the-operator-creates-users.md)). Tests connect as the superuser `postgres`, and tests of database adapters create a new database with `databasetest.New(t)`.
 - **Seed data:** one-shot compose services load [`services/register/seed/example.json`](services/register/seed/example.json) (participants) and the product catalogue of the data holder brand before the services start. To load a different set, change the file, then `mise run reset` and `mise run up`.
 - **Data holder brand:** each data holder instance gets its name, logo, colours and product catalogue from a preset brand or a mounted brand directory ([services/dataholder/brands](services/dataholder/brands/README.md), [ADR 0023](docs/adr/0023-give-the-brand-of-a-data-holder-as-a-strict-brand-directory.md)).
-- **Customer data:** the data holder operator interface creates customers, accounts and transactions ([data holder: operator interface](services/dataholder/design/operator-interface.md)). Use invented data only.
-- **Register operations:** the Register operator interface creates and changes participants, registers client certificates and changes statuses ([Register: operator interface](services/register/design/operator-interface.md#reg-0800)).
+- **Customer data:** the data holder operator interface creates customers, accounts and transactions ([data holder: operator interface](services/dataholder/design/operator-interface.md)). `cdrlab customers add` adds the customers of a file ([cdrlab: onboarding](cli/cdrlab/design/onboarding.md)). Use invented data only.
+- **Register operations:** the Register operator interface creates and changes participants, registers client certificates and changes statuses ([Register: operator interface](services/register/design/operator-interface.md#reg-0800)). `cdrlab participants add` adds the participants of a load file, and then `cdrlab cert issue` gets the certificate of a new software product or brand ([cdrlab: onboarding](cli/cdrlab/design/onboarding.md)).
 
 ### Conformance tests
 

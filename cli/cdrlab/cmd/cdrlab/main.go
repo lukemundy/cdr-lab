@@ -1,6 +1,6 @@
 // Command cdrlab is the CLI of the lab. Its commands make the mock CDR CA and the mock public CA, get CDR
-// certificates from the Register and issue public TLS certificates, with Kubernetes Secrets or files as the output
-// (cli/cdrlab/design/README.md).
+// certificates from the Register and issue public TLS certificates, with Kubernetes Secrets or files as the output.
+// They also add participants to the Register and customers to a data holder brand (cli/cdrlab/design/README.md).
 package main
 
 import (
@@ -21,6 +21,7 @@ import (
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/certcheck"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/certissue"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/compose"
+	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/dataholder"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/kube"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/pemfile"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/publiccert"
@@ -52,6 +53,12 @@ commands:
                             certificate file has no current certificate. The first NAME is the CN.
                             cdrlab public-cert issue -dir DIR -cert FILE -key FILE [-key-readable-by-all]
                               [-renew-before DURATION] NAME...
+  cdrlab participants add   add the participants of a load file to the Register, and change no participant that
+                            exists. The operator token is in the variable REGISTER_OPERATOR_TOKEN.
+                            cdrlab participants add -register-url URL -file FILE
+  cdrlab customers add      add the customers of a customer load file to a data holder brand, and change no customer
+                            that exists. The operator token is in the variable DATAHOLDER_OPERATOR_TOKEN.
+                            cdrlab customers add -dataholder-url URL -file FILE
   cdrlab up                 make the CAs and the certificates of the compose lab, and start the compose lab. The
                             certificate list lab/certificates.json of the lab directory gives the certificates.
                             cdrlab up -source [-dir DIR] [-all-banks] [-no-build] [-no-telemetry]
@@ -113,6 +120,8 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer, d deps) i
 		"ca init":           caInit,
 		"cert issue":        certIssue,
 		"public-cert issue": publicCertIssue,
+		"participants add":  participantsAdd,
+		"customers add":     customersAdd,
 		"up":                up,
 		"down":              down,
 		"reset":             reset,
@@ -309,9 +318,9 @@ func certIssue(ctx context.Context, args []string, stdout io.Writer, d deps) err
 		return err
 	}
 
-	token := d.getenv("REGISTER_OPERATOR_TOKEN")
-	if token == "" {
-		return fmt.Errorf("%w: the variable REGISTER_OPERATOR_TOKEN is not set", errUsage)
+	token, err := operatorToken(d, "REGISTER_OPERATOR_TOKEN")
+	if err != nil {
+		return err
 	}
 
 	var (
@@ -351,6 +360,91 @@ func certIssue(ctx context.Context, args []string, stdout io.Writer, d deps) err
 		name, cert.NotAfter.Format(time.DateOnly))
 
 	return err
+}
+
+func operatorToken(d deps, variable string) (string, error) {
+	token := d.getenv(variable)
+	if token == "" {
+		return "", fmt.Errorf("%w: the variable %s is not set", errUsage, variable)
+	}
+
+	return token, nil
+}
+
+func participantsAdd(ctx context.Context, args []string, stdout io.Writer, d deps) error {
+	fs := newFlags("participants add")
+	registerURL := fs.String("register-url", "", "the URL of the Register operator interface")
+	file := fs.String("file", "", "the participant load file")
+
+	if err := parse(fs, args, map[string]*string{"register-url": registerURL, "file": file}); err != nil {
+		return err
+	}
+
+	token, data, err := loadInputs(d, "REGISTER_OPERATOR_TOKEN", *file)
+	if err != nil {
+		return err
+	}
+
+	load, err := register.New(*registerURL, token, d.httpClient).LoadParticipants(ctx, data)
+	if err != nil {
+		return err
+	}
+
+	var out strings.Builder
+	for _, id := range load.Added {
+		fmt.Fprintf(&out, "added %s\n", id)
+	}
+
+	for _, id := range load.Existing {
+		fmt.Fprintf(&out, "existing %s\n", id)
+	}
+
+	_, err = io.WriteString(stdout, out.String())
+
+	return err
+}
+
+func customersAdd(ctx context.Context, args []string, stdout io.Writer, d deps) error {
+	fs := newFlags("customers add")
+	holderURL := fs.String("dataholder-url", "", "the URL of the operator interface of the data holder brand")
+	file := fs.String("file", "", "the customer load file")
+
+	if err := parse(fs, args, map[string]*string{"dataholder-url": holderURL, "file": file}); err != nil {
+		return err
+	}
+
+	token, data, err := loadInputs(d, "DATAHOLDER_OPERATOR_TOKEN", *file)
+	if err != nil {
+		return err
+	}
+
+	load, err := dataholder.New(*holderURL, token, d.httpClient).LoadCustomers(ctx, data)
+	if err != nil {
+		return err
+	}
+
+	noun := "customers"
+	if load.Created == 1 {
+		noun = "customer"
+	}
+
+	_, err = fmt.Fprintf(stdout, "%d %s created, %d existed\n", load.Created, noun, load.Existed)
+
+	return err
+}
+
+func loadInputs(d deps, tokenVariable, file string) (token string, data []byte, err error) {
+	token, err = operatorToken(d, tokenVariable)
+	if err != nil {
+		return "", nil, err
+	}
+
+	data, err = os.ReadFile(filepath.Clean(file))
+	if err != nil {
+		return "", nil, fmt.Errorf("read the load file: %w", err)
+	}
+
+	return token, data, nil
 }
 
 func readCSR(path string) ([]byte, error) {
