@@ -13,6 +13,8 @@ import (
 
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/certlist"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/compose"
+	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/labproject"
+	"github.com/lukemundy/cdr-lab/pkg/platform/buildinfo"
 )
 
 const (
@@ -39,9 +41,23 @@ func (l *labFlags) project(stdout io.Writer, env []string, d deps) compose.Proje
 	}
 }
 
+const defaultImagePrefix = "ghcr.io/lukemundy/cdr-lab"
+
+// releaseImages gives, for each service image, the variable that sets its image in compose.yaml.
+var releaseImages = []struct{ name, variable string }{
+	{"register", "CDRLAB_REGISTER_IMAGE"},
+	{"dataholder", "CDRLAB_DATAHOLDER_IMAGE"},
+}
+
 func up(ctx context.Context, args []string, stdout io.Writer, d deps) error {
 	lab, fs := newLabFlags("up")
 	source := fs.Bool("source", false, "use the compose project of the lab directory, and build the images")
+	imagePrefix := fs.String(
+		"image-prefix",
+		defaultImagePrefix,
+		"the repository prefix of the images of the release mode",
+	)
+	imageTag := fs.String("image-tag", "", "the image tag of the release mode (default: the version of cdrlab)")
 	allBanks := fs.Bool("all-banks", false, "also start the three other preset brands (compose profile all-banks)")
 	noBuild := fs.Bool("no-build", false, "use the images that are there, with no build")
 	noTelemetry := fs.Bool("no-telemetry", false, "start no telemetry backend, and export no telemetry")
@@ -52,15 +68,29 @@ func up(ctx context.Context, args []string, stdout io.Writer, d deps) error {
 		return err
 	}
 
-	if !*source {
-		return fmt.Errorf(
-			"%w: this version has no release mode: in a checkout of the repository, use -source",
-			errUsage,
-		)
+	if err := refuseModeFlags(fs, *source); err != nil {
+		return err
 	}
 
 	if *waitTimeout <= 0 {
 		return fmt.Errorf("%w: -wait-timeout must be more than 0", errUsage)
+	}
+
+	env := composeEnv(d.environ(), *allBanks, *noTelemetry)
+
+	if *source {
+		env = compose.SetEnv(env, builtImageEnv()...)
+	} else {
+		images, err := releaseImageEnv(d.version, *imagePrefix, *imageTag)
+		if err != nil {
+			return err
+		}
+
+		if err := labproject.Write(lab.dir, d.project, d.version); err != nil {
+			return err
+		}
+
+		env = compose.SetEnv(env, images...)
 	}
 
 	list, err := certlist.Load(lab.dir)
@@ -68,8 +98,9 @@ func up(ctx context.Context, args []string, stdout io.Writer, d deps) error {
 		return err
 	}
 
-	project := lab.project(stdout, composeEnv(d.environ(), *allBanks, *noTelemetry), d)
-	opts := compose.UpOptions{Build: !*noBuild, WaitTimeout: *waitTimeout}
+	project := lab.project(stdout, env, d)
+	// The release mode pulls the images, and never builds.
+	opts := compose.UpOptions{Build: *source && !*noBuild, WaitTimeout: *waitTimeout}
 
 	if err := makeCertificates(ctx, lab.dir, list, stdout, d); err != nil {
 		return err
@@ -90,6 +121,48 @@ func up(ctx context.Context, args []string, stdout io.Writer, d deps) error {
 	opts.Services = fs.Args()
 
 	return project.Up(ctx, opts)
+}
+
+func refuseModeFlags(fs *flag.FlagSet, source bool) error {
+	if source {
+		return refuseFlags(fs, "-source cannot go with", "image-prefix", "image-tag")
+	}
+
+	return refuseFlags(fs, "the release mode (no -source) cannot go with", "no-build")
+}
+
+func releaseImageEnv(version, prefix, tag string) ([]string, error) {
+	if prefix == "" {
+		return nil, fmt.Errorf("%w: -image-prefix must have a value", errUsage)
+	}
+
+	if tag == "" {
+		if !buildinfo.IsReleaseVersion(version) {
+			return nil, fmt.Errorf("%w: this cdrlab has the version %s, which is not a release version, so it has "+
+				"no release images: in a checkout of the repository, use -source, or use a release binary",
+				errUsage, version)
+		}
+
+		tag = version
+	}
+
+	env := make([]string, 0, len(releaseImages))
+	for _, image := range releaseImages {
+		env = append(env, image.variable+"="+prefix+"/"+image.name+":"+tag)
+	}
+
+	return env, nil
+}
+
+// builtImageEnv gives an empty value to each image variable, so that compose.yaml gives the names of the images that
+// Compose builds, also when the environment has a value.
+func builtImageEnv() []string {
+	env := make([]string, 0, len(releaseImages))
+	for _, image := range releaseImages {
+		env = append(env, image.variable+"=")
+	}
+
+	return env
 }
 
 // composeEnv sets the profiles, so that an inherited value cannot change them (CLI-0151, CLI-0152).
@@ -176,7 +249,16 @@ func reset(ctx context.Context, args []string, stdout io.Writer, d deps) error {
 		return err
 	}
 
-	return os.RemoveAll(filepath.Join(lab.dir, pkiDir))
+	if err := os.RemoveAll(filepath.Join(lab.dir, pkiDir)); err != nil {
+		return err
+	}
+
+	release, err := labproject.Recorded(lab.dir)
+	if err != nil || !release {
+		return err
+	}
+
+	return labproject.Remove(lab.dir, d.project)
 }
 
 // existingLab gives found false, and says so on stdout, when the lab directory has no compose file (CLI-0157).

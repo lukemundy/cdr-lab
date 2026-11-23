@@ -112,3 +112,23 @@ func TestADigestDirectoryWithNoDigestOfAChartIsRefused(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "register")
 }
+
+// Verifies: RLS-0123
+func TestTheNotesGiveTheCommandsThatDownloadVerifyAndRunTheCdrlabBinary(t *testing.T) {
+	t.Parallel()
+
+	got := notes(t, samplePlan(), map[string]string{"register": chartDigest})
+
+	for _, want := range []string{
+		"gh release download v0.2.0 --repo team/cdr-lab",
+		`--pattern "cdrlab-v0.2.0-$platform.tar.gz" --pattern "cdrlab-v0.2.0-checksums.txt*"`,
+		"cosign verify-blob cdrlab-v0.2.0-checksums.txt --bundle cdrlab-v0.2.0-checksums.txt.sigstore.json",
+		"--certificate-identity https://github.com/team/cdr-lab/.github/workflows/release.yml@refs/heads/main",
+		"sha256sum --check --ignore-missing cdrlab-v0.2.0-checksums.txt",
+		`gh attestation verify "cdrlab-v0.2.0-$platform.tar.gz" --repo team/cdr-lab`,
+		"go install github.com/lukemundy/cdr-lab/cli/cdrlab/cmd/cdrlab@v0.2.0",
+		"./cdrlab up",
+	} {
+		assert.Contains(t, got, want)
+	}
+}

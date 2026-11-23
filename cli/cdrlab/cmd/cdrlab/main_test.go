@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"slices"
 	"testing"
+	"testing/fstest"
 	"time"
 
 	"github.com/stretchr/testify/assert"
@@ -25,6 +26,9 @@ type harness struct {
 	environ   []string
 	compose   *fakeCompose
 	kubeCalls int
+	// project and version are the compose project and the version of the binary in the release mode.
+	project fstest.MapFS
+	version string
 }
 
 func newHarness(t *testing.T) *harness {
@@ -41,6 +45,8 @@ func newHarness(t *testing.T) *harness {
 			"DATAHOLDER_OPERATOR_TOKEN": dataholdertest.Token,
 		},
 		compose: &fakeCompose{register: register},
+		project: labFiles(t, register.URL),
+		version: "v0.3.1",
 	}
 }
 
@@ -59,6 +65,8 @@ func (h *harness) run(args ...string) (code int, stdout, stderr string) {
 		compose:    h.compose.exec,
 		now:        time.Now,
 		caKeyBits:  2048,
+		project:    h.project,
+		version:    h.version,
 	})
 
 	return code, out.String(), errOut.String()

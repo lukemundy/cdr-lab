@@ -8,6 +8,8 @@ x-telemetry-environment: &telemetry-environment
 x-lab-dns: &lab-dns
   dns_search: ["."]
 
+# The release mode of cdrlab up sets CDRLAB_REGISTER_IMAGE and CDRLAB_DATAHOLDER_IMAGE to the release images, and
+# Compose pulls them. With no value, each built service has the image name that Compose gives it.
 x-build-args: &build-args
   BUILD_COMMIT: ${BUILD_COMMIT:-unknown}
   BUILD_COMMIT_SHORT: ${BUILD_COMMIT_SHORT:-unknown}
@@ -55,6 +57,7 @@ x-dataholder-environment: &dataholder-environment
 services:
   register:
     <<: *lab-dns
+    image: ${CDRLAB_REGISTER_IMAGE:-cdr-lab-register}
     build: &register-build
       context: .
       dockerfile: services/register/Dockerfile
@@ -104,6 +107,7 @@ services:
 
   register-migrate:
     <<: *lab-dns
+    image: ${CDRLAB_REGISTER_IMAGE:-cdr-lab-register-migrate}
     build: *register-build
     environment:
       <<: *register-environment
@@ -117,6 +121,7 @@ services:
 
   register-seed:
     <<: *lab-dns
+    image: ${CDRLAB_REGISTER_IMAGE:-cdr-lab-register-seed}
     build: *register-build
     environment: *register-environment
     command: [seed, -if-empty, /seed/example.json]
@@ -129,6 +134,7 @@ services:
   # The default preset bank. The Register gives the service name of each bank as the host of the base URIs of its brand.
   wattle-bank:
     <<: *lab-dns
+    image: ${CDRLAB_DATAHOLDER_IMAGE:-cdr-lab-wattle-bank}
     build: *dataholder-build
     environment:
       <<: *dataholder-environment
@@ -166,6 +172,7 @@ services:
 
   wattle-bank-migrate:
     <<: *lab-dns
+    image: ${CDRLAB_DATAHOLDER_IMAGE:-cdr-lab-wattle-bank-migrate}
     build: *dataholder-build
     environment:
       <<: *dataholder-database-environment
@@ -181,6 +188,7 @@ services:
   # Loads the product catalogue of the brand.
   wattle-bank-seed:
     <<: *lab-dns
+    image: ${CDRLAB_DATAHOLDER_IMAGE:-cdr-lab-wattle-bank-seed}
     build: *dataholder-build
     environment:
       <<: *dataholder-database-environment
@@ -197,6 +205,7 @@ services:
   redgum-bank:
     <<: *lab-dns
     profiles: [all-banks]
+    image: ${CDRLAB_DATAHOLDER_IMAGE:-cdr-lab-redgum-bank}
     build: *dataholder-build
     environment:
       <<: *dataholder-environment
@@ -229,6 +238,7 @@ services:
   redgum-bank-migrate:
     <<: *lab-dns
     profiles: [all-banks]
+    image: ${CDRLAB_DATAHOLDER_IMAGE:-cdr-lab-redgum-bank-migrate}
     build: *dataholder-build
     environment:
       <<: *dataholder-database-environment
@@ -243,6 +253,7 @@ services:
   redgum-bank-seed:
     <<: *lab-dns
     profiles: [all-banks]
+    image: ${CDRLAB_DATAHOLDER_IMAGE:-cdr-lab-redgum-bank-seed}
     build: *dataholder-build
     environment:
       <<: *dataholder-database-environment
@@ -260,6 +271,7 @@ services:
   harbour-bank:
     <<: *lab-dns
     profiles: [all-banks]
+    image: ${CDRLAB_DATAHOLDER_IMAGE:-cdr-lab-harbour-bank}
     build: *dataholder-build
     environment:
       <<: *dataholder-environment
@@ -292,6 +304,7 @@ services:
   harbour-bank-migrate:
     <<: *lab-dns
     profiles: [all-banks]
+    image: ${CDRLAB_DATAHOLDER_IMAGE:-cdr-lab-harbour-bank-migrate}
     build: *dataholder-build
     environment:
       <<: *dataholder-database-environment
@@ -306,6 +319,7 @@ services:
   harbour-bank-seed:
     <<: *lab-dns
     profiles: [all-banks]
+    image: ${CDRLAB_DATAHOLDER_IMAGE:-cdr-lab-harbour-bank-seed}
     build: *dataholder-build
     environment:
       <<: *dataholder-database-environment
@@ -323,6 +337,7 @@ services:
   kestrel-bank:
     <<: *lab-dns
     profiles: [all-banks]
+    image: ${CDRLAB_DATAHOLDER_IMAGE:-cdr-lab-kestrel-bank}
     build: *dataholder-build
     environment:
       <<: *dataholder-environment
@@ -355,6 +370,7 @@ services:
   kestrel-bank-migrate:
     <<: *lab-dns
     profiles: [all-banks]
+    image: ${CDRLAB_DATAHOLDER_IMAGE:-cdr-lab-kestrel-bank-migrate}
     build: *dataholder-build
     environment:
       <<: *dataholder-database-environment
@@ -369,6 +385,7 @@ services:
   kestrel-bank-seed:
     <<: *lab-dns
     profiles: [all-banks]
+    image: ${CDRLAB_DATAHOLDER_IMAGE:-cdr-lab-kestrel-bank-seed}
     build: *dataholder-build
     environment:
       <<: *dataholder-database-environment

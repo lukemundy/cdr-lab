@@ -39,6 +39,10 @@ type values struct {
 // releaseVersion is the format of a release version (tools/release/DESIGN.md#rls-0004).
 var releaseVersion = regexp.MustCompile(`^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$`)
 
+func IsReleaseVersion(v string) bool {
+	return releaseVersion.MatchString(v)
+}
+
 // shortLength is the length of an abbreviated commit of git describe.
 const shortLength = 7
 
@@ -48,7 +52,7 @@ func resolve(v values, bi *debug.BuildInfo) Info {
 		return info
 	}
 
-	if info.Version == "dev" && releaseVersion.MatchString(bi.Main.Version) {
+	if info.Version == "dev" && IsReleaseVersion(bi.Main.Version) {
 		info.Version = bi.Main.Version
 	}
 

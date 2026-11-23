@@ -246,6 +246,7 @@ func TestAReleaseGivesTheVersionToTheImagesAndTheCharts(t *testing.T) {
 	assert.Equal(t, "0.1.0", got.ChartVersion)
 	assert.Equal(t, "oci://"+prefix+"/charts", got.ChartRepository)
 	assert.Equal(t, prefix+"/register", got.Images[0].Target)
+	assert.Equal(t, prefix, got.ImagePrefix)
 }
 
 // Verifies: RLS-0014, RLS-0015
@@ -267,6 +268,7 @@ func TestARehearsalUsesTheRehearsalNamesOnly(t *testing.T) {
 	assert.Equal(t, "oci://"+prefix+"/rehearsal/charts", got.ChartRepository)
 	assert.Equal(t, prefix+"/register", got.Images[0].Source)
 	assert.Equal(t, prefix+"/rehearsal/register", got.Images[0].Target)
+	assert.Equal(t, prefix+"/rehearsal", got.ImagePrefix)
 }
 
 // Verifies: RLS-0012

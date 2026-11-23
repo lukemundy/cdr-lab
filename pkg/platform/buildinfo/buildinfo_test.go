@@ -91,3 +91,19 @@ func TestWithNoCommitFromAnySourceTheCommitIsUnknown(t *testing.T) {
 	assert.Equal(t, "unknown", info.Commit)
 	assert.Equal(t, "unknown", info.CommitShort)
 }
+
+// Verifies: CLI-0143
+func TestIsReleaseVersionAcceptsOnlyAReleaseVersion(t *testing.T) {
+	for version, want := range map[string]bool{
+		"v0.3.1":       true,
+		"v10.0.12":     true,
+		"0.3.1":        false,
+		"v0.3":         false,
+		"v0.3.1-rc.1":  false,
+		"v01.2.3":      false,
+		"dev":          false,
+		"rehearsal-42": false,
+	} {
+		assert.Equal(t, want, IsReleaseVersion(version), version)
+	}
+}

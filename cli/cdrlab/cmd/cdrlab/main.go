@@ -9,6 +9,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"os/signal"
@@ -17,6 +18,7 @@ import (
 	"syscall"
 	"time"
 
+	cdrlab "github.com/lukemundy/cdr-lab"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/cainit"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/certcheck"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/certissue"
@@ -61,10 +63,16 @@ commands:
                             cdrlab customers add -dataholder-url URL -file FILE
   cdrlab up                 make the CAs and the certificates of the compose lab, and start the compose lab. The
                             certificate list lab/certificates.json of the lab directory gives the certificates.
+                            In a checkout, -source uses the compose project of the checkout and builds the images:
                             cdrlab up -source [-dir DIR] [-all-banks] [-no-build] [-no-telemetry]
                               [-wait-timeout DURATION] [SERVICE]...
+                            With no -source, cdrlab writes its own compose project into the lab directory, and
+                            Compose pulls the release images of the version of cdrlab:
+                            cdrlab up [-dir DIR] [-image-prefix PREFIX] [-image-tag TAG] [-all-banks]
+                              [-no-telemetry] [-wait-timeout DURATION] [SERVICE]...
   cdrlab down               stop the compose lab, and keep its data: cdrlab down [-dir DIR]
-  cdrlab reset              stop the compose lab, and delete its data and its CAs: cdrlab reset [-dir DIR]
+  cdrlab reset              stop the compose lab, and delete its data and its CAs, and the compose project that
+                            cdrlab up wrote: cdrlab reset [-dir DIR]
 
 The compose commands run Docker Compose as "docker compose", or as the command in the variable CDRLAB_COMPOSE.
 `
@@ -81,6 +89,9 @@ type deps struct {
 	environ    func() []string
 	compose    compose.Exec
 	stderr     io.Writer
+	// project is the compose project of the release mode, and version is the version of the binary.
+	project fs.FS
+	version string
 }
 
 // errUsage gives the exit status 2, as for a flag error.
@@ -95,6 +106,8 @@ func main() {
 		now:        time.Now,
 		environ:    os.Environ,
 		compose:    compose.OSExec,
+		project:    cdrlab.ComposeProject,
+		version:    buildinfo.Get().Version,
 		// The size of the CA keys of the PKI specification (PKI-0003).
 		caKeyBits: 4096,
 	})

@@ -218,10 +218,177 @@ jobs:
           path: ${{ runner.temp }}/notes.md
           if-no-files-found: error
 
+  # The release builds the cdrlab binaries from the release commit, because CI builds no host binaries.
+  binaries:
+    needs: plan
+    if: github.ref == 'refs/heads/main' && inputs.mode != 'check'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    strategy:
+      matrix:
+        platform: [linux-amd64, linux-arm64, darwin-amd64, darwin-arm64]
+    steps:
+      - *checkout
+
+      - *install-mise
+
+      - *download-plan
+
+      - name: Build the archive
+        id: build
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          BUILD_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          version=$(jq --raw-output .imageTag "$RUNNER_TEMP/plan/plan.json")
+          mise run release:cdrlab "$version" "${PLATFORM%-*}" "${PLATFORM#*-}" "$RUNNER_TEMP/dist"
+          echo "archive=$RUNNER_TEMP/dist/cdrlab-$version-$PLATFORM.tar.gz" >> "$GITHUB_OUTPUT"
+          echo "sbom=$RUNNER_TEMP/dist/cdrlab-$version-$PLATFORM.spdx.json" >> "$GITHUB_OUTPUT"
+
+      - name: Attest the provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: ${{ steps.build.outputs.archive }}
+
+      - name: Attest the SBOM
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: ${{ steps.build.outputs.archive }}
+          sbom-path: ${{ steps.build.outputs.sbom }}
+
+      - name: Upload the archive
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: cdrlab-${{ matrix.platform }}
+          path: ${{ steps.build.outputs.archive }}
+          if-no-files-found: error
+
+  # One keyless cosign signature of one checksum file covers each platform.
+  checksums:
+    needs: [plan, binaries]
+    if: github.ref == 'refs/heads/main' && inputs.mode != 'check'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - *checkout
+
+      - *install-mise
+
+      - *download-plan
+
+      - name: Download the archives
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: cdrlab-*
+          merge-multiple: true
+          path: ${{ runner.temp }}/dist
+
+      - name: Write and sign the checksum file
+        run: |
+          set -euo pipefail
+          version=$(jq --raw-output .imageTag "$RUNNER_TEMP/plan/plan.json")
+          cd "$RUNNER_TEMP/dist"
+          sha256sum cdrlab-*.tar.gz > "cdrlab-$version-checksums.txt"
+          if [ "$(wc -l < "cdrlab-$version-checksums.txt")" -ne 4 ]; then
+            echo "The checksum file must have 4 archives" >&2
+            exit 1
+          fi
+          mise exec -- cosign sign-blob --yes --bundle "cdrlab-$version-checksums.txt.sigstore.json" \
+            "cdrlab-$version-checksums.txt"
+
+      - name: Upload the cdrlab assets
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: cdrlab
+          path: ${{ runner.temp }}/dist/
+          if-no-files-found: error
+
+  # The release mode of cdrlab up, with the linux/amd64 binary and the images of the run, in a directory with no
+  # checkout. A user verifies the assets in the same way before a run.
+  lab:
+    needs: [plan, images, checksums]
+    if: github.ref == 'refs/heads/main' && inputs.mode != 'check'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      # The checkout gives only the pinned cosign. The lab directory is outside it.
+      - *checkout
+
+      - *install-mise
+
+      - *download-plan
+
+      - name: Download the cdrlab assets
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: cdrlab
+          path: ${{ runner.temp }}/dist
+
+      - name: Verify the assets
+        env:
+          WORKFLOW: ${{ github.server_url }}/${{ github.repository }}/.github/workflows/release.yml@refs/heads/main
+        run: |
+          set -euo pipefail
+          version=$(jq --raw-output .imageTag "$RUNNER_TEMP/plan/plan.json")
+          cosign=$(mise which cosign)
+          cd "$RUNNER_TEMP/dist"
+          "$cosign" verify-blob "cdrlab-$version-checksums.txt" --bundle "cdrlab-$version-checksums.txt.sigstore.json" \
+            --certificate-identity "$WORKFLOW" --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          sha256sum --check "cdrlab-$version-checksums.txt"
+
+      - name: Log in to the registry
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin <<< "$GH_TOKEN"
+
+      - name: Start the compose lab in the release mode
+        id: up
+        run: |
+          set -euo pipefail
+          plan="$RUNNER_TEMP/plan/plan.json"
+          version=$(jq --raw-output .imageTag "$plan")
+          mkdir "$RUNNER_TEMP/lab"
+          tar -xzf "$RUNNER_TEMP/dist/cdrlab-$version-linux-amd64.tar.gz" -C "$RUNNER_TEMP/lab" cdrlab
+          cd "$RUNNER_TEMP/lab"
+          ./cdrlab version
+          # A release binary has the release images as its default. A rehearsal binary needs the rehearsal names.
+          flags=()
+          if [ "$(jq --raw-output .mode "$plan")" = rehearse ]; then
+            flags=(-image-prefix "$(jq --raw-output .imagePrefix "$plan")" -image-tag "$version")
+          fi
+          # With no CDRLAB_COMPOSE, cdrlab runs "docker compose", as on a host with only Docker.
+          env -u CDRLAB_COMPOSE ./cdrlab up "${flags[@]}" -no-telemetry -wait-timeout 3m
+          curl --fail --silent --show-error http://127.0.0.1:8080/livez
+          curl --fail --silent --show-error http://127.0.0.1:8180/livez
+
+      - name: Show the logs of the lab
+        if: failure() && steps.up.conclusion == 'failure'
+        working-directory: ${{ runner.temp }}/lab
+        run: docker compose --profile '*' logs --no-color --tail 200
+
+      - name: Reset the lab
+        if: always()
+        run: |
+          if [ -x "$RUNNER_TEMP/lab/cdrlab" ]; then
+            cd "$RUNNER_TEMP/lab" && env -u CDRLAB_COMPOSE ./cdrlab reset
+          fi
+
+      - name: Log out of the registry
+        if: always()
+        run: docker logout ghcr.io
+
   # The GitHub Release is a draft until each artifact has its version, its signature and its attestations. The
   # publication makes the git tag, so a failure before it leaves no tag and no published release.
   github-release:
-    needs: [plan, notes]
+    needs: [plan, notes, lab]
     if: github.ref == 'refs/heads/main' && inputs.mode == 'release'
     runs-on: ubuntu-latest
     permissions:
@@ -234,6 +401,12 @@ jobs:
         with:
           name: notes
           path: ${{ runner.temp }}
+
+      - name: Download the cdrlab assets
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: cdrlab
+          path: ${{ runner.temp }}/dist
 
       - name: Publish the GitHub Release
         env:
@@ -248,5 +421,7 @@ jobs:
             gh release delete "$version" --yes
           fi
           gh release create "$version" --draft --target "$commit" --title "$version" \
-            --notes-file "$RUNNER_TEMP/notes.md"
+            --notes-file "$RUNNER_TEMP/notes.md" \
+            "$RUNNER_TEMP"/dist/cdrlab-"$version"-*.tar.gz "$RUNNER_TEMP/dist/cdrlab-$version-checksums.txt" \
+            "$RUNNER_TEMP/dist/cdrlab-$version-checksums.txt.sigstore.json"
           gh release edit "$version" --draft=false
