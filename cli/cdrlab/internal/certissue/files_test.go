@@ -3,6 +3,7 @@ package certissue_test
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"io/fs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -40,7 +41,7 @@ func (l lab) runFiles(t *testing.T, out certissue.Files, cfg certissue.Config) (
 func readFile(t *testing.T, path string) []byte {
 	t.Helper()
 
-	data, err := os.ReadFile(path)
+	data, err := fs.ReadFile(os.DirFS(filepath.Dir(path)), filepath.Base(path))
 	require.NoError(t, err)
 
 	return data

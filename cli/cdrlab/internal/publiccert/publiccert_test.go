@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -49,7 +50,7 @@ func issued(t *testing.T, cfg publiccert.Config) bool {
 func read(t *testing.T, path string) []byte {
 	t.Helper()
 
-	data, err := os.ReadFile(path)
+	data, err := fs.ReadFile(os.DirFS(filepath.Dir(path)), filepath.Base(path))
 	require.NoError(t, err)
 
 	return data
@@ -127,7 +128,8 @@ func TestTheCommandRenewsACertificateThatIsNotCurrent(t *testing.T) {
 				require.NoError(t, os.Remove(filepath.Join(cfg.Dir, name)))
 			}
 
-			for _, name := range []string{"cdr/root.crt", "cdr/intermediate.crt", "cdr/intermediate.key", "cdr/ca-bundle.pem"} {
+			cdrFiles := []string{"cdr/root.crt", "cdr/intermediate.crt", "cdr/intermediate.key", "cdr/ca-bundle.pem"}
+			for _, name := range cdrFiles {
 				require.NoError(t, os.Remove(filepath.Join(cfg.Dir, name)))
 			}
 

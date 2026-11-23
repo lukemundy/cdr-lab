@@ -145,6 +145,7 @@ func want(cfg Config, key crypto.PublicKey) certcheck.Want {
 
 	if cfg.Kind == ca.Server {
 		w.Usage = x509.ExtKeyUsageServerAuth
+
 		w.DNSNames = append([]string{cfg.CommonName}, cfg.DNSNames...)
 	}
 

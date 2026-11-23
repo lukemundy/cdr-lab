@@ -1,6 +1,7 @@
 package pemfile_test
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -16,7 +17,7 @@ func TestWriteMakesTheDirectoryAndTheFileWithTheMode(t *testing.T) {
 
 	require.NoError(t, pemfile.Write(path, []byte("key"), pemfile.OwnerOnly))
 
-	data, err := os.ReadFile(path)
+	data, err := fs.ReadFile(os.DirFS(filepath.Dir(path)), filepath.Base(path))
 	require.NoError(t, err)
 	assert.Equal(t, "key", string(data))
 
@@ -54,7 +55,7 @@ func TestWriteReplacesTheFileAsOneUnitAndLeavesNoOtherFile(t *testing.T) {
 	require.NoError(t, err)
 	assert.False(t, os.SameFile(before, after), "a rename replaces the file, so a reader never gets a part of a file")
 
-	data, err := os.ReadFile(path)
+	data, err := fs.ReadFile(os.DirFS(filepath.Dir(path)), filepath.Base(path))
 	require.NoError(t, err)
 	assert.Equal(t, "new", string(data))
 
@@ -67,12 +68,14 @@ func TestAFailedWriteLeavesTheEarlierFile(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "secure.crt")
 	require.NoError(t, pemfile.Write(path, []byte("earlier"), pemfile.AnyUser))
-	require.NoError(t, os.Chmod(dir, 0o555))
-	t.Cleanup(func() { _ = os.Chmod(dir, 0o755) })
+	//nolint:gosec // G302: the owner cannot write the directory, so that the write fails.
+	require.NoError(t, os.Chmod(dir, 0o500))
+	//nolint:gosec // G302: the owner must write the directory again, so that the test can delete it.
+	t.Cleanup(func() { _ = os.Chmod(dir, 0o700) })
 
 	require.Error(t, pemfile.Write(path, []byte("new"), pemfile.AnyUser))
 
-	data, err := os.ReadFile(path)
+	data, err := fs.ReadFile(os.DirFS(filepath.Dir(path)), filepath.Base(path))
 	require.NoError(t, err)
 	assert.Equal(t, "earlier", string(data))
 }

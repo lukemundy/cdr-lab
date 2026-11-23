@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -108,7 +109,7 @@ func TestCertIssueWithACSRFileSendsItAndWritesOnlyTheCertificate(t *testing.T) {
 		"-csr", csrPath, "-cert", filepath.Join(dir, "client.crt"))
 	require.Equal(t, 0, code, stderr)
 
-	csr, err := os.ReadFile(csrPath)
+	csr, err := fs.ReadFile(os.DirFS(dir), "client.csr")
 	require.NoError(t, err)
 	assert.Equal(t, csr, h.register.LastCSR())
 	assert.FileExists(t, filepath.Join(dir, "client.crt"))

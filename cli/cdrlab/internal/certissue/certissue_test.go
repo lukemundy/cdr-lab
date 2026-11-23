@@ -58,7 +58,8 @@ func (l lab) run(t *testing.T, cfg secretConfig) (bool, error) {
 
 func serverConfig() secretConfig {
 	//nolint:gosec // G101 reads the name of the Kubernetes Secret as a credential
-	return secretConfig{Secret: "wattle-bank-secure-tls", Config: certissue.Config{
+	return secretConfig{
+		Secret:        "wattle-bank-secure-tls",
 		Kind:          ca.Server,
 		LegalEntityID: "le-1",
 		RecordID:      "brand-1",
@@ -67,12 +68,13 @@ func serverConfig() secretConfig {
 		DNSNames:      []string{"wattle-bank", "localhost"},
 		RenewBefore:   certcheck.DefaultRenewBefore,
 		Now:           time.Now,
-	}}
+	}
 }
 
 func clientConfig() secretConfig {
 	//nolint:gosec // G101 reads the name of the Kubernetes Secret as a credential
-	return secretConfig{Secret: "conformance-client", Config: certissue.Config{
+	return secretConfig{
+		Secret:        "conformance-client",
 		Kind:          ca.Client,
 		LegalEntityID: "le-2",
 		RecordID:      "sp-2",
@@ -80,7 +82,7 @@ func clientConfig() secretConfig {
 		Organisation:  "Token Test",
 		RenewBefore:   certcheck.DefaultRenewBefore,
 		Now:           time.Now,
-	}}
+	}
 }
 
 func leaf(t *testing.T, s kubetest.Secret) *x509.Certificate {

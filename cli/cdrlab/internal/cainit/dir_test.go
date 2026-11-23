@@ -49,6 +49,7 @@ func TestTheCASetUpWritesTheFilesOfTheCDRCAAndThePublicCAWithNoCDRRootKey(t *tes
 	}
 
 	var all []string
+
 	require.NoError(t, filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
 		if err == nil && !d.IsDir() {
 			rel, _ := filepath.Rel(dir, path)
@@ -76,6 +77,7 @@ func TestTheCASetUpWritesTheFilesOfTheCDRCAAndThePublicCAWithNoCDRRootKey(t *tes
 	public := readCert(t, dir, "public/root.crt")
 	assert.Equal(t, "CN=Mock Public Root CA,O=cdr-lab,C=AU", public.Subject.String())
 	assert.NotEqual(t, root.Raw, public.Raw)
+
 	publicKey, err := ca.ReadKey(filepath.Join(dir, "public/root.key"))
 	require.NoError(t, err)
 	assert.True(t, sameKey(public.PublicKey, publicKey.Public()))
@@ -126,9 +128,8 @@ func TestTheCASetUpFailsAndChangesNothingWhenOnlySomeFilesExist(t *testing.T) {
 func TestAFailedWriteRemovesEachFileOfTheRun(t *testing.T) {
 	dir := t.TempDir()
 	public := filepath.Join(dir, "public")
-	require.NoError(t, os.Mkdir(public, 0o755))
-	require.NoError(t, os.Chmod(public, 0o555))
-	t.Cleanup(func() { _ = os.Chmod(public, 0o755) })
+	// A directory that the owner cannot write makes the write of the public CA fail.
+	require.NoError(t, os.Mkdir(public, 0o500))
 
 	_, err := runDir(t, dir)
 

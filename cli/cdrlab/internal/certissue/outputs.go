@@ -38,8 +38,9 @@ func (s *Secret) Load(ctx context.Context) ([]*x509.Certificate, crypto.PublicKe
 	}
 
 	s.loaded, s.found = secret, found
+	chain, key := parse(secret.Data["tls.crt"], secret.Data["tls.key"])
 
-	return parse(secret.Data["tls.crt"], secret.Data["tls.key"])
+	return chain, key, nil
 }
 
 func (s *Secret) Save(ctx context.Context, chain []*x509.Certificate, keyPEM []byte, bundle []*x509.Certificate) error {
@@ -84,7 +85,9 @@ func (f Files) Load(context.Context) ([]*x509.Certificate, crypto.PublicKey, err
 		}
 	}
 
-	return parse(certPEM, keyPEM)
+	chain, key := parse(certPEM, keyPEM)
+
+	return chain, key, nil
 }
 
 // Save writes the key first. If the write of the certificate then fails, the key does not agree with the
@@ -100,16 +103,16 @@ func (f Files) Save(_ context.Context, chain []*x509.Certificate, keyPEM []byte,
 }
 
 // parse gives no chain or no key for a text that it cannot read, so that the run gets a new certificate.
-func parse(certPEM, keyPEM []byte) ([]*x509.Certificate, crypto.PublicKey, error) {
+func parse(certPEM, keyPEM []byte) ([]*x509.Certificate, crypto.PublicKey) {
 	chain, err := ca.ParseCertificates(certPEM)
 	if err != nil {
-		return nil, nil, nil
+		return nil, nil
 	}
 
 	key, err := ca.ParseKey(keyPEM)
 	if err != nil {
-		return chain, nil, nil
+		return chain, nil
 	}
 
-	return chain, key.Public(), nil
+	return chain, key.Public()
 }
