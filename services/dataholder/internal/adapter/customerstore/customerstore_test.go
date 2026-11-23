@@ -467,3 +467,45 @@ func TestAnAccountWithATransactionGivesTheErrorsOfAnAccount(t *testing.T) {
 	require.ErrorIs(t, noCustomerErr, app.ErrCustomerNotFound)
 	assert.Empty(t, calls.transactions)
 }
+
+// Verifies: DH-2665
+func TestAWriteInATransactionThatGivesAnErrorLeavesNothing(t *testing.T) {
+	store := customerstore.New(newPool(t), nil, nil)
+	errStop := errors.New("stop")
+
+	err := store.InTransaction(t.Context(), func(inTx *customerstore.Store, _ pgx.Tx) error {
+		require.NoError(t, inTx.AddCustomer(t.Context(), customer("00000001")))
+		require.NoError(t, inTx.AddAccount(t.Context(), "00000001", account("111111")))
+
+		_, err := inTx.Customer(t.Context(), "00000001")
+		require.NoError(t, err, "the transaction sees its own writes")
+
+		return errStop
+	})
+
+	require.ErrorIs(t, err, errStop)
+
+	_, err = store.Customer(t.Context(), "00000001")
+	assert.ErrorIs(t, err, app.ErrCustomerNotFound)
+}
+
+// Verifies: DH-1201
+func TestACustomerNumberInUseInATransactionLetsTheTransactionTryADifferentNumber(t *testing.T) {
+	store := customerstore.New(newPool(t), nil, nil)
+	require.NoError(t, store.AddCustomer(t.Context(), customer("00000001")))
+
+	err := store.InTransaction(t.Context(), func(inTx *customerstore.Store, _ pgx.Tx) error {
+		used := customer("00000001")
+		used.EmailAddress = "other@example.com"
+		require.ErrorIs(t, inTx.AddCustomer(t.Context(), used), app.ErrCustomerNumberUsed)
+
+		used.CustomerNumber = "00000002"
+
+		return inTx.AddCustomer(t.Context(), used)
+	})
+
+	require.NoError(t, err)
+
+	_, err = store.Customer(t.Context(), "00000002")
+	assert.NoError(t, err)
+}

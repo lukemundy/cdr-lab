@@ -7,20 +7,26 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/app"
 	"github.com/lukemundy/cdr-lab/services/dataholder/internal/domain"
 )
 
+// DB is a pool or a transaction.
+type DB interface {
+	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+}
+
 type Store struct {
-	pool *pgxpool.Pool
+	db DB
 }
 
 var _ app.TransactionStore = (*Store)(nil)
 
-func New(pool *pgxpool.Pool) *Store {
-	return &Store{pool: pool}
+func New(db DB) *Store {
+	return &Store{db: db}
 }
 
 const columns = `transaction_id, type, status, description, amount_cents, reference, posting_date_time,
@@ -28,7 +34,7 @@ const columns = `transaction_id, type, status, description, amount_cents, refere
 	apca_number, extended_data`
 
 func (s *Store) AddTransaction(ctx context.Context, accountID string, t domain.Transaction) error {
-	return insert(ctx, s.pool, accountID, t)
+	return insert(ctx, s.db, accountID, t)
 }
 
 // Insert adds the transaction in tx, so that a different store can add it in the same write as its own rows.
@@ -54,7 +60,7 @@ func insert(ctx context.Context, db execer, accountID string, t domain.Transacti
 }
 
 func (s *Store) Transactions(ctx context.Context, accountID string) ([]domain.Transaction, error) {
-	rows, err := s.pool.Query(
+	rows, err := s.db.Query(
 		ctx,
 		"SELECT "+columns+" FROM transactions WHERE account_id = $1 ORDER BY transaction_sequence",
 		accountID,
@@ -78,11 +84,11 @@ func (s *Store) FindTransactions(ctx context.Context, q app.TransactionQuery) ([
 	filters := []any{q.AccountID, q.Oldest, q.Newest, q.MinAmount, q.MaxAmount, strings.ToLower(q.Text)}
 
 	var total int
-	if err := s.pool.QueryRow(ctx, "SELECT count(*) "+matchingTransactions, filters...).Scan(&total); err != nil {
+	if err := s.db.QueryRow(ctx, "SELECT count(*) "+matchingTransactions, filters...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
-	rows, err := s.pool.Query(
+	rows, err := s.db.Query(
 		ctx,
 		"SELECT "+columns+" "+matchingTransactions+
 			" ORDER BY effective_time DESC, transaction_sequence DESC LIMIT $7 OFFSET $8",
@@ -98,7 +104,7 @@ func (s *Store) FindTransactions(ctx context.Context, q app.TransactionQuery) ([
 }
 
 func (s *Store) Totals(ctx context.Context, accountIDs []string) (map[string]domain.TransactionTotals, error) {
-	rows, err := s.pool.Query(ctx, `SELECT account_id,
+	rows, err := s.db.Query(ctx, `SELECT account_id,
 		coalesce(sum(amount_cents) FILTER (WHERE status = 'POSTED'), 0)::bigint,
 		coalesce(sum(amount_cents) FILTER (WHERE status = 'PENDING' AND amount_cents < 0), 0)::bigint
 		FROM transactions WHERE account_id = ANY($1) GROUP BY account_id`, accountIDs)

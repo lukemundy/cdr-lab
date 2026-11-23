@@ -42,11 +42,11 @@ func (s *Store) CustomerPage(ctx context.Context, query app.CustomerPageQuery) (
 	}
 
 	var total int
-	if err := s.pool.QueryRow(ctx, "SELECT count(*) "+customerPage, query.Contains).Scan(&total); err != nil {
+	if err := s.db.QueryRow(ctx, "SELECT count(*) "+customerPage, query.Contains).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
-	rows, err := s.pool.Query(ctx, fmt.Sprintf(`
+	rows, err := s.db.Query(ctx, fmt.Sprintf(`
 		SELECT customer_number, first_name, last_name, email_address, last_updated,
 			(SELECT count(*) FROM accounts a
 				WHERE a.customer_number = customers.customer_number AND a.open_status = $2) AS open_account_count,
