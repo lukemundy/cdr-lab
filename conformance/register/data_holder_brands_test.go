@@ -27,11 +27,14 @@ const (
 	statusTestProduct   = "8bbe8ce3-3d90-44b2-b97d-383d7fa7e579"
 )
 
-const (
-	dataHolderBrandsPath = "/cdr-register/v1/all/data-holders/brands"
-	// The seed file has 12 data holder brands with a dataHolderBrandId, and 2 with only an interimId.
-	seedRegisteredBrands = 12
-)
+const dataHolderBrandsPath = "/cdr-register/v1/all/data-holders/brands"
+
+// registeredBrands gives the number of data holder brands with a dataHolderBrandId. The seed file has 8 of them that
+// are not preset brands, and 2 more brands with only an interimId.
+func registeredBrands(t *testing.T) int {
+	t.Helper()
+	return 8 + len(registerPresets(t))
+}
 
 // The CDS OpenAPI specification gives only these statuses for Get Data Holder Brands.
 var specifiedBrandStatuses = []int{
@@ -139,7 +142,11 @@ func TestADataRecipientGetsTheDataHolderBrandsOfEachIndustryWithTheirEndpoints(t
 	cert := activeTokenClient(t)
 	token := accessToken(t, idpTestActiveProduct, cert)
 
-	tests := map[string]int{"all": seedRegisteredBrands, "banking": 5, "energy": 3, "telco": 3, "non-bank-lending": 2}
+	presets := len(registerPresets(t))
+
+	tests := map[string]int{
+		"all": registeredBrands(t), "banking": 1 + presets, "energy": 3, "telco": 3, "non-bank-lending": 2,
+	}
 	for industry, want := range tests {
 		t.Run(industry, func(t *testing.T) {
 			page := brands(t, cert, token, "/cdr-register/v1/"+industry+"/data-holders/brands")
@@ -195,15 +202,21 @@ func TestGetDataHolderBrandsPagesFollowTheCDSPaginationRules(t *testing.T) {
 	token := accessToken(t, idpTestActiveProduct, cert)
 	secureBase := labtest.Env(t, "REGISTER_SECURE_URL")
 
+	const pageSize = 4
+
+	total := registeredBrands(t)
+	pages := (total + pageSize - 1) / pageSize
+	require.Greater(t, pages, 1, "the test needs more than one page")
+
 	var ids []string
 
-	target := dataHolderBrandsPath + "?page-size=4"
+	target := dataHolderBrandsPath + "?page-size=" + strconv.Itoa(pageSize)
 	for pageNumber := 1; target != ""; pageNumber++ {
-		require.LessOrEqual(t, pageNumber, 3, "the next links stop at the last page")
+		require.LessOrEqual(t, pageNumber, pages, "the next links stop at the last page")
 		page := brands(t, cert, token, target)
 
-		assert.Equal(t, seedRegisteredBrands, page.Meta.TotalRecords)
-		assert.Equal(t, 3, page.Meta.TotalPages)
+		assert.Equal(t, total, page.Meta.TotalRecords)
+		assert.Equal(t, pages, page.Meta.TotalPages)
 
 		for name, link := range page.Links {
 			assert.True(
@@ -218,7 +231,7 @@ func TestGetDataHolderBrandsPagesFollowTheCDSPaginationRules(t *testing.T) {
 
 		assert.Contains(t, page.Links["self"], "page="+strconv.Itoa(pageNumber))
 		assert.Equal(t, pageNumber > 1, page.Links["prev"] != "", "prev is present only after the first page")
-		assert.Equal(t, pageNumber < 3, page.Links["next"] != "", "next is present only before the last page")
+		assert.Equal(t, pageNumber < pages, page.Links["next"] != "", "next is present only before the last page")
 		assert.NotEmpty(t, page.Links["first"])
 		assert.NotEmpty(t, page.Links["last"])
 
@@ -229,9 +242,9 @@ func TestGetDataHolderBrandsPagesFollowTheCDSPaginationRules(t *testing.T) {
 		target = page.Links["next"]
 	}
 
-	assert.Len(t, ids, seedRegisteredBrands)
+	assert.Len(t, ids, total)
 	assert.True(t, slices.IsSorted(ids), "the brands are in the order of their IDs")
-	assert.Len(t, slices.Compact(slices.Clone(ids)), seedRegisteredBrands, "no brand is on two pages")
+	assert.Len(t, slices.Compact(slices.Clone(ids)), total, "no brand is on two pages")
 }
 
 func TestGetDataHolderBrandsDefaultsToTheFirstPageOf25(t *testing.T) {
@@ -265,7 +278,7 @@ func TestGetDataHolderBrandsUpdatedSinceGivesOnlyTheBrandsWithALaterOrEqualUpdat
 	fromOldest := brands(t, cert, token, since(oldest.Truncate(time.Second)))
 	future := brands(t, cert, token, since(time.Now().Add(time.Hour)))
 
-	assert.Equal(t, seedRegisteredBrands, fromOldest.Meta.TotalRecords)
+	assert.Equal(t, registeredBrands(t), fromOldest.Meta.TotalRecords)
 	assert.Contains(t, fromOldest.Links["self"], "updated-since=")
 	assert.Empty(t, future.Data)
 	assert.Equal(t, 0, future.Meta.TotalRecords)
@@ -311,7 +324,7 @@ func TestGetDataHolderBrandsAcceptsTheMaximumPageSize(t *testing.T) {
 
 	page := brands(t, cert, accessToken(t, idpTestActiveProduct, cert), dataHolderBrandsPath+"?page-size=1000")
 
-	assert.Len(t, page.Data, seedRegisteredBrands)
+	assert.Len(t, page.Data, registeredBrands(t))
 }
 
 // Verifies: REG-0313

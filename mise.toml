@@ -13,6 +13,9 @@ kubeconform = "0.8.0"
 crane = "0.22.1"
 syft = "1.57.2"
 cosign = "3.1.4"
+kind = "0.33.0"
+kubectl = "1.37.2"
+yq = "4.54.3"
 
 [env]
 # The image builds install this pnpm version, so that mise.toml is its only pin.
@@ -320,6 +323,166 @@ if [ "${usage_no_telemetry:-}" = true ]; then set -- "$@" -no-telemetry; fi
 # lab/certificates.json gives the certificates (cli/cdrlab/design/compose-lab.md#cli-0147).
 go run ./cli/cdrlab/cmd/cdrlab up -source "$@" ${usage_service:-}
 """
+
+[tasks."cluster:up"]
+description = "Create a kind cluster and install the umbrella chart in it with the images of the lab, as the cluster job of CI does"
+depends = ["chart:deps"]
+# The images of the register and wattle-bank compose services (mise run build:images, or the images that CI loads),
+# and the image cdrlab (mise run build:index cli/cdrlab, then mise run image:load cdrlab cdrlab).
+# CONFORMANCE_GO_CACHE, when it is set, is the host directory of the Go cache of the conformance suite.
+shell = "bash -c"
+run = """
+set -euo pipefail
+cluster=cdr-lab
+k() { kubectl --context "kind-$cluster" --namespace lab "$@"; }
+tag=$(git describe --always --dirty --exclude='*')
+compose=$(docker-compose --profile test config --format json)
+image_of() { jq --raw-output --arg service "$1" '.name as $project | .services[$service].image // "\\($project)-\\($service)"' <<< "$compose"; }
+
+# The node gets the checkout and the certificate files of the suite (lab/kind/conformance.yaml).
+mkdir -p .lab/kind/pki .lab/pki
+{
+  echo "kind: Cluster"
+  echo "apiVersion: kind.x-k8s.io/v1alpha4"
+  echo "nodes:"
+  echo "  - role: control-plane"
+  echo "    extraMounts:"
+  echo "      - {hostPath: \\"$PWD\\", containerPath: /src, readOnly: true}"
+  echo "      - {hostPath: \\"$PWD/.lab/kind/pki\\", containerPath: /pki}"
+  if [ -n "${CONFORMANCE_GO_CACHE:-}" ]; then
+    mkdir -p "$CONFORMANCE_GO_CACHE"
+    echo "      - {hostPath: \\"$CONFORMANCE_GO_CACHE\\", containerPath: /cache}"
+  fi
+} > .lab/kind/cluster.yaml
+kind create cluster --name "$cluster" --config .lab/kind/cluster.yaml --wait 2m
+
+# A tag that is not latest, so that the kubelet uses the loaded image and does not pull.
+for image in register:"$(image_of register)" dataholder:"$(image_of wattle-bank)" cdrlab:cdrlab; do
+  docker tag "${image#*:}" "cdr-lab.local/${image%%:*}:$tag"
+  kind load docker-image --name "$cluster" "cdr-lab.local/${image%%:*}:$tag"
+done
+
+helm install cert-manager oci://quay.io/jetstack/charts/cert-manager --version v1.21.3 --kube-context "kind-$cluster" \\
+  --namespace cert-manager --create-namespace --set crds.enabled=true --wait --timeout 5m
+kubectl --context "kind-$cluster" create namespace lab
+
+# The lab users of lab/postgres/init.sql, and the operator token of compose.yaml.
+k create secret generic lab-operator-token --from-literal=token=lab-operator-token
+for user in register-owner:register_owner register-service:register \\
+  wattle-bank-owner:wattle_bank_owner wattle-bank-service:wattle_bank; do
+  k create secret generic "${user%%:*}" --type=kubernetes.io/basic-auth \\
+    --from-literal=username="${user#*:}" --from-literal=password="${user#*:}"
+done
+k create configmap postgres-init --from-file=1-init.sql=lab/postgres/init.sql \\
+  --from-file=2-roles.sql=lab/kind/roles.sql --from-file=3-grants.sql=lab/postgres/grants.sql
+IMAGE=$(image_of postgres) yq '(select(.kind == "Deployment") | .spec.template.spec.containers[0].image) = strenv(IMAGE)' \\
+  lab/kind/postgres.yaml | k apply --filename -
+IMAGE=$(image_of mail) yq '(select(.kind == "Deployment") | .spec.template.spec.containers[0].image) = strenv(IMAGE)' \\
+  lab/kind/mail.yaml | k apply --filename -
+k apply --filename lab/kind/issuers.yaml
+k wait --for=condition=Ready certificate/public-root-ca --timeout 2m
+k create secret generic public-root \\
+  --from-literal=ca.crt="$(k get secret public-root-ca --output jsonpath='{.data.ca\\.crt}' | base64 --decode)"
+k wait --for=condition=Available deployment/postgres deployment/mail --timeout 5m
+
+# The participants of the Register seed of compose, except the preset brands, which the chart gives.
+jq --slurpfile preset charts/cdr-lab/files/preset-brands.json '
+  ($preset[0].dataHolders | map(.legalEntityId)) as $presets |
+  {participants: {
+    dataHolders: [.dataHolders[] | select(.legalEntityId as $id | $presets | index($id) | not)],
+    dataRecipients: .dataRecipients
+  }}' services/register/seed/example.json > .lab/kind/participants.json
+
+helm install cdr-lab charts/cdr-lab --kube-context "kind-$cluster" --namespace lab \\
+  --values lab/kind/values.yaml --values .lab/kind/participants.json \\
+  --set "images.register.repository=cdr-lab.local/register,images.register.tag=$tag" \\
+  --set "images.dataholder.repository=cdr-lab.local/dataholder,images.dataholder.tag=$tag" \\
+  --set "images.cdrlab.repository=cdr-lab.local/cdrlab,images.cdrlab.tag=$tag" \\
+  --wait --timeout 10m
+"""
+
+[tasks."cluster:conformance"]
+description = "Run the conformance tests as a Job in the kind cluster of cluster:up"
+shell = "bash -c"
+run = """
+set -euo pipefail
+k() { kubectl --context kind-cdr-lab --namespace lab "$@"; }
+secret() { k get secret "$1" --output jsonpath="{.data.${2//./\\\\.}}" | base64 --decode; }
+
+# The suite reads the files at the paths of compose.yaml, below .lab/pki, which the Job mounts from .lab/kind/pki.
+pki=.lab/kind/pki
+mkdir -p "$pki/cdr" "$pki/public" "$pki/conformance" "$pki/openid"
+secret cdr-ca-bundle ca.crt > "$pki/cdr/ca-bundle.pem"
+secret public-root ca.crt > "$pki/public/root.crt"
+k wait --for=condition=Ready certificate/conformance-jwks --timeout 2m
+secret conformance-jwks tls.crt > "$pki/conformance/jwks.crt"
+secret conformance-jwks tls.key > "$pki/conformance/jwks.key"
+
+# The port of lab/kind/values.yaml, which is not a port of the compose lab.
+k port-forward service/register 18080:8080 > /dev/null &
+forward=$!
+trap 'kill $forward' EXIT
+for _ in $(seq 30); do
+  if (exec 3<> /dev/tcp/127.0.0.1/18080) 2> /dev/null; then break; fi
+  sleep 1
+done
+# The client certificates of lab/certificates.json, with the keys as the flags of cdrlab cert issue.
+go build -o bin/cdrlab github.com/lukemundy/cdr-lab/cli/cdrlab/cmd/cdrlab
+export REGISTER_OPERATOR_TOKEN
+REGISTER_OPERATOR_TOKEN=$(secret lab-operator-token token)
+jq --compact-output --arg dir "$pki/" '.cdr[] | select(.kind == "client") |
+  (.cert, .key) |= sub("^\\\\.lab/pki/"; $dir) | [to_entries[] | "-\\(.key)", .value]' lab/certificates.json |
+  while read -r flags; do
+    mapfile -t flags < <(jq --raw-output '.[]' <<< "$flags")
+    bin/cdrlab cert issue -register-url http://localhost:18080 "${flags[@]}"
+  done
+
+# The Job has the image, the command and the environment of the conformance compose service. The Register has the
+# records of only the brands of the release.
+k delete job conformance --ignore-not-found --wait
+presets=$(yq '.brands | keys | join(",")' lab/kind/values.yaml)
+docker-compose --profile test config --format json | jq --arg presets "$presets" '.services.conformance |
+  .environment.REGISTER_PRESET_BRANDS = $presets | {
+  apiVersion: "batch/v1", kind: "Job", metadata: {name: "conformance"},
+  spec: {backoffLimit: 0, activeDeadlineSeconds: 1800, template: {metadata: {labels: {app: "conformance"}}, spec: {
+    restartPolicy: "Never", enableServiceLinks: false,
+    containers: [{
+      name: "conformance", image: .image, workingDir: .working_dir, command: .command,
+      env: [.environment | to_entries[] | {name: .key, value: .value}],
+      volumeMounts: [
+        {name: "src", mountPath: "/src", readOnly: true},
+        {name: "pki", mountPath: "/src/.lab/pki", readOnly: true},
+        {name: "cache", mountPath: "/cache"}
+      ]
+    }],
+    volumes: [
+      {name: "src", hostPath: {path: "/src", type: "Directory"}},
+      {name: "pki", hostPath: {path: "/pki", type: "Directory"}},
+      {name: "cache", hostPath: {path: "/cache", type: "DirectoryOrCreate"}}
+    ]
+  }}}
+}' | k apply --filename -
+k apply --filename lab/kind/conformance.yaml
+
+# The logs end when the container stops. The Job then has its result.
+until k get pod --selector job-name=conformance --output name | grep --quiet .; do sleep 1; done
+k wait --for=condition=Ready pod --selector job-name=conformance --timeout 10m || true
+k logs --follow job/conformance || true
+for _ in $(seq 60); do
+  result=$(k get job conformance --output jsonpath='{.status.succeeded}/{.status.failed}')
+  case "$result" in
+    1/*) exit 0 ;;
+    */?*) echo "The conformance Job failed." >&2; exit 1 ;;
+  esac
+  sleep 2
+done
+echo "The conformance Job has no result." >&2
+exit 1
+"""
+
+[tasks."cluster:down"]
+description = "Delete the kind cluster of cluster:up and its files"
+run = ["kind delete cluster --name cdr-lab", "rm -rf .lab/kind"]
 
 [tasks.openid-conformance]
 description = "Run the OpenID FAPI 1.0 Advanced conformance suite against the data holder in the running lab"

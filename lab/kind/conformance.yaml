@@ -1,0 +1,11 @@
+# The Service of the Job of the suite, with the JWKS ports of compose.yaml (JWKS_LISTEN_ADDRESS and
+# DATAHOLDER_JWKS_LISTEN_ADDRESS).
+apiVersion: v1
+kind: Service
+metadata:
+  name: conformance
+spec:
+  selector: {app: conformance}
+  ports:
+    - {name: jwks, port: 8443}
+    - {name: dataholder-jwks, port: 8444}

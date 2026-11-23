@@ -50,7 +50,7 @@ brands:
     mail: {smtpAddress: "mail:1025", from: no-reply@kestrelbank.test}
 ```
 
-A release `vX.Y.Z` publishes the chart as `oci://ghcr.io/lukemundy/cdr-lab/charts/cdr-lab`, version `X.Y.Z`, with the `appVersion` `vX.Y.Z`. The default tag of each image (Register, data holder and `cdrlab`) is the `appVersion`. CI does not publish the chart from `main` yet. From a checkout, give the image tags, for example the commit of a published image:
+A release `vX.Y.Z` publishes the chart as `oci://ghcr.io/lukemundy/cdr-lab/charts/cdr-lab`, version `X.Y.Z`, with the `appVersion` `vX.Y.Z`. The default tag of each image (Register, data holder and `cdrlab`) is the `appVersion`. After the cluster job of CI passes on `main`, CI also publishes the chart with the version `0.0.0-g<short commit>`. The default tag of each image in that chart is the [image commit](../../docs/spec/glossary.md#image-commit) of the image. From a checkout, give the image tags, for example the commit of a published image:
 
 ```sh
 helm install cdr-lab oci://ghcr.io/lukemundy/cdr-lab/charts/cdr-lab --version X.Y.Z \

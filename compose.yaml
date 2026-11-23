@@ -146,7 +146,7 @@ services:
       INTERNAL_ALLOWED_HOSTS: wattle-bank:8080,127.0.0.1:8180,localhost:8180
       MAIL_FROM: no-reply@wattlebank.test
       # The browser of the OpenID conformance suite cannot read the mail sink.
-      FIXED_OTPS: openid@mail.test:111111,fixed-otp@mail.test:024680
+      FIXED_OTPS: openid@mail.test:111111
       BANK_SITE_ALLOWED_HOSTS: 127.0.0.1:8185,localhost:8185
     ports:
       - 127.0.0.1:8180:8080
@@ -404,6 +404,8 @@ services:
       MAIL_SINK_URL: http://mail:8025
       # The Wattle Bank brand of services/register/seed/example.json.
       DATAHOLDER_BRAND_ID: d7385786-d8b1-4d4b-bb80-b21616df1a4d
+      # The seed file has the records of all four preset brands, also when the all-banks profile is off.
+      REGISTER_PRESET_BRANDS: wattle-bank,redgum-bank,harbour-bank,kestrel-bank
       PKI_CA_BUNDLE: /src/.lab/pki/cdr/ca-bundle.pem
       PKI_PUBLIC_ROOT: /src/.lab/pki/public/root.crt
       PKI_CLIENT_CERT: /src/.lab/pki/conformance/client.crt

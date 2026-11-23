@@ -1,0 +1,23 @@
+# The release of the cluster job: the default preset brand, with no routes and no external host names. The
+# cluster:up task adds the image tags and the participants of the conformance suite from the Register seed.
+operator:
+  tokenSecret: lab-operator-token
+database:
+  host: postgres
+  sslMode: disable
+publicTLS:
+  issuerRef: {name: lab-ca, kind: Issuer}
+  rootSecret: public-root
+register:
+  internal:
+    # The port-forward of the cluster:conformance task, which gets the fixture certificates.
+    allowedHosts: [localhost:18080]
+  database: {name: register, ownerSecret: register-owner, serviceSecret: register-service}
+dataHolders:
+  # The values of compose.yaml: the conformance suite gets the same status interval, and sees a revocation with no wait.
+  registerStatusInterval: 5s
+  crlMaxAge: 0s
+brands:
+  wattle-bank:
+    database: {name: wattle_bank, ownerSecret: wattle-bank-owner, serviceSecret: wattle-bank-service}
+    mail: {smtpAddress: "mail:1025", from: no-reply@wattlebank.test}

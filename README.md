@@ -182,6 +182,12 @@ The tests in `conformance/` are black-box tests of the CDR behaviour of the depl
 mise run reset && mise run up && mise run conformance
 ```
 
+The CI job `cluster` also runs the suite against the [umbrella chart](charts/cdr-lab/README.md) in a kind cluster, as a Job in the cluster ([ADR 0036](docs/adr/0036-test-the-umbrella-chart-in-a-kind-cluster-in-ci-with-the-conformance-suite-as-a-job-in-the-cluster.md)). To run it locally, with the lab images and the `cdrlab` image in Docker (`lab/kind/` gives the set-up):
+
+```sh
+mise run cluster:up && mise run cluster:conformance; mise run cluster:down
+```
+
 ### OpenID conformance suite
 
 `mise run openid-conformance` runs the FAPI 1.0 Advanced test plan of the [OpenID conformance suite](https://gitlab.com/openid/conformance-suite), with the Australian CDR profile, against the data holder authorisation server ([ADR 0001](docs/adr/0001-auth-server-library.md)). It starts the suite (compose profile `openid`), registers its two clients with the data holder, and fails when a test module fails or has a warning. The output gives a link to the log of each module on port 8443. It needs a new lab, because the data holder refuses a second registration of the clients. It does not run in CI.

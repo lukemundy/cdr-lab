@@ -43,6 +43,7 @@ jobs:
       cdrlab-image: ${{ steps.diff.outputs.cdrlab-image }}
       audit: ${{ steps.diff.outputs.audit }}
       chart: ${{ steps.diff.outputs.chart }}
+      cluster: ${{ steps.diff.outputs.cluster }}
       spec: ${{ steps.diff.outputs.spec }}
     steps:
       - name: Checkout
@@ -78,7 +79,7 @@ jobs:
           backend=(go.mod go.sum lab pkg cli services conformance compose.yaml)
           if [ "$EVENT" = schedule ]; then
             printf '%s\n' go=false conformance=false web=false register-image=false dataholder-image=false \
-              cdrlab-image=false audit=true chart=false spec=false >> "$GITHUB_OUTPUT"
+              cdrlab-image=false audit=true chart=false cluster=false spec=false >> "$GITHUB_OUTPUT"
           else
             {
               # Go tests check the brand directory contract against the token names and the fonts of the design system.
@@ -87,18 +88,26 @@ jobs:
                 web/packages/tokens/fonts.json)
               if [ "$(changed_all tools)" = true ]; then go=true; fi
               echo "go=$go"
-              echo "conformance=$(changed "${shared[@]}" "${backend[@]}" .dockerignore)"
+              conformance=$(changed "${shared[@]}" "${backend[@]}" .dockerignore)
+              echo "conformance=$conformance"
               echo "web=$(changed "${shared[@]}" web services/register/internal/adapter/console/openapi.yaml \
                 services/dataholder/internal/adapter/console/openapi.yaml \
                 services/dataholder/internal/adapter/banksite/openapi.yaml services/dataholder/brands \
                 services/dataholder/internal/adapter/consumerpages/testdata)"
+              # The cluster job runs when an input of an image, a chart or the conformance suite changes.
+              cluster=$conformance
               # The image inputs file gives the pathspecs of each image, also the excludes. The release reads the same file.
               for image in register dataholder cdrlab; do
                 mapfile -t inputs < <(jq --raw-output --arg image "$image" '.[$image][]' .github/image-inputs.json)
-                echo "$image-image=$(changed_all "${inputs[@]}")"
+                image_changed=$(changed_all "${inputs[@]}")
+                echo "$image-image=$image_changed"
+                if [ "$image_changed" = true ]; then cluster=true; fi
               done
               echo "audit=$(changed "${shared[@]}" osv-scanner.toml go.mod go.sum web/pnpm-lock.yaml)"
-              echo "chart=$(changed "${shared[@]}" charts go.mod go.sum)"
+              chart=$(changed "${shared[@]}" charts go.mod go.sum)
+              echo "chart=$chart"
+              if [ "$chart" = true ]; then cluster=true; fi
+              echo "cluster=$cluster"
               # The specifications, the Go imports that their library tables give, and the Verifies comments of the tests.
               echo "spec=$(changed_all "${shared[@]}" tools/speccheck '*.md' '*.go' '*.ts' '*.tsx')"
             } >> "$GITHUB_OUTPUT"
@@ -199,12 +208,11 @@ jobs:
             ~/go/pkg/mod
           key: ${{ steps.cache.outputs.cache-primary-key }}
 
-  # The lab jobs load these images, so that parallel jobs do not each build the same images.
+  # The lab jobs and the cluster job load these images, so that parallel jobs do not each build the same images. The
+  # cluster job runs for each input of the images, thus this job runs for it.
   images:
     needs: changes
-    if: >-
-      needs.changes.outputs.conformance == 'true' || needs.changes.outputs.register-image == 'true' ||
-      needs.changes.outputs.dataholder-image == 'true'
+    if: needs.changes.outputs.cluster == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -497,12 +505,12 @@ jobs:
           image: ${{ env.REGISTER_IMAGE }}
           tested-image: ${{ needs.register-image.outputs.tested-image }}
 
-  # The chart job also runs for a new image, because CI then publishes the chart of that service with the new image.
+  # The chart job also runs for a new image, because CI then publishes the charts with the new image.
   chart:
     needs: changes
     if: >-
       needs.changes.outputs.chart == 'true' || needs.changes.outputs.register-image == 'true' ||
-      needs.changes.outputs.dataholder-image == 'true'
+      needs.changes.outputs.dataholder-image == 'true' || needs.changes.outputs.cdrlab-image == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -557,7 +565,7 @@ jobs:
           for chart in charts/*/Chart.yaml; do
             dir=${chart%/Chart.yaml}
             service=${dir#charts/}
-            # The umbrella chart publishes from main only after its cluster job passes (charts/cdr-lab/DESIGN.md).
+            # The cdr-lab-chart-publish job publishes the umbrella chart, after the cluster job.
             if [ "$service" = cdr-lab ]; then
               continue
             fi
@@ -569,6 +577,117 @@ jobs:
             helm package "$dir" --version "0.0.0-g$commit" --app-version "$app" --destination "$RUNNER_TEMP"
             helm push "$RUNNER_TEMP/$service-0.0.0-g$commit.tgz" "$CHART_REPOSITORY"
           done
+          helm registry logout ghcr.io
+
+  # The umbrella chart in a kind cluster, with the conformance suite as a Job in the cluster. It builds no image.
+  cluster:
+    needs: [changes, images, cdrlab-image]
+    if: needs.changes.outputs.cluster == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - *install-mise
+
+      # The suite compiles in the Job, with the Go cache of the conformance job. The cdrlab CLI compiles on the runner.
+      - name: Restore the Go caches
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/conformance-go
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: go-conformance-${{ hashFiles('go.sum', 'mise.toml') }}-${{ github.sha }}
+          restore-keys: go-conformance-${{ hashFiles('go.sum', 'mise.toml') }}-
+
+      - *download-images
+
+      - name: Download the cdrlab image
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: cdrlab-image
+          path: ${{ runner.temp }}
+
+      - name: Install the umbrella chart in a kind cluster
+        run: |
+          set -euo pipefail
+          docker load --input "$RUNNER_TEMP/images.tar"
+          docker load --input "$RUNNER_TEMP/cdrlab.tar"
+          CONFORMANCE_GO_CACHE="$HOME/.cache/conformance-go" mise run cluster:up
+
+      - name: Run the conformance tests in the cluster
+        run: mise run cluster:conformance
+
+      - name: Show the state of the cluster
+        if: failure()
+        run: |
+          kubectl --context kind-cdr-lab --namespace lab get pods,jobs,certificates,secrets
+          kubectl --context kind-cdr-lab --namespace lab get events --sort-by=.lastTimestamp
+          for pod in $(kubectl --context kind-cdr-lab --namespace lab get pods --output name); do
+            echo "::group::$pod"
+            kubectl --context kind-cdr-lab --namespace lab logs "$pod" --all-containers --prefix || true
+            echo "::endgroup::"
+          done
+
+      - name: Delete the cluster
+        if: always()
+        run: mise run cluster:down
+
+  # The umbrella chart publishes from main only after the cluster job of its commit passes (charts/cdr-lab/DESIGN.md).
+  # It waits for the image publish jobs, because its default tags are the image commits.
+  cdr-lab-chart-publish:
+    needs: [changes, chart, cluster, register-image-publish, dataholder-image-publish, cdrlab-image-publish]
+    if: >-
+      github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !cancelled() && !failure() &&
+      needs.chart.result == 'success' && needs.cluster.result == 'success' && (needs.changes.outputs.chart == 'true' ||
+      needs.register-image-publish.result == 'success' || needs.dataholder-image-publish.result == 'success' ||
+      needs.cdrlab-image-publish.result == 'success')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # The image commit can be an earlier commit of main.
+          fetch-depth: 0
+
+      - *install-mise
+
+      # appVersion gives one tag, but each image has its own image commit, so the packaged values.yaml gives each tag.
+      - name: Push the umbrella chart
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHART_REPOSITORY: oci://ghcr.io/${{ github.repository }}/charts
+          IMAGE_REPOSITORY: ghcr.io/${{ github.repository }}
+        run: |
+          set -euo pipefail
+          commit=$(git describe --always --exclude='*')
+          mise run chart:deps
+          chart="$RUNNER_TEMP/cdr-lab"
+          cp -R charts/cdr-lab "$chart"
+          want=()
+          for image in register dataholder cdrlab; do
+            tag=$(mise exec -- go run ./tools/release image-commit -service "$image" -image "$IMAGE_REPOSITORY/$image")
+            TAG=$tag yq --inplace ".images.$image.tag = strenv(TAG)" "$chart/values.yaml"
+            want+=("$IMAGE_REPOSITORY/$image:$tag")
+          done
+          helm package "$chart" --version "0.0.0-g$commit" --destination "$RUNNER_TEMP"
+          package="$RUNNER_TEMP/cdr-lab-0.0.0-g$commit.tgz"
+          got=$(helm template cdr-lab "$package" --values lab/kind/values.yaml |
+            yq --no-doc '.. | select(tag == "!!map" and has("image")) | .image' | sort --unique)
+          if [ "$got" != "$(printf '%s\n' "${want[@]}" | sort)" ]; then
+            printf 'The chart renders these images:\n%s\nwant:\n%s\n' "$got" "$(printf '%s\n' "${want[@]}")" >&2
+            exit 1
+          fi
+          helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin <<< "$GH_TOKEN"
+          helm push "$package" "$CHART_REPOSITORY"
           helm registry logout ghcr.io
 
   dataholder-image:
@@ -669,10 +788,11 @@ jobs:
 
   # The structure of the specifications and the Verifies comments of the tests.
   # The cdrlab image has no lab job, because no compose service runs it. This job builds it and checks its linux/amd64
-  # image; the Go tests check the behaviour of its commands.
+  # image; the Go tests check the behaviour of its commands. The cluster job also runs the image, thus this job runs
+  # for each change that runs the cluster job.
   cdrlab-image:
     needs: changes
-    if: needs.changes.outputs.cdrlab-image == 'true'
+    if: needs.changes.outputs.cluster == 'true'
     runs-on: ubuntu-latest
     outputs:
       tested-image: ${{ steps.tested.outputs.id }}
@@ -714,6 +834,17 @@ jobs:
         id: tested
         run: echo "id=$(docker image inspect --format '{{.Id}}' cdrlab)" >> "$GITHUB_OUTPUT"
 
+      - name: Save the image
+        run: docker save cdrlab --output "$RUNNER_TEMP/cdrlab.tar"
+
+      - name: Upload the image
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: cdrlab-image
+          path: ${{ runner.temp }}/cdrlab.tar
+          retention-days: 1
+          if-no-files-found: error
+
       # Only main publishes images.
       - name: Upload the image index
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
@@ -728,12 +859,13 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
 
-  # A test job that fails or is cancelled stops the publish, but a test job that its path filter skipped does not.
+  # A test job that fails or is cancelled stops the publish, but a test job that its path filter skipped does not. The
+  # cdrlab-image job also runs for the cluster job, but only a change to an input of the image publishes it.
   cdrlab-image-publish:
-    needs: [lint, test, cdrlab-image]
+    needs: [changes, lint, test, cdrlab-image]
     if: >-
       github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !cancelled() && !failure() &&
-      needs.cdrlab-image.result == 'success'
+      needs.changes.outputs.cdrlab-image == 'true' && needs.cdrlab-image.result == 'success'
     runs-on: ubuntu-latest
     # Only this job of the image gets the permissions to push and to attest, and it never runs for a pull request.
     permissions:
