@@ -121,7 +121,7 @@ None.
   - `linux/arm64`
   - `darwin/amd64`
   - `darwin/arm64`
-- <a id="rls-0116"></a>**RLS-0116** Each binary gives the version of the release and the full commit ID of the release commit as [its version](../../cli/cdrlab/DESIGN.md#cli-0114). ([Judgement: build the binaries in the release (ADR 0039)][adr-0039])
+- <a id="rls-0116"></a>**RLS-0116** Each binary gives the version of the release and the full commit ID of the release commit as [its version](../../cli/cdrlab/design/commands.md#cli-0114). ([Judgement: build the binaries in the release (ADR 0039)][adr-0039])
 - <a id="rls-0117"></a>**RLS-0117** Each binary is in the archive `cdrlab-vX.Y.Z-<os>-<arch>.tar.gz`, with the licence notices of its third-party code. For example, `cdrlab-v0.3.1-linux-arm64.tar.gz`. ([Judgement: licence notices in each image (ADR 0018)][adr-0018])
 - <a id="rls-0118"></a>**RLS-0118** The release attaches each archive to the GitHub Release, and the checksum file `cdrlab-vX.Y.Z-checksums.txt`. The checksum file gives the SHA-256 of each archive, in the format of `sha256sum`. ([GNU coreutils: sha256sum][sha256sum]; [Judgement: one signature for the checksum file](#rls-0131))
 - <a id="rls-0119"></a>**RLS-0119** The release signs the checksum file with a keyless cosign signature, with [the identity of each signature](#rls-0051). It attaches the Sigstore bundle as `cdrlab-vX.Y.Z-checksums.txt.sigstore.json`. ([Sigstore: signing blobs][sigstore-sign-blob]; [Judgement: one signature for the checksum file](#rls-0131))

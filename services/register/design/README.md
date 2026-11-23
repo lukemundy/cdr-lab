@@ -78,7 +78,7 @@ flowchart LR
   - the revocation of CDR certificates, and the CRL that the Register signs and serves ([certificate revocation](certificate-revocation.md))
 - The revocation check of the client certificates of the Register with its own CRL ([certificate revocation](certificate-revocation.md)).
 - For the lab operator (lab-only):
-  - the operator interface, which creates and changes participants, registers client certificates and changes statuses ([operator interface](operator-interface.md))
+  - the operator interface, which creates, loads and changes participants, registers client certificates and changes statuses ([operator interface](operator-interface.md))
   - the operator console ([operator console](operator-console.md))
   - the load of a full set of participant data from a file ([deployment](deployment.md))
 - The load of a participant seed file by the Helm chart, and an example seed file of the four preset brands of the data holder ([deployment](deployment.md)).

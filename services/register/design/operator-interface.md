@@ -1,6 +1,6 @@
 # Mock CDR Register: Operator interface
 
-This area gives the lab-only HTTP API that creates and changes participants, registers client certificates and changes participant statuses. In production, the CDR Registrar keeps the participant data and statuses on the Register ([CDS: Participant Statuses][cds-participant-statuses]). The interface of the production Register is not public, so the lab has its own interface. Real components must not depend on it. The [certificate management](certificate-management.md) and [certificate revocation](certificate-revocation.md) areas give the certificate issue and revocation actions of the operator interface.
+This area gives the lab-only HTTP API that creates, loads and changes participants, registers client certificates and changes participant statuses. In production, the CDR Registrar keeps the participant data and statuses on the Register ([CDS: Participant Statuses][cds-participant-statuses]). The interface of the production Register is not public, so the lab has its own interface. Real components must not depend on it. The [certificate management](certificate-management.md) and [certificate revocation](certificate-revocation.md) areas give the certificate issue and revocation actions of the operator interface.
 
 ## Status actions
 
@@ -31,6 +31,20 @@ This area gives the lab-only HTTP API that creates and changes participants, reg
 - <a id="reg-0821"></a>**REG-0821** The path of a data holder brand has its `dataHolderBrandId`. When the brand has no `dataHolderBrandId`, the path has its `interimId`. ([CDS: Register API schemas][cds-register-schemas])
 - <a id="reg-0822"></a>**REG-0822** After a create, an add or a change, the participant obeys the participant model and the status rules, the same as after a load. ([Judgement: a create or an add has the format of the load file](#reg-0888))
 - <a id="reg-0823"></a>**REG-0823** For a create, an add or a change, the Register checks the full legal entity, with its brands and software products. For example, an add of an ACTIVE software product to an INACTIVE brand gives 409. ([Judgement: a create or an add has the format of the load file](#reg-0888))
+
+## Participant load
+
+A participant load adds the records of a load file that the Register does not have. It is the format of the participants of the [umbrella chart](../../../charts/cdr-lab/DESIGN.md) and of `cdrlab`.
+
+- <a id="reg-1532"></a>**REG-1532** The body of a participant load is one load file. ([the load file uses the CDS field names](deployment.md#reg-0905); [Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040])
+- <a id="reg-1533"></a>**REG-1533** When the Register has a record of the same kind with the identifier of a record of the file, the load changes nothing for that record. This applies also when its fields or its status are different. For example, a load does not change the status of a brand that exists. ([Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040])
+- <a id="reg-1534"></a>**REG-1534** The load adds each other record of the file: each legal entity, brand and software product, with its status. For example, a new software product of a brand that exists is added to that brand. ([Judgement: a create or an add has the format of the load file](#reg-0888); [Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040])
+- <a id="reg-1535"></a>**REG-1535** The Register checks each legal entity that the load changes, with its brands and software products, with the rules of [a create or an add](#reg-0823). When one record is not valid, the response is 400 or 409, as for a create. ([Judgement: 400 for a body that is not valid alone, and 409 for a conflict](#reg-0894))
+- <a id="reg-1536"></a>**REG-1536** When an identifier of the file is the identifier of a record of a different kind, the response is 409. ([an identifier in use by a different record](#reg-0858))
+- <a id="reg-1537"></a>**REG-1537** The response has `added` and `existing`: the identifiers of the legal entities, brands and software products of the file that the load added, and of those that existed. Each list is in the sequence of the file. ([Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040])
+- <a id="reg-1538"></a>**REG-1538** A participant load obeys [the rules of a create and an add](#reg-0824) for the visibility of a change. ([CDS: Metadata Cache Management][cds-metadata-cache])
+- <a id="reg-1539"></a>**REG-1539** Integrity: when the response of a participant load is not 200, the load changes 0 records. ([Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040])
+- <a id="reg-1540"></a>**REG-1540** Integrity: a second participant load of the same file changes 0 records, and its response has each identifier in `existing`. ([Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040])
 
 ## Visibility of a change
 
@@ -111,6 +125,7 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 | <a id="reg-0878"></a>**REG-0878** | Change the details of a data holder brand | `PUT /v1/data-holders/{legalEntityId}/brands/{brandId}` | 204 | [Judgement: a change replaces each field of the record](#reg-0892) |
 | <a id="reg-0879"></a>**REG-0879** | Activate, deactivate or remove a data holder brand | `POST /v1/data-holders/{legalEntityId}/brands/{brandId}/{activate,deactivate,remove}` | 204 | [Judgement: a lab-only operator interface](#reg-0880) |
 | <a id="reg-0896"></a>**REG-0896** | Publish the next key of a key set, or activate it. `{keySet}` is `access-token` or `ssa`. | `POST /v1/key-sets/{keySet}/{publish-next,activate-next}` | 204 | [Judgement: a lab-only operator interface](#reg-0880) |
+| <a id="reg-1531"></a>**REG-1531** | Add the participants of a load file | `POST /v1/participant-loads` | 200 | [Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040] |
 
 ## Judgements
 
@@ -211,6 +226,7 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 - Reason: A legal entity in the seed data is less than 20 KiB, a PEM certificate or CSR is less than 16 KiB, and a limit stops a body that fills the memory. The CDS APIs of the data holder also give [413 for a body that is too large](../../dataholder/design/api-standards.md#dh-0453), so a client gets the same status on each lab interface.
 
 [adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md
+[adr-0040]: ../../../docs/adr/0040-add-participants-and-customers-with-add-only-loads-of-the-operator-interfaces-from-cdrlab-and-from-the-umbrella-values.md
 [cds-participant-statuses]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#participant-statuses
 [cds-status-mapping]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#status-mapping
 [cds-register-schemas]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api-schemas
