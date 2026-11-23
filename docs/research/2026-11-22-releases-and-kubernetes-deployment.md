@@ -19,8 +19,8 @@ Releases and the changelog (part 1):
 
 - Use cocogitto in tag-only mode. Add `tag_prefix = "v"` to `cog.toml`: without it, cog does not see `vX.Y.Z` tags (tested). `cog bump --auto --dry-run` gives the next version with no commit, and `cog changelog <prev>..HEAD -t <template>` gives the release notes before the tag exists (tested). On 0.x, a breaking change gives a minor bump, and cog has no setting to change this ([section 1.1](#11-cocogitto)).
 - Put the changelog in the GitHub Release notes only, and optionally attach the full changelog as a release asset. A committed `CHANGELOG.md` needs a commit to `main`. Add a tag ruleset for `v*`, and turn on immutable releases ([section 1.3](#13-changelogmd-or-github-release-notes-only)).
-- Squash merges keep only the PR title, so commit footers do not reach `main`. Find "needs a fresh deployment" from the diff: a changed, renamed or deleted migration file, or a changed golden file of the event payloads ([section 1.4](#14-mark-this-release-needs-a-fresh-deployment)).
-- Promote the tested image with `crane tag` on its digest. `docker buildx imagetools create` changes the digest of a single-platform image unless you add `--prefer-index=false` ([section 1.5](#15-promote-a-tested-image-without-a-rebuild)).
+- Squash merges keep only the PR title, so commit footers do not reach `main`. Find "needs a fresh deployment" from the diff: a changed, renamed or deleted migration file, or a changed entry of the golden file of the event payloads ([section 1.4](#14-mark-this-release-needs-a-fresh-deployment)).
+- For each service, promote the image of the last commit that had an image build, with `crane tag` on its digest. `docker buildx imagetools create` changes the digest of a single-platform image unless you add `--prefer-index=false` ([section 1.5](#15-promote-a-tested-image-without-a-rebuild)).
 - `helm package --version` does not change the dependency versions of an umbrella chart. Set the versions of all `Chart.yaml` files in the CI workspace, and use `file://` dependencies ([section 1.6](#16-helm-charts)).
 - Build the CLI binaries with a plain `go build` loop and `gh release create`. `go install github.com/lukemundy/cdr-lab/<path>@vX.Y.Z` works with a root tag ([section 1.7](#17-go-cli-release-binaries)).
 
@@ -48,16 +48,20 @@ Exposure, operator access, CI and PostgreSQL (part 4):
 
 ## Items for the requirements step
 
+Decided after the research:
+
+1. A release finds "needs a fresh deployment" from the diff only: a changed, renamed or deleted migration, or a changed entry of an event golden file. The golden file is a new convention, and it is approved. The release check compares only the entries that the earlier file already had, so a new event type does not mark a release as fresh ([section 1.4](#14-mark-this-release-needs-a-fresh-deployment)). The squash settings stay as they are.
+2. A release uses, for each service, the image of the last commit that had an image build ([section 1.5](#15-promote-a-tested-image-without-a-rebuild)).
+3. `service.version` of an image stays the short commit. Only the CLI gets the release version ([section 1.8](#18-stamp-the-semver-version-into-binaries-and-images)).
+4. Compose moves from the offline `pki issue` to the Register issue path, so that the Register is the only issuer of CDR certificates in both environments ([section 3.6](#36-recommended-design)).
+
 These items have no decision yet:
 
-1. The event payload golden file of [section 1.4](#14-mark-this-release-needs-a-fresh-deployment) is a new convention.
-2. Which tested image a release promotes, because the path filters skip the image build of some commits ([section 1.5](#15-promote-a-tested-image-without-a-rebuild)).
-3. Whether `image.tag` gets `.Chart.AppVersion` as its default in the release charts ([section 1.6](#16-helm-charts)).
-4. Whether `service.version` of an image stays the commit, or becomes the release version. A promoted image is built before its tag exists, so it cannot contain the release version ([section 1.8](#18-stamp-the-semver-version-into-binaries-and-images)).
-5. Whether the SBOM must list the npm packages in version 1 ([section 2.4](#24-sbom-generation)).
-6. Whether the Register issues its own secure certificate at start, and whether compose moves from the offline `pki issue` to the Register issue path, so that the Register is the only issuer in both environments ([section 3.6](#36-recommended-design)).
-7. Whether the umbrella chart puts all releases in one namespace ([section 3.4](#34-the-lab-ca-roots-in-a-cluster)).
-8. The host names and ports of the base URLs behind a shared Gateway ([section 4.1](#41-exposure-of-the-tls-and-mtls-listeners)).
+1. Whether `image.tag` gets `.Chart.AppVersion` as its default in the release charts ([section 1.6](#16-helm-charts)).
+2. Whether the SBOM must list the npm packages in version 1 ([section 2.4](#24-sbom-generation)).
+3. Whether the Register issues its own secure certificate at start ([section 3.6](#36-recommended-design)).
+4. Whether the umbrella chart puts all releases in one namespace ([section 3.4](#34-the-lab-ca-roots-in-a-cluster)).
+5. The host names and ports of the base URLs behind a shared Gateway ([section 4.1](#41-exposure-of-the-tls-and-mtls-listeners)).
 
 ## 1. Versions, changelog and release artifacts
 
@@ -210,11 +214,19 @@ Option 1, optionally with option 4. Add one README line that links to the Releas
 1. **Commit footer** (`Lab-Reset: required`). Rendered by the cog template (tested). It depends on a person, and the squash settings drop it. Not reliable.
 2. **`!` in the PR title.** It survives the squash. But on 0.x `!` gives only a minor bump, and `!` also marks API breaks that need no reset. It is a mixed signal.
 3. **Path check on migrations.** In the release workflow: `git diff --name-only --diff-filter=MDR "$prev"..HEAD -- 'services/*/internal/migrations/*.sql'`. Not empty means a fresh deployment. Exact and cheap. It misses event payload changes.
-4. **Golden file of event payloads.** A test in each service encodes one sample of each registered event type (the list from `EventTypes()`) and compares it with a committed file, for example `services/<service>/internal/app/testdata/events.golden.json`. A payload change then must change the golden file. The release check: `git diff --quiet "$prev"..HEAD -- 'services/*/internal/app/testdata/events.golden.json'`. An added event type also changes the file; the check can treat each change as "fresh" (conservative and simple), or compare the keys (more code).
+4. **Golden file of event payloads.** A test in each service encodes one sample of each registered event type (the list from `EventTypes()`) and compares it with a committed file, for example `services/<service>/internal/app/testdata/events.golden.json`. A payload change then must change the golden file. The release check: `git diff --quiet "$prev"..HEAD -- 'services/*/internal/app/testdata/events.golden.json'`. An added event type also changes the file; the check can treat each change as "fresh" (conservative and simple), or compare only the entries that the earlier file had (one `jq` expression).
 
 #### Recommendation
 
-Use options 3 and 4 together, in the release workflow, as one rule: "A release needs a fresh deployment when, since the earlier tag, a committed migration file was changed, renamed or deleted, or an event golden file changed." The workflow writes a fixed "Needs a fresh deployment" section at the top of the notes, with the list of files. The rule comes from the diff, not from a person. Keep the golden test small: the test must fail when a payload field changes. This is a new convention, so it needs approval before use (AGENTS.md). Unconfirmed: whether the golden test should list field names and types (a schema) or sample JSON; sample JSON is simpler.
+Use options 3 and 4 together, in the release workflow, as one rule: "A release needs a fresh deployment when, since the earlier tag, a committed migration file was changed, renamed or deleted, or an entry of an event golden file that the earlier file had changed or was removed." The workflow writes a fixed "Needs a fresh deployment" section at the top of the notes, with the list of files. The rule comes from the diff, not from a person.
+
+The golden test of each service:
+
+- Gets the registered type names from `EventTypes()`, and has a sample value for each type. The test fails when a registered type has no sample, so each new event type gets one.
+- Encodes each sample with the real codec, and compares the result with the committed file. A field rename, a field removal, a type change or a type rename then fails the test. The `-update` flag writes the file again.
+- Uses sample JSON, not a schema of field names and types, because sample JSON is simpler.
+
+Limit: the test finds a change of the shape of a payload, not of its meaning, for example a field that keeps its type but changes its units. The author of such a change writes it in the release notes.
 
 ### 1.5. Promote a tested image without a rebuild
 
@@ -239,7 +251,14 @@ Use options 3 and 4 together, in the release workflow, as one rule: "A release n
 
 #### Recommendation
 
-Use `crane tag ghcr.io/lukemundy/cdr-lab/<service>@sha256:<digest> vX.Y.Z` (also `X.Y.Z` if wanted). Resolve the digest from the full-commit tag first (`crane digest ...:<full commit>`), and check after the tag that the digest of `vX.Y.Z` is the same. Pin crane by version in `mise.toml`. A release job needs `contents: write` and `packages: write`. The release must refuse a commit that has no tested image of each service: today an image exists only for commits where the image inputs changed (path filters in `ci.yml`). This needs a rule: release the latest image of each service, or require an image for the release commit. Decide that in the plan.
+Use `crane tag ghcr.io/lukemundy/cdr-lab/<service>@sha256:<digest> vX.Y.Z` (also `X.Y.Z` if wanted). Resolve the digest from the full-commit tag first (`crane digest ...:<full commit>`), and check after the tag that the digest of `vX.Y.Z` is the same. Pin crane by version in `mise.toml`. A release job needs `contents: write` and `packages: write`. The release must refuse a commit that has no tested image of each service: today an image exists only for commits where the image inputs changed (path filters in `ci.yml`).
+
+For each service, release the image of the last commit that had an image build: walk the first-parent history of `main` back from the release commit, and take the first commit that has a full-commit tag (`crane digest`). That image is equal to a build of the release commit, because the path filter skipped the build only when no image input changed. Two guards stop a release with an old image when a publish job failed or was cancelled:
+
+1. The release refuses a commit whose CI run on `main` did not pass.
+2. For each service, the image commit must be `git log -1 --format=%H <release> -- <image inputs>`. The inputs are the paths of the image filter (`ci.yml:94–96`). Keep these paths in one file that the CI filter and the release script both read, so that the two lists cannot differ.
+
+The release notes give the image commit of each service, because the services can have different commits and `service.version` is the commit (section 1.8).
 
 ### 1.6. Helm charts
 
