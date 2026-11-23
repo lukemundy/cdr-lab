@@ -175,3 +175,22 @@ func TestParseCertificatesRefusesATextThatIsNotPEMCertificates(t *testing.T) {
 		assert.EqualError(t, err, "the text is not PEM certificates", name)
 	}
 }
+
+func TestEncodeKeyAndParseKeyGiveTheSameKey(t *testing.T) {
+	data, err := ca.EncodeKey(key(1))
+	require.NoError(t, err)
+	assert.Equal(t, keyPEM(t, key(1)), data)
+
+	parsed, err := ca.ParseKey(data)
+	require.NoError(t, err)
+	assert.True(t, key(1).PublicKey.Equal(parsed.Public()))
+}
+
+func TestParseKeyRefusesTextThatIsNotAPEMKeyAndDoesNotRepeatIt(t *testing.T) {
+	for _, data := range [][]byte{nil, []byte("secret-text"), ca.EncodeCertificates(newLab(t).CDRRoot.Certificate)} {
+		_, err := ca.ParseKey(data)
+
+		require.Error(t, err)
+		assert.NotContains(t, err.Error(), "secret-text")
+	}
+}

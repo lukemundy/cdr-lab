@@ -28,6 +28,7 @@ env:
   LAB_OTLP_ENDPOINT: ""
   REGISTER_IMAGE: ghcr.io/${{ github.repository }}/register
   DATAHOLDER_IMAGE: ghcr.io/${{ github.repository }}/dataholder
+  CDRLAB_IMAGE: ghcr.io/${{ github.repository }}/cdrlab
 
 jobs:
   # Each job runs only when one of its inputs changes. A run with no base commit runs all jobs.
@@ -39,6 +40,7 @@ jobs:
       web: ${{ steps.diff.outputs.web }}
       register-image: ${{ steps.diff.outputs.register-image }}
       dataholder-image: ${{ steps.diff.outputs.dataholder-image }}
+      cdrlab-image: ${{ steps.diff.outputs.cdrlab-image }}
       audit: ${{ steps.diff.outputs.audit }}
       chart: ${{ steps.diff.outputs.chart }}
       spec: ${{ steps.diff.outputs.spec }}
@@ -75,13 +77,13 @@ jobs:
           shared=(mise.toml .github/workflows/ci.yml)
           backend=(go.mod go.sum lab pkg pki services conformance compose.yaml)
           if [ "$EVENT" = schedule ]; then
-            printf '%s\n' go=false conformance=false web=false register-image=false dataholder-image=false audit=true chart=false \
-              spec=false >> "$GITHUB_OUTPUT"
+            printf '%s\n' go=false conformance=false web=false register-image=false dataholder-image=false \
+              cdrlab-image=false audit=true chart=false spec=false >> "$GITHUB_OUTPUT"
           else
             {
               # Go tests check the brand directory contract against the token names and the fonts of the design system.
               # The test fixtures of tools/ are Markdown, so each change in tools/ counts.
-              go=$(changed "${shared[@]}" "${backend[@]}" .golangci.yml web/packages/tokens/tokens \
+              go=$(changed "${shared[@]}" "${backend[@]}" cli .golangci.yml web/packages/tokens/tokens \
                 web/packages/tokens/fonts.json)
               if [ "$(changed_all tools)" = true ]; then go=true; fi
               echo "go=$go"
@@ -91,9 +93,9 @@ jobs:
                 services/dataholder/internal/adapter/banksite/openapi.yaml services/dataholder/brands \
                 services/dataholder/internal/adapter/consumerpages/testdata)"
               # The image inputs file gives the pathspecs of each image, also the excludes. The release reads the same file.
-              for service in register dataholder; do
-                mapfile -t inputs < <(jq --raw-output --arg service "$service" '.[$service][]' .github/image-inputs.json)
-                echo "$service-image=$(changed_all "${inputs[@]}")"
+              for image in register dataholder cdrlab; do
+                mapfile -t inputs < <(jq --raw-output --arg image "$image" '.[$image][]' .github/image-inputs.json)
+                echo "$image-image=$(changed_all "${inputs[@]}")"
               done
               echo "audit=$(changed "${shared[@]}" osv-scanner.toml go.mod go.sum web/pnpm-lock.yaml)"
               echo "chart=$(changed "${shared[@]}" charts go.mod go.sum)"
@@ -662,6 +664,94 @@ jobs:
           tested-image: ${{ needs.dataholder-image.outputs.tested-image }}
 
   # The structure of the specifications and the Verifies comments of the tests.
+  # The cdrlab image has no lab job, because no compose service runs it. This job builds it and checks its linux/amd64
+  # image; the Go tests check the behaviour of its commands.
+  cdrlab-image:
+    needs: changes
+    if: needs.changes.outputs.cdrlab-image == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      tested-image: ${{ steps.tested.outputs.id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - *install-mise
+
+      - name: Build the image index
+        env:
+          BUILD_ID: ${{ github.run_id }}
+        run: mise run build:index cli/cdrlab
+
+      - name: Load the linux/amd64 image
+        run: |
+          set -euo pipefail
+          mise run image:load cdrlab cdrlab
+          mise run image:check cdrlab "$(docker image inspect --format '{{.Id}}' cdrlab)"
+
+      - name: Check the image
+        run: |
+          set -euo pipefail
+          docker run --rm cdrlab version | grep --fixed-strings "commit $(git describe --always --abbrev=40 --exclude='*'),"
+          docker run --rm cdrlab -h > /dev/null
+          user=$(docker image inspect --format '{{.Config.User}}' cdrlab)
+          case "$user" in
+            "" | 0 | 0:* | root | root:*) echo "The cdrlab image runs as root." >&2; exit 1 ;;
+          esac
+          container=$(docker create cdrlab)
+          files=$(docker export "$container" | tar -t)
+          docker rm "$container" > /dev/null
+          grep --line-regexp --fixed-strings licenses/go/third-party-notices.txt <<< "$files"
+
+      # The publish job pushes the image only when it is this tested image.
+      - name: Record the tested image
+        id: tested
+        run: echo "id=$(docker image inspect --format '{{.Id}}' cdrlab)" >> "$GITHUB_OUTPUT"
+
+      # Only main publishes images.
+      - name: Upload the image index
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: cdrlab-index
+          path: |
+            .lab/images/cdrlab/
+            .lab/images/cdrlab.spdx.json
+          retention-days: 1
+          # The layout is in .lab/, and the action leaves out hidden files by default.
+          include-hidden-files: true
+          if-no-files-found: error
+
+  # A test job that fails or is cancelled stops the publish, but a test job that its path filter skipped does not.
+  cdrlab-image-publish:
+    needs: [lint, test, cdrlab-image]
+    if: >-
+      github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !cancelled() && !failure() &&
+      needs.cdrlab-image.result == 'success'
+    runs-on: ubuntu-latest
+    # Only this job of the image gets the permissions to push and to attest, and it never runs for a pull request.
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - *install-mise
+
+      - name: Publish the cdrlab image
+        uses: ./.github/actions/publish-image
+        with:
+          name: cdrlab
+          image: ${{ env.CDRLAB_IMAGE }}
+          tested-image: ${{ needs.cdrlab-image.outputs.tested-image }}
+
   spec:
     needs: changes
     if: needs.changes.outputs.spec == 'true'

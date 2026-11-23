@@ -59,20 +59,7 @@ var (
 )
 
 func NewLab(keys LabKeys, now time.Time) (Lab, error) {
-	cdrRoot, err := newRoot(cdrRootSubject, keys.CDRRoot, now)
-	if err != nil {
-		return Lab{}, err
-	}
-
-	cdrIntermediate, err := cdrRoot.issue(&x509.Certificate{
-		Subject:               cdrIntermediateSubject,
-		NotBefore:             now,
-		NotAfter:              now.AddDate(intermediateValidityYears, 0, 0),
-		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
-		BasicConstraintsValid: true,
-		IsCA:                  true,
-		MaxPathLenZero:        true,
-	}, keys.CDRIntermediate.Public())
+	cdrRoot, cdrIntermediate, err := NewCDR(keys.CDRRoot, keys.CDRIntermediate, now)
 	if err != nil {
 		return Lab{}, err
 	}
@@ -82,11 +69,30 @@ func NewLab(keys LabKeys, now time.Time) (Lab, error) {
 		return Lab{}, err
 	}
 
-	return Lab{
-		CDRRoot:         cdrRoot,
-		CDRIntermediate: Authority{Certificate: cdrIntermediate, Key: keys.CDRIntermediate},
-		PublicRoot:      publicRoot,
-	}, nil
+	return Lab{CDRRoot: cdrRoot, CDRIntermediate: cdrIntermediate, PublicRoot: publicRoot}, nil
+}
+
+// NewCDR gives the mock CDR root and the mock CDR intermediate that it signs.
+func NewCDR(rootKey, intermediateKey crypto.Signer, now time.Time) (root, intermediate Authority, err error) {
+	root, err = newRoot(cdrRootSubject, rootKey, now)
+	if err != nil {
+		return Authority{}, Authority{}, err
+	}
+
+	cert, err := root.issue(&x509.Certificate{
+		Subject:               cdrIntermediateSubject,
+		NotBefore:             now,
+		NotAfter:              now.AddDate(intermediateValidityYears, 0, 0),
+		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
+		BasicConstraintsValid: true,
+		IsCA:                  true,
+		MaxPathLenZero:        true,
+	}, intermediateKey.Public())
+	if err != nil {
+		return Authority{}, Authority{}, err
+	}
+
+	return root, Authority{Certificate: cert, Key: intermediateKey}, nil
 }
 
 func newRoot(subject pkix.Name, key crypto.Signer, now time.Time) (Authority, error) {

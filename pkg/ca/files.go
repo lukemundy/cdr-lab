@@ -84,22 +84,42 @@ func ReadKey(path string) (crypto.Signer, error) {
 		return nil, err
 	}
 
-	blocks := pemBlocks(data, "PRIVATE KEY")
-	if len(blocks) == 0 {
-		return nil, fmt.Errorf("%s: no PEM PRIVATE KEY", path)
-	}
-
-	key, err := x509.ParsePKCS8PrivateKey(blocks[0].Bytes)
+	key, err := ParseKey(data)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
 
+	return key, nil
+}
+
+// ParseKey reads the first PEM PKCS #8 private key of data. Its error does not contain the text.
+func ParseKey(data []byte) (crypto.Signer, error) {
+	blocks := pemBlocks(data, "PRIVATE KEY")
+	if len(blocks) == 0 {
+		return nil, errors.New("no PEM PRIVATE KEY")
+	}
+
+	key, err := x509.ParsePKCS8PrivateKey(blocks[0].Bytes)
+	if err != nil {
+		return nil, errors.New("the PEM PRIVATE KEY is not a PKCS #8 key")
+	}
+
 	signer, ok := key.(crypto.Signer)
 	if !ok {
-		return nil, fmt.Errorf("%s: the key cannot sign", path)
+		return nil, errors.New("the key cannot sign")
 	}
 
 	return signer, nil
+}
+
+// EncodeKey gives the key as a PEM PKCS #8 private key.
+func EncodeKey(key crypto.Signer) ([]byte, error) {
+	der, err := x509.MarshalPKCS8PrivateKey(key)
+	if err != nil {
+		return nil, err
+	}
+
+	return pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: der}), nil
 }
 
 // ParseCSR refuses a second PEM block or other text, and its error does not contain the text.

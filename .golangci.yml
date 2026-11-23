@@ -61,7 +61,7 @@ linters:
             - "!$test"
           allow:
             - $gostd
-        # The pki command and the Register share the CA code, so it has no dependencies.
+        # The pki command, the cdrlab CLI and the Register share the CA code, so it has no dependencies.
         ca-is-standard-library-only:
           list-mode: strict
           files:
@@ -76,6 +76,20 @@ linters:
           deny:
             - pkg: github.com/lukemundy/cdr-lab/services
               desc: a repository tool does not use the code of a service
+        # A CLI uses the network interfaces of the services and shares code with them only through pkg/.
+        clis-do-not-import-services:
+          files:
+            - "**/cli/**"
+          deny:
+            - pkg: github.com/lukemundy/cdr-lab/services
+              desc: a CLI uses the network interfaces of a service, not its code
+        nothing-imports-clis:
+          files:
+            - $all
+            - "!**/cli/**"
+          deny:
+            - pkg: github.com/lukemundy/cdr-lab/cli
+              desc: a CLI is not a library; shared code goes in pkg/
         nothing-imports-tools:
           deny:
             - pkg: github.com/lukemundy/cdr-lab/tools

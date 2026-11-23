@@ -4,7 +4,6 @@ package labdir
 import (
 	"crypto"
 	"crypto/x509"
-	"encoding/pem"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -116,12 +115,12 @@ func WriteCertificates(path string, certs ...*x509.Certificate) error {
 }
 
 func WriteKey(path string, key crypto.Signer, perm os.FileMode) error {
-	der, err := x509.MarshalPKCS8PrivateKey(key)
+	data, err := ca.EncodeKey(key)
 	if err != nil {
 		return err
 	}
 
-	return writeNew(path, pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: der}), perm)
+	return writeNew(path, data, perm)
 }
 
 func writeNew(path string, data []byte, perm os.FileMode) error {
