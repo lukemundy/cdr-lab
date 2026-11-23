@@ -1,0 +1,172 @@
+{
+  "arrangement/ArrangementCreated": {
+    "schemaVersion": 1,
+    "payload": {
+      "arrangement": {
+        "arrangementId": "arr-1",
+        "customerNumber": "c-000001",
+        "clientId": "client-1",
+        "softwareId": "sp-1",
+        "clientName": "Sample Budget",
+        "orgName": "Sample App",
+        "legalEntityName": "Sample Recipient Pty Ltd",
+        "recipientBaseUri": "https://api.app.example.com",
+        "scopes": [
+          "openid",
+          "bank:accounts.basic:read"
+        ],
+        "accountIds": [
+          "acc-1"
+        ],
+        "confirmedAt": "2026-11-23T04:05:06Z",
+        "sharingDurationSeconds": 7776000,
+        "onceOffSharingSeconds": 600
+      }
+    }
+  },
+  "arrangement/ArrangementEndedForDeletion": {
+    "schemaVersion": 1,
+    "payload": {
+      "endedAt": "2026-11-23T04:05:06Z"
+    }
+  },
+  "arrangement/ArrangementEndedForIneligibility": {
+    "schemaVersion": 1,
+    "payload": {
+      "endedAt": "2026-11-23T04:05:06Z"
+    }
+  },
+  "arrangement/ArrangementEndedForRemoval": {
+    "schemaVersion": 1,
+    "payload": {
+      "endedAt": "2026-11-23T04:05:06Z"
+    }
+  },
+  "arrangement/ArrangementRevoked": {
+    "schemaVersion": 1,
+    "payload": {
+      "revokedAt": "2026-11-23T04:05:06Z"
+    }
+  },
+  "arrangement/ArrangementWithdrawn": {
+    "schemaVersion": 1,
+    "payload": {
+      "withdrawnAt": "2026-11-23T04:05:06Z",
+      "method": "CONSUMER_DASHBOARD"
+    }
+  },
+  "arrangement/NoticeAttempted": {
+    "schemaVersion": 1,
+    "payload": {
+      "attempt": 1,
+      "at": "2026-11-23T04:05:06Z",
+      "result": "HTTP 204"
+    }
+  },
+  "arrangement/NoticeRecorded": {
+    "schemaVersion": 1,
+    "payload": {
+      "recordedAt": "2026-11-23T04:05:06Z",
+      "status": "COMPLETE",
+      "attempts": [
+        {
+          "attempt": 1,
+          "at": "2026-11-23T04:05:06Z",
+          "result": "HTTP 204"
+        }
+      ]
+    }
+  },
+  "client-registration/ClientDeleted": {
+    "schemaVersion": 1,
+    "payload": {
+      "client_id": "client-1"
+    }
+  },
+  "client-registration/ClientRegistered": {
+    "schemaVersion": 1,
+    "payload": {
+      "registration": {
+        "client_id": "client-1",
+        "client_id_issued_at": 1795406706,
+        "client_name": "Sample Budget",
+        "client_description": "A sample budget product.",
+        "client_uri": "https://app.example.com",
+        "legal_entity_id": "le-recipient",
+        "legal_entity_name": "Sample Recipient Pty Ltd",
+        "org_id": "drb-1",
+        "org_name": "Sample App",
+        "redirect_uris": [
+          "https://app.example.com/callback"
+        ],
+        "sector_identifier_uri": "https://app.example.com/sector",
+        "logo_uri": "https://app.example.com/budget.png",
+        "tos_uri": "https://app.example.com/terms",
+        "policy_uri": "https://app.example.com/policy",
+        "jwks_uri": "https://app.example.com/jwks",
+        "revocation_uri": "https://app.example.com/revoke",
+        "recipient_base_uri": "https://api.app.example.com",
+        "token_endpoint_auth_method": "private_key_jwt",
+        "token_endpoint_auth_signing_alg": "PS256",
+        "grant_types": [
+          "authorization_code",
+          "refresh_token"
+        ],
+        "response_types": [
+          "code"
+        ],
+        "application_type": "web",
+        "id_token_signed_response_alg": "PS256",
+        "authorization_signed_response_alg": "PS256",
+        "request_object_signing_alg": "PS256",
+        "software_statement": "sample.software.statement",
+        "software_id": "sp-1",
+        "software_roles": "data-recipient-software-product",
+        "scope": "openid bank:accounts.basic:read"
+      }
+    }
+  },
+  "client-registration/ClientUpdated": {
+    "schemaVersion": 1,
+    "payload": {
+      "registration": {
+        "client_id": "client-1",
+        "client_id_issued_at": 1795406706,
+        "client_name": "Sample Budget",
+        "client_description": "A sample budget product.",
+        "client_uri": "https://app.example.com",
+        "legal_entity_id": "le-recipient",
+        "legal_entity_name": "Sample Recipient Pty Ltd",
+        "org_id": "drb-1",
+        "org_name": "Sample App",
+        "redirect_uris": [
+          "https://app.example.com/callback"
+        ],
+        "sector_identifier_uri": "https://app.example.com/sector",
+        "logo_uri": "https://app.example.com/budget.png",
+        "tos_uri": "https://app.example.com/terms",
+        "policy_uri": "https://app.example.com/policy",
+        "jwks_uri": "https://app.example.com/jwks",
+        "revocation_uri": "https://app.example.com/revoke",
+        "recipient_base_uri": "https://api.app.example.com",
+        "token_endpoint_auth_method": "private_key_jwt",
+        "token_endpoint_auth_signing_alg": "PS256",
+        "grant_types": [
+          "authorization_code",
+          "refresh_token"
+        ],
+        "response_types": [
+          "code"
+        ],
+        "application_type": "web",
+        "id_token_signed_response_alg": "PS256",
+        "authorization_signed_response_alg": "PS256",
+        "request_object_signing_alg": "PS256",
+        "software_statement": "sample.software.statement",
+        "software_id": "sp-1",
+        "software_roles": "data-recipient-software-product",
+        "scope": "openid bank:accounts.basic:read"
+      }
+    }
+  }
+}
