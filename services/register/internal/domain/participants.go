@@ -10,7 +10,8 @@ type Participants struct {
 	DataRecipients []DataRecipient `json:"dataRecipients"`
 }
 
-// Validate applies the rules between aggregates. The import of each aggregate applies the rules in it.
+// Validate applies the rules between aggregates. Its error matches ErrNotValid. The import of each aggregate applies
+// the rules in it.
 func (p Participants) Validate() error {
 	var errs []error
 
@@ -57,5 +58,9 @@ func (p Participants) Validate() error {
 		check(record{kind: "data recipient", id: dr.LegalEntityID}, ids)
 	}
 
-	return errors.Join(errs...)
+	if err := errors.Join(errs...); err != nil {
+		return notValidError{err}
+	}
+
+	return nil
 }

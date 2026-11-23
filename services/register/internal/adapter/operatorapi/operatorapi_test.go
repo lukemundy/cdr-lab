@@ -39,7 +39,14 @@ type fakeOperator struct {
 	legalEntityID     string
 	command           domain.DataRecipientCommand
 	dataHolderCommand domain.DataHolderCommand
+	participants      domain.Participants
+	load              domain.ParticipantLoad
 	err               error
+}
+
+func (f *fakeOperator) LoadParticipants(_ context.Context, p domain.Participants) (domain.ParticipantLoad, error) {
+	f.participants = p
+	return f.load, f.err
 }
 
 func (f *fakeOperator) Execute(_ context.Context, legalEntityID string, command domain.DataRecipientCommand) error {

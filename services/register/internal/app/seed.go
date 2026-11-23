@@ -23,9 +23,11 @@ func Seed(ctx context.Context, store EventStore, p domain.Participants) error {
 	var appends []eventsourcing.Append
 
 	for _, dh := range p.DataHolders {
-		a, err := importAggregate(
+		a, err := handleAll(
 			DataHolderType,
 			dh.LegalEntityID,
+			DataHolderType.Initial,
+			0,
 			domain.DataHolderCommand(domain.ImportDataHolder{DataHolder: dh}),
 		)
 		errs = append(errs, err)
@@ -33,9 +35,11 @@ func Seed(ctx context.Context, store EventStore, p domain.Participants) error {
 	}
 
 	for _, dr := range p.DataRecipients {
-		a, err := importAggregate(
+		a, err := handleAll(
 			DataRecipientType,
 			dr.LegalEntityID,
+			DataRecipientType.Initial,
+			0,
 			domain.DataRecipientCommand(domain.ImportDataRecipient{DataRecipient: dr}),
 		)
 		errs = append(errs, err)
@@ -58,17 +62,33 @@ func Seed(ctx context.Context, store EventStore, p domain.Participants) error {
 	return store.Append(ctx, appends...)
 }
 
-func importAggregate[S, C, E any](
+// handleAll handles each command on the state after the events of the commands before it, and gives one Append of
+// all events at the version of the state.
+func handleAll[S, C, E any](
 	t eventsourcing.AggregateType[S, C, E],
 	streamID string,
-	command C,
+	state S,
+	version int64,
+	commands ...C,
 ) (eventsourcing.Append, error) {
-	events, err := t.Handle(t.Initial, command)
-	if err != nil {
-		return eventsourcing.Append{}, err
+	var events []E
+
+	for _, c := range commands {
+		handled, err := t.Handle(state, c)
+		if err != nil {
+			return eventsourcing.Append{}, err
+		}
+
+		for _, e := range handled {
+			state = t.Apply(state, e)
+		}
+
+		events = append(events, handled...)
 	}
 
 	data, err := t.Encode(events)
 
-	return eventsourcing.Append{StreamType: t.StreamType, StreamID: streamID, Events: data}, err
+	return eventsourcing.Append{
+		StreamType: t.StreamType, StreamID: streamID, ExpectedVersion: version, Events: data,
+	}, err
 }

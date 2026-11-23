@@ -113,7 +113,7 @@ func executeBody[B, C any](
 	})
 }
 
-// maxBodyBytes is much more than a legal entity in the seed data, which is less than 20 KiB.
+// maxBodyBytes is much more than the full seed data of a participant load, which is less than 60 KiB.
 const maxBodyBytes = 1 << 20
 
 // decodeBody writes the problem when the body is not one JSON object with only the fields of v.
