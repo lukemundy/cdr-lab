@@ -6,17 +6,17 @@ The CA library makes the mock CDR CA and the mock public CA, checks CSRs, issues
 
 ```mermaid
 flowchart LR
-  pki["pki command<br>[External system]"]
+  cdrlab["cdrlab<br>[External system]"]
   register["Mock CDR Register<br>[External system]"]
   ca["CA library<br>[System]"]
 
-  pki -- "Makes the CAs and issues certificates<br>Go calls" --> ca
+  cdrlab -- "Makes the CAs and issues public TLS certificates<br>Go calls" --> ca
   register -- "Issues certificates and makes CRLs<br>Go calls" --> ca
 
   classDef system fill:#1168bd,color:#fff,stroke:#0b4884
   classDef external fill:#999,color:#fff,stroke:#6b6b6b
   class ca system
-  class pki,register external
+  class cdrlab,register external
 ```
 
 ## Library specifications

@@ -27,9 +27,7 @@ flowchart LR
 
 ## Library specifications
 
-| Library | Specification |
-|---|---|
-| `pkg/ca` | [CA library](../pkg/ca/DESIGN.md) |
+None.
 
 ## Goals
 

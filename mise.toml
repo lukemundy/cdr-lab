@@ -293,93 +293,36 @@ fi
 """
 
 [tasks."build:go"]
-description = "Build all service binaries into bin/"
+description = "Build all service binaries and the cdrlab CLI into bin/"
 run = """
 {{ vars.build_env }}
 p=github.com/lukemundy/cdr-lab/pkg/platform/buildinfo
-go build -o bin/ -ldflags "-X $p.commit=$BUILD_COMMIT -X $p.commitShort=$BUILD_COMMIT_SHORT -X $p.buildTime=$BUILD_TIME -X $p.id=$BUILD_ID" github.com/lukemundy/cdr-lab/services/.../cmd/...
+go build -o bin/ -ldflags "-X $p.commit=$BUILD_COMMIT -X $p.commitShort=$BUILD_COMMIT_SHORT -X $p.buildTime=$BUILD_TIME -X $p.id=$BUILD_ID" github.com/lukemundy/cdr-lab/services/.../cmd/... github.com/lukemundy/cdr-lab/cli/.../cmd/...
 """
 
 [tasks.pki]
-description = "Create the lab CAs and the lab certificates in .lab/pki if they do not exist"
-run = [
-  "go run github.com/lukemundy/cdr-lab/pki/cmd/pki init -dir .lab/pki",
-  """
-  pki="go run github.com/lukemundy/cdr-lab/pki/cmd/pki"
-  # The CRL on the internal listener of the Register (compose.yaml).
-  crl_url=http://register:8080/crl/cdr-intermediate.crl
-  mkdir -p .lab/pki/register .lab/pki/conformance .lab/pki/openid
+description = "Create the lab CAs and the public TLS certificates of the lab in .lab/pki, or renew the certificates"
+run = """
+set -eu
+cdrlab() { go run github.com/lukemundy/cdr-lab/cli/cdrlab/cmd/cdrlab "$@"; }
+cdrlab ca init -dir .lab/pki
 
-  # Any user can read these lab keys, because the containers read them as another user.
-  # O is the brand name in a client certificate and the legal entity name in a server certificate (pki/DESIGN.md, CSR profile).
-  cdr_certificate() {
-    openssl req -new -newkey rsa:2048 -nodes -keyout "$2.key" -out "$2.csr" \
-      -subj "/C=AU/O=$3/OU=Consumer Data Right/CN=$4" ${5:+-addext "subjectAltName=$5"} 2>/dev/null &&
-      chmod 644 "$2.key" &&
-      $pki issue -dir .lab/pki -type "$1" -crl-url "$crl_url" -out "$2.crt" "$2.csr" &&
-      rm "$2.csr"
-  }
-
-  if [ ! -f .lab/pki/register/public.crt ]; then
-    $pki issue-public -dir .lab/pki \
-      -cert .lab/pki/register/public.crt -key .lab/pki/register/public.key register localhost || exit 1
-  fi
-  # The four preset banks (compose.yaml), also when the all-banks profile is off, so that a lab can turn it on later.
-  for bank in "wattle-bank:Wattle Bank Limited" "redgum-bank:Redgum Bank Limited" \
-    "harbour-bank:Harbour Bank Limited" "kestrel-bank:Kestrel Bank Limited"; do
-    host=${bank%%:*}
-    legal_entity=${bank#*:}
-    mkdir -p ".lab/pki/$host"
-    if [ ! -f ".lab/pki/$host/public.crt" ]; then
-      $pki issue-public -dir .lab/pki \
-        -cert ".lab/pki/$host/public.crt" -key ".lab/pki/$host/public.key" "$host" localhost || exit 1
-    fi
-    if [ ! -f ".lab/pki/$host/secure.crt" ]; then
-      cdr_certificate server ".lab/pki/$host/secure" "$legal_entity" "$host" "DNS:$host,DNS:localhost" || exit 1
-    fi
-  done
-  if [ ! -f .lab/pki/conformance/client.crt ]; then
-    cdr_certificate client .lab/pki/conformance/client "Token Test" "Token Test Active" || exit 1
-  fi
-  if [ ! -f .lab/pki/conformance/unregistered.crt ]; then
-    cdr_certificate client .lab/pki/conformance/unregistered "Token Test" "Token Test Active" || exit 1
-  fi
-  if [ ! -f .lab/pki/conformance/inactive.crt ]; then
-    cdr_certificate client .lab/pki/conformance/inactive "Token Test" "Token Test Inactive" || exit 1
-  fi
-  if [ ! -f .lab/pki/conformance/jwks.crt ]; then
-    $pki issue-public -dir .lab/pki \
-      -cert .lab/pki/conformance/jwks.crt -key .lab/pki/conformance/jwks.key conformance || exit 1
-  fi
-  if [ ! -f .lab/pki/conformance/status.crt ]; then
-    cdr_certificate client .lab/pki/conformance/status "Status Test" "Status Test Web" || exit 1
-  fi
-  if [ ! -f .lab/pki/conformance/registration.crt ]; then
-    cdr_certificate client .lab/pki/conformance/registration "Registration Test" "Registration Test Web" || exit 1
-  fi
-  if [ ! -f .lab/pki/openid/client-1.crt ]; then
-    cdr_certificate client .lab/pki/openid/client-1 "OpenID Test" "OpenID Test Client 1" || exit 1
-  fi
-  if [ ! -f .lab/pki/openid/client-2.crt ]; then
-    cdr_certificate client .lab/pki/openid/client-2 "OpenID Test" "OpenID Test Client 2" || exit 1
-  fi
-  # The TLS front of the OpenID conformance suite, and the JWKS host of its two clients.
-  if [ ! -f .lab/pki/openid/suite.crt ]; then
-    $pki issue-public -dir .lab/pki -cert .lab/pki/openid/suite.crt -key .lab/pki/openid/suite.key openid localhost || exit 1
-  fi
-  if [ ! -f .lab/pki/openid/jwks.crt ]; then
-    $pki issue-public -dir .lab/pki -cert .lab/pki/openid/jwks.crt -key .lab/pki/openid/jwks.key openid-runner || exit 1
-  fi
-  # The conformance tests revoke this fixture through the Register before they use it.
-  if [ ! -f .lab/pki/conformance/revoked.crt ]; then
-    cdr_certificate client .lab/pki/conformance/revoked "Token Test" "Token Test Active" || exit 1
-  fi
-  # A conformance test revokes this fixture.
-  if [ ! -f .lab/pki/conformance/revocation.crt ]; then
-    cdr_certificate client .lab/pki/conformance/revocation "Token Test" "Token Test Active" || exit 1
-  fi
-  """,
-]
+# Any user can read these lab keys, because the containers read them as a different user (pki/DESIGN.md#pki-0077).
+public_certificate() {
+  files=$1
+  shift
+  cdrlab public-cert issue -dir .lab/pki -key-readable-by-all -cert "$files.crt" -key "$files.key" "$@"
+}
+public_certificate .lab/pki/register/public register localhost
+# The four preset banks (compose.yaml), also when the all-banks profile is off, so that a lab can turn it on later.
+for bank in wattle-bank redgum-bank harbour-bank kestrel-bank; do
+  public_certificate ".lab/pki/$bank/public" "$bank" localhost
+done
+public_certificate .lab/pki/conformance/jwks conformance
+# The TLS front of the OpenID conformance suite, and the JWKS host of its two clients.
+public_certificate .lab/pki/openid/suite openid localhost
+public_certificate .lab/pki/openid/jwks openid-runner
+"""
 
 [tasks.up]
 description = "Build and start the lab deployment, and wait until it is healthy. With --no-build, start the images that are there"
@@ -391,6 +334,7 @@ flag "--no-build" help="Do not build the images. Use the images that are there, 
 """
 run = """
 {{ vars.build_env }}
+set -eu
 if [ "${usage_all_banks:-}" = true ]; then
   export COMPOSE_PROFILES="${COMPOSE_PROFILES:+$COMPOSE_PROFILES,}all-banks"
 fi
@@ -398,6 +342,47 @@ build=--build
 if [ "${usage_no_build:-}" = true ]; then
   build=--no-build
 fi
+
+# The Register issues each CDR certificate of the lab, so it starts first (ADR 0038).
+docker-compose up --detach "$build" --wait --wait-timeout 60 register
+
+cdrlab() { go run github.com/lukemundy/cdr-lab/cli/cdrlab/cmd/cdrlab "$@"; }
+# The operator interface of the Register on the host (compose.yaml).
+export REGISTER_OPERATOR_TOKEN=lab-operator-token
+register=http://127.0.0.1:8080
+# Any user can read these lab keys, because the containers read them as a different user (pki/DESIGN.md#pki-0077).
+# The IDs and the names are those of the seed file (services/register/seed/example.json).
+server_certificate() {
+  cdrlab cert issue -register-url "$register" -key-readable-by-all -kind server \
+    -legal-entity-id "$2" -brand-id "$3" -o "$4" -cn "$1" -dns "$1" -dns localhost \
+    -cert ".lab/pki/$1/secure.crt" -key ".lab/pki/$1/secure.key"
+}
+client_certificate() {
+  cdrlab cert issue -register-url "$register" -key-readable-by-all -kind client \
+    -legal-entity-id "$2" -software-product-id "$3" -o "$4" -cn "$5" -cert "$1.crt" -key "$1.key"
+}
+# The four preset banks, also when the all-banks profile is off, so that a lab can turn it on later.
+server_certificate wattle-bank dd4d6bc6-22f4-4f61-aae9-9580382718c8 d7385786-d8b1-4d4b-bb80-b21616df1a4d "Wattle Bank Limited"
+server_certificate redgum-bank 830186b8-6060-4773-8b59-e8567a13df01 4967dd80-2cd2-43c3-8b13-f6faafb684ad "Redgum Bank Limited"
+server_certificate harbour-bank 00b12e81-207f-4fb7-b01f-d0c50cb1a06c 366f7b1c-93c7-4b84-9c92-ab2456614095 "Harbour Bank Limited"
+server_certificate kestrel-bank 0ed9945f-022e-4dca-9d05-ce327566e3de 1ee54312-624b-4679-bf33-cf4af113f934 "Kestrel Bank Limited"
+token=bd653a0f-cf64-40ae-b914-aa479f5fb725
+token_active=33bfd771-cac1-44c2-8940-a82f529b6170
+client_certificate .lab/pki/conformance/client "$token" "$token_active" "Token Test" "Token Test Active"
+# A conformance test removes the registration of this fixture before it uses it (pki/DESIGN.md#pki-0096).
+client_certificate .lab/pki/conformance/unregistered "$token" "$token_active" "Token Test" "Token Test Active"
+client_certificate .lab/pki/conformance/inactive "$token" 839ffa5f-09dd-4e00-9bbc-38dff23a9b2f "Token Test" "Token Test Inactive"
+# The conformance tests revoke these fixtures through the Register before they use them.
+client_certificate .lab/pki/conformance/revoked "$token" "$token_active" "Token Test" "Token Test Active"
+client_certificate .lab/pki/conformance/revocation "$token" "$token_active" "Token Test" "Token Test Active"
+client_certificate .lab/pki/conformance/status 41090368-a571-41df-a2c2-a9ad32dfa512 8bbe8ce3-3d90-44b2-b97d-383d7fa7e579 \
+  "Status Test" "Status Test Web"
+client_certificate .lab/pki/conformance/registration 6f1d2a57-0c5e-4b0e-9d0a-3f6c1b7e8a41 \
+  d4f6a8c0-2e4b-4c6d-9e8f-0a1b2c3d4e5f "Registration Test" "Registration Test Web"
+openid=1c664017-a83c-4086-96f8-d61026d2df41
+client_certificate .lab/pki/openid/client-1 "$openid" aa29d742-9413-4d10-850c-70b310427da2 "OpenID Test" "OpenID Test Client 1"
+client_certificate .lab/pki/openid/client-2 "$openid" d07c4109-dc08-4319-9856-274afa9fa7e2 "OpenID Test" "OpenID Test Client 2"
+
 docker-compose up --detach "$build" --wait --wait-timeout 60 ${usage_service:-}
 """
 

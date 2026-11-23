@@ -7,8 +7,11 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/tls"
+	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
 	"io"
 	"net"
 	"net/http"
@@ -200,27 +203,63 @@ func RequestToken(t *testing.T, endpoint string, cert tls.Certificate, form url.
 func RegisterClientCertificate(t *testing.T, legalEntityID, softwareProductID, certVariable string) {
 	t.Helper()
 
+	cert := leafCertificate(t, certVariable)
+	target := certificatesURL(t, legalEntityID, softwareProductID)
+
+	// A registration takes one PEM certificate, and the file has the chain of the issue.
+	status, body := operatorRetry(t, http.MethodPost, target,
+		pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: cert}))
+
+	require.Equal(t, http.StatusNoContent, status, string(body))
+}
+
+// RemoveClientCertificate removes a registration of the certificate, through the operator interface of the Register.
+// The Register registers each client certificate that it issues, so a test that needs a certificate that the
+// Register does not accept removes its registration first.
+func RemoveClientCertificate(t *testing.T, legalEntityID, softwareProductID, certVariable string) {
+	t.Helper()
+
+	sum := sha256.Sum256(leafCertificate(t, certVariable))
+	target := certificatesURL(t, legalEntityID, softwareProductID) + "/" + base64.RawURLEncoding.EncodeToString(sum[:])
+
+	status, body := operatorRetry(t, http.MethodDelete, target, nil)
+
+	require.Equal(t, http.StatusNoContent, status, string(body))
+}
+
+func certificatesURL(t *testing.T, legalEntityID, softwareProductID string) string {
+	t.Helper()
+
+	return Env(t, "REGISTER_INTERNAL_URL") + registerDataRecipientsPath + legalEntityID +
+		"/software-products/" + softwareProductID + "/certificates"
+}
+
+// leafCertificate gives the DER of the first certificate of the file.
+func leafCertificate(t *testing.T, certVariable string) []byte {
+	t.Helper()
+
 	pemData, err := os.ReadFile(Env(t, certVariable))
 	require.NoError(t, err)
 
-	target := Env(t, "REGISTER_INTERNAL_URL") + registerDataRecipientsPath + legalEntityID +
-		"/software-products/" + softwareProductID + "/certificates"
+	block, _ := pem.Decode(pemData)
+	require.NotNil(t, block, "the file of %s has no PEM certificate", certVariable)
 
-	// The Register gives 409 when a different request changes the same data recipient at the same time, and the test
-	// packages register certificates for software products of one data recipient at the same time.
-	var (
-		status int
-		body   []byte
-	)
+	return block.Bytes
+}
+
+// operatorRetry sends the request again when the Register gives 409, because a different request changes the same
+// data recipient at the same time. The test packages change software products of one data recipient at the same time.
+func operatorRetry(t *testing.T, method, target string, request []byte) (status int, body []byte) {
+	t.Helper()
 
 	for range maxOperatorAttempts {
-		status, body = postOperator(t, target, pemData)
+		status, body = operator(t, method, target, request)
 		if status != http.StatusConflict {
 			break
 		}
 	}
 
-	require.Equal(t, http.StatusNoContent, status, string(body))
+	return status, body
 }
 
 const maxOperatorAttempts = 5
@@ -232,25 +271,15 @@ func ChangeSoftwareProductStatus(t *testing.T, legalEntityID, softwareProductID,
 	target := Env(t, "REGISTER_INTERNAL_URL") + registerDataRecipientsPath + legalEntityID +
 		"/software-products/" + softwareProductID + "/" + action
 
-	var (
-		status int
-		body   []byte
-	)
-
-	for range maxOperatorAttempts {
-		status, body = postOperator(t, target, nil)
-		if status != http.StatusConflict {
-			break
-		}
-	}
+	status, body := operatorRetry(t, http.MethodPost, target, nil)
 
 	require.Equal(t, http.StatusNoContent, status, string(body))
 }
 
-func postOperator(t *testing.T, target string, request []byte) (status int, body []byte) {
+func operator(t *testing.T, method, target string, request []byte) (status int, body []byte) {
 	t.Helper()
 
-	req, err := http.NewRequestWithContext(t.Context(), http.MethodPost, target, bytes.NewReader(request))
+	req, err := http.NewRequestWithContext(t.Context(), method, target, bytes.NewReader(request))
 	require.NoError(t, err)
 	req.Header.Set("Authorization", "Bearer "+Env(t, "REGISTER_OPERATOR_TOKEN"))
 

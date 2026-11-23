@@ -1,5 +1,5 @@
-// Package certissue gets a CDR certificate through the Register issue path and writes it to a TLS Secret, only when the
-// Secret has no current certificate.
+// Package certissue gets a CDR certificate through the Register issue path and writes it to an output, a TLS Secret
+// or files, only when the output has no current certificate.
 package certissue
 
 import (
@@ -9,15 +9,12 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"fmt"
-	"slices"
 	"time"
 
-	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/kube"
+	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/certcheck"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/register"
 	"github.com/lukemundy/cdr-lab/pkg/ca"
 )
-
-const DefaultRenewBefore = 30 * 24 * time.Hour
 
 type Config struct {
 	Kind          ca.Kind
@@ -27,69 +24,102 @@ type Config struct {
 	CommonName   string
 	Organisation string
 	DNSNames     []string
-	Secret       string
-	RenewBefore  time.Duration
-	Now          func() time.Time
+	// CSR is a PEM CSR from the user. The command then sends it as it is, takes the subject and the DNS names from
+	// it, and writes no key.
+	CSR         []byte
+	RenewBefore time.Duration
+	Now         func() time.Time
 }
 
-// Run gives the new certificate, or nil when the Secret has a current certificate.
-func Run(ctx context.Context, secrets *kube.Client, reg *register.Client, cfg Config) (*x509.Certificate, error) {
+type Output interface {
+	// Load gives no chain when the output has no certificate that the command can read. The key is nil when the
+	// output has no key that the command can read.
+	Load(ctx context.Context) (chain []*x509.Certificate, key crypto.PublicKey, err error)
+	// Save gets no key when the user gave the CSR.
+	Save(ctx context.Context, chain []*x509.Certificate, keyPEM []byte, bundle []*x509.Certificate) error
+}
+
+// Run gives the new certificate, or nil when the output has a current certificate.
+func Run(ctx context.Context, out Output, reg *register.Client, cfg Config) (*x509.Certificate, error) {
+	cfg, csrKey, err := withCSRNames(cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	bundle, err := reg.CABundle(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	secret, found, err := secrets.Get(ctx, cfg.Secret)
+	chain, key, err := out.Load(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if found && secret.Type != kube.TLSType {
-		return nil, fmt.Errorf("the Secret %q has the type %q, not %s", cfg.Secret, secret.Type, kube.TLSType)
+	if csrKey != nil {
+		key = csrKey
 	}
 
-	if found && current(secret, bundle, cfg) {
+	if certcheck.Current(chain, bundle, want(cfg, key)) {
 		return nil, nil
 	}
 
-	key, err := rsa.GenerateKey(rand.Reader, ca.LeafKeyBits)
+	csr, keyPEM, err := request(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	csr, err := ca.NewCSR(key, cfg.Kind, cfg.CommonName, cfg.Organisation, cfg.DNSNames)
-	if err != nil {
-		return nil, fmt.Errorf("the inputs do not give a CSR with the CDS profile:\n%w", err)
-	}
-
-	chain, err := issue(ctx, reg, cfg, csr)
+	chain, err = issue(ctx, reg, cfg, csr)
 	if err != nil {
 		return nil, err
 	}
 
-	keyPEM, err := ca.EncodeKey(key)
-	if err != nil {
-		return nil, err
-	}
-
-	data := map[string][]byte{
-		"tls.crt": ca.EncodeCertificates(chain...),
-		"tls.key": keyPEM,
-		"ca.crt":  ca.EncodeCertificates(bundle...),
-	}
-
-	if found {
-		secret.Data = data
-		err = secrets.Update(ctx, secret)
-	} else {
-		err = secrets.Create(ctx, kube.Secret{Name: cfg.Secret, Type: kube.TLSType, Data: data})
-	}
-
-	if err != nil {
+	if err := out.Save(ctx, chain, keyPEM, bundle); err != nil {
 		return nil, err
 	}
 
 	return chain[0], nil
+}
+
+// withCSRNames gives cfg with the subject and the DNS names of the CSR of the user, and the key of the CSR. With no
+// CSR, it gives cfg and no key.
+func withCSRNames(cfg Config) (Config, crypto.PublicKey, error) {
+	if cfg.CSR == nil {
+		return cfg, nil, nil
+	}
+
+	csr, err := ca.ParseCSR(cfg.CSR)
+	if err != nil {
+		return cfg, nil, fmt.Errorf("the CSR file: %w", err)
+	}
+
+	cfg.CommonName, cfg.DNSNames, cfg.Organisation = csr.Subject.CommonName, csr.DNSNames, ""
+	if len(csr.Subject.Organization) > 0 {
+		cfg.Organisation = csr.Subject.Organization[0]
+	}
+
+	return cfg, csr.PublicKey, nil
+}
+
+// request gives the CSR of the user, or a CSR and the PEM of a new key.
+func request(cfg Config) (csr, keyPEM []byte, err error) {
+	if cfg.CSR != nil {
+		return cfg.CSR, nil, nil
+	}
+
+	key, err := rsa.GenerateKey(rand.Reader, ca.LeafKeyBits)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	csr, err = ca.NewCSR(key, cfg.Kind, cfg.CommonName, cfg.Organisation, cfg.DNSNames)
+	if err != nil {
+		return nil, nil, fmt.Errorf("the inputs do not give a CSR with the CDS profile:\n%w", err)
+	}
+
+	keyPEM, err = ca.EncodeKey(key)
+
+	return csr, keyPEM, err
 }
 
 func issue(ctx context.Context, reg *register.Client, cfg Config, csr []byte) ([]*x509.Certificate, error) {
@@ -100,67 +130,23 @@ func issue(ctx context.Context, reg *register.Client, cfg Config, csr []byte) ([
 	return reg.IssueClient(ctx, cfg.LegalEntityID, cfg.RecordID, csr)
 }
 
-func current(secret kube.Secret, bundle []*x509.Certificate, cfg Config) bool {
-	chain, err := ca.ParseCertificates(secret.Data["tls.crt"])
-	if err != nil {
-		return false
+// want has the CN of a server certificate also as a DNS name, because the CA adds the CN of a server CSR to its DNS
+// names.
+func want(cfg Config, key crypto.PublicKey) certcheck.Want {
+	w := certcheck.Want{
+		Usage:        x509.ExtKeyUsageClientAuth,
+		CommonName:   cfg.CommonName,
+		Organisation: []string{cfg.Organisation},
+		DNSNames:     []string{},
+		PublicKey:    key,
+		RenewBefore:  cfg.RenewBefore,
+		Now:          cfg.Now(),
 	}
 
-	key, err := ca.ParseKey(secret.Data["tls.key"])
-	if err != nil {
-		return false
-	}
-
-	cert, now := chain[0], cfg.Now()
-
-	return cert.NotAfter.After(now.Add(cfg.RenewBefore)) &&
-		chainsTo(cert, slices.Concat(chain[1:], bundle), now, cfg.Kind) &&
-		cert.Subject.CommonName == cfg.CommonName &&
-		slices.Equal(cert.Subject.Organization, []string{cfg.Organisation}) &&
-		sameNames(cert.DNSNames, cfg) &&
-		sameKey(cert.PublicKey, key.Public())
-}
-
-func chainsTo(cert *x509.Certificate, others []*x509.Certificate, now time.Time, kind ca.Kind) bool {
-	roots, intermediates := x509.NewCertPool(), x509.NewCertPool()
-
-	for _, c := range others {
-		if c.IsCA && c.CheckSignatureFrom(c) == nil {
-			roots.AddCert(c)
-		} else {
-			intermediates.AddCert(c)
-		}
-	}
-
-	usage := x509.ExtKeyUsageServerAuth
-	if kind == ca.Client {
-		usage = x509.ExtKeyUsageClientAuth
-	}
-
-	_, err := cert.Verify(x509.VerifyOptions{
-		Roots: roots, Intermediates: intermediates, CurrentTime: now, KeyUsages: []x509.ExtKeyUsage{usage},
-	})
-
-	return err == nil
-}
-
-// sameNames compares as sets, because the CA adds the CN of a server CSR to its DNS names.
-func sameNames(names []string, cfg Config) bool {
-	want := []string{}
 	if cfg.Kind == ca.Server {
-		want = append(want, cfg.CommonName)
-		want = append(want, cfg.DNSNames...)
+		w.Usage = x509.ExtKeyUsageServerAuth
+		w.DNSNames = append([]string{cfg.CommonName}, cfg.DNSNames...)
 	}
 
-	return slices.Equal(unique(names), unique(want))
-}
-
-func unique(names []string) []string {
-	sorted := slices.Sorted(slices.Values(names))
-	return slices.Compact(sorted)
-}
-
-func sameKey(a, b crypto.PublicKey) bool {
-	k, ok := a.(interface{ Equal(x crypto.PublicKey) bool })
-	return ok && k.Equal(b)
+	return w
 }

@@ -18,7 +18,7 @@ CLAUDE.local.md
 # Agent worktrees
 /.worktrees/
 
-# Lab CA keys and certificates (mise run pki), in any directory where a command or test makes them
+# Lab CA keys and certificates (cdrlab, mise run pki and mise run up), in any directory where a command or test makes them
 .lab/
 
 # JavaScript dependencies, Vitest failure screenshots and attachments, and Playwright results (web/)

@@ -75,7 +75,7 @@ jobs:
           }
 
           shared=(mise.toml .github/workflows/ci.yml)
-          backend=(go.mod go.sum lab pkg pki services conformance compose.yaml)
+          backend=(go.mod go.sum lab pkg cli services conformance compose.yaml)
           if [ "$EVENT" = schedule ]; then
             printf '%s\n' go=false conformance=false web=false register-image=false dataholder-image=false \
               cdrlab-image=false audit=true chart=false spec=false >> "$GITHUB_OUTPUT"
@@ -83,7 +83,7 @@ jobs:
             {
               # Go tests check the brand directory contract against the token names and the fonts of the design system.
               # The test fixtures of tools/ are Markdown, so each change in tools/ counts.
-              go=$(changed "${shared[@]}" "${backend[@]}" cli .golangci.yml web/packages/tokens/tokens \
+              go=$(changed "${shared[@]}" "${backend[@]}" .golangci.yml web/packages/tokens/tokens \
                 web/packages/tokens/fonts.json)
               if [ "$(changed_all tools)" = true ]; then go=true; fi
               echo "go=$go"
@@ -295,7 +295,7 @@ jobs:
 
       - *install-mise
 
-      # The pki task of the lab deployment compiles on the runner.
+      # The pki and up tasks of the lab deployment compile cdrlab on the runner.
       - name: Restore the Go caches
         id: cache
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -415,7 +415,7 @@ jobs:
 
       - *install-mise
 
-      # The pki task compiles on the runner. This job does not save the caches of the conformance and web jobs.
+      # The pki and up tasks compile cdrlab on the runner. This job does not save the caches of the conformance and web jobs.
       - name: Restore the Go caches
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -585,7 +585,7 @@ jobs:
 
       - *install-mise
 
-      # The pki task compiles on the runner. This job does not save the caches of the conformance and web jobs.
+      # The pki and up tasks compile cdrlab on the runner. This job does not save the caches of the conformance and web jobs.
       - name: Restore the Go caches
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
