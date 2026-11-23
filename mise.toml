@@ -532,8 +532,8 @@ seed_logs 1
 snapshot second
 same "$dir/participants-first.json" "$dir/participants-second.json" participants
 same "$dir/customers-first.json" "$dir/customers-second.json" customers
-echo "The second install gives $(jq length "$dir/participants-second.json") participants and \\
-$(jq length "$dir/customers-second.json") customers."
+echo "The second install gives the same records. Participants: $(jq length "$dir/participants-second.json"). \\
+Customers: $(jq length "$dir/customers-second.json")."
 
 yq '.brands["wattle-bank"].customers += [{"lastName": "Added", "emailAddress": "added.customer@wattlebank.test"}]' \\
   lab/kind/values.yaml > "$dir/upgrade-values.yaml"
