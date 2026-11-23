@@ -293,13 +293,15 @@ jobs:
         run: |
           set -euo pipefail
           version=$(jq --raw-output .imageTag "$RUNNER_TEMP/plan/plan.json")
+          # mise finds the pinned cosign only from the checkout.
+          cosign=$(mise which cosign)
           cd "$RUNNER_TEMP/dist"
           sha256sum cdrlab-*.tar.gz > "cdrlab-$version-checksums.txt"
           if [ "$(wc -l < "cdrlab-$version-checksums.txt")" -ne 4 ]; then
             echo "The checksum file must have 4 archives" >&2
             exit 1
           fi
-          mise exec -- cosign sign-blob --yes --bundle "cdrlab-$version-checksums.txt.sigstore.json" \
+          "$cosign" sign-blob --yes --bundle "cdrlab-$version-checksums.txt.sigstore.json" \
             "cdrlab-$version-checksums.txt"
 
       - name: Upload the cdrlab assets
