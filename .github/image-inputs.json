@@ -1,0 +1,34 @@
+{
+  "register": [
+    ".github/image-inputs.json",
+    ".github/workflows/ci.yml",
+    "mise.toml",
+    "go.mod",
+    "go.sum",
+    "pkg",
+    "services/register",
+    "tools/notices",
+    "web",
+    ".dockerignore",
+    "compose.yaml",
+    "lab",
+    ":(exclude)*.md",
+    ":(exclude)docs"
+  ],
+  "dataholder": [
+    ".github/image-inputs.json",
+    ".github/workflows/ci.yml",
+    "mise.toml",
+    "go.mod",
+    "go.sum",
+    "pkg",
+    "services/dataholder",
+    "tools/notices",
+    "web",
+    ".dockerignore",
+    "compose.yaml",
+    "lab",
+    ":(exclude)*.md",
+    ":(exclude)docs"
+  ]
+}

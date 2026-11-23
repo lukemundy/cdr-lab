@@ -148,7 +148,7 @@ None.
 ## Publication
 
 - <a id="lab-0090"></a>**LAB-0090** When the umbrella chart or the chart of a service changes, CI publishes the umbrella chart from `main` as `oci://ghcr.io/lukemundy/cdr-lab/charts/cdr-lab`. The version is `0.0.0-g<short commit>`. ([Judgement: commit ID tags and versions, as for the other published artifacts](../../services/dataholder/design/deployment.md#dh-1370))
-- <a id="lab-0091"></a>**LAB-0091** CI publishes the umbrella chart from `main` only when, for each image of [the default image tags](#lab-0085), the image commit is the last commit that changes an input of the image. ([Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
+- <a id="lab-0091"></a>**LAB-0091** CI publishes the umbrella chart from `main` only when, for each image of [the default image tags](#lab-0085), no commit after the image commit changes an input of the image. ([Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
 - <a id="lab-0092"></a>**LAB-0092** CI publishes the umbrella chart of a commit only after the cluster job of that commit passes. ([Judgement: the umbrella chart publishes after the cluster job passes](#lab-0107))
 - <a id="lab-0093"></a>**LAB-0093** The umbrella chart of a [release](../../tools/release/DESIGN.md#rls-0009) has the version of the release. ([Judgement: one version from a manual workflow on main (ADR 0027)][adr-0027])
 

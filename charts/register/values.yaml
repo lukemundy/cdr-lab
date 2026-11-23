@@ -3,7 +3,7 @@
 
 image:
   repository: ghcr.io/lukemundy/cdr-lab/register
-  # The full or the short commit ID of the image.
+  # Optional. The full or the short commit ID of the image. The default is the appVersion of the chart.
   tag: ""
   # Optional. With a digest, the image cannot change under the tag.
   digest: ""

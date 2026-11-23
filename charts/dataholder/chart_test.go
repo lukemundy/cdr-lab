@@ -141,6 +141,19 @@ func TestOnePodRunsAtATime(t *testing.T) {
 	assert.Equal(t, "Recreate", deployment.Spec.Strategy.Type)
 }
 
+// Verifies: DH-2646
+func TestTheImageTagIsTheAppVersionWhenTheValuesGiveNoTag(t *testing.T) {
+	const appVersion = "0123456789abcdef0123456789abcdef01234567"
+
+	objects, err := charttest.RenderPackaged(t, appVersion, "image.tag=null")
+	require.NoError(t, err)
+	assert.Equal(t, "ghcr.io/lukemundy/cdr-lab/dataholder:"+appVersion, charttest.Main(t, objects).Image)
+
+	objects, err = charttest.RenderPackaged(t, appVersion, "image.tag=fedcba9")
+	require.NoError(t, err)
+	assert.Equal(t, "ghcr.io/lukemundy/cdr-lab/dataholder:fedcba9", charttest.Main(t, objects).Image)
+}
+
 func TestTheImageIsTheTagAndTheOptionalDigest(t *testing.T) {
 	assert.Equal(t, "ghcr.io/lukemundy/cdr-lab/dataholder:0123abc", charttest.Main(t, charttest.MustRender(t)).Image)
 

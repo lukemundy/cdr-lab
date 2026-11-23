@@ -2,7 +2,7 @@
 
 A Helm chart that runs one brand of the mock data holder on Kubernetes, on the [bjw-s common library chart](https://github.com/bjw-s-labs/helm-charts/tree/main/charts/library/common). One image and one chart serve all brands: a second brand is a second release with different values. The requirements are in the [data holder deployment specification](../../services/dataholder/design/deployment.md).
 
-CI publishes the chart from `main` when a chart changes, as `oci://ghcr.io/lukemundy/cdr-lab/charts/dataholder`, version `0.0.0-g<short commit>`. Pin the exact version: a version range does not include prerelease versions.
+CI publishes the chart from `main` when the chart changes or when CI publishes the data holder image, as `oci://ghcr.io/lukemundy/cdr-lab/charts/dataholder`, version `0.0.0-g<short commit>`. Pin the exact version: a version range does not include prerelease versions. The `appVersion` of the chart is the full commit ID of the [image commit](../../docs/spec/glossary.md#image-commit) of the data holder, and it is the default of `image.tag`. Thus the chart deploys a published image with no `image.tag` in the values.
 
 ```sh
 helm install wattle-bank oci://ghcr.io/lukemundy/cdr-lab/charts/dataholder --version 0.0.0-g<short commit> --values my-values.yaml
@@ -14,7 +14,7 @@ The chart does not render when a required value is missing, and the error names 
 
 | Value | Required | Data holder setting |
 |---|---|---|
-| `image.tag` | yes | The commit of the image `image.repository` (default `ghcr.io/lukemundy/cdr-lab/dataholder`). `image.digest` is optional. |
+| `image.tag` | no | The commit of the image `image.repository` (default `ghcr.io/lukemundy/cdr-lab/dataholder`). The default is the `appVersion` of the chart. `image.digest` is optional. |
 | `brand.preset` or `brand.configMap` | exactly one | `DATA_HOLDER_BRAND`, or `DATA_HOLDER_BRAND_DIR` with the ConfigMap at `/brand` |
 | `brand.id` | yes | `DATA_HOLDER_BRAND_ID`: the `dataHolderBrandId` of the brand on the Register |
 | `publicBaseURL`, `secureBaseURL` | yes | `PUBLIC_BASE_URL` (also the issuer), `SECURE_BASE_URL` |
