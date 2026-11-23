@@ -417,7 +417,6 @@ secret public-root ca.crt > "$pki/public/root.crt"
 k wait --for=condition=Ready certificate/conformance-jwks --timeout 2m
 secret conformance-jwks tls.crt > "$pki/conformance/jwks.crt"
 secret conformance-jwks tls.key > "$pki/conformance/jwks.key"
-chmod 644 "$pki/conformance/jwks.key"
 
 # The port of lab/kind/values.yaml, which is not a port of the compose lab.
 k port-forward service/register 18080:8080 > /dev/null &
@@ -435,8 +434,7 @@ jq --compact-output --arg dir "$pki/" '.cdr[] | select(.kind == "client") |
   (.cert, .key) |= sub("^\\\\.lab/pki/"; $dir) | [to_entries[] | "-\\(.key)", .value]' lab/certificates.json |
   while read -r flags; do
     mapfile -t flags < <(jq --raw-output '.[]' <<< "$flags")
-    # Any user can read these lab keys, because the Job reads them as a different user.
-    bin/cdrlab cert issue -register-url http://localhost:18080 -key-readable-by-all "${flags[@]}"
+    bin/cdrlab cert issue -register-url http://localhost:18080 "${flags[@]}"
   done
 
 # The Job has the image, the command and the environment of the conformance compose service. The Register has the
