@@ -87,6 +87,7 @@
     "dbService" (include "cdrlab.required" (list (printf "brands.%s.database.serviceSecret" $name) $db.serviceSecret "the Secret of the service user"))
     "smtpAddress" (include "cdrlab.required" (list (printf "brands.%s.mail.smtpAddress" $name) $mail.smtpAddress "the host:port of the SMTP server"))
     "mailFrom" (include "cdrlab.required" (list (printf "brands.%s.mail.from" $name) $mail.from "the sender address of the email"))
+    "customers" ($b.customers | default list)
   ) -}}
   {{- $logo := printf "%s/brand/logo.svg" $public.uri -}}
   {{- $_ := set $record "logoUri" $logo -}}
@@ -217,6 +218,11 @@ controllers:
         args: [ca, init, -intermediate-secret, cdr-ca-intermediate, -ca-bundle-secret, cdr-ca-bundle]
         securityContext: {{ include "cdrlab.containerSecurityContext" . | nindent 10 }}
 
+  participants: {{ include "cdrlab.seedJob" (dict "root" $ "name" "participants" "image" $images.cdrlab "token" $token
+    "tokenVariable" "REGISTER_OPERATOR_TOKEN"
+    "args" (list "participants" "add" "-register-url" "http://register:8080" "-file" "/seed/participants.json")
+  ) | nindent 4 }}
+
   {{- range $name, $b := $brands }}
   {{- $brandEnv := dict "DATA_HOLDER_BRAND" $name }}
   {{ $name }}:
@@ -307,6 +313,13 @@ controllers:
             enabled: false
         securityContext: {{ include "cdrlab.containerSecurityContext" . | nindent 10 }}
 
+  {{- if $b.customers }}
+  {{ $name }}-customers: {{ include "cdrlab.seedJob" (dict "root" $ "name" (printf "%s-customers" $name)
+    "image" $images.cdrlab "token" $token "tokenVariable" "DATAHOLDER_OPERATOR_TOKEN"
+    "args" (list "customers" "add" "-dataholder-url" (printf "http://%s:8080" $name) "-file" "/customers/customers.json")
+  ) | nindent 4 }}
+  {{- end }}
+
   {{- $certArgs := list "cert" "issue" "-register-url" "http://register:8080" "-kind" "server" "-legal-entity-id" $b.legalEntityId "-brand-id" $b.id "-cn" $b.secure.host "-o" $b.legalEntityName }}
   {{- range $b.secureNames }}
   {{- $certArgs = concat $certArgs (list "-dns" .) }}
@@ -363,10 +376,22 @@ service:
       {{- end }}
   {{- end }}
 
+# A change of a seed file restarts no pod, because the seed Jobs of each revision load the files.
 configMaps:
   seed:
+    forceRename: {{ printf "%s-seed" $fullname | quote }}
+    includeInChecksum: false
     data:
       participants.json: {{ toJson $seed | quote }}
+  {{- range $name, $b := $brands }}
+  {{- if $b.customers }}
+  {{ $name }}-customers:
+    forceRename: {{ printf "%s-%s-customers" $fullname $name | quote }}
+    includeInChecksum: false
+    data:
+      customers.json: {{ toJson (dict "customers" $b.customers) | quote }}
+  {{- end }}
+  {{- end }}
 
 # Each Secret is a directory mount, with no subPath, so that each service gets a renewed Secret.
 persistence:
@@ -378,6 +403,22 @@ persistence:
         seed:
           - path: /seed
             readOnly: true
+      participants:
+        main:
+          - path: /seed
+            readOnly: true
+  {{- range $name, $b := $brands }}
+  {{- if $b.customers }}
+  {{ $name }}-customers:
+    type: configMap
+    identifier: {{ $name }}-customers
+    advancedMounts:
+      {{ $name }}-customers:
+        main:
+          - path: /customers
+            readOnly: true
+  {{- end }}
+  {{- end }}
   register-public-tls: {{ include "cdrlab.secretMount" (list "register-public-tls" "/tls/public" (dict "register" (list "main"))) | nindent 4 }}
   cdr-ca-intermediate: {{ include "cdrlab.secretMount" (list "cdr-ca-intermediate" "/pki/intermediate" (dict "register" (list "main"))) | nindent 4 }}
   cdr-ca-bundle: {{ include "cdrlab.secretMount" (list "cdr-ca-bundle" "/pki/ca-bundle" $allControllers) | nindent 4 }}
@@ -391,6 +432,8 @@ persistence:
 
 serviceAccount:
   ca: {}
+  # No Role binds it: the seed Jobs call only the operator interfaces.
+  seed: {}
   {{- range $name := keys $brands }}
   {{ $name }}-cert: {}
   {{- end }}
@@ -478,6 +521,23 @@ rawResources:
         issuerRef: {{ toYaml $v.publicTLS.issuerRef | nindent 10 }}
   {{- end }}
 {{- end }}
+{{- end -}}
+
+{{- define "cdrlab.seedJob" -}}
+type: job
+forceRename: {{ printf "%s-%s-r%d" `{{ include "bjw-s.common.lib.chart.names.fullname" . }}` .name .root.Release.Revision | quote }}
+job:
+  backoffLimit: 20
+  activeDeadlineSeconds: 600
+serviceAccount:
+  identifier: seed
+containers:
+  main:
+    image: {{ toYaml .image | nindent 6 }}
+    args: {{ toYaml .args | nindent 6 }}
+    env:
+      {{ .tokenVariable }}: {{ include "cdrlab.secretKey" (list .token "token") | nindent 8 }}
+    securityContext: {{ include "cdrlab.containerSecurityContext" .root | nindent 6 }}
 {{- end -}}
 
 {{- define "cdrlab.certSecrets" -}}

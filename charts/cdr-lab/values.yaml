@@ -91,10 +91,25 @@ dataHolders:
 #   console: {enabled: false}
 #   database: {name: "", ownerSecret: "", serviceSecret: ""}   # required
 #   mail: {smtpAddress: "", from: ""}   # required
+#   customers: []   # the seed customers, in the format of the customer load file of the data holder
+#
+# After each install and upgrade, a Job adds the seed customers that the brand does not have. An account names a
+# product of the brand by its productId, and a transaction has an age in place of its times, for example:
+#
+#   customers:
+#     - firstName: Jordan
+#       lastName: Lee
+#       emailAddress: jordan.lee@example.test
+#       accounts:
+#         - productId: wattle-pocket
+#           accountNumber: "12345678"
+#           transactions:
+#             - {type: PAYMENT, status: POSTED, description: Coffee, amount: "-4.50", age: P1D}
 brands: {}
 
 # More participant records for the Register seed, in the format of the load file of the Register, for example the
-# data recipients of the conformance suite. A record must not have an identifier of a preset brand.
+# data recipients of the conformance suite. A record must not have an identifier of a preset brand. After each install
+# and upgrade, a Job adds the records of the seed that the Register does not have.
 participants:
   dataHolders: []
   dataRecipients: []

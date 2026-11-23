@@ -42,11 +42,9 @@ type seedFile struct {
 func seed(t *testing.T, objects []object) seedFile {
 	t.Helper()
 
-	configMaps := ofKind(objects, "ConfigMap")
-	require.Len(t, configMaps, 1)
-
 	var s seedFile
-	require.NoError(t, json.Unmarshal([]byte(str(configMaps[0], "data", "participants.json")), &s))
+	require.NoError(t, json.Unmarshal([]byte(str(named(t, objects, "ConfigMap", "test-cdr-lab-seed"), "data",
+		"participants.json")), &s))
 
 	return s
 }
@@ -592,7 +590,10 @@ func TestEachJobCanChangeOnlyItsOwnSecrets(t *testing.T) {
 	}
 
 	for _, j := range append(ofKind(objects, "Job"), ofKind(objects, "CronJob")...) {
-		assert.Contains(t, want, accounts[str(podSpec(j), "serviceAccountName")], str(j, "metadata", "name"))
+		account := str(podSpec(j), "serviceAccountName")
+		if account != "test-cdr-lab-seed" {
+			assert.Contains(t, want, accounts[account], str(j, "metadata", "name"))
+		}
 	}
 }
 
@@ -603,5 +604,179 @@ func TestTheJobsAreNotHooksAndHaveTheRevisionInTheirNames(t *testing.T) {
 
 		assert.True(t, strings.HasSuffix(name, "-r1"), name)
 		assert.Nil(t, field(job, "metadata", "annotations", "helm.sh/hook"), name)
+	}
+}
+
+func mountedConfigMaps(o object) map[string]string {
+	spec := podSpec(o)
+	volumes := map[string]string{}
+
+	for _, v := range list(spec, "volumes") {
+		if c := str(v, "configMap", "name"); c != "" {
+			volumes[str(v, "name")] = c
+		}
+	}
+
+	mounts := map[string]string{}
+
+	for _, c := range append(list(spec, "initContainers"), list(spec, "containers")...) {
+		for _, m := range list(c, "volumeMounts") {
+			if c, ok := volumes[str(m, "name")]; ok {
+				mounts[c] = str(m, "mountPath")
+			}
+		}
+	}
+
+	return mounts
+}
+
+func seedJobs(objects []object) []object {
+	var jobs []object
+
+	for _, j := range ofKind(objects, "Job") {
+		if str(podSpec(j), "serviceAccountName") == "test-cdr-lab-seed" {
+			jobs = append(jobs, j)
+		}
+	}
+
+	return jobs
+}
+
+// Verifies: LAB-0129
+func TestAJobOfEachRevisionAddsTheParticipantSeedFile(t *testing.T) {
+	objects := render(t)
+	job := named(t, objects, "Job", "test-cdr-lab-participants-r1")
+	main := container(t, job, "main")
+
+	assert.Equal(t, []string{
+		"participants", "add", "-register-url", "http://register:8080", "-file", "/seed/participants.json",
+	}, strs(main, "args"))
+	assert.Equal(t, "ghcr.io/lukemundy/cdr-lab/cdrlab:89abcde", str(main, "image"))
+	assert.Equal(t, map[string]string{"REGISTER_OPERATOR_TOKEN": "lab-operator-token:token"}, env(main))
+	assert.Equal(t, map[string]string{"test-cdr-lab-seed": "/seed"}, mountedConfigMaps(job))
+	assert.Equal(t, map[string]string{"test-cdr-lab-seed": "/seed"},
+		mountedConfigMaps(named(t, objects, "Deployment", "test-cdr-lab-register")))
+}
+
+// Verifies: LAB-0135
+func TestAnUpgradeThatAddsABrandGivesItsRecordToTheParticipantJob(t *testing.T) {
+	objects := render(t, set(
+		"brands.redgum-bank.database.name=redgum_bank", "brands.redgum-bank.database.ownerSecret=redgum-bank-owner",
+		"brands.redgum-bank.database.serviceSecret=redgum-bank-service",
+		"brands.redgum-bank.mail.smtpAddress=mail.test:25", "brands.redgum-bank.mail.from=no-reply@redgumbank.test",
+	)...)
+
+	assert.Equal(t, map[string]string{"test-cdr-lab-seed": "/seed"},
+		mountedConfigMaps(named(t, objects, "Job", "test-cdr-lab-participants-r1")))
+
+	var brands []string
+	for _, holder := range seed(t, objects).DataHolders {
+		brands = append(brands, holder.DataHolderBrands[0].BrandName)
+	}
+
+	assert.ElementsMatch(t, []string{"Wattle Bank", "Redgum Bank"}, brands)
+}
+
+// Verifies: LAB-0128, LAB-0130
+func TestAJobOfEachRevisionAddsTheCustomersOfEachBrandWithCustomers(t *testing.T) {
+	objects := renderLint(t)
+	job := named(t, objects, "Job", "test-cdr-lab-wattle-bank-customers-r1")
+	main := container(t, job, "main")
+
+	assert.Equal(t, []string{
+		"customers", "add", "-dataholder-url", "http://wattle-bank:8080", "-file", "/customers/customers.json",
+	}, strs(main, "args"))
+	assert.Equal(t, "ghcr.io/lukemundy/cdr-lab/cdrlab:89abcde", str(main, "image"))
+	assert.Equal(t, map[string]string{"DATAHOLDER_OPERATOR_TOKEN": "lab-operator-token:token"}, env(main))
+	assert.Equal(t, map[string]string{"test-cdr-lab-wattle-bank-customers": "/customers"}, mountedConfigMaps(job))
+
+	var file struct {
+		Customers []map[string]any `json:"customers"`
+	}
+
+	data := str(named(t, objects, "ConfigMap", "test-cdr-lab-wattle-bank-customers"), "data", "customers.json")
+	require.NoError(t, json.Unmarshal([]byte(data), &file))
+	require.Len(t, file.Customers, 1)
+	assert.Equal(t, "jordan.lee@wattlebank.test", file.Customers[0]["emailAddress"])
+	assert.Len(t, list(file.Customers[0], "accounts"), 2)
+	assert.Equal(t, "P1D", str(file.Customers[0], "accounts", 0, "transactions", 0, "age"))
+
+	var jobs []string
+	for _, j := range seedJobs(objects) {
+		jobs = append(jobs, str(j, "metadata", "name"))
+	}
+
+	assert.ElementsMatch(t, []string{"test-cdr-lab-participants-r1", "test-cdr-lab-wattle-bank-customers-r1"}, jobs)
+
+	for _, d := range ofKind(objects, "Deployment") {
+		assert.NotContains(t, mountedConfigMaps(d), "test-cdr-lab-wattle-bank-customers", str(d, "metadata", "name"))
+	}
+}
+
+// Verifies: LAB-0131
+func TestEachSeedJobTriesAgainForTenMinutes(t *testing.T) {
+	jobs := seedJobs(renderLint(t))
+	require.Len(t, jobs, 2)
+
+	for _, job := range jobs {
+		name := str(job, "metadata", "name")
+
+		assert.Equal(t, "20", str(job, "spec", "backoffLimit"), name)
+		assert.Equal(t, "600", str(job, "spec", "activeDeadlineSeconds"), name)
+	}
+}
+
+// Verifies: LAB-0133
+func TestTheSeedJobsHaveNoPermissionAndNoToken(t *testing.T) {
+	objects := renderLint(t)
+
+	for _, b := range ofKind(objects, "RoleBinding") {
+		for _, s := range list(b, "subjects") {
+			assert.NotEqual(t, "test-cdr-lab-seed", str(s, "name"))
+		}
+	}
+
+	named(t, objects, "ServiceAccount", "test-cdr-lab-seed")
+
+	for _, job := range seedJobs(objects) {
+		name := str(job, "metadata", "name")
+
+		assert.Equal(t, "false", str(podSpec(job), "automountServiceAccountToken"), name)
+		assert.Empty(t, mountedSecrets(job), name)
+	}
+}
+
+// Verifies: LAB-0128
+func TestTheSchemaRefusesACustomerFieldThatTheLoadDoesNotHave(t *testing.T) {
+	account := []string{
+		"brands.wattle-bank.customers[0].lastName=Lee",
+		"brands.wattle-bank.customers[0].emailAddress=jordan.lee@wattlebank.test",
+		"brands.wattle-bank.customers[0].accounts[0].displayName=Pocket",
+	}
+	withProduct := append(slices.Clone(account), "brands.wattle-bank.customers[0].accounts[0].productId=wattle-pocket")
+	accountNumber := []string{"--set-string", "brands.wattle-bank.customers[0].accounts[0].accountNumber=12345678"}
+
+	render(t, append(slices.Clone(accountNumber), set(withProduct...)...)...)
+
+	assert.Contains(t, renderErr(t, append(slices.Clone(accountNumber), set(account...)...)...).Error(), "productId")
+
+	for _, value := range []string{
+		"brands.wattle-bank.customers[0].customerNumber=1",
+		"brands.wattle-bank.customers[0].brand=redgum-bank",
+		"brands.wattle-bank.customers[0].accounts[0].bsb=012345",
+		"brands.wattle-bank.customers[0].accounts[0].productName=Wattle Pocket",
+		"brands.wattle-bank.customers[0].accounts[0].productCategory=TRANS_AND_SAVINGS_ACCOUNTS",
+		"brands.wattle-bank.customers[0].accounts[0].transactions[0].postingDateTime=2026-01-01T00:00:00Z",
+	} {
+		err := renderErr(t, append(slices.Clone(accountNumber), set(append(slices.Clone(withProduct), value)...)...)...)
+
+		assert.Contains(t, err.Error(), "additional properties", value)
+	}
+}
+
+func TestAChangeOfTheSeedRestartsNoPod(t *testing.T) {
+	for _, d := range ofKind(renderLint(t), "Deployment") {
+		assert.Nil(t, field(d, "spec", "template", "metadata", "annotations", "checksum/configMaps"),
+			str(d, "metadata", "name"))
 	}
 }

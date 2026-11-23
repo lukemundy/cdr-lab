@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "description": "The values of a brand have only its deployment settings. The chart gives the fields of its Register record.",
+  "description": "The values of a brand have only its deployment settings and its seed customers. The chart gives the fields of its Register record. A seed customer has the fields of the customer load file of the data holder, and the data holder checks their values.",
   "type": "object",
   "properties": {
     "brands": {
@@ -50,7 +50,8 @@
               "smtpAddress": { "type": "string" },
               "from": { "type": "string" }
             }
-          }
+          },
+          "customers": { "type": "array", "items": { "$ref": "#/$defs/customer" } }
         }
       }
     },
@@ -63,6 +64,50 @@
     }
   },
   "$defs": {
+    "customer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lastName", "emailAddress"],
+      "properties": {
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "emailAddress": { "type": "string" },
+        "accounts": { "type": "array", "items": { "$ref": "#/$defs/account" } }
+      }
+    },
+    "account": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["productId", "accountNumber"],
+      "properties": {
+        "productId": { "type": "string" },
+        "accountNumber": { "type": "string" },
+        "displayName": { "type": "string" },
+        "creditLimit": { "type": "string" },
+        "openStatus": { "type": "string" },
+        "transactions": { "type": "array", "items": { "$ref": "#/$defs/transaction" } }
+      }
+    },
+    "transaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "status", "description", "amount", "age"],
+      "properties": {
+        "type": { "type": "string" },
+        "status": { "type": "string" },
+        "description": { "type": "string" },
+        "amount": { "type": "string" },
+        "reference": { "type": "string" },
+        "merchantName": { "type": "string" },
+        "merchantCategoryCode": { "type": "string" },
+        "billerCode": { "type": "string" },
+        "billerName": { "type": "string" },
+        "crn": { "type": "string" },
+        "apcaNumber": { "type": "string" },
+        "extendedData": { "type": "object" },
+        "age": { "type": "string" }
+      }
+    },
     "port": {
       "type": ["integer", "null"],
       "minimum": 1,

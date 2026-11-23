@@ -421,12 +421,131 @@ jq --slurpfile preset charts/cdr-lab/files/preset-brands.json '
     dataRecipients: .dataRecipients
   }}' services/register/seed/example.json > .lab/kind/participants.json
 
+# The cluster:seed task installs the release again with the same files.
+cat > .lab/kind/images.yaml << EOF
+images:
+  register: {repository: cdr-lab.local/register, tag: "$tag"}
+  dataholder: {repository: cdr-lab.local/dataholder, tag: "$tag"}
+  cdrlab: {repository: cdr-lab.local/cdrlab, tag: "$tag"}
+EOF
 helm install cdr-lab charts/cdr-lab --kube-context "kind-$cluster" --namespace lab \\
-  --values lab/kind/values.yaml --values .lab/kind/participants.json \\
-  --set "images.register.repository=cdr-lab.local/register,images.register.tag=$tag" \\
-  --set "images.dataholder.repository=cdr-lab.local/dataholder,images.dataholder.tag=$tag" \\
-  --set "images.cdrlab.repository=cdr-lab.local/cdrlab,images.cdrlab.tag=$tag" \\
+  --values lab/kind/values.yaml --values .lab/kind/participants.json --values .lab/kind/images.yaml \\
   --wait --timeout 10m
+"""
+
+[tasks."cluster:seed"]
+description = "Check the seed Jobs in the kind cluster of cluster:up: a fresh deployment with the same values gives the same participants and customers, and an upgrade adds only a new customer"
+shell = "bash -c"
+run = """
+set -euo pipefail
+k() { kubectl --context kind-cdr-lab --namespace lab "$@"; }
+helm_release() {
+  helm "$1" cdr-lab charts/cdr-lab --kube-context kind-cdr-lab --namespace lab --values "$2" \\
+    --values .lab/kind/participants.json --values .lab/kind/images.yaml --wait --timeout 10m
+}
+dir=.lab/kind/seed
+mkdir -p "$dir"
+
+# Waits for the seed Jobs of the current revision, and gives the log of each.
+seed_logs() {
+  local job
+  for job in participants wattle-bank-customers; do
+    k wait --for=condition=Complete "job/cdr-lab-$job-r$1" --timeout 10m > /dev/null
+    k logs "$(k get pods --selector "job-name=cdr-lab-$job-r$1" --field-selector status.phase=Succeeded --output name)" \\
+      > "$dir/$job.log"
+  done
+}
+
+# The seed records from the consoles, with no identifier that a service makes, no time and no certificate, because
+# these can differ after a fresh deployment. One load sets all times from one time, so the ages stay comparable.
+snapshot() {
+  # kubectl itself in the background, not the function k, so that the kill stops the forward.
+  local forwards=()
+  kubectl --context kind-cdr-lab --namespace lab port-forward service/register 18080:8080 > /dev/null & forwards+=($!)
+  kubectl --context kind-cdr-lab --namespace lab port-forward service/wattle-bank 18180:8080 > /dev/null & forwards+=($!)
+  for port in 18080 18180; do
+    for _ in $(seq 30); do
+      if (exec 3<> "/dev/tcp/127.0.0.1/$port") 2> /dev/null; then break; fi
+      sleep 1
+    done
+  done
+  get() { curl --fail --silent --show-error "http://localhost:$1$2"; }
+  page() {
+    local list
+    list=$(get "$1" "$2?pageSize=100")
+    if [ "$(jq '.totalRecords > 100' <<< "$list")" = true ]; then echo "More than 100 records at $2." >&2; return 1; fi
+    jq '.data' <<< "$list"
+  }
+
+  {
+    for kind in data-recipients data-holders; do
+      page 18080 "/api/$kind" | jq --raw-output '.[].legalEntityId' | sort | while read -r id; do
+        get 18080 "/api/$kind/$id"
+      done
+    done
+  } | jq --slurp 'walk(if type == "object" then del(.lastUpdated, .version, .clientCertificateThumbprints) else . end)' \\
+    > "$dir/participants-$1.json"
+
+  page 18180 /api/customers | jq --raw-output '.[].customerNumber' | while read -r number; do
+    get 18180 "/api/customers/$number" | jq --compact-output '.' | while read -r customer; do
+      jq --raw-output '.accounts[].accountId' <<< "$customer" | while read -r account; do
+        page 18180 "/api/customers/$number/accounts/$account/transactions"
+      done | jq --slurp --argjson customer "$customer" '$customer + {transactions: .}'
+    done
+  done | jq --slurp '
+    def seconds: sub("\\\\.[0-9]+"; "") | fromdateiso8601;
+    ([.[].transactions[][].executionDateTime | seconds] | max) as $newest |
+    sort_by(.emailAddress) | map(
+      del(.customerNumber, .lastUpdated) |
+      .accounts |= map(del(.accountId, .creationDate)) |
+      .transactions |= map(map(
+        .age = $newest - (.executionDateTime | seconds) |
+        del(.transactionId, .postingDateTime, .executionDateTime, .valueDateTime))))' > "$dir/customers-$1.json"
+
+  kill "${forwards[@]}"
+  wait "${forwards[@]}" 2> /dev/null || true
+}
+
+# Gives only the paths of the values that differ, and no value, because a customer value must not go into the log.
+same() {
+  jq --null-input --exit-status --raw-output --slurpfile a "$1" --slurpfile b "$2" --arg name "$3" '
+    def leaves: paths(type | IN("object", "array") | not);
+    if $a[0] == $b[0] then "The \\($name) are the same.\\n" | halt_error(0) else
+      [$a[0], $b[0] | leaves] | unique | map(. as $p | select(($a[0] | getpath($p)) != ($b[0] | getpath($p)))) |
+      if . == [] then [["an empty list or a null value"]] end |
+      "The \\($name) differ at these paths:\\n\\(map(map(tostring) | join(".")) | join("\\n"))\\n" | halt_error(1)
+    end'
+}
+
+started=$(date +%s)
+seed_logs 1
+snapshot first
+
+# A fresh deployment, with the steps of the chart README: the PostgreSQL pod gets new, empty databases.
+helm uninstall cdr-lab --kube-context kind-cdr-lab --namespace lab --wait --timeout 5m
+k delete secret cdr-ca-intermediate cdr-ca-bundle \\
+  $(yq '.brands | keys | .[] | . + "-secure-tls"' lab/kind/values.yaml)
+k rollout restart deployment/postgres
+k rollout status deployment/postgres --timeout 5m
+helm_release install lab/kind/values.yaml
+seed_logs 1
+snapshot second
+same "$dir/participants-first.json" "$dir/participants-second.json" participants
+same "$dir/customers-first.json" "$dir/customers-second.json" customers
+echo "The second install gives the same records. Participants: $(jq length "$dir/participants-second.json"). \\
+Customers: $(jq length "$dir/customers-second.json")."
+
+yq '.brands["wattle-bank"].customers += [{"lastName": "Added", "emailAddress": "added.customer@wattlebank.test"}]' \\
+  lab/kind/values.yaml > "$dir/upgrade-values.yaml"
+helm_release upgrade "$dir/upgrade-values.yaml"
+seed_logs 2
+if grep --quiet '^added ' "$dir/participants.log"; then echo "The upgrade added a participant." >&2; exit 1; fi
+want="1 customer created, $(jq length "$dir/customers-second.json") existed"
+if [ "$(cat "$dir/wattle-bank-customers.log")" != "$want" ]; then
+  echo "The customer Job of the upgrade did not give: $want" >&2
+  exit 1
+fi
+echo "The upgrade added 1 customer and 0 participants. The check took $(( $(date +%s) - started )) s."
 """
 
 [tasks."cluster:conformance"]
