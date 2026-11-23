@@ -10,6 +10,8 @@ pnpm = "12.16.1"
 osv-scanner = "2.7.1"
 helm = "4.3.2"
 kubeconform = "0.8.0"
+crane = "0.22.1"
+syft = "1.57.2"
 
 [env]
 # The image builds install this pnpm version, so that mise.toml is its only pin.
@@ -185,6 +187,104 @@ description = "Build the images of the lab deployment"
 run = """
 {{ vars.build_env }}
 docker-compose build
+"""
+
+[tasks."build:index"]
+description = "Build each image as an OCI image index for linux/amd64 and linux/arm64 in .lab/images/<name>/, with an SPDX SBOM"
+usage = """
+arg "<dir>..." help="The directory of each Dockerfile, for example services/register. The last element is the image name, and <dir>/cmd/<name> is the main package"
+"""
+shell = "bash -c"
+run = """
+{{ vars.build_env }}
+set -euo pipefail
+# The docker driver of the classic image store cannot build for more than one platform. Renovate does not update this pin.
+buildkit=docker.io/moby/buildkit:v0.35.1@sha256:baf6138eb8c37644800c7c913fba051e840ebb9ba13eaf92d92ef9a1712d0b4c
+if ! docker buildx inspect cdr-lab >/dev/null 2>&1; then
+  docker buildx create --name cdr-lab --driver docker-container --driver-opt "image=$buildkit"
+fi
+for dir in $usage_dir; do
+  dir=${dir%/}
+  name=$(basename "$dir")
+  out=.lab/images/$name
+  rm -rf "$out" "$out.spdx.json"
+  # GitHub artifact attestations give the provenance and the SBOM, so BuildKit adds none.
+  docker buildx build --builder cdr-lab --platform linux/amd64,linux/arm64 --provenance=false --sbom=false \
+    --build-arg BUILD_COMMIT --build-arg BUILD_COMMIT_SHORT --build-arg BUILD_TIME --build-arg BUILD_ID \
+    --build-arg PNPM_VERSION --file "$dir/Dockerfile" --output "type=oci,dest=$out,tar=false" .
+  # The two platforms have the same Go modules, so one SBOM is for the index.
+  syft scan "oci-dir:$out" --platform linux/amd64 --quiet --output "spdx-json=$out.spdx.json"
+  missing=$(comm -23 \
+    <(GOOS=linux GOARCH=amd64 go list -deps -json "./$dir/cmd/$name" | jq -r 'select(.Module) | .Module.Path' | sort -u) \
+    <(jq -r '.packages[].name' "$out.spdx.json" | sort -u))
+  if [ -n "$missing" ]; then
+    printf 'The SBOM of %s does not list these Go modules:\\n%s\\n' "$name" "$missing" >&2
+    exit 1
+  fi
+done
+"""
+
+# BuildKit puts the image index of the layout in index.json. The output is the blob, so its SHA-256 is its digest.
+[tasks."image:manifest"]
+description = "Print the manifest of the linux/amd64 image in .lab/images/<name>/ (build:index)"
+usage = 'arg "<name>" help="The image name, for example register"'
+quiet = true
+run = """
+set -eu
+blobs=.lab/images/$usage_name/blobs/sha256
+index=$(jq -r '.manifests[0] | select(.mediaType == "application/vnd.oci.image.index.v1+json") | .digest' \\
+  ".lab/images/$usage_name/index.json")
+manifest=$(jq -r '.manifests[] | select(.platform.os == "linux" and .platform.architecture == "amd64") | .digest' \\
+  "$blobs/${index#sha256:}")
+cat "$blobs/${manifest#sha256:}"
+"""
+
+# The archive has the index.json and the manifest.json of docker save, so that each image store of Docker loads the
+# blobs as they are. The image ID is then the manifest digest (containerd image store) or the configuration digest
+# (classic image store) in the layout.
+[tasks."image:load"]
+description = "Load the linux/amd64 image in .lab/images/<name>/ (build:index) into Docker with the given image names"
+usage = """
+arg "<name>" help="The image name, for example register"
+arg "<ref>..." help="The names of the image in Docker, with no tag, for example cdr-lab-register. The tag is latest"
+"""
+shell = "bash -c"
+run = """
+set -euo pipefail
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+mise run image:manifest "$usage_name" > "$work/image.json"
+digest=sha256:$(sha256sum "$work/image.json" | cut -d' ' -f1)
+jq --arg digest "$digest" '[$digest, .config.digest, .layers[].digest] | map("blobs/sha256/" + ltrimstr("sha256:"))' \\
+  "$work/image.json" > "$work/files.json"
+jq -n --slurpfile files "$work/files.json" \\
+  '[{Config: $files[0][1], RepoTags: $ARGS.positional | map(. + ":latest"), Layers: $files[0][2:]}]' \\
+  --args $usage_ref > "$work/manifest.json"
+jq -n --slurpfile image "$work/image.json" --arg digest "$digest" --argjson size "$(stat -c %s "$work/image.json")" \\
+  '{schemaVersion: 2, mediaType: "application/vnd.oci.image.index.v1+json", manifests: [$ARGS.positional[] | {
+    mediaType: $image[0].mediaType, digest: $digest, size: $size,
+    annotations: {"io.containerd.image.name": "docker.io/library/\\(.):latest", "org.opencontainers.image.ref.name": "latest"}
+  }]}' --args $usage_ref > "$work/index.json"
+mapfile -t files < <(jq -r '.[]' "$work/files.json")
+tar -c -C ".lab/images/$usage_name" oci-layout "${files[@]}" -C "$work" index.json manifest.json | docker load
+"""
+
+# The image ID in Docker is the manifest digest (containerd image store) or the configuration digest (classic image store).
+[tasks."image:check"]
+description = "Fail when an image ID is not the linux/amd64 image in .lab/images/<name>/ (build:index)"
+usage = """
+arg "<name>" help="The image name, for example register"
+arg "<id>" help="The image ID in Docker, for example of the container that a lab job tested"
+"""
+quiet = true
+run = """
+set -eu
+manifest=sha256:$(mise run image:manifest "$usage_name" | sha256sum | cut -d' ' -f1)
+config=$(mise run image:manifest "$usage_name" | jq -r .config.digest)
+if [ "$usage_id" != "$manifest" ] && [ "$usage_id" != "$config" ]; then
+  echo "The image ID '$usage_id' is not the linux/amd64 image of $usage_name: manifest $manifest, configuration $config." >&2
+  exit 1
+fi
 """
 
 [tasks."build:go"]

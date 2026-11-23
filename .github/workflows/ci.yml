@@ -212,10 +212,27 @@ jobs:
 
       - *install-mise
 
-      - name: Build the images
+      # One build makes the image of both platforms. The lab jobs test its linux/amd64 image, and the publish jobs push
+      # the same layout, so the published linux/amd64 image is the tested image.
+      - name: Build the image indexes
         env:
           BUILD_ID: ${{ github.run_id }}
-        run: mise run build:images
+        run: mise run build:index services/register services/dataholder
+
+      # Each compose service that builds from services/<name>/Dockerfile gets the linux/amd64 image of the layout.
+      - name: Load the linux/amd64 images
+        run: |
+          set -euo pipefail
+          config=$(docker-compose config --format json)
+          for name in register dataholder; do
+            mapfile -t tags < <(jq -r --arg file "services/$name/Dockerfile" \
+              '.name as $project | .services | to_entries[] | select(.value.build.dockerfile == $file) |
+                .value.image // "\($project)-\(.key)"' <<< "$config")
+            mise run image:load "$name" "${tags[@]}"
+            for tag in "${tags[@]}"; do
+              mise run image:check "$name" "$(docker image inspect --format '{{.Id}}' "$tag")"
+            done
+          done
 
       # The images that have no registry in their name are the images that compose builds.
       - name: Save the images
@@ -229,6 +246,33 @@ jobs:
           name: images
           path: ${{ runner.temp }}/images.tar
           retention-days: 1
+          if-no-files-found: error
+
+      # Only main publishes images.
+      - name: Upload the Register image index
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: register-index
+          path: |
+            .lab/images/register/
+            .lab/images/register.spdx.json
+          retention-days: 1
+          # The layout is in .lab/, and the action leaves out hidden files by default.
+          include-hidden-files: true
+          if-no-files-found: error
+
+      - name: Upload the data holder image index
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dataholder-index
+          path: |
+            .lab/images/dataholder/
+            .lab/images/dataholder.spdx.json
+          retention-days: 1
+          # The layout is in .lab/, and the action leaves out hidden files by default.
+          include-hidden-files: true
           if-no-files-found: error
 
       # The kernel messages can give the cause of a "Bus error" in the web build, which occurs only on hosted runners.
@@ -359,6 +403,8 @@ jobs:
     needs: [changes, images]
     if: needs.changes.outputs.register-image == 'true'
     runs-on: ubuntu-latest
+    outputs:
+      tested-image: ${{ steps.tested.outputs.id }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -408,27 +454,10 @@ jobs:
       - name: Run the browser tests
         run: mise run test:lab-web --project register-console
 
-      # Only the publish job can write packages, so it pushes this tested image.
-      - name: Save the Register image
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-        run: |
-          set -euo pipefail
-          image=$(docker inspect --format '{{.Image}}' "$(docker-compose ps --quiet register)")
-          # The same commands as BUILD_COMMIT and BUILD_COMMIT_SHORT in mise.toml, so that the tags are the commit
-          # that the service reports in its telemetry.
-          for tag in "$(git describe --always --abbrev=40 --exclude='*')" "$(git describe --always --exclude='*')"; do
-            docker tag "$image" "$REGISTER_IMAGE:$tag"
-          done
-          docker save "$REGISTER_IMAGE" --output "$RUNNER_TEMP/register-image.tar"
-
-      - name: Upload the Register image
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: register-image
-          path: ${{ runner.temp }}/register-image.tar
-          retention-days: 1
-          if-no-files-found: error
+      # The publish job pushes the image only when it is this tested image.
+      - name: Record the tested Register image
+        id: tested
+        run: echo "id=$(docker inspect --format '{{.Image}}' "$(docker-compose ps --quiet register)")" >> "$GITHUB_OUTPUT"
 
       - name: Show the service logs
         if: failure()
@@ -445,24 +474,26 @@ jobs:
       github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !cancelled() && !failure() &&
       needs.register-image.result == 'success'
     runs-on: ubuntu-latest
+    # Only this job of the image gets the permissions to push and to attest, and it never runs for a pull request.
     permissions:
+      contents: read
       packages: write
+      attestations: write
+      id-token: write
     steps:
-      - name: Download the Register image
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          name: register-image
-          path: ${{ runner.temp }}
+          persist-credentials: false
 
-      - name: Push the Register image
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          docker load --input "$RUNNER_TEMP/register-image.tar"
-          docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin <<< "$GH_TOKEN"
-          docker push --all-tags "$REGISTER_IMAGE"
-          docker logout ghcr.io
+      - *install-mise
+
+      - name: Publish the Register image
+        uses: ./.github/actions/publish-image
+        with:
+          name: register
+          image: ${{ env.REGISTER_IMAGE }}
+          tested-image: ${{ needs.register-image.outputs.tested-image }}
 
   # The chart job also runs for a new image, because CI then publishes the chart of that service with the new image.
   chart:
@@ -538,6 +569,8 @@ jobs:
     needs: [changes, images]
     if: needs.changes.outputs.dataholder-image == 'true'
     runs-on: ubuntu-latest
+    outputs:
+      tested-image: ${{ steps.tested.outputs.id }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -588,27 +621,10 @@ jobs:
       - name: Run the browser tests
         run: mise run test:lab-web --project dataholder-console --project dataholder-bank
 
-      # Only the publish job can write packages, so it pushes this tested image.
-      - name: Save the data holder image
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-        run: |
-          set -euo pipefail
-          image=$(docker inspect --format '{{.Image}}' "$(docker-compose ps --quiet wattle-bank)")
-          # The same commands as BUILD_COMMIT and BUILD_COMMIT_SHORT in mise.toml, so that the tags are the commit
-          # that the service reports in its telemetry.
-          for tag in "$(git describe --always --abbrev=40 --exclude='*')" "$(git describe --always --exclude='*')"; do
-            docker tag "$image" "$DATAHOLDER_IMAGE:$tag"
-          done
-          docker save "$DATAHOLDER_IMAGE" --output "$RUNNER_TEMP/dataholder-image.tar"
-
-      - name: Upload the data holder image
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: dataholder-image
-          path: ${{ runner.temp }}/dataholder-image.tar
-          retention-days: 1
-          if-no-files-found: error
+      # The publish job pushes the image only when it is this tested image.
+      - name: Record the tested data holder image
+        id: tested
+        run: echo "id=$(docker inspect --format '{{.Image}}' "$(docker-compose ps --quiet wattle-bank)")" >> "$GITHUB_OUTPUT"
 
       - name: Show the service logs
         if: failure()
@@ -624,24 +640,26 @@ jobs:
       github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !cancelled() && !failure() &&
       needs.dataholder-image.result == 'success'
     runs-on: ubuntu-latest
+    # Only this job of the image gets the permissions to push and to attest, and it never runs for a pull request.
     permissions:
+      contents: read
       packages: write
+      attestations: write
+      id-token: write
     steps:
-      - name: Download the data holder image
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          name: dataholder-image
-          path: ${{ runner.temp }}
+          persist-credentials: false
 
-      - name: Push the data holder image
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          docker load --input "$RUNNER_TEMP/dataholder-image.tar"
-          docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin <<< "$GH_TOKEN"
-          docker push --all-tags "$DATAHOLDER_IMAGE"
-          docker logout ghcr.io
+      - *install-mise
+
+      - name: Publish the data holder image
+        uses: ./.github/actions/publish-image
+        with:
+          name: dataholder
+          image: ${{ env.DATAHOLDER_IMAGE }}
+          tested-image: ${{ needs.dataholder-image.outputs.tested-image }}
 
   # The structure of the specifications and the Verifies comments of the tests.
   spec:

@@ -156,6 +156,7 @@ func TestTheImageInputsFileHasEachService(t *testing.T) {
 
 		assert.Contains(t, inputs[e.Name()], "services/"+e.Name(), e.Name())
 		assert.Contains(t, inputs[e.Name()], ".github/image-inputs.json", e.Name())
+		assert.Contains(t, inputs[e.Name()], ".github/actions/publish-image", e.Name())
 	}
 }
 

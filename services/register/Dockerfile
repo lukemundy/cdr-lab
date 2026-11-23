@@ -1,6 +1,7 @@
 # Keep this stage the same in each service Dockerfile, so that BuildKit builds it one time for all images.
 # Keep the Node version the same as in mise.toml; mise run lint checks it.
-FROM docker.io/library/node:26.13.0-trixie-slim@sha256:e4db4c914bf8ad241bd24804fc25d272d89bad97e68cdc8a1414862790a02c39 AS web
+# The web output does not depend on the target platform, so the stage runs on the build platform.
+FROM --platform=$BUILDPLATFORM docker.io/library/node:26.13.0-trixie-slim@sha256:e4db4c914bf8ad241bd24804fc25d272d89bad97e68cdc8a1414862790a02c39 AS web
 
 # mise.toml pins pnpm, and compose.yaml gives its version from the environment that mise sets.
 ARG PNPM_VERSION
@@ -18,10 +19,11 @@ RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
       --filter @cdr-lab/dataholder-bank... --filter @cdr-lab/ui... build
 
 # Keep the Go version the same as in mise.toml; mise run lint checks it.
-FROM docker.io/library/golang:1.27.4-trixie@sha256:b54b2639de8c1bfe538ec5ffc45f29b1932235ac5f6d63c059853646677112d9 AS build
+FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.27.4-trixie@sha256:b54b2639de8c1bfe538ec5ffc45f29b1932235ac5f6d63c059853646677112d9 AS build
 
 ENV CGO_ENABLED=0
 WORKDIR /src
+ARG TARGETOS TARGETARCH
 
 COPY go.mod go.sum ./
 RUN --mount=type=cache,target=/go/pkg/mod go mod download
@@ -31,13 +33,15 @@ COPY services/register/ services/register/
 COPY --from=web /src/web/apps/register-console/dist/ services/register/internal/adapter/console/dist/
 
 COPY tools/notices/ tools/notices/
+# The notices tool runs on the build platform, but it lists the dependencies of the target platform.
 RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build \
-    mkdir -p /out && go run ./tools/notices ./services/register/cmd/register > /out/third-party-notices.txt
+    go build -o /tmp/notices ./tools/notices && mkdir -p /out && \
+    GOOS=$TARGETOS GOARCH=$TARGETARCH /tmp/notices ./services/register/cmd/register > /out/third-party-notices.txt
 
 ARG BUILD_COMMIT=unknown BUILD_COMMIT_SHORT=unknown BUILD_TIME=unknown BUILD_ID=local
 RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build \
     buildinfo=github.com/lukemundy/cdr-lab/pkg/platform/buildinfo && \
-    go build -trimpath -o /out/register -ldflags="-s -w \
+    GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -o /out/register -ldflags="-s -w \
       -X ${buildinfo}.commit=${BUILD_COMMIT} \
       -X ${buildinfo}.commitShort=${BUILD_COMMIT_SHORT} \
       -X ${buildinfo}.buildTime=${BUILD_TIME} \

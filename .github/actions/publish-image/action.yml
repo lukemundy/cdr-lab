@@ -1,0 +1,78 @@
+name: Publish an image index
+description: >-
+  Push the image index of build:index from the artifact <name>-index, only when its linux/amd64 image is the tested image.
+  Then attest its provenance and its SBOM in GitHub and in the registry. The job needs mise, a
+  checkout of the commit, and the permissions packages, attestations and id-token to write.
+
+inputs:
+  name:
+    description: The image name, for example register. The artifact is <name>-index.
+    required: true
+  image:
+    description: The image repository, for example ghcr.io/lukemundy/cdr-lab/register.
+    required: true
+  tested-image:
+    description: The image ID of the container that the lab job tested.
+    required: true
+
+outputs:
+  digest:
+    description: The digest of the image index.
+    value: ${{ steps.push.outputs.digest }}
+
+runs:
+  using: composite
+  steps:
+    - name: Download the image index
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      with:
+        name: ${{ inputs.name }}-index
+        path: .lab/images
+
+    - name: Check that the linux/amd64 image is the tested image
+      shell: bash
+      env:
+        NAME: ${{ inputs.name }}
+        TESTED: ${{ inputs.tested-image }}
+      run: mise run image:check "$NAME" "$TESTED"
+
+    - name: Push the image index
+      id: push
+      shell: bash
+      env:
+        NAME: ${{ inputs.name }}
+        IMAGE: ${{ inputs.image }}
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        mise exec -- crane auth login ghcr.io --username "$GITHUB_ACTOR" --password-stdin <<< "$GH_TOKEN"
+        # The same commands as BUILD_COMMIT and BUILD_COMMIT_SHORT in mise.toml, so that the tags are the commit that
+        # the service reports in its telemetry.
+        ref=$(mise exec -- crane push ".lab/images/$NAME" "$IMAGE:$(git describe --always --abbrev=40 --exclude='*')")
+        mise exec -- crane tag "$ref" "$(git describe --always --exclude='*')"
+        echo "digest=${ref#*@}" >> "$GITHUB_OUTPUT"
+
+    - name: Attest the provenance
+      uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+      with:
+        subject-name: ${{ inputs.image }}
+        subject-digest: ${{ steps.push.outputs.digest }}
+        push-to-registry: true
+        # A storage record needs one more permission, and the registry already has the attestation.
+        create-storage-record: false
+
+    # The SBOM lists the Go modules of the binary, but not the npm packages of the web UIs.
+    - name: Attest the SBOM
+      uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+      with:
+        subject-name: ${{ inputs.image }}
+        subject-digest: ${{ steps.push.outputs.digest }}
+        sbom-path: .lab/images/${{ inputs.name }}.spdx.json
+        push-to-registry: true
+        # A storage record needs one more permission, and the registry already has the attestation.
+        create-storage-record: false
+
+    - name: Log out of the registry
+      if: always()
+      shell: bash
+      run: mise exec -- crane auth logout ghcr.io
