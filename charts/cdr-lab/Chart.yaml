@@ -1,0 +1,11 @@
+apiVersion: v2
+name: cdr-lab
+description: The mock CDR Register and the preset brands of the mock data holder of cdr-lab, in one release
+type: application
+# A release packages the chart with its version, and with the appVersion vX.Y.Z, which is the default tag of each
+# image.
+version: 0.0.0
+dependencies:
+  - name: common
+    version: 5.3.0
+    repository: oci://ghcr.io/bjw-s-labs/helm

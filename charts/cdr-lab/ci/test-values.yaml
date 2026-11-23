@@ -1,0 +1,28 @@
+# Values that render the chart in the tests and in mise run lint:chart. They are not for a deployment.
+images:
+  register:
+    tag: 0123abc
+  dataholder:
+    tag: 4567def
+  cdrlab:
+    tag: 89abcde
+operator:
+  tokenSecret: lab-operator-token
+database:
+  host: postgres.test
+register:
+  database:
+    name: register
+    ownerSecret: register-owner
+    serviceSecret: register-service
+dataHolders:
+  registerStatusInterval: 1m
+brands:
+  wattle-bank:
+    database:
+      name: wattle_bank
+      ownerSecret: wattle-bank-owner
+      serviceSecret: wattle-bank-service
+    mail:
+      smtpAddress: mail.test:25
+      from: no-reply@wattlebank.test

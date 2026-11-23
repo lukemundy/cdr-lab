@@ -1,0 +1,84 @@
+# An overlay of test-values.yaml that turns on each optional part, for mise run lint:chart. It is not for a deployment.
+telemetry:
+  otlpEndpoint: http://otel.test:4318
+publicTLS:
+  issuerRef:
+    name: lab-ca
+    kind: ClusterIssuer
+  rootSecret: public-root
+routes:
+  enabled: true
+  tls:
+    parentRefs:
+      - name: lab
+        namespace: gateway
+        sectionName: tls
+  crl:
+    parentRefs:
+      - name: lab
+        namespace: gateway
+        sectionName: http
+register:
+  public:
+    host: register.lab.test
+  secure:
+    host: mtls.register.lab.test
+  internal:
+    allowedHosts: [localhost:8080]
+  console:
+    enabled: true
+brands:
+  wattle-bank:
+    public:
+      host: wattle.lab.test
+    secure:
+      host: mtls.wattle.lab.test
+      port: 8443
+    bankSite:
+      enabled: true
+      host: online.wattle.lab.test
+    internal:
+      allowedHosts: [localhost:8180]
+    console:
+      enabled: true
+  redgum-bank:
+    public:
+      host: redgum.lab.test
+    secure:
+      host: mtls.redgum.lab.test
+    database:
+      name: redgum_bank
+      ownerSecret: redgum-bank-owner
+      serviceSecret: redgum-bank-service
+    mail:
+      smtpAddress: mail.test:25
+      from: no-reply@redgumbank.test
+  harbour-bank:
+    public:
+      host: harbour.lab.test
+    secure:
+      host: mtls.harbour.lab.test
+    database:
+      name: harbour_bank
+      ownerSecret: harbour-bank-owner
+      serviceSecret: harbour-bank-service
+    mail:
+      smtpAddress: mail.test:25
+      from: no-reply@harbourbank.test
+  kestrel-bank:
+    public:
+      host: kestrel.lab.test
+    secure:
+      host: mtls.kestrel.lab.test
+    database:
+      name: kestrel_bank
+      ownerSecret: kestrel-bank-owner
+      serviceSecret: kestrel-bank-service
+    mail:
+      smtpAddress: mail.test:25
+      from: no-reply@kestrelbank.test
+participants:
+  dataRecipients:
+    - legalEntityId: 00000000-0000-4000-8000-0000000000a1
+      legalEntityName: Test Recipient
+      status: ACTIVE

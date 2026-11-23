@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The values of a brand have only its deployment settings. The chart gives the fields of its Register record.",
+  "type": "object",
+  "properties": {
+    "brands": {
+      "type": "object",
+      "additionalProperties": {
+        "type": ["object", "null"],
+        "additionalProperties": false,
+        "properties": {
+          "public": { "$ref": "#/$defs/listener" },
+          "secure": { "$ref": "#/$defs/listener" },
+          "bankSite": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "enabled": { "type": "boolean" },
+              "host": { "type": "string" },
+              "port": { "$ref": "#/$defs/port" }
+            }
+          },
+          "internal": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "allowedHosts": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "console": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "enabled": { "type": "boolean" }
+            }
+          },
+          "database": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "ownerSecret": { "type": "string" },
+              "serviceSecret": { "type": "string" }
+            }
+          },
+          "mail": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "smtpAddress": { "type": "string" },
+              "from": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "register": {
+      "type": "object",
+      "properties": {
+        "public": { "$ref": "#/$defs/listener" },
+        "secure": { "$ref": "#/$defs/listener" }
+      }
+    }
+  },
+  "$defs": {
+    "port": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 65535
+    },
+    "listener": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "host": { "type": "string" },
+        "port": { "$ref": "#/$defs/port" }
+      }
+    }
+  }
+}
