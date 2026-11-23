@@ -1,6 +1,6 @@
 # CDS HTTP library
 
-The CDS HTTP library gives the HTTP rules of the Consumer Data Standards that the CDR APIs of each lab service share. These rules are the version negotiation, the check of the `Accept` header, the interaction ID, the CDS error format, the responses for an unknown path or method, pagination, the response envelope, CORS, the TLS and mTLS profile, and a revocation check of client certificates with the CRL. A service chooses the endpoints that each rule applies to. The specification of the service gives that choice.
+The CDS HTTP library gives the HTTP rules of the Consumer Data Standards that the CDR APIs of each lab service share. These rules are the version negotiation, the check of the `Accept` header, the interaction ID, the CDS error format, the responses for an unknown path or method, pagination, the response envelope, CORS, the TLS and mTLS profile, the reload of a server certificate, and a revocation check of client certificates with the CRL. A service chooses the endpoints that each rule applies to. The specification of the service gives that choice.
 
 ## Context
 
@@ -37,7 +37,8 @@ flowchart LR
 ## Non-goals
 
 - The choice of the endpoints that each rule applies to, the supported versions and the CORS headers that a service exposes. The specification of each service gives them.
-- The server certificates of a service. The service gives them.
+- The source of the server certificates of a service. The service gives them, and the library [uses a renewed certificate](#cdsl-0089).
+- A reload of a CA bundle. A new CA needs a fresh deployment.
 - The revocation check of the Register. The Register checks client certificates with its own CRL ([the Register checks with its newest CRL](../../services/register/design/certificate-revocation.md#reg-0726)).
 - The errors of the security endpoints and of the lab-only interfaces. They have their own formats.
 
@@ -130,6 +131,17 @@ These rules apply to each listener of a service that uses them. They also apply 
 - <a id="cdsl-0047"></a>**CDSL-0047** When the revocation check of the service fails, the mTLS listener refuses the client certificate. ([CDS: Certificate Validation][cds-cert-validation])
 - <a id="cdsl-0084"></a>**CDSL-0084** When a client resumes a TLS session, the mTLS listener does the revocation check again. For example, a client whose certificate is revoked after its first connection cannot resume the session. ([CDS: Certificate Validation][cds-cert-validation]; [Judgement: a revocation check at each resumption](#cdsl-0085))
 - <a id="cdsl-0086"></a>**CDSL-0086** Performance: the mTLS listener stops each revocation check after 5 seconds at most. For example, the CRL check stops a load from a CRL server that does not reply. ([Judgement: a limit of 5 seconds for a revocation check](#cdsl-0087))
+
+## Certificate reload
+
+A service gives the server certificate of each TLS listener. The library uses a renewed certificate with no restart of the service.
+
+- <a id="cdsl-0088"></a>**CDSL-0088** A service can give the server certificate of a listener as a certificate file and a key file in PEM, or as a certificate that the service replaces in memory. ([Judgement: a reload in the process (ADR 0032)][adr-0032])
+- <a id="cdsl-0089"></a>**CDSL-0089** When the certificate file or the key file changes, the listener uses the new certificate for each new TLS handshake within 1 minute, with no restart. ([Judgement: a reload in the process (ADR 0032)][adr-0032]; [Judgement: the last valid certificate stays in use](#cdsl-0094))
+- <a id="cdsl-0090"></a>**CDSL-0090** When the service replaces a certificate in memory, the listener uses it for each new TLS handshake. ([Judgement: a reload in the process (ADR 0032)][adr-0032])
+- <a id="cdsl-0091"></a>**CDSL-0091** A connection that is open keeps the certificate of its handshake. ([RFC 8446, section 4.4.2][rfc8446-cert])
+- <a id="cdsl-0092"></a>**CDSL-0092** When the changed files do not give a certificate and a key that agree, the listener keeps the last valid certificate. It reads the files again at the next check. For example, the key file changed, and the certificate file has the earlier certificate. ([Judgement: the last valid certificate stays in use](#cdsl-0094))
+- <a id="cdsl-0093"></a>**CDSL-0093** Telemetry: when a listener starts to use a new certificate, the library logs the serial number and the expiry time of the certificate. When the changed files do not give a valid certificate, it logs a warning. ([Judgement: the last valid certificate stays in use](#cdsl-0094))
 
 ## CRL check
 
@@ -251,11 +263,19 @@ These rules apply to a service that uses the CRL check of the library as its rev
 - Basis: Step 3.3. The CDS gives no time for the check ([CDS: Certificate Validation][cds-cert-validation]).
 - Reason: A CRL server that does not reply must not hold a TLS handshake with no end. The CRL check then uses [the last CRL after a failed load](#cdsl-0055), or refuses the certificate.
 
+### <a id="cdsl-0094"></a>CDSL-0094 The last valid certificate stays in use
+
+- Kind: choice
+- Basis: Step 3.2. Kubernetes updates all files of a mounted Secret in one step ([Kubernetes: Secrets as files][k8s-secret-files]), but a file on a host can change one file at a time.
+- Reason: A listener with no valid certificate refuses each handshake. The last certificate is valid until it expires, so a short mismatch of the files costs nothing.
+
 ## Withdrawn
 
 None.
 
 [adr-0022]: ../../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
+[adr-0032]: ../../docs/adr/0032-issue-each-cdr-certificate-of-a-deployment-through-the-register-and-renew-it-with-no-manual-step.md
+[k8s-secret-files]: https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-files-from-a-pod
 [cds-http-headers]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#http-headers
 [cds-request-headers]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#request-headers
 [cds-http-response-codes]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#http-response-codes
@@ -294,3 +314,4 @@ None.
 [rfc5280-next-update]: https://www.rfc-editor.org/rfc/rfc5280#section-5.1.2.5
 [rfc8446-resumption]: https://www.rfc-editor.org/rfc/rfc8446#section-2.2
 [rfc8446-ticket]: https://www.rfc-editor.org/rfc/rfc8446#section-4.6.1
+[rfc8446-cert]: https://www.rfc-editor.org/rfc/rfc8446#section-4.4.2

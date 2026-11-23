@@ -2,6 +2,7 @@
 
 - Date: 2026-10-27
 - Amended by [ADR-0025](0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md): the listener of the CRL
+- Amended by [ADR-0032](0032-issue-each-cdr-certificate-of-a-deployment-through-the-register-and-renew-it-with-no-manual-step.md): the issue of the CDR certificates of the lab services and tests
 
 ## Context
 

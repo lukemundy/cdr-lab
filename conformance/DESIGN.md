@@ -13,7 +13,7 @@ flowchart LR
   dataholder["Mock data holder<br>[External system]"]
 
   engineer -- "Runs the suite<br>mise run conformance" --> suite
-  ci -- "Runs the suite<br>mise run conformance" --> suite
+  ci -- "Runs the suite<br>mise run conformance, or a Job in a kind cluster" --> suite
   suite -- "Gets SSAs, base URIs and the CRL, and sets up participants<br>HTTPS, mTLS" --> register
   suite -- "Registers, gets authorisations and gets CDR data<br>HTTPS, mTLS" --> dataholder
   dataholder -- "Gets the JWKS and calls the software product endpoints<br>HTTPS" --> suite
@@ -63,15 +63,19 @@ flowchart LR
 
 ## Environment
 
-- <a id="conf-0010"></a>**CONF-0010** The suite runs in the `conformance` compose service on the lab network, with `mise run conformance`. ([Judgement: the suite runs on the lab network](#conf-0037))
-- <a id="conf-0011"></a>**CONF-0011** The suite serves the JWKS and the endpoints of the software products that it acts as. ([Judgement: the suite runs on the lab network](#conf-0037))
-- <a id="conf-0012"></a>**CONF-0012** A test gets each setting from an environment variable, which `compose.yaml` gives. ([Judgement: a missing setting fails the test](#conf-0038))
+- <a id="conf-0010"></a>**CONF-0010** The suite runs in each of these environments. ([Judgement: the suite runs on the network of the deployment](#conf-0037))
+  - the `conformance` compose service on the lab network, with `mise run conformance`
+  - a Job in the namespace of [the cluster job of CI](../charts/cdr-lab/DESIGN.md#lab-0110)
+- <a id="conf-0058"></a>**CONF-0058** In a cluster, the Job of the suite has a Service with the name `conformance` and the listen ports of the suite, so that the services reach the suite at the same URLs as in compose. ([Judgement: the suite runs on the network of the deployment](#conf-0037); [Judgement: a kind cluster in CI (ADR 0036)][adr-0036])
+- <a id="conf-0059"></a>**CONF-0059** No test depends on a name, a port or a file that only one environment has. Each setting comes from the environment of the suite. ([Judgement: a kind cluster in CI (ADR 0036)][adr-0036])
+- <a id="conf-0011"></a>**CONF-0011** The suite serves the JWKS and the endpoints of the software products that it acts as. ([Judgement: the suite runs on the network of the deployment](#conf-0037))
+- <a id="conf-0012"></a>**CONF-0012** A test gets each setting from an environment variable, which `compose.yaml` or the Job of the cluster job gives. ([Judgement: a missing setting fails the test](#conf-0038))
 - <a id="conf-0013"></a>**CONF-0013** When an environment variable is not set, the test fails. It does not skip. ([Judgement: a missing setting fails the test](#conf-0038))
 - <a id="conf-0014"></a>**CONF-0014** The test files have the build tag `conformance`, so `mise run test` does not run them. ([Judgement: a build tag for the conformance tests](#conf-0039))
 
 ## Runs and data
 
-- <a id="conf-0015"></a>**CONF-0015** The suite passes in one run after a new lab: `mise run reset && mise run up && mise run conformance`. ([Judgement: the suite passes in one run after a new lab](#conf-0040))
+- <a id="conf-0015"></a>**CONF-0015** The suite passes in one run after a new lab: `mise run reset && mise run up && mise run conformance`. It also passes in one run after a new install of the umbrella chart in the cluster job. ([Judgement: the suite passes in one run after a new lab](#conf-0040))
 - <a id="conf-0016"></a>**CONF-0016** A test can change the seed data in a way that cannot be reversed. Thus, a second run with no lab reset can fail. ([Judgement: the suite passes in one run after a new lab](#conf-0040))
 - <a id="conf-0017"></a>**CONF-0017** No test, requirement or acceptance criterion needs a second run of the suite. ([Judgement: no second run of the suite](#conf-0041))
 - <a id="conf-0018"></a>**CONF-0018** One test proves a full sequence. For example, one test registers, deletes and registers again. ([Judgement: one test for each sequence](#conf-0042))
@@ -124,11 +128,11 @@ Each row is an exception to the subject of a test or to the check of each CDS re
 - Basis: Step 1. The CDS text and specifications as written are the first source.
 - Reason: An edit makes the check agree with the component, not with the CDS. The checksum shows that the file has no edit.
 
-### <a id="conf-0037"></a>CONF-0037 The suite runs on the lab network
+### <a id="conf-0037"></a>CONF-0037 The suite runs on the network of the deployment
 
 - Kind: choice
-- Basis: Step 3.3. The data holder calls the JWKS and the endpoints of each software product ([the conformance suite acts as a participant](../services/dataholder/design/non-functional-requirements.md#dh-0015)).
-- Reason: The components then call the suite as they call a participant.
+- Basis: Step 3.3. The data holder calls the JWKS and the endpoints of each software product ([the conformance suite acts as a participant](../services/dataholder/design/non-functional-requirements.md#dh-0015)). In a cluster, a pod reaches a process on the CI runner only with more DNS and routing ([ADR 0036][adr-0036]).
+- Reason: The components then call the suite as they call a participant. The suite has the same name in compose and in a cluster, so the seed and the certificates do not change.
 
 ### <a id="conf-0038"></a>CONF-0038 A missing setting fails the test
 
@@ -239,6 +243,7 @@ None.
 [adr-0011]: ../docs/adr/0011-domain-data-as-typed-go.md
 [adr-0019]: ../docs/adr/0019-limit-the-conformance-suite-to-cdr-conformance.md
 [adr-0022]: ../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
+[adr-0036]: ../docs/adr/0036-test-the-umbrella-chart-in-a-kind-cluster-in-ci-with-the-conformance-suite-as-a-job-in-the-cluster.md
 [agents]: ../AGENTS.md
 [cds-banking-apis]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#banking-apis
 [cds-register-schemas]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api-schemas

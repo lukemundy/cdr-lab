@@ -1,6 +1,6 @@
 # Mock CDR Register: Certificate management
 
-This area gives the issue of CDR client certificates and CDR server certificates from a CSR, and the CDR CA bundle that the Register gives. In a running lab, the Register is the mock CDR intermediate CA. When it starts, it [reads the intermediate key file](../../../pki/DESIGN.md#pki-0075). The [CA library](../../../pkg/ca/DESIGN.md) gives the CSR profiles and the certificate profiles. In production, the ACCC CA issues the certificates through the Participant Portal, and the Register is not a CA.
+This area gives the issue of CDR client certificates and CDR server certificates from a CSR, the CDR CA bundle that the Register gives, and the certificate of the mTLS listener of the Register. In a running lab, the Register is the mock CDR intermediate CA. When it starts, it [reads the intermediate key file](../../../pki/DESIGN.md#pki-0075). The [CA library](../../../pkg/ca/DESIGN.md) gives the CSR profiles and the certificate profiles. In production, the ACCC CA issues the certificates through the Participant Portal, and the Register is not a CA.
 
 ## Intermediate CA
 
@@ -45,6 +45,21 @@ This area gives the issue of CDR client certificates and CDR server certificates
 - <a id="reg-0629"></a>**REG-0629** The Register does not register a server certificate. ([Judgement: a server certificate issue is an event, not a registration](#reg-0651))
 - <a id="reg-0630"></a>**REG-0630** The Register records a server certificate issue as one event of the data holder, with the brand and the thumbprint of the certificate. ([Judgement: a server certificate issue is an event, not a registration](#reg-0651))
 - <a id="reg-0631"></a>**REG-0631** A server certificate issue sets the `lastUpdated` of each brand of the data holder, as each other event of the data holder does ([the `lastUpdated` of a brand](register-apis.md#reg-0336)). ([Judgement: a server certificate issue is an event, not a registration](#reg-0651))
+
+## Certificate of the mTLS listener of the Register
+
+The Register issues the CDR server certificate of its own mTLS listener. This certificate is not a participant certificate, so the rules of a server certificate issue for a brand do not apply to it.
+
+- <a id="reg-1515"></a>**REG-1515** When the Register starts, it issues a CDR server certificate for its own mTLS listener from the intermediate, before the listener accepts a connection. ([Judgement: the Register issues the certificate of its own mTLS listener](#reg-1523))
+- <a id="reg-1516"></a>**REG-1516** The Register makes a new RSA 2048 key for each certificate of its mTLS listener. The key is only in the memory of the process: in 0 files, 0 database rows and 0 responses. ([CDS: Certificate Signing Request Profile][cds-csr-profile]; [Judgement: the Register issues the certificate of its own mTLS listener](#reg-1523))
+- <a id="reg-1517"></a>**REG-1517** The certificate has [the profile of a CDR server certificate](../../../pkg/ca/DESIGN.md#ca-0030), with the CRL URL of the intermediate. ([CA library: the profile of a CDR certificate](../../../pkg/ca/DESIGN.md#ca-0025))
+- <a id="reg-1518"></a>**REG-1518** The O of the subject is `Mock CDR Register`. The CN is the first DNS name of the setting, and the DNS names are the DNS names of the setting. ([CA library: the CN of a server CSR as the primary DNS name](../../../pkg/ca/DESIGN.md#ca-0016); [Judgement: the O of the certificate of the Register](#reg-1524))
+- <a id="reg-1519"></a>**REG-1519** The setting of the DNS names of the mTLS listener is required, and it has no default. For example, `register,mtls.register.lab.example`. ([Judgement: no default for a value of one deployment](../../dataholder/design/deployment.md#dh-1375))
+- <a id="reg-1520"></a>**REG-1520** When 30 days or less of the validity of the certificate remain, the Register issues a new certificate for its mTLS listener. The listener uses it for each new TLS handshake. ([Judgement: a renewal window of 30 days](../../../cli/cdrlab/DESIGN.md#cli-0101))
+- <a id="reg-1521"></a>**REG-1521** The Register records no event and no registration for a certificate of its own mTLS listener. ([Judgement: the Register issues the certificate of its own mTLS listener](#reg-1523))
+- <a id="reg-1522"></a>**REG-1522** When the issue at start fails, the Register does not start. When a renewal fails, the listener keeps the current certificate, and the Register tries again after 1 hour. ([Judgement: the Register issues the certificate of its own mTLS listener](#reg-1523))
+- <a id="reg-1525"></a>**REG-1525** Telemetry: the Register logs the serial number and the expiry time of each certificate that it issues for its mTLS listener. When a renewal fails, it logs an error. ([Judgement: the Register issues the certificate of its own mTLS listener](#reg-1523))
+- <a id="reg-1526"></a>**REG-1526** Availability: while the intermediate is valid for more than 30 days, the mTLS listener of the Register never serves an expired certificate. ([Judgement: the Register issues the certificate of its own mTLS listener](#reg-1523))
 
 ## Operator interface paths
 
@@ -128,6 +143,18 @@ This area gives the issue of CDR client certificates and CDR server certificates
 - Basis: Step 3.3. The ACCC keeps a reference to the server certificates of a brand on the Register ([CDR Support: Brands in the CDR ecosystem][support-brands]). One command that causes one fact is one event ([ADR 0021][adr-0021]).
 - Reason: No API of the Register uses a server certificate, so a registration adds nothing. The issue is a change to the data holder, and the `lastUpdated` of a brand is the time of the last change to its data holder. An exception for one event type adds a rule for no gain.
 
+### <a id="reg-1523"></a>REG-1523 The Register issues the certificate of its own mTLS listener
+
+- Kind: choice
+- Basis: Step 3.3. In production, the ACCC issues the server certificate of the Register. In the lab, the Register holds the intermediate key ([ADR 0022][adr-0022]), and [ADR 0032][adr-0032] gives the issue of the CDR certificates of a deployment.
+- Reason: The Register then needs no certificate before it runs, and no Job or Secret for its own certificate. A key in memory cannot leak from a file, and a restart makes a new key with no cost.
+
+### <a id="reg-1524"></a>REG-1524 The O of the certificate of the Register
+
+- Kind: choice
+- Basis: Step 3.3. The Register is not a participant, so the CSR profile of a participant does not give its O ([CDS: Certificate Signing Request Profile][cds-csr-profile]). The set-up of the lab gives `Mock CDR Register`.
+- Reason: The name says that the certificate is of the mock Register. It agrees with the certificate that the lab uses.
+
 [accc-cert-mgmt]: https://consumerdataright.atlassian.net/wiki/spaces/DP/pages/360415310/Certificate+Management
 [accc-token]: https://consumerdataright.atlassian.net/wiki/spaces/DP/pages/30081139
 [accc-brands-summary]: https://consumerdataright.atlassian.net/wiki/spaces/DP/pages/29851982
@@ -149,3 +176,4 @@ This area gives the issue of CDR client certificates and CDR server certificates
 [rfc9110-409]: https://www.rfc-editor.org/rfc/rfc9110#name-409-conflict
 [adr-0021]: ../../../docs/adr/0021-record-one-business-fact-in-each-event-type.md
 [adr-0022]: ../../../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
+[adr-0032]: ../../../docs/adr/0032-issue-each-cdr-certificate-of-a-deployment-through-the-register-and-renew-it-with-no-manual-step.md

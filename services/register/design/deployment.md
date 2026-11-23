@@ -18,7 +18,9 @@ This area gives the listeners of the Register and their ports, the lab-only part
 - <a id="reg-1509"></a>**REG-1509** In a process that serves the operator interface, the setting `INTERNAL_ALLOWED_HOSTS` is required, and it has no default. ([Judgement: a Host allowlist with no default](../../../pkg/platform/operatorhttp/DESIGN.md#opi-0009))
 - <a id="reg-1502"></a>**REG-1502** A process that runs only the background jobs serves only the health probes on the internal listener. ([Judgement: background jobs with River (ADR 0010)][adr-0010]; [Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
 - <a id="reg-1503"></a>**REG-1503** The chart gives one container port and one Service port for each listener. ([Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
-- <a id="reg-1506"></a>**REG-1506** The chart README says that a deployment exposes only the CRL path of the internal listener outside the cluster. For example, an ingress rule routes only `/crl/cdr-intermediate.crl` to the internal listener. ([Judgement: the CRL on the internal listener, with no authentication](certificate-revocation.md#reg-0751))
+- <a id="reg-1527"></a>**REG-1527** The public listener gets its certificate from a certificate file and a key file, and [uses a renewed certificate with no restart](../../../pkg/cds/DESIGN.md#cdsl-0089). ([Judgement: CDR certificates from the Register (ADR 0032)][adr-0032])
+- <a id="reg-1528"></a>**REG-1528** The mTLS listener uses [the certificate that the Register issues for it](certificate-management.md#reg-1515). The Register has no setting for a certificate file of the mTLS listener. ([Judgement: the Register issues the certificate of its own mTLS listener](certificate-management.md#reg-1523))
+- <a id="reg-1506"></a>**REG-1506** The chart README says that a deployment exposes only the CRL path of the internal listener outside the cluster. For example, an HTTPRoute routes only `/crl/cdr-intermediate.crl` to the internal listener. ([Judgement: the CRL on the internal listener, with no authentication](certificate-revocation.md#reg-0751))
 
 ## Participant load
 
@@ -41,6 +43,7 @@ This area gives the listeners of the Register and their ports, the lab-only part
 ## Chart
 
 - <a id="reg-1514"></a>**REG-1514** When the values give no image tag, the chart uses its `appVersion` as the tag of the Register image. A value of the image tag overrides the `appVersion`. ([Helm: charts][helm-charts]; [Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
+- <a id="reg-1529"></a>**REG-1529** The chart has no value for a Secret of the mTLS listener certificate. A value with no default gives [the DNS names of that certificate](certificate-management.md#reg-1519). ([Judgement: the Register issues the certificate of its own mTLS listener](certificate-management.md#reg-1523))
 
 ## Participant seed in the chart
 
@@ -130,6 +133,7 @@ A deployment changes the endpoints of the example seed to the hosts of the deplo
 [adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md
 [adr-0027]: ../../../docs/adr/0027-release-all-artifacts-with-one-version-from-a-manual-workflow-on-main.md
 [adr-0029]: ../../../docs/adr/0029-promote-the-tested-image-of-each-service-to-a-release-with-no-rebuild.md
+[adr-0032]: ../../../docs/adr/0032-issue-each-cdr-certificate-of-a-deployment-through-the-register-and-renew-it-with-no-manual-step.md
 [adr-0030]: ../../../docs/adr/0030-build-each-service-image-for-linux-amd64-and-linux-arm64-with-a-cross-compile.md
 [helm-charts]: https://helm.sh/docs/topics/charts/
 [oci-image-index]: https://github.com/opencontainers/image-spec/blob/main/image-index.md

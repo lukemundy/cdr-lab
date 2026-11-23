@@ -60,6 +60,9 @@ None.
 - <a id="rls-0009"></a>**RLS-0009** Each artifact of a release has the version of the release. ([Judgement: one version from a manual workflow on main (ADR 0027)][adr-0027])
   - the image of each service
   - the chart of each service
+  - the `cdrlab` image
+  - the umbrella chart
+- <a id="rls-0011"></a>**RLS-0011** Each rule of this specification for the image of a service applies also to the `cdrlab` image. For example, the release refuses a commit when the image commit of `cdrlab` is not the last commit that changes an input of its image. ([Judgement: the image of the lab CLI (ADR 0035)][adr-0035])
 - <a id="rls-0010"></a>**RLS-0010** Two releases never run at the same time. ([GitHub Actions: concurrency][gha-concurrency]; [Judgement: one release at a time](#rls-0102))
 
 ## Checks
@@ -80,9 +83,10 @@ None.
 
 ## Charts
 
-- <a id="rls-0040"></a>**RLS-0040** The release packages the chart of each service from the release commit. The chart version is `X.Y.Z`, with no `v`, and the `appVersion` is `vX.Y.Z`. For example, the chart of `v0.3.1` has the version `0.3.1`. ([Helm: charts and versioning][helm-chart-versions]; [Judgement: the chart version has no `v`](#rls-0104); [Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
+- <a id="rls-0040"></a>**RLS-0040** The release packages the chart of each service and the umbrella chart from the release commit. The chart version is `X.Y.Z`, with no `v`, and the `appVersion` is `vX.Y.Z`. For example, the chart of `v0.3.1` has the version `0.3.1`. ([Helm: charts and versioning][helm-chart-versions]; [Judgement: the chart version has no `v`](#rls-0104); [Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
 - <a id="rls-0041"></a>**RLS-0041** The release pushes each chart to the same OCI repository as the charts from `main`, `oci://ghcr.io/lukemundy/cdr-lab/charts/<chart>`. ([Judgement: one version from a manual workflow on main (ADR 0027)][adr-0027])
 - <a id="rls-0042"></a>**RLS-0042** When the values give no image tag, a chart of a release deploys the image with the tag `vX.Y.Z` of its service. ([the default image tag of the Register chart](../../services/register/design/deployment.md#reg-1514); [the default image tag of the data holder chart](../../services/dataholder/design/deployment.md#dh-2646); [Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
+- <a id="rls-0043"></a>**RLS-0043** When the values give no image tag, the umbrella chart of a release deploys the image with the tag `vX.Y.Z` of each image that it deploys. ([the default image tags of the umbrella chart](../../charts/cdr-lab/DESIGN.md#lab-0085); [Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
 
 ## Signatures and attestations
 
@@ -228,6 +232,7 @@ None.
 [adr-0027]: ../../docs/adr/0027-release-all-artifacts-with-one-version-from-a-manual-workflow-on-main.md
 [adr-0028]: ../../docs/adr/0028-find-the-need-for-a-fresh-deployment-from-the-migrations-and-the-event-golden-files.md
 [adr-0029]: ../../docs/adr/0029-promote-the-tested-image-of-each-service-to-a-release-with-no-rebuild.md
+[adr-0035]: ../../docs/adr/0035-give-the-lab-one-cli-cdrlab-in-cli-with-an-image-that-follows-the-rules-of-a-service-image.md
 [adr-0031]: ../../docs/adr/0031-sign-releases-with-keyless-cosign-and-attest-provenance-and-an-sbom.md
 [cog-config]: https://docs.cocogitto.io/reference/config.html
 [conventional-commits]: https://www.conventionalcommits.org/en/v1.0.0/#specification
