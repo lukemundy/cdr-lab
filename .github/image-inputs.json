@@ -2,6 +2,7 @@
   "register": [
     ".github/image-inputs.json",
     ".github/workflows/ci.yml",
+    ".github/actions/publish-image",
     "mise.toml",
     "go.mod",
     "go.sum",
@@ -18,6 +19,7 @@
   "dataholder": [
     ".github/image-inputs.json",
     ".github/workflows/ci.yml",
+    ".github/actions/publish-image",
     "mise.toml",
     "go.mod",
     "go.sum",

@@ -8,6 +8,16 @@ CI publishes the chart from `main` when the chart changes or when CI publishes t
 helm install register oci://ghcr.io/lukemundy/cdr-lab/charts/register --version 0.0.0-g<short commit> --values my-values.yaml
 ```
 
+The image is an OCI image index for `linux/amd64` and `linux/arm64`. The CI run that built the image attests its provenance and an SPDX SBOM, in GitHub and in the registry with the image. To verify them, use the `appVersion` of the chart as the image commit:
+
+```sh
+gh attestation verify oci://ghcr.io/lukemundy/cdr-lab/register:<image commit> --repo lukemundy/cdr-lab
+gh attestation verify oci://ghcr.io/lukemundy/cdr-lab/register:<image commit> --repo lukemundy/cdr-lab \
+  --predicate-type https://spdx.dev/Document/v2.3
+```
+
+Add `--bundle-from-oci` to read the attestations from the registry. The SBOM lists the Go modules of the binary. It does not list the npm packages of the web UIs, which are in the binary.
+
 `values.yaml` gives each value. The chart does not render when a required value is missing.
 
 - The chart makes no Secrets. It uses existing Secrets for the database users, the TLS certificates, the mock CDR intermediate CA, the CDR CA bundle and the operator token. `values.yaml` gives the keys of each Secret.
