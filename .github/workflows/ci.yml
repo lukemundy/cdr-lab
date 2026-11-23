@@ -229,13 +229,8 @@ jobs:
               '.name as $project | .services | to_entries[] | select(.value.build.dockerfile == $file) |
                 .value.image // "\($project)-\(.key)"' <<< "$config")
             mise run image:load "$name" "${tags[@]}"
-            want=$(mise run image:manifest "$name" | jq -r .config.digest)
             for tag in "${tags[@]}"; do
-              got=$(docker image inspect --format '{{.Id}}' "$tag")
-              if [ "$got" != "$want" ]; then
-                echo "The image ID of $tag is $got, but the configuration digest of the layout is $want." >&2
-                exit 1
-              fi
+              mise run image:check "$name" "$(docker image inspect --format '{{.Id}}' "$tag")"
             done
           done
 
@@ -409,7 +404,7 @@ jobs:
     if: needs.changes.outputs.register-image == 'true'
     runs-on: ubuntu-latest
     outputs:
-      tested-config: ${{ steps.tested.outputs.config }}
+      tested-image: ${{ steps.tested.outputs.id }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -462,7 +457,7 @@ jobs:
       # The publish job pushes the image only when it is this tested image.
       - name: Record the tested Register image
         id: tested
-        run: echo "config=$(docker inspect --format '{{.Image}}' "$(docker-compose ps --quiet register)")" >> "$GITHUB_OUTPUT"
+        run: echo "id=$(docker inspect --format '{{.Image}}' "$(docker-compose ps --quiet register)")" >> "$GITHUB_OUTPUT"
 
       - name: Show the service logs
         if: failure()
@@ -498,7 +493,7 @@ jobs:
         with:
           name: register
           image: ${{ env.REGISTER_IMAGE }}
-          tested-config: ${{ needs.register-image.outputs.tested-config }}
+          tested-image: ${{ needs.register-image.outputs.tested-image }}
 
   # The chart job also runs for a new image, because CI then publishes the chart of that service with the new image.
   chart:
@@ -575,7 +570,7 @@ jobs:
     if: needs.changes.outputs.dataholder-image == 'true'
     runs-on: ubuntu-latest
     outputs:
-      tested-config: ${{ steps.tested.outputs.config }}
+      tested-image: ${{ steps.tested.outputs.id }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -629,7 +624,7 @@ jobs:
       # The publish job pushes the image only when it is this tested image.
       - name: Record the tested data holder image
         id: tested
-        run: echo "config=$(docker inspect --format '{{.Image}}' "$(docker-compose ps --quiet wattle-bank)")" >> "$GITHUB_OUTPUT"
+        run: echo "id=$(docker inspect --format '{{.Image}}' "$(docker-compose ps --quiet wattle-bank)")" >> "$GITHUB_OUTPUT"
 
       - name: Show the service logs
         if: failure()
@@ -664,7 +659,7 @@ jobs:
         with:
           name: dataholder
           image: ${{ env.DATAHOLDER_IMAGE }}
-          tested-config: ${{ needs.dataholder-image.outputs.tested-config }}
+          tested-image: ${{ needs.dataholder-image.outputs.tested-image }}
 
   # The structure of the specifications and the Verifies comments of the tests.
   spec:

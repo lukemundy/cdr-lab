@@ -11,8 +11,8 @@ inputs:
   image:
     description: The image repository, for example ghcr.io/lukemundy/cdr-lab/register.
     required: true
-  tested-config:
-    description: The image ID of the container that the lab job tested, which is its configuration digest.
+  tested-image:
+    description: The image ID of the container that the lab job tested.
     required: true
 
 outputs:
@@ -33,14 +33,8 @@ runs:
       shell: bash
       env:
         NAME: ${{ inputs.name }}
-        TESTED: ${{ inputs.tested-config }}
-      run: |
-        set -euo pipefail
-        layout=$(mise run image:manifest "$NAME" | jq -r .config.digest)
-        if [ -z "$TESTED" ] || [ "$layout" != "$TESTED" ]; then
-          echo "The linux/amd64 configuration digest is $layout, but the tested image is '$TESTED'." >&2
-          exit 1
-        fi
+        TESTED: ${{ inputs.tested-image }}
+      run: mise run image:check "$NAME" "$TESTED"
 
     - name: Push the image index
       id: push

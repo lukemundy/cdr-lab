@@ -224,7 +224,7 @@ for dir in $usage_dir; do
 done
 """
 
-# BuildKit puts the image index of the layout in index.json.
+# BuildKit puts the image index of the layout in index.json. The output is the blob, so its SHA-256 is its digest.
 [tasks."image:manifest"]
 description = "Print the manifest of the linux/amd64 image in .lab/images/<name>/ (build:index)"
 usage = 'arg "<name>" help="The image name, for example register"'
@@ -232,32 +232,59 @@ quiet = true
 run = """
 set -eu
 blobs=.lab/images/$usage_name/blobs/sha256
-index=$(jq -r '.manifests[0] | select(.mediaType == "application/vnd.oci.image.index.v1+json") | .digest' \
+index=$(jq -r '.manifests[0] | select(.mediaType == "application/vnd.oci.image.index.v1+json") | .digest' \\
   ".lab/images/$usage_name/index.json")
-manifest=$(jq -r '.manifests[] | select(.platform.os == "linux" and .platform.architecture == "amd64") | .digest' \
+manifest=$(jq -r '.manifests[] | select(.platform.os == "linux" and .platform.architecture == "amd64") | .digest' \\
   "$blobs/${index#sha256:}")
-jq . "$blobs/${manifest#sha256:}"
+cat "$blobs/${manifest#sha256:}"
 """
 
-# The archive has the manifest.json of docker save, so that a Docker with the classic image store loads the
-# configuration as it is. The image ID is then the configuration digest in the layout.
+# The archive has the index.json and the manifest.json of docker save, so that each image store of Docker loads the
+# blobs as they are. The image ID is then the manifest digest (containerd image store) or the configuration digest
+# (classic image store) in the layout.
 [tasks."image:load"]
-description = "Load the linux/amd64 image in .lab/images/<name>/ (build:index) into Docker with the given tags"
+description = "Load the linux/amd64 image in .lab/images/<name>/ (build:index) into Docker with the given image names"
 usage = """
 arg "<name>" help="The image name, for example register"
-arg "<tag>..." help="The tags of the image in Docker, for example cdr-lab-register"
+arg "<ref>..." help="The names of the image in Docker, with no tag, for example cdr-lab-register. The tag is latest"
 """
 shell = "bash -c"
 run = """
 set -euo pipefail
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
-mise run image:manifest "$usage_name" |
-  jq '[.config.digest, .layers[].digest] | map("blobs/sha256/" + ltrimstr("sha256:"))' > "$work/files.json"
-jq -n --slurpfile files "$work/files.json" '[{Config: $files[0][0], RepoTags: $ARGS.positional, Layers: $files[0][1:]}]' \
-  --args $usage_tag > "$work/manifest.json"
+mise run image:manifest "$usage_name" > "$work/image.json"
+digest=sha256:$(sha256sum "$work/image.json" | cut -d' ' -f1)
+jq --arg digest "$digest" '[$digest, .config.digest, .layers[].digest] | map("blobs/sha256/" + ltrimstr("sha256:"))' \\
+  "$work/image.json" > "$work/files.json"
+jq -n --slurpfile files "$work/files.json" \\
+  '[{Config: $files[0][1], RepoTags: $ARGS.positional | map(. + ":latest"), Layers: $files[0][2:]}]' \\
+  --args $usage_ref > "$work/manifest.json"
+jq -n --slurpfile image "$work/image.json" --arg digest "$digest" --argjson size "$(stat -c %s "$work/image.json")" \\
+  '{schemaVersion: 2, mediaType: "application/vnd.oci.image.index.v1+json", manifests: [$ARGS.positional[] | {
+    mediaType: $image[0].mediaType, digest: $digest, size: $size,
+    annotations: {"io.containerd.image.name": "docker.io/library/\\(.):latest", "org.opencontainers.image.ref.name": "latest"}
+  }]}' --args $usage_ref > "$work/index.json"
 mapfile -t files < <(jq -r '.[]' "$work/files.json")
-tar -c -C ".lab/images/$usage_name" "${files[@]}" -C "$work" manifest.json | docker load
+tar -c -C ".lab/images/$usage_name" oci-layout "${files[@]}" -C "$work" index.json manifest.json | docker load
+"""
+
+# The image ID in Docker is the manifest digest (containerd image store) or the configuration digest (classic image store).
+[tasks."image:check"]
+description = "Fail when an image ID is not the linux/amd64 image in .lab/images/<name>/ (build:index)"
+usage = """
+arg "<name>" help="The image name, for example register"
+arg "<id>" help="The image ID in Docker, for example of the container that a lab job tested"
+"""
+quiet = true
+run = """
+set -eu
+manifest=sha256:$(mise run image:manifest "$usage_name" | sha256sum | cut -d' ' -f1)
+config=$(mise run image:manifest "$usage_name" | jq -r .config.digest)
+if [ "$usage_id" != "$manifest" ] && [ "$usage_id" != "$config" ]; then
+  echo "The image ID '$usage_id' is not the linux/amd64 image of $usage_name: manifest $manifest, configuration $config." >&2
+  exit 1
+fi
 """
 
 [tasks."build:go"]
