@@ -1,6 +1,6 @@
 # Release
 
-A release gives one version, `vX.Y.Z`, to the artifacts of one commit of `main`. It promotes the tested image of each service with no rebuild, packages the charts of the version, signs and attests the artifacts, and publishes a GitHub Release with the release notes. A maintainer starts each release by hand. The publications from `main` are in the deployment area of each service.
+A release gives one version, `vX.Y.Z`, to the artifacts of one commit of `main`. It promotes the tested image of each service with no rebuild, packages the charts of the version, builds the `cdrlab` binaries, signs and attests the artifacts, and publishes a GitHub Release with the release notes. A maintainer starts each release by hand. The publications from `main` are in the deployment area of each service.
 
 ## Context
 
@@ -17,7 +17,7 @@ flowchart LR
   release -- "Gets the CI result, writes the tag and the GitHub Release<br>HTTPS" --> github
   release -- "Tags the images, pushes the charts, stores signatures and attestations<br>HTTPS (OCI)" --> registry
   release -- "Gets signing certificates, logs the signatures<br>HTTPS" --> sigstore
-  labuser -- "Reads the release notes<br>HTTPS" --> github
+  labuser -- "Reads the release notes, downloads the CLI binaries<br>HTTPS" --> github
   labuser -- "Verifies and pulls the images and the charts<br>HTTPS (OCI)" --> registry
 
   classDef person fill:#08427b,color:#fff,stroke:#052e56
@@ -34,7 +34,7 @@ None.
 
 ## Goals
 
-- One version for the images and the charts of one tested commit of `main`.
+- One version for the images, the charts and the `cdrlab` binaries of one tested commit of `main`.
 - Release notes that tell a lab user what changed, and whether an upgrade needs a fresh deployment.
 - Signatures, provenance and an SBOM that a lab user can verify before a deployment.
 
@@ -43,6 +43,8 @@ None.
 - The publication of the images and the charts from `main`. The deployment areas of the [Register](../../services/register/design/deployment.md) and the [data holder](../../services/dataholder/design/deployment.md) give it.
 - A data promise across an upgrade. While the major version is 0, a release makes none ([ADR 0027][adr-0027]).
 - `service.version` in telemetry. It stays [the short commit ID of the build](../../pkg/platform/telemetry/DESIGN.md#tele-0003).
+- Package manager entries for `cdrlab`, for example Homebrew ([ADR 0039][adr-0039]).
+- `cdrlab` binaries for Windows ([Judgement: binaries for Linux and macOS](#rls-0130)).
 
 ## Start and version
 
@@ -62,6 +64,7 @@ None.
   - the chart of each service
   - the `cdrlab` image
   - the umbrella chart
+  - the `cdrlab` binaries
 - <a id="rls-0011"></a>**RLS-0011** Each rule of this specification for the image of a service applies also to the `cdrlab` image. For example, the release refuses a commit when the image commit of `cdrlab` is not the last commit that changes an input of its image. ([Judgement: the image of the lab CLI (ADR 0035)][adr-0035])
 - <a id="rls-0010"></a>**RLS-0010** Two releases never run at the same time. ([GitHub Actions: concurrency][gha-concurrency]; [Judgement: one release at a time](#rls-0102))
 
@@ -72,6 +75,7 @@ None.
 - <a id="rls-0014"></a>**RLS-0014** In the mode `rehearse`, the release does all checks and each step of the mode `release` up to the release notes, with these differences. ([Judgement: prove the release before the first version](#rls-0114))
   - The image of each service goes to `ghcr.io/lukemundy/cdr-lab/rehearsal/<service>`, with the tag `rehearsal-<run ID>`.
   - Each chart goes to `oci://ghcr.io/lukemundy/cdr-lab/rehearsal/charts/<chart>`, with the version `0.0.0-rehearsal.<run ID>` and the `appVersion` `rehearsal-<run ID>`.
+  - The `cdrlab` binaries have the version `rehearsal-<run ID>`. They are artifacts of the workflow run.
   - The run ID is the ID of the workflow run.
 - <a id="rls-0015"></a>**RLS-0015** In the mode `rehearse`, the release makes no git tag and no GitHub Release, and it pushes nothing to the repositories of a release. ([Judgement: prove the release before the first version](#rls-0114))
 
@@ -109,6 +113,24 @@ None.
 - <a id="rls-0056"></a>**RLS-0056** Each attestation is in the attestations of the repository, and in the registry with the artifact. ([GitHub: use artifact attestations][gh-attestations-use]; [Judgement: the attestations also in the registry](#rls-0108))
 - <a id="rls-0057"></a>**RLS-0057** Security: the repository and its secrets hold 0 private signing keys. ([Judgement: keyless cosign and GitHub artifact attestations (ADR 0031)][adr-0031])
 - <a id="rls-0058"></a>**RLS-0058** Security: 0 jobs that run for a pull request have the permission to write packages, to write attestations, or to get an OIDC token. ([GitHub Actions: permissions][gha-permissions]; [Judgement: keyless cosign and GitHub artifact attestations (ADR 0031)][adr-0031])
+
+## CLI binaries
+
+- <a id="rls-0115"></a>**RLS-0115** The release builds the `cdrlab` binary from the release commit for each of these platforms, with no cgo. ([Go: environment variables][go-env]; [Judgement: binaries for Linux and macOS](#rls-0130); [Judgement: build the binaries in the release (ADR 0039)][adr-0039])
+  - `linux/amd64`
+  - `linux/arm64`
+  - `darwin/amd64`
+  - `darwin/arm64`
+- <a id="rls-0116"></a>**RLS-0116** Each binary gives the version of the release and the full commit ID of the release commit as [its version](../../cli/cdrlab/DESIGN.md#cli-0114). ([Judgement: build the binaries in the release (ADR 0039)][adr-0039])
+- <a id="rls-0117"></a>**RLS-0117** Each binary is in the archive `cdrlab-vX.Y.Z-<os>-<arch>.tar.gz`, with the licence notices of its third-party code. For example, `cdrlab-v0.3.1-linux-arm64.tar.gz`. ([Judgement: licence notices in each image (ADR 0018)][adr-0018])
+- <a id="rls-0118"></a>**RLS-0118** The release attaches each archive to the GitHub Release, and the checksum file `cdrlab-vX.Y.Z-checksums.txt`. The checksum file gives the SHA-256 of each archive, in the format of `sha256sum`. ([GNU coreutils: sha256sum][sha256sum]; [Judgement: one signature for the checksum file](#rls-0131))
+- <a id="rls-0119"></a>**RLS-0119** The release signs the checksum file with a keyless cosign signature, with [the identity of each signature](#rls-0051). It attaches the Sigstore bundle as `cdrlab-vX.Y.Z-checksums.txt.sigstore.json`. ([Sigstore: signing blobs][sigstore-sign-blob]; [Judgement: one signature for the checksum file](#rls-0131))
+- <a id="rls-0120"></a>**RLS-0120** Each archive has a provenance attestation and an SBOM attestation in SPDX JSON from GitHub artifact attestations. The release made the attestations. ([Judgement: the provenance comes from the build that made the artifact](#rls-0105); [Judgement: an SBOM in SPDX JSON](#rls-0106))
+- <a id="rls-0121"></a>**RLS-0121** The SBOM of an archive lists the Go modules of its binary. ([Judgement: an SBOM in SPDX JSON](#rls-0106))
+- <a id="rls-0122"></a>**RLS-0122** `go install github.com/lukemundy/cdr-lab/cli/cdrlab/cmd/cdrlab@vX.Y.Z` builds the `cdrlab` of the release. ([Go: go install][go-install]; [Judgement: build the binaries in the release (ADR 0039)][adr-0039])
+- <a id="rls-0123"></a>**RLS-0123** The release notes give the commands that download the archive of a platform and verify its checksum, the cosign signature of the checksum file and the provenance attestation of the archive. They also give the `go install` command and the `cdrlab up` command. ([cosign: verify][cosign-verify]; [GitHub CLI: `gh attestation verify`][gh-attestation-verify]; [Judgement: build the binaries in the release (ADR 0039)][adr-0039])
+- <a id="rls-0124"></a>**RLS-0124** In the modes `rehearse` and `release`, before the GitHub Release is published, the release runs `cdrlab up` in the release mode with the `linux/amd64` binary of the run and the images of the run. It runs in a directory with no checkout of the repository. ([Judgement: start the compose lab from the binary before the publication](#rls-0132))
+- <a id="rls-0125"></a>**RLS-0125** When the compose lab of the run does not become healthy, the release fails. ([Judgement: start the compose lab from the binary before the publication](#rls-0132); [Judgement: the release fails closed](#rls-0103))
 
 ## Release notes
 
@@ -241,15 +263,40 @@ None.
 - Basis: Step 3.3. A published version never changes ([Judgement: a published version never changes](#rls-0101)), so a defect of the release workflow that the first release finds stays in that version.
 - Reason: A check and a rehearsal prove the checks, the notes, the pushes, the signatures and the attestations before a maintainer publishes a version. The rehearsal names keep its artifacts apart from the artifacts of a release, and a maintainer can delete them.
 
+### <a id="rls-0130"></a>RLS-0130 Binaries for Linux and macOS
+
+- Kind: choice
+- Basis: Step 3.3. `cdrlab up` needs Docker with Compose. Docker Desktop for Windows runs the containers in WSL 2 ([Docker: install Docker Desktop on Windows][docker-windows]), where the Linux binary runs.
+- Reason: The four platforms cover Linux hosts and the Macs with Intel or Apple silicon. A Windows binary needs a different file permission model for the key files, and no CI job tests it.
+
+### <a id="rls-0131"></a>RLS-0131 One signature for the checksum file
+
+- Kind: choice
+- Basis: Step 3.2. `cosign verify-blob` verifies a file with its Sigstore bundle ([cosign: verify][cosign-verify]). `sha256sum --check` verifies each file of a checksum file ([GNU coreutils: sha256sum][sha256sum]).
+- Reason: A lab user verifies one signature for each platform, and the release has two assets more than the archives. The provenance attestation of each archive also gives its digest.
+
+### <a id="rls-0132"></a>RLS-0132 Start the compose lab from the binary before the publication
+
+- Kind: choice
+- Basis: Step 3.3. No CI job on `main` builds a release binary ([ADR 0039][adr-0039]), and a published version never changes ([Judgement: a published version never changes](#rls-0101)).
+- Reason: The run proves the binary, its compose project and the images of the run together, before a lab user can get them. A directory with no checkout proves that `cdrlab up` needs no file of the repository.
+
 ## Withdrawn
 
 None.
 
+[adr-0018]: ../../docs/adr/0018-container-images-with-a-web-ui-build-stage.md
 [adr-0027]: ../../docs/adr/0027-release-all-artifacts-with-one-version-from-a-manual-workflow-on-main.md
 [adr-0028]: ../../docs/adr/0028-find-the-need-for-a-fresh-deployment-from-the-migrations-and-the-event-golden-files.md
 [adr-0029]: ../../docs/adr/0029-promote-the-tested-image-of-each-service-to-a-release-with-no-rebuild.md
 [adr-0035]: ../../docs/adr/0035-give-the-lab-one-cli-cdrlab-in-cli-with-an-image-that-follows-the-rules-of-a-service-image.md
 [adr-0031]: ../../docs/adr/0031-sign-releases-with-keyless-cosign-and-attest-provenance-and-an-sbom.md
+[adr-0039]: ../../docs/adr/0039-build-the-cdrlab-binaries-in-the-release-with-the-release-version-and-sign-their-checksums-with-keyless-cosign.md
+[docker-windows]: https://docs.docker.com/desktop/setup/install/windows-install/
+[go-env]: https://pkg.go.dev/cmd/go#hdr-Environment_variables
+[go-install]: https://go.dev/ref/mod#go-install
+[sha256sum]: https://www.gnu.org/software/coreutils/manual/html_node/sha2-utilities.html
+[sigstore-sign-blob]: https://docs.sigstore.dev/cosign/signing/signing_with_blobs/
 [conventional-commits]: https://www.conventionalcommits.org/en/v1.0.0/#specification
 [cosign-verify]: https://docs.sigstore.dev/cosign/verifying/verify/
 [gh-attestation-verify]: https://cli.github.com/manual/gh_attestation_verify
