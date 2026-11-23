@@ -1,30 +1,23 @@
-// Package register calls the certificate paths of the Register operator interface.
+// Package register calls the certificate paths and the participant load of the Register operator interface.
 package register
 
 import (
-	"bytes"
 	"context"
 	"crypto/x509"
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
-	"strings"
 
+	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/operator"
 	"github.com/lukemundy/cdr-lab/pkg/ca"
 )
 
-const maxBody = 1 << 20
-
 type Client struct {
-	base  string
-	token string
-	http  *http.Client
+	operator *operator.Client
 }
 
 func New(baseURL, token string, httpClient *http.Client) *Client {
-	return &Client{base: strings.TrimSuffix(baseURL, "/"), token: token, http: httpClient}
+	return &Client{operator: operator.New("the Register", baseURL, token, httpClient)}
 }
 
 func (c *Client) CABundle(ctx context.Context) ([]*x509.Certificate, error) {
@@ -60,6 +53,22 @@ func (c *Client) IssueClient(
 	)
 }
 
+// ParticipantLoad gives the identifiers of the file in the sequence of the file.
+type ParticipantLoad struct {
+	Added    []string `json:"added"`
+	Existing []string `json:"existing"`
+}
+
+// LoadParticipants sends the load file with no change.
+func (c *Client) LoadParticipants(ctx context.Context, file []byte) (ParticipantLoad, error) {
+	var load ParticipantLoad
+	if err := c.operator.PostJSON(ctx, "/v1/participant-loads", file, &load); err != nil {
+		return ParticipantLoad{}, fmt.Errorf("load the participants into the Register: %w", err)
+	}
+
+	return load, nil
+}
+
 func (c *Client) issue(ctx context.Context, owner string, csr []byte) ([]*x509.Certificate, error) {
 	certs, err := c.certificates(ctx, http.MethodPost, owner+"/certificates/issue", csr)
 	if err != nil {
@@ -70,46 +79,12 @@ func (c *Client) issue(ctx context.Context, owner string, csr []byte) ([]*x509.C
 }
 
 func (c *Client) certificates(ctx context.Context, method, path string, body []byte) ([]*x509.Certificate, error) {
-	var reader io.Reader = http.NoBody
-	if body != nil {
-		reader = bytes.NewReader(body)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, method, c.base+path, reader)
+	data, err := c.operator.Do(ctx, operator.Request{
+		Method: method, Path: path, Accept: "application/pem-certificate-chain", Body: body,
+	})
 	if err != nil {
 		return nil, err
-	}
-
-	req.Header.Set("Authorization", "Bearer "+c.token)
-	req.Header.Set("Accept", "application/pem-certificate-chain")
-
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	data, err := io.ReadAll(io.LimitReader(resp.Body, maxBody))
-	if err != nil {
-		return nil, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, refusal(resp, data)
 	}
 
 	return ca.ParseCertificates(data)
-}
-
-// refusal gives the status and the detail of an RFC 9457 problem.
-func refusal(resp *http.Response, data []byte) error {
-	var p struct {
-		Detail string `json:"detail"`
-	}
-
-	if json.Unmarshal(data, &p) != nil || p.Detail == "" {
-		return fmt.Errorf("the Register gave %s", resp.Status)
-	}
-
-	return fmt.Errorf("the Register gave %s: %s", resp.Status, p.Detail)
 }

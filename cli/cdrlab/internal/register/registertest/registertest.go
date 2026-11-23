@@ -1,5 +1,5 @@
-// Package registertest gives a fake of the certificate paths of the Register operator interface, for tests. It
-// issues with the CA library, as the Register does.
+// Package registertest gives a fake of the certificate paths and the participant load of the Register operator
+// interface, for tests. It issues with the CA library, as the Register does.
 package registertest
 
 import (
@@ -30,6 +30,9 @@ type Register struct {
 	lastCSR      []byte
 	refusal      int
 	detail       string
+	loads        [][]byte
+	added        []string
+	existing     []string
 }
 
 func New(t *testing.T) *Register {
@@ -45,6 +48,7 @@ func New(t *testing.T) *Register {
 		"POST /v1/data-recipients/{legalEntityId}/software-products/{softwareProductId}/certificates/issue",
 		r.issue(ca.Client),
 	)
+	mux.HandleFunc("POST /v1/participant-loads", r.loadParticipants)
 	r.Server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		if req.Header.Get("Authorization") != "Bearer "+Token {
 			problem(w, http.StatusUnauthorized, "The request has no valid operator token.")
@@ -82,7 +86,7 @@ func (r *Register) NewCA(t *testing.T) {
 	r.Root, r.Intermediate = root, intermediate
 }
 
-// Refuse makes each later issue fail with the status and the detail.
+// Refuse makes each later issue and participant load fail with the status and the detail.
 func (r *Register) Refuse(status int, detail string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -96,6 +100,22 @@ func (r *Register) Issues() []string {
 	defer r.mu.Unlock()
 
 	return append([]string(nil), r.issues...)
+}
+
+// SetParticipantLoad sets the result of each later participant load.
+func (r *Register) SetParticipantLoad(added, existing []string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	r.added, r.existing = added, existing
+}
+
+// ParticipantLoads gives the body of each participant load request.
+func (r *Register) ParticipantLoads() [][]byte {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	return append([][]byte(nil), r.loads...)
 }
 
 func (r *Register) LastCSR() []byte {
@@ -146,6 +166,35 @@ func (r *Register) issue(kind ca.Kind) http.HandlerFunc {
 
 		chain(w, ca.EncodeCertificates(cert, r.Intermediate.Certificate))
 	}
+}
+
+func (r *Register) loadParticipants(w http.ResponseWriter, req *http.Request) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	body, err := io.ReadAll(req.Body)
+	if err != nil {
+		problem(w, http.StatusBadRequest, "The request body is not valid JSON for the action.")
+		return
+	}
+
+	r.loads = append(r.loads, body)
+
+	if r.refusal != 0 {
+		problem(w, r.refusal, r.detail)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string][]string{"added": nonNil(r.added), "existing": nonNil(r.existing)})
+}
+
+func nonNil(ids []string) []string {
+	if ids == nil {
+		return []string{}
+	}
+
+	return ids
 }
 
 func chain(w http.ResponseWriter, data []byte) {

@@ -69,22 +69,14 @@ func TestIssueClientSendsTheCSRToTheIssuePathOfTheSoftwareProduct(t *testing.T) 
 
 // Verifies: CLI-0038
 func TestARefusalGivesTheStatusAndTheDetailOfTheProblem(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/problem+json")
-		w.WriteHeader(http.StatusBadRequest)
-		_, _ = io.WriteString(
-			w,
-			`{"type":"about:blank","title":"Bad Request","status":400,"detail":"O must be Wattle Bank."}`,
-		)
-	}))
-	t.Cleanup(srv.Close)
+	fake := registertest.New(t)
+	fake.Refuse(http.StatusBadRequest, "O must be Wattle Bank.")
 
-	_, err := register.New(srv.URL, registertest.Token, srv.Client()).
+	_, err := register.New(fake.URL, registertest.Token, fake.Client()).
 		IssueServer(t.Context(), "le-1", "brand-1", csr(t, ca.Server))
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "400 Bad Request")
-	assert.Contains(t, err.Error(), "O must be Wattle Bank.")
+	assert.Contains(t, err.Error(), "the Register gave 400 Bad Request: O must be Wattle Bank.")
 }
 
 // Verifies: CLI-0060
@@ -96,6 +88,31 @@ func TestAnErrorDoesNotGiveTheToken(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "401")
 	assert.NotContains(t, err.Error(), "wrong-token")
+}
+
+// Verifies: CLI-0179, CLI-0183, CLI-0185
+func TestLoadParticipantsSendsTheFileAndGivesTheResult(t *testing.T) {
+	fake := registertest.New(t)
+	fake.SetParticipantLoad([]string{"dr-1", "sp-1"}, []string{"brand-1"})
+
+	file := []byte(`{"dataRecipients": [{"legalEntityId": "dr-1"}]}` + "\n")
+
+	load, err := register.New(fake.URL, registertest.Token, fake.Client()).LoadParticipants(t.Context(), file)
+
+	require.NoError(t, err)
+	assert.Equal(t, register.ParticipantLoad{Added: []string{"dr-1", "sp-1"}, Existing: []string{"brand-1"}}, load)
+	assert.Equal(t, [][]byte{file}, fake.ParticipantLoads())
+}
+
+// Verifies: CLI-0184
+func TestARefusedParticipantLoadGivesTheStatusAndTheDetail(t *testing.T) {
+	fake := registertest.New(t)
+	fake.Refuse(http.StatusConflict, "dr-1: the identifier is in use.")
+
+	_, err := register.New(fake.URL, registertest.Token, fake.Client()).LoadParticipants(t.Context(), []byte("{}"))
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "the Register gave 409 Conflict: dr-1: the identifier is in use.")
 }
 
 func TestAResponseThatIsNotACertificateChainIsAnError(t *testing.T) {
