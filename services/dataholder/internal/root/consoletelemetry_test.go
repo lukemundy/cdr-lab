@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -46,6 +47,38 @@ var customerValues = []string{
 	"account-possum", "possum", "glider", "314159", "27182818", "14142", "1732",
 	"transaction-dingo", "possum groceries", "87.65", "galah mart", "cockatoo", "wombat-2", "lyrebird",
 	"00058315", "58315",
+}
+
+// assertNoValue fails when the text contains the value. A digit next to the value does not count, because a timestamp
+// or a duration can contain the digits of a short number.
+func assertNoValue(t assert.TestingT, text, value string, msgAndArgs ...any) {
+	if h, ok := t.(interface{ Helper() }); ok {
+		h.Helper()
+	}
+
+	pattern := regexp.MustCompile(`(^|[^0-9])` + regexp.QuoteMeta(value) + `([^0-9]|$)`)
+	assert.NotRegexp(t, pattern, text, msgAndArgs...)
+}
+
+type failures struct{ count int }
+
+func (f *failures) Errorf(string, ...any) { f.count++ }
+
+func TestADigitNextToAValueIsNotTheValue(t *testing.T) {
+	t.Parallel()
+
+	for text, want := range map[string]int{
+		`{"time":"2026-11-23t06:06:27.819817327z"}`: 0,
+		`{"accountNumber":"1732"}`:                  1,
+		`{"accountNumber":"1732a"}`:                 1,
+		"1732":                                      1,
+	} {
+		var f failures
+
+		assertNoValue(&f, text, "1732")
+
+		assert.Equal(t, want, f.count, text)
+	}
 }
 
 // The body that gives 409 has the bsb and accountNumber of account-wombat.
@@ -367,7 +400,7 @@ func TestTheConsolePutsNoCustomerAccountOrTransactionDataInTheSpansMetricsOrLogs
 	for _, span := range spans.Ended()[setUpSpans:] {
 		text := spanText(span)
 		for _, value := range customerValues {
-			assert.NotContains(t, text, value, "span %q", span.Name())
+			assertNoValue(t, text, value, "span %q", span.Name())
 		}
 
 		for _, a := range span.Attributes() {
@@ -397,7 +430,7 @@ func TestTheConsolePutsNoCustomerAccountOrTransactionDataInTheSpansMetricsOrLogs
 	assert.NotContains(t, text, "/api/customers", "the requests make no metrics, because their spans give the detail")
 
 	for _, value := range customerValues {
-		assert.NotContains(t, text, value)
-		assert.NotContains(t, strings.ToLower(logs.String()), value)
+		assertNoValue(t, text, value)
+		assertNoValue(t, strings.ToLower(logs.String()), value)
 	}
 }
