@@ -1,6 +1,9 @@
 package main
 
 import (
+	"encoding/json"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -86,12 +89,25 @@ func TestTheNotesOfACheckSayThatTheRunPublishedNothing(t *testing.T) {
 	assert.Contains(t, got, "| `oci://registry.test/team/charts/register` | `0.2.0` | not published |")
 }
 
-func TestTheNotesOfAReleaseNeedTheDigestOfEachChart(t *testing.T) {
+func TestTheNotesBeforeThePushOfTheChartsHaveNoChartDigests(t *testing.T) {
 	t.Parallel()
 
-	var out strings.Builder
+	got := notes(t, samplePlan(), nil)
 
-	err := writeNotes(&out, samplePlan(), map[string]string{})
+	assert.Contains(t, got, "| `oci://registry.test/team/charts/register` | `0.2.0` | not published |")
+}
+
+func TestADigestDirectoryWithNoDigestOfAChartIsRefused(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	plan := filepath.Join(dir, "plan.json")
+
+	data, err := json.Marshal(samplePlan())
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(plan, data, 0o600))
+
+	err = run(t.Context(), []string{"notes", "-plan", plan, "-chart-digests", t.TempDir()}, &strings.Builder{})
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "register")

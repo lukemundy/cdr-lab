@@ -2,7 +2,6 @@ package main
 
 import (
 	_ "embed"
-	"fmt"
 	"io"
 	"strings"
 	"text/template"
@@ -18,17 +17,12 @@ type notesChart struct {
 	Digest string
 }
 
-// writeNotes writes the release notes. A run that publishes the charts must give the digest of each chart.
+// writeNotes writes the release notes. A chart with no digest is not published yet.
 func writeNotes(w io.Writer, p releasePlan, chartDigests map[string]string) error {
 	charts := make([]notesChart, 0, len(p.Charts))
 
 	for _, name := range p.Charts {
-		digest := chartDigests[name]
-		if digest == "" && p.Mode != modeCheck {
-			return fmt.Errorf("no digest for the chart %s", name)
-		}
-
-		charts = append(charts, notesChart{Name: name, Digest: digest})
+		charts = append(charts, notesChart{Name: name, Digest: chartDigests[name]})
 	}
 
 	data := struct {
