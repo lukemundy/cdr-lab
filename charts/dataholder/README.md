@@ -18,6 +18,34 @@ gh attestation verify oci://ghcr.io/lukemundy/cdr-lab/dataholder:<image commit> 
 
 Add `--bundle-from-oci` to read the attestations from the registry. The SBOM lists the Go modules of the binary. It does not list the npm packages of the web UIs, which are in the binary.
 
+## Verify a release
+
+A release `vX.Y.Z` publishes the chart as version `X.Y.Z`, with the `appVersion` `vX.Y.Z`. The image of the data holder gets the tag `vX.Y.Z` on the digest of its image commit. The release workflow on `main` signs the chart and the image with keyless cosign, and attests the provenance of the chart. The CI run that built the image attests its provenance and its SBOM. The release notes give each digest ([release specification](../../tools/release/DESIGN.md)).
+
+A tag can move after you verify it, but a digest cannot. Thus verify the chart and the image by their digests from the release notes, and then install the chart by its digest:
+
+```sh
+chart=ghcr.io/lukemundy/cdr-lab/charts/dataholder@<chart digest>
+image=ghcr.io/lukemundy/cdr-lab/dataholder@<image digest>
+
+for ref in "$chart" "$image"; do
+  cosign verify "$ref" \
+    --certificate-identity https://github.com/lukemundy/cdr-lab/.github/workflows/release.yml@refs/heads/main \
+    --certificate-oidc-issuer https://token.actions.githubusercontent.com
+done
+
+gh attestation verify "oci://$chart" --repo lukemundy/cdr-lab \
+  --signer-workflow lukemundy/cdr-lab/.github/workflows/release.yml --source-ref refs/heads/main
+gh attestation verify "oci://$image" --repo lukemundy/cdr-lab \
+  --signer-workflow lukemundy/cdr-lab/.github/workflows/ci.yml --source-ref refs/heads/main
+gh attestation verify "oci://$image" --repo lukemundy/cdr-lab --predicate-type https://spdx.dev/Document/v2.3 \
+  --signer-workflow lukemundy/cdr-lab/.github/workflows/ci.yml --source-ref refs/heads/main
+
+helm install dataholder "oci://$chart" --values my-values.yaml
+```
+
+The SBOM does not list the npm packages of the web UIs.
+
 ## Values
 
 The chart does not render when a required value is missing, and the error names the value. `values.yaml` gives each value with a comment.

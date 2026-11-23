@@ -32,37 +32,52 @@ func newRegistry(client *http.Client, image string) (*registry, error) {
 }
 
 func (r *registry) has(ctx context.Context, tag string) (bool, error) {
-	status, challenge, err := r.head(ctx, tag)
+	digest, err := r.digest(ctx, tag)
+	if errors.Is(err, errNoManifest) {
+		return false, nil
+	}
+
+	return digest != "", err
+}
+
+var errNoManifest = errors.New("the registry has no manifest")
+
+func (r *registry) digest(ctx context.Context, tag string) (string, error) {
+	status, header, err := r.head(ctx, tag)
 	if err != nil {
-		return false, err
+		return "", err
 	}
 
 	if status == http.StatusUnauthorized && r.token == "" {
-		if err := r.getToken(ctx, challenge); err != nil {
-			return false, err
+		if err := r.getToken(ctx, header.Get("WWW-Authenticate")); err != nil {
+			return "", err
 		}
 
-		if status, _, err = r.head(ctx, tag); err != nil {
-			return false, err
+		if status, header, err = r.head(ctx, tag); err != nil {
+			return "", err
 		}
 	}
 
-	switch status {
-	case http.StatusOK:
-		return true, nil
-	case http.StatusNotFound:
-		return false, nil
+	ref := r.host + "/" + r.name + ":" + tag
+
+	switch digest := header.Get("Docker-Content-Digest"); {
+	case status == http.StatusNotFound:
+		return "", fmt.Errorf("%s: %w", ref, errNoManifest)
+	case status != http.StatusOK:
+		return "", fmt.Errorf("get the manifest %s: HTTP status %d", ref, status)
+	case digest == "":
+		return "", fmt.Errorf("get the manifest %s: the registry gives no digest", ref)
 	default:
-		return false, fmt.Errorf("get the manifest %s/%s:%s: HTTP status %d", r.host, r.name, tag, status)
+		return digest, nil
 	}
 }
 
-func (r *registry) head(ctx context.Context, tag string) (status int, challenge string, err error) {
+func (r *registry) head(ctx context.Context, tag string) (int, http.Header, error) {
 	u := url.URL{Scheme: "https", Host: r.host, Path: "/v2/" + r.name + "/manifests/" + tag}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodHead, u.String(), http.NoBody)
 	if err != nil {
-		return 0, "", err
+		return 0, nil, err
 	}
 
 	req.Header.Set("Accept", manifestTypes)
@@ -73,12 +88,12 @@ func (r *registry) head(ctx context.Context, tag string) (status int, challenge 
 
 	resp, err := r.client.Do(req)
 	if err != nil {
-		return 0, "", fmt.Errorf("get the manifest %s/%s:%s: %w", r.host, r.name, tag, err)
+		return 0, nil, fmt.Errorf("get the manifest %s/%s:%s: %w", r.host, r.name, tag, err)
 	}
 
 	_ = resp.Body.Close()
 
-	return resp.StatusCode, resp.Header.Get("WWW-Authenticate"), nil
+	return resp.StatusCode, resp.Header, nil
 }
 
 func (r *registry) getToken(ctx context.Context, challenge string) error {

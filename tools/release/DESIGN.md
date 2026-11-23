@@ -50,7 +50,7 @@ None.
 - <a id="rls-0002"></a>**RLS-0002** When the commit is not in the first-parent history of `main`, the release refuses it. ([Judgement: one version from a manual workflow on main (ADR 0027)][adr-0027])
 - <a id="rls-0003"></a>**RLS-0003** The release pushes no commit to a branch. Its only change to the repository is the git tag of the version. ([Judgement: one version from a manual workflow on main (ADR 0027)][adr-0027])
 - <a id="rls-0004"></a>**RLS-0004** The version is a SemVer 2.0.0 version with the prefix `v`, and with no prerelease and no build metadata. For example, `v0.3.1`. ([SemVer 2.0.0][semver]; [Judgement: one version from a manual workflow on main (ADR 0027)][adr-0027])
-- <a id="rls-0005"></a>**RLS-0005** The release calculates the version from the Conventional Commits after the earlier version tag, up to the release commit. ([Conventional Commits 1.0.0][conventional-commits]; [cocogitto: configuration][cog-config]; [Judgement: one version from a manual workflow on main (ADR 0027)][adr-0027])
+- <a id="rls-0005"></a>**RLS-0005** The release calculates the version from the Conventional Commits after the earlier version tag, up to the release commit. ([Conventional Commits 1.0.0][conventional-commits]; [Judgement: one version from a manual workflow on main (ADR 0027)][adr-0027])
   - A breaking change gives the next major version. While the major version is 0, it gives the next minor version.
   - With no breaking change, a `feat` commit gives the next minor version.
   - With no breaking change and no `feat` commit, a `fix` commit gives the next patch version.
@@ -64,6 +64,16 @@ None.
   - the umbrella chart
 - <a id="rls-0011"></a>**RLS-0011** Each rule of this specification for the image of a service applies also to the `cdrlab` image. For example, the release refuses a commit when the image commit of `cdrlab` is not the last commit that changes an input of its image. ([Judgement: the image of the lab CLI (ADR 0035)][adr-0035])
 - <a id="rls-0010"></a>**RLS-0010** Two releases never run at the same time. ([GitHub Actions: concurrency][gha-concurrency]; [Judgement: one release at a time](#rls-0102))
+
+## Modes
+
+- <a id="rls-0012"></a>**RLS-0012** A maintainer gives one mode to each run of the release: `check`, `rehearse` or `release`. ([Judgement: prove the release before the first version](#rls-0114))
+- <a id="rls-0013"></a>**RLS-0013** In the mode `check`, the release does all checks and writes the release notes. It pushes no artifact, it signs and attests nothing, and it makes no git tag and no GitHub Release. ([Judgement: prove the release before the first version](#rls-0114))
+- <a id="rls-0014"></a>**RLS-0014** In the mode `rehearse`, the release does all checks and each step of the mode `release` up to the release notes, with these differences. ([Judgement: prove the release before the first version](#rls-0114))
+  - The image of each service goes to `ghcr.io/lukemundy/cdr-lab/rehearsal/<service>`, with the tag `rehearsal-<run ID>`.
+  - Each chart goes to `oci://ghcr.io/lukemundy/cdr-lab/rehearsal/charts/<chart>`, with the version `0.0.0-rehearsal.<run ID>` and the `appVersion` `rehearsal-<run ID>`.
+  - The run ID is the ID of the workflow run.
+- <a id="rls-0015"></a>**RLS-0015** In the mode `rehearse`, the release makes no git tag and no GitHub Release, and it pushes nothing to the repositories of a release. ([Judgement: prove the release before the first version](#rls-0114))
 
 ## Checks
 
@@ -225,6 +235,12 @@ None.
 - Basis: Step 3.3. The codecs of a service are in its `internal/app` package, and Go tools ignore a `testdata` directory ([Go: test packages][go-testdata]). An event type name is unique only in its codec.
 - Reason: The release finds the files with one pattern, and it compares the entries by key. Indented JSON lets a reviewer see a payload change in the diff. The stream type in the key keeps two codecs of one service apart.
 
+### <a id="rls-0114"></a>RLS-0114 Prove the release before the first version
+
+- Kind: choice
+- Basis: Step 3.3. A published version never changes ([Judgement: a published version never changes](#rls-0101)), so a defect of the release workflow that the first release finds stays in that version.
+- Reason: A check and a rehearsal prove the checks, the notes, the pushes, the signatures and the attestations before a maintainer publishes a version. The rehearsal names keep its artifacts apart from the artifacts of a release, and a maintainer can delete them.
+
 ## Withdrawn
 
 None.
@@ -234,7 +250,6 @@ None.
 [adr-0029]: ../../docs/adr/0029-promote-the-tested-image-of-each-service-to-a-release-with-no-rebuild.md
 [adr-0035]: ../../docs/adr/0035-give-the-lab-one-cli-cdrlab-in-cli-with-an-image-that-follows-the-rules-of-a-service-image.md
 [adr-0031]: ../../docs/adr/0031-sign-releases-with-keyless-cosign-and-attest-provenance-and-an-sbom.md
-[cog-config]: https://docs.cocogitto.io/reference/config.html
 [conventional-commits]: https://www.conventionalcommits.org/en/v1.0.0/#specification
 [cosign-verify]: https://docs.sigstore.dev/cosign/verifying/verify/
 [gh-attestation-verify]: https://cli.github.com/manual/gh_attestation_verify

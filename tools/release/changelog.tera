@@ -1,0 +1,12 @@
+{#- The changelog of the release notes: groups by type, then by scope, and a mark for each breaking change. -#}
+{% for type, typed_commits in commits | sort(attribute="type") | group_by(attribute="type") -%}
+### {{ type | upper_first }}
+{% for scope, scoped_commits in typed_commits | group_by(attribute="scope") -%}
+{% for commit in scoped_commits -%}
+- **{{ scope }}:** {% if commit.breaking_change %}**BREAKING** {% endif %}{{ commit.summary }} ({{ commit.id | truncate(length=7, end="") }})
+{% endfor -%}
+{% endfor -%}
+{% for commit in typed_commits | unscoped -%}
+- {% if commit.breaking_change %}**BREAKING** {% endif %}{{ commit.summary }} ({{ commit.id | truncate(length=7, end="") }})
+{% endfor %}
+{% endfor -%}

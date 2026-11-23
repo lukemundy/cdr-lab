@@ -1,0 +1,37 @@
+## Needs a fresh deployment
+
+{{if .Fresh.First -}}
+{{.Version}} is the first release.
+{{- else if .Fresh.Files -}}
+Yes. Before you upgrade from {{.PreviousVersion}}, delete the data of the deployment. These changes from {{.PreviousVersion}} change the stored data:
+
+{{range .Fresh.Files}}- `{{.}}`
+{{end -}}
+{{- else -}}
+No. {{.Version}} does not need a fresh deployment after {{.PreviousVersion}}.
+{{- end}}
+{{if ne .Mode "release"}}
+> This run in the mode `{{.Mode}}` is not the release {{.Version}}. {{if eq .Mode "check"}}It published nothing.{{else}}It published the artifacts with the rehearsal names only.{{end}}
+{{end}}
+## Changelog
+
+{{.Changelog}}
+## Images
+
+Each image is the image that CI tested and published from the image commit. The release did not build it again.
+
+| Image | Image commit | Digest |
+|---|---|---|
+{{range .Images}}| `{{.Target}}:{{$.ImageTag}}` | `{{.Commit}}` | `{{.Digest}}` |
+{{end}}
+## Charts
+
+| Chart | Version | Digest |
+|---|---|---|
+{{range .Charts}}| `{{$.ChartRepository}}/{{.Name}}` | `{{$.ChartVersion}}` | {{if .Digest}}`{{.Digest}}`{{else}}not published{{end}} |
+{{end}}
+## Verify the artifacts
+
+Verify each chart and each image by its digest before you install the chart by its digest. The README of each chart gives the commands: {{range $i, $c := .Charts}}{{if $i}}, {{end}}[{{$c.Name}}](https://github.com/{{$.GitHubRepo}}/blob/{{$.Commit}}/charts/{{$c.Name}}/README.md#verify-a-release){{end}}.
+
+The SBOM of each image lists the Go modules of the service binary. It does not list the npm packages of the web UIs, which are in the binary.
