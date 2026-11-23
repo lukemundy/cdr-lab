@@ -267,6 +267,9 @@ controllers:
           SECURE_TLS_CERT_FILE: /tls/secure/tls.crt
           SECURE_TLS_KEY_FILE: /tls/secure/tls.key
           CDR_CA_BUNDLE_FILE: /pki/ca-bundle/ca.crt
+          {{- if $v.dataHolders.crlMaxAge }}
+          CRL_MAX_AGE: {{ $v.dataHolders.crlMaxAge | quote }}
+          {{- end }}
           {{- if $v.publicTLS.rootSecret }}
           SSL_CERT_FILE: /pki/public-root/ca.crt
           {{- end }}

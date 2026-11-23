@@ -113,6 +113,16 @@ func TestTheLabOnlyUIsAreOffByDefault(t *testing.T) {
 	assert.Equal(t, "true", brandMain(t, objects, "wattle-bank")["BANK_SITE_ENABLED"])
 }
 
+// Verifies: LAB-0021
+func TestTheValuesCanGiveTheMaximumCRLAgeOfEachBrand(t *testing.T) {
+	assert.NotContains(t, brandMain(t, render(t), "wattle-bank"), "CRL_MAX_AGE")
+
+	objects := renderLint(t)
+	for _, brand := range presetBrands {
+		assert.Equal(t, "30s", brandMain(t, objects, brand)["CRL_MAX_AGE"], brand)
+	}
+}
+
 // Verifies: LAB-0007, LAB-0008
 func TestEachServiceUsesItsDatabaseAndTheOperatorToken(t *testing.T) {
 	objects := render(t)

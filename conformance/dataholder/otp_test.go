@@ -237,21 +237,6 @@ func TestANewOTPMakesThePreviousOneNotValidAndTheFlowSends3AtMost(t *testing.T) 
 	assert.False(t, isOTPPage(accepted), "the third OTP is accepted: %s", accepted.body)
 }
 
-func TestACustomerWithAnAddressOfFixedOTPsGetsTheFixedOTPByEmailAndIsAuthenticatedWithIt(t *testing.T) {
-	// The FIXED_OTPS of wattle-bank in compose.yaml has this address and OTP.
-	const address, fixedOTP = "fixed-otp@mail.test", "024680"
-
-	client := registered(t, registrationTestProduct)
-	customer := account{t: t, customer: newCustomerWithEmail(t, address), browser: newConsumer(t)}
-	otpPage := customer.identify(client, client.requestObjectClaims())
-	assert.Equal(t, []string{fixedOTP}, customer.otps(1), "the email has the fixed OTP")
-
-	next := customer.browser.submit(otpPage, "continue", url.Values{"otp": {fixedOTP}})
-
-	require.Equal(t, http.StatusOK, next.status, next.body)
-	assert.False(t, isOTPPage(next), "the fixed OTP is accepted")
-}
-
 func TestTheEmailAddressInADifferentCaseGetsAnOTPByEmailAndAuthenticatesTheCustomer(t *testing.T) {
 	client := registered(t, registrationTestProduct)
 	customer := newEligibleAccount(t)

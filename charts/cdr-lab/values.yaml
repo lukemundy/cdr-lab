@@ -77,6 +77,9 @@ register:
 dataHolders:
   # The interval of the requests for the statuses of the software products, more than 0s and at most 4m.
   registerStatusInterval: ""
+  # Optional. The maximum age of a CRL in the revocation check of the client certificates of each brand, 0s or more,
+  # for example 30s. Without a value, each brand uses the default of the data holder, 1m.
+  crlMaxAge: ""
 
 # The brands of the release. Each key is the name of a preset brand: wattle-bank, redgum-bank, harbour-bank or
 # kestrel-bank. The chart gives each brand its Register record. Each brand has these values:

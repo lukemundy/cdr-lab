@@ -1,0 +1,44 @@
+# The cluster:up task sets the image of compose.yaml and makes the ConfigMap postgres-init from the lab SQL files.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: postgres}
+  template:
+    metadata:
+      labels: {app: postgres}
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: postgres
+          image: postgres
+          env:
+            - {name: POSTGRES_USER, value: postgres}
+            - {name: POSTGRES_PASSWORD, value: postgres}
+          ports:
+            - {name: postgres, containerPort: 5432}
+          # TCP, because the temporary server that initialises the database listens on the socket only.
+          readinessProbe:
+            exec:
+              command: [pg_isready, --host=127.0.0.1, --username=postgres, --dbname=postgres]
+            periodSeconds: 2
+          volumeMounts:
+            - {name: init, mountPath: /docker-entrypoint-initdb.d, readOnly: true}
+            - {name: data, mountPath: /var/lib/postgresql}
+      volumes:
+        - name: init
+          configMap: {name: postgres-init}
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector: {app: postgres}
+  ports:
+    - {name: postgres, port: 5432}

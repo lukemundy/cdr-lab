@@ -81,6 +81,8 @@ None.
 - <a id="lab-0019"></a>**LAB-0019** The values can give more participant records, in the format of the load file of the Register. For example, the data recipients of the conformance suite. ([Register: the load file uses the CDS field names](../../services/register/design/deployment.md#reg-0905); [Judgement: the chart makes the seed from its values](#lab-0103))
 - <a id="lab-0020"></a>**LAB-0020** When a record of the more participants has the identifier of a preset brand or of its legal entity, the chart does not render. The error names the identifier. ([Judgement: the chart has the Register record of each preset brand](#lab-0102))
 
+- <a id="lab-0021"></a>**LAB-0021** The values can give a maximum CRL age for the data holders. The chart gives it to each brand. With no value, each brand uses the [default maximum CRL age](../../pkg/cds/DESIGN.md#cdsl-0053). ([data holder: the maximum CRL age](../../services/dataholder/design/api-standards.md#dh-0467); [Judgement: the maximum CRL age in the cluster job](#lab-0108))
+
 ## Seed data
 
 - <a id="lab-0128"></a>**LAB-0128** The values of a brand can give the customers of that brand as a list. Each item has the format of [a customer of the customer load file](../../services/dataholder/design/operator-interface.md#dh-2651). ([Judgement: seed customers under their brand (ADR 0041)][adr-0041])
@@ -234,6 +236,12 @@ None.
 - Kind: choice
 - Basis: Step 3.3. The chart of a service publishes after only its own tests pass ([Judgement: the chart publishes after only its own tests pass](../../services/dataholder/design/deployment.md#dh-1373)).
 - Reason: The cluster job is the only test that installs the umbrella chart. A chart that its own test did not install must not publish.
+
+### <a id="lab-0108"></a>LAB-0108 The maximum CRL age in the cluster job
+
+- Kind: choice
+- Basis: Step 3.3. The conformance suite revokes a client certificate and then expects each data holder to refuse it with no wait ([conformance: no long waits](../../conformance/DESIGN.md#conf-0025)). With the default maximum age, a data holder can use a CRL from before the revocation for 1 minute.
+- Reason: The cluster job then gives `0s`, as compose does. The value is optional, as in the [data holder chart](../dataholder/README.md), so a lab user gets the default of the data holder.
 
 ## Withdrawn
 

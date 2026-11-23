@@ -25,7 +25,7 @@ func TestTheContainersHaveTheVariablesOfTheServiceCharts(t *testing.T) {
 			desc:     "each optional part",
 			umbrella: lintArgs,
 			register: set("seed.configMap=seed", "pki.publicRootSecret=root", "console.enabled=true"),
-			dataholder: set("pki.publicRootSecret=root", "console.enabled=true", "bankSite.enabled=true",
+			dataholder: set("pki.publicRootSecret=root", "crlMaxAge=30s", "console.enabled=true", "bankSite.enabled=true",
 				"bankSite.allowedHosts={bank.test:8085}"),
 		},
 	} {

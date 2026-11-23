@@ -146,7 +146,7 @@ services:
       INTERNAL_ALLOWED_HOSTS: wattle-bank:8080,127.0.0.1:8180,localhost:8180
       MAIL_FROM: no-reply@wattlebank.test
       # The browser of the OpenID conformance suite cannot read the mail sink.
-      FIXED_OTPS: openid@mail.test:111111,fixed-otp@mail.test:024680
+      FIXED_OTPS: openid@mail.test:111111
       BANK_SITE_ALLOWED_HOSTS: 127.0.0.1:8185,localhost:8185
     ports:
       - 127.0.0.1:8180:8080

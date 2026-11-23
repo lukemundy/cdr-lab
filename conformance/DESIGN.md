@@ -42,6 +42,7 @@ flowchart LR
 
 - The OpenID conformance run (build tag `openid`, `mise run openid-conformance`). It runs the test plan of the OpenID Foundation, and it does not run in CI ([README][readme]).
 - The interfaces that the CDR does not define: the operator interfaces, the health probes and the operator consoles. The Go tests of each service test them, and the browser tests test the UIs ([ADR 0019][adr-0019]).
+- The [fixed OTPs of the data holder](../services/dataholder/design/consumer-authentication.md#dh-1264). They are a lab-only test feature that [no chart gives](../services/dataholder/design/deployment.md#dh-1353), so a test of them cannot pass in [each environment](#conf-0059). The Go tests of the data holder test them.
 
 ## Subject of a test
 

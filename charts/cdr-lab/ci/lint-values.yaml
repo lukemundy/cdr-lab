@@ -6,6 +6,8 @@ publicTLS:
     name: lab-ca
     kind: ClusterIssuer
   rootSecret: public-root
+dataHolders:
+  crlMaxAge: 30s
 routes:
   enabled: true
   tls:

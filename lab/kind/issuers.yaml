@@ -1,0 +1,31 @@
+# The mock public CA of the cluster job, as cert-manager resources: a root, the issuer lab-ca of the chart values, and
+# the certificate of the JWKS host of the conformance suite.
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata: {name: selfsigned}
+spec: {selfSigned: {}}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata: {name: public-root-ca}
+spec:
+  isCA: true
+  commonName: cdr-lab public root
+  secretName: public-root-ca
+  privateKey: {algorithm: ECDSA, size: 256}
+  issuerRef: {name: selfsigned, kind: Issuer}
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata: {name: lab-ca}
+spec: {ca: {secretName: public-root-ca}}
+---
+# The services get the JWKS of the software products of the suite at https://conformance:8443 and :8444.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata: {name: conformance-jwks}
+spec:
+  secretName: conformance-jwks
+  dnsNames: [conformance]
+  privateKey: {algorithm: ECDSA, size: 256}
+  issuerRef: {name: lab-ca, kind: Issuer}
