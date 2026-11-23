@@ -64,14 +64,12 @@ func startAPIs(t *testing.T) process {
 // Verifies: DH-2648
 func TestEachTLSListenerUsesARenewedCertificateWithNoRestart(t *testing.T) {
 	setOnly(t, apiMode)
-	t.Setenv("BANK_SITE_ENABLED", "true")
-	t.Setenv("BANK_SITE_ALLOWED_HOSTS", "bank.example")
 	public := newRenewableTLSFiles(t, "PUBLIC_TLS_CERT_FILE", "PUBLIC_TLS_KEY_FILE")
 	secure := newRenewableTLSFiles(t, "SECURE_TLS_CERT_FILE", "SECURE_TLS_KEY_FILE")
 	proc := startAPIs(t)
 
-	renewedPublic := public.renew(t)
-	renewed := map[int][]byte{apiPort: renewedPublic, bankSitePort: renewedPublic, securePort: secure.renew(t)}
+	// The bank site gets the certificate of the public listener, which a bank site test proves.
+	renewed := map[int][]byte{apiPort: public.renew(t), securePort: secure.renew(t)}
 
 	var ports []int
 
@@ -88,7 +86,7 @@ func TestEachTLSListenerUsesARenewedCertificateWithNoRestart(t *testing.T) {
 		}, 15*time.Second, 100*time.Millisecond, "port %d", l.Port)
 	}
 
-	assert.ElementsMatch(t, []int{apiPort, securePort, bankSitePort}, ports)
+	assert.ElementsMatch(t, []int{apiPort, securePort}, ports)
 }
 
 func TestTheAPIsDoNotStartWithATLSCertificateFileThatDoesNotExist(t *testing.T) {
