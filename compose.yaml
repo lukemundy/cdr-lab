@@ -73,8 +73,8 @@ services:
       PUBLIC_TLS_CERT_FILE: /tls/public.crt
       PUBLIC_TLS_KEY_FILE: /tls/public.key
       SECURE_BASE_URL: https://register:8083
-      SECURE_TLS_CERT_FILE: /tls/secure.crt
-      SECURE_TLS_KEY_FILE: /tls/secure.key
+      # localhost is for the clients on the host.
+      SECURE_TLS_DNS_NAMES: register,localhost
       CDR_CA_BUNDLE_FILE: /pki/cdr-ca-bundle.pem
       # The Register issues CDR certificates as the mock CDR intermediate.
       CDR_INTERMEDIATE_CERT_FILE: /pki/cdr-intermediate.crt

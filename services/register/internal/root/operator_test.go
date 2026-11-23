@@ -61,8 +61,7 @@ func setLabSettings(t *testing.T) {
 		"INTERNAL_ALLOWED_HOSTS": operatorHost,
 		"PUBLIC_TLS_CERT_FILE":   certFile,
 		"PUBLIC_TLS_KEY_FILE":    keyFile,
-		"SECURE_TLS_CERT_FILE":   certFile,
-		"SECURE_TLS_KEY_FILE":    keyFile,
+		"SECURE_TLS_DNS_NAMES":   "register,mtls.register.example",
 		"CDR_CA_BUNDLE_FILE":     certFile,
 		// The one certificate of the bundle is also the CA that issues.
 		"CDR_INTERMEDIATE_CERT_FILE": certFile,

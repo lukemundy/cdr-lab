@@ -13,9 +13,9 @@ import (
 
 func TestEachRequiredValueFailsTheRenderWithItsName(t *testing.T) {
 	for _, value := range []string{
-		"image.tag", "publicBaseURL", "secureBaseURL", "crlURL", "internal.allowedHosts",
+		"image.tag", "publicBaseURL", "secureBaseURL", "secureDNSNames", "crlURL", "internal.allowedHosts",
 		"database.host", "database.name", "database.ownerSecret", "database.serviceSecret",
-		"pki.publicTLSSecret", "pki.secureTLSSecret", "pki.intermediateSecret", "pki.caBundleSecret",
+		"pki.publicTLSSecret", "pki.intermediateSecret", "pki.caBundleSecret",
 		"operator.tokenSecret",
 	} {
 		_, err := charttest.Render(t, value+"=null")
@@ -86,6 +86,7 @@ func TestTheRegisterGetsItsConfiguration(t *testing.T) {
 		"PGSSLMODE":                   "require",
 		"PUBLIC_BASE_URL":             "https://register.test:8081",
 		"SECURE_BASE_URL":             "https://register.test:8083",
+		"SECURE_TLS_DNS_NAMES":        "register.test,mtls.register.test",
 		"CDR_INTERMEDIATE_CRL_URL":    "http://register.test:8080/crl/cdr-intermediate.crl",
 		"OPERATOR_TOKEN":              "register-operator-token:token",
 		"INTERNAL_ALLOWED_HOSTS":      "register.test:8080",
@@ -96,13 +97,25 @@ func TestTheRegisterGetsItsConfiguration(t *testing.T) {
 	}
 
 	for _, name := range []string{
-		"PUBLIC_TLS_CERT_FILE", "PUBLIC_TLS_KEY_FILE", "SECURE_TLS_CERT_FILE", "SECURE_TLS_KEY_FILE",
-		"CDR_CA_BUNDLE_FILE", "CDR_INTERMEDIATE_CERT_FILE", "CDR_INTERMEDIATE_KEY_FILE",
+		"PUBLIC_TLS_CERT_FILE", "PUBLIC_TLS_KEY_FILE", "CDR_CA_BUNDLE_FILE", "CDR_INTERMEDIATE_CERT_FILE",
+		"CDR_INTERMEDIATE_KEY_FILE",
 	} {
 		assert.NotEmpty(t, env[name], name)
 	}
 
 	assert.NotContains(t, env, "SSL_CERT_FILE", "without a public root, the Register uses the system roots")
+}
+
+// Verifies: REG-1529
+func TestTheRegisterGetsTheDNSNamesOfItsMTLSCertificateAndNoCertificateFile(t *testing.T) {
+	env := charttest.Main(t, charttest.MustRender(t, "secureDNSNames={register.example}")).Vars()
+
+	assert.Equal(t, "register.example", env["SECURE_TLS_DNS_NAMES"])
+	assert.NotContains(t, env, "SECURE_TLS_CERT_FILE")
+	assert.NotContains(t, env, "SECURE_TLS_KEY_FILE")
+
+	_, err := charttest.Render(t, "secureDNSNames=null")
+	require.ErrorContains(t, err, "secureDNSNames")
 }
 
 func TestEachSecretIsMountedReadOnly(t *testing.T) {
@@ -115,7 +128,7 @@ func TestEachSecretIsMountedReadOnly(t *testing.T) {
 	}
 
 	assert.ElementsMatch(t,
-		[]string{"register-public-tls", "register-secure-tls", "cdr-intermediate", "cdr-ca-bundle", "public-root"},
+		[]string{"register-public-tls", "cdr-intermediate", "cdr-ca-bundle", "public-root"},
 		secrets)
 
 	main := charttest.Main(t, objects)

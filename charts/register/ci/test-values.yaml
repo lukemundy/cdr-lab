@@ -3,6 +3,7 @@ image:
   tag: 0123abc
 publicBaseURL: https://register.test:8081
 secureBaseURL: https://register.test:8083
+secureDNSNames: [register.test, mtls.register.test]
 crlURL: http://register.test:8080/crl/cdr-intermediate.crl
 internal:
   allowedHosts: [register.test:8080]
@@ -17,6 +18,5 @@ database:
   serviceSecret: register-service
 pki:
   publicTLSSecret: register-public-tls
-  secureTLSSecret: register-secure-tls
   intermediateSecret: cdr-intermediate
   caBundleSecret: cdr-ca-bundle

@@ -11,6 +11,9 @@ image:
 # The base URLs that clients use for the public and the secure APIs.
 publicBaseURL: ""
 secureBaseURL: ""
+# The DNS names of the CDR server certificate that the Register issues and renews for the secure listener (8083), with
+# the primary name first. For example: [register, mtls.register.example].
+secureDNSNames: []
 # The CRL URL of the mock CDR intermediate CA, which each certificate that the Register issues gives. The CRL is at the
 # path /crl/cdr-intermediate.crl of the internal listener.
 crlURL: ""
@@ -50,9 +53,9 @@ database:
 
 # The names of existing Secrets. The chart makes no keys or certificates.
 pki:
-  # kubernetes.io/tls Secrets (tls.crt and tls.key) of the public and the secure API listeners.
+  # A kubernetes.io/tls Secret (tls.crt and tls.key) of the public API listener. The Register issues the certificate
+  # of the secure API listener.
   publicTLSSecret: ""
-  secureTLSSecret: ""
   # A kubernetes.io/tls Secret with the certificate and the key of the mock CDR intermediate CA.
   intermediateSecret: ""
   # A Secret with the CDR CA bundle in the key ca.crt.

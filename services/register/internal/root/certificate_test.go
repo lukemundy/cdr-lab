@@ -65,44 +65,61 @@ func startAPIs(t *testing.T) process {
 func TestEachTLSListenerUsesARenewedCertificateWithNoRestart(t *testing.T) {
 	setLabSettings(t)
 	public := newRenewableTLSFiles(t, "PUBLIC_TLS_CERT_FILE", "PUBLIC_TLS_KEY_FILE")
-	secure := newRenewableTLSFiles(t, "SECURE_TLS_CERT_FILE", "SECURE_TLS_KEY_FILE")
 	proc := startAPIs(t)
 
-	renewed := map[int][]byte{apiPort: public.renew(t), securePort: secure.renew(t)}
+	renewed := public.renew(t)
 
-	var ports []int
+	assert.Eventually(t, func() bool {
+		_, tlsConfig := listener(t, proc, apiPort)
+		cert, err := tlsConfig.GetCertificate(nil)
 
-	for _, l := range proc.listeners {
-		if l.TLSConfig == nil {
-			continue
-		}
-
-		ports = append(ports, l.Port)
-		assert.Eventually(t, func() bool {
-			cert, err := l.TLSConfig.GetCertificate(nil)
-
-			return err == nil && bytes.Equal(cert.Certificate[0], renewed[l.Port])
-		}, 15*time.Second, 100*time.Millisecond, "port %d", l.Port)
-	}
-
-	assert.ElementsMatch(t, []int{apiPort, securePort}, ports)
+		return err == nil && bytes.Equal(cert.Certificate[0], renewed)
+	}, 15*time.Second, 100*time.Millisecond)
 }
 
-func TestTheAPIsDoNotStartWithATLSCertificateFileThatDoesNotExist(t *testing.T) {
+// Verifies: REG-1515, REG-1518, REG-1521, REG-1528
+func TestTheMTLSListenerServesACertificateThatTheRegisterIssuesWithNoFile(t *testing.T) {
+	pool := databasetest.New(t)
+	proc := startRegister(t, pool)
+
+	_, tlsConfig := listener(t, proc, securePort)
+	cert, err := tlsConfig.GetCertificate(nil)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"Mock CDR Register"}, cert.Leaf.Subject.Organization)
+	assert.Equal(t, "register", cert.Leaf.Subject.CommonName)
+	assert.Equal(t, []string{"register", "mtls.register.example"}, cert.Leaf.DNSNames)
+	assert.NoError(t, cert.Leaf.CheckSignatureFrom(intermediateAuthority(t).Certificate))
+
+	var events int
+	require.NoError(t, pool.QueryRow(t.Context(), "SELECT count(*) FROM events").Scan(&events))
+	assert.Zero(t, events)
+}
+
+// Verifies: REG-1519
+func TestTheAPIsDoNotStartWithNoDNSNamesOfTheMTLSListener(t *testing.T) {
+	for name, value := range map[string]string{"absent": "", "an empty name": "register,"} {
+		t.Run(name, func(t *testing.T) {
+			setLabSettings(t)
+			t.Setenv("SECURE_TLS_DNS_NAMES", value)
+
+			_, err := loadConfig(apiMode)
+
+			assert.ErrorContains(t, err, "SECURE_TLS_DNS_NAMES")
+		})
+	}
+}
+
+// Verifies: REG-1522
+func TestTheAPIsDoNotStartWhenTheIssueOfTheMTLSCertificateFails(t *testing.T) {
 	setLabSettings(t)
+	t.Setenv("SECURE_TLS_DNS_NAMES", "not_a_host_name")
 	pool := databasetest.New(t)
 	require.NoError(t, migrate(t.Context(), pool))
 
-	for _, setting := range []string{"PUBLIC_TLS_CERT_FILE", "SECURE_TLS_CERT_FILE"} {
-		t.Run(setting, func(t *testing.T) {
-			t.Setenv(setting, "does-not-exist.pem")
+	cfg, err := loadConfig(apiMode)
+	require.NoError(t, err)
 
-			cfg, err := loadConfig(apiMode)
-			require.NoError(t, err)
+	_, err = newProcess(t.Context(), pool, cfg, apiMode)
 
-			_, err = newProcess(t.Context(), pool, cfg, apiMode)
-
-			assert.ErrorContains(t, err, "TLS certificate")
-		})
-	}
+	assert.ErrorContains(t, err, "issue the certificate of the mTLS listener")
 }

@@ -33,6 +33,7 @@ advancedMounts:
 {{- define "register.values" -}}
 {{- $v := .Values -}}
 {{- $_ := include "register.required" (list "internal.allowedHosts" $v.internal.allowedHosts "the Host header values of the operator interface and the console") -}}
+{{- $_ := include "register.required" (list "secureDNSNames" $v.secureDNSNames "the DNS names of the certificate that the Register issues for the secure APIs") -}}
 {{- $image := dict
   "repository" $v.image.repository
   "tag" (include "register.required" (list "image.tag" ($v.image.tag | default $.Chart.AppVersion) "the commit ID of the Register image, or a chart with an appVersion"))
@@ -96,8 +97,7 @@ controllers:
           PUBLIC_TLS_CERT_FILE: /tls/public/tls.crt
           PUBLIC_TLS_KEY_FILE: /tls/public/tls.key
           SECURE_BASE_URL: {{ include "register.required" (list "secureBaseURL" $v.secureBaseURL "the base URL of the secure APIs") }}
-          SECURE_TLS_CERT_FILE: /tls/secure/tls.crt
-          SECURE_TLS_KEY_FILE: /tls/secure/tls.key
+          SECURE_TLS_DNS_NAMES: {{ $v.secureDNSNames | join "," | quote }}
           CDR_CA_BUNDLE_FILE: /pki/ca-bundle/ca.crt
           CDR_INTERMEDIATE_CERT_FILE: /pki/intermediate/tls.crt
           CDR_INTERMEDIATE_KEY_FILE: /pki/intermediate/tls.key
@@ -139,7 +139,6 @@ service:
 
 persistence:
   public-tls: {{ include "register.secretMount" (list (include "register.required" (list "pki.publicTLSSecret" $v.pki.publicTLSSecret "the TLS Secret of the public APIs")) "/tls/public") | nindent 4 }}
-  secure-tls: {{ include "register.secretMount" (list (include "register.required" (list "pki.secureTLSSecret" $v.pki.secureTLSSecret "the TLS Secret of the secure APIs")) "/tls/secure") | nindent 4 }}
   intermediate: {{ include "register.secretMount" (list (include "register.required" (list "pki.intermediateSecret" $v.pki.intermediateSecret "the Secret of the mock CDR intermediate CA")) "/pki/intermediate") | nindent 4 }}
   ca-bundle: {{ include "register.secretMount" (list (include "register.required" (list "pki.caBundleSecret" $v.pki.caBundleSecret "the Secret of the CDR CA bundle")) "/pki/ca-bundle") | nindent 4 }}
   {{- if $v.pki.publicRootSecret }}
