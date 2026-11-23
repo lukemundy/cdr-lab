@@ -33,7 +33,8 @@ Change these versions only on purpose, in a separate change.
 cdr-lab/
 ├── mise.toml            # tool versions and tasks
 ├── compose.yaml         # the lab deployment
-├── charts/              # Helm charts, for deployments outside the lab
+├── charts/              # Helm charts: one for each service, and the umbrella chart of a cluster deployment
+├── cli/                 # the lab CLI, cdrlab
 ├── conformance/         # black-box tests of deployed components, and the pinned CDS OpenAPI specifications
 ├── docs/
 │   ├── adr/             # architecture decision records
@@ -117,7 +118,7 @@ mise run openid-conformance # the OpenID FAPI 1.0 Advanced test plan against the
 
 ## Lab deployment
 
-The lab deployment is Docker Compose (`compose.yaml`). It runs all services, PostgreSQL, a [Mailpit](https://mailpit.axllent.org) mail sink and a [`grafana/otel-lgtm`](https://github.com/grafana/docker-otel-lgtm) telemetry backend. It needs Docker, or Podman with its Docker-compatible API (`DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock`).
+The supported environments are the lab deployment (Docker Compose), a cluster deployment from the umbrella chart ([specification](charts/cdr-lab/DESIGN.md)) and CI. The lab deployment is Docker Compose (`compose.yaml`). It runs all services, PostgreSQL, a [Mailpit](https://mailpit.axllent.org) mail sink and a [`grafana/otel-lgtm`](https://github.com/grafana/docker-otel-lgtm) telemetry backend. It needs Docker, or Podman with its Docker-compatible API (`DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock`).
 
 ```sh
 mise run up         # create the lab CAs if necessary, build and start the lab (or only the named services), and wait until it is healthy

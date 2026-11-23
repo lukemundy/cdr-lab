@@ -17,6 +17,7 @@ This area gives the listeners of the data holder, the four preset brands in the 
 - <a id="dh-2629"></a>**DH-2629** In a process that serves the operator interface, the setting `INTERNAL_ALLOWED_HOSTS` is required, and it has no default. ([Judgement: a Host allowlist with no default](../../../pkg/platform/operatorhttp/DESIGN.md#opi-0009))
 - <a id="dh-2625"></a>**DH-2625** A process that runs only the workers serves only the health probes on the internal listener. ([a process needs only the settings that it uses](non-functional-requirements.md#dh-0010); [Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
 - <a id="dh-2626"></a>**DH-2626** The chart gives one container port and one Service port for each listener that the release runs. ([Judgement: listeners by TLS mode and audience (ADR 0025)][adr-0025])
+- <a id="dh-2648"></a>**DH-2648** Each TLS listener gets its certificate from a certificate file and a key file, and [uses a renewed certificate with no restart](../../../pkg/cds/DESIGN.md#cdsl-0089). For example, the mTLS listener uses a CDR server certificate that a CronJob renewed. ([Judgement: CDR certificates from the Register (ADR 0032)][adr-0032])
 
 ## Lab-only features
 
@@ -237,6 +238,7 @@ A production data holder does not have these features. Real components must not 
 [adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md
 [adr-0027]: ../../../docs/adr/0027-release-all-artifacts-with-one-version-from-a-manual-workflow-on-main.md
 [adr-0029]: ../../../docs/adr/0029-promote-the-tested-image-of-each-service-to-a-release-with-no-rebuild.md
+[adr-0032]: ../../../docs/adr/0032-issue-each-cdr-certificate-of-a-deployment-through-the-register-and-renew-it-with-no-manual-step.md
 [adr-0030]: ../../../docs/adr/0030-build-each-service-image-for-linux-amd64-and-linux-arm64-with-a-cross-compile.md
 [cds-register-apis]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-apis
 [cds-register-schemas]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api-schemas

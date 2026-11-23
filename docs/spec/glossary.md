@@ -262,6 +262,11 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 ## Lab
 
+### Cluster deployment
+
+- Lab term: the lab services from one release of the [umbrella chart](#umbrella-chart), in one namespace of a Kubernetes cluster ([umbrella chart][umbrella-chart-design]). It is a lab, not a production service.
+- Not the same as: [lab](#lab), which is the deployment with Docker Compose.
+
 ### Conformance suite
 
 - Lab term: the black-box tests in `conformance/` ([conformance DESIGN.md][conformance-design]). One test of the suite is a conformance test.
@@ -304,7 +309,7 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 ### Lab
 
-- Lab term: the lab deployment (Docker Compose) and its data ([README: Lab deployment][readme-lab]). "Lab-only" marks a function that production does not have.
+- Lab term: the lab deployment (Docker Compose) and its data ([README: Lab deployment][readme-lab]). "Lab-only" marks a function that production does not have, also in a [cluster deployment](#cluster-deployment).
 
 ### Lab brand
 
@@ -375,6 +380,11 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 - Not the same as: [authentication](#authentication). The data holder keeps them separate.
 - Do not use: login, log in.
 
+### Umbrella chart
+
+- Lab term: the Helm chart `cdr-lab`, which deploys the Register and a set of the preset brands with one release ([umbrella chart][umbrella-chart-design]).
+- Not the same as: the chart of a service, which deploys one service.
+
 ### Web UI
 
 - Lab term: a lab-only browser UI and its API on one listener, with one origin ([web UI library DESIGN.md][consolehttp-design]). The web UIs are the operator consoles, with their console APIs, and the online bank site, with its API.
@@ -404,6 +414,7 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 [readme-data]: ../../README.md#data
 [readme-lab]: ../../README.md#lab-deployment
 [ui-design]: ../../web/packages/ui/design/README.md
+[umbrella-chart-design]: ../../charts/cdr-lab/DESIGN.md
 [accc-cert-mgmt]: https://consumerdataright.atlassian.net/wiki/spaces/DP/pages/360415310/Certificate+Management
 [cdr-act]: https://www.legislation.gov.au/C2004A00109/latest/text
 [cdr-rules]: https://www.legislation.gov.au/F2020L00094/latest/text

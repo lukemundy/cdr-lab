@@ -2,6 +2,7 @@
 
 - Date: 2026-10-22
 - Amended by [ADR-0030](0030-build-each-service-image-for-linux-amd64-and-linux-arm64-with-a-cross-compile.md): the platforms of each image
+- Amended by [ADR-0035](0035-give-the-lab-one-cli-cdrlab-in-cli-with-an-image-that-follows-the-rules-of-a-service-image.md): the image of the lab CLI
 
 ## Context
 

@@ -99,6 +99,8 @@ This table is the registry of the codes. A new specification adds its code in th
 | `pki` | `PKI` |
 | `conformance` | `CONF` |
 | `tools/release` | `RLS` |
+| `charts/cdr-lab` | `LAB` |
+| `cli/cdrlab` | `CLI` |
 | `web/packages/ui` | `UI` |
 | `web/packages/web-platform` | `WCON` |
 | `pkg/cds` | `CDSL` |
