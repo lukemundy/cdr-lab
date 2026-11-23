@@ -69,7 +69,7 @@ To change or remove a record, use the operator console of the Register (`http://
 
 ## Run your software on the lab network
 
-A browser on the host cannot reach the authorisation pages of a brand, because the base URIs of the compose lab are compose host names, for example `https://wattle-bank:8081`. Thus run your software and its tests as a container on the compose network `cdr-lab_default`, and drive the authorisation over HTTP from there.
+A browser on the host cannot reach the authorisation pages of a brand, because the base URIs of the compose lab are compose host names, for example `https://wattle-bank:8081` ([CDR-218](https://linear.app/mundy/issue/CDR-218) tracks this limit). Thus run your software and its tests as a container on the compose network `cdr-lab_default`, and drive the authorisation over HTTP from there.
 
 The Register and the brand get your JWKS from the `jwksUri` over TLS, and they trust only the public root of the lab. Thus give the host names of your URIs a certificate from the mock public CA, and give them to the container as network aliases:
 
