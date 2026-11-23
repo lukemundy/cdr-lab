@@ -162,4 +162,4 @@ helm upgrade cdr-lab oci://ghcr.io/lukemundy/cdr-lab/charts/cdr-lab --version X.
   --values my-values.yaml --values budget-values.yaml --values customers-values.yaml --wait --timeout 10m
 ```
 
-After each install and each upgrade, the seed Jobs add each record of the values that the service does not have. A customer gets a new customer number at each fresh deployment: find a seed customer by its email address.
+A list in a later values file replaces the full list of an earlier file. Thus give all the customers of a brand in one file. After each install and each upgrade, the seed Jobs add each record of the values that the service does not have. A customer gets a new customer number at each fresh deployment: find a seed customer by its email address.
