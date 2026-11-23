@@ -1,6 +1,6 @@
 # Umbrella chart
 
-The umbrella chart `cdr-lab` deploys the lab to one namespace of a Kubernetes cluster with one Helm release: the mock CDR Register and a set of the four preset brands of the mock data holder. Its values give the seed data. It makes the mock CDR CA when it is absent, gets the CDR certificates from the Register and renews them, and gets the public TLS certificates from cert-manager or from existing Secrets. A [cluster deployment](../../docs/spec/glossary.md#cluster-deployment) is a lab, not a production service ([ADR 0033][adr-0033]).
+The umbrella chart `cdr-lab` deploys the lab to one namespace of a Kubernetes cluster with one Helm release: the mock CDR Register and a set of the four preset brands of the mock data holder. Its values give the seed data: the participants and the customers of each brand. It makes the mock CDR CA when it is absent, gets the CDR certificates from the Register and renews them, and gets the public TLS certificates from cert-manager or from existing Secrets. A [cluster deployment](../../docs/spec/glossary.md#cluster-deployment) is a lab, not a production service ([ADR 0033][adr-0033]).
 
 ## Context
 
@@ -39,6 +39,7 @@ None.
 
 - One release that deploys the Register and a set of the preset brands, with no step on a host other than the databases and the Secrets of the deployment.
 - No way to give a brand values that disagree with its Register record.
+- The same participants and customers after a new install with the same values, and the new seed records of the values after an upgrade.
 - CDR certificates that the Register issues, and that are replaced before they expire with no manual step.
 - A CI job that installs the chart and runs the conformance suite against it.
 
@@ -46,7 +47,6 @@ None.
 
 - PostgreSQL, the mail server, cert-manager and the Gateway. The cluster or the lab user gives them ([ADR 0033][adr-0033]).
 - A brand from a mounted brand directory. The [data holder chart](../dataholder/README.md) deploys it.
-- Customer seed data, and the onboarding of software products with `cdrlab`. A later change adds them.
 - More than one instance of a service, and data that stays across an upgrade before version 1.0.0 ([ADR 0027][adr-0027]).
 - Operator identity and a login for the consoles ([production gaps][production-gaps]).
 
@@ -81,6 +81,15 @@ None.
 - <a id="lab-0019"></a>**LAB-0019** The values can give more participant records, in the format of the load file of the Register. For example, the data recipients of the conformance suite. ([Register: the load file uses the CDS field names](../../services/register/design/deployment.md#reg-0905); [Judgement: the chart makes the seed from its values](#lab-0103))
 - <a id="lab-0020"></a>**LAB-0020** When a record of the more participants has the identifier of a preset brand or of its legal entity, the chart does not render. The error names the identifier. ([Judgement: the chart has the Register record of each preset brand](#lab-0102))
 
+## Seed data
+
+- <a id="lab-0128"></a>**LAB-0128** The values of a brand can give the customers of that brand as a list. Each item has the format of [a customer of the customer load file](../../services/dataholder/design/operator-interface.md#dh-2651). ([Judgement: seed customers under their brand (ADR 0041)][adr-0041])
+- <a id="lab-0129"></a>**LAB-0129** After each install and each upgrade, a Job of the chart runs [the participant add of `cdrlab`](../../cli/cdrlab/design/onboarding.md#cli-0179) with the participant seed file of the release. ([Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040])
+- <a id="lab-0130"></a>**LAB-0130** After each install and each upgrade, a Job of the chart runs [the customer add of `cdrlab`](../../cli/cdrlab/design/onboarding.md#cli-0180) for each brand with customers in the values. The file has the customers of that brand. ([Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040]; [Judgement: seed customers under their brand (ADR 0041)][adr-0041])
+- <a id="lab-0131"></a>**LAB-0131** Each seed Job tries again until its service is ready. It fails after 10 minutes. ([Kubernetes: Jobs][k8s-job]; [Judgement: a ready brand within 10 minutes of an install](#lab-0106))
+- <a id="lab-0132"></a>**LAB-0132** The chart README says that an upgrade adds only the new participants and customers of the values. A change or a removal of a seed record needs a fresh deployment. ([Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040])
+- <a id="lab-0133"></a>**LAB-0133** Security: the ServiceAccount of a seed Job has no permission, and the pod of a seed Job mounts no ServiceAccount token. ([Kubernetes: RBAC][k8s-rbac]; [Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040])
+
 ## Host names and base URIs
 
 - <a id="lab-0030"></a>**LAB-0030** Each TLS listener of the release has an external host name and a port. ([Judgement: separate host names on port 443 (ADR 0034)][adr-0034])
@@ -105,7 +114,7 @@ None.
 
 ## Mock CDR CA
 
-- <a id="lab-0050"></a>**LAB-0050** After each install and each upgrade, a Job of the chart runs [the CA set-up of `cdrlab`](../../cli/cdrlab/DESIGN.md#cli-0010). ([Judgement: CDR certificates from the Register (ADR 0032)][adr-0032])
+- <a id="lab-0050"></a>**LAB-0050** After each install and each upgrade, a Job of the chart runs [the CA set-up of `cdrlab`](../../cli/cdrlab/design/certificates.md#cli-0010). ([Judgement: CDR certificates from the Register (ADR 0032)][adr-0032])
 - <a id="lab-0051"></a>**LAB-0051** The CA Secrets have the names that the chart README gives. A deployment that makes them before the install gives its own mock CDR CA. ([Judgement: CDR certificates from the Register (ADR 0032)][adr-0032])
 - <a id="lab-0052"></a>**LAB-0052** The Register starts only after the CA Secrets exist. ([Judgement: CDR certificates from the Register (ADR 0032)][adr-0032])
 - <a id="lab-0053"></a>**LAB-0053** The CA Secrets and the certificate Secrets stay after an uninstall. After an install with the same values and the same databases, the Register has the same CA. ([Judgement: CDR certificates from the Register (ADR 0032)][adr-0032])
@@ -114,7 +123,7 @@ None.
 ## CDR certificates
 
 - <a id="lab-0060"></a>**LAB-0060** The Register issues the CDR server certificate of its own mTLS listener. The DNS names are the external host name and the Service name of that listener. ([Register: the certificate of its own mTLS listener](../../services/register/design/certificate-management.md#reg-1515); [Judgement: in-cluster callers use the Service names (ADR 0034)][adr-0034])
-- <a id="lab-0061"></a>**LAB-0061** After each install and each upgrade, a Job of the chart runs [the certificate command of `cdrlab`](../../cli/cdrlab/DESIGN.md#cli-0030) for the mTLS listener of each brand. ([Judgement: CDR certificates from the Register (ADR 0032)][adr-0032])
+- <a id="lab-0061"></a>**LAB-0061** After each install and each upgrade, a Job of the chart runs [the certificate command of `cdrlab`](../../cli/cdrlab/design/certificates.md#cli-0030) for the mTLS listener of each brand. ([Judgement: CDR certificates from the Register (ADR 0032)][adr-0032])
 - <a id="lab-0062"></a>**LAB-0062** A CronJob of the chart runs the same command for each brand one time each day. ([Judgement: CDR certificates from the Register (ADR 0032)][adr-0032])
 - <a id="lab-0063"></a>**LAB-0063** The CDR server certificate of a brand has the legal entity name of its Register record as O. Its CN is the external host name of its mTLS listener. Its DNS names are that host name and the Service name of the brand. ([data holder: the subject of the CDR server certificate](../../services/dataholder/design/deployment.md#dh-1307); [Register: the O of a server CSR](../../services/register/design/certificate-management.md#reg-0623))
 - <a id="lab-0064"></a>**LAB-0064** The certificate Job of a brand tries again until the Register is ready. It fails after 10 minutes. ([Kubernetes: Jobs][k8s-job]; [Judgement: a ready brand within 10 minutes of an install](#lab-0106))
@@ -165,14 +174,16 @@ None.
 
 ## Non-functional requirements
 
-- <a id="lab-0120"></a>**LAB-0120** Availability: each CDR certificate of the release is replaced at least 30 days before it expires, with no manual step. ([CA library: the validity of a CDR certificate](../../pkg/ca/DESIGN.md#ca-0026); [Judgement: a renewal window of 30 days](../../cli/cdrlab/DESIGN.md#cli-0101))
+- <a id="lab-0120"></a>**LAB-0120** Availability: each CDR certificate of the release is replaced at least 30 days before it expires, with no manual step. ([CA library: the validity of a CDR certificate](../../pkg/ca/DESIGN.md#ca-0026); [Judgement: a renewal window of 30 days](../../cli/cdrlab/design/certificates.md#cli-0101))
 - <a id="lab-0121"></a>**LAB-0121** Availability: each service uses a renewed certificate within 5 minutes after its Secret changes, with no restart. ([Kubernetes: Secrets as files][k8s-secret-files]; [the reload of a certificate file](../../pkg/cds/DESIGN.md#cdsl-0089))
 - <a id="lab-0122"></a>**LAB-0122** Availability: after an install, each brand passes its readiness probe within 10 minutes with no manual step, when the databases, the users and the Secrets of the values exist. ([Judgement: a ready brand within 10 minutes of an install](#lab-0106))
 - <a id="lab-0123"></a>**LAB-0123** Security: 0 pods mount a Secret with the intermediate key, except the Register pod. ([Judgement: CDR certificates from the Register (ADR 0032)][adr-0032]; [Judgement: the Register is the CDR intermediate CA (ADR 0022)][adr-0022])
 - <a id="lab-0124"></a>**LAB-0124** Security: 0 Secrets of the release have the key of the mock CDR root. ([Judgement: CDR certificates from the Register (ADR 0032)][adr-0032])
-- <a id="lab-0125"></a>**LAB-0125** Security: the ServiceAccount of each Job and CronJob can get, update, patch and delete only the Secrets that it writes, by name. It can also create Secrets in the namespace. It has no other permission. ([Kubernetes: RBAC][k8s-rbac]; [Judgement: CDR certificates from the Register (ADR 0032)][adr-0032])
+- <a id="lab-0125"></a>**LAB-0125** Security: the ServiceAccount of each Job and CronJob that writes a Secret can get, update, patch and delete only the Secrets that it writes, by name. It can also create Secrets in the namespace. It has no other permission. ([Kubernetes: RBAC][k8s-rbac]; [Judgement: CDR certificates from the Register (ADR 0032)][adr-0032])
 - <a id="lab-0126"></a>**LAB-0126** Integrity: an upgrade to a new version of the chart completes with no manual step, also when the image of a Job changes. ([Kubernetes: Jobs][k8s-job]; [Judgement: one umbrella chart (ADR 0033)][adr-0033])
 - <a id="lab-0127"></a>**LAB-0127** Integrity: each Job and CronJob of the chart gives the same result when it runs again with the same inputs. ([Judgement: CDR certificates from the Register (ADR 0032)][adr-0032])
+- <a id="lab-0134"></a>**LAB-0134** Integrity: a new install with the same values and new databases gives the same participants, with the same identifiers, fields and statuses. It gives [the same customers](../../services/dataholder/design/operator-interface.md#dh-2668) for each brand. ([Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040]; [Judgement: seed customers under their brand (ADR 0041)][adr-0041])
+- <a id="lab-0135"></a>**LAB-0135** Integrity: after an upgrade that adds a participant or a customer to the values, the release has it within 10 minutes. The upgrade changes 0 participants and 0 customers that exist. ([Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040]; [Judgement: a ready brand within 10 minutes of an install](#lab-0106))
 
 ## Judgements
 
@@ -236,6 +247,8 @@ None.
 [adr-0033]: ../../docs/adr/0033-deploy-the-lab-to-a-cluster-with-one-umbrella-chart-that-derives-each-brand-from-its-register-record.md
 [adr-0034]: ../../docs/adr/0034-expose-the-tls-listeners-of-a-cluster-deployment-with-optional-gateway-api-tlsroutes-in-passthrough-mode.md
 [adr-0036]: ../../docs/adr/0036-test-the-umbrella-chart-in-a-kind-cluster-in-ci-with-the-conformance-suite-as-a-job-in-the-cluster.md
+[adr-0040]: ../../docs/adr/0040-add-participants-and-customers-with-add-only-loads-of-the-operator-interfaces-from-cdrlab-and-from-the-umbrella-values.md
+[adr-0041]: ../../docs/adr/0041-give-the-seed-customers-of-a-brand-under-that-brand-with-accounts-that-name-a-product-of-the-brand-and-transaction-times-relative-to-the-load.md
 [cds-register-schemas]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api-schemas
 [cert-manager-certificate]: https://cert-manager.io/docs/usage/certificate/
 [dataholder-chart]: ../dataholder/README.md

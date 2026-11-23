@@ -1,6 +1,6 @@
 // Command cdrlab is the CLI of the lab. Its commands make the mock CDR CA and the mock public CA, get CDR
 // certificates from the Register and issue public TLS certificates, with Kubernetes Secrets or files as the output
-// (cli/cdrlab/DESIGN.md).
+// (cli/cdrlab/design/README.md).
 package main
 
 import (

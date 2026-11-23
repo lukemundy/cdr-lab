@@ -1,6 +1,6 @@
 # Mock CDR PKI
 
-The mock CDR PKI gives the lab a CDR CA and a separate public CA. They have the structure and the certificate profiles of production. In production, the ACCC operates the CDR CA, and TLS endpoints use certificates from public CAs. A real component that trusts the mock CAs then needs only a change of its CA bundles and certificates to work with production. The [`cdrlab` CA set-up](../cli/cdrlab/DESIGN.md#cli-0105) makes the CAs, and `cdrlab` issues the public TLS certificates of the lab. In a running lab, the Register is the CDR intermediate CA ([ADR 0022][adr-0022]). Each CDR certificate of a lab service or a lab test comes from the Register ([ADR 0032][adr-0032]), and the Register [issues the certificate of its own mTLS listener](../services/register/design/certificate-management.md#reg-1515).
+The mock CDR PKI gives the lab a CDR CA and a separate public CA. They have the structure and the certificate profiles of production. In production, the ACCC operates the CDR CA, and TLS endpoints use certificates from public CAs. A real component that trusts the mock CAs then needs only a change of its CA bundles and certificates to work with production. The [`cdrlab` CA set-up](../cli/cdrlab/design/commands.md#cli-0105) makes the CAs, and `cdrlab` issues the public TLS certificates of the lab. In a running lab, the Register is the CDR intermediate CA ([ADR 0022][adr-0022]). Each CDR certificate of a lab service or a lab test comes from the Register ([ADR 0032][adr-0032]), and the Register [issues the certificate of its own mTLS listener](../services/register/design/certificate-management.md#reg-1515).
 
 ## Context
 
@@ -34,7 +34,7 @@ None.
 - A mock CDR CA: a root CA and one issuing intermediate CA.
 - A mock public CA for TLS endpoints.
 - The issue of CDR certificates from CSRs, and of public TLS server certificates for lab hosts. The Register issues each CDR client and server certificate as the intermediate CA ([ADR 0022][adr-0022], [ADR 0032][adr-0032]). `cdrlab` issues the public TLS server certificates.
-- The revocation of CDR certificates, and a CRL of the CDR intermediate. In a running lab, the Register revokes CDR certificates, and signs and serves the CRL ([ADR 0022][adr-0022]). [`cdrlab` does neither](../cli/cdrlab/DESIGN.md#cli-0112).
+- The revocation of CDR certificates, and a CRL of the CDR intermediate. In a running lab, the Register revokes CDR certificates, and signs and serves the CRL ([ADR 0022][adr-0022]). [`cdrlab` does neither](../cli/cdrlab/design/commands.md#cli-0112).
 
 ## Non-goals
 
@@ -207,7 +207,7 @@ The [Register certificate revocation area](../services/register/design/certifica
 - <a id="pki-0057"></a>**PKI-0057** Moved to [the signature algorithm of the CRL](../pkg/ca/DESIGN.md#ca-0045).
 - <a id="pki-0058"></a>**PKI-0058** Moved to [the extensions of the CRL](../pkg/ca/DESIGN.md#ca-0046).
 - <a id="pki-0060"></a>**PKI-0060** Moved to [the next update of a CRL](../pkg/ca/DESIGN.md#ca-0047).
-- <a id="pki-0067"></a>**PKI-0067** Moved to [no command that revokes a certificate or signs a CRL](../cli/cdrlab/DESIGN.md#cli-0112).
+- <a id="pki-0067"></a>**PKI-0067** Moved to [no command that revokes a certificate or signs a CRL](../cli/cdrlab/design/commands.md#cli-0112).
 - <a id="pki-0078"></a>**PKI-0078** Moved to [the judgement on mock CA names](../pkg/ca/DESIGN.md#ca-0048).
 - <a id="pki-0079"></a>**PKI-0079** Moved to [the judgement on the production profiles](../pkg/ca/DESIGN.md#ca-0049).
 - <a id="pki-0080"></a>**PKI-0080** Moved to [the judgement on the host name rules of a server CSR](../pkg/ca/DESIGN.md#ca-0050).

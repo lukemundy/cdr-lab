@@ -13,7 +13,7 @@ Early development. Two services run in the lab deployment, and a black-box confo
 | Mock CDR Register | Participants and their statuses, SSAs, and the Register APIs | [design/README.md](services/register/design/README.md) |
 | Mock data holder | One banking brand for each instance, from four preset brands: product data, the authorisation server, authorisations, and the banking APIs of an arrangement | [design/README.md](services/dataholder/design/README.md) |
 
-The lab CLI `cdrlab` makes the CAs and the certificates of the compose lab and of a cluster deployment ([DESIGN.md](cli/cdrlab/DESIGN.md)).
+The lab CLI `cdrlab` makes the CAs and the certificates of the compose lab and of a cluster deployment ([specification](cli/cdrlab/design/README.md)).
 
 ## Target standards
 

@@ -322,11 +322,11 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 ### Lab directory
 
-- Lab term: the directory of the compose project of a lab, with its CAs and its certificates in `.lab/pki` ([cdrlab DESIGN.md][cdrlab-design]).
+- Lab term: the directory of the compose project of a lab, with its CAs and its certificates in `.lab/pki` ([cdrlab specification][cdrlab-design]).
 
 ### Load file
 
-- Lab term: the JSON format of the participant records that the Register loads, or of the products that the data holder loads.
+- Lab term: the JSON format of the participant records that the Register loads, or of the products or the customers that the data holder loads.
 - Not the same as: [seed file](#seed-file).
 
 ### Mock CDR PKI
@@ -341,6 +341,11 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 - Lab term: the listener of a service that requires a client certificate. The secure APIs and the authorisation server endpoints that need mTLS are on it.
 - Abbreviation: mTLS ([RFC 8705][rfc8705-binding]).
+
+### Onboarding
+
+- Lab term: the add of a participant or a customer to a running lab or [cluster deployment](#cluster-deployment), with `cdrlab` and an operator interface ([ADR 0040][adr-0040]). The onboarding of a software product also gets its client certificate.
+- Not the same as: [registration](#registration), which a software product does with a data holder.
 
 ### Online bank site
 
@@ -420,8 +425,9 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 [adr-0027]: ../adr/0027-release-all-artifacts-with-one-version-from-a-manual-workflow-on-main.md
 [adr-0029]: ../adr/0029-promote-the-tested-image-of-each-service-to-a-release-with-no-rebuild.md
 [adr-0038]: ../adr/0038-run-the-compose-lab-with-cdrlab-from-a-compose-project-in-the-binary-and-issue-its-cdr-certificates-from-the-host.md
+[adr-0040]: ../adr/0040-add-participants-and-customers-with-add-only-loads-of-the-operator-interfaces-from-cdrlab-and-from-the-umbrella-values.md
 [brands-readme]: ../../services/dataholder/brands/README.md
-[cdrlab-design]: ../../cli/cdrlab/DESIGN.md
+[cdrlab-design]: ../../cli/cdrlab/design/README.md
 [conformance-design]: ../../conformance/DESIGN.md
 [consolehttp-design]: ../../pkg/platform/consolehttp/DESIGN.md
 [pki-design]: ../../pki/DESIGN.md

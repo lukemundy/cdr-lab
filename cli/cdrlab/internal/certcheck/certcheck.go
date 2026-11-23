@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// DefaultRenewBefore is the renewal window of the commands (cli/cdrlab/DESIGN.md#cli-0101).
+// DefaultRenewBefore is the renewal window of the commands (cli/cdrlab/design/certificates.md#cli-0101).
 const DefaultRenewBefore = 30 * 24 * time.Hour
 
 type Want struct {

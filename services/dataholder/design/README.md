@@ -45,7 +45,7 @@ flowchart LR
 | Authorisation | [authorisation.md](authorisation.md) | The authorisation page, the authorisation response, the CDR arrangement and the presentation of the consumer pages. |
 | End of an arrangement | [end-of-an-arrangement.md](end-of-an-arrangement.md) | CDR arrangement revocation, withdrawal, the end of the sharing period and of eligibility, and the notice to the data recipient. |
 | Banking APIs | [banking-apis.md](banking-apis.md) | The customers and accounts, the APIs that give the CDR data of an arrangement, and the record of disclosures. |
-| Operator interface | [operator-interface.md](operator-interface.md) | The lab-only HTTP API that creates customer data, closes accounts and withdraws authorisations. |
+| Operator interface | [operator-interface.md](operator-interface.md) | The lab-only HTTP API that creates customer data, loads a set of customers, closes accounts and withdraws authorisations. |
 | Operator console | [operator-console.md](operator-console.md) | The lab-only browser UI for the lab operator. |
 | Operator console actions and create forms | [operator-console-create.md](operator-console-create.md) | The actions and the create forms of the operator console. |
 | Operator console API | [operator-console-api.md](operator-console-api.md) | The console API of the operator console. |
@@ -90,7 +90,7 @@ flowchart LR
 - The reaction to the participant status of a software product on the Register ([registration management](registration-management.md)).
 - The customers, accounts and transactions of the brand ([banking APIs](banking-apis.md)).
 - For the lab operator (lab-only):
-  - the operator interface, which creates customer data, closes accounts and withdraws authorisations for a consumer ([operator interface](operator-interface.md))
+  - the operator interface, which creates customer data, loads a set of customers, closes accounts and withdraws authorisations for a consumer ([operator interface](operator-interface.md))
   - the operator console ([operator console](operator-console.md))
   - the load of product reference data ([product reference data](product-reference-data.md))
 - For consumers (lab-only): the online bank site of the brand. It has a landing page, the current products, sign-up, sign-in and sign-out, the accounts with their balances and transactions, the opening and the close of an account, and the consumer dashboard ([online bank site](online-bank-site.md)).

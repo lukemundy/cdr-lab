@@ -1,6 +1,6 @@
 # Mock data holder: Operator interface
 
-This area gives the lab-only operator interface, which creates customers, accounts and transactions, closes accounts and withdraws authorisations. A production data holder gets its customers, accounts and transactions from its banking systems. In the lab, the operator interface creates them, and a real component does not depend on it.
+This area gives the lab-only operator interface, which creates customers, accounts and transactions, loads a set of customers, closes accounts and withdraws authorisations. A production data holder gets its customers, accounts and transactions from its banking systems. In the lab, the operator interface creates them, and a real component does not depend on it.
 
 ## Operations
 
@@ -14,6 +14,7 @@ This area gives the lab-only operator interface, which creates customers, accoun
 | <a id="dh-0725"></a>**DH-0725** | Read the transactions of an account | `GET /v1/customers/{customerNumber}/accounts/{accountId}/transactions` | None | 200 with the transactions, in the sequence of their creation | [Judgement: an operator interface for the customer data of the lab](#dh-0770) |
 | <a id="dh-0726"></a>**DH-0726** | Read the arrangements of a customer | `GET /v1/customers/{customerNumber}/arrangements` | None | 200 with the arrangements, in the sequence of their creation | [CDR Rules][cdr-rules], rule 9.3; [Judgement: an operator interface for the customer data of the lab](#dh-0770) |
 | <a id="dh-0727"></a>**DH-0727** | Withdraw an authorisation | `POST /v1/customers/{customerNumber}/arrangements/{arrangementId}/withdraw` | None | 200 with the arrangement | [CDR Rules][cdr-rules], rule 4.25(1)(b); [CDS: Withdrawal Standards][cds-withdrawal-standards] |
+| <a id="dh-2649"></a>**DH-2649** | Load customers | `POST /v1/customer-loads` | a [customer load file](#dh-2650) | 200 with [the result of each customer](#dh-2662) | [Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040] |
 
 ## Listener and access
 
@@ -26,7 +27,7 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 
 - <a id="dh-0729"></a>**DH-0729** The request bodies and the response bodies are JSON. ([Judgement: an operator interface for the customer data of the lab](#dh-0770))
 - <a id="dh-0730"></a>**DH-0730** When a request body is not valid, the response is 400, and the `detail` names each field and rule that fails. For example, a body with [a field that the table does not give](../../../pkg/platform/jsonhttp/DESIGN.md#body-0001) is not valid. ([RFC 9457, section 3.1.4][rfc9457-detail])
-- <a id="dh-2615"></a>**DH-2615** When a request body is larger than 64 KiB, the response is 413. ([the status of a body that is larger than its limit](../../../pkg/platform/problem/DESIGN.md#prob-0012); [Judgement: a body limit for each operation, with 413](operator-console-api.md#dh-1681))
+- <a id="dh-2615"></a>**DH-2615** When a request body is larger than its limit, the response is 413. The limit is 1 MiB for a customer load, and 64 KiB for each other body. ([the status of a body that is larger than its limit](../../../pkg/platform/problem/DESIGN.md#prob-0012); [Judgement: a body limit for each operation, with 413](operator-console-api.md#dh-1681); [Judgement: a body limit of 1 MiB for a customer load](#dh-2667))
 - <a id="dh-0731"></a>**DH-0731** The `detail` of an error response does not repeat a value of the request. ([RFC 9457, section 3.1.4][rfc9457-detail])
 - <a id="dh-0732"></a>**DH-0732** A request for a customer that does not exist gets 404. ([RFC 9110, section 15.5.5][rfc9110-404])
 - <a id="dh-0733"></a>**DH-0733** An error response is a [problem details](../../../docs/spec/glossary.md#problem-details) body with [the type `about:blank`](../../../pkg/platform/problem/DESIGN.md#prob-0001). ([RFC 9457][rfc9457])
@@ -88,6 +89,29 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 - <a id="dh-0764"></a>**DH-0764** A withdrawal of an arrangement that ended gets 409. ([RFC 9110, section 15.5.10][rfc9110-409])
 - <a id="dh-0765"></a>**DH-0765** The lab operator cannot create an arrangement. The only change to an arrangement is a withdrawal. ([Judgement: only the close of an account changes the customer data](#dh-0772))
 
+## Customer load
+
+A customer load adds the customers of a file to the brand. It is the format of the seed customers of the [umbrella chart](../../../charts/cdr-lab/DESIGN.md) and of `cdrlab`.
+
+- <a id="dh-2650"></a>**DH-2650** A customer load file is one JSON object with the field `customers`, a list of customers. ([Judgement: seed customers under their brand (ADR 0041)][adr-0041])
+- <a id="dh-2651"></a>**DH-2651** A customer of the file has the fields of [a create of a customer](#dh-0720), and optionally `accounts`, a list of accounts. ([Judgement: seed customers under their brand (ADR 0041)][adr-0041])
+- <a id="dh-2652"></a>**DH-2652** An account of the file has `productId` and `accountNumber`, and optionally `displayName`, `creditLimit`, `openStatus` and `transactions`. ([Judgement: seed customers under their brand (ADR 0041)][adr-0041])
+- <a id="dh-2653"></a>**DH-2653** The load takes the `productName` and the `productCategory` of an account from the product of the data holder with its `productId`. ([a `productId` is unique in the brand](product-reference-data.md#dh-0212); [Judgement: seed customers under their brand (ADR 0041)][adr-0041])
+- <a id="dh-2654"></a>**DH-2654** When the data holder has no product with the `productId` of an account, the response is 400. The `detail` names the customer by its position in the file, and the account. ([RFC 9457, section 3.1.4][rfc9457-detail]; [Judgement: seed customers under their brand (ADR 0041)][adr-0041])
+- <a id="dh-2655"></a>**DH-2655** The `bsb` of each account of the load is [the `bsb` of the brand file](brand.md#dh-0334). ([Judgement: seed customers under their brand (ADR 0041)][adr-0041])
+- <a id="dh-2656"></a>**DH-2656** When the `displayName` of an account is absent, it is the `name` of its product. When the `openStatus` is absent, it is `OPEN`. ([CDS: BankingAccountV3][cds-schema-account]; [Judgement: seed customers under their brand (ADR 0041)][adr-0041])
+- <a id="dh-2657"></a>**DH-2657** A transaction of the file has the fields of [a create of a transaction](#dh-0724), except `postingDateTime`, `executionDateTime` and `valueDateTime`. It also has `age`, a duration of RFC 3339 with days, hours and minutes only. For example, `P3DT2H`. ([RFC 3339, appendix A][rfc3339-duration]; [Judgement: seed customers under their brand (ADR 0041)][adr-0041])
+- <a id="dh-2658"></a>**DH-2658** The load sets the `executionDateTime` of each transaction to the time of the load less its `age`. It also sets the `postingDateTime` of a `POSTED` transaction to that time. ([the default `oldest-time` of Get Transactions For Account](banking-apis.md#dh-1085); [Judgement: seed customers under their brand (ADR 0041)][adr-0041])
+- <a id="dh-2659"></a>**DH-2659** Each customer, account and transaction of the file obeys the rules of its create. For example, an account number of 5 digits gets 400. ([the rules of a customer and an account](#dh-0734); [the rules of a transaction](#dh-0748))
+- <a id="dh-2660"></a>**DH-2660** The load creates the accounts of a customer, and the transactions of an account, in the sequence of the file. Then it closes each account with the `openStatus` `CLOSED`. ([no transaction for a closed account](#dh-0756); [Judgement: seed customers under their brand (ADR 0041)][adr-0041])
+- <a id="dh-2661"></a>**DH-2661** When the brand has a customer with the email address of a customer of the file, the load changes nothing for that customer of the file. This applies also when its fields or its accounts are different. ([the uniqueness of the email address](consumer-authentication.md#dh-1202); [Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040])
+- <a id="dh-2662"></a>**DH-2662** The response has `customers`: for each customer of the file, in its sequence, the `customerNumber` and `created`. `created` is `true` when the load created the customer, and `false` when the customer existed. ([Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040])
+- <a id="dh-2663"></a>**DH-2663** When two customers of the file have the same email address, with no difference for upper and lower case, the response is 400. ([the uniqueness of the email address](consumer-authentication.md#dh-1202))
+- <a id="dh-2664"></a>**DH-2664** When an account of a new customer has the BSB and the account number of a different account of the brand or of the file, the response is 409. ([the uniqueness of the BSB and the account number](#dh-0740))
+- <a id="dh-2665"></a>**DH-2665** Integrity: when the response of a customer load is not 200, the load creates 0 customers, 0 accounts and 0 transactions. ([Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040])
+- <a id="dh-2666"></a>**DH-2666** Integrity: a second customer load of the same file creates 0 customers, 0 accounts and 0 transactions, and its response has `created` set to `false` for each customer. ([Judgement: add-only loads of the operator interfaces (ADR 0040)][adr-0040])
+- <a id="dh-2668"></a>**DH-2668** Integrity: two loads of the same file into two new data holders of the same brand give the same customers. Each customer has the same fields, the same accounts by BSB and account number, and the same transactions in the same sequence with the same `age`. ([Judgement: seed customers under their brand (ADR 0041)][adr-0041])
+
 ## Judgements
 
 ### <a id="dh-0770"></a>DH-0770 An operator interface for the customer data of the lab
@@ -132,7 +156,18 @@ The operator interface obeys the [operator interface library](../../../pkg/platf
 - Basis: Step 3.3. In `extendedData`, the `extensionUType` is optional, and its only value is `nppPayload` ([CDS: BankingTransactionDetailV3][cds-schema-transaction-detail]). The `nppPayload` is mandatory when the `extensionUType` is `nppPayload`.
 - Reason: The CDS gives extended data only for NPP service overlays. A required `extensionUType` gives one shape of `extendedData`, with one set of validation rules. A transaction that is not an NPP payment has no `extendedData`.
 
+### <a id="dh-2667"></a>DH-2667 A body limit of 1 MiB for a customer load
+
+- Kind: choice
+- Basis: Step 3.2. A Kubernetes ConfigMap holds 1 MiB at most ([Kubernetes: ConfigMaps][k8s-configmap]). The umbrella chart gives the customers of a brand to its load in a ConfigMap.
+- Reason: A seed that fits in its ConfigMap then fits in one request. The other operations keep their limit of 64 KiB, because each creates one record.
+
 [adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md
+[adr-0040]: ../../../docs/adr/0040-add-participants-and-customers-with-add-only-loads-of-the-operator-interfaces-from-cdrlab-and-from-the-umbrella-values.md
+[adr-0041]: ../../../docs/adr/0041-give-the-seed-customers-of-a-brand-under-that-brand-with-accounts-that-name-a-product-of-the-brand-and-transaction-times-relative-to-the-load.md
+[cds-schema-account]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-banking-api_schemas_tocSbankingaccountv3
+[k8s-configmap]: https://kubernetes.io/docs/concepts/configuration/configmap/
+[rfc3339-duration]: https://www.rfc-editor.org/rfc/rfc3339#appendix-A
 [cdr-rules]: https://www.legislation.gov.au/F2020L00094/latest/text
 [cds-withdrawal-standards]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#withdrawal-standards
 [cds-product-categories]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#product-categories
