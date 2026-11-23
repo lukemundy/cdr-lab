@@ -1,0 +1,97 @@
+# The values of the umbrella chart. An empty value with no default is required: the chart does not render without it.
+# The chart also accepts the values of the bjw-s common library chart, for example defaultPodOptions.
+
+images:
+  # Optional tags. The default tag of each image is the appVersion of the chart. With a digest, the image cannot change
+  # under the tag.
+  register:
+    repository: ghcr.io/lukemundy/cdr-lab/register
+    tag: ""
+    digest: ""
+  dataholder:
+    repository: ghcr.io/lukemundy/cdr-lab/dataholder
+    tag: ""
+    digest: ""
+  cdrlab:
+    repository: ghcr.io/lukemundy/cdr-lab/cdrlab
+    tag: ""
+    digest: ""
+
+operator:
+  # An existing Secret with the operator token in the key token. The Register, each brand and each Job use it.
+  tokenSecret: ""
+
+# The PostgreSQL server of the release. The Register and each brand give their database and users.
+database:
+  host: ""
+  port: 5432
+  sslMode: require
+
+telemetry:
+  # The OTLP HTTP endpoint for traces, metrics and logs. Empty: the pods send no telemetry.
+  otlpEndpoint: ""
+
+publicTLS:
+  # Optional. A cert-manager issuer, for example {name: lab-ca, kind: ClusterIssuer}. With it, the chart makes a
+  # Certificate for each public listener. Without it, the Secrets that the chart README gives must exist.
+  issuerRef: {}
+  # Optional. An existing Secret with a public root in the key ca.crt. The Register and each brand then trust that root
+  # instead of the system roots.
+  rootSecret: ""
+
+# Gateway API routes, off by default. With routes, each TLS listener must have a host.
+routes:
+  enabled: false
+  # The parent Gateways of the TLSRoutes. The Gateway listener must have tls.mode Passthrough.
+  tls:
+    parentRefs: []
+  # The parent Gateways of the HTTPRoute of the CRL path of the Register, on its public host.
+  crl:
+    parentRefs: []
+
+# The CronJob of each brand gets a new CDR server certificate when the current one expires within 30 days.
+certificates:
+  schedule: "0 3 * * *"
+
+# A listener with no host has the Service name and the port of the listener. A listener with a host has the port 443
+# when it gives no port.
+register:
+  public:
+    host: ""
+    port: null
+  secure:
+    host: ""
+    port: null
+  internal:
+    # More Host header values (host:port) for the operator interface and the console, for example localhost:8080 for
+    # a port-forward. The chart adds register:8080.
+    allowedHosts: []
+  console:
+    enabled: false
+  database:
+    name: ""
+    # Secrets with the keys username and password. The owner user runs the migrations.
+    ownerSecret: ""
+    serviceSecret: ""
+
+dataHolders:
+  # The interval of the requests for the statuses of the software products, more than 0s and at most 4m.
+  registerStatusInterval: ""
+
+# The brands of the release. Each key is the name of a preset brand: wattle-bank, redgum-bank, harbour-bank or
+# kestrel-bank. The chart gives each brand its Register record. Each brand has these values:
+#
+#   public: {host: "", port: null}
+#   secure: {host: "", port: null}
+#   bankSite: {enabled: false, host: "", port: null}
+#   internal: {allowedHosts: []}   # the chart adds <brand>:8080
+#   console: {enabled: false}
+#   database: {name: "", ownerSecret: "", serviceSecret: ""}   # required
+#   mail: {smtpAddress: "", from: ""}   # required
+brands: {}
+
+# More participant records for the Register seed, in the format of the load file of the Register, for example the
+# data recipients of the conformance suite. A record must not have an identifier of a preset brand.
+participants:
+  dataHolders: []
+  dataRecipients: []

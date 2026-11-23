@@ -72,16 +72,20 @@ for chart in charts/*/Chart.yaml; do
 done
 """
 
-# ci/lint-values.yaml of each chart turns on each optional part.
+# ci/lint-values.yaml of each chart turns on each optional part. The API versions make the routes of the bjw-s
+# library use the Gateway API v1. The schemas of the Gateway API and cert-manager resources come from the CRDs-catalog
+# at a fixed commit.
 [tasks."lint:chart"]
-description = "Lint each chart, and check its manifests against the Kubernetes schemas"
+description = "Lint each chart, and check its manifests against the Kubernetes, Gateway API and cert-manager schemas"
 depends = ["chart:deps"]
 run = """
+crds='https://raw.githubusercontent.com/datreeio/CRDs-catalog/04af58d740718c4dc719441bf39fb284c784f4a8/{{ "{{" }}.Group{{ "}}" }}/{{ "{{" }}.ResourceKind{{ "}}" }}_{{ "{{" }}.ResourceAPIVersion{{ "}}" }}.json'
 for chart in charts/*/Chart.yaml; do
   dir=${chart%/Chart.yaml}
   helm lint --strict "$dir" --values "$dir/ci/test-values.yaml" --values "$dir/ci/lint-values.yaml"
-  helm template test "$dir" --kube-version 1.36.0 --values "$dir/ci/test-values.yaml" --values "$dir/ci/lint-values.yaml" |
-    kubeconform -strict -summary -kubernetes-version 1.36.0
+  helm template test "$dir" --kube-version 1.36.0 --values "$dir/ci/test-values.yaml" --values "$dir/ci/lint-values.yaml" \
+    --api-versions gateway.networking.k8s.io/v1/TLSRoute --api-versions gateway.networking.k8s.io/v1/HTTPRoute |
+    kubeconform -strict -summary -kubernetes-version 1.36.0 -schema-location default -schema-location "$crds"
 done
 """
 

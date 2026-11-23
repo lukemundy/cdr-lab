@@ -159,10 +159,49 @@ func RenderPackaged(t *testing.T, appVersion string, set ...string) ([]Object, e
 	return render(t, packages[0], nil, set)
 }
 
+// RenderDir renders the chart in dir with its ci/test-values.yaml and the more arguments of helm template, and gives
+// each object as a map.
+func RenderDir(t *testing.T, dir string, args ...string) ([]map[string]any, error) {
+	t.Helper()
+
+	readChartFiles(t, dir)
+
+	args = append([]string{"template", "test", dir, "--values", filepath.Join(dir, "ci", "test-values.yaml")}, args...)
+
+	var stdout, stderr bytes.Buffer
+
+	//nolint:gosec // The chart directory and the arguments come from the chart tests.
+	cmd := exec.CommandContext(t.Context(), "helm", args...)
+	cmd.Stdout, cmd.Stderr = &stdout, &stderr
+
+	if err := cmd.Run(); err != nil {
+		return nil, errors.New(stderr.String())
+	}
+
+	var objects []map[string]any
+
+	dec := yaml.NewDecoder(&stdout)
+
+	for {
+		var o map[string]any
+
+		err := dec.Decode(&o)
+		if errors.Is(err, io.EOF) {
+			return objects, nil
+		}
+
+		require.NoError(t, err)
+
+		if o != nil {
+			objects = append(objects, o)
+		}
+	}
+}
+
 func render(t *testing.T, chart string, files []string, set []string) ([]Object, error) {
 	t.Helper()
 
-	readChartFiles(t)
+	readChartFiles(t, ".")
 
 	args := []string{"template", "test", chart, "--values", "ci/test-values.yaml"}
 	for _, f := range files {
@@ -205,10 +244,10 @@ func render(t *testing.T, chart string, files []string, set []string) ([]Object,
 
 // readChartFiles reads each file of the chart, because go test caches a result until a file that the test opens
 // changes, and it does not see the files that helm opens.
-func readChartFiles(t *testing.T) {
+func readChartFiles(t *testing.T, dir string) {
 	t.Helper()
 
-	chart := os.DirFS(".")
+	chart := os.DirFS(dir)
 
 	err := fs.WalkDir(chart, ".", func(name string, d fs.DirEntry, err error) error {
 		if err != nil || d.IsDir() {

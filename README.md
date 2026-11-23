@@ -93,7 +93,7 @@ Record each choice that this process makes as a judgement next to its requiremen
 - **Telemetry:** OpenTelemetry through `pkg/platform/telemetry`. CDR data and personally identifiable information must never appear in telemetry, also when the data is mocked. The client IP address is the only exception ([ADR 0006](docs/adr/0006-telemetry.md)). Metrics give only the state of each process, and the traces give the detail of each request. Each long-running service process sends 23 metric series, also when the traffic increases: approximately 46 for the default lab and 115 with all banks ([ADR 0026](docs/adr/0026-send-metrics-only-for-the-state-of-a-process.md)).
 - **Commits:** Conventional Commits, with the component directory name as the scope ([ADR 0007](docs/adr/0007-conventional-commits.md), `cog.toml`).
 - **npm dependencies:** `web/pnpm-workspace.yaml` sets the supply-chain controls of [ADR 0015](docs/adr/0015-web-toolchain-and-npm-supply-chain-controls.md). Do not weaken them. A dependency with a build script needs an `allowBuilds` entry with a reason. A person reviews each major update.
-- **Container images:** distroless base images, pinned by digest, with the licence notices of their third-party code in `/licenses/` ([ADR 0018](docs/adr/0018-container-images-with-a-web-ui-build-stage.md)). CI publishes the tested image of each service and of `cdrlab` from `main` to `ghcr.io/lukemundy/cdr-lab/<name>` (the directory name), tagged with the full and the short commit ID. Each image is an OCI image index for `linux/amd64` and `linux/arm64`, with a provenance and an SPDX SBOM attestation ([ADR 0030](docs/adr/0030-build-each-service-image-for-linux-amd64-and-linux-arm64-with-a-cross-compile.md), [ADR 0031](docs/adr/0031-sign-releases-with-keyless-cosign-and-attest-provenance-and-an-sbom.md)). When a chart changes, or CI publishes the image of its service, CI also publishes the chart from `main` ([charts/register](charts/register/README.md), [charts/dataholder](charts/dataholder/README.md)). A maintainer releases one version `vX.Y.Z` of all images and charts with the `release` workflow, in the mode `check`, `rehearse` or `release` ([release specification](tools/release/DESIGN.md)).
+- **Container images:** distroless base images, pinned by digest, with the licence notices of their third-party code in `/licenses/` ([ADR 0018](docs/adr/0018-container-images-with-a-web-ui-build-stage.md)). CI publishes the tested image of each service and of `cdrlab` from `main` to `ghcr.io/lukemundy/cdr-lab/<name>` (the directory name), tagged with the full and the short commit ID. Each image is an OCI image index for `linux/amd64` and `linux/arm64`, with a provenance and an SPDX SBOM attestation ([ADR 0030](docs/adr/0030-build-each-service-image-for-linux-amd64-and-linux-arm64-with-a-cross-compile.md), [ADR 0031](docs/adr/0031-sign-releases-with-keyless-cosign-and-attest-provenance-and-an-sbom.md)). When the chart of a service changes, or CI publishes the image of that service, CI also publishes the chart from `main` ([charts/register](charts/register/README.md), [charts/dataholder](charts/dataholder/README.md)). A maintainer releases one version `vX.Y.Z` of all images and charts with the `release` workflow, in the mode `check`, `rehearse` or `release` ([release specification](tools/release/DESIGN.md)).
 - **Writing:** write all prose (comments, docs, commit messages) in ASD-STE100 Simplified Technical English. Use inclusive language, for example allowlist/blocklist and primary/replica.
 
 ## Development
@@ -185,6 +185,15 @@ mise run reset && mise run up && mise run conformance
 ### OpenID conformance suite
 
 `mise run openid-conformance` runs the FAPI 1.0 Advanced test plan of the [OpenID conformance suite](https://gitlab.com/openid/conformance-suite), with the Australian CDR profile, against the data holder authorisation server ([ADR 0001](docs/adr/0001-auth-server-library.md)). It starts the suite (compose profile `openid`), registers its two clients with the data holder, and fails when a test module fails or has a warning. The output gives a link to the log of each module on port 8443. It needs a new lab, because the data holder refuses a second registration of the clients. It does not run in CI.
+
+## Cluster deployment
+
+The umbrella chart [`charts/cdr-lab`](charts/cdr-lab/README.md) deploys the Register and the preset brands to one namespace of a Kubernetes cluster with one release. First make the databases, the users, the operator token Secret and the public TLS certificates in the namespace. The chart README gives a values file with the four preset brands, a CloudNativePG example and the operator access:
+
+```sh
+helm install cdr-lab oci://ghcr.io/lukemundy/cdr-lab/charts/cdr-lab --version X.Y.Z \
+  --namespace lab --values my-values.yaml --wait --timeout 10m
+```
 
 ## Licence
 

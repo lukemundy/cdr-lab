@@ -557,6 +557,10 @@ jobs:
           for chart in charts/*/Chart.yaml; do
             dir=${chart%/Chart.yaml}
             service=${dir#charts/}
+            # The umbrella chart publishes from main only after its cluster job passes (charts/cdr-lab/DESIGN.md).
+            if [ "$service" = cdr-lab ]; then
+              continue
+            fi
             published=$(jq --raw-output --arg job "$service-image-publish" '.[$job].result' <<< "$NEEDS")
             if [ "$CHART_CHANGED" != true ] && [ "$published" != success ]; then
               continue

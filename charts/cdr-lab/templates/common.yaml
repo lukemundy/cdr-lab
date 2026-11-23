@@ -1,0 +1,487 @@
+{{- define "cdrlab.values" -}}
+{{- $v := .Values -}}
+{{- $records := include "cdrlab.presetRecords" . | fromYaml -}}
+{{- range $name, $_ := $v.brands -}}
+  {{- if not (hasKey $records $name) -}}
+    {{- fail (printf "brands.%s: the key of a brand must be the name of a preset brand: %s" $name (keys $records | sortAlpha | join ", ")) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $presetIDs := list -}}
+{{- range $records -}}
+  {{- $presetIDs = append $presetIDs .legalEntityId -}}
+  {{- range .dataHolderBrands -}}
+    {{- $presetIDs = append $presetIDs .dataHolderBrandId -}}
+  {{- end -}}
+{{- end -}}
+{{- range concat ($v.participants.dataHolders | default list) ($v.participants.dataRecipients | default list) -}}
+  {{- $ids := list .legalEntityId -}}
+  {{- range .dataHolderBrands -}}
+    {{- $ids = append $ids .dataHolderBrandId -}}
+  {{- end -}}
+  {{- range $ids -}}
+    {{- if has . $presetIDs -}}
+      {{- fail (printf "participants: the identifier %s is the identifier of a preset brand or of its legal entity, which the chart gives" .) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $token := include "cdrlab.required" (list "operator.tokenSecret" $v.operator.tokenSecret "the Secret of the operator token") -}}
+{{- $database := dict
+  "PGHOST" (include "cdrlab.required" (list "database.host" $v.database.host "the PostgreSQL host"))
+  "PGPORT" ($v.database.port | toString)
+  "PGSSLMODE" $v.database.sslMode
+-}}
+{{- with $v.telemetry.otlpEndpoint -}}
+  {{- $_ := set $database "OTEL_EXPORTER_OTLP_ENDPOINT" . -}}
+{{- end -}}
+{{- $statusInterval := include "cdrlab.required" (list "dataHolders.registerStatusInterval" $v.dataHolders.registerStatusInterval "the interval of the Register statuses") -}}
+{{- $images := dict
+  "register" (include "cdrlab.image" (list $v.images.register "register" $.Chart.AppVersion) | fromYaml)
+  "dataholder" (include "cdrlab.image" (list $v.images.dataholder "dataholder" $.Chart.AppVersion) | fromYaml)
+  "cdrlab" (include "cdrlab.image" (list $v.images.cdrlab "cdrlab" $.Chart.AppVersion) | fromYaml)
+-}}
+
+{{- $regPublic := include "cdrlab.listener" (list "register" 8081 $v.register.public "register.public") | fromYaml -}}
+{{- $regSecure := include "cdrlab.listener" (list "register" 8083 $v.register.secure "register.secure") | fromYaml -}}
+{{- $regDB := $v.register.database | default dict -}}
+{{- $crlURL := "http://register:8080/crl/cdr-intermediate.crl" -}}
+{{- if $regPublic.external -}}
+  {{- $crlURL = printf "http://%s/crl/cdr-intermediate.crl" $regPublic.host -}}
+{{- end -}}
+{{- $tlsListeners := list $regPublic $regSecure -}}
+
+{{- $brands := dict -}}
+{{- $seedHolders := list -}}
+{{- range $name := keys ($v.brands | default dict) | sortAlpha -}}
+  {{- $b := get $v.brands $name | default dict -}}
+  {{- $record := get $records $name | deepCopy -}}
+  {{- $brandRecord := first $record.dataHolderBrands -}}
+  {{- $public := include "cdrlab.listener" (list $name 8081 $b.public (printf "brands.%s.public" $name)) | fromYaml -}}
+  {{- $secure := include "cdrlab.listener" (list $name 8083 $b.secure (printf "brands.%s.secure" $name)) | fromYaml -}}
+  {{- $tlsListeners = concat $tlsListeners (list $public $secure) -}}
+  {{- $site := dig "bankSite" "enabled" false $b -}}
+  {{- $siteListener := include "cdrlab.listener" (list $name 8085 $b.bankSite (printf "brands.%s.bankSite" $name)) | fromYaml -}}
+  {{- $publicNames := list $public.host $name -}}
+  {{- if $site -}}
+    {{- $tlsListeners = append $tlsListeners $siteListener -}}
+    {{- $publicNames = append $publicNames $siteListener.host -}}
+  {{- end -}}
+  {{- $db := $b.database | default dict -}}
+  {{- $mail := $b.mail | default dict -}}
+  {{- $_ := set $brands $name (dict
+    "id" $brandRecord.dataHolderBrandId
+    "legalEntityId" $record.legalEntityId
+    "legalEntityName" $record.legalEntityName
+    "public" $public
+    "secure" $secure
+    "site" $site
+    "siteHost" $siteListener.host
+    "siteHosts" (list $siteListener.hostHeader (printf "%s:8085" $name) | uniq)
+    "publicNames" ($publicNames | uniq)
+    "secureNames" (list $secure.host $name | uniq)
+    "internalHosts" (prepend (dig "internal" "allowedHosts" list $b) (printf "%s:8080" $name) | uniq)
+    "console" (dig "console" "enabled" false $b)
+    "dbName" (include "cdrlab.required" (list (printf "brands.%s.database.name" $name) $db.name "the database of the brand"))
+    "dbOwner" (include "cdrlab.required" (list (printf "brands.%s.database.ownerSecret" $name) $db.ownerSecret "the Secret of the owner user"))
+    "dbService" (include "cdrlab.required" (list (printf "brands.%s.database.serviceSecret" $name) $db.serviceSecret "the Secret of the service user"))
+    "smtpAddress" (include "cdrlab.required" (list (printf "brands.%s.mail.smtpAddress" $name) $mail.smtpAddress "the host:port of the SMTP server"))
+    "mailFrom" (include "cdrlab.required" (list (printf "brands.%s.mail.from" $name) $mail.from "the sender address of the email"))
+  ) -}}
+  {{- $logo := printf "%s/brand/logo.svg" $public.uri -}}
+  {{- $_ := set $record "logoUri" $logo -}}
+  {{- $_ := set $brandRecord "logoUri" $logo -}}
+  {{- $_ := set $brandRecord "jwksEndpoint" (printf "%s/jwks" $public.uri) -}}
+  {{- $endpoints := $brandRecord.endpointDetail -}}
+  {{- $_ := set $endpoints "publicBaseUri" $public.uri -}}
+  {{- $_ := set $endpoints "productBaseUri" $public.uri -}}
+  {{- $_ := set $endpoints "infosecBaseUri" $public.uri -}}
+  {{- $_ := set $endpoints "resourceBaseUri" $secure.uri -}}
+  {{- $seedHolders = append $seedHolders $record -}}
+{{- end -}}
+{{- $seed := dict
+  "dataHolders" (concat $seedHolders ($v.participants.dataHolders | default list))
+  "dataRecipients" ($v.participants.dataRecipients | default list)
+-}}
+
+{{- if $v.routes.enabled -}}
+  {{- range $tlsListeners -}}
+    {{- if not .external -}}
+      {{- fail (printf "set %s.host: with routes, each TLS listener needs a host" .path) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $_ := include "cdrlab.required" (list "routes.tls.parentRefs" $v.routes.tls.parentRefs "the parent Gateways of the TLSRoutes") -}}
+  {{- $_ := include "cdrlab.required" (list "routes.crl.parentRefs" $v.routes.crl.parentRefs "the parent Gateways of the CRL route") -}}
+{{- end -}}
+
+{{- $brandControllers := dict -}}
+{{- range $name := keys $brands -}}
+  {{- $_ := set $brandControllers $name (list "main") -}}
+{{- end -}}
+{{- $allControllers := merge (dict "register" (list "main")) $brandControllers -}}
+{{- $fullname := `{{ include "bjw-s.common.lib.chart.names.fullname" . }}` -}}
+defaultPodOptions:
+  automountServiceAccountToken: false
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    seccompProfile:
+      type: RuntimeDefault
+
+controllers:
+  register:
+    replicas: 1
+    # One pod at a time, because the Register is the issuing CA.
+    strategy: Recreate
+    # The library needs a ServiceAccount when the release has more than one. The pod has no API access.
+    serviceAccount:
+      name: default
+    initContainers:
+      migrate:
+        order: 1
+        image: {{ toYaml $images.register | nindent 10 }}
+        args: [migrate]
+        env:
+          {{- toYaml $database | nindent 10 }}
+          PGDATABASE: {{ include "cdrlab.required" (list "register.database.name" $regDB.name "the database of the Register") }}
+          PGUSER: {{ include "cdrlab.secretKey" (list (include "cdrlab.required" (list "register.database.ownerSecret" $regDB.ownerSecret "the Secret of the owner user")) "username") | nindent 12 }}
+          PGPASSWORD: {{ include "cdrlab.secretKey" (list $regDB.ownerSecret "password") | nindent 12 }}
+        securityContext: {{ include "cdrlab.containerSecurityContext" . | nindent 10 }}
+      seed:
+        order: 2
+        image: {{ toYaml $images.register | nindent 10 }}
+        args: [seed, -if-empty, /seed/participants.json]
+        env:
+          {{- toYaml $database | nindent 10 }}
+          PGDATABASE: {{ $regDB.name }}
+          PGUSER: {{ include "cdrlab.secretKey" (list (include "cdrlab.required" (list "register.database.serviceSecret" $regDB.serviceSecret "the Secret of the service user")) "username") | nindent 12 }}
+          PGPASSWORD: {{ include "cdrlab.secretKey" (list $regDB.serviceSecret "password") | nindent 12 }}
+        securityContext: {{ include "cdrlab.containerSecurityContext" . | nindent 10 }}
+    containers:
+      main:
+        image: {{ toYaml $images.register | nindent 10 }}
+        args: [serve]
+        env:
+          {{- toYaml $database | nindent 10 }}
+          PGDATABASE: {{ $regDB.name }}
+          PGUSER: {{ include "cdrlab.secretKey" (list $regDB.serviceSecret "username") | nindent 12 }}
+          PGPASSWORD: {{ include "cdrlab.secretKey" (list $regDB.serviceSecret "password") | nindent 12 }}
+          PUBLIC_BASE_URL: {{ $regPublic.uri }}
+          PUBLIC_TLS_CERT_FILE: /tls/public/tls.crt
+          PUBLIC_TLS_KEY_FILE: /tls/public/tls.key
+          SECURE_BASE_URL: {{ $regSecure.uri }}
+          SECURE_TLS_DNS_NAMES: {{ list $regSecure.host "register" | uniq | join "," | quote }}
+          CDR_CA_BUNDLE_FILE: /pki/ca-bundle/ca.crt
+          CDR_INTERMEDIATE_CERT_FILE: /pki/intermediate/tls.crt
+          CDR_INTERMEDIATE_KEY_FILE: /pki/intermediate/tls.key
+          CDR_INTERMEDIATE_CRL_URL: {{ $crlURL }}
+          {{- if $v.publicTLS.rootSecret }}
+          SSL_CERT_FILE: /pki/public-root/ca.crt
+          {{- end }}
+          OPERATOR_TOKEN: {{ include "cdrlab.secretKey" (list $token "token") | nindent 12 }}
+          INTERNAL_ALLOWED_HOSTS: {{ prepend ($v.register.internal.allowedHosts | default list) "register:8080" | uniq | join "," | quote }}
+          CONSOLE_ENABLED: {{ $v.register.console.enabled | toString | quote }}
+        ports:
+          - {name: internal, containerPort: 8080}
+          - {name: public, containerPort: 8081}
+          - {name: secure, containerPort: 8083}
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet: {path: /livez, port: 8080}
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet: {path: /readyz, port: 8080}
+          startup:
+            enabled: false
+        securityContext: {{ include "cdrlab.containerSecurityContext" . | nindent 10 }}
+
+  ca:
+    type: job
+    forceRename: {{ printf "%s-ca-r%d" $fullname .Release.Revision | quote }}
+    serviceAccount:
+      identifier: ca
+    pod:
+      automountServiceAccountToken: true
+    job:
+      backoffLimit: 3
+      activeDeadlineSeconds: 600
+    containers:
+      main:
+        image: {{ toYaml $images.cdrlab | nindent 10 }}
+        args: [ca, init, -intermediate-secret, cdr-ca-intermediate, -ca-bundle-secret, cdr-ca-bundle]
+        securityContext: {{ include "cdrlab.containerSecurityContext" . | nindent 10 }}
+
+  {{- range $name, $b := $brands }}
+  {{- $brandEnv := dict "DATA_HOLDER_BRAND" $name }}
+  {{ $name }}:
+    replicas: 1
+    # One pod at a time, because the sessions are in the memory of the process.
+    strategy: Recreate
+    # The library needs a ServiceAccount when the release has more than one. The pod has no API access.
+    serviceAccount:
+      name: default
+    initContainers:
+      migrate:
+        order: 1
+        image: {{ toYaml $images.dataholder | nindent 10 }}
+        args: [migrate]
+        env:
+          {{- toYaml $database | nindent 10 }}
+          PGDATABASE: {{ $b.dbName }}
+          PGUSER: {{ include "cdrlab.secretKey" (list $b.dbOwner "username") | nindent 12 }}
+          PGPASSWORD: {{ include "cdrlab.secretKey" (list $b.dbOwner "password") | nindent 12 }}
+        securityContext: {{ include "cdrlab.containerSecurityContext" . | nindent 10 }}
+      # Loads the product catalogue of the brand when the data holder has no products.
+      seed:
+        order: 2
+        image: {{ toYaml $images.dataholder | nindent 10 }}
+        args: [seed, -if-empty]
+        env:
+          {{- toYaml $database | nindent 10 }}
+          {{- toYaml $brandEnv | nindent 10 }}
+          PGDATABASE: {{ $b.dbName }}
+          PGUSER: {{ include "cdrlab.secretKey" (list $b.dbService "username") | nindent 12 }}
+          PGPASSWORD: {{ include "cdrlab.secretKey" (list $b.dbService "password") | nindent 12 }}
+        securityContext: {{ include "cdrlab.containerSecurityContext" . | nindent 10 }}
+    containers:
+      main:
+        image: {{ toYaml $images.dataholder | nindent 10 }}
+        args: [serve]
+        env:
+          {{- toYaml $database | nindent 10 }}
+          {{- toYaml $brandEnv | nindent 10 }}
+          PGDATABASE: {{ $b.dbName }}
+          PGUSER: {{ include "cdrlab.secretKey" (list $b.dbService "username") | nindent 12 }}
+          PGPASSWORD: {{ include "cdrlab.secretKey" (list $b.dbService "password") | nindent 12 }}
+          DATA_HOLDER_BRAND_ID: {{ $b.id | quote }}
+          PUBLIC_BASE_URL: {{ $b.public.uri }}
+          PUBLIC_TLS_CERT_FILE: /tls/public/tls.crt
+          PUBLIC_TLS_KEY_FILE: /tls/public/tls.key
+          SECURE_BASE_URL: {{ $b.secure.uri }}
+          SECURE_TLS_CERT_FILE: /tls/secure/tls.crt
+          SECURE_TLS_KEY_FILE: /tls/secure/tls.key
+          CDR_CA_BUNDLE_FILE: /pki/ca-bundle/ca.crt
+          {{- if $v.publicTLS.rootSecret }}
+          SSL_CERT_FILE: /pki/public-root/ca.crt
+          {{- end }}
+          REGISTER_PUBLIC_BASE_URL: https://register:8081
+          REGISTER_JWKS_URL: https://register:8081/cdr-register/v1/jwks
+          REGISTER_STATUS_INTERVAL: {{ $statusInterval | quote }}
+          SMTP_ADDRESS: {{ $b.smtpAddress | quote }}
+          MAIL_FROM: {{ $b.mailFrom | quote }}
+          OPERATOR_TOKEN: {{ include "cdrlab.secretKey" (list $token "token") | nindent 12 }}
+          INTERNAL_ALLOWED_HOSTS: {{ $b.internalHosts | join "," | quote }}
+          CONSOLE_ENABLED: {{ $b.console | toString | quote }}
+          BANK_SITE_ENABLED: {{ $b.site | toString | quote }}
+          {{- if $b.site }}
+          BANK_SITE_ALLOWED_HOSTS: {{ $b.siteHosts | join "," | quote }}
+          {{- end }}
+        ports:
+          - {name: internal, containerPort: 8080}
+          - {name: public, containerPort: 8081}
+          - {name: secure, containerPort: 8083}
+          {{- if $b.site }}
+          - {name: bank-site, containerPort: 8085}
+          {{- end }}
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet: {path: /livez, port: 8080}
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet: {path: /readyz, port: 8080}
+          startup:
+            enabled: false
+        securityContext: {{ include "cdrlab.containerSecurityContext" . | nindent 10 }}
+
+  {{- $certArgs := list "cert" "issue" "-register-url" "http://register:8080" "-kind" "server" "-legal-entity-id" $b.legalEntityId "-brand-id" $b.id "-cn" $b.secure.host "-o" $b.legalEntityName }}
+  {{- range $b.secureNames }}
+  {{- $certArgs = concat $certArgs (list "-dns" .) }}
+  {{- end }}
+  {{- $certArgs = concat $certArgs (list "-secret" (printf "%s-secure-tls" $name)) }}
+  {{- range $kind := list "cert" "renew" }}
+  {{ $name }}-{{ $kind }}:
+    {{- if eq $kind "cert" }}
+    type: job
+    forceRename: {{ printf "%s-%s-cert-r%d" $fullname $name $.Release.Revision | quote }}
+    job:
+      # The Register can start after the Job. The Job tries again, and it fails after 10 minutes.
+      backoffLimit: 20
+      activeDeadlineSeconds: 600
+    {{- else }}
+    type: cronjob
+    cronjob:
+      schedule: {{ $v.certificates.schedule | quote }}
+      backoffLimit: 20
+      activeDeadlineSeconds: 600
+    {{- end }}
+    serviceAccount:
+      identifier: {{ $name }}-cert
+    pod:
+      automountServiceAccountToken: true
+    containers:
+      main:
+        image: {{ toYaml $images.cdrlab | nindent 10 }}
+        args: {{ toYaml $certArgs | nindent 10 }}
+        env:
+          REGISTER_OPERATOR_TOKEN: {{ include "cdrlab.secretKey" (list $token "token") | nindent 12 }}
+        securityContext: {{ include "cdrlab.containerSecurityContext" $ | nindent 10 }}
+  {{- end }}
+  {{- end }}
+
+service:
+  register:
+    controller: register
+    forceRename: register
+    ports:
+      internal: {port: 8080}
+      public: {port: 8081}
+      secure: {port: 8083}
+  {{- range $name, $b := $brands }}
+  {{ $name }}:
+    controller: {{ $name }}
+    forceRename: {{ $name }}
+    ports:
+      internal: {port: 8080}
+      public: {port: 8081}
+      secure: {port: 8083}
+      {{- if $b.site }}
+      bank-site: {port: 8085}
+      {{- end }}
+  {{- end }}
+
+configMaps:
+  seed:
+    data:
+      participants.json: {{ toJson $seed | quote }}
+
+# Each Secret is a directory mount, with no subPath, so that each service gets a renewed Secret.
+persistence:
+  seed:
+    type: configMap
+    identifier: seed
+    advancedMounts:
+      register:
+        seed:
+          - path: /seed
+            readOnly: true
+  register-public-tls: {{ include "cdrlab.secretMount" (list "register-public-tls" "/tls/public" (dict "register" (list "main"))) | nindent 4 }}
+  cdr-ca-intermediate: {{ include "cdrlab.secretMount" (list "cdr-ca-intermediate" "/pki/intermediate" (dict "register" (list "main"))) | nindent 4 }}
+  cdr-ca-bundle: {{ include "cdrlab.secretMount" (list "cdr-ca-bundle" "/pki/ca-bundle" $allControllers) | nindent 4 }}
+  {{- with $v.publicTLS.rootSecret }}
+  public-root: {{ include "cdrlab.secretMount" (list . "/pki/public-root" $allControllers) | nindent 4 }}
+  {{- end }}
+  {{- range $name := keys $brands }}
+  {{ $name }}-public-tls: {{ include "cdrlab.secretMount" (list (printf "%s-public-tls" $name) "/tls/public" (dict $name (list "main"))) | nindent 4 }}
+  {{ $name }}-secure-tls: {{ include "cdrlab.secretMount" (list (printf "%s-secure-tls" $name) "/tls/secure" (dict $name (list "main"))) | nindent 4 }}
+  {{- end }}
+
+serviceAccount:
+  ca: {}
+  {{- range $name := keys $brands }}
+  {{ $name }}-cert: {}
+  {{- end }}
+
+rbac:
+  roles:
+    {{- range $id, $secrets := merge (dict "ca" (list "cdr-ca-intermediate" "cdr-ca-bundle")) (include "cdrlab.certSecrets" $brands | fromYaml) }}
+    {{ $id }}:
+      type: Role
+      rules:
+        - apiGroups: [""]
+          resources: [secrets]
+          resourceNames: {{ toYaml $secrets | nindent 12 }}
+          verbs: [get, update, patch, delete]
+        - apiGroups: [""]
+          resources: [secrets]
+          verbs: [create]
+    {{- end }}
+  bindings:
+    ca:
+      type: RoleBinding
+      roleRef:
+        identifier: ca
+      subjects:
+        - identifier: ca
+    {{- range $name := keys $brands }}
+    {{ $name }}-cert:
+      type: RoleBinding
+      roleRef:
+        identifier: {{ $name }}-cert
+      subjects:
+        - identifier: {{ $name }}-cert
+    {{- end }}
+
+{{- if $v.routes.enabled }}
+
+route:
+  {{- $routes := list (list "register-public" "register" $regPublic.host 8081) (list "register-secure" "register" $regSecure.host 8083) }}
+  {{- range $name, $b := $brands }}
+  {{- $routes = concat $routes (list (list (printf "%s-public" $name) $name $b.public.host 8081) (list (printf "%s-secure" $name) $name $b.secure.host 8083)) }}
+  {{- if $b.site }}
+  {{- $routes = append $routes (list (printf "%s-bank-site" $name) $name $b.siteHost 8085) }}
+  {{- end }}
+  {{- end }}
+  {{- range $routes }}
+  {{ index . 0 }}:
+    kind: TLSRoute
+    parentRefs: {{ toYaml $v.routes.tls.parentRefs | nindent 6 }}
+    hostnames: [{{ index . 2 | quote }}]
+    rules:
+      - backendRefs:
+          - identifier: {{ index . 1 }}
+            port: {{ index . 3 }}
+  {{- end }}
+  register-crl:
+    kind: HTTPRoute
+    parentRefs: {{ toYaml $v.routes.crl.parentRefs | nindent 6 }}
+    hostnames: [{{ $regPublic.host | quote }}]
+    rules:
+      - matches:
+          - path: {type: Exact, value: /crl/cdr-intermediate.crl}
+        backendRefs:
+          - identifier: register
+            port: 8080
+{{- end }}
+
+{{- with $v.publicTLS.issuerRef }}
+
+rawResources:
+  {{- $certificates := dict "register-public-tls" (list $regPublic.host "register" | uniq) }}
+  {{- range $name, $b := $brands }}
+  {{- $_ := set $certificates (printf "%s-public-tls" $name) $b.publicNames }}
+  {{- end }}
+  {{- range $secret, $names := $certificates }}
+  {{ $secret }}:
+    forceRename: {{ $secret }}
+    manifest:
+      apiVersion: cert-manager.io/v1
+      kind: Certificate
+      metadata:
+        namespace: {{ $.Release.Namespace }}
+      spec:
+        secretName: {{ $secret }}
+        dnsNames: {{ toYaml $names | nindent 10 }}
+        issuerRef: {{ toYaml $v.publicTLS.issuerRef | nindent 10 }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{- define "cdrlab.certSecrets" -}}
+{{- range $name := keys . | sortAlpha }}
+{{ $name }}-cert: [{{ $name }}-secure-tls]
+{{- end }}
+{{- end -}}
+
+{{- $_ := mustMergeOverwrite .Values (include "cdrlab.values" . | fromYaml) -}}
+{{- include "bjw-s.common.loader.all" . -}}
