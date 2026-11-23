@@ -1,7 +1,6 @@
 package root
 
 import (
-	"crypto/tls"
 	"net/http"
 	"net/http/httptest"
 	"slices"
@@ -120,7 +119,7 @@ func TestTheBankSitePutsNoCustomerDataSessionIDOrPasswordInTheSpansMetricsOrLogs
 		Customers: store, TransactionStore: transactions, Arrangements: reader,
 		Disclosures: disclosurestore.New(pool), Now: time.Now,
 	}
-	listeners, err := bankSiteListeners(testBankSite, tls.Certificate{}, ui, banksite.Ports{
+	listeners, err := bankSiteListeners(testBankSite, nil, ui, banksite.Ports{
 		BrandName:  "Coastal Bank",
 		BrandID:    "d7385786-d8b1-4d4b-bb80-b21616df1a4d",
 		Customers:  customers,

@@ -1,7 +1,6 @@
 package root
 
 import (
-	"crypto/tls"
 	"fmt"
 	"io/fs"
 	"net/http"
@@ -16,7 +15,7 @@ import (
 // bankSiteListeners gives the site the certificate and the TLS rules of the public listener.
 func bankSiteListeners(
 	cfg consolehttp.Config,
-	cert tls.Certificate,
+	cert *cds.ServerCertificate,
 	ui fs.FS,
 	ports banksite.Ports,
 ) ([]httpserver.Listener, error) {

@@ -165,9 +165,7 @@ func TestEachModeNeedsEachSettingThatItUses(t *testing.T) {
 
 func TestTheConfigurationRefusesFilesThatDoNotExist(t *testing.T) {
 	tests := map[string]string{
-		"PUBLIC_TLS_CERT_FILE": "load the TLS certificate of the public APIs",
-		"SECURE_TLS_CERT_FILE": "load the TLS certificate of the secure APIs",
-		"CDR_CA_BUNDLE_FILE":   "load the CDR CA bundle",
+		"CDR_CA_BUNDLE_FILE": "load the CDR CA bundle",
 	}
 	for setting, wantError := range tests {
 		t.Run(setting, func(t *testing.T) {

@@ -1,7 +1,7 @@
 package root
 
 import (
-	"crypto/tls"
+	"context"
 	"crypto/x509"
 	"errors"
 	"fmt"
@@ -43,8 +43,8 @@ type apiConfig struct {
 	// mailFrom is the sender address of those emails.
 	mailFrom   string
 	fixedOTPs  domain.FixedOTPs
-	publicCert tls.Certificate
-	secureCert tls.Certificate
+	publicCert certificatePaths
+	secureCert certificatePaths
 	cdrCAs     []*x509.Certificate
 	crlMaxAge  time.Duration
 	console    consolehttp.Config
@@ -52,6 +52,13 @@ type apiConfig struct {
 	bankSite   consolehttp.Config
 	// brandID is the dataHolderBrandId of the brand on the Register. Only the online bank site uses it.
 	brandID string
+}
+
+// The listeners, not the configuration, read the files, because the reload lasts as long as the process.
+type certificatePaths struct{ cert, key string }
+
+func (f certificatePaths) watch(ctx context.Context, name string) (*cds.ServerCertificate, error) {
+	return cds.WatchCertificateFiles(ctx, name, f.cert, f.key)
 }
 
 type workerConfig struct {
@@ -166,26 +173,18 @@ func loadAPIConfig() (apiConfig, error) {
 		return apiConfig{}, fmt.Errorf("FIXED_OTPS: %w", err)
 	}
 
-	publicCertFile, publicKeyFile := os.Getenv("PUBLIC_TLS_CERT_FILE"), os.Getenv("PUBLIC_TLS_KEY_FILE")
-	if publicCertFile == "" || publicKeyFile == "" {
+	cfg.publicCert = certificatePaths{cert: os.Getenv("PUBLIC_TLS_CERT_FILE"), key: os.Getenv("PUBLIC_TLS_KEY_FILE")}
+	if cfg.publicCert.cert == "" || cfg.publicCert.key == "" {
 		return apiConfig{}, errors.New(
 			"set PUBLIC_TLS_CERT_FILE and PUBLIC_TLS_KEY_FILE to the TLS certificate and key of the public APIs",
 		)
 	}
 
-	if cfg.publicCert, err = tls.LoadX509KeyPair(publicCertFile, publicKeyFile); err != nil {
-		return apiConfig{}, fmt.Errorf("load the TLS certificate of the public APIs: %w", err)
-	}
-
-	secureCertFile, secureKeyFile := os.Getenv("SECURE_TLS_CERT_FILE"), os.Getenv("SECURE_TLS_KEY_FILE")
-	if secureCertFile == "" || secureKeyFile == "" {
+	cfg.secureCert = certificatePaths{cert: os.Getenv("SECURE_TLS_CERT_FILE"), key: os.Getenv("SECURE_TLS_KEY_FILE")}
+	if cfg.secureCert.cert == "" || cfg.secureCert.key == "" {
 		return apiConfig{}, errors.New(
 			"set SECURE_TLS_CERT_FILE and SECURE_TLS_KEY_FILE to the TLS certificate and key of the secure APIs",
 		)
-	}
-
-	if cfg.secureCert, err = tls.LoadX509KeyPair(secureCertFile, secureKeyFile); err != nil {
-		return apiConfig{}, fmt.Errorf("load the TLS certificate of the secure APIs: %w", err)
 	}
 
 	caBundleFile := os.Getenv("CDR_CA_BUNDLE_FILE")
