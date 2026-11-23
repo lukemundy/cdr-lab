@@ -2,6 +2,7 @@
 
 - Date: 2026-09-29
 - Amended by [ADR-0021](0021-record-one-business-fact-in-each-event-type.md): the design of event types
+- Amended by [ADR-0028](0028-find-the-need-for-a-fresh-deployment-from-the-migrations-and-the-event-golden-files.md): a payload change needs a fresh deployment while the major version is 0
 
 ## Context
 

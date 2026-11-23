@@ -32,7 +32,15 @@ This area gives the listeners of the Register and their ports, the lab-only part
 
 ## Publication
 
-- <a id="reg-0910"></a>**REG-0910** An operator deploys the Register to Kubernetes from the image and the Helm chart that CI publishes from `main`. ([Register chart][register-chart]; [README: Container images][readme-conventions])
+- <a id="reg-0910"></a>**REG-0910** An operator deploys the Register to Kubernetes from the image and the Helm chart that CI publishes from `main`, or from the image and the chart of a [release](../../../tools/release/DESIGN.md#rls-0009). ([Register chart][register-chart]; [README: Container images][readme-conventions]; [Judgement: one version from a manual workflow on main (ADR 0027)][adr-0027])
+- <a id="reg-1510"></a>**REG-1510** Each image of the Register that CI publishes is an OCI image index with an image for `linux/amd64` and an image for `linux/arm64`. ([OCI: image index][oci-image-index]; [Judgement: images for linux/amd64 and linux/arm64 (ADR 0030)][adr-0030])
+- <a id="reg-1511"></a>**REG-1511** Integrity: the `linux/amd64` image of the index has the same configuration digest as the image that the lab jobs of its commit tested. ([Judgement: images for linux/amd64 and linux/arm64 (ADR 0030)][adr-0030])
+- <a id="reg-1512"></a>**REG-1512** The `appVersion` of a chart from `main` is the full commit ID of the [image commit](../../../docs/spec/glossary.md#image-commit) of the Register at that commit. ([Helm: charts][helm-charts]; [Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
+- <a id="reg-1513"></a>**REG-1513** CI publishes the chart from `main` only when the image commit of the Register is the last commit that changes an input of the image. For example, when the commit changes an input of the image, the chart waits until CI publishes the image of that commit. ([Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
+
+## Chart
+
+- <a id="reg-1514"></a>**REG-1514** When the values give no image tag, the chart uses its `appVersion` as the tag of the Register image. A value of the image tag overrides the `appVersion`. ([Helm: charts][helm-charts]; [Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
 
 ## Participant seed in the chart
 
@@ -120,3 +128,8 @@ A deployment changes the endpoints of the example seed to the hosts of the deplo
 [adr-0010]: ../../../docs/adr/0010-background-jobs-with-river.md
 [adr-0020]: ../../../docs/adr/0020-service-migrations-create-roles-and-the-operator-creates-users.md
 [adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md
+[adr-0027]: ../../../docs/adr/0027-release-all-artifacts-with-one-version-from-a-manual-workflow-on-main.md
+[adr-0029]: ../../../docs/adr/0029-promote-the-tested-image-of-each-service-to-a-release-with-no-rebuild.md
+[adr-0030]: ../../../docs/adr/0030-build-each-service-image-for-linux-amd64-and-linux-arm64-with-a-cross-compile.md
+[helm-charts]: https://helm.sh/docs/topics/charts/
+[oci-image-index]: https://github.com/opencontainers/image-spec/blob/main/image-index.md
