@@ -439,9 +439,12 @@ jq --compact-output --arg dir "$pki/" '.cdr[] | select(.kind == "client") |
     bin/cdrlab cert issue -register-url http://localhost:18080 -key-readable-by-all "${flags[@]}"
   done
 
-# The Job has the image, the command and the environment of the conformance compose service.
+# The Job has the image, the command and the environment of the conformance compose service. The Register has the
+# records of only the brands of the release.
 k delete job conformance --ignore-not-found --wait
-docker-compose --profile test config --format json | jq '.services.conformance | {
+presets=$(yq '.brands | keys | join(",")' lab/kind/values.yaml)
+docker-compose --profile test config --format json | jq --arg presets "$presets" '.services.conformance |
+  .environment.REGISTER_PRESET_BRANDS = $presets | {
   apiVersion: "batch/v1", kind: "Job", metadata: {name: "conformance"},
   spec: {backoffLimit: 0, activeDeadlineSeconds: 1800, template: {metadata: {labels: {app: "conformance"}}, spec: {
     restartPolicy: "Never", enableServiceLinks: false,
