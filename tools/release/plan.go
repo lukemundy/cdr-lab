@@ -30,12 +30,14 @@ const (
 )
 
 type releasePlan struct {
-	Mode            releaseMode     `json:"mode"`
-	GitHubRepo      string          `json:"githubRepo"`
-	Commit          string          `json:"commit"`
-	Version         string          `json:"version"`
-	PreviousVersion string          `json:"previousVersion"`
-	ImageTag        string          `json:"imageTag"`
+	Mode            releaseMode `json:"mode"`
+	GitHubRepo      string      `json:"githubRepo"`
+	Commit          string      `json:"commit"`
+	Version         string      `json:"version"`
+	PreviousVersion string      `json:"previousVersion"`
+	ImageTag        string      `json:"imageTag"`
+	// ImagePrefix is the repository prefix of the target images, also the input of cdrlab up in the release mode.
+	ImagePrefix     string          `json:"imagePrefix"`
 	ChartVersion    string          `json:"chartVersion"`
 	ChartRepository string          `json:"chartRepository"`
 	Images          []planImage     `json:"images"`
@@ -109,6 +111,7 @@ func makePlan(ctx context.Context, cfg planConfig, rev string) (releasePlan, err
 		Version:         version,
 		PreviousVersion: previous,
 		ImageTag:        version,
+		ImagePrefix:     targetPrefix,
 		ChartVersion:    strings.TrimPrefix(version, "v"),
 		ChartRepository: "oci://" + targetPrefix + "/charts",
 	}

@@ -252,6 +252,34 @@ cat "$blobs/${manifest#sha256:}"
 # The archive has the index.json and the manifest.json of docker save, so that each image store of Docker loads the
 # blobs as they are. The image ID is then the manifest digest (containerd image store) or the configuration digest
 # (classic image store) in the layout.
+[tasks."release:cdrlab"]
+description = "Build the cdrlab release archive of one platform in <out>/, with the licence notices, and the SPDX SBOM of its binary (tools/release/DESIGN.md#rls-0115)"
+usage = """
+arg "<version>" help="The version of the binary, for example v0.3.1 or rehearsal-123"
+arg "<os>" help="linux or darwin"
+arg "<arch>" help="amd64 or arm64"
+arg "<out>" help="The output directory"
+"""
+shell = "bash -c"
+run = """
+set -euo pipefail
+{{ vars.build_env }}
+name="cdrlab-$usage_version-$usage_os-$usage_arch"
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+mkdir -p "$work/licenses/go" "$usage_out"
+go build -o "$work/notices" ./tools/notices
+GOOS=$usage_os GOARCH=$usage_arch "$work/notices" ./cli/cdrlab/cmd/cdrlab > "$work/licenses/go/third-party-notices.txt"
+buildinfo=github.com/lukemundy/cdr-lab/pkg/platform/buildinfo
+CGO_ENABLED=0 GOOS=$usage_os GOARCH=$usage_arch go build -trimpath -o "$work/cdrlab" -ldflags="-s -w \
+  -X $buildinfo.version=$usage_version -X $buildinfo.commit=$BUILD_COMMIT -X $buildinfo.commitShort=$BUILD_COMMIT_SHORT \
+  -X $buildinfo.buildTime=$BUILD_TIME -X $buildinfo.id=$BUILD_ID" ./cli/cdrlab/cmd/cdrlab
+# The same commit gives the same archive.
+tar -c -C "$work" --sort=name --owner=0 --group=0 --numeric-owner --mtime="@$(git log -1 --format=%ct)" \
+  cdrlab licenses | gzip -n > "$usage_out/$name.tar.gz"
+syft scan "file:$work/cdrlab" --quiet --output "spdx-json=$usage_out/$name.spdx.json"
+"""
+
 [tasks."image:load"]
 description = "Load the linux/amd64 image in .lab/images/<name>/ (build:index) into Docker with the given image names"
 usage = """

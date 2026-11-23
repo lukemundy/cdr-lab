@@ -11,6 +11,10 @@ RUN --mount=type=cache,target=/go/pkg/mod go mod download
 
 COPY pkg/ pkg/
 COPY cli/cdrlab/ cli/cdrlab/
+# The compose project of the release mode, which the binary embeds (ADR 0038).
+COPY composeproject.go compose.yaml ./
+COPY lab/ lab/
+COPY services/register/seed/example.json services/register/seed/
 
 COPY tools/notices/ tools/notices/
 # The notices tool runs on the build platform, but it lists the dependencies of the target platform.

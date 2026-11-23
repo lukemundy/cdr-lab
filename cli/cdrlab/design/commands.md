@@ -40,7 +40,7 @@ This area gives the commands of `cdrlab`, its version, its access to the Kuberne
   - The tags are the full and the short commit ID.
   - The image is an OCI image index for `linux/amd64` and `linux/arm64`.
   - CI publishes it only after its gate jobs pass, and for each commit that changes an input of the image.
-- <a id="cli-0051"></a>**CLI-0051** The inputs of the image are the Go code of `cli/cdrlab`, the Go code of `pkg/`, `go.mod`, `go.sum` and the `Dockerfile` of `cdrlab`. ([Judgement: the image job runs for each input of the image](../../../services/dataholder/design/deployment.md#dh-1372))
+- <a id="cli-0051"></a>**CLI-0051** The inputs of the image are the Go code of `cli/cdrlab`, the Go code of `pkg/`, `go.mod`, `go.sum`, the `Dockerfile` of `cdrlab` and [the compose project that the binary contains](compose-lab.md#cli-0139). ([Judgement: the image job runs for each input of the image](../../../services/dataholder/design/deployment.md#dh-1372))
 - <a id="cli-0052"></a>**CLI-0052** The image has a distroless base image, the `cdrlab` binary and the licence notices of its third-party code in `/licenses/`. ([Judgement: the image of the lab CLI (ADR 0035)][adr-0035])
 - <a id="cli-0053"></a>**CLI-0053** The image runs as a user that is not root. ([Judgement: the image of the lab CLI (ADR 0035)][adr-0035])
 

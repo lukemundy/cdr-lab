@@ -76,7 +76,7 @@ jobs:
           }
 
           shared=(mise.toml .github/workflows/ci.yml)
-          backend=(go.mod go.sum lab pkg cli services conformance compose.yaml)
+          backend=(go.mod go.sum composeproject.go lab pkg cli services conformance compose.yaml)
           if [ "$EVENT" = schedule ]; then
             printf '%s\n' go=false conformance=false web=false register-image=false dataholder-image=false \
               cdrlab-image=false audit=true chart=false cluster=false spec=false >> "$GITHUB_OUTPUT"

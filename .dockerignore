@@ -1,6 +1,9 @@
 *
 !go.mod
 !go.sum
+!composeproject.go
+!compose.yaml
+!lab/
 !cli/
 !pkg/
 !services/

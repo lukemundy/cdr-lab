@@ -35,3 +35,23 @@ Each image is the image that CI tested and published from the image commit. The 
 Verify each chart and each image by its digest before you install the chart by its digest. The README of each chart gives the commands: {{range $i, $c := .Charts}}{{if $i}}, {{end}}[{{$c.Name}}](https://github.com/{{$.GitHubRepo}}/blob/{{$.Commit}}/charts/{{$c.Name}}/README.md#verify-a-release){{end}}.
 
 The SBOM of each image lists the Go modules of the service binary. It does not list the npm packages of the web UIs, which are in the binary.
+
+## cdrlab
+
+The release has a `cdrlab` archive for `linux-amd64`, `linux-arm64`, `darwin-amd64` and `darwin-arm64`. `cdrlab up` starts the compose lab of this release in the current directory, with only Docker and Compose on the host. Download the archive of your platform, verify the signature of the checksum file, the checksum and the provenance of the archive, then start the lab:
+
+```sh
+platform=linux-amd64
+gh release download {{.ImageTag}} --repo {{.GitHubRepo}} \
+  --pattern "cdrlab-{{.ImageTag}}-$platform.tar.gz" --pattern "cdrlab-{{.ImageTag}}-checksums.txt*"
+cosign verify-blob cdrlab-{{.ImageTag}}-checksums.txt --bundle cdrlab-{{.ImageTag}}-checksums.txt.sigstore.json \
+  --certificate-identity https://github.com/{{.GitHubRepo}}/.github/workflows/release.yml@refs/heads/main \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+sha256sum --check --ignore-missing cdrlab-{{.ImageTag}}-checksums.txt  # macOS: shasum -a 256 --check --ignore-missing
+gh attestation verify "cdrlab-{{.ImageTag}}-$platform.tar.gz" --repo {{.GitHubRepo}} \
+  --signer-workflow {{.GitHubRepo}}/.github/workflows/release.yml --source-ref refs/heads/main
+tar -xzf "cdrlab-{{.ImageTag}}-$platform.tar.gz" cdrlab
+./cdrlab up
+```
+
+With Go, `go install github.com/lukemundy/cdr-lab/cli/cdrlab/cmd/cdrlab@{{.Version}}` builds the same `cdrlab` from the source, with no cosign signature.

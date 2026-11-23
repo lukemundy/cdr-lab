@@ -13,7 +13,7 @@ Early development. Two services run in the lab deployment, and a black-box confo
 | Mock CDR Register | Participants and their statuses, SSAs, and the Register APIs | [design/README.md](services/register/design/README.md) |
 | Mock data holder | One banking brand for each instance, from four preset brands: product data, the authorisation server, authorisations, and the banking APIs of an arrangement | [design/README.md](services/dataholder/design/README.md) |
 
-The lab CLI `cdrlab` makes the CAs and the certificates of the compose lab and of a cluster deployment, and adds participants and customers to them ([specification](cli/cdrlab/design/README.md)).
+The lab CLI `cdrlab` makes the CAs and the certificates of the compose lab and of a cluster deployment, adds participants and customers to them, and starts the compose lab from a checkout or from a release binary ([specification](cli/cdrlab/design/README.md)).
 
 ## Target standards
 
@@ -35,6 +35,7 @@ Change these versions only on purpose, in a separate change.
 cdr-lab/
 ├── mise.toml            # tool versions and tasks
 ├── compose.yaml         # the lab deployment
+├── composeproject.go    # embeds the compose project in cdrlab, for the release mode (ADR 0038)
 ├── charts/              # Helm charts: one for each service, and the umbrella chart of a cluster deployment
 ├── cli/                 # the lab CLI, cdrlab
 ├── conformance/         # black-box tests of deployed components, and the pinned CDS OpenAPI specifications
@@ -130,6 +131,21 @@ mise run reset      # cdrlab reset: stop the lab and delete all its data and its
 ```
 
 To start the lab without telemetry, run `mise run up --no-telemetry`, as CI does. `cdrlab` runs Docker Compose as `docker compose`, or as the command in `CDRLAB_COMPOSE` (mise sets the pinned `docker-compose`).
+
+To run the lab from a release, with only Docker and Compose on the host, download the `cdrlab` archive of your platform from the GitHub Release, verify it, and run `cdrlab up` in an empty directory. The release notes give the commands for each platform; for example, on Linux:
+
+```sh
+version=vX.Y.Z platform=linux-amd64  # the version of a release
+gh release download "$version" --repo lukemundy/cdr-lab \
+  --pattern "cdrlab-$version-$platform.tar.gz" --pattern "cdrlab-$version-checksums.txt*"
+cosign verify-blob "cdrlab-$version-checksums.txt" --bundle "cdrlab-$version-checksums.txt.sigstore.json" \
+  --certificate-identity https://github.com/lukemundy/cdr-lab/.github/workflows/release.yml@refs/heads/main \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+sha256sum --check --ignore-missing "cdrlab-$version-checksums.txt"
+tar -xzf "cdrlab-$version-$platform.tar.gz" cdrlab
+./cdrlab up     # writes the compose project of the release here, and pulls the release images
+./cdrlab reset  # also deletes the compose project; run it before you use a different version
+```
 
 The lab and CI run one bank, `wattle-bank`. To also start the three other preset banks (compose profile `all-banks`), run `mise run up --all-banks`. Each bank is its own instance, with its own Register record and its own block of ports.
 

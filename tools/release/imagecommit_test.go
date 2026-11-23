@@ -194,7 +194,11 @@ func TestTheInputsOfTheCdrlabImageAreItsGoCodeTheLibrariesAndTheModuleFiles(t *t
 	inputs, err := readInputs("../../.github/image-inputs.json")
 	require.NoError(t, err)
 
-	for _, input := range []string{"cli/cdrlab", "pkg", "go.mod", "go.sum"} {
+	// The binary also embeds the compose project of the release mode (ADR 0038).
+	for _, input := range []string{
+		"cli/cdrlab", "pkg", "go.mod", "go.sum",
+		"composeproject.go", "compose.yaml", "lab", "services/register/seed/example.json",
+	} {
 		assert.Contains(t, inputs["cdrlab"], input)
 	}
 }

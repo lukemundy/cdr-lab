@@ -16,7 +16,7 @@ This area gives the start, the stop and the reset of the compose lab with `cdrla
 - <a id="cli-0141"></a>**CLI-0141** In the release mode, Compose pulls the image of each service from `ghcr.io/lukemundy/cdr-lab/<service>`, with the version of the binary as the tag. ([release: the version tag of each image](../../../tools/release/DESIGN.md#rls-0030); [Judgement: the compose lab from a compose project in the binary (ADR 0038)][adr-0038])
 - <a id="cli-0142"></a>**CLI-0142** In the release mode, an input gives a different image repository prefix, and an input gives a different image tag. For example, `ghcr.io/lukemundy/cdr-lab/rehearsal` and `rehearsal-<run ID>`. ([release: the images of a rehearsal](../../../tools/release/DESIGN.md#rls-0014))
 - <a id="cli-0143"></a>**CLI-0143** When the version of the binary is not a [release version](../../../tools/release/DESIGN.md#rls-0004) and no input gives an image tag, the release mode changes nothing, and it fails. The error tells the user to use the source mode or a release binary. ([Judgement: the compose lab from a compose project in the binary (ADR 0038)][adr-0038])
-- <a id="cli-0144"></a>**CLI-0144** When the lab directory has a compose file and no version record of `cdrlab`, the release mode changes nothing, and it fails. For example, the lab directory is a checkout of the repository. ([Judgement: the release mode changes only a lab of its own version](#cli-0175))
+- <a id="cli-0144"></a>**CLI-0144** When the lab directory has a file of the compose project of the binary and no version record of `cdrlab`, the release mode changes nothing, and it fails. For example, the lab directory is a checkout of the repository, or it has a seed file of the user at the path of the seed file of the project. ([Judgement: the release mode changes only a lab of its own version](#cli-0175))
 - <a id="cli-0145"></a>**CLI-0145** When the version record of the lab directory is not the version of the binary, the release mode changes nothing, and it fails. The error gives the two versions, and tells the user to run `cdrlab reset`. ([Judgement: the release mode changes only a lab of its own version](#cli-0175))
 
 ## Start of the compose lab
@@ -63,7 +63,7 @@ This area gives the start, the stop and the reset of the compose lab with `cdrla
 
 - Kind: choice
 - Basis: Step 3.3. A release makes no promise about the data of a deployment while the major version is 0 ([ADR 0027][adr-0027]).
-- Reason: The images of a different version can fail on the data of the lab, and the cause is then not clear. A refusal with a clear error costs a reset, and the lab data has no value. The record also stops a write over a checkout or another compose project.
+- Reason: The images of a different version can fail on the data of the lab, and the cause is then not clear. A refusal with a clear error costs a reset, and the lab data has no value. The record also stops a write over a checkout or another compose project. The check is for each file of the project, not only the compose file, because the release mode must not write over any file that it did not write.
 
 ### <a id="cli-0176"></a>CLI-0176 Each certificate of the list at each start
 

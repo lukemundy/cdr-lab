@@ -8,14 +8,19 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
+	"testing/fstest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.yaml.in/yaml/v4"
 
+	cdrlab "github.com/lukemundy/cdr-lab"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/certlist"
+	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/labproject"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/register/registertest"
 )
 
@@ -71,15 +76,12 @@ func envValue(env []string, key string) (string, bool) {
 	return "", false
 }
 
-// newLab writes a compose project with a certificate list for the fake Register.
-func newLab(t *testing.T, h *harness) string {
+// labFiles is a compose project with a certificate list for the fake Register.
+func labFiles(t *testing.T, registerURL string) fstest.MapFS {
 	t.Helper()
 
-	dir := t.TempDir()
-	require.NoError(t, os.WriteFile(filepath.Join(dir, "compose.yaml"), []byte("services: {}\n"), 0o600))
-
 	list := certlist.List{
-		Register: certlist.Register{URL: h.register.URL, OperatorToken: registertest.Token},
+		Register: certlist.Register{URL: registerURL, OperatorToken: registertest.Token},
 		Public: []certlist.Public{
 			{Cert: ".lab/pki/register/public.crt", Key: ".lab/pki/register/public.key", Names: []string{"register"}},
 		},
@@ -103,8 +105,19 @@ func newLab(t *testing.T, h *harness) string {
 
 	data, err := json.Marshal(list)
 	require.NoError(t, err)
-	require.NoError(t, os.MkdirAll(filepath.Join(dir, "lab"), 0o750))
-	require.NoError(t, os.WriteFile(filepath.Join(dir, certlist.File), data, 0o600))
+
+	return fstest.MapFS{
+		"compose.yaml": {Data: []byte("services: {}\n")},
+		certlist.File:  {Data: data},
+	}
+}
+
+// newLab writes the compose project of the harness, as a checkout has it.
+func newLab(t *testing.T, h *harness) string {
+	t.Helper()
+
+	dir := t.TempDir()
+	require.NoError(t, os.CopyFS(dir, h.project))
 
 	return dir
 }
@@ -257,14 +270,174 @@ func TestUpStopsWhenTheRegisterIsNotHealthyAndNamesTheService(t *testing.T) {
 	assert.Len(t, h.compose.upCalls(), 1)
 }
 
-func TestUpWithNoSourceFlagTellsTheUserToUseTheSourceMode(t *testing.T) {
+// Verifies: CLI-0140, CLI-0141, CLI-0146
+func TestUpInTheReleaseModeWritesTheProjectAndPullsTheImagesOfTheVersion(t *testing.T) {
 	h := newHarness(t)
+	dir := t.TempDir()
 
-	code, _, stderr := h.run("up", "-dir", newLab(t, h))
+	code, _, stderr := h.run("up", "-dir", dir)
+	require.Equal(t, 0, code, stderr)
+
+	assert.FileExists(t, filepath.Join(dir, "compose.yaml"))
+	assert.FileExists(t, filepath.Join(dir, labproject.RecordFile))
+	assert.FileExists(t, filepath.Join(dir, ".lab/pki/wattle-bank/secure.crt"))
+
+	ups := h.compose.upCalls()
+	require.Len(t, ups, 2)
+
+	for _, call := range ups {
+		assert.Contains(t, call.argv, "--no-build")
+
+		image, _ := envValue(call.env, "CDRLAB_REGISTER_IMAGE")
+		assert.Equal(t, "ghcr.io/lukemundy/cdr-lab/register:v0.3.1", image)
+
+		image, _ = envValue(call.env, "CDRLAB_DATAHOLDER_IMAGE")
+		assert.Equal(t, "ghcr.io/lukemundy/cdr-lab/dataholder:v0.3.1", image)
+	}
+}
+
+// Verifies: CLI-0142
+func TestUpInTheReleaseModeUsesTheImagePrefixAndTagOfTheFlags(t *testing.T) {
+	h := newHarness(t)
+	h.version = "rehearsal-42"
+
+	code, _, stderr := h.run("up", "-dir", t.TempDir(),
+		"-image-prefix", "ghcr.io/lukemundy/cdr-lab/rehearsal", "-image-tag", "rehearsal-42")
+	require.Equal(t, 0, code, stderr)
+
+	for _, call := range h.compose.upCalls() {
+		image, _ := envValue(call.env, "CDRLAB_DATAHOLDER_IMAGE")
+		assert.Equal(t, "ghcr.io/lukemundy/cdr-lab/rehearsal/dataholder:rehearsal-42", image)
+	}
+}
+
+// Verifies: CLI-0143
+func TestUpInTheReleaseModeWithNoReleaseVersionAndNoTagChangesNothing(t *testing.T) {
+	h := newHarness(t)
+	h.version = "dev"
+	dir := t.TempDir()
+
+	code, _, stderr := h.run("up", "-dir", dir)
 
 	assert.Equal(t, 2, code)
 	assert.Contains(t, stderr, "-source")
+	assert.Contains(t, stderr, "release binary")
 	assert.Empty(t, h.compose.calls)
+
+	entries, err := os.ReadDir(dir)
+	require.NoError(t, err)
+	assert.Empty(t, entries)
+}
+
+// Verifies: CLI-0144
+func TestUpInTheReleaseModeRefusesACheckout(t *testing.T) {
+	h := newHarness(t)
+	dir := newLab(t, h)
+
+	code, _, stderr := h.run("up", "-dir", dir)
+
+	assert.Equal(t, 1, code)
+	assert.Contains(t, stderr, "compose.yaml")
+	assert.Empty(t, h.compose.calls)
+	assert.NoFileExists(t, filepath.Join(dir, labproject.RecordFile))
+	assert.NoDirExists(t, filepath.Join(dir, ".lab/pki"))
+}
+
+// Verifies: CLI-0145
+func TestUpInTheReleaseModeRefusesALabOfADifferentVersion(t *testing.T) {
+	h := newHarness(t)
+	dir := t.TempDir()
+	code, _, stderr := h.run("up", "-dir", dir)
+	require.Equal(t, 0, code, stderr)
+
+	calls := len(h.compose.calls)
+	h.version = "v0.4.0"
+	code, _, stderr = h.run("up", "-dir", dir)
+
+	assert.Equal(t, 1, code)
+	assert.Contains(t, stderr, "v0.3.1")
+	assert.Contains(t, stderr, "v0.4.0")
+	assert.Contains(t, stderr, "cdrlab reset")
+	assert.Len(t, h.compose.calls, calls)
+}
+
+func TestUpInTheSourceModeIgnoresAnInheritedImageVariable(t *testing.T) {
+	h := newHarness(t)
+	h.environ = []string{"CDRLAB_REGISTER_IMAGE=elsewhere/register:x"}
+
+	code, _, stderr := h.run("up", "-source", "-dir", newLab(t, h))
+	require.Equal(t, 0, code, stderr)
+
+	for _, call := range h.compose.upCalls() {
+		image, _ := envValue(call.env, "CDRLAB_REGISTER_IMAGE")
+		assert.Empty(t, image)
+	}
+}
+
+func TestUpRefusesTheFlagsOfTheOtherMode(t *testing.T) {
+	for _, args := range [][]string{
+		{"-source", "-image-tag", "rehearsal-42"},
+		{"-source", "-image-prefix", "ghcr.io/x"},
+		{"-no-build"},
+	} {
+		t.Run(strings.Join(args, " "), func(t *testing.T) {
+			h := newHarness(t)
+
+			code, _, stderr := h.run(append([]string{"up", "-dir", t.TempDir()}, args...)...)
+
+			assert.Equal(t, 2, code)
+			assert.Contains(t, stderr, "cannot go with")
+			assert.Empty(t, h.compose.calls)
+		})
+	}
+}
+
+// imageVariable is the form of the image of a built service in compose.yaml: a variable with a default.
+var (
+	imageVariable     = regexp.MustCompile(`^\$\{([A-Z_]+):-([^}]+)\}$`)
+	serviceDockerfile = regexp.MustCompile(`^services/([a-z]+)/Dockerfile$`)
+)
+
+// Verifies: CLI-0141
+func TestEachServiceThatComposeBuildsHasTheReleaseImageOfItsDockerfile(t *testing.T) {
+	data, err := fs.ReadFile(cdrlab.ComposeProject, "compose.yaml")
+	require.NoError(t, err)
+
+	var file struct {
+		Services map[string]struct {
+			Image string `yaml:"image"`
+			Build *struct {
+				Dockerfile string `yaml:"dockerfile"`
+			} `yaml:"build"`
+		} `yaml:"services"`
+	}
+	require.NoError(t, yaml.Unmarshal(data, &file))
+
+	env, err := releaseImageEnv("v0.3.1", defaultImagePrefix, "")
+	require.NoError(t, err)
+
+	built := 0
+
+	for name, service := range file.Services {
+		if service.Build == nil {
+			continue
+		}
+
+		built++
+		dockerfile := serviceDockerfile.FindStringSubmatch(service.Build.Dockerfile)
+		require.NotNil(t, dockerfile, "%s builds from %q", name, service.Build.Dockerfile)
+		image := dockerfile[1]
+
+		m := imageVariable.FindStringSubmatch(service.Image)
+		require.NotNil(t, m, "%s builds an image, and has no image variable: %q", name, service.Image)
+
+		value, _ := envValue(env, m[1])
+		assert.Equal(t, defaultImagePrefix+"/"+image+":v0.3.1", value, name)
+		// The source mode keeps the name that Compose gives to the image of the service.
+		assert.Equal(t, "cdr-lab-"+name, m[2], name)
+	}
+
+	assert.Positive(t, built)
 }
 
 func TestUpFailsWithNoCertificateList(t *testing.T) {
