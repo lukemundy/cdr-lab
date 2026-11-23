@@ -21,6 +21,7 @@ import (
 type Operator interface {
 	Execute(ctx context.Context, legalEntityID string, command domain.DataRecipientCommand) error
 	ExecuteDataHolder(ctx context.Context, legalEntityID string, command domain.DataHolderCommand) error
+	ParticipantLoader
 }
 
 // CertificateIssuer gives the certificate and then the certificate of its issuer.
@@ -98,6 +99,7 @@ func Register(
 	)
 	registerDataRecipientChanges(routes, operator)
 	registerDataHolders(routes, operator)
+	routes.Handle("POST /v1/participant-loads", loadParticipants(operator))
 	routes.Handle("/v1/", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		problem.Write(w, http.StatusNotFound, "The URL and method are not an operator action.")
 	}))
