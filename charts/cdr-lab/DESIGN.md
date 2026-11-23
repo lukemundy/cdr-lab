@@ -224,6 +224,10 @@ None.
 - Basis: Step 3.3. The chart of a service publishes after only its own tests pass ([Judgement: the chart publishes after only its own tests pass](../../services/dataholder/design/deployment.md#dh-1373)).
 - Reason: The cluster job is the only test that installs the umbrella chart. A chart that its own test did not install must not publish.
 
+## Withdrawn
+
+None.
+
 [adr-0020]: ../../docs/adr/0020-service-migrations-create-roles-and-the-operator-creates-users.md
 [adr-0022]: ../../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
 [adr-0027]: ../../docs/adr/0027-release-all-artifacts-with-one-version-from-a-manual-workflow-on-main.md
