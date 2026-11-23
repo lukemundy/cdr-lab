@@ -55,13 +55,13 @@ The onboarding is two commands: add the participant records, then get the client
    mkdir -p budget
    ./cdrlab cert issue -register-url http://localhost:8080 -kind client \
      -legal-entity-id 6f6c2a04-6a2f-4c2a-9b77-0c1f8c0a1b01 -software-product-id 2b7f9c1e-0d4a-4e6b-8f3c-5a6b7c8d9e03 \
-     -cn "Example Budget Web" -o "Example Budget Pty Ltd" -cert budget/client.crt -key budget/client.key -key-readable-by-all
+     -cn "Example Budget Web" -o "Example Budget" -cert budget/client.crt -key budget/client.key -key-readable-by-all
    ```
 
 Your software product is now in the Register APIs:
 
 ```sh
-http --verify .lab/pki/public/root.crt https://localhost:8081/cdr-register/v1/banking/data-recipients x-v:4 |
+http --verify .lab/pki/public/root.crt https://localhost:8081/cdr-register/v1/all/data-recipients x-v:4 |
   jq '.data[] | select(.legalEntityId == "6f6c2a04-6a2f-4c2a-9b77-0c1f8c0a1b01") | .dataRecipientBrands[].softwareProducts'
 ```
 
@@ -80,7 +80,7 @@ docker run --detach --name budget-web --network cdr-lab_default \
   --network-alias web.budget.example --network-alias cdr.web.budget.example \
   --volume "$PWD/budget:/budget:ro" --volume "$PWD/.lab/pki:/pki:ro" <your image>
 docker run --rm --network cdr-lab_default --volume "$PWD/.lab/pki/public:/pki:ro" \
-  docker.io/curlimages/curl:8.17.0 --cacert /pki/root.crt https://web.budget.example/jwks
+  docker.io/curlimages/curl:8.17.0 --silent --show-error --cacert /pki/root.crt https://web.budget.example/jwks
 ```
 
 The last command checks that the lab can get your JWKS. In the container, your software uses these URLs and files:
@@ -132,8 +132,8 @@ export DATAHOLDER_OPERATOR_TOKEN=lab-operator-token
 At the authorisation, the consumer gives the email address or the customer number of a customer. The brand then sends a one-time password (OTP) to that email address ([data holder: consumer authentication](../../services/dataholder/design/consumer-authentication.md#dh-1220)). All email of the lab goes to the mail sink. A test gets the OTP from the mail sink API, at `http://mail:8025` on the compose network or at `http://localhost:8025` on the host:
 
 ```sh
-id=$(http --ignore-stdin :8025/api/v1/search query=='to:"jordan.lee@example.test"' | jq --raw-output '.messages[0].ID')
-http --ignore-stdin ":8025/api/v1/message/$id" | jq --raw-output .Text | grep --only-matching 'one-time password is [0-9]*'
+id=$(http :8025/api/v1/search query=='to:"jordan.lee@example.test"' | jq --raw-output '.messages[0].ID')
+http ":8025/api/v1/message/$id" | jq --raw-output .Text | grep --only-matching --extended-regexp 'one-time password is [0-9]{6}'
 ```
 
 The web page of the mail sink is at `http://localhost:8025`. An OTP is valid for 5 minutes and for one authorisation.
@@ -156,8 +156,8 @@ With external host names and routes, a browser can do the authorisation ([routes
 A fresh deployment deletes all records that you added with `cdrlab`. To rebuild them, put the same records into the values of the release: `participants` takes the participant load file, and `brands.<brand>.customers` takes the customers of the customer load file ([seed data](../../charts/cdr-lab/README.md#seed-data)). The files convert to values with no change of format:
 
 ```sh
-yq --prettyPrint '{"participants": .}' example-budget.json > budget-values.yaml
-yq --prettyPrint '{"brands": {"wattle-bank": {"customers": .customers}}}' customers.json > customers-values.yaml
+yq --output-format yaml '{"participants": .}' example-budget.json > budget-values.yaml
+yq --output-format yaml '{"brands": {"wattle-bank": {"customers": .customers}}}' customers.json > customers-values.yaml
 helm upgrade cdr-lab oci://ghcr.io/lukemundy/cdr-lab/charts/cdr-lab --version X.Y.Z --namespace lab \
   --values my-values.yaml --values budget-values.yaml --values customers-values.yaml --wait --timeout 10m
 ```

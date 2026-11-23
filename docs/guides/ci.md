@@ -39,7 +39,7 @@ jobs:
           mkdir -p budget
           ./cdrlab cert issue -register-url http://localhost:8080 -kind client \
             -legal-entity-id 6f6c2a04-6a2f-4c2a-9b77-0c1f8c0a1b01 -software-product-id 2b7f9c1e-0d4a-4e6b-8f3c-5a6b7c8d9e03 \
-            -cn "Example Budget Web" -o "Example Budget Pty Ltd" -cert budget/client.crt -key budget/client.key \
+            -cn "Example Budget Web" -o "Example Budget" -cert budget/client.crt -key budget/client.key \
             -key-readable-by-all
           ./cdrlab customers add -dataholder-url http://localhost:8180 -file customers.json
 

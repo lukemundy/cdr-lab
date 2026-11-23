@@ -34,7 +34,7 @@ Then start the lab. The lab directory is the current directory: `cdrlab up` writ
 http --verify .lab/pki/public/root.crt https://localhost:8181/cds-au/v1/banking/products x-v:5
 ```
 
-The ports are in the [README](../../README.md#lab-deployment). The flags of `cdrlab up` are in `./cdrlab up -h`. For example, `-all-banks` also starts the three other preset brands, and `-no-telemetry` starts no telemetry backend.
+The ports are in the [README](../../README.md#lab-deployment). `./cdrlab -h` gives each command and its flags. For example, `-all-banks` also starts the three other preset brands, and `-no-telemetry` starts no telemetry backend.
 
 To stop the lab and keep its data, run `./cdrlab down`. To delete its data, its CAs and the files that `cdrlab up` wrote, run `./cdrlab reset`. `cdrlab up` starts only a lab of its own version. To change the version, see the [upgrade guide](upgrade.md#the-compose-lab).
 

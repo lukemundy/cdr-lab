@@ -76,9 +76,9 @@ The public APIs of the Register need no authentication. From the host they are a
 
 ```sh
 root=.lab/pki/public/root.crt
-http --verify $root https://localhost:8081/cdr-register/v1/banking/data-recipients x-v:4
-http --verify $root https://localhost:8081/cdr-register/v1/banking/data-recipients/status x-v:3
-http --verify $root https://localhost:8081/cdr-register/v1/banking/data-recipients/brands/software-products/status x-v:3
+http --verify $root https://localhost:8081/cdr-register/v1/all/data-recipients x-v:4
+http --verify $root https://localhost:8081/cdr-register/v1/all/data-recipients/status x-v:3
+http --verify $root https://localhost:8081/cdr-register/v1/all/data-recipients/brands/software-products/status x-v:3
 http --verify $root https://localhost:8081/cdr-register/v1/jwks
 ```
 
