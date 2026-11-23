@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"slices"
+	"strings"
 
 	"github.com/lukemundy/cdr-lab/pkg/ca"
 	"github.com/lukemundy/cdr-lab/pkg/cds"
@@ -21,11 +22,12 @@ type config struct {
 	secureBaseURL string
 	operator      operatorhttp.Config
 	publicCert    certificatePaths
-	secureCert    certificatePaths
-	cdrCAs        []*x509.Certificate
-	intermediate  ca.Authority
-	console       consolehttp.Config
-	consoleUI     fs.FS
+	// secureDNSNames are the DNS names of the certificate that the Register issues for its mTLS listener.
+	secureDNSNames []string
+	cdrCAs         []*x509.Certificate
+	intermediate   ca.Authority
+	console        consolehttp.Config
+	consoleUI      fs.FS
 }
 
 // The listeners, not the configuration, read the files, because the reload lasts as long as the process.
@@ -69,11 +71,8 @@ func loadConfig(m mode) (config, error) {
 		)
 	}
 
-	cfg.secureCert = certificatePaths{cert: os.Getenv("SECURE_TLS_CERT_FILE"), key: os.Getenv("SECURE_TLS_KEY_FILE")}
-	if cfg.secureCert.cert == "" || cfg.secureCert.key == "" {
-		return config{}, errors.New(
-			"set SECURE_TLS_CERT_FILE and SECURE_TLS_KEY_FILE to the TLS certificate and key of the secure APIs",
-		)
+	if cfg.secureDNSNames, err = loadSecureDNSNames(); err != nil {
+		return config{}, err
 	}
 
 	if err := loadCA(&cfg); err != nil {
@@ -87,6 +86,20 @@ func loadConfig(m mode) (config, error) {
 	cfg.consoleUI = console.UI()
 
 	return cfg, nil
+}
+
+func loadSecureDNSNames() ([]string, error) {
+	value := os.Getenv("SECURE_TLS_DNS_NAMES")
+
+	names := strings.Split(value, ",")
+	if value == "" || slices.Contains(names, "") {
+		return nil, errors.New(
+			"set SECURE_TLS_DNS_NAMES to the comma-separated DNS names of the certificate that the Register issues " +
+				"for the secure APIs, with the primary name first",
+		)
+	}
+
+	return names, nil
 }
 
 func loadCA(cfg *config) error {

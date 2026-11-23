@@ -319,9 +319,6 @@ run = [
     $pki issue-public -dir .lab/pki \
       -cert .lab/pki/register/public.crt -key .lab/pki/register/public.key register localhost || exit 1
   fi
-  if [ ! -f .lab/pki/register/secure.crt ]; then
-    cdr_certificate server .lab/pki/register/secure "Mock CDR Register" register DNS:register,DNS:localhost || exit 1
-  fi
   # The four preset banks (compose.yaml), also when the all-banks profile is off, so that a lab can turn it on later.
   for bank in "wattle-bank:Wattle Bank Limited" "redgum-bank:Redgum Bank Limited" \
     "harbour-bank:Harbour Bank Limited" "kestrel-bank:Kestrel Bank Limited"; do

@@ -1,6 +1,6 @@
 # Mock CDR PKI
 
-The mock CDR PKI gives the lab a CDR CA and a separate public CA. They have the structure and the certificate profiles of production. In production, the ACCC operates the CDR CA, and TLS endpoints use certificates from public CAs. A real component that trusts the mock CAs then needs only a change of its CA bundles and certificates to work with production. The `pki` command makes the CAs and issues the certificates of the lab at set-up. In a running lab, the Register is the CDR intermediate CA ([ADR 0022][adr-0022]).
+The mock CDR PKI gives the lab a CDR CA and a separate public CA. They have the structure and the certificate profiles of production. In production, the ACCC operates the CDR CA, and TLS endpoints use certificates from public CAs. A real component that trusts the mock CAs then needs only a change of its CA bundles and certificates to work with production. The `pki` command makes the CAs and issues the certificates of the lab at set-up, except the certificate of the mTLS listener of the Register, which [the Register issues](../services/register/design/certificate-management.md#reg-1515). In a running lab, the Register is the CDR intermediate CA ([ADR 0022][adr-0022]).
 
 ## Context
 

@@ -19,6 +19,8 @@ const (
 	// With app.CRLRenewalAge, less than 24 hours (ACCC CP, section 4.9.7). The job compares wall-clock times, so the
 	// first run after a suspend of the host renews the CRL.
 	crlRenewalInterval = 10 * time.Minute
+	// A failed renewal of the certificate of the mTLS listener is tried again at the next check.
+	listenerCertificateCheckInterval = time.Hour
 	// With the server shutdown, less than 10 seconds: the default wait before a container stop sends SIGKILL.
 	telemetryShutdownTimeout = 3 * time.Second
 )

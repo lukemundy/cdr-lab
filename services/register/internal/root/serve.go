@@ -181,7 +181,7 @@ func apiListeners(
 		return nil, err
 	}
 
-	secureCert, err := cfg.secureCert.watch(ctx, "secure")
+	secureCert, err := issueSecureCertificate(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -199,4 +199,23 @@ func apiListeners(
 			TLSConfig: cds.MutualTLSConfig(ctx, secureCert, clientCAs, authority.CheckRevocation),
 		},
 	}, nil
+}
+
+// issueSecureCertificate also renews the certificate until ctx ends.
+func issueSecureCertificate(ctx context.Context, cfg config) (*cds.ServerCertificate, error) {
+	certs := app.NewListenerCertificates(cfg.intermediate, cfg.secureDNSNames, time.Now)
+
+	cert, err := certs.Issue()
+	if err != nil {
+		return nil, err
+	}
+
+	secureCert, err := cds.NewServerCertificate(ctx, "secure", cert)
+	if err != nil {
+		return nil, err
+	}
+
+	go certs.KeepRenewed(ctx, secureCert, listenerCertificateCheckInterval)
+
+	return secureCert, nil
 }

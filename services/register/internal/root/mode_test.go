@@ -48,7 +48,7 @@ func onlyCASettings(t *testing.T) {
 
 	for _, name := range []string{
 		"PUBLIC_BASE_URL", "SECURE_BASE_URL", "OPERATOR_TOKEN", "INTERNAL_ALLOWED_HOSTS", "PUBLIC_TLS_CERT_FILE",
-		"PUBLIC_TLS_KEY_FILE", "SECURE_TLS_CERT_FILE", "SECURE_TLS_KEY_FILE",
+		"PUBLIC_TLS_KEY_FILE", "SECURE_TLS_DNS_NAMES",
 	} {
 		t.Setenv(name, "")
 	}
