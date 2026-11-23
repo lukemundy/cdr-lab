@@ -80,7 +80,6 @@ None.
   - the mTLS listener: the resource base URI
 - <a id="lab-0019"></a>**LAB-0019** The values can give more participant records, in the format of the load file of the Register. For example, the data recipients of the conformance suite. ([Register: the load file uses the CDS field names](../../services/register/design/deployment.md#reg-0905); [Judgement: the chart makes the seed from its values](#lab-0103))
 - <a id="lab-0020"></a>**LAB-0020** When a record of the more participants has the identifier of a preset brand or of its legal entity, the chart does not render. The error names the identifier. ([Judgement: the chart has the Register record of each preset brand](#lab-0102))
-
 - <a id="lab-0021"></a>**LAB-0021** The values can give a maximum CRL age for the data holders. The chart gives it to each brand. With no value, each brand uses the [default maximum CRL age](../../pkg/cds/DESIGN.md#cdsl-0053). ([data holder: the maximum CRL age](../../services/dataholder/design/api-standards.md#dh-0467); [Judgement: the maximum CRL age in the cluster job](#lab-0108))
 
 ## Seed data
