@@ -54,14 +54,13 @@ Decided after the research:
 2. A release uses, for each service, the image of the last commit that had an image build ([section 1.5](#15-promote-a-tested-image-without-a-rebuild)).
 3. `service.version` of an image stays the short commit. Only the CLI gets the release version ([section 1.8](#18-stamp-the-semver-version-into-binaries-and-images)).
 4. Compose moves from the offline `pki issue` to the Register issue path, so that the Register is the only issuer of CDR certificates in both environments ([section 3.6](#36-recommended-design)).
+5. `image.tag` gets `.Chart.AppVersion` as its default. A release chart has `appVersion: vX.Y.Z`, the tag that the release puts on the promoted images. A chart from `main` has the image commit of its service as `appVersion`, from the same "last commit that had an image build" rule, so that the default also gives an image that exists. A value of `image.tag` still overrides it ([section 1.6](#16-helm-charts)).
+6. The SBOM of version 1 lists the Go modules only. The release notes and the chart READMEs state that the npm packages are not in it ([section 2.4](#24-sbom-generation)).
+7. The Register issues its own CDR server certificate from its intermediate, at start and before expiry, with the key in memory only ([section 3.6](#36-recommended-design)).
+8. The umbrella chart puts all releases in one namespace, so that one Job writes the CA Secrets that all releases mount ([section 3.4](#34-the-lab-ca-roots-in-a-cluster)).
+9. The docs use one Gateway on port 443 with SNI, and separate host names for the public and the secure listener of each service. The values also permit separate ports. In-cluster callers use the Service names, and each certificate has the external host name and the Service name ([section 4.1](#41-exposure-of-the-tls-and-mtls-listeners)).
 
-These items have no decision yet:
-
-1. Whether `image.tag` gets `.Chart.AppVersion` as its default in the release charts ([section 1.6](#16-helm-charts)).
-2. Whether the SBOM must list the npm packages in version 1 ([section 2.4](#24-sbom-generation)).
-3. Whether the Register issues its own secure certificate at start ([section 3.6](#36-recommended-design)).
-4. Whether the umbrella chart puts all releases in one namespace ([section 3.4](#34-the-lab-ca-roots-in-a-cluster)).
-5. The host names and ports of the base URLs behind a shared Gateway ([section 4.1](#41-exposure-of-the-tls-and-mtls-listeners)).
+All items of the research have a decision.
 
 ## 1. Versions, changelog and release artifacts
 
@@ -278,7 +277,7 @@ The release notes give the image commit of each service, because the services ca
 
 #### Recommendation
 
-Option 1. Use `version: 0.0.0` in the committed umbrella dependencies, the same as the subcharts. The release (and the `main` publish) job sets one version in all three `Chart.yaml` files of the workspace, then packages with `--version X.Y.Z --app-version X.Y.Z`. Consider a default of `image.tag` to `.Chart.AppVersion` for the release charts, so that a release chart deploys the release images; this changes the chart rule "image.tag is required" and needs its own decision.
+Option 1. Use `version: 0.0.0` in the committed umbrella dependencies, the same as the subcharts. The release (and the `main` publish) job sets one version in all three `Chart.yaml` files of the workspace, then packages with `--version X.Y.Z --app-version vX.Y.Z`. `image.tag` gets `.Chart.AppVersion` as its default, so that a release chart deploys the release images. The `appVersion` must be the image tag exactly: `vX.Y.Z` for a release, and the image commit of the service for a chart from `main` (section 1.5). This changes the chart rule "image.tag is required".
 
 ### 1.7. Go CLI release binaries
 
@@ -495,7 +494,7 @@ To get SLSA Build Level 3, move the build and attest steps into a reusable workf
 
 #### Recommendation
 
-Syft through `anchore/sbom-action` on the image digest, in SPDX JSON, attested with `actions/attest` `sbom-path`. Accept that version 1 lists the Go modules only, and record the npm gap, or merge a lock-file scan. Do not use BuildKit `--sbom` while the images go through `docker save`/`docker load`.
+Syft through `anchore/sbom-action` on the image digest, in SPDX JSON, attested with `actions/attest` `sbom-path`. Version 1 lists the Go modules only. The release notes and the chart READMEs state the npm gap. A filtered lock-file scan can close it later. Do not use BuildKit `--sbom` while the images go through `docker save`/`docker load`.
 
 ### 2.5. Helm chart verification
 
@@ -767,7 +766,7 @@ Option 1 for clusters with cert-manager, and option 3 for the rest. The chart ke
 #### Cluster
 
 1. **CA set-up:** an idempotent install Job (`cdrlab pki init`) writes the intermediate Secret, the CDR CA bundle Secret and, with no cert-manager, the public root Secret, only when they are absent. User-provided Secrets override it.
-2. **Register secure certificate:** the Register issues its own CDR server certificate from its intermediate at start, with a key in memory, and before expiry. This removes the chicken-and-egg step. (Alternative: the install Job issues it offline, as `mise.toml:222-223` does now.)
+2. **Register secure certificate:** the Register issues its own CDR server certificate from its intermediate at start, with a key in memory, and before expiry. This removes the chicken-and-egg step. (The alternative, which the design does not use: the install Job issues it offline, as `mise.toml:222-223` does now.)
 3. **Data holder CDR server certificates and data recipient client certificates:** one `cdrlab` command sends a CSR to the Register operator API and writes a `kubernetes.io/tls` Secret. A CronJob runs it each day; it renews only when the certificate is absent or near expiry. An install Job (or Argo CD-safe hook) runs it once after the Register is ready.
 4. **Public TLS:** cert-manager `Certificate` resources that write the existing `pki.publicTLSSecret` Secrets; without cert-manager, `cdrlab issue-public` in the same Jobs.
 5. **Reload:** the shared TLS code reads the certificate files again when they change (`GetCertificate`), for the public and the secure listeners of both services. No restart and no Reloader.
