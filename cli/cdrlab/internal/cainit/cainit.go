@@ -1,5 +1,5 @@
-// Package cainit makes the mock CDR CA and writes its intermediate Secret and its CDR CA bundle Secret, only when
-// both are absent.
+// Package cainit makes the mock CDR CA, only when its output is absent. The output is the intermediate Secret and the
+// CDR CA bundle Secret, or the files of a directory with also the mock public CA.
 package cainit
 
 import (

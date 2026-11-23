@@ -1,6 +1,6 @@
-// Command cdrlab is the CLI of the lab. Its commands make the mock CDR CA and get CDR certificates from the Register
-// for
-// a cluster deployment (cli/cdrlab/DESIGN.md).
+// Command cdrlab is the CLI of the lab. Its commands make the mock CDR CA and the mock public CA, get CDR
+// certificates from the Register and issue public TLS certificates, with Kubernetes Secrets or files as the output
+// (cli/cdrlab/DESIGN.md).
 package main
 
 import (
@@ -12,13 +12,17 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/cainit"
+	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/certcheck"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/certissue"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/kube"
+	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/pemfile"
+	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/publiccert"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/register"
 	"github.com/lukemundy/cdr-lab/pkg/ca"
 	"github.com/lukemundy/cdr-lab/pkg/platform/buildinfo"
@@ -26,18 +30,27 @@ import (
 
 const usage = `usage: cdrlab <command> [flags]
 
-In a pod, the commands read and write the Secrets of the namespace of the pod, as its ServiceAccount.
+With Secrets as the output, the commands read and write the Secrets of the namespace of the pod, as its
+ServiceAccount. With files as the output, they make no call to Kubernetes.
 
 commands:
-  cdrlab version     give the commit of the build
-  cdrlab ca init     make the mock CDR CA and write its Secrets, if both are absent:
-                     cdrlab ca init -intermediate-secret NAME -ca-bundle-secret NAME
-  cdrlab cert issue  get a CDR certificate from the Register and write it to a TLS Secret, if the Secret has no
-                     current certificate. The operator token is in the variable REGISTER_OPERATOR_TOKEN.
-                     cdrlab cert issue -register-url URL -kind server -legal-entity-id ID -brand-id ID
-                       -cn NAME -o NAME [-dns NAME]... -secret NAME [-renew-before DURATION]
-                     cdrlab cert issue -register-url URL -kind client -legal-entity-id ID -software-product-id ID
-                       -cn NAME -o NAME -secret NAME [-renew-before DURATION]
+  cdrlab version            give the version, the commit and the build time
+  cdrlab ca init            make the mock CDR CA, if its output is absent:
+                            cdrlab ca init -intermediate-secret NAME -ca-bundle-secret NAME
+                            cdrlab ca init -dir DIR    (also makes the mock public CA)
+  cdrlab cert issue         get a CDR certificate from the Register and write it to the output, if the output has no
+                            current certificate. The operator token is in the variable REGISTER_OPERATOR_TOKEN.
+                            cdrlab cert issue -register-url URL -kind server -legal-entity-id ID -brand-id ID
+                              -cn NAME -o NAME [-dns NAME]... OUTPUT [-renew-before DURATION]
+                            cdrlab cert issue -register-url URL -kind client -legal-entity-id ID -software-product-id ID
+                              -cn NAME -o NAME OUTPUT [-renew-before DURATION]
+                            OUTPUT is -secret NAME, or -cert FILE -key FILE [-key-readable-by-all].
+                            With -csr FILE in place of -cn, -o, -dns and -key, the command sends that CSR and writes
+                            only the -cert FILE.
+  cdrlab public-cert issue  issue a TLS server certificate from the mock public CA of a directory, if the
+                            certificate file has no current certificate. The first NAME is the CN.
+                            cdrlab public-cert issue -dir DIR -cert FILE -key FILE [-key-readable-by-all]
+                              [-renew-before DURATION] NAME...
 `
 
 // requestTimeout is more than the time of a Register issue, which signs one certificate.
@@ -77,14 +90,15 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer, d deps) i
 
 	if len(args) == 1 && args[0] == "version" {
 		info := buildinfo.Get()
-		_, _ = fmt.Fprintf(stdout, "cdrlab commit %s, built %s, build %s\n", info.Commit, info.Time, info.ID)
+		_, _ = fmt.Fprintf(stdout, "cdrlab %s, commit %s, built %s\n", info.Version, info.Commit, info.Time)
 
 		return 0
 	}
 
 	commands := map[string]func(context.Context, []string, io.Writer, deps) error{
-		"ca init":    caInit,
-		"cert issue": certIssue,
+		"ca init":           caInit,
+		"cert issue":        certIssue,
+		"public-cert issue": publicCertIssue,
 	}
 
 	if len(args) < 2 || commands[args[0]+" "+args[1]] == nil {
@@ -115,15 +129,28 @@ func newFlags(name string) *flag.FlagSet {
 	return fs
 }
 
-func parse(fs *flag.FlagSet, args []string, required map[string]*string) error {
+func parseFlags(fs *flag.FlagSet, args []string) error {
 	if err := fs.Parse(args); err != nil {
 		return fmt.Errorf("%w: %w", errUsage, err)
+	}
+
+	return nil
+}
+
+// parse also refuses arguments that are not flags.
+func parse(fs *flag.FlagSet, args []string, required map[string]*string) error {
+	if err := parseFlags(fs, args); err != nil {
+		return err
 	}
 
 	if fs.NArg() != 0 {
 		return fmt.Errorf("%w: unexpected arguments: %s", errUsage, strings.Join(fs.Args(), " "))
 	}
 
+	return requireFlags(fs, required)
+}
+
+func requireFlags(fs *flag.FlagSet, required map[string]*string) error {
 	var missing []string
 
 	fs.VisitAll(func(f *flag.Flag) {
@@ -139,6 +166,24 @@ func parse(fs *flag.FlagSet, args []string, required map[string]*string) error {
 	return nil
 }
 
+func refuseFlags(fs *flag.FlagSet, reason string, names ...string) error {
+	var set []string
+
+	fs.Visit(func(f *flag.Flag) {
+		for _, name := range names {
+			if f.Name == name {
+				set = append(set, "-"+f.Name)
+			}
+		}
+	})
+
+	if len(set) > 0 {
+		return fmt.Errorf("%w: %s %s", errUsage, reason, strings.Join(set, ", "))
+	}
+
+	return nil
+}
+
 func caInit(ctx context.Context, args []string, stdout io.Writer, d deps) error {
 	fs := newFlags("ca init")
 	intermediate := fs.String(
@@ -147,10 +192,22 @@ func caInit(ctx context.Context, args []string, stdout io.Writer, d deps) error 
 		"the name of the Secret of the intermediate certificate and key",
 	)
 	bundle := fs.String("ca-bundle-secret", "", "the name of the Secret of the CDR CA bundle")
+	dir := fs.String("dir", "", "the directory of the files of the mock CDR CA and the mock public CA")
 
-	if err := parse(
+	if err := parse(fs, args, nil); err != nil {
+		return err
+	}
+
+	if *dir != "" {
+		if err := refuseFlags(fs, "-dir cannot go with", "intermediate-secret", "ca-bundle-secret"); err != nil {
+			return err
+		}
+
+		return caInitDir(*dir, stdout, d)
+	}
+
+	if err := requireFlags(
 		fs,
-		args,
 		map[string]*string{"intermediate-secret": intermediate, "ca-bundle-secret": bundle},
 	); err != nil {
 		return err
@@ -178,6 +235,23 @@ func caInit(ctx context.Context, args []string, stdout io.Writer, d deps) error 
 	return err
 }
 
+func caInitDir(dir string, stdout io.Writer, d deps) error {
+	created, err := cainit.RunDir(dir, d.caKeyBits, d.now)
+	if err != nil {
+		return err
+	}
+
+	if !created {
+		_, err = fmt.Fprintf(stdout, "the lab CAs exist in %s: no change\n", dir)
+		return err
+	}
+
+	_, err = fmt.Fprintf(stdout, "created the lab CAs in %s\ntrust bundles: %s, %s\n", dir,
+		filepath.Join(dir, "cdr/ca-bundle.pem"), filepath.Join(dir, "public/root.crt"))
+
+	return err
+}
+
 type dnsNames []string
 
 func (n *dnsNames) String() string { return strings.Join(*n, ",") }
@@ -187,8 +261,14 @@ func (n *dnsNames) Set(v string) error {
 	return nil
 }
 
+// certOutput is a Secret, or a certificate file and a key file.
+type certOutput struct {
+	secret, cert, key, csr string
+	anyUser                bool
+}
+
 func certIssue(ctx context.Context, args []string, stdout io.Writer, d deps) error {
-	cfg, registerURL, err := parseCertIssue(args, d.now)
+	cfg, output, registerURL, err := parseCertIssue(args, d.now)
 	if err != nil {
 		return err
 	}
@@ -198,28 +278,67 @@ func certIssue(ctx context.Context, args []string, stdout io.Writer, d deps) err
 		return fmt.Errorf("%w: the variable REGISTER_OPERATOR_TOKEN is not set", errUsage)
 	}
 
-	secrets, err := d.secrets()
-	if err != nil {
-		return err
+	var (
+		out  certissue.Output
+		name string
+	)
+
+	switch {
+	case output.secret != "":
+		secrets, err := d.secrets()
+		if err != nil {
+			return err
+		}
+
+		out, name = certissue.NewSecret(secrets, output.secret), fmt.Sprintf("the Secret %q", output.secret)
+	default:
+		if output.csr != "" {
+			if cfg.CSR, err = readCSR(output.csr); err != nil {
+				return err
+			}
+		}
+
+		out, name = certissue.Files{Cert: output.cert, Key: output.key, KeyPerm: keyPerm(output.anyUser)}, output.cert
 	}
 
-	cert, err := certissue.Run(ctx, secrets, register.New(registerURL, token, d.httpClient), cfg)
+	cert, err := certissue.Run(ctx, out, register.New(registerURL, token, d.httpClient), cfg)
 	if err != nil {
 		return err
 	}
 
 	if cert == nil {
-		_, err = fmt.Fprintf(stdout, "the Secret %q has a current certificate: no change\n", cfg.Secret)
+		_, err = fmt.Fprintf(stdout, "%s has a current certificate: no change\n", name)
 		return err
 	}
 
-	_, err = fmt.Fprintf(stdout, "wrote a new certificate to the Secret %q, valid until %s\n",
-		cfg.Secret, cert.NotAfter.Format(time.DateOnly))
+	_, err = fmt.Fprintf(stdout, "wrote a new certificate to %s, valid until %s\n",
+		name, cert.NotAfter.Format(time.DateOnly))
 
 	return err
 }
 
-func parseCertIssue(args []string, now func() time.Time) (certissue.Config, string, error) {
+func readCSR(path string) ([]byte, error) {
+	csr, found, err := pemfile.Read(path)
+	if err != nil {
+		return nil, fmt.Errorf("read the CSR file: %w", err)
+	}
+
+	if !found {
+		return nil, fmt.Errorf("the CSR file %s is absent", path)
+	}
+
+	return csr, nil
+}
+
+func keyPerm(anyUser bool) os.FileMode {
+	if anyUser {
+		return pemfile.AnyUser
+	}
+
+	return pemfile.OwnerOnly
+}
+
+func parseCertIssue(args []string, now func() time.Time) (certissue.Config, certOutput, string, error) {
 	fs := newFlags("cert issue")
 	registerURL := fs.String("register-url", "", "the URL of the Register operator interface")
 	kindName := fs.String("kind", "", "server or client")
@@ -228,27 +347,30 @@ func parseCertIssue(args []string, now func() time.Time) (certissue.Config, stri
 	product := fs.String("software-product-id", "", "the ID of the software product, for a client certificate")
 	cn := fs.String("cn", "", "the CN of the subject")
 	org := fs.String("o", "", "the O of the subject")
-	secret := fs.String("secret", "", "the name of the TLS Secret")
-	renewBefore := fs.Duration("renew-before", certissue.DefaultRenewBefore,
+
+	var output certOutput
+	fs.StringVar(&output.secret, "secret", "", "the name of the TLS Secret")
+	fs.StringVar(&output.cert, "cert", "", "the certificate file")
+	fs.StringVar(&output.key, "key", "", "the key file")
+	fs.StringVar(&output.csr, "csr", "", "a PEM CSR file to send in place of a new key and CSR")
+	fs.BoolVar(&output.anyUser, "key-readable-by-all", false, "let any user read the key file")
+	renewBefore := fs.Duration("renew-before", certcheck.DefaultRenewBefore,
 		"get a new certificate when the current one expires within this time")
 
 	var dns dnsNames
 	fs.Var(&dns, "dns", "a DNS name of a server certificate (repeat for each name)")
 
-	err := parse(fs, args, map[string]*string{
-		"register-url":    registerURL,
-		"kind":            kindName,
-		"legal-entity-id": legalEntity,
-		"cn":              cn,
-		"o":               org,
-		"secret":          secret,
-	})
-	if err != nil {
-		return certissue.Config{}, "", err
+	required := map[string]*string{"register-url": registerURL, "kind": kindName, "legal-entity-id": legalEntity}
+	if err := parse(fs, args, required); err != nil {
+		return certissue.Config{}, certOutput{}, "", err
+	}
+
+	if err := checkCertOutput(fs, output, cn, org); err != nil {
+		return certissue.Config{}, certOutput{}, "", err
 	}
 
 	cfg := certissue.Config{
-		LegalEntityID: *legalEntity, CommonName: *cn, Organisation: *org, DNSNames: dns, Secret: *secret,
+		LegalEntityID: *legalEntity, CommonName: *cn, Organisation: *org, DNSNames: dns,
 		RenewBefore: *renewBefore, Now: now,
 	}
 
@@ -258,13 +380,74 @@ func parseCertIssue(args []string, now func() time.Time) (certissue.Config, stri
 	case *kindName == "client" && *product != "" && *brand == "" && len(dns) == 0:
 		cfg.Kind, cfg.RecordID = ca.Client, *product
 	default:
-		return certissue.Config{}, "", fmt.Errorf(
+		return certissue.Config{}, certOutput{}, "", fmt.Errorf(
 			"%w: -kind server needs -brand-id, and -kind client needs -software-product-id and no -dns", errUsage)
 	}
 
 	if *renewBefore <= 0 {
-		return certissue.Config{}, "", fmt.Errorf("%w: -renew-before must be more than 0", errUsage)
+		return certissue.Config{}, certOutput{}, "", fmt.Errorf("%w: -renew-before must be more than 0", errUsage)
 	}
 
-	return cfg, *registerURL, nil
+	return cfg, output, *registerURL, nil
+}
+
+func checkCertOutput(fs *flag.FlagSet, output certOutput, cn, org *string) error {
+	if (output.secret == "") == (output.cert == "") {
+		return fmt.Errorf("%w: give -secret or -cert, not both", errUsage)
+	}
+
+	if output.secret != "" {
+		return refuseFlags(fs, "-secret cannot go with", "key", "csr", "key-readable-by-all")
+	}
+
+	if output.csr != "" {
+		// The CSR gives the subject and the DNS names, and the user keeps the key (CLI-0128).
+		return refuseFlags(fs, "-csr cannot go with", "cn", "o", "dns", "key", "key-readable-by-all")
+	}
+
+	return requireFlags(fs, map[string]*string{"cn": cn, "o": org, "key": &output.key})
+}
+
+func publicCertIssue(_ context.Context, args []string, stdout io.Writer, d deps) error {
+	fs := newFlags("public-cert issue")
+	dir := fs.String("dir", "", "the directory of the files of the CA set-up")
+	cert := fs.String("cert", "", "the certificate file")
+	key := fs.String("key", "", "the key file")
+	anyUser := fs.Bool("key-readable-by-all", false, "let any user read the key file")
+	renewBefore := fs.Duration("renew-before", certcheck.DefaultRenewBefore,
+		"issue a new certificate when the current one expires within this time")
+
+	if err := parseFlags(fs, args); err != nil {
+		return err
+	}
+
+	if err := requireFlags(fs, map[string]*string{"dir": dir, "cert": cert, "key": key}); err != nil {
+		return err
+	}
+
+	if fs.NArg() == 0 {
+		return fmt.Errorf("%w: give at least one DNS name", errUsage)
+	}
+
+	if *renewBefore <= 0 {
+		return fmt.Errorf("%w: -renew-before must be more than 0", errUsage)
+	}
+
+	issued, err := publiccert.Run(publiccert.Config{
+		Dir: *dir, Cert: *cert, Key: *key, KeyPerm: keyPerm(*anyUser), Names: fs.Args(),
+		RenewBefore: *renewBefore, Now: d.now,
+	})
+	if err != nil {
+		return err
+	}
+
+	if issued == nil {
+		_, err = fmt.Fprintf(stdout, "%s has a current certificate: no change\n", *cert)
+		return err
+	}
+
+	_, err = fmt.Fprintf(stdout, "wrote a new certificate to %s, valid until %s\n",
+		*cert, issued.NotAfter.Format(time.DateOnly))
+
+	return err
 }

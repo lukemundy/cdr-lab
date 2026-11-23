@@ -13,7 +13,7 @@ Early development. Two services run in the lab deployment, and a black-box confo
 | Mock CDR Register | Participants and their statuses, SSAs, and the Register APIs | [design/README.md](services/register/design/README.md) |
 | Mock data holder | One banking brand for each instance, from four preset brands: product data, the authorisation server, authorisations, and the banking APIs of an arrangement | [design/README.md](services/dataholder/design/README.md) |
 
-The lab CLI `cdrlab` has the commands that the Jobs of a cluster deployment run ([DESIGN.md](cli/cdrlab/DESIGN.md)). The compose lab still uses the `pki` command.
+The lab CLI `cdrlab` makes the CAs and the certificates of the compose lab and of a cluster deployment ([DESIGN.md](cli/cdrlab/DESIGN.md)).
 
 ## Target standards
 
@@ -45,7 +45,7 @@ cdr-lab/
 │   └── research/        # dated research notes with sources (background only)
 ├── lab/                 # lab-only set-up files, for example the databases and users of the lab PostgreSQL
 ├── pkg/                 # shared libraries, one directory each
-├── pki/                 # mock CDR PKI: creates the lab CAs and issues certificates
+├── pki/                 # the specification of the mock CDR PKI
 ├── services/            # one directory and one binary for each service
 ├── tools/               # repository tools that are not components of the lab
 └── web/                 # the pnpm workspace: web UIs in apps/, shared packages in packages/
@@ -164,7 +164,7 @@ http --verify .lab/pki/cdr/ca-bundle.pem --cert .lab/pki/conformance/client.crt 
 
 ### Certificates
 
-`mise run pki` creates the lab CAs (a CDR CA and a separate public CA) and the certificates of the lab services and tests in `.lab/pki/`, which git ignores. The Register issues the certificate of its own mTLS listener at start, and renews it, with the key in memory only. `mise run up` runs it first, and `mise run reset` deletes the CAs. TLS clients trust `public/root.crt`, and mTLS clients and servers trust `cdr/ca-bundle.pem`. The `pki` command also issues CDR certificates from a CSR. See [pki/DESIGN.md](pki/DESIGN.md) and `go run ./pki/cmd/pki -h`. In a running lab, the Register is the CDR intermediate CA: its operator interface issues CDR client and server certificates from a CSR and revokes CDR certificates, with no host access, and the Register signs and serves the CRL ([ADR 0022](docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md)).
+`mise run pki` runs `cdrlab` to create the lab CAs (a CDR CA and a separate public CA) and the public TLS certificates of the lab in `.lab/pki/`, which git ignores. `mise run up` runs it first, starts the Register, gets each CDR certificate of the lab services and tests from the Register operator interface, and then starts the other services. The Register issues the certificate of its own mTLS listener at start, and renews it, with the key in memory only. `mise run reset` deletes the CAs. TLS clients trust `public/root.crt`, and mTLS clients and servers trust `cdr/ca-bundle.pem`. `cdrlab cert issue` also gets a CDR certificate from a CSR. See [pki/DESIGN.md](pki/DESIGN.md) and `go run ./cli/cdrlab/cmd/cdrlab -h`. In a running lab, the Register is the CDR intermediate CA: its operator interface issues CDR client and server certificates from a CSR and revokes CDR certificates, with no host access, and the Register signs and serves the CRL ([ADR 0022](docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md)).
 
 ### Data
 

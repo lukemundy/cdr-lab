@@ -17,9 +17,10 @@ import (
 )
 
 type harness struct {
-	api      *kubetest.API
-	register *registertest.Register
-	env      map[string]string
+	api       *kubetest.API
+	register  *registertest.Register
+	env       map[string]string
+	kubeCalls int
 }
 
 func newHarness(t *testing.T) *harness {
@@ -37,6 +38,8 @@ func (h *harness) run(args ...string) (code int, stdout, stderr string) {
 
 	code = run(context.Background(), args, &out, &errOut, deps{
 		secrets: func() (*kube.Client, error) {
+			h.kubeCalls++
+
 			return kube.New(h.api.URL, kubetest.Namespace, h.api.TokenFile, h.api.Client()), nil
 		},
 		httpClient: http.DefaultClient,
@@ -79,13 +82,16 @@ func TestHelpGivesTheUsageAndExitsWithZero(t *testing.T) {
 	assert.Equal(t, 0, code)
 	assert.Contains(t, stdout, "cdrlab ca init")
 	assert.Contains(t, stdout, "cdrlab cert issue")
+	assert.Contains(t, stdout, "cdrlab public-cert issue")
+	assert.Contains(t, stdout, "cdrlab version")
 }
 
-func TestVersionGivesTheCommitOfTheBuild(t *testing.T) {
+// Verifies: CLI-0104, CLI-0114, CLI-0117, CLI-0118
+func TestVersionGivesTheVersionTheCommitAndTheBuildTime(t *testing.T) {
 	code, stdout, _ := newHarness(t).run("version")
 
 	assert.Equal(t, 0, code)
-	assert.Equal(t, "cdrlab commit unknown, built unknown, build local\n", stdout)
+	assert.Equal(t, "cdrlab dev, commit unknown, built unknown\n", stdout)
 }
 
 // Verifies: CLI-0003
@@ -232,5 +238,19 @@ func TestTheOutputHasNoKeyAndNoToken(t *testing.T) {
 		assert.NotContains(t, text, "not-the-token")
 		assert.NotContains(t, text, registertest.Token)
 		assert.NotContains(t, text, kubetest.Token)
+	}
+}
+
+// Verifies: CLI-0112
+func TestNoCommandRevokesACertificateOrSignsACRL(t *testing.T) {
+	h := newHarness(t)
+	_, usageText, _ := h.run("-h")
+
+	assert.NotContains(t, usageText, "revoke")
+	assert.NotContains(t, usageText, "crl")
+
+	for _, args := range [][]string{{"cert", "revoke"}, {"crl", "sign"}} {
+		code, _, _ := h.run(args...)
+		assert.Equal(t, 2, code, args)
 	}
 }

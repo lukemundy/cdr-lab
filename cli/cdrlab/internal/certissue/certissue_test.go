@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/certcheck"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/certissue"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/kube"
 	"github.com/lukemundy/cdr-lab/cli/cdrlab/internal/kube/kubetest"
@@ -40,39 +41,46 @@ func newLab(t *testing.T) lab {
 	}
 }
 
-func (l lab) run(t *testing.T, cfg certissue.Config) (bool, error) {
+// secretConfig is the config of a run with a Secret as the output.
+type secretConfig struct {
+	certissue.Config
+
+	Secret string
+}
+
+func (l lab) run(t *testing.T, cfg secretConfig) (bool, error) {
 	t.Helper()
 
-	cert, err := certissue.Run(t.Context(), l.secrets, l.client, cfg)
+	cert, err := certissue.Run(t.Context(), certissue.NewSecret(l.secrets, cfg.Secret), l.client, cfg.Config)
 
 	return cert != nil, err
 }
 
-func serverConfig() certissue.Config {
+func serverConfig() secretConfig {
 	//nolint:gosec // G101 reads the name of the Kubernetes Secret as a credential
-	return certissue.Config{
+	return secretConfig{
+		Secret:        "wattle-bank-secure-tls",
 		Kind:          ca.Server,
 		LegalEntityID: "le-1",
 		RecordID:      "brand-1",
 		CommonName:    "wattle-bank",
 		Organisation:  "Wattle Bank Ltd",
 		DNSNames:      []string{"wattle-bank", "localhost"},
-		Secret:        "wattle-bank-secure-tls",
-		RenewBefore:   certissue.DefaultRenewBefore,
+		RenewBefore:   certcheck.DefaultRenewBefore,
 		Now:           time.Now,
 	}
 }
 
-func clientConfig() certissue.Config {
+func clientConfig() secretConfig {
 	//nolint:gosec // G101 reads the name of the Kubernetes Secret as a credential
-	return certissue.Config{
+	return secretConfig{
+		Secret:        "conformance-client",
 		Kind:          ca.Client,
 		LegalEntityID: "le-2",
 		RecordID:      "sp-2",
 		CommonName:    "Token Test Active",
 		Organisation:  "Token Test",
-		Secret:        "conformance-client",
-		RenewBefore:   certissue.DefaultRenewBefore,
+		RenewBefore:   certcheck.DefaultRenewBefore,
 		Now:           time.Now,
 	}
 }
@@ -155,7 +163,7 @@ func TestTheCommandSendsOnlyACSRWithANewRSA2048Key(t *testing.T) {
 
 // Verifies: CLI-0035, CLI-0062
 func TestTheCommandChangesNothingWhenTheCertificateIsCurrent(t *testing.T) {
-	for name, cfg := range map[string]certissue.Config{"server": serverConfig(), "client": clientConfig()} {
+	for name, cfg := range map[string]secretConfig{"server": serverConfig(), "client": clientConfig()} {
 		t.Run(name, func(t *testing.T) {
 			l := newLab(t)
 			_, err := l.run(t, cfg)
@@ -177,20 +185,20 @@ func TestTheCommandChangesNothingWhenTheCertificateIsCurrent(t *testing.T) {
 
 // Verifies: CLI-0035
 func TestTheCommandRenewsACertificateThatNoLongerMeetsAConditionOfACurrentCertificate(t *testing.T) {
-	for name, change := range map[string]func(*testing.T, lab, *certissue.Config){
-		"it expires within the renewal window": func(_ *testing.T, _ lab, cfg *certissue.Config) {
+	for name, change := range map[string]func(*testing.T, lab, *secretConfig){
+		"it expires within the renewal window": func(_ *testing.T, _ lab, cfg *secretConfig) {
 			cfg.Now = func() time.Time { return time.Now().AddDate(0, 12, 10) }
 		},
-		"it does not chain to the CDR CA bundle": func(t *testing.T, l lab, _ *certissue.Config) {
+		"it does not chain to the CDR CA bundle": func(t *testing.T, l lab, _ *secretConfig) {
 			l.register.NewCA(t)
 		},
-		"the CN changed": func(_ *testing.T, _ lab, cfg *certissue.Config) { cfg.CommonName = "wattle" },
-		"the O changed":  func(_ *testing.T, _ lab, cfg *certissue.Config) { cfg.Organisation = "Wattle Bank" },
-		"a DNS name was added": func(_ *testing.T, _ lab, cfg *certissue.Config) {
+		"the CN changed": func(_ *testing.T, _ lab, cfg *secretConfig) { cfg.CommonName = "wattle" },
+		"the O changed":  func(_ *testing.T, _ lab, cfg *secretConfig) { cfg.Organisation = "Wattle Bank" },
+		"a DNS name was added": func(_ *testing.T, _ lab, cfg *secretConfig) {
 			cfg.DNSNames = append(cfg.DNSNames, "wattle-bank.cdr-lab.svc")
 		},
-		"a DNS name was removed": func(_ *testing.T, _ lab, cfg *certissue.Config) { cfg.DNSNames = cfg.DNSNames[:1] },
-		"the key does not agree": func(_ *testing.T, l lab, cfg *certissue.Config) {
+		"a DNS name was removed": func(_ *testing.T, _ lab, cfg *secretConfig) { cfg.DNSNames = cfg.DNSNames[:1] },
+		"the key does not agree": func(_ *testing.T, l lab, cfg *secretConfig) {
 			s, _ := l.api.Secret(cfg.Secret)
 			other, _ := l.api.Secret("other")
 			s.Data["tls.key"] = other.Data["tls.key"]
@@ -238,7 +246,7 @@ func TestARenewalWindowFromTheInputsReplacesTheDefault(t *testing.T) {
 }
 
 func TestTheDefaultRenewalWindowIsThirtyDays(t *testing.T) {
-	assert.Equal(t, 30*24*time.Hour, certissue.DefaultRenewBefore)
+	assert.Equal(t, 30*24*time.Hour, certcheck.DefaultRenewBefore)
 }
 
 // Verifies: CLI-0037, CLI-0038

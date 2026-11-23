@@ -189,8 +189,10 @@ func TestAnActiveSoftwareProductGetsATokenThatIsBoundToItsCertificate(t *testing
 	}
 }
 
+// Verifies: PKI-0096
 func TestTheTokenEndpointRefusesAClientThatItCannotTrust(t *testing.T) {
 	registered := activeTokenClient(t)
+	labtest.RemoveClientCertificate(t, idpTestRecipient, idpTestActiveProduct, "PKI_UNREGISTERED_CLIENT_CERT")
 	inactive := tokenClient(
 		t,
 		idpTestRecipient,

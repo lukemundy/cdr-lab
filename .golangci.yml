@@ -61,7 +61,7 @@ linters:
             - "!$test"
           allow:
             - $gostd
-        # The pki command, the cdrlab CLI and the Register share the CA code, so it has no dependencies.
+        # The cdrlab CLI and the Register share the CA code, so it has no dependencies.
         ca-is-standard-library-only:
           list-mode: strict
           files:
