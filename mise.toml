@@ -77,6 +77,28 @@ for chart in charts/*/Chart.yaml; do
 done
 """
 
+# GHCR sometimes gives "not found" when helm push tags a new manifest, and a new push of the same package is safe.
+[tasks."chart:push"]
+description = "Push a chart package to an OCI repository, with up to 3 attempts"
+usage = """
+arg "<package>" help="The chart package (.tgz)"
+arg "<repository>" help="The OCI repository, for example oci://ghcr.io/lukemundy/cdr-lab/charts"
+"""
+shell = "bash -c"
+run = """
+set -euo pipefail
+for attempt in 1 2 3; do
+  if helm push "$usage_package" "$usage_repository"; then
+    exit 0
+  fi
+  if [ "$attempt" -lt 3 ]; then
+    echo "helm push failed (attempt $attempt of 3). Try again in 10 seconds." >&2
+    sleep 10
+  fi
+done
+exit 1
+"""
+
 # ci/lint-values.yaml of each chart turns on each optional part. The API versions make the routes of the bjw-s
 # library use the Gateway API v1. The schemas of the Gateway API and cert-manager resources come from the CRDs-catalog
 # at a fixed commit.

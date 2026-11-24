@@ -158,7 +158,7 @@ jobs:
           cp LICENSE NOTICE "charts/$CHART/"
           helm package "charts/$CHART" --version "$version" --app-version "$(jq --raw-output .imageTag "$plan")" \
             --destination "$RUNNER_TEMP"
-          helm push "$RUNNER_TEMP/$CHART-$version.tgz" "$repository"
+          mise run chart:push "$RUNNER_TEMP/$CHART-$version.tgz" "$repository"
           helm registry logout ghcr.io
           name="${repository#oci://}/$CHART"
           digest=$(mise exec -- crane digest "$name:$version")

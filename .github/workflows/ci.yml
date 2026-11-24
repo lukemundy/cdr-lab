@@ -577,7 +577,7 @@ jobs:
             # The Apache License 2.0 requires the licence and the NOTICE file with each copy of the chart.
             cp LICENSE NOTICE "$dir/"
             helm package "$dir" --version "0.0.0-g$commit" --app-version "$app" --destination "$RUNNER_TEMP"
-            helm push "$RUNNER_TEMP/$service-0.0.0-g$commit.tgz" "$CHART_REPOSITORY"
+            mise run chart:push "$RUNNER_TEMP/$service-0.0.0-g$commit.tgz" "$CHART_REPOSITORY"
           done
           helm registry logout ghcr.io
 
@@ -695,7 +695,7 @@ jobs:
             exit 1
           fi
           helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin <<< "$GH_TOKEN"
-          helm push "$package" "$CHART_REPOSITORY"
+          mise run chart:push "$package" "$CHART_REPOSITORY"
           helm registry logout ghcr.io
 
   dataholder-image:
