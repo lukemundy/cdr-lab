@@ -21,9 +21,9 @@ This area gives the listeners of the data holder, the four preset brands in the 
 
 ## Lab-only features
 
-A production data holder does not have these features. Real components must not depend on them ([README: Component types][readme-component-types]).
+A production data holder does not have these features. Real components must not depend on them ([mock component, real component][glossary-mock-real]).
 
-- <a id="dh-1300"></a>**DH-1300** The online bank site is a lab-only feature. The lab turns it on for each instance that runs. A production data holder has its own web site. ([online bank site](online-bank-site.md); [README: Component types][readme-component-types])
+- <a id="dh-1300"></a>**DH-1300** The online bank site is a lab-only feature. The lab turns it on for each instance that runs. A production data holder has its own web site. ([online bank site](online-bank-site.md); [mock component, real component][glossary-mock-real])
 
 ## Preset brands in the lab
 
@@ -58,7 +58,7 @@ A production data holder does not have these features. Real components must not 
 
 ## Publication
 
-- <a id="dh-1325"></a>**DH-1325** CI publishes the data holder image from `main` to `ghcr.io/lukemundy/cdr-lab/dataholder`. Its tags are the full and the short commit ID. ([README: Container images][readme-conventions]; [Judgement: commit ID tags and versions, as for the other published artifacts](#dh-1370))
+- <a id="dh-1325"></a>**DH-1325** CI publishes the data holder image from `main` to `ghcr.io/lukemundy/cdr-lab/dataholder`. Its tags are the full and the short commit ID. ([Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029]; [Judgement: commit ID tags and versions, as for the other published artifacts](#dh-1370))
 - <a id="dh-1326"></a>**DH-1326** CI publishes the image of a commit only after these jobs of that commit pass: lint, test, conformance, web and the data holder image. ([GitHub Actions: `needs`][gha-needs]; [Judgement: the image publishes only after its gate jobs pass or are skipped](#dh-1371))
 - <a id="dh-1327"></a>**DH-1327** When a job of the gate fails or is cancelled, CI does not publish the image. When CI skips a job because its inputs did not change, CI still publishes the image. ([GitHub Actions: status check functions][gha-status-checks]; [Judgement: the image publishes only after its gate jobs pass or are skipped](#dh-1371))
 - <a id="dh-1328"></a>**DH-1328** Each commit on `main` that changes an input of the image gets an image. ([Judgement: the image job runs for each input of the image](#dh-1372))
@@ -157,7 +157,7 @@ A production data holder does not have these features. Real components must not 
 ### <a id="dh-1370"></a>DH-1370 Commit ID tags and versions, as for the other published artifacts
 
 - Kind: choice
-- Basis: Step 3.3. The repository publishes the image of each service with the full and the short commit ID as tags ([README: Container images][readme-conventions]), and the Register chart with the version `0.0.0-g<short commit>` ([Register chart][register-chart]).
+- Basis: Step 3.3. The repository publishes the image of each service with the full and the short commit ID as tags ([Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029]), and the Register chart with the version `0.0.0-g<short commit>` ([Register chart][register-chart]).
 - Reason: All images and charts of the repository then have one pattern. An operator finds the commit of each artifact in the same way.
 
 ### <a id="dh-1371"></a>DH-1371 The image publishes only after its gate jobs pass or are skipped
@@ -253,7 +253,6 @@ A production data holder does not have these features. Real components must not 
 [k8s-init-containers]: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
 [oci-image-index]: https://github.com/opencontainers/image-spec/blob/main/image-index.md
 [postgres-image-init]: https://hub.docker.com/_/postgres
-[readme-component-types]: ../../../README.md#component-types
-[readme-conventions]: ../../../README.md#other-conventions
+[glossary-mock-real]: ../../../docs/spec/glossary.md#mock-component-real-component
 [register-chart]: ../../../charts/register/README.md
 [register-deployment]: ../../register/design/deployment.md#reg-0920

@@ -335,7 +335,8 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 ### Mock component, real component
 
-- Lab term: [README: Component types][readme-component-types].
+- Lab term: each component in this repository is a mock component. A mock component copies the behaviour of its production equivalent, and it can have lab-only test functions, for example seed data. It is not for production use.
+- Lab term: a real component is CDR software outside this repository, for example the data recipient software of a user, that uses the lab as a test environment. A real component changes from the lab to the real CDR with a change of its configuration only: the Register URL, the CA bundles, the certificates, the keys and the registration IDs. It must not depend on a lab-only function.
 
 ### mTLS listener
 
@@ -431,7 +432,6 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 [conformance-design]: ../../conformance/DESIGN.md
 [consolehttp-design]: ../../pkg/platform/consolehttp/DESIGN.md
 [pki-design]: ../../pki/DESIGN.md
-[readme-component-types]: ../../README.md#component-types
 [readme-data]: ../../README.md#data
 [readme-lab]: ../../README.md#lab-deployment
 [ui-design]: ../../web/packages/ui/design/README.md

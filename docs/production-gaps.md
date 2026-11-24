@@ -7,7 +7,7 @@ This file lists the shortcuts that are acceptable in the lab and that a producti
 - An entry is a choice that we made because it is easy, and that a production service could not operate with. A function that a project put out of scope is not a gap.
 - Add the entry in the change that takes the shortcut. Remove the entry in the change that closes the gap.
 - One line for each gap. The file has no history, no priority and no status.
-- A gap in `pkg/` is more important than a gap in a mock service. A mock is never for production, but the real components use the `pkg/` libraries as they are.
+- A real component never imports a `pkg/` library, but it can copy or fork one. A gap in `pkg/` then goes into the copy, so its entry gives what the copy needs.
 
 ## Shared libraries (`pkg/`)
 

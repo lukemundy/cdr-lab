@@ -4,6 +4,21 @@
 
 @README.md
 
+## This repository is public
+
+Anyone can read everything that you push or post: commits, commit messages, branch names, pull request titles and descriptions, review comments, issues, CI logs, release notes and published artifacts. A deletion does not remove it, because forks, caches and archives keep a copy.
+
+Never put private information in any of these. Private information includes:
+
+- Secrets, credentials, tokens and keys, also when they seem to be test values. The lab values that the repository already contains, for example `lab-operator-token`, are the only exception.
+- Personal information: names, email addresses and other contact details, except the commit author.
+- Information about an employer or a client, and their systems, data or plans.
+- Host names, IP addresses, URLs, cluster names and other details of private infrastructure.
+- The names, contents and links of private repositories, documents and conversations, and the contents of tickets. A ticket ID, for example `CDR-219`, is permitted. Write the facts that a reader needs in the text itself.
+- Real CDR data or real consumer data. Use invented data only.
+
+If you are not sure that a piece of information is public, leave it out and ask the repository owner.
+
 ## Agent workflow
 
 The following rules are to be followed for all work:
@@ -58,6 +73,24 @@ Do the work for each milestone of a project in this sequence:
 1. Research, with no ticket.
 2. The requirements of the milestone in the specifications that own them (the component, or the `pkg/` library that implements a shared rule), in a pull request for review.
 3. The tickets of that milestone only.
+
+## Conventions for contributors
+
+- Write tests first (TDD). Fix lint issues. Do not suppress them. If you must use `//nolint`, name the linter and give the reason.
+- Send telemetry through `pkg/platform/telemetry`. Never put CDR data or personal information in telemetry, also when the data is mocked. The client IP address is the only exception ([ADR 0006](docs/adr/0006-telemetry.md)).
+- Use Conventional Commits, with the component directory name as the scope ([ADR 0007](docs/adr/0007-conventional-commits.md), `cog.toml`).
+- Do not weaken the npm supply-chain controls in `web/pnpm-workspace.yaml` ([ADR 0015](docs/adr/0015-web-toolchain-and-npm-supply-chain-controls.md)). A dependency with a build script needs an `allowBuilds` entry with a reason. A person reviews each major update.
+- Write `README.md` in plain language. Write the specifications, the ADRs, the comments, the commit messages and the steps of a procedure in ASD-STE100 Simplified Technical English.
+- Use inclusive language, for example allowlist and blocklist, primary and replica.
+
+## Add a service
+
+1. Copy `services/register`, but not its `design/` directory. Write a new specification.
+2. Change the import paths.
+3. Add the service to `.golangci.yml` (depguard rules), `cog.toml` (scope), its `Dockerfile`, `compose.yaml` (with `<<: *lab-dns`, as each compose service has) and the layout in `README.md`.
+4. If the service keeps state, give it its own database ([ADR 0002](docs/adr/0002-data-store.md)). Its migrations create its application role. Add the database, an owner user and a service user to `lab/postgres/init.sql`, the role membership to `lab/postgres/grants.sql`, and a `<service>-migrate` container to `compose.yaml` ([ADR 0020](docs/adr/0020-service-migrations-create-roles-and-the-operator-creates-users.md)).
+
+Tests connect to the lab PostgreSQL as the superuser `postgres`. A test of a database adapter creates a new database with `databasetest.New(t)`.
 
 ## Keep the README a summary
 
