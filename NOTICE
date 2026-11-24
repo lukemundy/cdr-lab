@@ -1,0 +1,15 @@
+cdr-lab
+Copyright 2026 Luke Mundy
+
+This product includes software developed at https://github.com/lukemundy/cdr-lab.
+
+The Apache License 2.0 does not apply to these parts of the repository. Each part has its own licence:
+
+- conformance/register/spec/ and conformance/dataholder/spec/: the CDS OpenAPI specifications, under the MIT
+  licence in the LICENCE.md file of each directory.
+- The photos in services/dataholder/brands/: under the Unsplash License, as the ATTRIBUTION.md file of each brand
+  says.
+- Third-party code in the images and the release archives: under the licences in /licenses/ of each image, and in
+  licenses/ of each archive.
+
+cdr-lab is not affiliated with the ACCC, the Data Standards Body (DSB) or any CDR participant.
