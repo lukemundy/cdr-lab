@@ -1,23 +1,27 @@
 # cdr-lab
 
-A standards-compliant simulation of Australia's Consumer Data Right (CDR) in Go. It has a mock CDR Register and mock data holders.
+A standards-compliant simulation of Australia's Consumer Data Right (CDR), written in Go. It runs a mock CDR Register and mock banks, so you can test your own CDR software, for example an accredited data recipient (ADR) client, without the real CDR.
+
+Everything in this repository is a mock. Real CDR software lives in other repositories and uses the lab as a test environment.
 
 This project is not affiliated with the ACCC, the Data Standards Body (DSB) or any CDR participant.
 
 ## Status
 
-Early development. Two services run in the lab deployment, and a black-box conformance suite checks them:
+Early development. Two services run in the lab, and a black-box conformance suite tests them:
 
-| Service | Summary | Specification |
+| Service | What it is | Specification |
 |---|---|---|
-| Mock CDR Register | Participants and their statuses, SSAs, and the Register APIs | [design/README.md](services/register/design/README.md) |
-| Mock data holder | One banking brand for each instance, from four preset brands: product data, the authorisation server, authorisations, and the banking APIs of an arrangement | [design/README.md](services/dataholder/design/README.md) |
+| Mock CDR Register | The CDR Register | [design/README.md](services/register/design/README.md) |
+| Mock data holder | A bank, with one of four preset brands for each instance | [design/README.md](services/dataholder/design/README.md) |
 
-The lab CLI `cdrlab` makes the CAs and the certificates of the compose lab and of a cluster deployment, adds participants and customers to them, and starts the compose lab from a checkout or from a release binary ([specification](cli/cdrlab/design/README.md)).
+The lab CLI, `cdrlab`, sets up and runs the lab ([specification](cli/cdrlab/design/README.md)).
+
+The lab is not a production service. [`docs/production-gaps.md`](docs/production-gaps.md) lists the shortcuts that are acceptable only in the lab.
 
 ## Quick start
 
-The compose lab from a release `vX.Y.Z`, on a host with Docker (the [install guide](docs/guides/install.md) also verifies the download):
+To run the lab with Docker Compose from release `vX.Y.Z` (the [install guide](docs/guides/install.md) also shows how to verify the download):
 
 ```sh
 gh release download vX.Y.Z --repo lukemundy/cdr-lab --pattern 'cdrlab-vX.Y.Z-linux-amd64.tar.gz'
@@ -25,14 +29,14 @@ tar -xzf cdrlab-vX.Y.Z-linux-amd64.tar.gz cdrlab
 ./cdrlab up
 ```
 
-The umbrella chart in a namespace of a Kubernetes cluster, after the [prerequisites](charts/cdr-lab/README.md#before-the-install):
+To install the umbrella chart in a Kubernetes namespace, first do the [prerequisites](charts/cdr-lab/README.md#before-the-install), then:
 
 ```sh
 helm install cdr-lab oci://ghcr.io/lukemundy/cdr-lab/charts/cdr-lab --version X.Y.Z --namespace lab --values my-values.yaml --wait --timeout 10m
 kubectl get pods,jobs --namespace lab
 ```
 
-Guides: [install](docs/guides/install.md), [upgrade](docs/guides/upgrade.md), [ADR developers](docs/guides/adr-developers.md), [data holder developers](docs/guides/data-holder-developers.md), [CI](docs/guides/ci.md).
+The [guides](docs/guides/) cover install, upgrade, ADR and data holder development, and CI.
 
 ## Target standards
 
@@ -41,13 +45,6 @@ Guides: [install](docs/guides/install.md), [upgrade](docs/guides/upgrade.md), [A
 | Consumer Data Standards | 1.36.0 |
 | Security profile | FAPI 1.0 Advanced, with PAR, PKCE and JARM |
 
-Change these versions only on purpose, in a separate change.
-
-## Component types
-
-- **Mock** components copy the behaviour of their production equivalents. They are not for production use. They can include test features, for example seed data.
-- **Real** components use the mocks now. To connect them to the real CDR, you change only their configuration: Register URL, CA bundles, certificates, keys and registration IDs. Real components must not contain mock-specific code or test backdoors.
-
 ## Layout
 
 ```
@@ -55,188 +52,125 @@ cdr-lab/
 ├── mise.toml            # tool versions and tasks
 ├── compose.yaml         # the lab deployment
 ├── composeproject.go    # embeds the compose project in cdrlab, for the release mode (ADR 0038)
-├── charts/              # Helm charts: one for each service, and the umbrella chart of a cluster deployment
+├── charts/              # Helm charts: one for each service, and the umbrella chart
 ├── cli/                 # the lab CLI, cdrlab
-├── conformance/         # black-box tests of deployed components, and the pinned CDS OpenAPI specifications
+├── conformance/         # black-box tests of the deployed services, and the pinned CDS OpenAPI specifications
 ├── docs/
 │   ├── adr/             # architecture decision records
-│   ├── guides/          # guides for the users of the lab: install, upgrade, ADR and data holder developers, CI
+│   ├── guides/          # guides for people who use the lab
 │   ├── production-gaps.md # shortcuts that are acceptable in the lab only
-│   ├── spec/            # the conventions and the glossary of the specifications
-│   └── research/        # dated research notes with sources (background only)
-├── lab/                 # lab-only set-up files, for example the databases and users of the lab PostgreSQL
+│   ├── spec/            # specification conventions and glossary
+│   └── research/        # dated research notes (background only)
+├── lab/                 # lab-only set-up files, for example the PostgreSQL databases and users
 ├── pkg/                 # shared libraries, one directory each
 ├── pki/                 # the specification of the mock CDR PKI
 ├── services/            # one directory and one binary for each service
-├── tools/               # repository tools that are not components of the lab
+├── tools/               # repository tools that are not part of the lab
 └── web/                 # the pnpm workspace: web UIs in apps/, shared packages in packages/
 ```
 
-The repository is one Go module. Each directory in `pkg/`, `services/` and `cli/` is one component. A service or a CLI must not import a service ([ADR 0004](docs/adr/0004-module-layout.md)). All JavaScript and TypeScript code is in one pnpm workspace in `web/`, which `go.mod` ignores ([ADR 0015](docs/adr/0015-web-toolchain-and-npm-supply-chain-controls.md)). Each service has a hexagonal architecture, and participant state is event sourced ([ADR 0013](docs/adr/0013-hexagonal-architecture-with-an-internal-composition-root.md), [ADR 0003](docs/adr/0003-event-sourcing.md)).
+The repository is one Go module. Each directory in `pkg/`, `services/` and `cli/` is one component, and a service or a CLI must not import a service ([ADR 0004](docs/adr/0004-module-layout.md)). All JavaScript and TypeScript code is in the pnpm workspace in `web/` ([ADR 0015](docs/adr/0015-web-toolchain-and-npm-supply-chain-controls.md)). Each service has a hexagonal architecture and event-sourced participant state ([ADR 0013](docs/adr/0013-hexagonal-architecture-with-an-internal-composition-root.md), [ADR 0003](docs/adr/0003-event-sourcing.md)).
 
-To add a service, copy `services/register`, except its `design/` directory: write a new specification. Then change the import paths, and add the service to `.golangci.yml` (depguard rules), `cog.toml` (scope), its `Dockerfile`, `compose.yaml` (with `<<: *lab-dns`, as each compose service has) and the layout above. A service that keeps state gets its own database ([ADR 0002](docs/adr/0002-data-store.md)): its migrations create its application role, and the lab adds the database, an owner user and a service user to `lab/postgres/init.sql`, the membership of the role to `lab/postgres/grants.sql`, and a `<service>-migrate` container to `compose.yaml` ([ADR 0020](docs/adr/0020-service-migrations-create-roles-and-the-operator-creates-users.md)).
+## Specifications
 
-## Conventions
+Each component has a specification: a `DESIGN.md`, or a `design/` directory for a large one. A specification holds requirements only, each one rule with an identifier and a source ([ADR 0024](docs/adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md)). The [specification conventions](docs/spec/conventions.md) give the templates, the formats and the [sources for requirements](docs/spec/conventions.md#sources-for-requirements). The CDS is always the first source. Specifications and ADRs have no status field: on `main` means accepted.
 
-### Specifications
+## Images, releases and telemetry
 
-- Each service, `pkg/` library and other component has a specification: a `DESIGN.md`, or a `design/` directory when it has more than 5,000 words. It gives requirements only, also non-functional requirements, and does not describe the implementation ([ADR 0024](docs/adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md)). [`docs/spec/conventions.md`](docs/spec/conventions.md) gives the templates and the formats.
-- Each requirement is one rule, with an identifier and a link to its primary source or to a judgement in the same file. Refer to a rule with a descriptive link, never with an identifier alone.
-- A rule that a `pkg/` library implements is in the specification of that library. A service gives only its differences.
-- The research notes in `docs/research/` are background. Do not cite them as a source, and do not cite through them.
-- Specifications and ADRs have no status field. On `main` means accepted. Anything else is a draft.
-
-### Sources for requirements
-
-Use this process to decide each requirement, and to decide when sources are not clear or do not agree:
-
-1. The CDS text and specifications as written, for the target CDS version. This is always the first source.
-2. When the CDS is not clear or says nothing: first-party ACCC guidance from official sources, for example the ACCC Developer Portal or the CDR Support Portal. The ACCC mock implementations are not a source.
-3. When the ACCC guidance is also not clear or says nothing: our own judgement. Balance these items, in approximately this order:
-   1. The spirit and intent of the Consumer Data Right.
-   2. Relevant technical standards, protocols, RFCs, frameworks and industry benchmarks.
-   3. The least complex solution.
-
-Examples:
-
-- The CDS does not give an HTTP response code for a condition. Use the code that is correct for the HTTP protocol and usual in the industry, if it does not go against the spirit or intent of the CDR.
-- The CDS is not clear or does not give enough information, but ACCC supporting documentation gives guidance or a clarification. Use the ACCC guidance.
-- The CDS and the ACCC say nothing about a detail, and more than one solution meets industry norms. Use the solution that is the simplest to understand, implement and maintain.
-- The CDS does not agree with an ACCC support article or another official ACCC document that is not a specification. Follow the CDS.
-- The CDS text does not agree with the CDS OpenAPI specification, and the ACCC has not clarified it. Use the option that agrees more with the spirit of the CDR or with industry norms.
-
-Record each choice that this process makes as a judgement next to its requirements, with its basis and its reason.
-
-### Other conventions
-
-- **Production gaps:** [`docs/production-gaps.md`](docs/production-gaps.md) lists the shortcuts that are acceptable in the lab only. A change that takes such a shortcut adds an entry, and a change that closes a gap removes its entry.
-- **Code:** write tests first (TDD). Fix lint issues; do not suppress them. If you must use `//nolint`, name the linter and give the reason.
-- **Telemetry:** OpenTelemetry through `pkg/platform/telemetry`. CDR data and personally identifiable information must never appear in telemetry, also when the data is mocked. The client IP address is the only exception ([ADR 0006](docs/adr/0006-telemetry.md)). Metrics give only the state of each process, and the traces give the detail of each request. Each long-running service process sends 23 metric series, also when the traffic increases: approximately 46 for the default lab and 115 with all banks ([ADR 0026](docs/adr/0026-send-metrics-only-for-the-state-of-a-process.md)).
-- **Commits:** Conventional Commits, with the component directory name as the scope ([ADR 0007](docs/adr/0007-conventional-commits.md), `cog.toml`).
-- **npm dependencies:** `web/pnpm-workspace.yaml` sets the supply-chain controls of [ADR 0015](docs/adr/0015-web-toolchain-and-npm-supply-chain-controls.md). Do not weaken them. A dependency with a build script needs an `allowBuilds` entry with a reason. A person reviews each major update.
-- **Container images:** distroless base images, pinned by digest, with the `LICENSE` and `NOTICE` files of the repository and the licence notices of their third-party code in `/licenses/` ([ADR 0018](docs/adr/0018-container-images-with-a-web-ui-build-stage.md)). CI publishes the tested image of each service and of `cdrlab` from `main` to `ghcr.io/lukemundy/cdr-lab/<name>` (the directory name), tagged with the full and the short commit ID. Each image is an OCI image index for `linux/amd64` and `linux/arm64`, with a provenance and an SPDX SBOM attestation ([ADR 0030](docs/adr/0030-build-each-service-image-for-linux-amd64-and-linux-arm64-with-a-cross-compile.md), [ADR 0031](docs/adr/0031-sign-releases-with-keyless-cosign-and-attest-provenance-and-an-sbom.md)). When the chart of a service changes, or CI publishes the image of that service, CI also publishes the chart from `main` ([charts/register](charts/register/README.md), [charts/dataholder](charts/dataholder/README.md)). A maintainer releases one version `vX.Y.Z` of all images and charts with the `release` workflow, in the mode `check`, `rehearse` or `release` ([release specification](tools/release/DESIGN.md)).
-- **Writing:** write all prose (comments, docs, commit messages) in ASD-STE100 Simplified Technical English. Use inclusive language, for example allowlist/blocklist and primary/replica.
+- CI publishes the tested image and chart of each component from `main` to `ghcr.io/lukemundy/cdr-lab/`, tagged with the commit ID. The images use distroless base images pinned by digest, and are built for `linux/amd64` and `linux/arm64` ([ADR 0018](docs/adr/0018-container-images-with-a-web-ui-build-stage.md), [ADR 0030](docs/adr/0030-build-each-service-image-for-linux-amd64-and-linux-arm64-with-a-cross-compile.md)).
+- A release gives one version, `vX.Y.Z`, to all images, charts and `cdrlab` binaries. It promotes the tested images without a rebuild, and signs everything with keyless cosign, with provenance and an SBOM ([ADR 0029](docs/adr/0029-promote-the-tested-image-of-each-service-to-a-release-with-no-rebuild.md), [ADR 0031](docs/adr/0031-sign-releases-with-keyless-cosign-and-attest-provenance-and-an-sbom.md), [release specification](tools/release/DESIGN.md)).
+- The services send OpenTelemetry traces, metrics and logs. CDR data and personal information never go in telemetry, even when the data is mocked ([ADR 0006](docs/adr/0006-telemetry.md)). Metrics show only the state of each process, and traces show each request ([ADR 0026](docs/adr/0026-send-metrics-only-for-the-state-of-a-process.md)).
 
 ## Development
 
-Install [mise](https://mise.jdx.dev), then run from the repository root:
+Install [mise](https://mise.jdx.dev), then run these from the repository root:
 
 ```sh
-mise install         # install the pinned tools, also Node and pnpm
-mise run hooks       # install the git hooks (one time, after you clone)
-mise run tidy        # go mod tidy (CI fails if this changes files)
-mise run fmt         # format the code
-mise run generate    # generate the committed files, for example the console API types (CI fails if this changes files)
-mise run lint        # golangci-lint (linters, formatting, architecture rules); tsc, oxlint and oxfmt for web/; Go and Node image versions; helm lint and kubeconform for charts/; the specification check (ADR 0024)
-mise run test        # all tests except the conformance tests (needs the lab PostgreSQL; web tests run in Chromium)
-mise run audit       # OSV-Scanner on go.mod and web/pnpm-lock.yaml
-mise run build       # all service binaries into bin/, and the web workspace (build:go, build:web)
-mise run build:images # the images of the lab deployment, for the platform of the host
-mise run build:index services/register # an image index for linux/amd64 and linux/arm64 and its SBOM in .lab/images/ (CI builds each image one time, and the lab jobs use its linux/amd64 image with up --no-build)
-mise run conformance # black-box tests against the running lab deployment
-mise run test:lab-web # browser tests of the web UIs against the running lab deployment
-mise run openid-conformance # the OpenID FAPI 1.0 Advanced test plan against the data holder in the running lab
+mise install          # install the pinned tools
+mise run hooks        # install the git hooks (once, after you clone)
+mise run tidy         # go mod tidy
+mise run fmt          # format the code
+mise run generate     # generate the committed files
+mise run lint         # all linters and the specification check
+mise run test         # all tests except conformance (needs the lab PostgreSQL)
+mise run audit        # scan the Go and npm dependencies
+mise run build        # build the binaries and the web workspace
+mise run build:images # build the lab images for this host
+mise run conformance  # black-box tests against the running lab
+mise run test:lab-web # browser tests against the running lab
 ```
 
-`build`, `fmt`, `lint` and `test` run a `:go` and a `:web` task, for example `mise run test:web`. `lint` also runs `lint:versions`, `lint:chart` and `lint:spec`. `lint:spec` checks the structure of the specifications, the `// Verifies:` comments of the tests and the heading links of the Markdown files ([conventions](docs/spec/conventions.md#the-specification-check)). The web tasks install the workspace from the lock file first. CI runs each job only when its inputs change (`.github/workflows/ci.yml`).
+`mise tasks` lists all tasks. CI runs each job only when its inputs change (`.github/workflows/ci.yml`).
 
 ## Lab deployment
 
-The supported environments are the lab deployment (Docker Compose), a cluster deployment from the umbrella chart ([specification](charts/cdr-lab/DESIGN.md)) and CI. The lab deployment is Docker Compose (`compose.yaml`). It runs all services, PostgreSQL, a [Mailpit](https://mailpit.axllent.org) mail sink and a [`grafana/otel-lgtm`](https://github.com/grafana/docker-otel-lgtm) telemetry backend. It needs Docker, or Podman with its Docker-compatible API (`DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock`).
+The lab runs on Docker Compose (`compose.yaml`): all the services, PostgreSQL, a [Mailpit](https://mailpit.axllent.org) mail sink and a [`grafana/otel-lgtm`](https://github.com/grafana/docker-otel-lgtm) telemetry backend. It needs Docker, or Podman with its Docker-compatible API (`DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock`).
 
 ```sh
-mise run up         # cdrlab up -source: make the lab CAs and certificates if necessary, build and start the lab (or only the named services), and wait until it is healthy
-mise run down       # cdrlab down: stop the lab; data stays
-mise run reset      # cdrlab reset: stop the lab and delete all its data and its CAs
+mise run up         # build and start the lab, and wait until it is healthy
+mise run down       # stop the lab and keep its data
+mise run reset      # stop the lab and delete its data and its CAs
 ```
 
-To start the lab without telemetry, run `mise run up --no-telemetry`, as CI does. `cdrlab` runs Docker Compose as `docker compose`, or as the command in `CDRLAB_COMPOSE` (mise sets the pinned `docker-compose`).
+`mise run up --no-telemetry` starts the lab without telemetry, as CI does. By default the lab runs one bank, `wattle-bank`. `mise run up --all-banks` also starts the other three preset banks.
 
-To run the lab from a release, with only Docker and Compose on the host, download the `cdrlab` archive of your platform from the GitHub Release, verify it, and run `cdrlab up` in an empty directory. The release notes give the commands for each platform; for example, on Linux:
+All ports bind to `127.0.0.1`. The operator interfaces need the bearer token `lab-operator-token`.
 
-```sh
-version=vX.Y.Z platform=linux-amd64  # the version of a release
-gh release download "$version" --repo lukemundy/cdr-lab \
-  --pattern "cdrlab-$version-$platform.tar.gz" --pattern "cdrlab-$version-checksums.txt*"
-cosign verify-blob "cdrlab-$version-checksums.txt" --bundle "cdrlab-$version-checksums.txt.sigstore.json" \
-  --certificate-identity https://github.com/lukemundy/cdr-lab/.github/workflows/release.yml@refs/heads/main \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com
-sha256sum --check --ignore-missing "cdrlab-$version-checksums.txt"
-tar -xzf "cdrlab-$version-$platform.tar.gz" cdrlab
-./cdrlab up     # writes the compose project of the release here, and pulls the release images
-./cdrlab reset  # also deletes the compose project; run it before you use a different version
-```
-
-The lab and CI run one bank, `wattle-bank`. To also start the three other preset banks (compose profile `all-banks`), run `mise run up --all-banks`. Each bank is its own instance, with its own Register record and its own block of ports.
-
-All ports bind to `127.0.0.1`. `compose.yaml` gives the configuration of each service. The operator interfaces need the bearer token `lab-operator-token`.
-
-| Port | Service | Use |
+| Port | Service | Listener |
 |---|---|---|
-| 8080 | `register` | Internal (HTTP): health probes, operator interface, operator console (no login) and the CRL of the mock CDR intermediate |
+| 8080 | `register` | Internal (HTTP): health, operator interface and console, CRL |
 | 8081 | `register` | Public APIs (TLS) |
 | 8083 | `register` | Secure APIs (mTLS) |
-| 8180 | `wattle-bank` | Internal (HTTP): health probes, operator interface and operator console (no login) |
-| 8181 | `wattle-bank` | Public APIs, OpenID Provider configuration and authorisation pages (TLS) |
-| 8183 | `wattle-bank` | Secure APIs: authorisation server endpoints and resource APIs (mTLS) |
-| 8185 | `wattle-bank` | Online bank site: web UI and its API (TLS, lab-only) |
-| 8280–8285 | `redgum-bank` | As 8180–8185 (profile `all-banks`) |
-| 8380–8385 | `harbour-bank` | As 8180–8185 (profile `all-banks`) |
-| 8480–8485 | `kestrel-bank` | As 8180–8185 (profile `all-banks`) |
-| 8025 | `mail` | Mail sink: web page and API |
-| 8443 | `openid` | OpenID conformance suite: web page and API (profile `openid`) |
-| 5432 | `postgres` | PostgreSQL: one database for each service |
+| 8180 | `wattle-bank` | Internal (HTTP): health, operator interface and console |
+| 8181 | `wattle-bank` | Public APIs and authorisation pages (TLS) |
+| 8183 | `wattle-bank` | Secure APIs (mTLS) |
+| 8185 | `wattle-bank` | Online bank site (TLS, lab only) |
+| 8280–8285 | `redgum-bank` | As 8180–8185 (`--all-banks`) |
+| 8380–8385 | `harbour-bank` | As 8180–8185 (`--all-banks`) |
+| 8480–8485 | `kestrel-bank` | As 8180–8185 (`--all-banks`) |
+| 8025 | `mail` | Mail sink |
+| 8443 | `openid` | OpenID conformance suite (profile `openid`) |
+| 5432 | `postgres` | PostgreSQL, one database for each service |
 | 3000 | `lgtm` | Grafana |
-| 3100, 3200, 9090 | `lgtm` | Loki, Tempo (also its MCP server at `/api/mcp`) and Prometheus APIs |
+| 3100, 3200, 9090 | `lgtm` | Loki, Tempo and Prometheus APIs |
 | 4317, 4318 | `lgtm` | OTLP gRPC and HTTP |
 
-Example calls from the host ([HTTPie](https://httpie.io)):
+For example, to get the products of `wattle-bank` with [HTTPie](https://httpie.io):
 
 ```sh
 http --verify .lab/pki/public/root.crt https://localhost:8181/cds-au/v1/banking/products x-v:5
-http --verify .lab/pki/cdr/ca-bundle.pem --cert .lab/pki/conformance/client.crt \
-  --cert-key .lab/pki/conformance/client.key https://localhost:8083/...
 ```
 
 ### Certificates
 
-`cdrlab up` creates the lab CAs (a CDR CA and a separate public CA) and the public TLS certificates of the lab in `.lab/pki/`, which git ignores. Then it starts the Register, gets each CDR certificate of the lab services and tests from the Register operator interface, and starts the other services. [`lab/certificates.json`](lab/certificates.json) lists the certificates ([cdrlab: the certificate list](cli/cdrlab/design/compose-lab.md#cli-0147)). The Register issues the certificate of its own mTLS listener at start, and renews it, with the key in memory only. `mise run reset` deletes the CAs. TLS clients trust `public/root.crt`, and mTLS clients and servers trust `cdr/ca-bundle.pem`. `cdrlab cert issue` also gets a CDR certificate from a CSR. See [pki/DESIGN.md](pki/DESIGN.md) and `go run ./cli/cdrlab/cmd/cdrlab -h`. In a running lab, the Register is the CDR intermediate CA: its operator interface issues CDR client and server certificates from a CSR and revokes CDR certificates, with no host access, and the Register signs and serves the CRL ([ADR 0022](docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md)).
+`cdrlab up` creates two lab CAs in `.lab/pki/`: a CDR CA and a separate public CA. TLS clients trust `public/root.crt`, and mTLS clients and servers trust `cdr/ca-bundle.pem`. In a running lab the Register is the CDR intermediate CA, and it issues every CDR certificate ([ADR 0022](docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md)). [`lab/certificates.json`](lab/certificates.json) lists the lab certificates. See [pki/DESIGN.md](pki/DESIGN.md) and the [cdrlab specification](cli/cdrlab/design/README.md).
 
 ### Data
 
-- **Database:** each service reads its connection from the libpq variables (`PG*`). A service applies its migrations at startup only when `DATABASE_MIGRATE_ON_START` is `true`; otherwise, run its `migrate` subcommand. Migrations are goose SQL files. In the lab, a one-shot `<service>-migrate` container runs the migrations as the owner user, and the service connects as a service user with the application role only ([ADR 0020](docs/adr/0020-service-migrations-create-roles-and-the-operator-creates-users.md)). Tests connect as the superuser `postgres`, and tests of database adapters create a new database with `databasetest.New(t)`.
-- **Seed data:** one-shot compose services load [`services/register/seed/example.json`](services/register/seed/example.json) (participants) and the product catalogue of the data holder brand before the services start. To load a different set, change the file, then `mise run reset` and `mise run up`.
-- **Data holder brand:** each data holder instance gets its name, logo, colours and product catalogue from a preset brand or a mounted brand directory ([services/dataholder/brands](services/dataholder/brands/README.md), [ADR 0023](docs/adr/0023-give-the-brand-of-a-data-holder-as-a-strict-brand-directory.md)).
-- **Customer data:** the data holder operator interface creates customers, accounts and transactions ([data holder: operator interface](services/dataholder/design/operator-interface.md)). `cdrlab customers add` adds the customers of a file ([cdrlab: onboarding](cli/cdrlab/design/onboarding.md)). Use invented data only.
-- **Register operations:** the Register operator interface creates and changes participants, registers client certificates and changes statuses ([Register: operator interface](services/register/design/operator-interface.md#reg-0800)). `cdrlab participants add` adds the participants of a load file, and then `cdrlab cert issue` gets the certificate of a new software product or brand ([cdrlab: onboarding](cli/cdrlab/design/onboarding.md)).
+- Each service has its own database and runs its own migrations ([ADR 0020](docs/adr/0020-service-migrations-create-roles-and-the-operator-creates-users.md)).
+- The lab loads its participants from [`services/register/seed/example.json`](services/register/seed/example.json), and each bank loads the product catalogue of its brand ([brands](services/dataholder/brands/README.md)).
+- `cdrlab participants add` and `cdrlab customers add` load your own participants and customers ([onboarding](cli/cdrlab/design/onboarding.md)). Use invented data only.
 
 ### Conformance tests
 
-The tests in `conformance/` are black-box tests of the CDR behaviour of the deployed components. [conformance/DESIGN.md](conformance/DESIGN.md) gives the rules for each test. The suite passes one time after a new lab:
+The tests in `conformance/` are black-box tests of the CDR behaviour of the running services ([conformance/DESIGN.md](conformance/DESIGN.md)). Run them on a new lab:
 
 ```sh
 mise run reset && mise run up && mise run conformance
 ```
 
-The CI job `cluster` also runs the suite against the [umbrella chart](charts/cdr-lab/README.md) in a kind cluster, as a Job in the cluster ([ADR 0036](docs/adr/0036-test-the-umbrella-chart-in-a-kind-cluster-in-ci-with-the-conformance-suite-as-a-job-in-the-cluster.md)). To run it locally, with the lab images and the `cdrlab` image in Docker (`lab/kind/` gives the set-up):
+CI also runs the suite against the umbrella chart in a kind cluster ([ADR 0036](docs/adr/0036-test-the-umbrella-chart-in-a-kind-cluster-in-ci-with-the-conformance-suite-as-a-job-in-the-cluster.md)). To do the same locally:
 
 ```sh
 mise run cluster:up && mise run cluster:conformance; mise run cluster:down
 ```
 
-### OpenID conformance suite
-
-`mise run openid-conformance` runs the FAPI 1.0 Advanced test plan of the [OpenID conformance suite](https://gitlab.com/openid/conformance-suite), with the Australian CDR profile, against the data holder authorisation server ([ADR 0001](docs/adr/0001-auth-server-library.md)). It starts the suite (compose profile `openid`), registers its two clients with the data holder, and fails when a test module fails or has a warning. The output gives a link to the log of each module on port 8443. It needs a new lab, because the data holder refuses a second registration of the clients. It does not run in CI.
+`mise run openid-conformance` runs the FAPI 1.0 Advanced test plan of the [OpenID conformance suite](https://gitlab.com/openid/conformance-suite), with the Australian CDR profile, against the data holder ([ADR 0001](docs/adr/0001-auth-server-library.md)). It needs a new lab, and it does not run in CI.
 
 ## Cluster deployment
 
-The umbrella chart [`charts/cdr-lab`](charts/cdr-lab/README.md) deploys the Register and the preset brands to one namespace of a Kubernetes cluster with one release. First make the databases, the users, the operator token Secret and the public TLS certificates in the namespace. The chart README gives a values file with the four preset brands, a CloudNativePG example and the operator access:
-
-```sh
-helm install cdr-lab oci://ghcr.io/lukemundy/cdr-lab/charts/cdr-lab --version X.Y.Z \
-  --namespace lab --values my-values.yaml --wait --timeout 10m
-```
+The umbrella chart [`charts/cdr-lab`](charts/cdr-lab/README.md) deploys the Register and the preset banks to one Kubernetes namespace ([specification](charts/cdr-lab/DESIGN.md)). Its README gives the prerequisites, an example values file and the operator access.
 
 ## Licence
 
-Copyright 2026 Luke Mundy. Licensed under the [Apache License 2.0](LICENSE). A copy or a derived work keeps the [NOTICE](NOTICE) file, which gives the attribution and the parts of the repository that have a different licence. Each image, chart and release archive contains the two files.
+Copyright 2026 Luke Mundy. Licensed under the [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for the attribution and for the parts of the repository that have a different licence.

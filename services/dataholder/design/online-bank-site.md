@@ -4,7 +4,7 @@ This area gives the lab-only online bank site of the brand: its pages and their 
 
 ## Scope of the site
 
-- <a id="dh-1800"></a>**DH-1800** The online bank site is a lab-only feature. A real component does not depend on it, and it is not the web site of a production data holder. ([Judgement: web UIs as single-page applications that the service embeds (ADR 0014)][adr-0014]; [mock and real components][readme-component-types])
+- <a id="dh-1800"></a>**DH-1800** The online bank site is a lab-only feature. A real component does not depend on it, and it is not the web site of a production data holder. ([Judgement: web UIs as single-page applications that the service embeds (ADR 0014)][adr-0014]; [mock and real components][glossary-mock-real])
 - <a id="dh-1801"></a>**DH-1801** The data holder embeds and serves the site as a React single-page application. ([Judgement: web UIs as single-page applications that the service embeds (ADR 0014)][adr-0014])
 - <a id="dh-1802"></a>**DH-1802** A hand-written OpenAPI document gives the contract of the [site API](online-bank-site-api.md#dh-1701). ([Judgement: API contracts in OpenAPI (ADR 0017)][adr-0017])
 - <a id="dh-1803"></a>**DH-1803** The site is not part of the authorisation flow. The authentication and authorisation pages stay on the public listener. ([the site and the consumer pages on different origins](online-bank-site-sign-in.md#dh-2058))
@@ -213,7 +213,7 @@ The site API also obeys [route patterns in place of raw paths](../../../pkg/plat
 - Basis: Step 3.3. The CDS and the ACCC give no text for a failure of a web site of a data holder.
 - Reason: A customer cannot start the bank, and does not know the services of the lab. The text is in the voice of the bank, as the other text of the site is.
 
-[readme-component-types]: ../../../README.md#component-types
+[glossary-mock-real]: ../../../docs/spec/glossary.md#mock-component-real-component
 [adr-0006]: ../../../docs/adr/0006-telemetry.md
 [adr-0014]: ../../../docs/adr/0014-web-uis-as-embedded-react-single-page-applications.md
 [adr-0016]: ../../../docs/adr/0016-design-system-on-shadcn-base-ui-and-dtcg-tokens.md

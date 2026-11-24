@@ -6,7 +6,7 @@
 
 This ADR amends [ADR-0006](0006-telemetry.md). It replaces the statement that the HTTP server metrics do not have `server.address` or `server.port`, because the services send no HTTP request metrics after this decision.
 
-A deployment of the lab can send its telemetry to a backend that other workloads also use. Such a backend has limits on the number of active series and on the samples each second. On 2026-11-03, the Register and four data holders took a shared Grafana Cloud stack over its limit of 15,000 active series. The infrastructure metrics of the other workloads then stopped for approximately 45 minutes.
+A deployment of the lab can send its telemetry to a backend that other workloads also use. Such a backend has limits on the number of active series and on the samples each second. A lab with the Register and four data holders took such a shared backend over its limit of active series. The metrics of the other workloads then stopped until the series expired.
 
 The number of series came from the instrumentation libraries: otelhttp, otelpgx and otelriver. Each of these records histograms for each route, method, status code, SQL operation or job kind. After one run of the conformance suite and the browser tests, a lab with the Register and four data holders had 16,187 series. Of these, 13,939 were HTTP server histograms. Thus the number of series increases with each route that a client calls, with each new endpoint, query or job, and with each restart, because each process start had a new `service.instance.id`. The one-shot `migrate` and `seed` processes also sent approximately 75 series each, under an instance that stops after some seconds.
 
@@ -16,7 +16,7 @@ The real options were:
 
 1. **Keep the request metrics with fewer attributes and buckets.** An allowlist of instruments and attribute keys gives approximately 60 series for each process. The rate, the latency and the 5xx rate of each service are then available as metrics, at any sample rate and with the retention of the metrics backend. The number of series still changes when new error codes occur. Each new instrumentation library adds metrics until somebody adds it to the allowlist.
 2. **Send metrics only for the state of the process.** The Go runtime, the connection pool and the number of active HTTP requests are state that a trace cannot give. They give 23 series for each process, and the number does not change with traffic, routes, errors or features. The request detail is available only from the traces.
-3. **Keep all metrics, and limit them in the collector or the backend.** This needs work from each operator, and the lab then sends data that the backend discards. A collector of the home cluster discards all OTLP data of the lab for this reason.
+3. **Keep all metrics, and limit them in the collector or the backend.** This needs work from each operator, and the lab then sends data that the backend discards. An operator who shares a backend with other workloads must then discard the lab data in the collector.
 
 ## Decision
 

@@ -34,7 +34,7 @@ The CDR standards, rules and the products in these notes change. Before you depe
 
 ## Main findings
 
-- The production Register does not always follow the CDS or RFC 9110. For example, its ETags have no quotes, and it does not return `x-fapi-interaction-id`. Observed production behaviour is background only. The [README](../../README.md#sources-for-requirements) gives the sources for requirements.
+- The production Register does not always follow the CDS or RFC 9110. For example, its ETags have no quotes, and it does not return `x-fapi-interaction-id`. Observed production behaviour is background only. The [specification conventions](../spec/conventions.md#sources-for-requirements) give the sources for requirements.
 - The ACCC mock Register is not a reliable model of production behaviour. It does not implement Get Data Holder Brands Summary. Its certificate-bound tokens use a SHA-1 thumbprint, and its token endpoint checks only the certificate common name. Use it only as a black-box reference for the API contract.
 - The CDS 1.36.0 sources disagree about Register error codes. The CDS Known Issues section admits this. The ACCC Developer Portal describes what the production Register does.
 - The CDS gives no non-functional requirements for the Register itself. It sets requirements only for the participants that call the Register, for example that data holders react to status changes within 5 minutes.

@@ -34,7 +34,7 @@ This area gives the listeners of the Register and their ports, the lab-only part
 
 ## Publication
 
-- <a id="reg-0910"></a>**REG-0910** An operator deploys the Register to Kubernetes from the image and the Helm chart that CI publishes from `main`, or from the image and the chart of a [release](../../../tools/release/DESIGN.md#rls-0009). ([Register chart][register-chart]; [README: Container images][readme-conventions]; [Judgement: one version from a manual workflow on main (ADR 0027)][adr-0027])
+- <a id="reg-0910"></a>**REG-0910** An operator deploys the Register to Kubernetes from the image and the Helm chart that CI publishes from `main`, or from the image and the chart of a [release](../../../tools/release/DESIGN.md#rls-0009). ([Register chart][register-chart]; [Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029]; [Judgement: one version from a manual workflow on main (ADR 0027)][adr-0027])
 - <a id="reg-1510"></a>**REG-1510** Each image of the Register that CI publishes is an OCI image index with an image for `linux/amd64` and an image for `linux/arm64`. ([OCI: image index][oci-image-index]; [Judgement: images for linux/amd64 and linux/arm64 (ADR 0030)][adr-0030])
 - <a id="reg-1511"></a>**REG-1511** Integrity: the `linux/amd64` image of the index has the same configuration digest as the image that the lab jobs of its commit tested. ([Judgement: images for linux/amd64 and linux/arm64 (ADR 0030)][adr-0030])
 - <a id="reg-1512"></a>**REG-1512** The `appVersion` of a chart from `main` is the full commit ID of the [image commit](../../../docs/spec/glossary.md#image-commit) of the Register at that commit. ([Helm: charts][helm-charts]; [Judgement: promote the tested image with no rebuild (ADR 0029)][adr-0029])
@@ -128,7 +128,6 @@ A deployment changes the endpoints of the example seed to the hosts of the deplo
 [helm-values]: https://helm.sh/docs/chart_template_guide/values_files/
 [rfc6761-test]: https://www.rfc-editor.org/rfc/rfc6761#section-6.2
 [register-chart]: ../../../charts/register/README.md
-[readme-conventions]: ../../../README.md#other-conventions
 [adr-0010]: ../../../docs/adr/0010-background-jobs-with-river.md
 [adr-0020]: ../../../docs/adr/0020-service-migrations-create-roles-and-the-operator-creates-users.md
 [adr-0025]: ../../../docs/adr/0025-group-the-listeners-of-a-service-by-tls-mode-and-audience.md

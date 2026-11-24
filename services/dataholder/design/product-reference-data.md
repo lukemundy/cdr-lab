@@ -48,11 +48,11 @@ This area gives the products of the brand, their load, and the public APIs Get P
 
 ## Product load
 
-- <a id="dh-0226"></a>**DH-0226** The lab operator can load a full set of products into a data holder that has no products. The set is one of these. ([README: Component types][readme-component-types])
+- <a id="dh-0226"></a>**DH-0226** The lab operator can load a full set of products into a data holder that has no products. The set is one of these. ([mock component, real component][glossary-mock-real])
   - the product catalogue of the brand
   - the products of a load file
 - <a id="dh-0227"></a>**DH-0227** When the data holder has products, the load refuses the set and changes nothing. ([Judgement: no load into a data holder that has products](#dh-0268))
-- <a id="dh-0228"></a>**DH-0228** The load is separate from the start of the data holder. The start of the data holder needs no load file. ([README: Component types][readme-component-types])
+- <a id="dh-0228"></a>**DH-0228** The load is separate from the start of the data holder. The start of the data holder needs no load file. ([mock component, real component][glossary-mock-real])
 - <a id="dh-0229"></a>**DH-0229** The load validates the full set against the product fields and the product validity rules of this area. When one product is not valid, the load changes nothing. ([the product fields](#dh-0200); [the product validity rules](#dh-0212))
 - <a id="dh-0230"></a>**DH-0230** When a product is not valid, the error of the load names each product and each rule that fails. For example, the error names the second product and its empty `name`. ([the product validity rules](#dh-0212))
 - <a id="dh-0231"></a>**DH-0231** The load refuses a product with a field that the data holder does not hold. For example, the load refuses a product with `brandGroup`. ([the optional fields that a product can have](#dh-0201); [Judgement: only the effective dates, features, fees and rates as optional fields](#dh-0260))
@@ -209,4 +209,4 @@ This area gives the products of the brand, their load, and the public APIs Get P
 [support-brands]: https://cdr-support.zendesk.com/hc/en-us/articles/900005881263
 [support-status-fields]: https://cdr-support.zendesk.com/hc/en-us/articles/900005173683
 [readme]: ../../../README.md
-[readme-component-types]: ../../../README.md#component-types
+[glossary-mock-real]: ../../../docs/spec/glossary.md#mock-component-real-component

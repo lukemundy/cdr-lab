@@ -122,7 +122,7 @@ A CDR certificate copies the profile of the production server certificate of `se
 
 - Kind: choice
 - Basis: Step 3.2. On 2026-10-02, we observed "CDR Root CA", "CDR Intermediate CA 2025", the server certificate of `secure.api.cdr.gov.au` and the CRL of "CDR Intermediate CA 2025". The [CP section 6.3.2, Table 6][accc-cp] gives only maximums, for example 15 years for an intermediate.
-- Reason: A mock component copies the behaviour of its production equivalent ([README: Component types][readme-component-types]). A relying party that works with the mock certificates then works with the production certificates.
+- Reason: A mock component copies the behaviour of its production equivalent ([mock component, real component][glossary-mock-real]). A relying party that works with the mock certificates then works with the production certificates.
 
 ### <a id="ca-0050"></a>CA-0050 The CN host name rules for each name in a server CSR
 
@@ -164,7 +164,7 @@ A CDR certificate copies the profile of the production server certificate of `se
 
 None.
 
-[readme-component-types]: ../../README.md#component-types
+[glossary-mock-real]: ../../docs/spec/glossary.md#mock-component-real-component
 [adr-0022]: ../../docs/adr/0022-run-the-mock-cdr-intermediate-ca-in-the-register.md
 [cds-csr-profile]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#certificate-signing-request-profile
 [cds-cert-validation]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#certificate-validation

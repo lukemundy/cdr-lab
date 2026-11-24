@@ -16,6 +16,33 @@ Write all text in [ASD-STE100 Simplified Technical English][ste100]:
 - 20 words or fewer for an instruction, 25 words or fewer for a description.
 - Inclusive language, for example allowlist and blocklist, primary and replica.
 
+## Sources for requirements
+
+Use this process to decide each requirement, and to decide when sources are not clear or do not agree:
+
+1. The CDS text and specifications as written, for the target CDS version. This is always the first source.
+2. When the CDS is not clear or says nothing: first-party ACCC guidance from official sources, for example the ACCC Developer Portal or the CDR Support Portal. The ACCC mock implementations are not a source.
+3. When the ACCC guidance is also not clear or says nothing: our own judgement. Balance these items, in approximately this order:
+   1. The spirit and intent of the Consumer Data Right.
+   2. Relevant technical standards, protocols, RFCs, frameworks and industry benchmarks.
+   3. The least complex solution.
+
+Examples:
+
+- The CDS does not give an HTTP response code for a condition. Use the code that is correct for the HTTP protocol and usual in the industry, if it does not go against the spirit or intent of the CDR.
+- The CDS is not clear or does not give enough information, but ACCC supporting documentation gives guidance or a clarification. Use the ACCC guidance.
+- The CDS and the ACCC say nothing about a detail, and more than one solution meets industry norms. Use the solution that is the simplest to understand, implement and maintain.
+- The CDS does not agree with an ACCC support article or another official ACCC document that is not a specification. Follow the CDS.
+- The CDS text does not agree with the CDS OpenAPI specification, and the ACCC has not clarified it. Use the option that agrees more with the spirit of the CDR or with industry norms.
+
+Record each choice that this process makes as a [judgement](#judgements) next to its requirements, with its basis and its reason.
+
+Other rules for the sources and the links:
+
+- Refer to a rule with a descriptive link, never with an identifier alone.
+- A rule that a `pkg/` library implements is in the specification of that library. A service gives only its differences.
+- The research notes in `docs/research/` are background. Do not cite them as a source, and do not cite through them.
+
 ## Templates
 
 A heading in angle brackets is a name that you choose. The other headings are fixed, and the check finds them by their text: `Context`, `Areas`, `Library specifications`, `Goals`, `Non-goals`, `Judgements` and `Withdrawn`. Each other `##` heading is a group of requirements.
@@ -186,7 +213,7 @@ A judgement is in the Judgements section of the file that has its requirements. 
   - `choice`: a choice that the sources do not make
   - `conflict`: a conflict between two sources, and the source that we follow
   - `gap`: a source requirement that the component does not meet
-- `Basis:` the step of the [sources process][readme-sources] (`Step 1`, `Step 2`, `Step 3.1`, `Step 3.2` or `Step 3.3`), and then the links to the sources that the judgement uses.
+- `Basis:` the step of the [sources process](#sources-for-requirements) (`Step 1`, `Step 2`, `Step 3.1`, `Step 3.2` or `Step 3.3`), and then the links to the sources that the judgement uses.
 - `Reason:` three sentences or fewer.
 
 ```markdown
@@ -303,6 +330,5 @@ In each test file (`_test.go`, `.test.ts`, `.test.tsx`, `.spec.ts`, `.spec.tsx`)
 [adr-0024-identifiers]: ../adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md#identifiers
 [adr-0024-structure]: ../adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md#structure
 [adr-0024-checks]: ../adr/0024-write-specifications-as-identified-single-requirements-split-by-area.md#checks
-[readme-sources]: ../../README.md#sources-for-requirements
 [ste100]: https://www.asd-ste100.org/
 [c4-context]: https://c4model.com/diagrams/system-context

@@ -70,7 +70,7 @@ None.
 
 - Kind: choice
 - Basis: Step 3.2. The CDS and the ACCC give no connection limits. Go `net/http` has no read, write or idle limit by default, so a slow client can keep a connection open with no end ([Go: net/http Server][go-http-server]).
-- Reason: Real components use this library. The limits stop a slow request body and an idle connection from holding resources. They are much longer than each request of the lab, and no response of the lab is a stream.
+- Reason: The limits stop a slow request body and an idle connection from holding resources, also in a real component that copies the library. They are much longer than each request of the lab, and no response of the lab is a stream.
 
 ### <a id="srv-0013"></a>SRV-0013 Health probes with no `Host` check and no authentication
 
