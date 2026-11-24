@@ -574,6 +574,8 @@ jobs:
               continue
             fi
             app=$(mise exec -- go run ./tools/release image-commit -service "$service" -image "$IMAGE_REPOSITORY/$service")
+            # The Apache License 2.0 requires the licence and the NOTICE file with each copy of the chart.
+            cp LICENSE NOTICE "$dir/"
             helm package "$dir" --version "0.0.0-g$commit" --app-version "$app" --destination "$RUNNER_TEMP"
             helm push "$RUNNER_TEMP/$service-0.0.0-g$commit.tgz" "$CHART_REPOSITORY"
           done
@@ -682,6 +684,8 @@ jobs:
             TAG=$tag yq --inplace ".images.$image.tag = strenv(TAG)" "$chart/values.yaml"
             want+=("$IMAGE_REPOSITORY/$image:$tag")
           done
+          # The Apache License 2.0 requires the licence and the NOTICE file with each copy of the chart.
+          cp LICENSE NOTICE "$chart/"
           helm package "$chart" --version "0.0.0-g$commit" --destination "$RUNNER_TEMP"
           package="$RUNNER_TEMP/cdr-lab-0.0.0-g$commit.tgz"
           got=$(helm template cdr-lab "$package" --values lab/kind/values.yaml |
@@ -832,6 +836,7 @@ jobs:
           files=$(docker export "$container" | tar -t)
           docker rm "$container" > /dev/null
           grep --line-regexp --fixed-strings licenses/go/third-party-notices.txt <<< "$files"
+          grep --line-regexp --fixed-strings licenses/NOTICE <<< "$files"
 
       # The publish job pushes the image only when it is this tested image.
       - name: Record the tested image

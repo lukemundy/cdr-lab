@@ -34,8 +34,11 @@ RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache
 
 FROM gcr.io/distroless/static-debian13:nonroot@sha256:25ac8f0c3b2334a9eb05452266bd4697864a8c8ef0ef71e5e6480d7f92868329
 
-LABEL org.opencontainers.image.source=https://github.com/lukemundy/cdr-lab
+LABEL org.opencontainers.image.source=https://github.com/lukemundy/cdr-lab \
+      org.opencontainers.image.licenses=Apache-2.0
 COPY --from=build /out/cdrlab /cdrlab
+# The Apache License 2.0 requires the licence and the NOTICE file with each copy of the work.
+COPY LICENSE NOTICE /licenses/
 # The licences of the Go modules require their notices with each copy of their code.
 COPY --from=build /out/third-party-notices.txt /licenses/go/
 ENTRYPOINT ["/cdrlab"]

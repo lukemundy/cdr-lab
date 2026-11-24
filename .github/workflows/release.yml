@@ -154,6 +154,8 @@ jobs:
           mise exec -- crane auth login ghcr.io --username "$GITHUB_ACTOR" --password-stdin <<< "$GH_TOKEN"
           helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin <<< "$GH_TOKEN"
           mise run chart:deps
+          # The Apache License 2.0 requires the licence and the NOTICE file with each copy of the chart.
+          cp LICENSE NOTICE "charts/$CHART/"
           helm package "charts/$CHART" --version "$version" --app-version "$(jq --raw-output .imageTag "$plan")" \
             --destination "$RUNNER_TEMP"
           helm push "$RUNNER_TEMP/$CHART-$version.tgz" "$repository"

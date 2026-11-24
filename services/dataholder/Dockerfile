@@ -52,8 +52,11 @@ RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache
 
 FROM gcr.io/distroless/static-debian13:nonroot@sha256:25ac8f0c3b2334a9eb05452266bd4697864a8c8ef0ef71e5e6480d7f92868329
 
-LABEL org.opencontainers.image.source=https://github.com/lukemundy/cdr-lab
+LABEL org.opencontainers.image.source=https://github.com/lukemundy/cdr-lab \
+      org.opencontainers.image.licenses=Apache-2.0
 COPY --from=build /out/dataholder /dataholder
+# The Apache License 2.0 requires the licence and the NOTICE file with each copy of the work.
+COPY LICENSE NOTICE /licenses/
 # The SIL Open Font License requires its text with each copy of the fonts of the web UIs.
 COPY --from=web /src/web/packages/tokens/dist/fonts/*-LICENSE.txt /licenses/fonts/
 # The licences of the Go modules and the npm packages require their notices with each copy of their code.
