@@ -14,7 +14,7 @@ crane = "0.22.1"
 syft = "1.57.2"
 cosign = "3.1.4"
 kind = "0.33.0"
-kubectl = "1.37.2"
+kubectl = "1.37.3"
 yq = "4.54.3"
 
 [env]
