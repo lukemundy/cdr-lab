@@ -524,7 +524,7 @@ services:
   openid-server:
     <<: *lab-dns
     profiles: [openid]
-    image: registry.gitlab.com/openid/conformance-suite:release-v5.3.4@sha256:dcc4bd1fb7e9c00f048a67373fe2bec5ecf9feb45a6b5d55e237e5c30e5312c6
+    image: registry.gitlab.com/openid/conformance-suite:release-v5.3.5@sha256:576ad9d6ea4230a6d58623a03c17c74e2ae1438cceec252f8721daa53a705961
     environment:
       BASE_URL: https://openid:8443
       MONGODB_HOST: openid-mongodb
