@@ -3,7 +3,7 @@
 go = "1.27.4"
 golangci-lint = "2.15.0"
 cocogitto = "7.0.0"
-docker-compose = "5.7.1"
+docker-compose = "5.8.1"
 # Pin Node and pnpm only here, not also in web/.
 node = "26.13.0"
 pnpm = "12.16.1"
