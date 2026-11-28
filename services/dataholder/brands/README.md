@@ -1,6 +1,6 @@
 # Data holder brands
 
-A data holder instance gets its brand from a brand directory. [ADR 0023](../../../docs/adr/0023-give-the-brand-of-a-data-holder-as-a-strict-brand-directory.md) gives the format, and [the brand area of the specification](../design/brand.md) gives the rules.
+A data holder instance gets its brand from a brand directory. [ADR 0023](../../../docs/adr/0023-give-the-brand-of-a-data-holder-as-a-strict-brand-directory.md) gives the format. [The brand directory library](../../../pkg/platform/branddir/DESIGN.md) gives the rules that each brand directory of the lab obeys, and [the brand area of the specification](../design/brand.md) gives the files and the rules of the data holder.
 
 Each subdirectory here is a preset brand. The binary contains each preset, and the name of the directory is the name of the preset.
 

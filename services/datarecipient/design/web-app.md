@@ -37,6 +37,7 @@ This area gives the web app of the brand: its listener, its pages and their pres
   - the member details page
   - the home page
 - <a id="dr-0214"></a>**DR-0214** The landing page says in one sentence that the app shows the bank accounts of the consumer in one place. It has the photo of the brand, and a primary action to sign up and a link to sign in. ([Judgement: a landing page that says what the app does](#dr-0252))
+- <a id="dr-0229"></a>**DR-0229** The sign-up page, the sign-in page and the password reset pages show the access photo of the brand, when the brand has one. On a page 1280 CSS pixels wide, the photo is next to the form. On a narrow page, a crop of the photo is above the form. ([the access photo of a brand](brand.md#dr-0127); [Judgement: a portrait photo of 4:5 next to a form](brand.md#dr-0154))
 - <a id="dr-0215"></a>**DR-0215** The home page says that the member has no connected bank. ([Judgement: a landing page that says what the app does](#dr-0252))
 
 ## Presentation

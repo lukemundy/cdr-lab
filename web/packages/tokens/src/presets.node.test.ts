@@ -5,26 +5,37 @@ import { consoleShellPairs, contrastPairs } from "./contrast.ts";
 import { consoleColor, participantConsoleRoles } from "./shell.ts";
 import { loadTokens, toColor } from "./tokens.ts";
 
-// The preset brands of the data holder (services/dataholder/brands). Each one has the colour roles of the design
-// system, and services/dataholder/design/brand.md requires the same contrast as for the brands here.
-const presetsURL = new URL("../../../../services/dataholder/brands/", import.meta.url);
+// The preset brands of the data holder (services/dataholder/brands) and of the data recipient
+// (services/datarecipient/brands). Each one has the colour roles of the design system, and the specification of each
+// service requires the same contrast as for the brands here. Only the data holder has a console.
+const services = [
+  { service: "dataholder", hasConsole: true },
+  { service: "datarecipient", hasConsole: false },
+];
 
-const presets = await Promise.all(
-  (await readdir(presetsURL, { withFileTypes: true }))
-    .filter((entry) => entry.isDirectory())
-    .map(async ({ name }) => {
-      const tokens: unknown = JSON.parse(
-        await readFile(new URL(`${name}/tokens.json`, presetsURL), "utf8"),
+const presets = (
+  await Promise.all(
+    services.map(async ({ service, hasConsole }) => {
+      const presetsURL = new URL(`../../../../services/${service}/brands/`, import.meta.url);
+      return Promise.all(
+        (await readdir(presetsURL, { withFileTypes: true }))
+          .filter((entry) => entry.isDirectory())
+          .map(async ({ name }) => {
+            const tokens: unknown = JSON.parse(
+              await readFile(new URL(`${name}/tokens.json`, presetsURL), "utf8"),
+            );
+            return { service, name, hasConsole, tokens };
+          }),
       );
-      return { name, tokens };
     }),
-);
+  )
+).flat();
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-// The data holder accepts only literal OKLCH values (ADR 0023).
+// A brand directory has only literal OKLCH values (ADR 0023).
 function colorOf(tokens: unknown, id: string) {
   const group = isRecord(tokens) ? tokens.color : undefined;
   const token = isRecord(group) ? group[id.replace(/^color\./, "")] : undefined;
@@ -36,8 +47,8 @@ function colorOf(tokens: unknown, id: string) {
   return new Color("oklch", [l, c, h], typeof value.alpha === "number" ? value.alpha : 1);
 }
 
-test("the data holder has a preset brand", () => {
-  expect(presets.length).toBeGreaterThan(0);
+test.each(services)("$service has a preset brand", ({ service }) => {
+  expect(presets.filter((preset) => preset.service === service).length).toBeGreaterThan(0);
 });
 
 // The console of a preset uses the lab brand for each role that the brand does not give to its console.
@@ -50,7 +61,7 @@ function labColor(id: string) {
   return toColor(token.$value);
 }
 
-describe.each(presets)("preset $name", ({ tokens }) => {
+describe.each(presets)("$service preset $name", ({ tokens, hasConsole }) => {
   test.each(contrastPairs)("$fg on $bg has a contrast of $min:1 or more", ({ fg, bg, min }) => {
     expect(colorOf(tokens, fg).contrast(colorOf(tokens, bg), "WCAG21")).toBeGreaterThanOrEqual(min);
   });
@@ -58,7 +69,7 @@ describe.each(presets)("preset $name", ({ tokens }) => {
   const consoleRole = (id: string) =>
     participantConsoleRoles.includes(id) ? colorOf(tokens, id) : labColor(id);
 
-  test.each(consoleShellPairs)(
+  test.skipIf(!hasConsole).each(consoleShellPairs)(
     "console: $fg on $bg has a contrast of $min:1 or more",
     ({ fg, bg, min }) => {
       expect(

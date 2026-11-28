@@ -136,6 +136,7 @@ This table is the registry of the codes. A new specification adds its code in th
 | `pkg/ca` | `CA` |
 | `pkg/platform/consolehttp` | `CNSL` |
 | `pkg/platform/asset` | `ASSET` |
+| `pkg/platform/branddir` | `BRAND` |
 | `pkg/platform/telemetry` | `TELE` |
 | `pkg/platform/httpserver` | `SRV` |
 | `pkg/platform/database` | `DBASE` |

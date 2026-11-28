@@ -7,8 +7,8 @@ The Apache License 2.0 does not apply to these parts of the repository. Each par
 
 - conformance/register/spec/ and conformance/dataholder/spec/: the CDS OpenAPI specifications, under the MIT
   licence in the LICENCE.md file of each directory.
-- The photos in services/dataholder/brands/: under the Unsplash License, as the ATTRIBUTION.md file of each brand
-  says.
+- The photos in services/dataholder/brands/ and services/datarecipient/brands/: under the Unsplash License, as the
+  ATTRIBUTION.md file of each brand says.
 - Third-party code in the images and the release archives: under the licences in /licenses/ of each image, and in
   licenses/ of each archive.
 

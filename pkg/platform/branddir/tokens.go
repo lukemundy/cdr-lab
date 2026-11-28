@@ -15,6 +15,7 @@ import (
 var fonts = []string{
 	"Inter Variable", "JetBrains Mono Variable", "Figtree Variable", "Public Sans Variable", "Geist Variable",
 	"DM Sans Variable", "Bricolage Grotesque Variable", "Source Serif 4 Variable", "Unbounded Variable",
+	"Fraunces Variable",
 }
 
 // genericFamilies are the CSS generic font families, which a font token can give after its font.
@@ -47,21 +48,16 @@ var contract = []tokenGroup{
 	{name: "radius", dtcg: "dimension", toCSS: dimensionCSS, tokens: []string{"sm", "md", "lg", "full"}},
 }
 
-// consoleProperties are the only roles of the brand in the console: the roles of the console shell, the link and the
-// primary action (web/packages/ui/design/tokens-and-brands.md, UI-0035). The console uses the lab brand for the rest.
-var consoleProperties = []string{
-	"--ds-color-brand", "--ds-color-fg-on-brand", "--ds-color-hero", "--ds-color-fg-on-hero", "--ds-color-accent",
-	"--ds-color-heading", "--ds-color-link", "--ds-color-primary", "--ds-color-primary-hover",
-	"--ds-color-primary-pressed", "--ds-color-fg-on-primary",
+type declaration struct {
+	property, value string
 }
 
-// parseTokens gives the stylesheets of the brand: the custom properties of the design system with the values of the
-// brand, and the properties of the console only. Each value comes only from numbers and fixed names, so a brand
-// directory cannot add other CSS.
-func parseTokens(data []byte) (styles, consoleStyles []byte, errs []error) {
+// parseTokens gives the custom properties of the design system with the values of the brand, in the order of the
+// stylesheet. Each value comes only from numbers and fixed names, so a brand directory cannot add other CSS.
+func parseTokens(data []byte) (declarations []declaration, errs []error) {
 	var groups map[string]json.RawMessage
 	if err := decodeStrict(data, &groups); err != nil {
-		return nil, nil, []error{err}
+		return nil, []error{err}
 	}
 
 	for _, name := range slices.Sorted(maps.Keys(groups)) {
@@ -69,11 +65,6 @@ func parseTokens(data []byte) (styles, consoleStyles []byte, errs []error) {
 			errs = append(errs, fmt.Errorf("%s: the contract has no group of this name", name))
 		}
 	}
-
-	var css, console strings.Builder
-
-	css.WriteString(":root:root {\n")
-	console.WriteString(":root:root {\n")
 
 	for _, group := range contract {
 		raw, found := groups[group.name]
@@ -87,20 +78,12 @@ func parseTokens(data []byte) (styles, consoleStyles []byte, errs []error) {
 
 		for _, token := range group.tokens {
 			if value, found := values[token]; found {
-				declaration := fmt.Sprintf("  --ds-%s-%s: %s;\n", group.name, token, value)
-				css.WriteString(declaration)
-
-				if slices.Contains(consoleProperties, "--ds-"+group.name+"-"+token) {
-					console.WriteString(declaration)
-				}
+				declarations = append(declarations, declaration{"--ds-" + group.name + "-" + token, value})
 			}
 		}
 	}
 
-	css.WriteString("}\n")
-	console.WriteString("}\n")
-
-	return []byte(css.String()), []byte(console.String()), errs
+	return declarations, errs
 }
 
 // parseGroup gives the CSS value of each valid token of the group.
@@ -315,7 +298,7 @@ func fontCSS(raw json.RawMessage) (string, error) {
 	}
 
 	if !slices.Contains(fonts, families[0]) {
-		return "", fmt.Errorf("%q is not a font of the data holder: give one of %s", families[0], quoted(fonts))
+		return "", fmt.Errorf("%q is not a font of the design system: give one of %s", families[0], quoted(fonts))
 	}
 
 	for _, family := range families[1:] {
