@@ -25,31 +25,27 @@ This area gives the identity of the brand of an instance, the selection of the b
 
 ## Files of a brand directory
 
-- <a id="dr-0113"></a>**DR-0113** A brand directory has these files, and no other file. Only `hero.webp` and `ATTRIBUTION.md` are optional. ([Judgement: a brand directory as the data holder has](#dr-0150))
+- <a id="dr-0113"></a>**DR-0113** A brand directory has these files, and no other file. Only the photos and `ATTRIBUTION.md` are optional. ([Judgement: a brand directory as the data holder has](#dr-0150))
   - `brand.json`: the brand file
   - `tokens.json`: the design tokens of the brand
   - `logo.svg`: the logo, for the header of the web app
   - `mark.svg`: a square symbol of the brand, for the icon of the web app
   - `logo.png`: the logo, for the header of each email
   - `hero.webp`: the photo of the landing page
-  - `ATTRIBUTION.md`: the source, the author and the licence of the photo
+  - `access.webp`: the photo of the sign-up, sign-in and password reset pages
+  - `ATTRIBUTION.md`: the source, the author and the licence of each photo
 - <a id="dr-0114"></a>**DR-0114** The brand file `brand.json` has only the field `brandName`, and the field is required. ([CDS: Register API schemas][cds-register-schemas])
 - <a id="dr-0115"></a>**DR-0115** The data recipient does not read or serve `ATTRIBUTION.md`. ([Judgement: a brand directory as the data holder has](#dr-0150))
 - <a id="dr-0116"></a>**DR-0116** The logo is legible on the header colour of the brand and on white. ([WCAG 2.2, SC 1.4.11][wcag-1-4-11])
 
 ## Validation of the brand directory
 
-- <a id="dr-0117"></a>**DR-0117** A brand directory obeys these rules of the data holder brand directory, with "data recipient" in place of "data holder". ([Judgement: a brand directory as the data holder has](#dr-0150))
-  - [the length of the `brandName`](../../dataholder/design/brand.md#dh-0332) and [no control character in the `brandName`](../../dataholder/design/brand.md#dh-0333)
-  - [each token of a brand of the design system](../../dataholder/design/brand.md#dh-0336)
-  - [no unknown field and no unknown file](../../dataholder/design/brand.md#dh-0338), and [no format version](../../dataholder/design/brand.md#dh-0339)
-  - [no entry whose name starts with `..`](../../dataholder/design/brand.md#dh-0340)
-  - [fonts from the fixed set](../../dataholder/design/brand.md#dh-0341), [colours in the sRGB gamut](../../dataholder/design/brand.md#dh-0342) and [the contrast of the roles](../../dataholder/design/brand.md#dh-0343)
-  - [the SVG files](../../dataholder/design/brand.md#dh-0345) and [a square mark](../../dataholder/design/brand.md#dh-0347)
-  - [the size of `logo.png`](../../dataholder/design/brand.md#dh-0348) and [its aspect ratio](../../dataholder/design/brand.md#dh-0349)
-  - [the size of each JSON file](../../dataholder/design/brand.md#dh-0350) and [of the directory](../../dataholder/design/brand.md#dh-0357)
-  - [a photo that is a WebP image and not animated](../../dataholder/design/brand.md#dh-0351), and [the size of an image from its header](../../dataholder/design/brand.md#dh-0354)
+- <a id="dr-0117"></a>**DR-0117** A brand directory obeys each rule of the brand directory library, and the contrast rules of the design system. These are the groups of rules. ([Judgement: a brand directory as the data holder has](#dr-0150))
+  - [the files of each brand directory](../../../pkg/platform/branddir/DESIGN.md#brand-0001) and [the rules of the `brandName`](../../../pkg/platform/branddir/DESIGN.md#brand-0006)
+  - [the validation of a brand directory](../../../pkg/platform/branddir/DESIGN.md#brand-0009)
+  - [the text contrast of a brand](../../../web/packages/ui/design/tokens-and-brands.md#ui-0013) and [the focus ring contrast of a brand](../../../web/packages/ui/design/tokens-and-brands.md#ui-0014)
 - <a id="dr-0118"></a>**DR-0118** `hero.webp` is 256 KiB or less and 1200 to 2400 pixels wide. Its aspect ratio is 4:3, with a tolerance of 2 %. ([Judgement: a hero photo of 4:3 for a phone screen](#dr-0152))
+- <a id="dr-0127"></a>**DR-0127** `access.webp` is 160 KiB or less and 800 to 1600 pixels wide. Its aspect ratio is 4:5, with a tolerance of 2 %. ([Judgement: a portrait photo of 4:5 next to a form](#dr-0154))
 - <a id="dr-0119"></a>**DR-0119** At start-up, the data recipient does not check the contrast of a brand. A check in the tests of the web workspace checks each preset brand. ([Judgement: a brand directory as the data holder has](#dr-0150))
 - <a id="dr-0120"></a>**DR-0120** Each process that needs a brand setting validates the brand directory at start-up. When a rule fails, the process does not start. Its error names the file and the rule. ([Judgement: a brand directory as the data holder has](#dr-0150))
 
@@ -87,6 +83,12 @@ This area gives the identity of the brand of an instance, the selection of the b
 - Kind: choice
 - Basis: Step 3.3. The authorisation page of a data holder shows the brand of the data holder and the brand name of the data recipient together ([the data recipient on the authorisation page](../../dataholder/design/authorisation.md#dh-0802)).
 - Reason: Brands that are different in each part show a part of the web app that ignores the brand. Colours that are not the colours of a bank help the consumer see which brand is which.
+
+### <a id="dr-0154"></a>DR-0154 A portrait photo of 4:5 next to a form
+
+- Kind: choice
+- Basis: Step 3.3. The pages of the membership have a form, and the web app has a layout 1280 CSS pixels wide ([the web app is mobile-first](web-app.md#dr-0216)). The data holder gives the sizes of its photos for a pixel ratio of 2 ([photo sizes of the data holder](../../dataholder/design/brand.md#dh-0378)).
+- Reason: A portrait photo fills the side of a wide page next to a narrow form, and a crop of it gives a band above the form on a phone. A width of 800 to 1600 pixels is sharp at a pixel ratio of 2 in a panel up to 800 CSS pixels wide. The size limit keeps a brand with two photos far below the limit of the directory.
 
 [adr-0023]: ../../../docs/adr/0023-give-the-brand-of-a-data-holder-as-a-strict-brand-directory.md
 [cds-register-schemas]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-register-api-schemas

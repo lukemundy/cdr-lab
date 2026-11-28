@@ -35,7 +35,9 @@ flowchart LR
 
 ## Library specifications
 
-None.
+| Library | Specification |
+|---|---|
+| `pkg/platform/branddir` | [Brand directory library](../../../pkg/platform/branddir/DESIGN.md) |
 
 ## Goals
 

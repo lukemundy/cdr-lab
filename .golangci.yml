@@ -110,6 +110,21 @@ linters:
           deny:
             - pkg: github.com/lukemundy/cdr-lab/services/dataholder/internal/root
               desc: only main calls the composition root
+        datarecipient-adapters-only-in-root:
+          files:
+            - "**/services/datarecipient/**"
+            - "!**/services/datarecipient/internal/root/**"
+            - "!**/services/datarecipient/internal/adapter/**/*_test.go"
+          deny:
+            - pkg: github.com/lukemundy/cdr-lab/services/datarecipient/internal/adapter
+              desc: only the composition root connects adapters; the app layer defines ports, and adapters implement them
+        datarecipient-root-only-in-main:
+          files:
+            - "**/services/datarecipient/**"
+            - "!**/services/datarecipient/cmd/**"
+          deny:
+            - pkg: github.com/lukemundy/cdr-lab/services/datarecipient/internal/root
+              desc: only main calls the composition root
         register-adapters-only-in-root:
           files:
             - "**/services/register/**"
