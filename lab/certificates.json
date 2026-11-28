@@ -45,6 +45,14 @@
       ]
     },
     {
+      "cert": ".lab/pki/sorrel/public.crt",
+      "key": ".lab/pki/sorrel/public.key",
+      "names": [
+        "sorrel",
+        "localhost"
+      ]
+    },
+    {
       "cert": ".lab/pki/conformance/jwks.crt",
       "key": ".lab/pki/conformance/jwks.key",
       "names": [

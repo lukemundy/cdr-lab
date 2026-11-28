@@ -1,0 +1,23 @@
+import babel from "@rolldown/plugin-babel";
+import tailwindcss from "@tailwindcss/vite";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
+import { thirdPartyNotices } from "@cdr-lab/ui/third-party-notices";
+import { defineConfig } from "vite";
+
+// The data recipient embeds the build and serves it with a strict CSP.
+export default defineConfig({
+  plugins: [
+    react(),
+    babel({ presets: [reactCompilerPreset()] }),
+    tailwindcss(),
+    thirdPartyNotices(),
+  ],
+  build: {
+    // The data recipient serves each file in assets/ as immutable, so each file name there must have a content hash.
+    assetsDir: "assets",
+    // No data: URIs: the CSP permits them for images only.
+    assetsInlineLimit: 0,
+    // All target browsers support modulepreload.
+    modulePreload: { polyfill: false },
+  },
+});

@@ -8,8 +8,9 @@ x-telemetry-environment: &telemetry-environment
 x-lab-dns: &lab-dns
   dns_search: ["."]
 
-# The release mode of cdrlab up sets CDRLAB_REGISTER_IMAGE and CDRLAB_DATAHOLDER_IMAGE to the release images, and
-# Compose pulls them. With no value, each built service has the image name that Compose gives it.
+# The release mode of cdrlab up sets CDRLAB_REGISTER_IMAGE, CDRLAB_DATAHOLDER_IMAGE and CDRLAB_DATARECIPIENT_IMAGE to
+# the release images, and Compose pulls them. With no value, each built service has the image name that Compose gives
+# it.
 x-build-args: &build-args
   BUILD_COMMIT: ${BUILD_COMMIT:-unknown}
   BUILD_COMMIT_SHORT: ${BUILD_COMMIT_SHORT:-unknown}
@@ -400,6 +401,60 @@ services:
       postgres-grants:
         condition: service_completed_successfully
 
+  # The default preset brand of the data recipient (services/datarecipient/design/deployment.md).
+  sorrel:
+    <<: *lab-dns
+    image: ${CDRLAB_DATARECIPIENT_IMAGE:-cdr-lab-sorrel}
+    build: &datarecipient-build
+      context: .
+      dockerfile: services/datarecipient/Dockerfile
+      args:
+        <<: *build-args
+        # mise.toml sets it.
+        PNPM_VERSION: ${PNPM_VERSION:-}
+    environment:
+      <<: *telemetry-environment
+      PGHOST: postgres
+      PGSSLMODE: disable
+      PGUSER: sorrel
+      PGPASSWORD: sorrel
+      PGDATABASE: sorrel
+      DATA_RECIPIENT_BRAND: sorrel
+      # The links of each email open in a browser on the host.
+      WEB_APP_BASE_URI: https://localhost:8585
+      # The web app refuses other Host values, so that DNS rebinding cannot reach it.
+      WEB_APP_ALLOWED_HOSTS: localhost:8585,127.0.0.1:8585
+      WEB_APP_TLS_CERT_FILE: /tls/public.crt
+      WEB_APP_TLS_KEY_FILE: /tls/public.key
+      # The mail sink keeps each email, and delivers none.
+      SMTP_ADDRESS: mail:1025
+      MAIL_FROM: no-reply@sorrel.test
+    ports:
+      - 127.0.0.1:8580:8080
+      - 127.0.0.1:8585:8085
+    volumes:
+      - ./.lab/pki/sorrel:/tls:ro,z
+    depends_on:
+      postgres-grants:
+        condition: service_completed_successfully
+
+  sorrel-migrate:
+    <<: *lab-dns
+    image: ${CDRLAB_DATARECIPIENT_IMAGE:-cdr-lab-sorrel-migrate}
+    build: *datarecipient-build
+    environment:
+      <<: *telemetry-environment
+      PGHOST: postgres
+      PGSSLMODE: disable
+      # The owner user of the database runs the migrations (lab/postgres/init.sql).
+      PGUSER: sorrel_owner
+      PGPASSWORD: sorrel_owner
+      PGDATABASE: sorrel
+    command: [migrate]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   conformance:
     <<: *lab-dns
     profiles: [test]
@@ -601,6 +656,8 @@ services:
       register-migrate:
         condition: service_completed_successfully
       wattle-bank-migrate:
+        condition: service_completed_successfully
+      sorrel-migrate:
         condition: service_completed_successfully
 
   lgtm:

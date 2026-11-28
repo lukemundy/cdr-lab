@@ -37,7 +37,14 @@ flowchart LR
 
 | Library | Specification |
 |---|---|
+| `pkg/cds` | [CDS HTTP library](../../../pkg/cds/DESIGN.md) |
 | `pkg/platform/branddir` | [Brand directory library](../../../pkg/platform/branddir/DESIGN.md) |
+| `pkg/platform/consolehttp` | [Web UI library](../../../pkg/platform/consolehttp/DESIGN.md) |
+| `pkg/platform/database` | [Database library](../../../pkg/platform/database/DESIGN.md) |
+| `pkg/platform/httproute` | None. |
+| `pkg/platform/httpserver` | [HTTP server library](../../../pkg/platform/httpserver/DESIGN.md) |
+| `pkg/platform/lifecycle` | None. |
+| `pkg/platform/telemetry` | [Telemetry library](../../../pkg/platform/telemetry/DESIGN.md) |
 
 ## Goals
 

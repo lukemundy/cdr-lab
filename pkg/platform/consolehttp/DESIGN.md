@@ -1,6 +1,6 @@
 # Web UI library
 
-The web UI library serves a [web UI](../../../docs/spec/glossary.md#web-ui) and its API as one group of routes on a listener. The lab services use it for the operator consoles of the Register and the data holder, and for the online bank site of the data holder. It gives the browser security of the routes of the web UI, the cache headers, the routes of the UI and its API, and the list parameters of the API. Each service gives the UI, the operations of the API and the names of the settings.
+The web UI library serves a [web UI](../../../docs/spec/glossary.md#web-ui) and its API as one group of routes on a listener. The lab services use it for the operator consoles of the Register and the data holder, for the online bank site of the data holder, and for the web app of the data recipient. It gives the browser security of the routes of the web UI, the cache headers, the routes of the UI and its API, and the list parameters of the API. Each service gives the UI, the operations of the API and the names of the settings.
 
 ## Context
 

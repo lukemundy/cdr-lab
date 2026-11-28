@@ -2,3 +2,4 @@
 
 CREATE ROLE register_app NOLOGIN;
 CREATE ROLE dataholder_app NOLOGIN;
+CREATE ROLE datarecipient_app NOLOGIN;

@@ -18,7 +18,7 @@ This area gives the identity of the brand of an instance, the selection of the b
   - `DATA_RECIPIENT_BRAND`: the name of a preset brand
   - `DATA_RECIPIENT_BRAND_DIR`: the path of a brand directory
 - <a id="dr-0108"></a>**DR-0108** The two brand settings have no default. ([Judgement: a brand directory as the data holder has](#dr-0150))
-- <a id="dr-0109"></a>**DR-0109** The subcommands `api` and `serve` need one brand setting. The subcommand `migrate` needs no brand setting. ([a process needs only the settings that it uses](non-functional-requirements.md#dr-0010))
+- <a id="dr-0109"></a>**DR-0109** The subcommand `serve` needs one brand setting. The subcommand `migrate` needs no brand setting. ([a process needs only the settings that it uses](non-functional-requirements.md#dr-0010))
 - <a id="dr-0110"></a>**DR-0110** When both brand settings are present, or neither, a subcommand that needs one does not start. ([Judgement: a brand directory as the data holder has](#dr-0150))
 - <a id="dr-0111"></a>**DR-0111** The preset brands are brand directories that the data recipient contains. Each instance can run each preset brand with no file outside the data recipient. ([Judgement: a brand directory as the data holder has](#dr-0150))
 - <a id="dr-0112"></a>**DR-0112** A lab user adds a brand with a brand directory and configuration only, with no change to the code. ([Judgement: a brand directory as the data holder has](#dr-0150))

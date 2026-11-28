@@ -47,6 +47,7 @@ const defaultImagePrefix = "ghcr.io/lukemundy/cdr-lab"
 var releaseImages = []struct{ name, variable string }{
 	{"register", "CDRLAB_REGISTER_IMAGE"},
 	{"dataholder", "CDRLAB_DATAHOLDER_IMAGE"},
+	{"datarecipient", "CDRLAB_DATARECIPIENT_IMAGE"},
 }
 
 func up(ctx context.Context, args []string, stdout io.Writer, d deps) error {

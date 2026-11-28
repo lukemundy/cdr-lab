@@ -8,12 +8,13 @@ This project is not affiliated with the ACCC, the Data Standards Body (DSB) or a
 
 ## Status
 
-Early development. Two services run in the lab, and a black-box conformance suite tests them:
+Early development. Three services run in the lab, and a black-box conformance suite tests the Register and the data holder:
 
 | Service | What it is | Specification |
 |---|---|---|
 | Mock CDR Register | The CDR Register | [design/README.md](services/register/design/README.md) |
 | Mock data holder | A bank, with one of four preset brands for each instance | [design/README.md](services/dataholder/design/README.md) |
+| Mock data recipient | A data recipient brand with a consumer web app, with no CDR function yet | [design/README.md](services/datarecipient/design/README.md) |
 
 The lab CLI, `cdrlab`, sets up and runs the lab ([specification](cli/cdrlab/design/README.md)).
 
@@ -112,7 +113,7 @@ mise run down       # stop the lab and keep its data
 mise run reset      # stop the lab and delete its data and its CAs
 ```
 
-`mise run up --no-telemetry` starts the lab without telemetry, as CI does. By default the lab runs one bank, `wattle-bank`. `mise run up --all-banks` also starts the other three preset banks.
+`mise run up --no-telemetry` starts the lab without telemetry, as CI does. By default the lab runs one bank, `wattle-bank`, and one data recipient, `sorrel`. `mise run up --all-banks` also starts the other three preset banks.
 
 All ports bind to `127.0.0.1`. The operator interfaces need the bearer token `lab-operator-token`.
 
@@ -128,6 +129,8 @@ All ports bind to `127.0.0.1`. The operator interfaces need the bearer token `la
 | 8280–8285 | `redgum-bank` | As 8180–8185 (`--all-banks`) |
 | 8380–8385 | `harbour-bank` | As 8180–8185 (`--all-banks`) |
 | 8480–8485 | `kestrel-bank` | As 8180–8185 (`--all-banks`) |
+| 8580 | `sorrel` | Internal (HTTP): health |
+| 8585 | `sorrel` | Web app (TLS) |
 | 8025 | `mail` | Mail sink |
 | 8443 | `openid` | OpenID conformance suite (profile `openid`) |
 | 5432 | `postgres` | PostgreSQL, one database for each service |

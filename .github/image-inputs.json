@@ -37,6 +37,25 @@
     ":(exclude)*.md",
     ":(exclude)docs"
   ],
+  "datarecipient": [
+    ".github/image-inputs.json",
+    ".github/workflows/ci.yml",
+    ".github/actions/publish-image",
+    "LICENSE",
+    "NOTICE",
+    "mise.toml",
+    "go.mod",
+    "go.sum",
+    "pkg",
+    "services/datarecipient",
+    "tools/notices",
+    "web",
+    ".dockerignore",
+    "compose.yaml",
+    "lab",
+    ":(exclude)*.md",
+    ":(exclude)docs"
+  ],
   "cdrlab": [
     ".github/image-inputs.json",
     ".github/workflows/ci.yml",

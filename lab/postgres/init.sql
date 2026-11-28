@@ -31,3 +31,9 @@ CREATE ROLE kestrel_bank LOGIN PASSWORD 'kestrel_bank';
 CREATE DATABASE kestrel_bank OWNER kestrel_bank_owner;
 REVOKE ALL ON DATABASE kestrel_bank FROM PUBLIC;
 GRANT CONNECT ON DATABASE kestrel_bank TO kestrel_bank;
+
+CREATE ROLE sorrel_owner LOGIN CREATEROLE PASSWORD 'sorrel_owner';
+CREATE ROLE sorrel LOGIN PASSWORD 'sorrel';
+CREATE DATABASE sorrel OWNER sorrel_owner;
+REVOKE ALL ON DATABASE sorrel FROM PUBLIC;
+GRANT CONNECT ON DATABASE sorrel TO sorrel;

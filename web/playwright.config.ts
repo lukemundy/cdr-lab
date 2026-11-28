@@ -57,5 +57,18 @@ export default defineConfig({
         ignoreHTTPSErrors: true,
       },
     },
+    {
+      name: "datarecipient-app",
+      testMatch: "datarecipient-app/e2e/**/*.spec.ts",
+      // The web app is mobile-first (services/datarecipient/design/web-app.md).
+      use: {
+        browserName: "chromium",
+        baseURL: requiredURL("DATARECIPIENT_WEB_APP_URL"),
+        timezoneId: "Australia/Perth",
+        viewport: { width: 360, height: 800 },
+        // As for the online bank site: Chromium cannot verify the certificate of the lab public CA.
+        ignoreHTTPSErrors: true,
+      },
+    },
   ],
 });

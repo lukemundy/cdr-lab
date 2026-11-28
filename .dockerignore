@@ -17,6 +17,7 @@ web/**/test-results/
 services/register/internal/adapter/console/dist/
 services/dataholder/internal/adapter/console/dist/
 services/dataholder/internal/adapter/banksite/dist/
+services/datarecipient/internal/adapter/webapp/dist/
 services/dataholder/internal/adapter/consumerpages/static/
 **/*_test.go
 **/testdata/

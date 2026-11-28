@@ -441,6 +441,24 @@ func TestTheSettingsOfAUIGiveTheNamesOfItsSettings(t *testing.T) {
 	assert.ErrorContains(t, err, site.ExampleHost)
 }
 
+// A web UI that is always on, for example the web app of a data recipient, reads only its allowlist.
+func TestTheAllowedHostsOfAUILoadWithNoEnabledSetting(t *testing.T) {
+	t.Setenv(site.EnabledEnv, "")
+	t.Setenv(site.AllowedHostsEnv, "Localhost:8585")
+
+	got, err := site.LoadAllowedHosts()
+
+	require.NoError(t, err)
+	assert.Equal(t, []string{"localhost:8585"}, got)
+
+	t.Setenv(site.AllowedHostsEnv, "")
+
+	_, err = site.LoadAllowedHosts()
+
+	require.ErrorContains(t, err, site.AllowedHostsEnv)
+	assert.ErrorContains(t, err, site.ExampleHost)
+}
+
 func TestAUIWithNoAllowedHostNamesTheSettingOfTheUI(t *testing.T) {
 	err := site.Register(http.NewServeMux(), ui, nil, func(*httproute.Routes) {})
 
