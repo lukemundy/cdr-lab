@@ -12,7 +12,7 @@ This area gives the preset brand in the lab, its ports, its database and its mai
   |---|---|---|---|
   | `sorrel` | 8580 | 8581 | 8585 |
 
-- <a id="dr-0637"></a>**DR-0637** In the container, the public listener listens on port 8581, the same port as on the host. The JWKS URI and the recipient base URI are then the same on the lab network and on the host. ([Judgement: the redirect URI on the web app, and the JWKS on the public listener](participation.md#dr-0750))
+- <a id="dr-0637"></a>**DR-0637** In the container, each listener has the port that the Register gives to the listener with the same last digit: 8080 for the internal listener, 8081 for the public listener and 8085 for the web app listener. For example, the JWKS URI on the lab network is `https://sorrel:8081/jwks`, and the host reaches the JWKS at `https://localhost:8581/jwks`. ([the ports of the Register](../../register/design/deployment.md#reg-1500); [Judgement: a web app listener on a data recipient (ADR 0025)][adr-0025])
 - <a id="dr-0603"></a>**DR-0603** Each port binds to `127.0.0.1` only. ([the lab ports](../../dataholder/design/deployment.md#dh-1310))
 - <a id="dr-0604"></a>**DR-0604** The instance has its own database, an owner user that runs the migrations, and a service user that can connect only to that database. The migrations create the application role. ([ADR 0002][adr-0002]; [ADR 0020][adr-0020])
 - <a id="dr-0605"></a>**DR-0605** The instance has its own TLS certificate from the mock public CA for the web app listener and the public listener. Its SAN has `localhost` and the host name of the instance. ([PKI specification](../../../pki/DESIGN.md); [the certificate of the public listener](participation.md#dr-0706))
@@ -29,9 +29,9 @@ This area gives the preset brand in the lab, its ports, its database and its mai
   | Field | URI |
   |---|---|
   | `redirectUris` | `https://localhost:8585/connect/callback` |
-  | `jwksUri` | `https://sorrel:8581/jwks` |
-  | `recipientBaseUri` | `https://sorrel:8581` |
-  | `revocationUri` | `https://sorrel:8581/arrangements/revoke` |
+  | `jwksUri` | `https://sorrel:8081/jwks` |
+  | `recipientBaseUri` | `https://sorrel:8081` |
+  | `revocationUri` | `https://sorrel:8081/arrangements/revoke` |
   | `clientUri` | `https://localhost:8585` |
   | `policyUri` and `tosUri` | the URI of the CDR policy page of the web app |
   | `logoUri` of the legal entity, the brand and the software product | the URI of the logo that the web app serves |
