@@ -123,6 +123,7 @@ This table is the registry of the codes. A new specification adds its code in th
 |---|---|
 | `services/register` | `REG` |
 | `services/dataholder` | `DH` |
+| `services/datarecipient` | `DR` |
 | `pki` | `PKI` |
 | `conformance` | `CONF` |
 | `tools/release` | `RLS` |

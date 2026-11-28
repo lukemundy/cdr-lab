@@ -294,7 +294,7 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 ### Consumer UI
 
-- Lab term: a lab UI for a consumer in a browser: the consumer pages or the online bank site ([design system][ui-design]).
+- Lab term: a lab UI for a consumer in a browser: the consumer pages, the online bank site or the [web app](#web-app) of a data recipient ([design system][ui-design]).
 
 ### Design system
 
@@ -401,18 +401,33 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 ### Sign-in
 
-- Lab term: the sign-in of a customer on the online bank site.
+- Lab term: the sign-in of a customer on the online bank site, or of a [member](#member) on the [web app](#web-app) of a data recipient.
 - Not the same as: [authentication](#authentication). The data holder keeps them separate.
 - Do not use: login, log in.
+
+### Sign-up
+
+- Lab term: the request of a consumer to become a customer on the online bank site, or a [member](#member) of a data recipient on its [web app](#web-app).
+- Not the same as: [onboarding](#onboarding), which adds a participant or a customer with `cdrlab`.
 
 ### Umbrella chart
 
 - Lab term: the Helm chart `cdr-lab`, which deploys the Register and a set of the preset brands with one release ([umbrella chart][umbrella-chart-design]).
 - Not the same as: the chart of a service, which deploys one service.
 
+### Web app
+
+- Lab term: the consumer web UI of a data recipient, with its API, on the [web app listener](#web-app-listener). A consumer signs up, signs in and uses the data recipient in it.
+- Not the same as: [online bank site](#online-bank-site), which is the consumer web UI of a data holder.
+
+### Web app listener
+
+- Lab term: the TLS listener of a data recipient for its [web app](#web-app) ([ADR 0025][adr-0025]).
+- Not the same as: [public listener](#public-listener).
+
 ### Web UI
 
-- Lab term: a lab-only browser UI and its API on one listener, with one origin ([web UI library DESIGN.md][consolehttp-design]). The web UIs are the operator consoles, with their console APIs, and the online bank site, with its API.
+- Lab term: a browser UI of a mock component and its API on one listener, with one origin ([web UI library DESIGN.md][consolehttp-design]). The web UIs are the operator consoles, with their console APIs, the online bank site and the [web app](#web-app) of a data recipient, each with its API.
 - Not the same as: [operator console](#operator-console) and [online bank site](#online-bank-site), which are each one web UI.
 - Not the same as: [consumer pages](#consumer-pages), which are on the public listener.
 

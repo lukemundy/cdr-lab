@@ -87,7 +87,7 @@ Do the work for each milestone of a project in this sequence:
 
 1. Copy `services/register`, but not its `design/` directory. Write a new specification.
 2. Change the import paths.
-3. Add the service to `.golangci.yml` (depguard rules), `cog.toml` (scope), its `Dockerfile`, `compose.yaml` (with `<<: *lab-dns`, as each compose service has) and the layout in `README.md`.
+3. Add the service to `.golangci.yml` (depguard rules), `cog.toml` (scope), its `Dockerfile`, `compose.yaml` (with `<<: *lab-dns`, as each compose service has) and the layout in `README.md`. Also add it to the release images of `cdrlab` (`cli/cdrlab/cmd/cdrlab/lab.go`), `.github/image-inputs.json`, `lab/certificates.json` and each list of services in `.github/workflows/ci.yml`.
 4. If the service keeps state, give it its own database ([ADR 0002](docs/adr/0002-data-store.md)). Its migrations create its application role. Add the database, an owner user and a service user to `lab/postgres/init.sql`, the role membership to `lab/postgres/grants.sql`, and a `<service>-migrate` container to `compose.yaml` ([ADR 0020](docs/adr/0020-service-migrations-create-roles-and-the-operator-creates-users.md)).
 
 Tests connect to the lab PostgreSQL as the superuser `postgres`. A test of a database adapter creates a new database with `databasetest.New(t)`.
