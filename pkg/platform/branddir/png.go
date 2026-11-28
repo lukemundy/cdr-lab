@@ -50,7 +50,7 @@ func checkPNGSize(width, height int, svgAspectRatio float64) error {
 		return fmt.Errorf(
 			"the aspect ratio of the image is %s, and the aspect ratio of %s is %s: give the same logo, with a "+
 				"tolerance of 2 %%",
-			ratio(aspectRatio), logoFile, ratio(svgAspectRatio),
+			ratio(aspectRatio), LogoFile, ratio(svgAspectRatio),
 		)
 	}
 

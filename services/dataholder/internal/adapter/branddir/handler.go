@@ -1,27 +1,20 @@
 package branddir
 
 import (
-	"net/http"
-
 	"github.com/lukemundy/cdr-lab/pkg/platform/asset"
+	shared "github.com/lukemundy/cdr-lab/pkg/platform/branddir"
 )
 
-// svgPolicy stops scripts and other resources when a browser opens the URL of an SVG file directly. A page shows the
-// file only in an img element, where a script cannot run.
-const svgPolicy = "default-src 'none'; style-src 'unsafe-inline'; sandbox"
-
-type Routes interface {
-	Handle(pattern string, handler http.Handler)
-}
-
-// Register adds the assets of the brand. They contain no CDR data, so they need no authentication.
-func (b Brand) Register(routes Routes) {
-	b.registerImages(routes)
-	routes.Handle("GET /brand/styles.css", asset.Handler("text/css; charset=utf-8", b.styles, ""))
+// consoleProperties are the only roles of the brand in the console: the roles of the console shell, the link and the
+// primary action (web/packages/ui/design/tokens-and-brands.md, UI-0035). The console uses the lab brand for the rest.
+var consoleProperties = []string{
+	"--ds-color-brand", "--ds-color-fg-on-brand", "--ds-color-hero", "--ds-color-fg-on-hero", "--ds-color-accent",
+	"--ds-color-heading", "--ds-color-link", "--ds-color-primary", "--ds-color-primary-hover",
+	"--ds-color-primary-pressed", "--ds-color-fg-on-primary",
 }
 
 // RegisterSite adds the assets of the pages and the photos of the online bank site.
-func (b Brand) RegisterSite(routes Routes) {
+func (b Brand) RegisterSite(routes shared.Routes) {
 	b.Register(routes)
 
 	for name, data := range b.photos {
@@ -30,12 +23,7 @@ func (b Brand) RegisterSite(routes Routes) {
 }
 
 // RegisterConsole adds the brand assets of the console, because the console has a different origin from the pages.
-func (b Brand) RegisterConsole(routes Routes) {
-	b.registerImages(routes)
-	routes.Handle("GET /brand/console.css", asset.Handler("text/css; charset=utf-8", b.consoleStyles, ""))
-}
-
-func (b Brand) registerImages(routes Routes) {
-	routes.Handle("GET /brand/logo.svg", asset.Handler("image/svg+xml", b.logo, svgPolicy))
-	routes.Handle("GET /brand/mark.svg", asset.Handler("image/svg+xml", b.mark, svgPolicy))
+func (b Brand) RegisterConsole(routes shared.Routes) {
+	b.RegisterImages(routes)
+	routes.Handle("GET /brand/console.css", asset.Handler("text/css; charset=utf-8", b.StylesOf(consoleProperties), ""))
 }

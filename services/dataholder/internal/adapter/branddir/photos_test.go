@@ -20,7 +20,7 @@ const (
 	animated
 )
 
-// webp gives the header of a WebP file (RFC 9649) with the size of the image, and size bytes in all. The data holder
+// webp gives the header of a WebP file (RFC 9649) with the size of the image, and size bytes in all. The library
 // reads only the header.
 func webp(kind webpKind, width, height, size int) []byte {
 	var chunk []byte
@@ -128,7 +128,7 @@ func TestEachLayoutHasTheAspectRatioOfItsHeroPhoto(t *testing.T) {
 	}
 }
 
-// Verifies: DH-0351, DH-0352, DH-0353
+// Verifies: DH-0352, DH-0353
 func TestEachPhotoIsAWebPImageOfItsSizeAndAspectRatio(t *testing.T) {
 	tests := map[string]struct {
 		file string
@@ -195,29 +195,6 @@ func TestAPhotoCanBeAtItsLimits(t *testing.T) {
 	}))
 
 	require.NoError(t, err)
-}
-
-// A brand directory can be one ConfigMap, which is at most 1 MiB.
-// Verifies: DH-0357
-func TestTheBrandDirectoryIs1MiBOrLessInAll(t *testing.T) {
-	dir := validDir(t)
-	tokens := dir["tokens.json"].Data
-	dir["tokens.json"] = &fstest.MapFile{Data: append(tokens, bytes.Repeat([]byte(" "), 900<<10-len(tokens))...)}
-	dir["hero.webp"] = &fstest.MapFile{Data: webp(lossy, 1600, 1200, 200<<10)}
-
-	_, err := load(t, dir)
-
-	require.ErrorContains(t, err, "the files of the brand directory are more than 1 MiB in all: give 1 MiB or less")
-}
-
-// Verifies: DH-0341
-func TestTheTokensHaveAHeadingFontOfTheDataHolder(t *testing.T) {
-	dir := validDir(t)
-	changeTokens(t, dir, func(tokens map[string]map[string]any) { setValue(tokens, "font", "heading", "Papyrus") })
-
-	_, err := load(t, dir)
-
-	require.ErrorContains(t, err, `tokens.json: font.heading: "Papyrus" is not a font of the data holder`)
 }
 
 // Verifies: DH-2071, DH-2072

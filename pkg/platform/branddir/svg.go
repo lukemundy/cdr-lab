@@ -12,7 +12,7 @@ import (
 
 const svgNamespace = "http://www.w3.org/2000/svg"
 
-// checkSVG checks the structure only, and gives the aspect ratio of the viewBox. The data holder serves the file in a
+// checkSVG checks the structure only, and gives the aspect ratio of the viewBox. The library serves the file in a
 // sandbox, so a script in it cannot run.
 func checkSVG(data []byte, square bool) (float64, error) {
 	decoder := xml.NewDecoder(bytes.NewReader(data))

@@ -65,6 +65,7 @@ flowchart LR
 | `pkg/cds` | [CDS HTTP library](../../../pkg/cds/DESIGN.md) |
 | `pkg/eventsourcing` | None. |
 | `pkg/platform/asset` | [Fixed file library](../../../pkg/platform/asset/DESIGN.md) |
+| `pkg/platform/branddir` | [Brand directory library](../../../pkg/platform/branddir/DESIGN.md) |
 | `pkg/platform/consolehttp` | [Web UI library](../../../pkg/platform/consolehttp/DESIGN.md) |
 | `pkg/platform/database` | [Database library](../../../pkg/platform/database/DESIGN.md) |
 | `pkg/platform/httproute` | None. |
@@ -121,14 +122,41 @@ flowchart LR
 ## Withdrawn
 
 - <a id="dh-0232"></a>**DH-0232** Removed.
+- <a id="dh-0323"></a>**DH-0323** Moved to [the tokens of a brand directory](../../../pkg/platform/branddir/DESIGN.md#brand-0001).
+- <a id="dh-0324"></a>**DH-0324** Moved to [the logo of a brand directory](../../../pkg/platform/branddir/DESIGN.md#brand-0002).
+- <a id="dh-0325"></a>**DH-0325** Moved to [the PNG logo for an email](../../../pkg/platform/branddir/DESIGN.md#brand-0003).
+- <a id="dh-0326"></a>**DH-0326** Moved to [the mark of a brand directory](../../../pkg/platform/branddir/DESIGN.md#brand-0004).
+- <a id="dh-0330"></a>**DH-0330** Moved to [the attribution file of the photos](../../../pkg/platform/branddir/DESIGN.md#brand-0005).
+- <a id="dh-0332"></a>**DH-0332** Moved to [the length of the `brandName`](../../../pkg/platform/branddir/DESIGN.md#brand-0006).
+- <a id="dh-0333"></a>**DH-0333** Moved to [no control character in the `brandName`](../../../pkg/platform/branddir/DESIGN.md#brand-0007).
+- <a id="dh-0336"></a>**DH-0336** Moved to [each token of a brand of the design system](../../../pkg/platform/branddir/DESIGN.md#brand-0008).
+- <a id="dh-0338"></a>**DH-0338** Moved to [no unknown field and no unknown file](../../../pkg/platform/branddir/DESIGN.md#brand-0009).
+- <a id="dh-0339"></a>**DH-0339** Moved to [no format version](../../../pkg/platform/branddir/DESIGN.md#brand-0010).
+- <a id="dh-0340"></a>**DH-0340** Moved to [no entry whose name starts with `..`](../../../pkg/platform/branddir/DESIGN.md#brand-0011).
+- <a id="dh-0341"></a>**DH-0341** Moved to [fonts from the fixed set](../../../pkg/platform/branddir/DESIGN.md#brand-0012).
+- <a id="dh-0342"></a>**DH-0342** Moved to [colours in the sRGB gamut](../../../pkg/platform/branddir/DESIGN.md#brand-0013).
+- <a id="dh-0345"></a>**DH-0345** Moved to [the SVG files](../../../pkg/platform/branddir/DESIGN.md#brand-0014).
+- <a id="dh-0347"></a>**DH-0347** Moved to [a square mark](../../../pkg/platform/branddir/DESIGN.md#brand-0015).
+- <a id="dh-0348"></a>**DH-0348** Moved to [the size of `logo.png`](../../../pkg/platform/branddir/DESIGN.md#brand-0016).
+- <a id="dh-0349"></a>**DH-0349** Moved to [the aspect ratio of `logo.png`](../../../pkg/platform/branddir/DESIGN.md#brand-0017).
+- <a id="dh-0350"></a>**DH-0350** Moved to [the size of each JSON file](../../../pkg/platform/branddir/DESIGN.md#brand-0018).
+- <a id="dh-0351"></a>**DH-0351** Moved to [a photo that is a WebP image and not animated](../../../pkg/platform/branddir/DESIGN.md#brand-0019).
+- <a id="dh-0354"></a>**DH-0354** Moved to [the size of an image from its header](../../../pkg/platform/branddir/DESIGN.md#brand-0020).
+- <a id="dh-0357"></a>**DH-0357** Moved to [the size of the brand directory](../../../pkg/platform/branddir/DESIGN.md#brand-0021).
+- <a id="dh-0359"></a>**DH-0359** Moved to [one error that names each file and rule](../../../pkg/platform/branddir/DESIGN.md#brand-0022).
+- <a id="dh-0376"></a>**DH-0376** Moved to [SVG files in the SVG namespace, and a square mark](../../../pkg/platform/branddir/DESIGN.md#brand-0030).
+- <a id="dh-0377"></a>**DH-0377** Moved to [a `logo.png` 96 pixels high and at most 768 pixels wide](../../../pkg/platform/branddir/DESIGN.md#brand-0031).
 - <a id="dh-0497"></a>**DH-0497** Removed.
 - <a id="dh-0637"></a>**DH-0637** Removed.
 - <a id="dh-0678"></a>**DH-0678** Removed.
 - <a id="dh-0707"></a>**DH-0707** Removed.
+- <a id="dh-0848"></a>**DH-0848** Moved to [no script in an SVG file of the brand](../../../pkg/platform/branddir/DESIGN.md#brand-0024).
 - <a id="dh-0854"></a>**DH-0854** Removed.
+- <a id="dh-0863"></a>**DH-0863** Moved to [no script in an SVG file of the brand](../../../pkg/platform/branddir/DESIGN.md#brand-0032).
 - <a id="dh-1448"></a>**DH-1448** Moved to [the `detail` of a refusal in the dialog or the form of the action](../../../web/packages/web-platform/DESIGN.md#wcon-0014).
 - <a id="dh-1449"></a>**DH-1449** Moved to [the current state after each action](../../../web/packages/web-platform/DESIGN.md#wcon-0015).
 - <a id="dh-1450"></a>**DH-1450** Moved to [the UI never sends an action again by itself](../../../web/packages/ui/design/forms-and-dialogs.md#ui-0301).
 - <a id="dh-1451"></a>**DH-1451** Moved to [the result of a success in a toast](../../../web/packages/web-platform/DESIGN.md#wcon-0016).
 - <a id="dh-1473"></a>**DH-1473** Moved to [the filter, the search, the sort and the page of a list are in the URL](../../../web/packages/web-platform/DESIGN.md#wcon-0001).
 - <a id="dh-1480"></a>**DH-1480** Removed.
+- <a id="dh-2091"></a>**DH-2091** Moved to [the selector of the stylesheet of the brand](../../../pkg/platform/branddir/DESIGN.md#brand-0023).

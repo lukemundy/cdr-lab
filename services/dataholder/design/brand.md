@@ -37,58 +37,36 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 
 ## Files of a brand directory
 
-- <a id="dh-0321"></a>**DH-0321** A brand directory has the files of the table that follows, and no other file. Only the photos and `ATTRIBUTION.md` are optional. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
+- <a id="dh-0321"></a>**DH-0321** A brand directory has [the files of each brand directory](../../../pkg/platform/branddir/DESIGN.md#brand-0001) and the files of the table that follows, and no other file. Only the photos are optional. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023]; [a service adds its own files](../../../pkg/platform/branddir/DESIGN.md#brand-0025))
 
 | ID | File | Required | Content | Source |
 |---|---|---|---|---|
 | <a id="dh-0322"></a>**DH-0322** | `brand.json` | Yes | The fields of [the brand file](#dh-0331) | [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
-| <a id="dh-0323"></a>**DH-0323** | `tokens.json` | Yes | The values of the brand for the semantic colour roles, the body font, the heading font and the radius of the design system. They are in the token format of the design system, with literal values only. | [what a brand can change](../../../web/packages/ui/design/tokens-and-brands.md#ui-0031); [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
-| <a id="dh-0324"></a>**DH-0324** | `logo.svg` | Yes | The logo, legible on the brand colour of the header of the pages and on white | [the logo on the brand colour and on white](../../../web/packages/ui/design/consumer-pages.md#ui-0363) |
-| <a id="dh-0325"></a>**DH-0325** | `logo.png` | Yes | The logo of `logo.svg` as a PNG image for the email, legible on the brand colour of the header of the email | [the logo in the OTP email](consumer-authentication.md#dh-1251); [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
-| <a id="dh-0326"></a>**DH-0326** | `mark.svg` | Yes | A square symbol of the brand, for small sizes | [a brand can change the logo](../../../web/packages/ui/design/tokens-and-brands.md#ui-0031) |
 | <a id="dh-0327"></a>**DH-0327** | `products.json` | Yes | The product catalogue of the brand, in the format of [a load file](product-reference-data.md#dh-0234) | [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 | <a id="dh-0328"></a>**DH-0328** | `hero.webp` | No | The hero photo of the landing page of the online bank site, with the aspect ratio of the layout | [the hero photo on the landing page](online-bank-site.md#dh-1841); [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 | <a id="dh-0329"></a>**DH-0329** | `category-<anchor>.webp` | No | The photo of a CDS product category on the online bank site, with the anchor of the category. For example, `category-term-deposits.webp`. | [CDS: Product Categories][cds-product-categories]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
-| <a id="dh-0330"></a>**DH-0330** | `ATTRIBUTION.md` | No | The source, the author and the licence of each photo, 16 KiB or less. The data holder does not read or serve it. | [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023] |
 
 - <a id="dh-0331"></a>**DH-0331** The brand file `brand.json` has these fields, and all are required. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023]; [Judgement: the field name `brandName`, as on the Register](#dh-0374))
-  - `brandName`: the brand name
+  - `brandName`: the brand name, which obeys [the rules of a brand name](../../../pkg/platform/branddir/DESIGN.md#brand-0006)
   - `bsb`: the BSB of the accounts that a consumer opens on the online bank site
   - `layout`: the layout of the online bank site
-- <a id="dh-0332"></a>**DH-0332** The `brandName` has 1 to 200 characters, and it is not only white space. ([CDS: Register API schemas][cds-register-schemas])
-- <a id="dh-0333"></a>**DH-0333** The `brandName` has no control character. For example, the data holder refuses a brand name with a line break. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 - <a id="dh-0334"></a>**DH-0334** The `bsb` has 6 digits, and it obeys the rule of a `bsb` in the operator interface. ([the rule of a BSB](operator-interface.md#dh-0739); [Judgement: the BSB of the brand for an account that the consumer opens](online-bank-site-accounts.md#dh-2304))
 - <a id="dh-0335"></a>**DH-0335** The `layout` is one of these values. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023]; [the layouts of the online bank site](online-bank-site.md#dh-1834))
   - `meadow`
   - `ledger`
   - `horizon`
   - `updraft`
-- <a id="dh-0336"></a>**DH-0336** `tokens.json` has each token of a brand of the design system. A missing token is an error. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 - <a id="dh-0337"></a>**DH-0337** A catalogue with no products is valid. For example, `products.json` can be `{"products": []}`. ([Judgement: a catalogue with no products is valid](#dh-0375))
 
 ## Validation of the brand directory
 
-- <a id="dh-0338"></a>**DH-0338** A JSON file of the brand directory has only the fields of the contract. The data holder refuses an unknown field, and a file that the contract does not name. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
-- <a id="dh-0339"></a>**DH-0339** The contract of the brand directory has no format version. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
-- <a id="dh-0340"></a>**DH-0340** The data holder ignores each entry of the directory whose name starts with `..`. For example, it ignores the `..data` entry of a ConfigMap volume. ([Kubernetes: atomic_writer.go][k8s-atomic-writer]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
-- <a id="dh-0341"></a>**DH-0341** The body font and the heading font of a brand are each one of a fixed set of fonts that the data holder contains. A brand with a different font is a change to the design system. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
-- <a id="dh-0342"></a>**DH-0342** Each colour of `tokens.json` is in the sRGB gamut. ([colour values in OKLCH](../../../web/packages/ui/design/tokens-and-brands.md#ui-0012))
 - <a id="dh-0343"></a>**DH-0343** Each pair of text and background roles of a brand has a contrast of 4.5:1 or more. Each focus ring and each control boundary has a contrast of 3:1 or more against its background. ([WCAG 2.2, SC 1.4.3][wcag-1-4-3]; [WCAG 2.2, SC 1.4.11][wcag-1-4-11]; [the text contrast of a brand](../../../web/packages/ui/design/tokens-and-brands.md#ui-0013); [the focus ring contrast of a brand](../../../web/packages/ui/design/tokens-and-brands.md#ui-0014))
 - <a id="dh-0344"></a>**DH-0344** At start-up, the data holder does not check the contrast of a brand. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
-- <a id="dh-0345"></a>**DH-0345** Each SVG file is well-formed XML with an `svg` root element in the SVG namespace and a `viewBox`. It is 100 KiB or less. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023]; [Judgement: SVG files in the SVG namespace, and a square mark](#dh-0376))
-- <a id="dh-0347"></a>**DH-0347** The `viewBox` of `mark.svg` is square. ([Judgement: SVG files in the SVG namespace, and a square mark](#dh-0376))
-- <a id="dh-0348"></a>**DH-0348** `logo.png` is a valid PNG image of 100 KiB or less. It is exactly 96 pixels high and 768 pixels wide or less. ([Judgement: a `logo.png` 96 pixels high and at most 768 pixels wide](#dh-0377))
-- <a id="dh-0349"></a>**DH-0349** The aspect ratio of `logo.png` is the aspect ratio of the `viewBox` of `logo.svg`, with a tolerance of 2 %. The aspect ratio is the width divided by the height. ([Judgement: a `logo.png` 96 pixels high and at most 768 pixels wide](#dh-0377))
-- <a id="dh-0350"></a>**DH-0350** Each JSON file is 1 MiB or less. ([Kubernetes: ConfigMaps][k8s-configmap]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
-- <a id="dh-0351"></a>**DH-0351** Each photo is a WebP image that is not animated. ([RFC 9649][rfc9649]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 - <a id="dh-0352"></a>**DH-0352** `hero.webp` is 256 KiB or less and 1200 to 2400 pixels wide. Its aspect ratio is the aspect ratio of the layout, with a tolerance of 2 %. ([Judgement: photo sizes that are sharp at a pixel ratio of 2](#dh-0378))
 - <a id="dh-0353"></a>**DH-0353** Each category photo is 96 KiB or less and 800 to 1200 pixels wide. Its aspect ratio is 4:3, with a tolerance of 2 %. ([Judgement: photo sizes that are sharp at a pixel ratio of 2](#dh-0378))
-- <a id="dh-0354"></a>**DH-0354** The data holder reads the size of each image, and the animation flag of each photo, in the header of the file before it decodes the image. ([RFC 9649][rfc9649]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 - <a id="dh-0355"></a>**DH-0355** The name of a category photo has the anchor of one of the CDS product categories. The data holder refuses a different name. ([CDS: Product Categories][cds-product-categories]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 - <a id="dh-0356"></a>**DH-0356** A photo of a category with no current product is valid. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
-- <a id="dh-0357"></a>**DH-0357** The brand directory is 1 MiB or less in all. ([Kubernetes: ConfigMaps][k8s-configmap]; [Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
-- <a id="dh-0358"></a>**DH-0358** The process that runs the APIs, and the product load, validate the brand directory at start-up. They check each rule of this group, and the rules of the files and of the brand file. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
-- <a id="dh-0359"></a>**DH-0359** When a rule of the brand directory fails, the process does not start. Its error names the file and the rule. ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
+- <a id="dh-0358"></a>**DH-0358** The process that runs the APIs, and the product load, validate the brand directory at start-up. They check each rule of this area, and [each rule of the brand directory library](../../../pkg/platform/branddir/DESIGN.md#brand-0009). ([Judgement: the brand directory of a data holder (ADR 0023)][adr-0023])
 
 ## Preset brands
 
@@ -141,18 +119,6 @@ This area gives the brand of a data holder instance: the brand directory, the pr
 - Kind: choice
 - Basis: Step 3.3. A brand on the Register with no `productBaseUri` has no product reference data endpoints ([CDS: Participant Endpoints][cds-participant-endpoints]).
 - Reason: A user brand that tests only the authentication and the authorisation needs no products.
-
-### <a id="dh-0376"></a>DH-0376 SVG files in the SVG namespace, and a square mark
-
-- Kind: choice
-- Basis: Step 3.3. [ADR 0023][adr-0023] gives the SVG structure, and the design system shows the mark in a row of the hero ([the row of the hero](../../../web/packages/ui/design/consumer-pages.md#ui-0365)).
-- Reason: A browser does not show an SVG file with no SVG namespace as an image. A `viewBox` that is not square cannot give a square mark.
-
-### <a id="dh-0377"></a>DH-0377 A `logo.png` 96 pixels high and at most 768 pixels wide
-
-- Kind: choice
-- Basis: Step 3.3. [ADR 0023][adr-0023] requires a fixed height, a maximum width and the aspect ratio of `logo.svg`, and does not give the numbers.
-- Reason: The email shows the logo 48 CSS px high, and 96 pixels gives a sharp image on a screen with a pixel ratio of 2. A width of 768 pixels (an aspect ratio of 8) is more than each preset logo needs, and the size limit is the limit of the SVG files. The tolerance permits the rounding of the width to a whole pixel.
 
 ### <a id="dh-0378"></a>DH-0378 Photo sizes that are sharp at a pixel ratio of 2
 

@@ -58,7 +58,7 @@ func TestTheLogoAndTheMarkAreSVGFilesThatCannotRunAScript(t *testing.T) {
 	}
 }
 
-// Verifies: DH-2090, DH-2091
+// Verifies: DH-2090
 func TestTheStylesSetTheCustomPropertiesOfTheDesignSystemForEachTokenOfTheBrand(t *testing.T) {
 	rec := get(t, serveBrand(t, validDir(t)), "/brand/styles.css", nil)
 

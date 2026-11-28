@@ -172,7 +172,7 @@ This area gives the API of the online bank site. The site API is JSON over HTTP 
 ### <a id="dh-1793"></a>DH-1793 All current products in one response
 
 - Kind: choice
-- Basis: Step 3.3. A catalogue file is 1 MiB or less ([brand: the size of a JSON file](brand.md#dh-0350)).
+- Basis: Step 3.3. A catalogue file is 1 MiB or less ([brand: the size of a JSON file](../../../pkg/platform/branddir/DESIGN.md#brand-0018)).
 - Reason: The site shows all current products on one page. One response is the least complex.
 
 ### <a id="dh-1794"></a>DH-1794 The balance in the list of the accounts
