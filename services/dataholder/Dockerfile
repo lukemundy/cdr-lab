@@ -1,7 +1,7 @@
 # Keep this stage the same in each service Dockerfile, so that BuildKit builds it one time for all images.
 # Keep the Node version the same as in mise.toml; mise run lint checks it.
 # The web output does not depend on the target platform, so the stage runs on the build platform.
-FROM --platform=$BUILDPLATFORM docker.io/library/node:26.13.0-trixie-slim@sha256:e4db4c914bf8ad241bd24804fc25d272d89bad97e68cdc8a1414862790a02c39 AS web
+FROM --platform=$BUILDPLATFORM docker.io/library/node:26.13.1-trixie-slim@sha256:abe7e5a82b61a8ef67b315b85497c9e65173387ccf2f4a029248184b8e020be5 AS web
 
 # mise.toml pins pnpm, and compose.yaml gives its version from the environment that mise sets.
 ARG PNPM_VERSION
