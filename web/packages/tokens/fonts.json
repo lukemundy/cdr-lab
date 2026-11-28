@@ -10,5 +10,6 @@
     "family": "Bricolage Grotesque Variable"
   },
   { "package": "@fontsource-variable/source-serif-4", "family": "Source Serif 4 Variable" },
-  { "package": "@fontsource-variable/unbounded", "family": "Unbounded Variable" }
+  { "package": "@fontsource-variable/unbounded", "family": "Unbounded Variable" },
+  { "package": "@fontsource-variable/fraunces", "family": "Fraunces Variable" }
 ]
