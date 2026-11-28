@@ -46,6 +46,9 @@ A production data holder does not have these features. Real components must not 
   - `harbour-bank`: 8380 to 8385
   - `kestrel-bank`: 8480 to 8485
 - <a id="dh-1312"></a>**DH-1312** The databases, the users and the certificates of the four instances exist in each lab, also with no profile. A lab that turns the profile on later needs no reset. ([PostgreSQL image][postgres-image-init]; [Judgement: the set-up of all four instances, also with no profile](#dh-1363))
+- <a id="dh-2674"></a>**DH-2674** In the lab, [the browser base URI](authorisation-server.md#dh-2669) of each instance is `https://localhost` and the host port of its public listener. For example, `https://localhost:8181` for `wattle-bank` and `https://localhost:8281` for `redgum-bank`. ([Judgement: a browser base URI for the authorisation endpoint](authorisation-server.md#dh-2673))
+- <a id="dh-2675"></a>**DH-2675** `mise run openid-conformance` runs the default preset brand with its issuer as the browser base URI, because the browser of the OpenID conformance suite is on the lab network. ([Judgement: a browser base URI for the authorisation endpoint](authorisation-server.md#dh-2673))
+- <a id="dh-2677"></a>**DH-2677** In the lab, each instance resolves the name `host.docker.internal` to the host. A lab user can then serve the JWKS of a software product on the host, at `https://host.docker.internal:<port>`. ([Judgement: the host as `host.docker.internal` for the lab services](#dh-2678))
 - <a id="dh-1313"></a>**DH-1313** The Register seed of the lab has a record for each of the four preset brands. Each record has its own legal entity. ([Judgement: Register records with the status `ACTIVE` for the brands that do not run](#dh-1364))
 - <a id="dh-1314"></a>**DH-1314** The legal entity and the brand of each record have the status `ACTIVE`, also with no profile. ([Judgement: Register records with the status `ACTIVE` for the brands that do not run](#dh-1364))
 - <a id="dh-1315"></a>**DH-1315** Each record has the brand name of its preset brand and the base URIs of its instance. ([CDS: Register API schemas][cds-register-schemas])
@@ -92,6 +95,7 @@ A production data holder does not have these features. Real components must not 
 - <a id="dh-1349"></a>**DH-1349** After the migrations complete, the chart loads the product catalogue of the brand as the service user, when the data holder has no products. The data holder starts after the load. ([the product load](product-reference-data.md); [Kubernetes: init containers][k8s-init-containers]; [Judgement: the chart loads the product catalogue when no products exist](#dh-1378))
 - <a id="dh-1350"></a>**DH-1350** The chart runs one pod. An upgrade stops the old pod before it starts the new pod. ([Judgement: a restart keeps the data, and not the flows or the sessions](non-functional-requirements.md#dh-0022))
 - <a id="dh-1351"></a>**DH-1351** The chart sets the Register JWKS URL from the base URI of the public APIs of the Register and the CDS path `/cdr-register/v1/jwks`. For example, for the base URI `https://register.test`, the URL is `https://register.test/cdr-register/v1/jwks`. ([CDS: Register APIs][cds-register-apis]; [Judgement: a Register JWKS URL from the public base URI of the Register](#dh-1379))
+- <a id="dh-2676"></a>**DH-2676** The chart gives the browser base URI the value of the public base URI. It has no value of its own for the browser base URI. ([Judgement: a browser base URI for the authorisation endpoint](authorisation-server.md#dh-2673))
 - <a id="dh-1352"></a>**DH-1352** The [interval of the participant statuses](registration-management.md#dh-0683) is a value with no default. ([Judgement: no default for a value of one deployment](#dh-1375))
 - <a id="dh-1353"></a>**DH-1353** The chart has no value for the [fixed OTPs](consumer-authentication.md#dh-1264). ([Judgement: no fixed OTPs in the chart](#dh-1380))
 - <a id="dh-1354"></a>**DH-1354** The operator console and the online bank site are off by default. Each has a value that turns it on. ([Judgement: the lab-only UIs are off by default in the chart](#dh-1381))
@@ -147,6 +151,12 @@ A production data holder does not have these features. Real components must not 
 - Kind: choice
 - Basis: Step 3.3. No source requires a test of more than one brand.
 - Reason: The conformance suite runs against the default preset brand only. A CI job that starts the profile then proves only that three more containers start, at the cost of three more instances on a runner with one node. The lab deployment proves the four instances after the merge.
+
+### <a id="dh-2678"></a>DH-2678 The host as `host.docker.internal` for the lab services
+
+- Kind: choice
+- Basis: Step 3.3. A data holder gets the `jwks_uri` of the SSA at each registration ([the connection to the `jwks_uri`](registration.md#dh-0623)), and the Register gets the JWKS of a software product at each token request. In the lab, these services are on the lab network, and `localhost` in a container is the container. Compose maps a name to the address of the host with the value `host-gateway` of `extra_hosts` ([Compose: extra_hosts][compose-extra-hosts]). Docker and Podman 5 or later support this value.
+- Reason: A lab user who develops a data recipient on the host can run it with no container, and the lab services still get its JWKS. The lab user serves the JWKS with a certificate from the mock public CA for the name `host.docker.internal`, because the lab services trust only the public CAs of the lab.
 
 ### <a id="dh-1367"></a>DH-1367 Down and reset remove the orphan containers
 
@@ -256,3 +266,4 @@ A production data holder does not have these features. Real components must not 
 [glossary-mock-real]: ../../../docs/spec/glossary.md#mock-component-real-component
 [register-chart]: ../../../charts/register/README.md
 [register-deployment]: ../../register/design/deployment.md#reg-0920
+[compose-extra-hosts]: https://docs.docker.com/reference/compose-file/services/#extra_hosts

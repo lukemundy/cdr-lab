@@ -133,6 +133,7 @@ This table is the registry of the codes. A new specification adds its code in th
 | `web/packages/web-platform` | `WCON` |
 | `pkg/cds` | `CDSL` |
 | `pkg/authserver` | `AUTH` |
+| `pkg/cdrclient` | `CDRC` |
 | `pkg/ca` | `CA` |
 | `pkg/platform/consolehttp` | `CNSL` |
 | `pkg/platform/asset` | `ASSET` |

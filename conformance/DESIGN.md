@@ -69,6 +69,7 @@ flowchart LR
   - a Job in the namespace of [the cluster job of CI](../charts/cdr-lab/DESIGN.md#lab-0110)
 - <a id="conf-0058"></a>**CONF-0058** In a cluster, the Job of the suite has a Service with the name `conformance` and the listen ports of the suite, so that the services reach the suite at the same URLs as in compose. ([Judgement: the suite runs on the network of the deployment](#conf-0037); [Judgement: a kind cluster in CI (ADR 0036)][adr-0036])
 - <a id="conf-0059"></a>**CONF-0059** No test depends on a name, a port or a file that only one environment has. Each setting comes from the environment of the suite. ([Judgement: a kind cluster in CI (ADR 0036)][adr-0036])
+- <a id="conf-0060"></a>**CONF-0060** The suite gets the [browser base URI](../services/dataholder/design/authorisation-server.md#dh-2669) of the default preset brand from an environment variable. A test that acts as the browser sends each request of the authorisation flow to the issuer, with the path of the `authorization_endpoint`. ([Judgement: the browser of the suite uses the issuer](#conf-0061))
 - <a id="conf-0011"></a>**CONF-0011** The suite serves the JWKS and the endpoints of the software products that it acts as. ([Judgement: the suite runs on the network of the deployment](#conf-0037))
 - <a id="conf-0012"></a>**CONF-0012** A test gets each setting from an environment variable, which `compose.yaml` or the Job of the cluster job gives. ([Judgement: a missing setting fails the test](#conf-0038))
 - <a id="conf-0013"></a>**CONF-0013** When an environment variable is not set, the test fails. It does not skip. ([Judgement: a missing setting fails the test](#conf-0038))
@@ -236,6 +237,12 @@ Each row is an exception to the subject of a test or to the check of each CDS re
 - Kind: choice
 - Basis: Step 3.3. `go test` gives no fixed sequence for the tests of a package, and a fixture certificate costs a change to the PKI set-up and the seed files.
 - Reason: An idempotent change with one end state gives the same result in each sequence of the tests. One fixture for each test that needs it is then not necessary.
+
+### <a id="conf-0061"></a>CONF-0061 The browser of the suite uses the issuer
+
+- Kind: choice
+- Basis: Step 3.3. The suite runs on the network of the deployment ([Judgement: the suite runs on the network of the deployment](#conf-0037)). In the lab, the browser base URI of a bank is on `localhost` of the host, which the suite cannot reach. The public listener serves the same pages for each `Host` ([the pages for each Host](../services/dataholder/design/authorisation-server.md#dh-2672)).
+- Reason: The suite still checks that the `authorization_endpoint` is on the browser base URI, and it reaches the same pages at the issuer. In a cluster deployment, the two base URIs are equal, so the test is the same.
 
 ## Withdrawn
 

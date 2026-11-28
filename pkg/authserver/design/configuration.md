@@ -46,6 +46,7 @@ The Register authorisation server serves Get OpenId Provider Config.
   - `id_token_signing_alg_values_supported` and `authorization_signing_alg_values_supported`: `PS256`
   - `tls_client_certificate_bound_access_tokens` and `require_pushed_authorization_requests`: `true`
 
+- <a id="auth-0254"></a>**AUTH-0254** A data holder service can give a browser base URI. The `authorization_endpoint` is then on the browser base URI, and not on the issuer. When the service gives none, the `authorization_endpoint` is on the issuer. ([Judgement: a browser base URI for the authorisation endpoint](../../../services/dataholder/design/authorisation-server.md#dh-2673))
 - <a id="auth-0005"></a>**AUTH-0005** The configuration of the data holder authorisation server has no field for the encryption of ID tokens or of authorisation responses. ([CDS: OpenID Provider Configuration endpoint][cds-oidc-config]; [Judgement: no encryption of ID tokens or authorisation responses](#auth-0017))
 
 ## JWKS

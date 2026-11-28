@@ -135,6 +135,21 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 - Not the same as: [authorisation](#authorisation). The arrangement is the record and the identifier (`cdr_arrangement_id`) that the CDS gives to an authorisation and the consent that it serves.
 - Do not use: sharing arrangement.
 
+### Collection consent, use consent
+
+- Source: [CDR Rules][cdr-rules], rule 1.10A(1): the consent to collect CDR data from a CDR participant, and the consent to use the collected data. The mock data recipient asks for the two together ([data recipient: consent][dr-consent]).
+- Short form: consent, when the text names both.
+
+### Collection run
+
+- Lab term: one set of calls of a data recipient to a data holder that gets the current data of one [connection](#connection) ([data recipient: data collection][dr-collection]).
+- Do not use: sync, refresh (for the run). A refresh is the `refresh_token` grant.
+
+### Connection
+
+- Lab term: a [consent](#consent) of a [member](#member) with an authorisation at one data holder, as the web app of a data recipient shows it ([data recipient: authorisation][dr-authorisation]).
+- Not the same as: [CDR arrangement](#cdr-arrangement), which is the record of the data holder and the data recipient.
+
 ### Consent
 
 - Source: [CDR Rules][cdr-rules], rule 1.7 and rule 1.10A.
@@ -180,6 +195,11 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 - Source: [CDS: Participant Endpoints][cds-participant-endpoints].
 - Do not use: base URL.
+
+### Browser base URI
+
+- Lab term: the base URI at which the browser of a consumer reaches the public listener of a data holder ([data holder: browser base URI][dh-browser-base-uri]). The `authorization_endpoint` is on it.
+- Not the same as: [issuer](#issuer). In the lab, the two are different. In a cluster deployment, they are the same.
 
 ### Client
 
@@ -382,7 +402,7 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 ### Public listener
 
-- Lab term: the TLS listener of a service with no client authentication. The public APIs, the OpenID Provider configuration and the consumer pages are on it.
+- Lab term: the TLS listener of a service with no client authentication. The public APIs, the OpenID Provider configuration and the consumer pages are on it. On a data recipient, the JWKS is on it.
 - Do not use: TLS listener.
 
 ### Release
@@ -437,6 +457,10 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 
 - Source: [Competition and Consumer Act 2010][cdr-act], section 56AI.
 
+### Redundant data
+
+- Source: [Competition and Consumer Act 2010][cdr-act], section 56EO(2): CDR data that the CDR entity no longer needs for a purpose that the rules permit.
+
 ### Personal information
 
 - Source: [Privacy Act 1988][privacy-act], section 6. Telemetry never contains it ([ADR 0006][adr-0006]).
@@ -450,6 +474,10 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 [adr-0040]: ../adr/0040-add-participants-and-customers-with-add-only-loads-of-the-operator-interfaces-from-cdrlab-and-from-the-umbrella-values.md
 [brands-readme]: ../../services/dataholder/brands/README.md
 [cdrlab-design]: ../../cli/cdrlab/design/README.md
+[dh-browser-base-uri]: ../../services/dataholder/design/authorisation-server.md#dh-2669
+[dr-authorisation]: ../../services/datarecipient/design/authorisation.md
+[dr-collection]: ../../services/datarecipient/design/data-collection.md
+[dr-consent]: ../../services/datarecipient/design/consent.md
 [conformance-design]: ../../conformance/DESIGN.md
 [consolehttp-design]: ../../pkg/platform/consolehttp/DESIGN.md
 [pki-design]: ../../pki/DESIGN.md
