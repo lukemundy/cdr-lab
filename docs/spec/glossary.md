@@ -474,7 +474,7 @@ The data holder asks for an authorisation. The data recipient asks for a consent
 [adr-0040]: ../adr/0040-add-participants-and-customers-with-add-only-loads-of-the-operator-interfaces-from-cdrlab-and-from-the-umbrella-values.md
 [brands-readme]: ../../services/dataholder/brands/README.md
 [cdrlab-design]: ../../cli/cdrlab/design/README.md
-[dh-browser-base-uri]: ../../services/dataholder/design/authorisation-server.md#browser-base-uri
+[dh-browser-base-uri]: ../../services/dataholder/design/authorisation-server.md#dh-2669
 [dr-authorisation]: ../../services/datarecipient/design/authorisation.md
 [dr-collection]: ../../services/datarecipient/design/data-collection.md
 [dr-consent]: ../../services/datarecipient/design/consent.md

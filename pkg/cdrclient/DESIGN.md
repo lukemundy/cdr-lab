@@ -37,7 +37,7 @@ None.
 
 - The endpoints that a software product serves: the JWKS and the CDR Arrangement Revocation endpoint. The service serves them. The library gives only the JWKS document.
 - The self-signed JWT client authentication of a data holder that calls a software product. The specification of the service that serves the CDR Arrangement Revocation endpoint gives it.
-- The update and the deletion of a registration, token introspection, token revocation and arrangement revocation.
+- The update and the deletion of a registration, token introspection and token revocation.
 - The conformance suite. It keeps its own client code. A later change can move the suite to the library.
 - The storage of the tokens, the registrations and the keys. The service keeps them.
 
@@ -48,8 +48,8 @@ None.
 - <a id="cdrc-0003"></a>**CDRC-0003** Each call uses TLS 1.2 or TLS 1.3. With TLS 1.2, the library offers only the cipher suites that [the TLS profile of the CDS library](../cds/DESIGN.md#cdsl-0042) gives. ([CDS: Ciphers][cds-ciphers])
 - <a id="cdrc-0004"></a>**CDRC-0004** When the certificate file or the key file of the client certificate changes, the library uses the new certificate for each new connection within 1 minute, with no restart. ([Judgement: CDR certificates from the Register (ADR 0032)][adr-0032])
 - <a id="cdrc-0005"></a>**CDRC-0005** The library does not follow an HTTP redirect in a response of the Register or of a data holder. It gives the redirect to the service as an error. ([Judgement: no redirect from a CDR endpoint](#cdrc-0050))
-- <a id="cdrc-0006"></a>**CDRC-0006** Performance: each call stops after 30 seconds, when the service gives no shorter limit. ([Judgement: a limit of 30 seconds for each call](#cdrc-0051))
-- <a id="cdrc-0007"></a>**CDRC-0007** The library reads a response body of 10 MiB at most. It refuses a larger body. ([Judgement: a limit of 30 seconds for each call](#cdrc-0051))
+- <a id="cdrc-0006"></a>**CDRC-0006** Performance: each call stops after 30 seconds, when the service gives no shorter limit. ([Judgement: limits of 30 seconds and 10 MiB for each call](#cdrc-0051))
+- <a id="cdrc-0007"></a>**CDRC-0007** The library reads a response body of 10 MiB at most. It refuses a larger body. ([Judgement: limits of 30 seconds and 10 MiB for each call](#cdrc-0051))
 
 ## Keys and client authentication
 
@@ -75,7 +75,7 @@ None.
 - <a id="cdrc-0031"></a>**CDRC-0031** The library uses a Register access token until 30 seconds before its `expires_in` ends. It then gets a new token. ([CDS: Token Expiry][cds-token-expiry]; [Judgement: JWTs that expire after 60 seconds](#cdrc-0052))
 - <a id="cdrc-0032"></a>**CDRC-0032** The library gets the SSA of a software product with Get Software Statement Assertion, version 4, with the industry `all`. ([CDS: Get Software Statement Assertion][cds-get-ssa]; [CDS: Endpoint Version Schedule][cds-version-schedule])
 - <a id="cdrc-0033"></a>**CDRC-0033** The library gets the data holder brands with Get Data Holder Brands, version 3, with the industry `all`. It gets each page, with the page size 1000, until the response has no `next` link. ([CDS: Get Data Holder Brands][cds-get-dh-brands]; [CDS: Pagination][cds-pagination])
-- <a id="cdrc-0034"></a>**CDRC-0034** The library gets the data recipients with Get Data Recipients, version 3, with no authentication. ([CDS: Get Data Recipients][cds-get-drs])
+- <a id="cdrc-0034"></a>**CDRC-0034** The library gets the data recipients with Get Data Recipients, version 4, with no authentication. ([CDS: Get Data Recipients][cds-get-drs])
 
 ## Registration
 
@@ -126,9 +126,9 @@ None.
 ## Tokens
 
 - <a id="cdrc-0080"></a>**CDRC-0080** The library exchanges a code with the `authorization_code` grant, the `redirect_uri` of the flow and the code verifier of the flow. It uses each code one time only. ([CDS: Authentication Flows][cds-authentication-flows]; [RFC 7636, section 4.5][rfc7636-token])
-- <a id="cdrc-0081"></a>**CDRC-0081** The library refuses a token response with no `access_token`, no `id_token` or no `expires_in`. For a sharing duration of more than 0, it also refuses a response with no `refresh_token`. ([CDS: Tokens][cds-tokens]; [CDS: Requesting Sharing Duration][cds-sharing-duration])
+- <a id="cdrc-0081"></a>**CDRC-0081** The library refuses a response to the `authorization_code` grant with no `access_token`, no `id_token` or no `expires_in`. For a sharing duration of more than 0, it also refuses a response with no `refresh_token`. ([CDS: Tokens][cds-tokens]; [CDS: Requesting Sharing Duration][cds-sharing-duration])
 - <a id="cdrc-0082"></a>**CDRC-0082** The library gives the `cdr_arrangement_id` of the token response to the service. ([CDS: CDR Arrangement ID][cds-arrangement-id])
-- <a id="cdrc-0083"></a>**CDRC-0083** The library validates the ID token. When one of these checks fails, it refuses the token response. ([OpenID Connect Core, section 3.1.3.7][oidc-id-token-validation]; [CDS: ID Token][cds-id-token])
+- <a id="cdrc-0083"></a>**CDRC-0083** The library validates the ID token of a response to the `authorization_code` grant. When one of these checks fails, it refuses the token response. ([OpenID Connect Core, section 3.1.3.7][oidc-id-token-validation]; [CDS: ID Token][cds-id-token])
   - the signature, with a key of the JWKS of the data holder and the `id_token_signed_response_alg` of the registration
   - the `iss` is the issuer of the data holder
   - the `aud` is the client ID, or a list that contains the client ID
@@ -137,14 +137,20 @@ None.
   - the `acr` is `urn:cds.au:cdr:2` or `urn:cds.au:cdr:3`
 - <a id="cdrc-0084"></a>**CDRC-0084** The library refuses an encrypted ID token. ([CDS: ID Token][cds-id-token])
 - <a id="cdrc-0085"></a>**CDRC-0085** The library refreshes an access token with the `refresh_token` grant. When the response has a new refresh token, the library gives it to the service. ([CDS: Refresh Token][cds-refresh-token])
+- <a id="cdrc-0087"></a>**CDRC-0087** When a response to the `refresh_token` grant has an ID token, the library validates it with [the checks of the ID token](#cdrc-0083), except the `nonce`. A response with no ID token is valid. ([OpenID Connect Core, section 12.2][oidc-refresh-response])
 - <a id="cdrc-0086"></a>**CDRC-0086** When the token endpoint gives `invalid_grant`, the library gives the service an error that says that the grant ended. ([RFC 6749, section 5.2][rfc6749-token-errors])
+
+## Arrangement revocation
+
+- <a id="cdrc-0088"></a>**CDRC-0088** The library revokes an arrangement with `POST` to the `cdr_arrangement_revocation_endpoint` of the data holder, with the client assertion and the `cdr_arrangement_id` in the form. ([CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation])
+- <a id="cdrc-0089"></a>**CDRC-0089** The library gives a response of 204 to the service as a success, and a response of 422 as an arrangement that is not valid. It gives each other response as an error. ([CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation])
 
 ## Resource calls
 
 - <a id="cdrc-0090"></a>**CDRC-0090** Each call to a resource API has the access token as a bearer token, the `x-v` that the service gives and no `x-min-v`. ([CDS: HTTP Headers][cds-http-headers]; [Judgement: one version for each endpoint](#cdrc-0054))
 - <a id="cdrc-0091"></a>**CDRC-0091** Each call to a resource API has an `x-fapi-interaction-id` that is a new random RFC 4122 UUID. ([CDS: HTTP Headers][cds-http-headers]; [Judgement: a new interaction ID for each call](#cdrc-0055))
 - <a id="cdrc-0092"></a>**CDRC-0092** Each call to a resource API has `x-fapi-auth-date` with the time that the service gives, in the format of RFC 7231 in UTC. For example, `Thu, 16 Jan 2020 16:50:15 GMT`. ([CDS: HTTP Headers][cds-http-headers])
-- <a id="cdrc-0093"></a>**CDRC-0093** A call that the service marks as customer present has `x-fapi-customer-ip-address` and `x-cds-client-headers` with the values that the service gives. Each other call has neither header. ([CDS: HTTP Headers][cds-http-headers]; [CDS: NFRs, Definitions][cds-definitions])
+- <a id="cdrc-0093"></a>**CDRC-0093** A call that the service marks as customer present has `x-fapi-customer-ip-address` and `x-cds-client-headers` with the values that the service gives. Each other call has neither header. The `x-cds-client-headers` has only the `User-Agent`, `Accept` and `Accept-Language` headers that the service gives, encoded in Base64. It never has a `Cookie`, an `Authorization` or a header against cross-site request forgery. ([CDS: HTTP Headers][cds-http-headers]; [CDS: NFRs, Definitions][cds-definitions])
 - <a id="cdrc-0094"></a>**CDRC-0094** The library gets each page of a paginated resource API, with the page size that the service gives, until the response has no `next` link. It follows the `next` link only when the link is on the base URI of the first request. ([CDS: Pagination][cds-pagination]; [Judgement: no redirect from a CDR endpoint](#cdrc-0050))
 - <a id="cdrc-0095"></a>**CDRC-0095** When the response has a different `x-v` from the request, the library refuses the response. ([CDS: HTTP Headers][cds-http-headers]; [Judgement: one version for each endpoint](#cdrc-0054))
 - <a id="cdrc-0096"></a>**CDRC-0096** When a resource API gives an error response, the library gives the status and the `code` of each error to the service. For example, a 403 with `urn:au-cds:error:cds-all:Authorisation/RevokedConsent`. ([CDS: Error Codes][cds-error-codes])
@@ -167,7 +173,7 @@ None.
 - Basis: Step 3.2. A client that follows a redirect sends the next request to a host that the configuration did not give ([RFC 9700, section 4.11][rfc9700-open-redirect]). The CDS gives no redirect for these endpoints.
 - Reason: A redirect or a `next` link to a different host can take an access token or a client assertion to that host. The refusal costs nothing, because no CDS endpoint redirects a software product.
 
-### <a id="cdrc-0051"></a>CDRC-0051 A limit of 30 seconds for each call
+### <a id="cdrc-0051"></a>CDRC-0051 Limits of 30 seconds and 10 MiB for each call
 
 - Kind: choice
 - Basis: Step 3.3. The CDS gives response times for data holders, and the slowest is a few seconds ([CDS: Performance Requirements][cds-performance]). It gives no limit for the client.
@@ -202,6 +208,7 @@ None.
 None.
 
 [adr-0032]: ../../docs/adr/0032-issue-each-cdr-certificate-of-a-deployment-through-the-register-and-renew-it-with-no-manual-step.md
+[cds-arrangement-revocation]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-arrangement-revocation-endpoint
 [cds-arrangement-id]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-arrangement-id
 [cds-authentication-flows]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#authentication-flows
 [cds-cert-trust-model]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#certificate-trust-model
@@ -242,6 +249,7 @@ None.
 [jarm-validation]: https://openid.net/specs/oauth-v2-jarm.html#name-processing-rules
 [oidc-discovery]: https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig
 [oidc-discovery-validation]: https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfigurationValidation
+[oidc-refresh-response]: https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokenResponse
 [oidc-id-token-validation]: https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
 [otel-http-client]: https://opentelemetry.io/docs/specs/semconv/http/http-spans/#http-client-span
 [otel-http-headers]: https://opentelemetry.io/docs/specs/semconv/registry/attributes/http/

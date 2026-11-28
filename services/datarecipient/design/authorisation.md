@@ -33,7 +33,7 @@ This area gives the authorisation flow of the data recipient at a bank, after [t
 - <a id="dr-0917"></a>**DR-0917** After the token response, the web app shows the home page with the new connection, and says that the brand is getting the data. ([Judgement: a page for each outcome of the flow](#dr-0952))
 - <a id="dr-0918"></a>**DR-0918** A member can have more than one connection, also to the same bank. Each connection has its own consent and its own arrangement. ([the new arrangement for each authorisation](../../dataholder/design/authorisation.md#dh-0832))
 - <a id="dr-0919"></a>**DR-0919** When a connection [needs attention](data-collection.md#dr-1020), the web app offers to connect the bank again. The new connection starts with a new consent page. ([Judgement: a new connection replaces a connection that needs attention](#dr-0954))
-- <a id="dr-0920"></a>**DR-0920** When a new connection to a bank completes from that offer, the data recipient ends the consent of the connection that needed attention, with the reason "replaced". It then deletes the collected data and the tokens of that consent. ([CDR Rules][cdr-rules], rule 1.18; [Judgement: a new connection replaces a connection that needs attention](#dr-0954))
+- <a id="dr-0920"></a>**DR-0920** When a new connection to a bank completes from that offer, the data recipient ends the consent of the connection that needed attention, with the reason "replaced". It [revokes the arrangement of that consent](../../../pkg/cdrclient/DESIGN.md#cdrc-0088) at the bank, and then deletes the collected data and the tokens of that consent. A 422 from the bank is a success. ([CDR Rules][cdr-rules], rule 1.18 and rule 4.18AA; [CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation]; [Judgement: a new connection replaces a connection that needs attention](#dr-0954))
 
 ## Judgements
 
@@ -67,6 +67,7 @@ This area gives the authorisation flow of the data recipient at a bank, after [t
 - Basis: Step 3.3. The data holder does not support the amendment of an authorisation ([data holder non-goals](../../dataholder/design/README.md#non-goals)). A connection that needs attention has no arrangement that the data recipient can use.
 - Reason: The member connects again to see current data, so the old consent has no use. An end of the old consent and a deletion of its data stops two copies of the same accounts.
 
+[cds-arrangement-revocation]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#cdr-arrangement-revocation-endpoint
 [cdr-rules]: https://www.legislation.gov.au/F2020L00094/latest/text
 [cds-authentication-flows]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#authentication-flows
 [cds-participant-endpoints]: https://consumerdatastandardsaustralia.github.io/standards-archives/standards-1.36.0/#participant-endpoints

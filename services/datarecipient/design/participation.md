@@ -51,7 +51,7 @@ This area gives the work of the data recipient as a participant of the CDR: its 
 - <a id="dr-0726"></a>**DR-0726** The data recipient keeps the client ID of each registration, with the brand ID of the bank. It uses the registration for each later flow at that bank. ([CDS: Registration Response][cds-registration-response])
 - <a id="dr-0727"></a>**DR-0727** Two flows that start at the same time at a bank with no registration give one registration. ([the one registration for each software product](../../dataholder/design/registration.md#dh-0632))
 - <a id="dr-0728"></a>**DR-0728** The registration request gives the redirect URI of the software product as its only redirect URI. ([CDS: Registration Request using JWT][cds-registration-request])
-- <a id="dr-0729"></a>**DR-0729** When a registration fails, the web app says that the bank cannot be connected now, and the member can try again later. The data recipient keeps no registration. ([CDS: Registration Errors][cds-registration-errors])
+- <a id="dr-0729"></a>**DR-0729** When a registration fails, the web app says that the bank cannot be connected now, and the member can try again later. The data recipient keeps no registration, and the stream of the consent records an authorisation flow with no authorisation. ([CDS: Registration Errors][cds-registration-errors]; [the facts of a consent](consent.md#dr-0831))
 
 ## Judgements
 
@@ -65,7 +65,7 @@ This area gives the work of the data recipient as a participant of the CDR: its 
 
 - Kind: gap
 - Basis: Step 1. A software product serves the CDR Arrangement Revocation endpoint at its recipient base URI ([CDS: CDR Arrangement Revocation endpoint][cds-arrangement-revocation]). The data holder sends no new attempt after a 404 ([the failed notice of the data holder](../../dataholder/design/end-of-an-arrangement.md#dh-0935)).
-- Reason: The endpoint, the withdrawal and the dashboard come together in a later project. Until then, a collection run finds an arrangement that ended ([a connection that needs attention](data-collection.md#dr-1020)).
+- Reason: The endpoint, the withdrawal and the dashboard are [non-goals of the data recipient](README.md#non-goals), because they make one function together. Without the endpoint, a collection run finds an arrangement that ended ([a connection that needs attention](data-collection.md#dr-1020)).
 
 ### <a id="dr-0752"></a>DR-0752 The accreditation number from the Register
 
@@ -82,7 +82,7 @@ This area gives the work of the data recipient as a participant of the CDR: its 
 ### <a id="dr-0754"></a>DR-0754 Only active banks
 
 - Kind: choice
-- Basis: Step 3.1. A data holder brand that is not active does not serve a consumer data request ([CDS: Participant Statuses][cds-participant-statuses]).
+- Basis: Step 3.1. Get Data Holder Brands gives the status and the industries of each brand ([CDS: Get Data Holder Brands][cds-get-dh-brands]). A brand that is not active is not a brand that a consumer can connect.
 - Reason: A bank that cannot complete a flow gives the member an error after the consent. The web app does not offer it.
 
 ### <a id="dr-0755"></a>DR-0755 A copy of each bank logo on the origin of the web app

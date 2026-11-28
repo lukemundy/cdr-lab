@@ -10,7 +10,7 @@ This area gives the collection runs of a connection: when they occur, the calls 
 - <a id="dr-1003"></a>**DR-1003** After a new connection, the data recipient starts the first collection run at once. The first run is customer present. ([CDS: NFRs, Definitions][cds-definitions])
 - <a id="dr-1004"></a>**DR-1004** The page of a connection has an action to get new data. The action starts a collection run that is customer present. ([CDS: NFRs, Definitions][cds-definitions]; [Judgement: a run that the member starts, at most each 15 minutes](#dr-1051))
 - <a id="dr-1005"></a>**DR-1005** When a run of the connection that is customer present started less than 15 minutes before, the data recipient starts no run, and the page says the time from which the member can get new data. ([Judgement: a run that the member starts, at most each 15 minutes](#dr-1051))
-- <a id="dr-1006"></a>**DR-1006** The calls of a run that is customer present have `x-fapi-customer-ip-address` and `x-cds-client-headers` from the request of the member. ([CDS: HTTP Headers][cds-http-headers])
+- <a id="dr-1006"></a>**DR-1006** The calls of a run that is customer present have `x-fapi-customer-ip-address` and `x-cds-client-headers` from the request of the member. The `x-cds-client-headers` has only [the headers that the library permits](../../../pkg/cdrclient/DESIGN.md#cdrc-0093). For example, it never has the session cookie. ([CDS: HTTP Headers][cds-http-headers])
 - <a id="dr-1007"></a>**DR-1007** Each call of a run has `x-fapi-auth-date` with the time of the last sign-in of the member. The data recipient keeps that time with the member, so that a restart does not change it. ([CDS: HTTP Headers][cds-http-headers])
 - <a id="dr-1008"></a>**DR-1008** A connection has one run at a time. When a run of the connection is in progress, a request for a new run starts no run. ([CDS: Data Recipient Requirements][cds-dr-requirements])
 
@@ -27,7 +27,7 @@ This area gives the collection runs of a connection: when they occur, the calls 
 
 - <a id="dr-1011"></a>**DR-1011** The first run of a connection calls Get Transactions For Account with no `oldest-time`, so that the bank gives its default window of 90 days. ([CDS: Get Transactions For Account][cds-get-transactions]; [Judgement: a first window of 90 days, and later windows with an overlap of 7 days](#dr-1052))
 - <a id="dr-1012"></a>**DR-1012** A later run calls Get Transactions For Account with an `oldest-time` 7 days before the start of the last successful run. ([CDS: Get Transactions For Account][cds-get-transactions]; [Judgement: a first window of 90 days, and later windows with an overlap of 7 days](#dr-1052))
-- <a id="dr-1013"></a>**DR-1013** Performance: an unattended run makes 100 calls or fewer with each access token, and 5 calls each second or fewer. ([CDS: Traffic Thresholds][cds-traffic-thresholds])
+- <a id="dr-1013"></a>**DR-1013** Performance: an unattended run makes 100 calls or fewer with each access token, and 5 calls each second or fewer. When the run needs more calls, it refreshes the access token before the next call. ([CDS: Traffic Thresholds][cds-traffic-thresholds])
 
 ## Storage of the collected data
 
@@ -47,7 +47,7 @@ This area gives the collection runs of a connection: when they occur, the calls 
 
 ## Failure of a run
 
-- <a id="dr-1020"></a>**DR-1020** The arrangement ended when the token endpoint gives `invalid_grant`, or when a resource call gives 403 with `urn:au-cds:error:cds-all:Authorisation/RevokedConsent` or `urn:au-cds:error:cds-all:Authorisation/InvalidConsent`. The connection then needs attention. ([CDS: Error Codes][cds-error-codes]; [the grant ended](../../../pkg/cdrclient/DESIGN.md#cdrc-0086); [Judgement: a connection that needs attention until the dashboard](#dr-1053))
+- <a id="dr-1020"></a>**DR-1020** The arrangement ended when the token endpoint gives `invalid_grant`, or when a resource call gives 403 with `urn:au-cds:error:cds-all:Authorisation/RevokedConsent`. The connection then needs attention. ([CDS: Error Codes][cds-error-codes]; [the grant ended](../../../pkg/cdrclient/DESIGN.md#cdrc-0086); [Judgement: a connection that needs attention until the dashboard](#dr-1053))
 - <a id="dr-1021"></a>**DR-1021** A connection that needs attention has no more scheduled runs, and its page has no action to get new data. ([Judgement: a connection that needs attention until the dashboard](#dr-1053))
 - <a id="dr-1022"></a>**DR-1022** The home page shows a connection that needs attention with a message that the bank stopped the sharing, and the offer to [connect the bank again](authorisation.md#dr-0919). ([Judgement: a connection that needs attention until the dashboard](#dr-1053))
 - <a id="dr-1023"></a>**DR-1023** After a run fails for a different reason, the data recipient makes no new attempt before the next scheduled run. The member can start a run. ([CDS: Data Recipient Requirements][cds-dr-requirements]; [Judgement: a failed run keeps the data and waits for the next run](#dr-1054))
@@ -71,14 +71,14 @@ This area gives the collection runs of a connection: when they occur, the calls 
 ### <a id="dr-1052"></a>DR-1052 A first window of 90 days, and later windows with an overlap of 7 days
 
 - Kind: choice
-- Basis: Step 3.2. With no `oldest-time`, Get Transactions For Account gives the 90 days before `newest-time` ([CDS: Get Transactions For Account][cds-get-transactions]). A pending transaction can change or become posted after the last run. The collection relates to no longer period than the use needs ([CDR Rules][cdr-rules], rule 1.8(1)(b)).
-- Reason: The default window of the bank is enough for a view of recent spending, so the first run asks for no more. An overlap of 7 days gets each change of a recent transaction again, and a replacement of the window removes a pending transaction that the bank no longer gives.
+- Basis: Step 3.2. With no `oldest-time`, Get Transactions For Account gives the 90 days before `newest-time` ([CDS: Get Transactions For Account][cds-get-transactions]). A pending transaction can change or become posted after the last run. The collection relates to a period that is not more than the use needs ([CDR Rules][cdr-rules], rule 1.8(1)(b)).
+- Reason: The default window of the bank is enough for a view of recent spending, so the first run asks for no more. An overlap of 7 days gets each change of a recent transaction again, and a replacement of the window removes a pending transaction that is not in the new response.
 
 ### <a id="dr-1053"></a>DR-1053 A connection that needs attention until the dashboard
 
 - Kind: gap
-- Basis: Step 1. When a data holder notifies the withdrawal of an authorisation, the collection consent expires ([CDR Rules][cdr-rules], rule 4.14(3)). The data recipient has no endpoint for the notice until a later project ([no endpoint for the end of an arrangement](participation.md#dr-0751)).
-- Reason: An error at the token endpoint or a revoked consent shows that the arrangement ended, but it is not the notice of the rule. The data recipient stops the collection, keeps the consent, and offers the member a new connection. The later project adds the notice, and the consent then expires.
+- Basis: Step 1. When a data holder notifies the withdrawal of an authorisation, the collection consent expires ([CDR Rules][cdr-rules], rule 4.14(3)). The data recipient has no endpoint for the notice ([no endpoint for the end of an arrangement](participation.md#dr-0751)).
+- Reason: An error at the token endpoint or a revoked consent shows that the arrangement ended, but it is not the notice of the rule. The data recipient stops the collection, keeps the consent, and offers the member a new connection. With the endpoint, the notice makes the consent expire.
 
 ### <a id="dr-1054"></a>DR-1054 A failed run keeps the data and waits for the next run
 

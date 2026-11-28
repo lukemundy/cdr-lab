@@ -76,7 +76,7 @@ flowchart LR
 - The removal of a member.
 - An operator interface and an operator console. Engineers use the telemetry ([non-functional requirements](non-functional-requirements.md)).
 - A native mobile app.
-- The consumer dashboard, the withdrawal of a consent, the CDR Arrangement Revocation endpoint, the CDR receipts and the notifications after 90 days. A later project adds them ([no endpoint for the end of an arrangement](participation.md#dr-0751)).
+- The consumer dashboard, the withdrawal of a consent, the CDR Arrangement Revocation endpoint, the CDR receipts and the notifications after 90 days ([no endpoint for the end of an arrangement](participation.md#dr-0751)).
 - The amendment of a consent. The data holder does not support the amendment of an authorisation ([data holder non-goals](../../dataholder/design/README.md#non-goals)).
 - An election to delete redundant data, and de-identification. Each brand deletes all redundant data ([no election to delete](consent.md#dr-0853)).
 - Direct marketing consents, de-identification consents and disclosure consents.
