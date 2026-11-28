@@ -28,6 +28,7 @@ env:
   LAB_OTLP_ENDPOINT: ""
   REGISTER_IMAGE: ghcr.io/${{ github.repository }}/register
   DATAHOLDER_IMAGE: ghcr.io/${{ github.repository }}/dataholder
+  DATARECIPIENT_IMAGE: ghcr.io/${{ github.repository }}/datarecipient
   CDRLAB_IMAGE: ghcr.io/${{ github.repository }}/cdrlab
 
 jobs:
@@ -40,6 +41,7 @@ jobs:
       web: ${{ steps.diff.outputs.web }}
       register-image: ${{ steps.diff.outputs.register-image }}
       dataholder-image: ${{ steps.diff.outputs.dataholder-image }}
+      datarecipient-image: ${{ steps.diff.outputs.datarecipient-image }}
       cdrlab-image: ${{ steps.diff.outputs.cdrlab-image }}
       audit: ${{ steps.diff.outputs.audit }}
       chart: ${{ steps.diff.outputs.chart }}
@@ -79,7 +81,8 @@ jobs:
           backend=(go.mod go.sum composeproject.go lab pkg cli services conformance compose.yaml)
           if [ "$EVENT" = schedule ]; then
             printf '%s\n' go=false conformance=false web=false register-image=false dataholder-image=false \
-              cdrlab-image=false audit=true chart=false cluster=false spec=false >> "$GITHUB_OUTPUT"
+              datarecipient-image=false cdrlab-image=false audit=true chart=false cluster=false spec=false \
+              >> "$GITHUB_OUTPUT"
           else
             {
               # Go tests check the brand directory contract against the token names and the fonts of the design system.
@@ -93,11 +96,11 @@ jobs:
               echo "web=$(changed "${shared[@]}" web services/register/internal/adapter/console/openapi.yaml \
                 services/dataholder/internal/adapter/console/openapi.yaml \
                 services/dataholder/internal/adapter/banksite/openapi.yaml services/dataholder/brands \
-                services/dataholder/internal/adapter/consumerpages/testdata)"
+                services/dataholder/internal/adapter/consumerpages/testdata services/datarecipient/brands)"
               # The cluster job runs when an input of an image, a chart or the conformance suite changes.
               cluster=$conformance
               # The image inputs file gives the pathspecs of each image, also the excludes. The release reads the same file.
-              for image in register dataholder cdrlab; do
+              for image in register dataholder datarecipient cdrlab; do
                 mapfile -t inputs < <(jq --raw-output --arg image "$image" '.[$image][]' .github/image-inputs.json)
                 image_changed=$(changed_all "${inputs[@]}")
                 echo "$image-image=$image_changed"
@@ -227,14 +230,14 @@ jobs:
       - name: Build the image indexes
         env:
           BUILD_ID: ${{ github.run_id }}
-        run: mise run build:index services/register services/dataholder
+        run: mise run build:index services/register services/dataholder services/datarecipient
 
       # Each compose service that builds from services/<name>/Dockerfile gets the linux/amd64 image of the layout.
       - name: Load the linux/amd64 images
         run: |
           set -euo pipefail
           config=$(docker-compose config --format json)
-          for name in register dataholder; do
+          for name in register dataholder datarecipient; do
             mapfile -t tags < <(jq -r --arg file "services/$name/Dockerfile" \
               '.name as $project | .services | to_entries[] | select(.value.build.dockerfile == $file) |
                 .value.image // "\($project)-\(.key)"' <<< "$config")
@@ -280,6 +283,19 @@ jobs:
           path: |
             .lab/images/dataholder/
             .lab/images/dataholder.spdx.json
+          retention-days: 1
+          # The layout is in .lab/, and the action leaves out hidden files by default.
+          include-hidden-files: true
+          if-no-files-found: error
+
+      - name: Upload the data recipient image index
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: datarecipient-index
+          path: |
+            .lab/images/datarecipient/
+            .lab/images/datarecipient.spdx.json
           retention-days: 1
           # The layout is in .lab/, and the action leaves out hidden files by default.
           include-hidden-files: true
@@ -510,7 +526,8 @@ jobs:
     needs: changes
     if: >-
       needs.changes.outputs.chart == 'true' || needs.changes.outputs.register-image == 'true' ||
-      needs.changes.outputs.dataholder-image == 'true' || needs.changes.outputs.cdrlab-image == 'true'
+      needs.changes.outputs.dataholder-image == 'true' || needs.changes.outputs.datarecipient-image == 'true' ||
+      needs.changes.outputs.cdrlab-image == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -528,7 +545,7 @@ jobs:
 
   # The chart waits for the image publish jobs of its commit. A failed or cancelled image publish stops it.
   chart-publish:
-    needs: [changes, chart, register-image-publish, dataholder-image-publish]
+    needs: [changes, chart, register-image-publish, dataholder-image-publish, datarecipient-image-publish]
     if: >-
       github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !cancelled() && !failure() &&
       needs.chart.result == 'success'
@@ -793,6 +810,101 @@ jobs:
           name: dataholder
           image: ${{ env.DATAHOLDER_IMAGE }}
           tested-image: ${{ needs.dataholder-image.outputs.tested-image }}
+
+  datarecipient-image:
+    needs: [changes, images]
+    if: needs.changes.outputs.datarecipient-image == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      tested-image: ${{ steps.tested.outputs.id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - *install-mise
+
+      # The pki and up tasks compile cdrlab on the runner. This job does not save the caches of the conformance and web jobs.
+      - name: Restore the Go caches
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: go-conformance-${{ hashFiles('go.sum', 'mise.toml') }}-${{ github.sha }}
+          restore-keys: go-conformance-${{ hashFiles('go.sum', 'mise.toml') }}-
+
+      - name: Find the pnpm store
+        id: store
+        working-directory: web
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the pnpm store and the browsers
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ${{ steps.store.outputs.path }}
+            ~/.cache/ms-playwright
+          key: web-${{ hashFiles('web/pnpm-lock.yaml', 'mise.toml') }}-${{ github.sha }}
+          restore-keys: web-${{ hashFiles('web/pnpm-lock.yaml', 'mise.toml') }}-
+
+      - *download-images
+
+      - name: Start the data recipient
+        run: docker load --input "$RUNNER_TEMP/images.tar" && mise run up --no-build --no-telemetry sorrel
+
+      - name: Check that the data recipient image has no Node
+        run: |
+          set -euo pipefail
+          files=$(docker export "$(docker-compose ps --quiet sorrel)" | tar -t)
+          if grep -E '(^|/)(node|node_modules|npm|pnpm)(/|$)' <<< "$files"; then
+            echo "The data recipient image contains Node or npm packages." >&2
+            exit 1
+          fi
+
+      - name: Run the browser tests
+        run: mise run test:lab-web --project datarecipient-app
+
+      # The publish job pushes the image only when it is this tested image.
+      - name: Record the tested data recipient image
+        id: tested
+        run: echo "id=$(docker inspect --format '{{.Image}}' "$(docker-compose ps --quiet sorrel)")" >> "$GITHUB_OUTPUT"
+
+      - name: Show the service logs
+        if: failure()
+        run: docker-compose logs
+
+      - name: Stop the lab deployment
+        if: always()
+        run: mise run reset
+
+  datarecipient-image-publish:
+    needs: [lint, test, conformance, web, datarecipient-image]
+    if: >-
+      github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !cancelled() && !failure() &&
+      needs.datarecipient-image.result == 'success'
+    runs-on: ubuntu-latest
+    # Only this job of the image gets the permissions to push and to attest, and it never runs for a pull request.
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - *install-mise
+
+      - name: Publish the data recipient image
+        uses: ./.github/actions/publish-image
+        with:
+          name: datarecipient
+          image: ${{ env.DATARECIPIENT_IMAGE }}
+          tested-image: ${{ needs.datarecipient-image.outputs.tested-image }}
 
   # The structure of the specifications and the Verifies comments of the tests.
   # The cdrlab image has no lab job, because no compose service runs it. This job builds it and checks its linux/amd64

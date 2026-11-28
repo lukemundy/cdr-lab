@@ -70,9 +70,19 @@ func (s Settings) LoadConfig() (Config, error) {
 		return Config{}, nil
 	}
 
+	hosts, err := s.LoadAllowedHosts()
+	if err != nil {
+		return Config{}, err
+	}
+
+	return Config{Enabled: true, AllowedHosts: hosts}, nil
+}
+
+// LoadAllowedHosts reads only the allowlist, for a UI that has no EnabledEnv because it is always on.
+func (s Settings) LoadAllowedHosts() ([]string, error) {
 	hosts, err := hostallowlist.Parse(os.Getenv(s.AllowedHostsEnv))
 	if err != nil {
-		return Config{}, fmt.Errorf(
+		return nil, fmt.Errorf(
 			"set %s to the Host header values that browsers send to the %s, separated by commas, "+
 				"for example %s, or a host with no port behind a TLS proxy: %w",
 			s.AllowedHostsEnv,
@@ -82,7 +92,7 @@ func (s Settings) LoadConfig() (Config, error) {
 		)
 	}
 
-	return Config{Enabled: true, AllowedHosts: hosts}, nil
+	return hosts, nil
 }
 
 // Register refuses a request whose Host is not in allowedHosts, so that DNS rebinding cannot reach the UI.

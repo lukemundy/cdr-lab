@@ -5,7 +5,8 @@ import { defineConfig } from "vitest/config";
 const nodeTests = "{apps,packages}/*/src/**/*.node.test.ts";
 const browserTests = "{apps,packages}/*/src/**/*.test.{ts,tsx}";
 // Each app has its own project, with the Vite config of the app.
-const consoleTests = "apps/{register-console,dataholder-console,dataholder-bank}/**";
+const consoleTests =
+  "apps/{register-console,dataholder-console,dataholder-bank,datarecipient-app}/**";
 const localTimeTests = "packages/ui/src/components/{local-time,date-time-field}.test.tsx";
 
 // Each browser test has a fixed time zone, so that a time shows the same in each place where a test runs.
@@ -47,6 +48,7 @@ export default defineConfig({
       "apps/register-console",
       "apps/dataholder-console",
       "apps/dataholder-bank",
+      "apps/datarecipient-app",
       {
         test: {
           name: "node",

@@ -40,7 +40,7 @@ None.
 
 ## Non-goals
 
-- The publication of the images and the charts from `main`. The deployment areas of the [Register](../../services/register/design/deployment.md) and the [data holder](../../services/dataholder/design/deployment.md) give it.
+- The publication of the images and the charts from `main`. The deployment areas of the [Register](../../services/register/design/deployment.md), the [data holder](../../services/dataholder/design/deployment.md) and the [data recipient](../../services/datarecipient/design/deployment.md) give it.
 - A data promise across an upgrade. While the major version is 0, a release makes none ([ADR 0027][adr-0027]).
 - `service.version` in telemetry. It stays [the short commit ID of the build](../../pkg/platform/telemetry/DESIGN.md#tele-0003).
 - Package manager entries for `cdrlab`, for example Homebrew ([ADR 0039][adr-0039]).

@@ -14,9 +14,9 @@ COPY web/ ./
 # pnpm applies the supply-chain controls of pnpm-workspace.yaml here, as in CI.
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile --filter @cdr-lab/register-console... --filter @cdr-lab/dataholder-console... \
-      --filter @cdr-lab/dataholder-bank... --filter @cdr-lab/ui... && \
+      --filter @cdr-lab/dataholder-bank... --filter @cdr-lab/datarecipient-app... --filter @cdr-lab/ui... && \
     pnpm --filter @cdr-lab/register-console... --filter @cdr-lab/dataholder-console... \
-      --filter @cdr-lab/dataholder-bank... --filter @cdr-lab/ui... build
+      --filter @cdr-lab/dataholder-bank... --filter @cdr-lab/datarecipient-app... --filter @cdr-lab/ui... build
 
 # Keep the Go version the same as in mise.toml; mise run lint checks it.
 FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.27.4-trixie@sha256:b54b2639de8c1bfe538ec5ffc45f29b1932235ac5f6d63c059853646677112d9 AS build

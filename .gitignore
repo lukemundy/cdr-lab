@@ -30,13 +30,15 @@ test-results/
 # Build output of the web workspace
 web/**/dist/
 
-# The image of each service with a console copies the console build into its embed directory.
+# The image of each service with a web UI copies the UI build into its embed directory.
 services/register/internal/adapter/console/dist/*
 !services/register/internal/adapter/console/dist/.gitkeep
 services/dataholder/internal/adapter/console/dist/*
 !services/dataholder/internal/adapter/console/dist/.gitkeep
 services/dataholder/internal/adapter/banksite/dist/*
 !services/dataholder/internal/adapter/banksite/dist/.gitkeep
+services/datarecipient/internal/adapter/webapp/dist/*
+!services/datarecipient/internal/adapter/webapp/dist/.gitkeep
 # The data holder image copies the consumer pages build of web/packages/ui into its embed directory.
 services/dataholder/internal/adapter/consumerpages/static/*
 !services/dataholder/internal/adapter/consumerpages/static/.gitkeep

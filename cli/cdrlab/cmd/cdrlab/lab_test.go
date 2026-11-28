@@ -293,6 +293,9 @@ func TestUpInTheReleaseModeWritesTheProjectAndPullsTheImagesOfTheVersion(t *test
 
 		image, _ = envValue(call.env, "CDRLAB_DATAHOLDER_IMAGE")
 		assert.Equal(t, "ghcr.io/lukemundy/cdr-lab/dataholder:v0.3.1", image)
+
+		image, _ = envValue(call.env, "CDRLAB_DATARECIPIENT_IMAGE")
+		assert.Equal(t, "ghcr.io/lukemundy/cdr-lab/datarecipient:v0.3.1", image)
 	}
 }
 
