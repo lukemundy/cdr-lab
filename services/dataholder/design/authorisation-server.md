@@ -1,6 +1,6 @@
 # Mock data holder: Authorisation server
 
-This area gives the choices of the data holder for its authorisation server: the OpenID Provider configuration, the JWKS, the signing keys, client authentication, the authorisation request and the subject identifier. The data holder serves the data holder authorisation server of the [authorisation server library](../../../pkg/authserver/design/README.md). The library gives the rules of the [token endpoint](../../../pkg/authserver/design/token-endpoint.md), the [authorisation request](../../../pkg/authserver/design/authorisation-request.md), the [tokens of an arrangement](../../../pkg/authserver/design/tokens-of-an-arrangement.md), introspection and token revocation. [API standards](api-standards.md) gives the endpoints.
+This area gives the choices of the data holder for its authorisation server: the OpenID Provider configuration, the JWKS, the browser base URI, the signing keys, client authentication, the authorisation request and the subject identifier. The data holder serves the data holder authorisation server of the [authorisation server library](../../../pkg/authserver/design/README.md). The library gives the rules of the [token endpoint](../../../pkg/authserver/design/token-endpoint.md), the [authorisation request](../../../pkg/authserver/design/authorisation-request.md), the [tokens of an arrangement](../../../pkg/authserver/design/tokens-of-an-arrangement.md), introspection and token revocation. [API standards](api-standards.md) gives the endpoints.
 
 ## OpenID Provider configuration and JWKS
 
@@ -17,6 +17,15 @@ The library gives [the path](../../../pkg/authserver/design/configuration.md#aut
   - `bank:accounts.detail:read`
   - `bank:transactions:read`
 - <a id="dh-0503"></a>**DH-0503** The `jwksEndpoint` of the brand on the Register is the `jwks_uri` of the OpenID Provider configuration. ([CDS: Multi-Brand Support][cds-multi-brand]; [Judgement: one JWKS for the Register and the configuration](#dh-0532))
+
+## Browser base URI
+
+The browser of the consumer can reach the public listener at a different base URI from the issuer. For example, in the lab the browser on the host reaches `wattle-bank` at `https://localhost:8181`, and the other participants reach it at `https://wattle-bank:8081`.
+
+- <a id="dh-2669"></a>**DH-2669** The setting `BROWSER_BASE_URL` gives the browser base URI: the base URI of the public listener for the browser of a consumer. It is required, and it has no default. ([Judgement: a browser base URI for the authorisation endpoint](#dh-2673); [Judgement: no default for a value of one deployment](deployment.md#dh-1375))
+- <a id="dh-2670"></a>**DH-2670** The `authorization_endpoint` of the OpenID Provider configuration is on the browser base URI. The issuer and the other endpoints of the configuration do not change. For example, the `jwks_uri` stays on the issuer. ([the authorisation endpoint on the browser base URI](../../../pkg/authserver/design/configuration.md#auth-0254); [Judgement: a browser base URI for the authorisation endpoint](#dh-2673))
+- <a id="dh-2671"></a>**DH-2671** Each link, form action and redirect of the consumer pages is a relative URI or a URI on the browser base URI. None is on the issuer. ([Judgement: a browser base URI for the authorisation endpoint](#dh-2673))
+- <a id="dh-2672"></a>**DH-2672** The public listener serves the authorisation endpoint and the consumer pages for each `Host`. For example, a request to the issuer with the path of the authorisation endpoint gets the same page as a request to the browser base URI. ([Judgement: a browser base URI for the authorisation endpoint](#dh-2673))
 
 ## Signing keys
 
@@ -55,6 +64,12 @@ The library gives the tokens of an arrangement. The data holder gives [the subje
 - <a id="dh-0513"></a>**DH-0513** The `sub` of a customer is the same in each arrangement with the same sector identifier, also after the software product registers again. ([CDR Support: ID Permanence and PPID][support-ppid])
 
 ## Judgements
+
+### <a id="dh-2673"></a>DH-2673 A browser base URI for the authorisation endpoint
+
+- Kind: choice
+- Basis: Step 3.3. OpenID Connect Discovery requires that the issuer is the prefix of the URL of the configuration, and gives no rule for the host of the `authorization_endpoint` ([OpenID Connect Discovery, section 4.3][oidc-discovery-validation]). The browser follows only the `authorization_endpoint` and the consumer pages. In the lab, the browser on the host cannot resolve the compose service name, and the host port is different from the container port.
+- Reason: A separate base URI for the browser lets a browser on the host complete an authorisation, and changes no URI that a participant uses on the lab network. Each other choice changes each listener and each URI of the lab, or needs a manual step on the host. In a cluster deployment, the browser base URI is the public base URI.
 
 ### <a id="dh-0530"></a>DH-0530 The issuer on the public listener
 
