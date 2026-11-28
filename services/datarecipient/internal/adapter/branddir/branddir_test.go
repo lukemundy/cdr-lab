@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/lukemundy/cdr-lab/services/datarecipient/brands"
 	"github.com/lukemundy/cdr-lab/services/datarecipient/internal/adapter/branddir"
 )
 
@@ -192,4 +193,33 @@ func TestTheAccessPhotoCanBeAtItsLimits(t *testing.T) {
 			assert.Equal(t, []string{"access.webp", "hero.webp"}, brand.Photos())
 		})
 	}
+}
+
+// Verifies: DR-0111
+func TestEachPresetBrandIsValid(t *testing.T) {
+	require.Contains(t, brands.Names(), "sorrel")
+
+	for _, name := range brands.Names() {
+		t.Run(name, func(t *testing.T) {
+			dir, err := brands.Preset(name)
+			require.NoError(t, err)
+
+			brand, err := branddir.Load(dir)
+
+			require.NoError(t, err)
+			assert.NotEmpty(t, brand.Name)
+		})
+	}
+}
+
+// Verifies: DR-0121
+func TestThePresetSorrelHasTheBrandNameSorrel(t *testing.T) {
+	dir, err := brands.Preset("sorrel")
+	require.NoError(t, err)
+
+	brand, err := branddir.Load(dir)
+
+	require.NoError(t, err)
+	assert.Equal(t, "Sorrel", brand.Name)
+	assert.Equal(t, []string{"access.webp", "hero.webp"}, brand.Photos())
 }
