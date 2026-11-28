@@ -37,7 +37,7 @@ This glossary gives one term for each concept that two or more specifications us
 ### Customer
 
 - Lab term: the record of a person at a data holder, with a customer number and accounts. The CDS uses the word in [Get Customer][cds-get-customer] and [User Identifiers][cds-user-identifiers].
-- Not the same as: [CDR consumer](#cdr-consumer). A consumer acts. A customer is the record of the data holder about that consumer.
+- Not the same as: [CDR consumer](#cdr-consumer), [member](#member). A consumer acts. A customer is the record of the data holder about that consumer.
 
 ### Data holder
 
@@ -59,7 +59,7 @@ This glossary gives one term for each concept that two or more specifications us
 
 - Source: the CDS name for an accredited data recipient ([Competition and Consumer Act 2010][cdr-act], section 56AK; [CDS: CDR Federation][cds-federation]).
 - Not the same as: [software product](#software-product), [client](#client).
-- Do not use: ADR. Use "accredited person" only where a CDR rule names it, for example on the authorisation page ([CDR Rules][cdr-rules], rule 4.23(1)(a)).
+- Do not use: ADR. In this repository, ADR is the abbreviation of an architecture decision record (`docs/adr/`), and a text that names both is not clear. Use "accredited person" only where a CDR rule names it, for example on the authorisation page ([CDR Rules][cdr-rules], rule 4.23(1)(a)).
 
 ### Data recipient brand
 
@@ -80,6 +80,12 @@ This glossary gives one term for each concept that two or more specifications us
 ### Legal entity
 
 - Source: [CDS: Register API schemas][cds-register-schemas]. A data holder legal entity or a data recipient legal entity.
+
+### Member
+
+- Lab term: the record of a person at a data recipient, with an email address, a password and the details of the person. A CDR consumer becomes a member at the sign-up.
+- Not the same as: [CDR consumer](#cdr-consumer), [customer](#customer). A consumer acts. A member is the record of the data recipient about that consumer, as a customer is the record of a data holder.
+- Do not use: user, account (for the member).
 
 ### Participant
 
